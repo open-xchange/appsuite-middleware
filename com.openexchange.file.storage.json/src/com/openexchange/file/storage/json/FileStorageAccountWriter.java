@@ -55,7 +55,6 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
-import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -84,9 +83,8 @@ public class FileStorageAccountWriter {
      * @param rootFolder The accounts root folder
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
-     * @throws OXException
      */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder) throws JSONException, OXException {
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder) throws JSONException {
         JSONObject accountJSON = new JSONObject(6);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
@@ -95,9 +93,10 @@ public class FileStorageAccountWriter {
         accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
         accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
         accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
-        final DynamicFormDescription formDescription = fsService.getFormDescription();
+
+        DynamicFormDescription formDescription = fsService.getFormDescription();
         if (null != formDescription && null != account.getConfiguration()) {
-            final JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
+            JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
         return accountJSON;

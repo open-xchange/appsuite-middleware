@@ -64,12 +64,11 @@ import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * A class implementing the "all" action for listing file storage accounts. Optionally only accounts of a certain service
  * are returned. Parameters are:
  * <dl>
- *  <dt>filestorageService</dt><dd>(optional) The ID of the file storage service. If present lists only accounts of this service.</dd>
+ * <dt>filestorageService</dt><dd>(optional) The ID of the file storage service. If present lists only accounts of this service.</dd>
  * </dl>
  * Returns a JSONArray of JSONObjects representing the file storage accounts.
  *
@@ -83,20 +82,19 @@ public class AllAction extends AbstractFileStorageAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
+    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException {
+        String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
 
-        final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
-
-        final List<FileStorageService> services = new ArrayList<FileStorageService>();
-        if(fsServiceId != null) {
+        List<FileStorageService> services = new ArrayList<FileStorageService>();
+        if (fsServiceId != null) {
             services.add(registry.getFileStorageService(fsServiceId));
         } else {
             services.addAll(registry.getAllServices());
         }
 
-        final JSONArray result = new JSONArray();
-
-        for (final FileStorageService fsService : services) {
+        JSONArray result = new JSONArray(services.size() << 1);
+        for (FileStorageService fsService : services) {
+            // Get the accounts associated with current file storage service
             List<FileStorageAccount> userAccounts = null;
             if (fsService instanceof AccountAware) {
                 userAccounts = ((AccountAware) fsService).getAccounts(session);
@@ -104,9 +102,23 @@ public class AllAction extends AbstractFileStorageAccountAction {
             if (null == userAccounts) {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
             }
-            for (final FileStorageAccount account : userAccounts) {
-                FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
-                result.put(writer.write(account, rootFolder));
+
+            // Iterate accounts and append its JSON representation
+            for (FileStorageAccount account : userAccounts) {
+                try {
+                    FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
+                    result.put(writer.write(account, rootFolder));
+                } catch (OXException e) {
+                    if (!e.equalsCode(6, "OAUTH")) {
+                        throw e;
+                    }
+                    // "OAUTH-0006" --> OAuth account not found
+                    try {
+                        fsService.getAccountManager().deleteAccount(account, session);
+                    } catch (Exception x) {
+                        // Ignore
+                    }
+                }
             }
         }
 

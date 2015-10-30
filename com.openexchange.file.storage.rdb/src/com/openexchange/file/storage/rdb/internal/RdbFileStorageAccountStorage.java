@@ -495,12 +495,14 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
                  * Delete account configuration using generic conf
                  */
                 {
-                    final GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
+                    GenericConfigurationStorageService genericConfStorageService = getService(CLAZZ_GEN_CONF);
                     int genericConfId = genericConfIds[i];
                     if (genericConfId <= 0) {
-                        genericConfId = getGenericConfId(contextId, session.getUserId(), serviceId, accountId, wc);
+                        genericConfId = optGenericConfId(contextId, session.getUserId(), serviceId, accountId, wc);
                     }
-                    genericConfStorageService.delete(wc, getContext(session), genericConfId);
+                    if (genericConfId > 0) {
+                        genericConfStorageService.delete(wc, getContext(session), genericConfId);
+                    }
                 }
                 /*
                  * Delete account data
@@ -623,6 +625,14 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
     }
 
     private static int getGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws OXException, SQLException {
+        int confId = optGenericConfId(contextId, userId, serviceId, accountId, con);
+        if (confId < 0) {
+            throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(Integer.valueOf(accountId), serviceId, Integer.valueOf(userId), Integer.valueOf(contextId));
+        }
+        return confId;
+    }
+
+    private static int optGenericConfId(final int contextId, final int userId, final String serviceId, final int accountId, final Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -633,14 +643,7 @@ public class RdbFileStorageAccountStorage implements FileStorageAccountStorage, 
             stmt.setString(pos++, serviceId);
             stmt.setInt(pos, accountId);
             rs = stmt.executeQuery();
-            if (!rs.next()) {
-                throw FileStorageExceptionCodes.ACCOUNT_NOT_FOUND.create(
-                    Integer.valueOf(accountId),
-                    serviceId,
-                    Integer.valueOf(userId),
-                    Integer.valueOf(contextId));
-            }
-            return rs.getInt(1);
+            return rs.next() ? rs.getInt(1) : -1;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }

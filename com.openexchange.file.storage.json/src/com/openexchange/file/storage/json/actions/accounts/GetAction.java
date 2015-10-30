@@ -62,12 +62,11 @@ import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * Loads a file storage account. Parameters are:
  * <dl>
- *  <dt>filestorageService</dt> <dd>The ID of the messaging service. </dd>
- *  <dt>id</dt><dd>The id of the messaging service that is to be loaded</dd>
+ * <dt>filestorageService</dt> <dd>The ID of the messaging service. </dd>
+ * <dt>id</dt><dd>The id of the messaging service that is to be loaded</dd>
  * </dl>
  * Throws an exception upon an error or returns the loaded FileStorageAccount JSON representation.
  *
@@ -82,16 +81,17 @@ public class GetAction extends AbstractFileStorageAccountAction {
 
     @Override
     protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-
-        final List<String> missingParameters = request.getMissingParameters(FileStorageAccountConstants.FILE_STORAGE_SERVICE, FileStorageAccountConstants.ID);
-        if(!missingParameters.isEmpty()) {
+        List<String> missingParameters = request.getMissingParameters(FileStorageAccountConstants.FILE_STORAGE_SERVICE, FileStorageAccountConstants.ID);
+        if (!missingParameters.isEmpty()) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
-        final String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
 
-        final String id = request.getParameter(FileStorageAccountConstants.ID);
+        String fsServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
         FileStorageService fsService = registry.getFileStorageService(fsServiceId);
-        final FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
+
+        String id = request.getParameter(FileStorageAccountConstants.ID);
+        FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
+
         FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
         return new AJAXRequestResult(writer.write(account, rootFolder));
     }
