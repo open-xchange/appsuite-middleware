@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -211,7 +212,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
-                String[] defaultFolderNames = null;
+                Map<Integer, String> defaultFolderNames = null;
                 if (!pop3) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     mailAccess = getMailAccess(accountDescription, session, warnings);

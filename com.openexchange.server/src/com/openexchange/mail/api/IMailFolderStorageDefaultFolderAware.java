@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.api;
 
+import java.util.Map;
 import com.openexchange.exception.OXException;
 
 /**
@@ -66,6 +67,6 @@ public interface IMailFolderStorageDefaultFolderAware {
      * 
      * @throws OXException If user's default folder could not be checked
      */
-    public String[] getSpecialUseFolder() throws OXException;
+    public Map<Integer, String> getSpecialUseFolder() throws OXException;
 
 }

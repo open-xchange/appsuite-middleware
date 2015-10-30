@@ -353,6 +353,8 @@ public final class DefaultFolderNamesProvider {
         String getConfirmedSpam();
 
         String getConfirmedHam();
+
+        String getArchive();
     }
 
     private static final class DefaultAccountFallbackProvider implements FallbackProvider {
@@ -418,6 +420,15 @@ public final class DefaultFolderNamesProvider {
             return ret;
         }
 
+        @Override
+        public String getArchive() {
+            final String ret = defaultAccount.getArchive();
+            if (isEmpty(ret)) {
+                return DEFAULT_PROVIDER.getArchive();
+            }
+            return ret;
+        }
+
     }
 
     /**
@@ -453,6 +464,11 @@ public final class DefaultFolderNamesProvider {
         @Override
         public String getTrash() {
             return MailStrings.TRASH;
+        }
+
+        @Override
+        public String getArchive() {
+            return MailStrings.ARCHIVE;
         }
     };
 }

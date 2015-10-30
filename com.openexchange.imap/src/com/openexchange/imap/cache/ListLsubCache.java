@@ -859,6 +859,27 @@ public final class ListLsubCache {
         }
     }
 
+    /**
+     * Gets the LIST entries marked with "\Archive" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     *
+     * @param accountId The account identifier
+     * @param imapFolder The IMAP folder
+     * @param session The session
+     * @param ignoreSubscriptions Whether to ignore subscriptions
+     * @return The entries
+     * @throws OXException If loading the entries fails
+     * @throws MessagingException If a messaging error occurs
+     */
+    public static Collection<ListLsubEntry> getArchiveEntry(int accountId, IMAPFolder imapFolder, Session session, boolean ignoreSubscriptions) throws OXException, MessagingException {
+        ListLsubCollection collection = getCollection(accountId, imapFolder, session, ignoreSubscriptions);
+        synchronized (collection) {
+            checkTimeStamp(imapFolder, collection, ignoreSubscriptions);
+            return collection.getArchiveEntry();
+        }
+    }
+
     private static ListLsubCollection getCollection(final int accountId, final IMAPFolder imapFolder, final Session session, final boolean ignoreSubscriptions) throws OXException, MessagingException {
         KeyedCache cache = getCache(session);
 

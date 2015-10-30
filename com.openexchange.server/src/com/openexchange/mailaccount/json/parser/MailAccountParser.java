@@ -315,7 +315,7 @@ public class MailAccountParser extends DataParser {
         }
         if (json.has(MailAccountFields.ARCHIVE)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE);
-            account.setTrash(null == string ? string : string.trim());
+            account.setArchive(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_LITERAL);
         }
         if (json.has(MailAccountFields.SENT)) {
@@ -354,7 +354,7 @@ public class MailAccountParser extends DataParser {
         }
         if (json.has(MailAccountFields.ARCHIVE_FULLNAME)) {
             final String string = parseString(json, MailAccountFields.ARCHIVE_FULLNAME);
-            account.setTrashFullname(null == string ? string : string.trim());
+            account.setArchiveFullname(null == string ? string : string.trim());
             attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
         }
         if (json.has(MailAccountFields.SENT_FULLNAME)) {

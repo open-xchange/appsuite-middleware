@@ -53,7 +53,9 @@ import static com.openexchange.java.Strings.isEmpty;
 import static com.openexchange.java.Strings.toLowerCase;
 import java.sql.Connection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -227,11 +229,11 @@ public final class Tools {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final String[] folderNames) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final Map<Integer, String> folderNames) throws OXException {
 
-        String[] given_names = folderNames;
+        Map<Integer, String> given_names = folderNames;
         if (null == given_names) {
-            given_names = new String[4];
+            given_names = new HashMap<Integer, String>();
         }
         
         final int accountId = account.getId();
@@ -325,7 +327,7 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = given_names[StorageUtility.INDEX_DRAFTS];
+                String name = given_names.get(StorageUtility.INDEX_DRAFTS);
                 if (null == name) {
                     name = account.getDrafts();
                 }
@@ -362,7 +364,7 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = given_names[StorageUtility.INDEX_SENT];
+                String name = given_names.get(StorageUtility.INDEX_SENT);
                 if (null == name) {
                     name = account.getSent();
                 }
@@ -399,7 +401,7 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = given_names[StorageUtility.INDEX_SPAM];
+                String name = given_names.get(StorageUtility.INDEX_SPAM);
                 if (null == name) {
                     name = account.getSpam();
                 }
@@ -436,7 +438,7 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = given_names[StorageUtility.INDEX_TRASH];
+                String name = given_names.get(StorageUtility.INDEX_TRASH);
                 if (null == name) {
                     name = account.getTrash();
                 }
@@ -454,6 +456,38 @@ public final class Tools {
                 }
                 mad.setTrashFullname(tmp.append(name).toString());
                 attributes.add(Attribute.TRASH_FULLNAME_LITERAL);
+            }
+            // archive
+            fullName = account.getArchiveFullname();
+            if (null == fullName) {
+                if (null == prefix) {
+                    prefix = getPrefix(accountId, serverSession);
+                    tmp = new StringBuilder(prefix);
+                } else {
+                    if (null == tmp) {
+                        tmp = new StringBuilder(prefix);
+                    } else {
+                        tmp.setLength(prefix.length());
+                    }
+                }
+                String name = given_names.get(StorageUtility.INDEX_ARCHIVE);
+                if (null == name) {
+                    name = account.getArchive();
+                }
+                if (null == name) {
+                    if (null == locale) {
+                        locale = serverSession.getUser().getLocale();
+                    }
+                    if (null == primaryAccount) {
+                        primaryAccount = storageService.getDefaultMailAccount(userId, contextId);
+                    }
+                    name = getName(StorageUtility.INDEX_ARCHIVE, primaryAccount, locale, Policy.BY_LOCALE);
+
+                    mad.setArchive(name);
+                    attributes.add(Attribute.ARCHIVE_LITERAL);
+                }
+                mad.setArchiveFullname(tmp.append(name).toString());
+                attributes.add(Attribute.ARCHIVE_FULLNAME_LITERAL);
             }
             /*
              * Something to update?
@@ -553,6 +587,16 @@ public final class Tools {
                 // Special handling for confirmed-ham; see AdminUser.properties: no translation for that folder
                 retval = "confirmed-ham";
                 // retval = StringHelper.valueOf(locale).getString(MailStrings.CONFIRMED_HAM);
+            }
+            break;
+        case StorageUtility.INDEX_ARCHIVE:
+            if (Policy.BY_PRIMARY_ACCOUNT == policy) {
+                retval = primaryAccount.getArchive();
+                if (null == retval) {
+                    retval = DefaultFolderNamesProvider.DEFAULT_PROVIDER.getArchive();
+                }
+            } else {
+                retval = StringHelper.valueOf(locale).getString(MailStrings.ARCHIVE);
             }
             break;
         default:

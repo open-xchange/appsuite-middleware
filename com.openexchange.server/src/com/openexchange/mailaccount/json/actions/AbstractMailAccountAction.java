@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.json.JSONException;
@@ -413,7 +414,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final String[] folderNames) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<Integer, String> folderNames) throws OXException {
         return Tools.checkFullNames(account, storageService, session, con, folderNames);
     }
 
