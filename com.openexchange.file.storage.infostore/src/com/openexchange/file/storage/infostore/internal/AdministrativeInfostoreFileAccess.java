@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.infostore.internal;
 
 import static com.openexchange.file.storage.FileStorageUtility.checkUrl;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -70,6 +71,7 @@ import com.openexchange.file.storage.infostore.osgi.Services;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.InfostoreFacades;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -111,16 +113,37 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
         if (modifiedFields.contains(Field.URL)) {
             checkUrl(file);
         }
-        getInfostore(file.getFolderId()).saveDocumentMetadata(
-            new FileMetadata(file),
-            sequenceNumber,
-            FieldMapping.getMatching(modifiedFields),
-            context);
+
+        InfostoreFacade infostoreFacade = getInfostore(file.getFolderId());
+        infostoreFacade.startTransaction();
+        boolean committed = false;
+        try {
+            infostoreFacade.saveDocumentMetadata(new FileMetadata(file), sequenceNumber, FieldMapping.getMatching(modifiedFields), context);
+            infostoreFacade.commit();
+            committed = true;
+        } finally {
+            if (!committed) {
+                infostoreFacade.rollback();
+            }
+            infostoreFacade.finish();
+        }
     }
 
     @Override
     public void removeDocument(String folderId, String id) throws OXException {
-        getInfostore(folderId).removeDocuments(Collections.singletonList(new IDTuple(folderId, id)), context);
+        InfostoreFacade infostoreFacade = getInfostore(folderId);
+        infostoreFacade.startTransaction();
+        boolean committed = false;
+        try {
+            infostoreFacade.removeDocuments(Collections.singletonList(new IDTuple(folderId, id)), context);
+            infostoreFacade.commit();
+            committed = true;
+        } finally {
+            if (!committed) {
+                infostoreFacade.rollback();
+            }
+            infostoreFacade.finish();
+        }
     }
 
     @Override
@@ -137,8 +160,26 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
             fileIds.add(tuple);
         }
 
-        for (Entry<String, List<IDTuple>> entry : idsByFolder.entrySet()) {
-            getInfostore(entry.getKey()).removeDocuments(entry.getValue(), context);
+        List<InfostoreFacade> openedFacades = new ArrayList<InfostoreFacade>(idsByFolder.size());
+        boolean allCommitted = false;
+        try {
+            for (Entry<String, List<IDTuple>> entry : idsByFolder.entrySet()) {
+                InfostoreFacade infostoreFacade = getInfostore(entry.getKey());
+                infostoreFacade.startTransaction();
+                openedFacades.add(infostoreFacade);
+                infostoreFacade.removeDocuments(entry.getValue(), context);
+                infostoreFacade.commit();
+            }
+            allCommitted = true;
+        } finally {
+            if (!allCommitted) {
+                for (InfostoreFacade infostoreFacade : openedFacades) {
+                    InfostoreFacades.rollback(infostoreFacade);
+                }
+            }
+            for (InfostoreFacade infostoreFacade : openedFacades) {
+                InfostoreFacades.finish(infostoreFacade);
+            }
         }
     }
 
