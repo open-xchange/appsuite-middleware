@@ -233,7 +233,7 @@ public class RssAction implements AJAXActionService {
                 // Check possible image
                 SyndImage image = feed.getImage();
                 if (image != null) {
-                    result.setImageUrl(image.getLink());
+                    result.setImageUrl(image.getUrl());
                 }
 
                 // Add to results list
