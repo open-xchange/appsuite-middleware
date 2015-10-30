@@ -1116,8 +1116,8 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public Map<Integer, String> getSpecialUseFolder() throws OXException {
-        HashMap<Integer, String> retval = new HashMap<Integer, String>();
         try {
+            Map<Integer, String> retval = new HashMap<Integer, String>(8);
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(IMAPDefaultFolderChecker.INBOX);
             Collection<ListLsubEntry> entries = null;
             entries = ListLsubCache.getSentEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
@@ -1140,11 +1140,10 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             if (!entries.isEmpty()) {
                 retval.put(StorageUtility.INDEX_ARCHIVE, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
-
+            return retval;
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
-        return retval;
     }
 
     private static final int FOLDER_TYPE = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);

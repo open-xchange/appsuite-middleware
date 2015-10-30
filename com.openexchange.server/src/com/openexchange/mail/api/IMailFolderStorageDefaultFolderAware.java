@@ -51,6 +51,7 @@ package com.openexchange.mail.api;
 
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.utils.StorageUtility;
 
 /**
  * {@link IMailFolderStorageDefaultFolderAware}
@@ -61,12 +62,16 @@ import com.openexchange.exception.OXException;
 public interface IMailFolderStorageDefaultFolderAware {
 
     /**
-     * Retrieve the available special use folders from the mail server.
-     * 
-     * return a array with the special use folder names or null entries
-     * 
+     * Retrieves the available special-use (aka default) folders from the mail server.
+     *
+     * @return A mapping with the available special use folder names
      * @throws OXException If user's default folder could not be checked
+     * @see StorageUtility#INDEX_TRASH
+     * @see StorageUtility#INDEX_DRAFTS
+     * @see StorageUtility#INDEX_SENT
+     * @see StorageUtility#INDEX_SPAM
+     * @see StorageUtility#INDEX_ARCHIVE
      */
-    public Map<Integer, String> getSpecialUseFolder() throws OXException;
+    Map<Integer, String> getSpecialUseFolder() throws OXException;
 
 }
