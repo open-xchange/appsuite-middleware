@@ -291,6 +291,9 @@ public class SearchEngineImpl extends DBService {
      */
     protected static void appendFoldersAsUnion(StringBuilder sqlQuery, String filter, int contextID, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
         if (readAllFolders.isEmpty() && readOwnFolders.isEmpty()) {
+            if (null != filter) {
+                sqlQuery.append(" WHERE ").append(filter);
+            }
             return;
         }
 
