@@ -89,7 +89,7 @@ import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link TransformImageAction} transforms the image if necessary
- * 
+ *
  * Influence the following IDataWrapper attributes:
  * -File
  *
@@ -221,29 +221,29 @@ public class TransformImageAction implements IFileResponseRendererAction {
             stream.mark(131072); // 128KB
         }
         // Start transformations: scale, rotate, ...
-        final ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
+        ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
         // Rotate by default when not delivering as download
-        final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+        Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-            final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-            final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-            final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            int cropX = optIntParameter(request, "cropX");
+            int cropY = optIntParameter(request, "cropY");
+            int cropWidth = optIntParameter(request, "cropWidth");
+            int cropHeight = optIntParameter(request, "cropHeight");
             transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            int maxWidth = optIntParameter(request, "width");
             if (maxWidth > Constants.getMaxWidth()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
             }
-            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            int maxHeight = optIntParameter(request, "height");
             if (maxHeight > Constants.getMaxHeight()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
             }
-            final ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
+            ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             try {
                 transformations.scale(maxWidth, maxHeight, scaleType);
             } catch (final IllegalArgumentException e) {
@@ -251,7 +251,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
             }
         }
         // Compress by default when not delivering as download
-        final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+        Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
@@ -356,6 +356,21 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 return returnValue;
             }
         }
+    }
+
+    /**
+     * Optionally parses a specific numerical parameter from the supplied request data.
+     *
+     * @param request The request to get the paramter from
+     * @param name The parameter, or <code>0</code> if not set
+     * @return
+     */
+    private int optIntParameter(AJAXRequestData request, String name) throws OXException {
+        if (request.isSet(name)) {
+            Integer integer = request.getParameter("width", int.class);
+            return null != integer ? integer.intValue() : 0;
+        }
+        return 0;
     }
 
     private boolean isImage(final IFileHolder file) {
