@@ -82,7 +82,7 @@ public class UserJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DispatcherPrefixService.class };
+        return EMPTY_CLASSES;
     }
 
     @Override
