@@ -283,6 +283,7 @@ public class SearchEngineImpl extends DBService {
      * holding single shared files (10) is appended automatically if the <code>readAllFolders</code> collection contains it.
      *
      * @param sqlQuery The string builder holding the current SQL query w/o WHERE
+     * @param filter An optional filter expression that is supposed to be appended to WHERE clause
      * @param contextID The context identifier
      * @param userID The identifier of the requesting user
      * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
