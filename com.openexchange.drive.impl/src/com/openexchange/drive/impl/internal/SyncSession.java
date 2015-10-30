@@ -70,6 +70,7 @@ import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.checksum.FileChecksum;
 import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ServerFileVersion;
+import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.storage.DriveStorage;
 import com.openexchange.drive.impl.storage.DriveTemp;
 import com.openexchange.drive.impl.storage.StorageOperation;
@@ -276,8 +277,23 @@ public class SyncSession {
      * @return The server directory versions
      */
     public List<ServerFileVersion> getServerFiles(String path) throws OXException {
+        return getServerFiles(path, -1);
+    }
+
+    /**
+     * Gets a list of all file versions in a directory available at the server. Only synchronized files are taken into account, i.e.
+     * invalid and ignored files are excluded from the result. Missing file checksums will be calculated on demand.
+     *
+     * @param limit The maximum number of files to add before throwing an exception, or <code>-1</code> for no limitations
+     * @return The server directory versions
+     */
+    public List<ServerFileVersion> getServerFiles(String path, int limit) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
         List<File> files = getStorage().getFilesInFolder(folder.getId());
+        int maxFilesPerDiretory = DriveConfig.getInstance().getMaxFilesPerDiretory();
+        if (-1 != maxFilesPerDiretory && files.size() > maxFilesPerDiretory) {
+            throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDiretory, path);
+        }
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
         List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
         for (int i = 0; i < files.size(); i++) {
@@ -290,14 +306,15 @@ public class SyncSession {
      * Gets a list of all directory versions available at the server. Only synchronized folders are taken into account, i.e. invalid and
      * ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
      *
+     * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
      * @return The server directory versions
      */
-    public List<ServerDirectoryVersion> getServerDirectories() throws OXException {
+    public List<ServerDirectoryVersion> getServerDirectories(final int limit) throws OXException {
         return getStorage().wrapInTransaction(new StorageOperation<List<ServerDirectoryVersion>>() {
 
             @Override
             public List<ServerDirectoryVersion> call() throws OXException {
-                return getServerDirectoryVersions();
+                return getServerDirectoryVersions(limit);
             }
         });
     }
@@ -306,17 +323,29 @@ public class SyncSession {
      * Gets a list of all directory versions available at the server. Only synchronized folders are taken into account, i.e. invalid and
      * ignored directories are excluded from the result. Missing directory checksums will be calculated on demand.
      *
+     * @param limit The maximum number of directories to add before throwing an exception, or <code>-1</code> for no limitations
      * @return The server directory versions
      */
-    private List<ServerDirectoryVersion> getServerDirectoryVersions() throws OXException {
-        Map<String, FileStorageFolder> folders = getStorage().getFolders();
+    private List<ServerDirectoryVersion> getServerDirectoryVersions(int limit) throws OXException {
+        Map<String, FileStorageFolder> folders;
+        if (-1 != limit) {
+            folders = getStorage().getFolders(limit + 1);
+            if (folders.size() > limit) {
+                throw DriveExceptionCodes.TOO_MANY_DIRECTORIES.create(limit);
+            }
+        } else {
+            folders = getStorage().getFolders();
+        }
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();
+            String folderID = entry.getValue().getId();
             if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(entry.getValue().getName())) {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());
+            } else if (false == DriveUtils.isSynchronizable(folderID)) {
+                trace("Skipping not synchronizable server directory: " + entry.getKey());
             } else {
                 folderIDs.add(entry.getValue().getId());
             }

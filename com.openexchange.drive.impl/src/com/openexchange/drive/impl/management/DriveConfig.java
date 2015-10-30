@@ -50,7 +50,10 @@
 package com.openexchange.drive.impl.management;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -113,6 +116,10 @@ public class DriveConfig implements Initialization {
     private String directLinkDirectory;
     private String uiWebPath;
     private String dispatcherPrefix;
+    private int maxDirectories;
+    private int maxFilesPerDiretory;
+    private Set<String> enabledServices;
+    private Set<String> excludedFolders;
 
     private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
     private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
@@ -375,6 +382,53 @@ public class DriveConfig implements Initialization {
     }
 
     /**
+     * Gets the maxDirectories
+     *
+     * @return The maxDirectories
+     */
+    public int getMaxDirectories() {
+        return maxDirectories;
+    }
+
+    /**
+     * Gets the maxFilesPerDiretory
+     *
+     * @return The maxFilesPerDiretory
+     */
+    public int getMaxFilesPerDiretory() {
+        return maxFilesPerDiretory;
+    }
+
+    /**
+     * Gets a value indicating whether synchronization is enabled for a specific file storage service or not.
+     *
+     * @param serviceID The identifier of the file storage service to check
+     * @return <code>true</code> if synchronization is enabled, <code>false</code>, otherwise
+     */
+    public boolean isEnabledService(String serviceID) {
+        return Strings.isNotEmpty(serviceID) && null != enabledServices && enabledServices.contains(serviceID);
+    }
+
+    /**
+     * Gets a value indicating whether a specific folder is excluded explicitly from synchronization or not.
+     *
+     * @param folderID The identifier of the folder to check
+     * @return <code>true</code> if the folder is excluded, <code>false</code>, otherwise
+     */
+    public boolean isExcludedFolder(String folderID) {
+        return Strings.isNotEmpty(folderID) && null != excludedFolders && excludedFolders.contains(folderID);
+    }
+
+    /**
+     * Gets the exclduedFolders
+     *
+     * @return The exclduedFolders
+     */
+    public Set<String> getExclduedFolders() {
+        return excludedFolders;
+    }
+
+    /**
      * Loads all relevant drive properties from the configuration service.
      *
      * @param configService The configuration service
@@ -435,6 +489,19 @@ public class DriveConfig implements Initialization {
         maxConcurrentSyncOperations = configService.getIntProperty("com.openexchange.drive.maxConcurrentSyncOperations", -1);
         maxDirectoryActions = configService.getIntProperty("com.openexchange.drive.maxDirectoryActions", 1000);
         maxFileActions = configService.getIntProperty("com.openexchange.drive.maxFileActions", 500);
+        /*
+         * restrictions
+         */
+        maxDirectories = configService.getIntProperty("com.openexchange.drive.maxDirectories", 65535);
+        maxFilesPerDiretory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDiretory", 65535);
+        String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.enabledServices", "com.openexchange.infostore"));
+        enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
+        String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.excludedFolders"));
+        if (null == exclduedFoldersValue || 0 == exclduedFoldersValue.length) {
+            excludedFolders = Collections.emptySet();
+        } else {
+            excludedFolders = new HashSet<String>(Arrays.asList(exclduedFoldersValue));
+        }
         /*
          * direct link templates
          */

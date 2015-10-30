@@ -78,6 +78,8 @@ import static com.openexchange.drive.DriveExceptionMessages.PATH_NOT_FOUND_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.QUOTA_REACHED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.SERVER_BUSY_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_DIRECTORIES_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_FILES_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -193,6 +195,12 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** The supplied metadata could not be parsed: \"%1$s\" */
     METDATA_PARSE_ERROR(METDATA_PARSE_ERROR_MSG, METDATA_PARSE_ERROR_MSG, Category.CATEGORY_USER_INPUT, 34),
+
+    /** The maximum number of synchronizable directories (%1$d) is exceeded. Please remove some directories and try again, or select another root folder. */
+    TOO_MANY_DIRECTORIES(TOO_MANY_DIRECTORIES_MSG, TOO_MANY_DIRECTORIES_MSG, Category.CATEGORY_CAPACITY, 35),
+
+    /** The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please remove some files and try again. */
+    TOO_MANY_FILES(TOO_MANY_FILES_MSG, TOO_MANY_FILES_MSG, Category.CATEGORY_CAPACITY, 36),
 
     ;
 

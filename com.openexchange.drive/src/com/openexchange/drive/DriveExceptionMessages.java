@@ -90,6 +90,8 @@ public final class DriveExceptionMessages implements LocalizableStrings {
     public static final String LEVEL_CONFLICTING_PATH_MSG = "The path \"%1$s\" is conflicting with an equally named file at \"%2$s\".";
     public static final String NOT_SYNCHRONIZABLE_DIRECTORY_MSG = "The directory \"%1$s\" is not synchronizable. Please select another directory.";
     public static final String METDATA_PARSE_ERROR_MSG = "The supplied metadata could not be parsed: \"%1$s\"";
+    public static final String TOO_MANY_DIRECTORIES_MSG = "The maximum number of synchronizable directories (%1$d) is exceeded. Please remove some directories and try again, or select another root folder.";
+    public static final String TOO_MANY_FILES_MSG = "The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please remove some files and try again.";
 
     /**
      * Prevent instantiation.

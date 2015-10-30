@@ -62,10 +62,15 @@ import com.openexchange.exception.OXException;
 public class ErrorFileAction extends AbstractFileAction {
 
     public ErrorFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, OXException error, boolean quarantine) {
+        this(file, newFile, comparison, path, error, quarantine, false);
+    }
+
+    public ErrorFileAction(FileVersion file, FileVersion newFile, ThreeWayComparison<FileVersion> comparison, String path, OXException error, boolean quarantine, boolean stop) {
         super(file, newFile, comparison);
         parameters.put(PARAMETER_PATH, path);
         parameters.put(PARAMETER_ERROR, error);
         parameters.put(PARAMETER_QUARANTINE, Boolean.valueOf(quarantine));
+        parameters.put(PARAMETER_STOP, Boolean.valueOf(stop));
     }
 
     @Override
