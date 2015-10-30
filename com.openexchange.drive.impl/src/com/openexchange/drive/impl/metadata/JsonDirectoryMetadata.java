@@ -76,6 +76,7 @@ import com.openexchange.folderstorage.type.TemplatesType;
 import com.openexchange.folderstorage.type.TrashType;
 import com.openexchange.folderstorage.type.VideosType;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.recipient.RecipientType;
@@ -95,7 +96,6 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
      *
      * @param session The sync session
      * @param folder The folder to create the metadata for
-     * @throws OXException
      */
     public JsonDirectoryMetadata(SyncSession session, FileStorageFolder folder) throws OXException {
         super(session);
@@ -123,7 +123,10 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             JSONObject jsonObject = new JSONObject();
             jsonObject.put("id", folder.getId());
             jsonObject.put("name", folder.getName());
-            jsonObject.putOpt("localized_name", folder.getLocalizedName(session.getDriveSession().getLocale()));
+            String localizedName = folder.getLocalizedName(session.getDriveSession().getLocale());
+            if (Strings.isNotEmpty(localizedName) && false == localizedName.equals(folder.getName())) {
+                jsonObject.put("localized_name", localizedName);
+            }
             jsonObject.put("path", session.getStorage().getPath(folderID));
             if (null != folder.getCreationDate()) {
                 jsonObject.put("created", folder.getCreationDate().getTime());

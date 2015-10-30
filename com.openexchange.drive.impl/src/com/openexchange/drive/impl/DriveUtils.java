@@ -488,6 +488,15 @@ public class DriveUtils {
                 // no numerical folder identifier
             }
             /*
+             * check for blacklisted folders / disabled services
+             */
+            if (DriveConfig.getInstance().isExcludedFolder(folderID)) {
+                return false;
+            }
+            if (false == DriveConfig.getInstance().isEnabledService(new FolderID(folderID).getService())) {
+                return false;
+            }
+            /*
              * allow, otherwise
              */
             return true;
