@@ -116,6 +116,7 @@ import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
 import com.openexchange.mail.api.MailFolderStorage;
@@ -147,7 +148,7 @@ import com.sun.mail.imap.Rights;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -1111,6 +1112,35 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public void checkDefaultFolders() throws OXException {
         getChecker().checkDefaultFolders();
+    }
+
+    @Override
+    public String[] getSpecialUseFolder() throws OXException {
+        String[] retval = new String[4];
+        try {
+            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(IMAPDefaultFolderChecker.INBOX);
+            Collection<ListLsubEntry> entries = null;
+            entries = ListLsubCache.getSentEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
+            if (!entries.isEmpty()) {
+                retval[StorageUtility.INDEX_SENT] = entries.toArray(new ListLsubEntry[entries.size()])[0].getName();
+            }
+            entries = ListLsubCache.getDraftsEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
+            if (!entries.isEmpty()) {
+                retval[StorageUtility.INDEX_DRAFTS] = entries.toArray(new ListLsubEntry[entries.size()])[0].getName();
+            }
+            entries = ListLsubCache.getJunkEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
+            if (!entries.isEmpty()) {
+                retval[StorageUtility.INDEX_SPAM] = entries.toArray(new ListLsubEntry[entries.size()])[0].getName();
+            }
+            entries = ListLsubCache.getTrashEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
+            if (!entries.isEmpty()) {
+                retval[StorageUtility.INDEX_TRASH] = entries.toArray(new ListLsubEntry[entries.size()])[0].getName();
+            }
+
+        } catch (MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, imapConfig, session);
+        }
+        return retval;
     }
 
     private static final int FOLDER_TYPE = (Folder.HOLDS_MESSAGES | Folder.HOLDS_FOLDERS);

@@ -210,7 +210,7 @@ public final class Tools {
         final DatabaseService databaseService = ServerServiceRegistry.getServize(DatabaseService.class);
         final Connection wcon = databaseService.getWritable(contextId);
         try {
-            return checkFullNames(account, storageService, session, wcon);
+            return checkFullNames(account, storageService, session, wcon, null);
         } finally {
             databaseService.backWritable(contextId, wcon);
         }
@@ -223,10 +223,17 @@ public final class Tools {
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
      * @param con The connection or <code>null</code>
+     * @param folderNames Array of predefined folder names (e.g. Special-Use Folders) or null entries. If present, these names are used for creation.
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final Session session, final Connection con, final String[] folderNames) throws OXException {
+
+        String[] given_names = folderNames;
+        if (null == given_names) {
+            given_names = new String[4];
+        }
+        
         final int accountId = account.getId();
         if (MailAccount.DEFAULT_ID == accountId) {
             /*
@@ -234,6 +241,7 @@ public final class Tools {
              */
             return account;
         }
+
         final ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         final MailAccountDescription mad = new MailAccountDescription();
         mad.setId(accountId);
@@ -257,6 +265,7 @@ public final class Tools {
         final int userId = serverSession.getUserId();
         final int contextId = serverSession.getContextId();
         try {
+            //Confirmed-Ham
             String fullName = account.getConfirmedHamFullname();
             if (null == fullName) {
                 if (null == prefix) {
@@ -316,7 +325,10 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = account.getDrafts();
+                String name = given_names[StorageUtility.INDEX_DRAFTS];
+                if (null == name) {
+                    name = account.getDrafts();
+                }
                 if (null == name) {
                     if (null == locale) {
                         locale = serverSession.getUser().getLocale();
@@ -350,7 +362,10 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = account.getSent();
+                String name = given_names[StorageUtility.INDEX_SENT];
+                if (null == name) {
+                    name = account.getSent();
+                }
                 if (null == name) {
                     if (null == locale) {
                         locale = serverSession.getUser().getLocale();
@@ -384,7 +399,10 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = account.getSpam();
+                String name = given_names[StorageUtility.INDEX_SPAM];
+                if (null == name) {
+                    name = account.getSpam();
+                }
                 if (null == name) {
                     if (null == locale) {
                         locale = serverSession.getUser().getLocale();
@@ -418,7 +436,10 @@ public final class Tools {
                         tmp.setLength(prefix.length());
                     }
                 }
-                String name = account.getTrash();
+                String name = given_names[StorageUtility.INDEX_TRASH];
+                if (null == name) {
+                    name = account.getTrash();
+                }
                 if (null == name) {
                     if (null == locale) {
                         locale = serverSession.getUser().getLocale();

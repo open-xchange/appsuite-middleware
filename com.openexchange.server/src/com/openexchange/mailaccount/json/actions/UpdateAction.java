@@ -244,7 +244,7 @@ public final class UpdateAction extends AbstractMailAccountAction implements Mai
 
                 // Any standard folders changed?
                 if ((null != updatedAccount) && (fieldsToUpdate.removeAll(DEFAULT))) {
-                    updatedAccount = checkFullNames(updatedAccount, storageService, session, wcon);
+                    updatedAccount = checkFullNames(updatedAccount, storageService, session, wcon, null);
                 }
 
                 // Clear POP3 account's time stamp

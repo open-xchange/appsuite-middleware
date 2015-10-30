@@ -74,6 +74,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -210,9 +211,20 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
+                String[] defaultFolderNames = null;
+                if (!pop3) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    mailAccess = getMailAccess(accountDescription, session, warnings);
+                    mailAccess.connect(false);
+                    IMailFolderStorage storage = mailAccess.getFolderStorage();
+                    if (storage instanceof IMailFolderStorageDefaultFolderAware) {
+                        defaultFolderNames = ((IMailFolderStorageDefaultFolderAware) storage).getSpecialUseFolder();
+                    }
+                    mailAccess.close(false);
+                    mailAccess = null;
+                }
 
-                newAccount = checkFullNames(newAccount, storageService, session, wcon);
-
+                newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
                 wcon.commit();
                 rollback = false;
             } catch (SQLException e) {
