@@ -66,7 +66,7 @@ import com.openexchange.session.reservation.Reservation;
 public class PortableReservation extends AbstractCustomPortable {
 
     /** The unique portable class ID of the {@link PortableSession} */
-    public static final int CLASS_ID = 19;
+    public static final int CLASS_ID = 23;
 
     public static final String PARAMETER_TOKEN = "token";
     public static final String PARAMETER_TIMEOUT = "timeout";
