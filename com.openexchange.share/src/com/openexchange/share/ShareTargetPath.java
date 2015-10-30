@@ -192,18 +192,18 @@ public class ShareTargetPath {
      * @return A {@link ShareTargetPath} instance or <code>null</code>, if the passed input is no valid path.
      */
     public static ShareTargetPath parse(List<String> segments) {
-        Iterator<String> iterator = segments.iterator();
-        int version = -1;
-        while (iterator.hasNext()) {
-            String segment = iterator.next();
-            if (Strings.isEmpty(segment)) {
-                iterator.remove();
-            } else if (-1 == version) {
-                version = Integer.valueOf(segment);
-                iterator.remove();
-            }
-        }
         try {
+            Iterator<String> iterator = segments.iterator();
+            int version = -1;
+            while (iterator.hasNext()) {
+                String segment = iterator.next();
+                if (Strings.isEmpty(segment)) {
+                    iterator.remove();
+                } else if (-1 == version) {
+                    version = Integer.valueOf(segment);
+                    iterator.remove();
+                }
+            }
             switch (version) {
                 case 1:
                     return decodeV1Segments(segments);
