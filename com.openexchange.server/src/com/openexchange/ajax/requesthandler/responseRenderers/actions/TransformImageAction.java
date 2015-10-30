@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicReference;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
@@ -103,7 +104,13 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     @Override
     public void call(IDataWrapper data) throws Exception {
-        data.setFile(transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference()));
+        IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference());
+        if (null == file) {
+            // Quit with 404
+            data.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
+            throw new FileResponseRenderer.FileResponseRendererActionException();
+        }
+        data.setFile(file);
     }
 
     private IFileHolder transformIfImage(final AJAXRequestData request, final AJAXRequestResult result, final IFileHolder fileHolder, final String delivery, AtomicReference<File> tmpDirReference) throws IOException, OXException, FileResponseRendererActionException {

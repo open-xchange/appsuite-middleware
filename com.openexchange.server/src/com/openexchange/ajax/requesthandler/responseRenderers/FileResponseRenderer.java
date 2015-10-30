@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.httpclient.HttpStatus;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.fileholder.Readable;
@@ -202,16 +203,16 @@ public class FileResponseRenderer implements ResponseRenderer {
             .setCloseAbles(closeables)
             .setResult(result)
             .setTmpDirReference(tmpDirReference);
-        
+
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
             for (IFileResponseRendererAction action : REGISTERED_ACTIONS) {
                 action.call(data);
             }
         } catch (FileResponseRendererActionException ex) {
-            //Respond with an error
+            // Respond with an error
             return;
-        } catch (final OXException e) {
+        } catch (OXException e) {
             String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
             LOG.error(message, e);
             if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
@@ -221,10 +222,16 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
                 final String causeMsg = cause.getMessage();
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, null == causeMsg ? message : causeMsg, resp);
+            } else if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+                Object[] logArgs = e.getLogArgs();
+                Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+                int sc = ((Integer) logArgs[0]).intValue();
+                sendErrorSafe(sc, null == statusMsg ? null : statusMsg.toString(), resp);
+                return;
             } else {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
@@ -240,7 +247,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private void sendErrorSafe(int sc, String msg, final HttpServletResponse resp) {
         try {
-            resp.sendError(sc, msg);
+            resp.sendError(sc, null == msg ? HttpStatus.getStatusText(sc) : msg);
         } catch (final Exception e) {
             // Ignore
         }
@@ -280,7 +287,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         private String fileContentType;
         private String fileName;
         private long length = -1;
-        private Boolean contentTypeByParameter = false;
+        private Boolean contentTypeByParameter = Boolean.FALSE;
         private Readable documentData = null;
         private IFileHolder file;
         private HttpServletRequest request;
@@ -290,8 +297,11 @@ public class FileResponseRenderer implements ResponseRenderer {
         private List<Closeable> closeables;
         private AtomicReference<File> tmpDirReference;
 
-        public DataWrapper() {
-
+        /**
+         * Initializes a new {@link DataWrapper}.
+         */
+        DataWrapper() {
+            super();
         }
 
         @Override
@@ -483,8 +493,19 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     }
 
+    /**
+     * {@link FileResponseRendererActionException} - The special exception to signal that an appropriate HTTP status has already been
+     * applied to {@link HttpServletResponse} instance and control flow is supposed to return.
+     */
     public static class FileResponseRendererActionException extends Exception {
 
         private static final long serialVersionUID = 1654135178706909163L;
+
+        /**
+         * Initializes a new {@link FileResponseRendererActionException}.
+         */
+        public FileResponseRendererActionException() {
+            super();
+        }
     }
 }
