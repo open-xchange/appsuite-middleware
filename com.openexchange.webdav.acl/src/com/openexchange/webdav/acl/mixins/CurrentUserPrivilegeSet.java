@@ -52,10 +52,10 @@ package com.openexchange.webdav.acl.mixins;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
-import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
 
 /**
@@ -96,12 +96,12 @@ public class CurrentUserPrivilegeSet implements PropertyMixin {
 
             int writePermission = permission.getWritePermission();
             if (writePermission >= Permission.WRITE_OWN_OBJECTS) {
-                applying.add(WRITE);
-                applying.add(WRITE_PROPERTIES);
                 applying.add(WRITE_CONTENT);
             }
 
             if (permission.isAdmin()) {
+                applying.add(WRITE);
+                applying.add(WRITE_PROPERTIES);
                 applying.add(WRITE_ACL);
             }
 
