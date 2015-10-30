@@ -62,6 +62,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import org.json.JSONException;
@@ -126,7 +127,7 @@ public class SearchEngineImpl extends DBService {
 
     /**
      * Performs a term-based search.
-     * 
+     *
      * @param session The session
      * @param searchTerm The search term
      * @param all A collection of folder identifiers the user is able to read "all" items from
@@ -136,12 +137,12 @@ public class SearchEngineImpl extends DBService {
      * @param dir The sort direction
      * @param start The start of the requested range
      * @param end The end of the requested range
-     * @return The search results 
+     * @return The search results
      */
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, List<Integer> all, List<Integer> own, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(all, own, session.getContextId(), session.getUserId(), getResultFieldsSelect(cols), sortedBy, dir, start, end);
         searchTerm.visit(visitor);
-        String sqlQuery = visitor.getMySqlQuery();        
+        String sqlQuery = visitor.getMySqlQuery();
         boolean keepConnection = false;
         PreparedStatement stmt = null;
         Connection con = null;
@@ -153,6 +154,10 @@ public class SearchEngineImpl extends DBService {
             keepConnection = true;
             return iter;
         } catch (SQLException e) {
+            if (e.getCause() instanceof java.net.SocketTimeoutException) {
+                // Communications link failure
+                throw InfostoreExceptionCodes.SEARCH_TOOK_TOO_LONG.create(e, session.getUserId(), session.getContextId(), sqlQuery);
+            }
             LOG.error("", e);
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, sqlQuery);
         } catch (OXException e) {
@@ -167,7 +172,7 @@ public class SearchEngineImpl extends DBService {
 
     /**
      * Performs a simple, pattern-based search.
-     * 
+     *
      * @param session The session
      * @param query The pattern, or <code>null</code> / <code>*</code> to search for all items
      * @param all A collection of folder identifiers the user is able to read "all" items from
@@ -177,7 +182,7 @@ public class SearchEngineImpl extends DBService {
      * @param dir The sort direction
      * @param start The start of the requested range
      * @param end The end of the requested range
-     * @return The search results 
+     * @return The search results
      */
     public SearchIterator<DocumentMetadata> search(ServerSession session, String query, List<Integer> all, List<Integer> own, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
         if (Strings.isEmpty(query) || "*".equals(query)) {
@@ -274,9 +279,82 @@ public class SearchEngineImpl extends DBService {
     }
 
     /**
-     * Appends a WHERE-clause to restrict the results to the supplied set of folders. An appropriate condition for the special folder 
-     * holding single shared files (10) is appended automatically if the <code>readAllFolders</code> collection contains it. 
-     * 
+     * Appends a UNION-clause to restrict the results to the supplied set of folders. An appropriate condition for the special folder
+     * holding single shared files (10) is appended automatically if the <code>readAllFolders</code> collection contains it.
+     *
+     * @param sqlQuery The string builder holding the current SQL query w/o WHERE
+     * @param contextID The context identifier
+     * @param userID The identifier of the requesting user
+     * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
+     * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
+     */
+    protected static void appendFoldersAsUnion(StringBuilder sqlQuery, String filter, int contextID, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+        if (readAllFolders.isEmpty() && readOwnFolders.isEmpty()) {
+            return;
+        }
+
+        String prefix = sqlQuery.toString();
+
+        boolean appendUnion = false;
+        if (!readAllFolders.isEmpty()) {
+            Integer sharedFilesFolderID = I(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+            if (readAllFolders.contains(sharedFilesFolderID)) {
+                // Remove virtual folder identifier
+                readAllFolders = new ArrayList<Integer>(readAllFolders);
+                readAllFolders.remove(sharedFilesFolderID);
+
+                sqlQuery.append(" WHERE infostore.cid = ").append(contextID).append(" AND ");
+                sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=");
+                sqlQuery.append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID);
+                sqlQuery.append(" AND permission_id=").append(userID).append("))");
+                if (null != filter) {
+                    sqlQuery.append(" AND ").append(filter);
+                }
+                appendUnion = true;
+            }
+            if (!readAllFolders.isEmpty()) {
+                if (appendUnion) {
+                    sqlQuery.append(" UNION ").append(prefix);
+                }
+
+                Iterator<Integer> iter = readAllFolders.iterator();
+                sqlQuery.append(" INNER JOIN (SELECT ").append(iter.next()).append(" AS fid");
+                while (iter.hasNext()) {
+                    sqlQuery.append(" UNION ALL SELECT ").append(iter.next());
+                }
+                sqlQuery.append(") AS x ON infostore.folder_id = x.fid");
+
+                sqlQuery.append(" WHERE infostore.cid = ").append(contextID);
+                if (null != filter) {
+                    sqlQuery.append(" AND ").append(filter);
+                }
+                appendUnion = true;
+            }
+        }
+        if (!readOwnFolders.isEmpty()) {
+            if (appendUnion) {
+                sqlQuery.append(" UNION ").append(prefix);
+            }
+
+            Iterator<Integer> iter = readOwnFolders.iterator();
+            sqlQuery.append(" INNER JOIN (SELECT ").append(iter.next()).append(" AS fid");
+            while (iter.hasNext()) {
+                sqlQuery.append(" UNION ALL SELECT ").append(iter.next());
+            }
+            sqlQuery.append(") AS x ON infostore.folder_id = x.fid");
+
+            sqlQuery.append(" WHERE infostore.cid = ").append(contextID);
+            sqlQuery.append(" AND infostore.created_by=").append(userID);
+            if (null != filter) {
+                sqlQuery.append(" AND ").append(filter);
+            }
+        }
+    }
+
+    /**
+     * Appends a WHERE-clause to restrict the results to the supplied set of folders. An appropriate condition for the special folder
+     * holding single shared files (10) is appended automatically if the <code>readAllFolders</code> collection contains it.
+     *
      * @param sqlQuery The string builder holding the current SQL query
      * @param contextID The context identifier
      * @param userID The identifier of the requesting user
@@ -293,7 +371,7 @@ public class SearchEngineImpl extends DBService {
             Integer sharedFilesFolderID = I(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
             if (readAllFolders.contains(sharedFilesFolderID)) {
                 readAllFolders = new ArrayList<Integer>(readAllFolders);
-                readAllFolders.remove(sharedFilesFolderID);                               
+                readAllFolders.remove(sharedFilesFolderID);
                 sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=")
                     .append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID)
                     .append(" AND permission_id=").append(userID).append("))");
@@ -316,7 +394,7 @@ public class SearchEngineImpl extends DBService {
         if (0 < readOwnFolders.size()) {
             if (appendOr) {
                 sqlQuery.append(" OR ");
-            } 
+            }
             sqlQuery.append("(infostore.created_by=").append(userID);
             if (1 == readOwnFolders.size()) {
                 sqlQuery.append(" AND infostore.folder_id=").append(readOwnFolders.get(0)).append(')');
@@ -805,7 +883,7 @@ public class SearchEngineImpl extends DBService {
             retval.setIsCurrentVersion(true);
             return retval;
         }
-        
+
     }
 
 }

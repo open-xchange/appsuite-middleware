@@ -133,6 +133,9 @@ public class InfostoreExceptionMessages implements LocalizableStrings {
     // Concurrent write attempt. Please await the previous save operation to terminate.
     public static final String CONCURRENT_VERSION_CREATION_MSG_DISPLA = "Concurrent write attempt. Please await the previous save operation to terminate.";
 
+    // Your search took too long in order to be accomplished.
+    public static final String SEARCH_TOOK_TOO_LONG_MSG_DISPLAY = "Your search took too long in order to be accomplished.";
+
 
     private InfostoreExceptionMessages() {
         super();

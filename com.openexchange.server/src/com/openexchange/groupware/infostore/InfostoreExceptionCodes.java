@@ -214,6 +214,10 @@ public enum InfostoreExceptionCodes implements DisplayableOXExceptionCode {
      * Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.
      */
     CONCURRENT_VERSION_CREATION("Concurrent attempt to write the same version %1$s of document %2$s. Please await the previous save operation to terminate.", CATEGORY_USER_INPUT, 2105, InfostoreExceptionMessages.CONCURRENT_VERSION_CREATION_MSG_DISPLA),
+    /**
+     * The search took too long to accomplish the following query for user %1$s in context %2$s: %3$s
+     */
+    SEARCH_TOOK_TOO_LONG("The search took too long to accomplish the following query for user %1$s in context %2$s: %3$s", CATEGORY_USER_INPUT, 2106, InfostoreExceptionMessages.SEARCH_TOOK_TOO_LONG_MSG_DISPLAY)
 
     ;
 

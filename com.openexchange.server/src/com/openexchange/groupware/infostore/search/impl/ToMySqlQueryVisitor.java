@@ -101,21 +101,26 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     private static final String INFOSTORE = "infostore.";
     private static final String DOCUMENT = "infostore_document.";
-    private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ";
+    private static final String PREFIX = " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version";
     private static final char[] IMMUNE = new char[] { ' ', '%', '_' };
     private static final char[] IMMUNE_WILDCARDS = new char[] { ' ', '%', '_', '\\' };
     private static final Set<Class<? extends SearchTerm<?>>> UNSUPPORTED = Collections.unmodifiableSet(new HashSet<Class<? extends SearchTerm<?>>>(Arrays.asList(ContentTerm.class, MetaTerm.class, SequenceNumberTerm.class)));
 
-    private final StringBuilder sb;
+    private final StringBuilder filterBuilder;
     private final MySQLCodec codec;
     private final Metadata sortedBy;
     private final int dir;
     private final int start;
     private final int end;
+    private final String prefix;
+    private final List<Integer> readAllFolders;
+    private final List<Integer> readOwnFolders;
+    private final int contextId;
+    private final int userId;
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
-     * 
+     *
      * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
      * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
      * @param contextId The context identifier
@@ -128,43 +133,49 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      */
     public ToMySqlQueryVisitor(List<Integer> readAllFolders, List<Integer> readOwnFolders, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
         super();
-        this.sb = new StringBuilder(8192);
+        this.filterBuilder = new StringBuilder(1024);
         this.codec = new MySQLCodec(Mode.STANDARD);
         this.sortedBy = sortedBy;
         this.dir = dir;
         this.start = start;
         this.end = end;
-        sb.append(cols);
-        sb.append(PREFIX).append(contextId);
-        SearchEngineImpl.appendFolders(sb, contextId, userId, readAllFolders, readOwnFolders);        
-        sb.append(" AND ");
+
+        this.readAllFolders = readAllFolders;
+        this.readOwnFolders = readOwnFolders;
+        this.contextId = contextId;
+        this.userId = userId;
+
+        // Build prefix
+        this.prefix = new StringBuilder(cols.length() + PREFIX.length()).append(cols).append(PREFIX).toString();
     }
-    
+
     protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
         this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
             null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
             contextId, userId, cols, sortedBy, dir, start, end);
     }
-    
+
     protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols) {
         this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
             null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
             contextId, userId, cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
     }
-    
+
     public String getMySqlQuery() {
+        StringBuilder queryBuilder = new StringBuilder(8192).append(prefix);
+        SearchEngineImpl.appendFoldersAsUnion(queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, contextId, userId, readAllFolders, readOwnFolders);
         if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
-            sb.append(" ORDER BY ").append(sortedBy.getName());
+            queryBuilder.append(" ORDER BY ").append(sortedBy.getName());
             if (dir == InfostoreSearchEngine.ASC) {
-                sb.append(" ASC");
+                queryBuilder.append(" ASC");
             } else if (dir == InfostoreSearchEngine.DESC) {
-                sb.append(" DESC");
+                queryBuilder.append(" DESC");
             }
         }
-        if (start > -1 && end > -1 && start < end) {
-            sb.append(" LIMIT ").append(start).append(",").append(end);
+        if (start >= 0 && end >= 0 && start < end) {
+            queryBuilder.append(" LIMIT ").append(start).append(",").append(end);
         }
-        return sb.toString();
+        return queryBuilder.toString();
     }
 
     private static List<SearchTerm<?>> prepareTerms(List<SearchTerm<?>> terms) {
@@ -198,13 +209,13 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
 
         // More than 1 term
-        sb.append('(');
+        filterBuilder.append('(');
         terms.get(0).visit(this);
         for (int i = 1; i < size; i++) {
-            sb.append("AND ");
+            filterBuilder.append("AND ");
             terms.get(i).visit(this);
         }
-        sb.append(')');
+        filterBuilder.append(')');
     }
 
     @Override
@@ -224,18 +235,18 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
 
         // More than 1 term
-        sb.append('(');
+        filterBuilder.append('(');
         terms.get(0).visit(this);
         for (int i = 1; i < size; i++) {
-            sb.append("OR ");
+            filterBuilder.append("OR ");
             terms.get(i).visit(this);
         }
-        sb.append(')');
+        filterBuilder.append(')');
     }
 
     @Override
     public void visit(NotTerm notTerm) throws OXException {
-        sb.append("NOT ");
+        filterBuilder.append("NOT ");
         notTerm.getPattern().visit(this);
     }
 
@@ -247,26 +258,26 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(NumberOfVersionsTerm numberOfVersionsTerm) {
         String comp = getComparionType(numberOfVersionsTerm.getPattern());
-        sb.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(
+        filterBuilder.append(INFOSTORE).append("version").append(comp).append("MAX(").append(numberOfVersionsTerm.getPattern().getPattern()).append(
             ") ");
     }
 
     @Override
     public void visit(LastModifiedUtcTerm lastModifiedUtcTerm) {
         String comp = getComparionType(lastModifiedUtcTerm.getPattern());
-        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(
+        filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedUtcTerm.getPattern().getPattern().getTime()).append(
             " ");
     }
 
     @Override
     public void visit(ColorLabelTerm colorLabelTerm) {
         String comp = getComparionType(colorLabelTerm.getPattern());
-        sb.append(INFOSTORE).append("color_label").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
+        filterBuilder.append(INFOSTORE).append("color_label").append(comp).append(colorLabelTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
     public void visit(CurrentVersionTerm currentVersionTerm) {
-        sb.append(INFOSTORE).append("version = ").append(DOCUMENT).append("version_number").append(" ");
+        filterBuilder.append(INFOSTORE).append("version = ").append(DOCUMENT).append("version_number").append(" ");
     }
 
     @Override
@@ -284,7 +295,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(LockedUntilTerm lockedUntilTerm) {
         String comp = getComparionType(lockedUntilTerm.getPattern());
-        sb.append(INFOSTORE).append("locked_until").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
+        filterBuilder.append(INFOSTORE).append("locked_until").append(comp).append(lockedUntilTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
@@ -313,19 +324,19 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(LastModifiedTerm lastModifiedTerm) {
         String comp = getComparionType(lastModifiedTerm.getPattern());
-        sb.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
+        filterBuilder.append(INFOSTORE).append("last_modified").append(comp).append(lastModifiedTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(CreatedTerm createdTerm) {
         String comp = getComparionType(createdTerm.getPattern());
-        sb.append(INFOSTORE).append("creating_date").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
+        filterBuilder.append(INFOSTORE).append("creating_date").append(comp).append(createdTerm.getPattern().getPattern().getTime()).append(" ");
     }
 
     @Override
     public void visit(ModifiedByTerm modifiedByTerm) {
         String comp = getComparionType(modifiedByTerm.getPattern());
-        sb.append(INFOSTORE).append("changed_by =").append(comp).append(modifiedByTerm.getPattern().getPattern()).append(" ");
+        filterBuilder.append(INFOSTORE).append("changed_by =").append(comp).append(modifiedByTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
@@ -336,7 +347,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
     @Override
     public void visit(VersionTerm versionTerm) {
-        sb.append(DOCUMENT).append("version_number = ").append(versionTerm.getPattern()).append(" ");
+        filterBuilder.append(DOCUMENT).append("version_number = ").append(versionTerm.getPattern()).append(" ");
     }
 
     @Override
@@ -347,7 +358,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(FileSizeTerm fileSizeTerm) {
         String comp = getComparionType(fileSizeTerm.getPattern());
-        sb.append(DOCUMENT).append("file_size").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
+        filterBuilder.append(DOCUMENT).append("file_size").append(comp).append(fileSizeTerm.getPattern().getPattern()).append(" ");
     }
 
     @Override
@@ -365,7 +376,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     @Override
     public void visit(CreatedByTerm createdByTerm) {
         String comp = getComparionType(createdByTerm.getPattern());
-        sb.append(INFOSTORE).append("created_by").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
+        filterBuilder.append(INFOSTORE).append("created_by").append(comp).append(createdByTerm.getPattern().getPattern()).append(" ");
     }
 
     private <T> String getComparionType(ComparablePattern<T> pattern) {
@@ -454,11 +465,11 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         }
 
         // Append to query builder
-        sb.append(fieldName);
+        filterBuilder.append(fieldName);
         if (useLike) {
-            sb.append(" LIKE ").append(pattern);
+            filterBuilder.append(" LIKE ").append(pattern);
         } else {
-            sb.append(" = ").append(pattern);
+            filterBuilder.append(" = ").append(pattern);
         }
     }
 
