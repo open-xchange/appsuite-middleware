@@ -59,7 +59,7 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 
 /**
  * {@link SetBinaryInputStreamAction} set the documentData as an binary InputStream
- * 
+ *
  * Influence the following IDataWrapper attributes:
  * -documentData
  *
@@ -87,8 +87,7 @@ public class SetBinaryInputStreamAction implements IFileResponseRendererAction {
 
         if (null == data.getDocumentData()) {
             // Quit with 404
-            data.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
-            throw new FileResponseRenderer.FileResponseRendererActionException();
+            throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_FOUND, "File not found.");
         }
     }
 }

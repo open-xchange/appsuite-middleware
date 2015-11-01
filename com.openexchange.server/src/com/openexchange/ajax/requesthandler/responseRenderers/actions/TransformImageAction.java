@@ -99,16 +99,17 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class TransformImageAction implements IFileResponseRendererAction {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
-    ImageTransformationService scaler;
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
+
+    private ImageTransformationService scaler;
 
     @Override
     public void call(IDataWrapper data) throws Exception {
         IFileHolder file = transformIfImage(data.getRequestData(), data.getResult(), data.getFile(), data.getDelivery(), data.getTmpDirReference());
         if (null == file) {
             // Quit with 404
-            data.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
-            throw new FileResponseRenderer.FileResponseRendererActionException();
+            throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_FOUND, "File not found.");
         }
         data.setFile(file);
     }
@@ -165,6 +166,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
             final ResourceCache tmp = ResourceCaches.getResourceCache();
             resourceCache = null == tmp ? null : (tmp.isEnabledFor(request.getSession().getContextId(), request.getSession().getUserId()) ? tmp : null);
         }
+
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);
@@ -227,8 +229,10 @@ public class TransformImageAction implements IFileResponseRendererAction {
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
+
         // Start transformations: scale, rotate, ...
         ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
+
         // Rotate by default when not delivering as download
         Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
@@ -257,14 +261,14 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
             }
         }
+
         // Compress by default when not delivering as download
         Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
         if ((null == compress && false == IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery)) || (null != compress && compress.booleanValue())) {
             transformations.compress();
         }
-        /*
-         * Transform
-         */
+
+        // Transform
         boolean cachingAdvised = false;
         try {
             String fileContentType = file.getContentType();
@@ -294,6 +298,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 return handleFailure(file, stream, markSupported);
             }
+
             // Return immediately if not cacheable
             if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
                 return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, fileContentType, file.getName());
@@ -319,6 +324,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     return null;
                 }
             };
+
             // Acquire thread pool service
             final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
             if (null == threadPool) {
@@ -357,11 +363,10 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
             IFileHolder returnValue = file.repetitive() ? file : null;
             if (returnValue == null) {
-                throw new FileResponseRenderer.FileResponseRendererActionException();
+                // Quit with 404
+                throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_FOUND, "File not found.");
             }
-            else {
-                return returnValue;
-            }
+            return returnValue;
         }
     }
 
@@ -446,6 +451,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
         return newFile;
     }
 
+    /**
+     * Sets the scaler/image transformation service to use
+     *
+     * @param scaler The scaler
+     */
     public void setScaler(ImageTransformationService scaler) {
         this.scaler = scaler;
     }

@@ -59,13 +59,13 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
 
 /**
  * {@link CheckParametersAction} Check certain parameters
- * 
+ *
  * Influence the following IDataWrapper attributes:
  * -delivery
  * -contentType
  * -contentTypeByParameter
  * -contentDisposition
- * 
+ *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
@@ -114,8 +114,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
 
         if (null == data.getFile()) {
             // Quit with 404
-            data.getResponse().sendError(HttpServletResponse.SC_NOT_FOUND, "File not found.");
-            throw new FileResponseRenderer.FileResponseRendererActionException();
+            throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_FOUND, "File not found.");
         }
     }
 

@@ -211,6 +211,11 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         } catch (FileResponseRendererActionException ex) {
             // Respond with an error
+            try {
+                resp.sendError(ex.statusCode, ex.message == null ? HttpStatus.getStatusText(ex.statusCode) : ex.message);
+            } catch (IOException e) {
+                LOG.error("", e);
+            }
             return;
         } catch (OXException e) {
             String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
@@ -490,8 +495,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             this.tmpDirReference = tmpDirReference;
             return this;
         }
-
-    }
+    } // End of class DataWrapper
 
     /**
      * {@link FileResponseRendererActionException} - The special exception to signal that an appropriate HTTP status has already been
@@ -501,11 +505,23 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         private static final long serialVersionUID = 1654135178706909163L;
 
+        /** The status code to respond with */
+        public final int statusCode;
+
+        /** The optional accompanying  message */
+        public final String message;
+
         /**
          * Initializes a new {@link FileResponseRendererActionException}.
+         *
+         * @param statusCode The HTTP status code
+         * @param message The optional accompanying  message
          */
-        public FileResponseRendererActionException() {
+        public FileResponseRendererActionException(int statusCode, String message) {
             super();
+            this.statusCode = statusCode;
+            this.message = message;
         }
-    }
+    } // End of class FileResponseRendererActionException
+
 }
