@@ -54,9 +54,11 @@ import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link RemovePragmaHeaderAction} removes the pragma header
- * 
+ *
  * Influence the following IDataWrapper attributes:
- * -response
+ * <ul>
+ * <li>response
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

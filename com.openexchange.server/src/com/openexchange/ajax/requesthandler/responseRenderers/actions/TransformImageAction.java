@@ -92,7 +92,9 @@ import com.openexchange.tools.session.ServerSession;
  * {@link TransformImageAction} transforms the image if necessary
  *
  * Influence the following IDataWrapper attributes:
- * -File
+ * <ul>
+ * <li>File
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

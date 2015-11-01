@@ -65,13 +65,15 @@ import com.openexchange.mail.mime.ContentType;
 
 /**
  * {@link PrepareResponseHeaderAction} prepares the header of the response object
- * 
+ *
  * Influence the following IDataWrapper attributes:
- * -response
- * -length
- * -closeables
- * -documentData
- * -contentType
+ * <ul>
+ * <li>response
+ * <li>length
+ * <li>closeables
+ * <li>documentData
+ * <li>contentType
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

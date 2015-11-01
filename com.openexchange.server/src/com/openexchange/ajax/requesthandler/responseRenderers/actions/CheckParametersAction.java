@@ -61,10 +61,12 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
  * {@link CheckParametersAction} Check certain parameters
  *
  * Influence the following IDataWrapper attributes:
- * -delivery
- * -contentType
- * -contentTypeByParameter
- * -contentDisposition
+ * <ul>
+ * <li>delivery
+ * <li>contentType
+ * <li>contentTypeByParameter
+ * <li>contentDisposition
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0

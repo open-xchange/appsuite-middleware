@@ -61,7 +61,9 @@ import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRender
  * {@link SetBinaryInputStreamAction} set the documentData as an binary InputStream
  *
  * Influence the following IDataWrapper attributes:
- * -documentData
+ * <ul>
+ * <li>documentData
+ * </ul>
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
