@@ -73,7 +73,7 @@ public class CreateMiscTables extends AbstractCreateTableImpl {
         + "cid INT4 UNSIGNED NOT NULL,"
         + "last_modified INT8,"
         + "created_by INT4 UNSIGNED,"
-        + "uuid BINARY(16) DEFAULT NULL,"
+        + "uuid BINARY(16) NOT NULL,"
         + "PRIMARY KEY (cid, uuid),"
         + "INDEX (firstid),"
         + "INDEX (secondid),"

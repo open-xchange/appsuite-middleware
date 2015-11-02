@@ -78,7 +78,6 @@ import com.openexchange.groupware.update.tasks.DelDatesMembersPrimaryKeyUpdateTa
 import com.openexchange.groupware.update.tasks.DelDatesPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DelInfostorePrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.DropDuplicateEntryFromUpdateTaskTable;
-import com.openexchange.groupware.update.tasks.DropRendundantIndicesUpdateTask;
 import com.openexchange.groupware.update.tasks.DropVersionTableTask;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddPrimaryKey;
 import com.openexchange.groupware.update.tasks.GenconfAttributesBoolsAddUuidUpdateTask;
@@ -587,6 +586,9 @@ public final class InternalList {
 
         // Create object_use_count table
         list.add(new CreateObjectUseCountTableTask());
+
+        // Re-executes PrgLinksAddPrimaryKeyUpdateTask --> Adds primary key to `prg_links` table
+        list.add(new com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTaskV2());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
