@@ -1,3 +1,9 @@
+open-xchange-grizzly (7.8.0-9) stable; urgency=medium
+
+  * Build for patch 2015-11-09 (2840)
+
+ -- Marc Arens <marc.arens@open-xchange.com>  Mon, 02 Nov 2015 13:31:53 +0100
+
 open-xchange-grizzly (7.8.0-8) stable; urgency=medium
 
   * Build for patch 2015-11-02 (2853)
