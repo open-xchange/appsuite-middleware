@@ -203,7 +203,7 @@ public class DefaultFileStorageFolder implements FileStorageFolder {
 
     @Override
     public String getLocalizedName(Locale locale) {
-        return null;
+        return name;
     }
 
     @Override
