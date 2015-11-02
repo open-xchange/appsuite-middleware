@@ -945,6 +945,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public boolean handleInlinePlainText(final String plainTextContentArg, final ContentType contentType, final long size, final String fileName, final String id) throws OXException {
+        String identifier = id;
         if (isAlternative && usm.isDisplayHtmlInlineContent() && (DisplayMode.RAW.getMode() < displayMode.getMode()) && contentType.startsWith(MimeTypes.MIME_TEXT_PLAIN)) {
             /*
              * User wants to see message's alternative content
@@ -953,16 +954,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 /*
                  * Remember plain-text content
                  */
-                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(
-                    plainTextContentArg,
-                    usm,
-                    displayMode,
-                    maxContentSize);
-                plainText = new PlainTextContent(id, contentType.getBaseType(), sanitizeResult.getContent());
+                HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
+                plainText = new PlainTextContent(identifier, contentType.getBaseType(), sanitizeResult.getContent());
             }
             return true;
         }
         try {
+            /*
+             * Adjust DI if virtually inserted; e.g. MimeForward
+             */
+            if (isVirtual(contentType)) {
+                identifier = "0";
+            }
             if (contentType.startsWith(MimeTypes.MIME_TEXT_ENRICHED) || contentType.startsWith(MimeTypes.MIME_TEXT_RICHTEXT) || contentType.startsWith(MimeTypes.MIME_TEXT_RTF)) {
                 if (textAppended) {
                     if (DisplayMode.DISPLAY.isIncluded(displayMode)) {
@@ -970,7 +973,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                          * Add alternative part as attachment
                          */
                         try {
-                            JSONObject attachment = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                            JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
                             attachment.put(VIRTUAL, true);
                         } catch (final JSONException e) {
                             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -980,7 +983,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         /*
                          * Return plain-text content as-is
                          */
-                        asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                        asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
                     }
                     /*
                      * Discard
@@ -993,20 +996,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (DisplayMode.MODIFYABLE.getMode() <= displayMode.getMode()) {
                     final JSONObject textObject;
                     if (usm.isDisplayHtmlInlineContent()) {
-                        textObject =
-                            asDisplayHtml(
-                                id,
-                                contentType.getBaseType(),
-                                getHtmlDisplayVersion(contentType, plainTextContentArg),
-                                contentType.getCharsetParameter());
+                        textObject = asDisplayHtml(identifier, contentType.getBaseType(), getHtmlDisplayVersion(contentType, plainTextContentArg), contentType.getCharsetParameter());
                     } else {
-                        textObject =
-                            asDisplayText(
-                                id,
-                                contentType.getBaseType(),
-                                getHtmlDisplayVersion(contentType, plainTextContentArg),
-                                fileName,
-                                DisplayMode.DISPLAY.isIncluded(displayMode));
+                        textObject = asDisplayText(identifier, contentType.getBaseType(), getHtmlDisplayVersion(contentType, plainTextContentArg), fileName, DisplayMode.DISPLAY.isIncluded(displayMode));
                     }
                     if (includePlainText && !textObject.has("plain_text")) {
                         textObject.put("plain_text", plainTextContentArg);
@@ -1015,10 +1007,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     /*
                      * Return plain-text content as-is
                      */
-                    asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                    asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
                 } else {
                     final JSONObject jsonObject = new JSONObject(6);
-                    jsonObject.put(ID, id);
+                    jsonObject.put(ID, identifier);
                     jsonObject.put(DISPOSITION, Part.INLINE);
                     jsonObject.put(CONTENT_TYPE, contentType.getBaseType());
                     jsonObject.put(SIZE, plainTextContentArg.length());
@@ -1038,7 +1030,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             if (textAppended) {
                 if (textWasEmpty) {
                     final HtmlSanitizeResult content = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
-                    final JSONObject textObject = asPlainText(id, contentType.getBaseType(), content);
+                    final JSONObject textObject = asPlainText(identifier, contentType.getBaseType(), content);
                     if (includePlainText) {
                         textObject.put("plain_text", plainTextContentArg);
                     }
@@ -1052,7 +1044,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                              */
                             if (null != contentType.getParameter("realfilename") && plainTextContentArg.length() > 0) {
                                 try {
-                                    JSONObject attachment = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
+                                    JSONObject attachment = asAttachment(identifier, contentType.getBaseType(), plainTextContentArg.length(), fileName, null);
                                     attachment.put(VIRTUAL, true);
                                 } catch (final JSONException e) {
                                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1063,7 +1055,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                             /*
                              * Return plain-text content as-is
                              */
-                            asRawContent(id, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
+                            asRawContent(identifier, contentType.getBaseType(), new HtmlSanitizeResult(plainTextContentArg));
                             return true;
                         }
                     }
@@ -1071,7 +1063,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     // A plain text message body has already been detected
                     final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
                     final MultipartInfo mpInfo = multiparts.peek();
-                    if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
+                    if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && identifier.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                         final JSONArray attachments = getAttachmentsArr();
                         final int len = attachments.length();
                         final String keyContentType = CONTENT_TYPE;
@@ -1094,7 +1086,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         /*
                          * Append inline text as an attachment, too
                          */
-                        JSONObject textObject = asAttachment(id, contentType.getBaseType(), plainTextContentArg.length(), fileName, new HtmlSanitizeResult(sanitizeResult.getContent()));
+                        JSONObject textObject = asAttachment(identifier, contentType.getBaseType(), plainTextContentArg.length(), fileName, new HtmlSanitizeResult(sanitizeResult.getContent()));
                         textObject.put(VIRTUAL, true);
                         if (includePlainText) {
                             textObject.put("plain_text", plainTextContentArg);
@@ -1103,7 +1095,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
             } else {
                 HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
-                final JSONObject textObject = asPlainText(id, contentType.getBaseType(), sanitizeResult);
+                final JSONObject textObject = asPlainText(identifier, contentType.getBaseType(), sanitizeResult);
                 if (includePlainText) {
                     textObject.put("plain_text", plainTextContentArg);
                 }
@@ -1193,27 +1185,28 @@ public final class JsonMessageHandler implements MailMessageHandler {
             asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
         }
         try {
-            final String headersKey = HEADERS;
+            String headersKey = HEADERS;
             if (!jsonObject.hasAndNotNull(headersKey)) {
                 jsonObject.put(headersKey, new JSONObject(1));
             }
-            final String attachKey = ATTACHMENTS;
-            final String dispKey = DISPOSITION;
+
+            String attachKey = ATTACHMENTS;
+            String dispKey = DISPOSITION;
             if (jsonObject.hasAndNotNull(attachKey)) {
-                final JSONArray attachments = jsonObject.getJSONArray(attachKey);
-                final int len = attachments.length();
+                JSONArray jAttachments = jsonObject.getJSONArray(attachKey);
+                int len = jAttachments.length();
                 for (int i = 0; i < len; i++) {
-                    final JSONObject attachment = attachments.getJSONObject(i);
-                    attachment.remove(MULTIPART_ID);
-                    if (attachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(attachment.getString(dispKey))) {
-                        if (attachment.hasAndNotNull(VIRTUAL) && attachment.getBoolean(VIRTUAL)) {
-                            attachment.remove(VIRTUAL);
+                    JSONObject jAttachment = jAttachments.getJSONObject(i);
+                    jAttachment.remove(MULTIPART_ID);
+                    if (jAttachment.hasAndNotNull(dispKey) && Part.ATTACHMENT.equalsIgnoreCase(jAttachment.getString(dispKey))) {
+                        if (jAttachment.hasAndNotNull(VIRTUAL) && jAttachment.getBoolean(VIRTUAL)) {
+                            jAttachment.remove(VIRTUAL);
                         } else {
                             jsonObject.put(HAS_ATTACHMENTS, true);
                         }
-                        if (token && !attachment.hasAndNotNull("token")) {
+                        if (token && !jAttachment.hasAndNotNull("token")) {
                             try {
-                                addToken(attachment, attachment.getString(ID));
+                                addToken(jAttachment, jAttachment.getString(ID));
                             } catch (final Exception e) {
                                 // Missing field "id"
                             }
@@ -1224,6 +1217,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
         } catch (final JSONException e) {
             LOG.error("", e);
         }
+    }
+
+    private boolean isVirtual(ContentType contentType) {
+        return "virtual".equals(contentType.getParameter("nature"));
     }
 
     @Override

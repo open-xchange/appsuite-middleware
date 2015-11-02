@@ -530,7 +530,9 @@ public final class MimeReply extends AbstractMimeProcessing {
                 MessageUtility.setText("", MailProperties.getInstance().getDefaultMimeCharset(), replyMsg);
                 // replyMsg.setText("", MailProperties.getInstance().getDefaultMimeCharset(), "plain");
                 replyMsg.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeTypes.MIME_TEXT_PLAIN_TEMPL.replaceFirst("#CS#", MailProperties.getInstance().getDefaultMimeCharset()));
+                ContentType newContentType = new ContentType().setPrimaryType("text").setSubType("plain").setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
+                newContentType.setParameter("nature", "virtual");
+                replyMsg.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(newContentType.toString()));
                 final MailMessage replyMail = MimeMessageConverter.convertMessage(replyMsg);
                 if (null != msgref) {
                     replyMail.setMsgref(msgref);
@@ -544,12 +546,11 @@ public final class MimeReply extends AbstractMimeProcessing {
             String replyText;
             {
                 final List<String> list = new LinkedList<String>();
-                {
-                    final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
-                    final Locale locale = user.getLocale();
-                    final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
-                    generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
-                }
+                final User user = UserStorage.getInstance().getUser(session.getUserId(), ctx);
+                final Locale locale = user.getLocale();
+                final LocaleAndTimeZone ltz = new LocaleAndTimeZone(locale, user.getTimeZone());
+                generateReplyText(origMsg, retvalContentType, StringHelper.valueOf(locale), ltz, usm, mailSession, session, accountId, list);
+
                 final StringBuilder replyTextBuilder = new StringBuilder(8192 << 1);
                 for (int i = list.size() - 1; i >= 0; i--) {
                     replyTextBuilder.append(list.get(i));
@@ -563,6 +564,20 @@ public final class MimeReply extends AbstractMimeProcessing {
                         // Select default charset
                         retvalContentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
+                }
+                if (replyTextBuilder.length() <= 0) {
+                    /*
+                     * No reply text found at all
+                     */
+                    retvalContentType.setParameter("nature", "virtual");
+                    String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, origMsg);
+                    boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
+                    if (isHtml) {
+                        replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append('\n').append('\n').toString());
+                    } else {
+                        replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append('\n').append('\n').toString();
+                    }
+                    replyTextBuilder.append(replyPrefix);
                 }
                 replyText = replyTextBuilder.toString();
             }
@@ -720,16 +735,14 @@ public final class MimeReply extends AbstractMimeProcessing {
             found = true;
         }
         if (found && !usm.isDropReplyForwardPrefix()) {
-            final boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
+            boolean isHtml = retvalContentType.startsWith(TEXT_HTM);
             String replyPrefix = generatePrefixText(MailStrings.REPLY_PREFIX, ltz, msg);
             {
-                final char nextLine = '\n';
+                char nextLine = '\n';
                 if (isHtml) {
-                    replyPrefix =
-                        HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
+                    replyPrefix = HtmlProcessing.htmlFormat(new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString());
                 } else {
-                    replyPrefix =
-                        new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
+                    replyPrefix = new StringBuilder(replyPrefix.length() + 1).append(replyPrefix).append(nextLine).append(nextLine).toString();
                 }
             }
             /*-

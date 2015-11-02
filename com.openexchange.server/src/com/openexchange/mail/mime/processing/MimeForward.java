@@ -341,14 +341,14 @@ public final class MimeForward extends AbstractMimeProcessing {
         final ContentType originalContentType = originalMsg.getContentType();
         final MailMessage forwardMail;
         if (originalContentType.startsWith(MULTIPART)) {
-            final Multipart multipart = new MimeMultipart();
+            Multipart multipart = new MimeMultipart();
             List<String> contentIds = null;
             final boolean isHtml;
             {
                 /*
                  * Grab first seen text from original message
                  */
-                final ContentType contentType = new ContentType();
+                ContentType contentType = new ContentType();
                 String firstSeenText = getFirstSeenText(originalMsg, contentType, usm, originalMsg, session, false);
                 {
                     final String cs = contentType.getCharsetParameter();
@@ -356,10 +356,14 @@ public final class MimeForward extends AbstractMimeProcessing {
                         contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
                     }
                 }
+                /*
+                 * Prepare the text to insert
+                 */
                 isHtml = contentType.startsWith(TEXT_HTM);
                 if (null == firstSeenText) {
                     firstSeenText = "";
                     contentType.setPrimaryType("text").setSubType("plain");
+                    contentType.setParameter("nature", "virtual");
                 } else if (isHtml) {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                     contentType.setCharsetParameter("UTF-8");
@@ -368,9 +372,8 @@ public final class MimeForward extends AbstractMimeProcessing {
                 /*
                  * Add appropriate text part prefixed with forward text
                  */
-                final MimeBodyPart textPart = new MimeBodyPart();
-                final String txt =
-                    usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml);
+                MimeBodyPart textPart = new MimeBodyPart();
+                String txt = usm.isDropReplyForwardPrefix() ? firstSeenText : generateForwardText(firstSeenText, new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, isHtml);
                 {
                     final String cs = contentType.getCharsetParameter();
                     if (cs == null || "US-ASCII".equalsIgnoreCase(cs) || !CharsetDetector.isValid(cs) || MessageUtility.isSpecialCharset(cs)) {
