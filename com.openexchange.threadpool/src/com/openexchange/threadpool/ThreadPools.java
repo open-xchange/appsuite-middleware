@@ -473,15 +473,15 @@ public final class ThreadPools {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (TimeoutException e) {
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (CancellationException e) {
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (ExecutionException e) {
-            throw launderThrowable(e, factory.getType());
+            throw launderThrowable(e, fac.getType());
         }
     }
 
