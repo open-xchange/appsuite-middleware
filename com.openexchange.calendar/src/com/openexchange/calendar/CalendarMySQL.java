@@ -3703,7 +3703,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     if (mup.getAlarmMinutes() >= 0 && mup.containsAlarm()) {
                         java.util.Date calc_date = null;
                         java.util.Date end_date = null;
-                        if (cdao.containsStartDate()) {
+                        if (cdao.getStartDate() != null) {
                             calc_date = cdao.getStartDate();
                         } else {
                             calc_date = edao.getStartDate();
