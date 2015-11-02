@@ -210,10 +210,16 @@ public class RdbCredentialStorage implements CredentialStorage {
     public Credentials deleteCredentials(int userId, int contextId) throws OXException {
         DatabaseService service = CredStorageServices.requireService(DatabaseService.class);
         Connection connection = service.getWritable(contextId);
+        Credentials deletedCredentials = null;
         try {
-            return obfuscator.unobfuscateCredentials(deleteCredentials(userId, contextId, connection));
+            deletedCredentials = deleteCredentials(userId, contextId, connection);
+            return obfuscator.unobfuscateCredentials(deletedCredentials);
         } finally {
-            service.backWritable(contextId, connection);
+            if (null == deletedCredentials) {
+                service.backWritableAfterReading(contextId, connection);
+            } else {
+                service.backWritable(contextId, connection);
+            }
         }
     }
 
