@@ -61,6 +61,12 @@ import com.openexchange.mail.utils.StorageUtility;
  */
 public interface IMailFolderStorageDefaultFolderAware {
 
+    static final String TRASH = "trash";
+    static final String SENT = "sent";
+    static final String SPAM = "spam";
+    static final String DRAFTS = "drafts";
+    static final String ARCHIVE = "archive";
+
     /**
      * Retrieves the available special-use (aka default) folders from the mail server.
      *
@@ -72,6 +78,6 @@ public interface IMailFolderStorageDefaultFolderAware {
      * @see StorageUtility#INDEX_SPAM
      * @see StorageUtility#INDEX_ARCHIVE
      */
-    Map<Integer, String> getSpecialUseFolder() throws OXException;
+    Map<String, String> getSpecialUseFolder() throws OXException;
 
 }

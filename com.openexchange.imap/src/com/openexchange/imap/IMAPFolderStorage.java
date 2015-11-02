@@ -1115,30 +1115,30 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     @Override
-    public Map<Integer, String> getSpecialUseFolder() throws OXException {
+    public Map<String, String> getSpecialUseFolder() throws OXException {
         try {
-            Map<Integer, String> retval = new HashMap<Integer, String>(8);
+            Map<String, String> retval = new HashMap<String, String>(5);
             IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(IMAPDefaultFolderChecker.INBOX);
             Collection<ListLsubEntry> entries = null;
             entries = ListLsubCache.getSentEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(StorageUtility.INDEX_SENT, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(SENT, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
             entries = ListLsubCache.getDraftsEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(StorageUtility.INDEX_DRAFTS, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(DRAFTS, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
             entries = ListLsubCache.getJunkEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(StorageUtility.INDEX_SPAM, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(SPAM, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
             entries = ListLsubCache.getTrashEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(StorageUtility.INDEX_TRASH, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(TRASH, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
             entries = ListLsubCache.getArchiveEntry(-1, imapFolder, session, imapAccess.getIMAPConfig().getIMAPProperties().isIgnoreSubscription());
             if (!entries.isEmpty()) {
-                retval.put(StorageUtility.INDEX_ARCHIVE, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
+                retval.put(ARCHIVE, entries.toArray(new ListLsubEntry[entries.size()])[0].getName());
             }
             return retval;
         } catch (MessagingException e) {

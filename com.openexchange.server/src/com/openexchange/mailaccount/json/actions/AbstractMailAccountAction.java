@@ -414,7 +414,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<Integer, String> folderNames) throws OXException {
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
         return Tools.checkFullNames(account, storageService, session, con, folderNames);
     }
 

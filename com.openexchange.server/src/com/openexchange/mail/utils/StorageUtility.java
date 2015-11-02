@@ -104,9 +104,6 @@ public final class StorageUtility {
     /** The index for standard INBOX folder */
     public static final int INDEX_INBOX = 6;
 
-    /** The index for standard INBOX folder */
-    public static final int INDEX_ARCHIVE = 7;
-
     /** Signals to perform a hard delete */
     public static final int MAIL_PARAM_HARD_DELETE = 1;
 

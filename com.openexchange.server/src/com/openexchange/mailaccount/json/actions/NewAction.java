@@ -212,7 +212,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
-                Map<Integer, String> defaultFolderNames = null;
+                Map<String, String> defaultFolderNames = null;
                 if (!pop3) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     mailAccess = getMailAccess(accountDescription, session, warnings);
