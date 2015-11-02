@@ -51,6 +51,7 @@ package com.openexchange.database.internal;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -58,6 +59,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -217,7 +219,16 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 if (active > 0) {
                     final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
-                    ConnectionPool.LOG.error("", dbe);
+                    String openStatement = "";
+                    if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+                        Field field = ((com.mysql.jdbc.ConnectionImpl) con).getClass().getField("openStatements");
+                        field.setAccessible(true);
+                        Map<Statement, Statement> open = (Map<Statement, Statement>) field.get(con);
+                        for (Entry<Statement, Statement> entry : open.entrySet()) {
+                            openStatement = entry.getKey().toString();
+                        }
+                    }
+                    ConnectionPool.LOG.error(openStatement, dbe);
                     retval = false;
                 }
             } catch (final Exception e) {
