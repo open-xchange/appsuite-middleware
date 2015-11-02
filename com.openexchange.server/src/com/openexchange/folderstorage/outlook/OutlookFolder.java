@@ -82,8 +82,6 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
 
     private String name;
 
-    private String localizedName;
-
     private String parent;
 
     private Permission[] permissions;
@@ -227,10 +225,7 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
         if (null == name) {
             return realFolder.getLocalizedName(loc);
         }
-        if (null == localizedName) {
-            localizedName = StringHelper.valueOf(loc).getString(name);
-        }
-        return localizedName;
+        return StringHelper.valueOf(loc).getString(name);
     }
 
     @Override
@@ -288,7 +283,6 @@ public final class OutlookFolder implements FolderExtension, AltNameAwareFolder 
     @Override
     public void setName(final String name) {
         this.name = name;
-        localizedName = null;
     }
 
     @Override
