@@ -106,7 +106,7 @@ public class DefaultOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute() throws OXException {
+    public Result execute(Session session) throws OXException {
         return null;
     }
 
