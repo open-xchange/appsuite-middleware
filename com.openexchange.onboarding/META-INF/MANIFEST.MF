@@ -17,3 +17,4 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-Activator: com.openexchange.onboarding.osgi.OnboardingActivator
+Export-Package: com.openexchange.onboarding
