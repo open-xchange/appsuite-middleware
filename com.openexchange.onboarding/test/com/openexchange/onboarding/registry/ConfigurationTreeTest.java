@@ -62,6 +62,7 @@ import com.openexchange.onboarding.DefaultOnboardingConfiguration;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
+import com.openexchange.onboarding.service.ConfigurationTree;
 
 /**
  * {@link ConfigurationTree}

@@ -47,57 +47,61 @@
  *
  */
 
-package com.openexchange.onboarding.osgi;
+package com.openexchange.onboarding.json.converter;
 
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.Converter;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.service.ConfigurationTree;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OnboardingActivator}
+ * {@link ConfigurationTreeConverter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
-
-    private volatile OnboardingConfigurationRegistry registry;
+public class ConfigurationTreeConverter implements ResultConverter {
 
     /**
-     * Initializes a new {@link OnboardingActivator}.
+     * Initializes a new {@link ConfigurationTreeConverter}.
      */
-    public OnboardingActivator() {
+    public ConfigurationTreeConverter() {
         super();
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+    public String getInputFormat() {
+        return "configurationTree";
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
-        registry.open();
-        this.registry = registry;
-
-        registerService(OnboardingConfigurationService.class, registry);
+    public String getOutputFormat() {
+        return "json";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
+    public Quality getQuality() {
+        return Quality.GOOD;
+    }
 
-        OnboardingConfigurationRegistry registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            registry.close();
+    @Override
+    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
+        Object resultObject = result.getResultObject();
+        if (resultObject instanceof ConfigurationTree) {
+            try {
+                ConfigurationTree configurationTree = (ConfigurationTree) resultObject;
+                JSONObject jConfigurationTree = configurationTree.toJsonObject();
+                result.setResultObject(jConfigurationTree, "json");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
         }
-
-        Services.setServiceLookup(null);
     }
 
 }

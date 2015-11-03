@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,46 @@
  *
  */
 
-package com.openexchange.onboarding.osgi;
+package com.openexchange.onboarding.json;
 
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.json.actions.GetTreeAction;
+import com.openexchange.server.ServiceLookup;
+
 
 /**
- * {@link OnboardingActivator}
+ * {@link OnboardingActionFactory}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
+public class OnboardingActionFactory implements AJAXActionServiceFactory {
 
-    private volatile OnboardingConfigurationRegistry registry;
+    private final Map<String, AJAXActionService> actions;
 
     /**
-     * Initializes a new {@link OnboardingActivator}.
+     * Initializes a new {@link OnboardingActionFactory}.
+     * @param services
      */
-    public OnboardingActivator() {
+    public OnboardingActionFactory(ServiceLookup services) {
         super();
+        actions = new HashMap<String, AJAXActionService>(4, 0.9F);
+        actions.put("getTree", new GetTreeAction(services));
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+    public AJAXActionService createActionService(String action) throws OXException {
+        return actions.get(action);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
-        registry.open();
-        this.registry = registry;
-
-        registerService(OnboardingConfigurationService.class, registry);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        OnboardingConfigurationRegistry registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            registry.close();
-        }
-
-        Services.setServiceLookup(null);
+    public Collection<?> getSupportedServices() {
+        return null;
     }
 
 }

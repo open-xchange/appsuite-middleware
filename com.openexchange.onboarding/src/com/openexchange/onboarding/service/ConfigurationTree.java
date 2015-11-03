@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.onboarding.registry;
+package com.openexchange.onboarding.service;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -62,6 +62,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
+import com.openexchange.onboarding.registry.ConfigurationTreeTest;
 import com.openexchange.session.Session;
 
 /**

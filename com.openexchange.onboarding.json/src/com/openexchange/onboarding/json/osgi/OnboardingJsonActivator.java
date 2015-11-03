@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,42 @@
  *
  */
 
-package com.openexchange.onboarding.osgi;
+package com.openexchange.onboarding.json.osgi;
 
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
+import org.slf4j.Logger;
+import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.onboarding.json.OnboardingActionFactory;
+import com.openexchange.onboarding.json.converter.ConfigurationTreeConverter;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
 
 /**
- * {@link OnboardingActivator}
+ * {@link OnboardingJsonActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
-
-    private volatile OnboardingConfigurationRegistry registry;
+public class OnboardingJsonActivator extends AJAXModuleActivator {
 
     /**
-     * Initializes a new {@link OnboardingActivator}.
+     * Initializes a new {@link OnboardingJsonActivator}.
      */
-    public OnboardingActivator() {
+    public OnboardingJsonActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+        return new Class<?>[] { CapabilityService.class, OnboardingConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+        Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingJsonActivator.class);
+        logger.info("Starting bundle: \"com.openexchange.onboarding.json\"");
 
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
-        registry.open();
-        this.registry = registry;
-
-        registerService(OnboardingConfigurationService.class, registry);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        OnboardingConfigurationRegistry registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            registry.close();
-        }
-
-        Services.setServiceLookup(null);
+        registerService(ResultConverter.class, new ConfigurationTreeConverter());
+        registerModule(new OnboardingActionFactory(this), "onboarding");
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,57 @@
  *
  */
 
-package com.openexchange.onboarding.registry;
+package com.openexchange.onboarding.json.actions;
 
-import java.util.Collection;
+import static com.openexchange.osgi.Tools.requireService;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.Translator;
+import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OnboardingConfigurationService} - The service for {@link OnboardingConfiguration configurations}.
+ * {@link AbstractOnboardingAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.0
  */
-@SingletonService
-public interface OnboardingConfigurationService {
+public abstract class AbstractOnboardingAction implements AJAXActionService {
+
+    /** The service look-up */
+    protected final ServiceLookup services;
 
     /**
-     * Gets all currently registered {@link OnboardingConfiguration configurations}.
+     * Initializes a new {@link AbstractOnboardingAction}.
      *
-     * @return All configurations
-     * @throws OXException If configurations cannot be returned
+     * @param services The service lookup reference
      */
-    Collection<OnboardingConfiguration> getAllConfigurations() throws OXException;
+    protected AbstractOnboardingAction(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     /**
-     * Gets the specified {@link OnboardingConfiguration configurations}.
+     * Gets the on-boarding service.
      *
-     * @return The specified configuration
-     * @throws OXException If configuration cannot be returned
+     * @return The on-boarding service
+     * @throws OXException if the service is unavailable
      */
-    OnboardingConfiguration getConfiguration(String id) throws OXException;
+    protected OnboardingConfigurationService getOnboardingService() throws OXException {
+        return requireService(OnboardingConfigurationService.class, services);
+    }
 
     /**
-     * Gets the currently available {@link OnboardingConfiguration configurations} for the session-associated user.
-     *
+     * Gets a {@link Translator} for the session users locale.
      * @param session The session
-     * @return The currently available configurations
-     * @throws OXException If configurations cannot be returned
+     * @return The translator
+     * @throws OXException
      */
-    Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
+    protected Translator getTranslator(ServerSession session) throws OXException {
+        TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
+        return translatorFactory.translatorFor(session.getUser().getLocale());
+    }
 
 }

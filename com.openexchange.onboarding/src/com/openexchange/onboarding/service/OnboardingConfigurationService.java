@@ -47,57 +47,46 @@
  *
  */
 
-package com.openexchange.onboarding.osgi;
+package com.openexchange.onboarding.service;
 
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingActivator}
+ * {@link OnboardingConfigurationService} - The service for {@link OnboardingConfiguration configurations}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
-
-    private volatile OnboardingConfigurationRegistry registry;
+@SingletonService
+public interface OnboardingConfigurationService {
 
     /**
-     * Initializes a new {@link OnboardingActivator}.
+     * Gets all currently registered {@link OnboardingConfiguration configurations}.
+     *
+     * @return All configurations
+     * @throws OXException If configurations cannot be returned
      */
-    public OnboardingActivator() {
-        super();
-    }
+    Collection<OnboardingConfiguration> getAllConfigurations() throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
-    }
+    /**
+     * Gets the specified {@link OnboardingConfiguration configurations}.
+     *
+     * @return The specified configuration
+     * @throws OXException If configuration cannot be returned
+     */
+    OnboardingConfiguration getConfiguration(String id) throws OXException;
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
-        registry.open();
-        this.registry = registry;
-
-        registerService(OnboardingConfigurationService.class, registry);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        OnboardingConfigurationRegistry registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            registry.close();
-        }
-
-        Services.setServiceLookup(null);
-    }
+    /**
+     * Gets the currently available {@link OnboardingConfiguration configurations} for the session-associated user.
+     *
+     * @param session The session
+     * @return The currently available configurations
+     * @throws OXException If configurations cannot be returned
+     */
+    Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
 
 }

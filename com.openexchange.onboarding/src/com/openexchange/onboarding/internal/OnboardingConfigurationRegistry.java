@@ -62,7 +62,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.registry.OnboardingConfigurationService;
+import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.session.Session;
 
 /**
