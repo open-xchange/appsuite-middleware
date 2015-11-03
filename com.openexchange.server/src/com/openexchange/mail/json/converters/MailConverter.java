@@ -723,32 +723,38 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             return false;
         }
 
+        boolean valid = true;
         if (mailFields.contains(MailField.SUBJECT)) {
             if (mail.containsSubject()) {
                 return true;
             }
+            valid = false; // pessimistic
         }
         if (mailFields.contains(MailField.FROM)) {
             if (mail.containsFrom()) {
                 return true;
             }
+            valid = false; // pessimistic
         }
         if (mailFields.contains(MailField.TO)) {
             if (mail.containsTo()) {
                 return true;
             }
+            valid = false; // pessimistic
         }
         if (mailFields.contains(MailField.SIZE)) {
             if (mail.containsSize()) {
                 return true;
             }
+            valid = false; // pessimistic
         }
         if (mailFields.contains(MailField.SENT_DATE)) {
             if (mail.containsSentDate()) {
                 return true;
             }
+            valid = false; // pessimistic
         }
 
-        return false;
+        return valid;
     }
 }
