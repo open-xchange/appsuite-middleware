@@ -63,8 +63,8 @@ import com.openexchange.tools.session.ServerSession;
 /**
  * {@link GetTreeAction}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
 public class GetTreeAction extends AbstractOnboardingAction {
 
