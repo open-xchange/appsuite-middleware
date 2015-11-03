@@ -49,29 +49,22 @@
 
 package com.openexchange.onboarding;
 
-import java.util.Locale;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link Entity} - An on-boarding entity.
+ * {@link OnboardingStrings} - Translatable string literals for on-boarding module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface Entity {
+public class OnboardingStrings implements LocalizableStrings {
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * Initializes a new {@link OnboardingStrings}.
      */
-    String getId();
-
-    /**
-     * Gets the display name
-     *
-     * @param locale The locale to use
-     * @return The display name
-     */
-    String getDisplayName(Locale locale);
+    private OnboardingStrings() {
+        super();
+    }
 
 }

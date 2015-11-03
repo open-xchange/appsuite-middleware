@@ -49,6 +49,8 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Locale;
+import com.openexchange.java.Strings;
 
 /**
  * {@link Platform} - A supported on-boarding platform.
@@ -73,24 +75,21 @@ public enum Platform implements Entity {
     ;
 
     private final String displayName;
+    private final String id;
 
     private Platform(String displayName) {
         this.displayName = displayName;
+        id = Strings.asciiLowerCase(displayName);
     }
 
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
     @Override
-    public String getDisplayName() {
+    public String getDisplayName(Locale locale) {
         return displayName;
     }
 
     @Override
     public String getId() {
-        return displayName;
+        return id;
     }
 
 }

@@ -52,26 +52,61 @@ package com.openexchange.onboarding;
 import java.util.Locale;
 
 /**
- * {@link Entity} - An on-boarding entity.
+ * {@link DefaultEntity}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface Entity {
+public class DefaultEntity implements Entity {
+
+    private String id;
+    private String displayName;
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * Initializes a new {@link DefaultEntity}.
      */
-    String getId();
+    public DefaultEntity() {
+        super();
+    }
 
     /**
-     * Gets the display name
-     *
-     * @param locale The locale to use
-     * @return The display name
+     * Initializes a new {@link DefaultEntity}.
+     * @param id
+     * @param displayName
      */
-    String getDisplayName(Locale locale);
+    public DefaultEntity(String id, String displayName) {
+        super();
+        this.id = id;
+        this.displayName = displayName;
+    }
+
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getDisplayName(Locale locale) {
+        return displayName;
+    }
+
+    /**
+     * Sets the displayName
+     *
+     * @param displayName The displayName to set
+     */
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    /**
+     * Sets the id
+     *
+     * @param id The id to set
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
 
 }

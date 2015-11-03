@@ -54,7 +54,10 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -62,46 +65,92 @@ import com.openexchange.onboarding.Platform;
 import com.openexchange.session.Session;
 
 /**
- * {@link ConfigurationTree}
+ * {@link ConfigurationTreeTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
 public class ConfigurationTree {
 
-    private final NodeElem root;
+    private final RootElem root;
+    private final Locale locale;
 
     /**
-     * Initializes a new {@link ConfigurationTree}.
+     * Initializes a new {@link ConfigurationTreeTest}.
      *
      * @param configurations The configurations from which to build the tree
+     * @throws OXException If building the tree fails
      */
-    public ConfigurationTree(Collection<OnboardingConfiguration> configurations, Session session) {
+    public ConfigurationTree(Collection<OnboardingConfiguration> configurations, Session session, Locale locale) throws OXException {
         super();
-        root = new NodeElem();
+        this.locale = locale;
+        root = new RootElem();
+        for (OnboardingConfiguration configuration : configurations) {
+            root.add(configuration, session);
+        }
+    }
+
+    /**
+     * Converts this tree into its JSON representation
+     *
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     */
+    public JSONObject toJsonObject() throws JSONException {
+        JSONObject jObject = new JSONObject(root.elems.size());
+        for (Map.Entry<Platform, NodeElem> entry : root.elems.entrySet()) {
+            NodeElem nodeElem = entry.getValue();
+            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, locale);
+        }
+        return jObject;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return toJsonObject().toString();
+        } catch (JSONException e) {
+            return "toString() failed: " + e.getMessage();
+        }
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
-    public static class NodeElem {
+    private static class NodeElem {
 
         final Map<String, NodeElem> children;
+        final Entity entity;
         final OnboardingConfiguration value;
 
-        NodeElem() {
+        NodeElem(Entity entity) {
             super();
             children = new HashMap<String, NodeElem>(4);
+            this.entity = entity;
             value = null;
         }
 
         NodeElem(OnboardingConfiguration value) {
             super();
             children = null;
+            entity = null;
             this.value = value;
         }
 
-        public boolean isLeaf() {
+        boolean isLeaf() {
             return null != value;
+        }
+
+        void addToJsonObject(String id, JSONObject jObject, Locale locale) throws JSONException {
+            if (null != value) {
+                jObject.put(value.getId(), value.getDisplayName(locale));
+            } else {
+                JSONObject jChildren = new JSONObject(children.size());
+                for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
+                    NodeElem childElem = entry.getValue();
+                    childElem.addToJsonObject(entry.getKey(), jChildren, locale);
+                }
+                jObject.put(id, jChildren);
+            }
         }
     }
 
@@ -119,7 +168,7 @@ public class ConfigurationTree {
 
             NodeElem nodeElem = elems.get(platform);
             if (null == nodeElem) {
-                nodeElem = new NodeElem();
+                nodeElem = new NodeElem(platform);
                 elems.put(platform, nodeElem);
             }
 
@@ -128,12 +177,12 @@ public class ConfigurationTree {
                 Entity entity = it.next();
                 NodeElem treeElem = nodeElem.children.get(entity.getId());
                 if (null == treeElem) {
-                    NodeElem ne = new NodeElem();
+                    NodeElem ne = new NodeElem(entity);
                     nodeElem.children.put(entity.getId(), ne);
                     nodeElem = ne;
                 } else {
                     if (treeElem.isLeaf()) {
-                        NodeElem ne = new NodeElem();
+                        NodeElem ne = new NodeElem(entity);
                         nodeElem.children.put(entity.getId(), ne);
                         ne.children.put(treeElem.value.getId(), treeElem);
                         nodeElem = ne;

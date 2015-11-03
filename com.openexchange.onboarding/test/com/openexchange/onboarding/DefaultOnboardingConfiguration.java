@@ -49,29 +49,85 @@
 
 package com.openexchange.onboarding;
 
+import java.util.List;
 import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link Entity} - An on-boarding entity.
+ * {@link DefaultOnboardingConfiguration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface Entity {
+public class DefaultOnboardingConfiguration implements OnboardingConfiguration {
+
+    private String id;
+    private String displayName;
+    private Platform platform;
+    private boolean enabled;
+    private List<Entity> path;
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * Initializes a new {@link DefaultOnboardingConfiguration}.
      */
-    String getId();
+    public DefaultOnboardingConfiguration() {
+        super();
+    }
 
-    /**
-     * Gets the display name
-     *
-     * @param locale The locale to use
-     * @return The display name
-     */
-    String getDisplayName(Locale locale);
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public String getDisplayName(Locale locale) {
+        return displayName;
+    }
+
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        return enabled;
+    }
+
+    @Override
+    public Platform getPlatform() throws OXException {
+        return platform;
+    }
+
+    @Override
+    public List<Entity> getEntityPath(Session session) throws OXException {
+        return path;
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Result execute() throws OXException {
+        return null;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public void setPlatform(Platform platform) {
+        this.platform = platform;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public void setPath(List<Entity> path) {
+        this.path = path;
+    }
 
 }

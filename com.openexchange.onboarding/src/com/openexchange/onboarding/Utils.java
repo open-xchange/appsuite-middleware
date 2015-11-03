@@ -50,28 +50,44 @@
 package com.openexchange.onboarding;
 
 import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.osgi.Services;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
- * {@link Entity} - An on-boarding entity.
+ * {@link Utils} - Utility class for on-boarding module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface Entity {
+public class Utils {
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * Initializes a new {@link Utils}.
      */
-    String getId();
+    private Utils() {
+        super();
+    }
 
     /**
-     * Gets the display name
+     * Gets the locale for session-associated user
      *
-     * @param locale The locale to use
-     * @return The display name
+     * @param session The session
+     * @return The locale
+     * @throws OXException If locale cannot be returned
      */
-    String getDisplayName(Locale locale);
+    public static Locale getLocaleFor(Session session) throws OXException {
+        if (null == session) {
+            return null;
+        }
+
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        UserService service = Services.getService(UserService.class);
+        return service.getUser(session.getUserId(), session.getContextId()).getLocale();
+    }
 
 }

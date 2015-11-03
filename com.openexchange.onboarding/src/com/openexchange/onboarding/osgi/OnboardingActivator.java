@@ -52,6 +52,7 @@ package com.openexchange.onboarding.osgi;
 import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
 import com.openexchange.onboarding.registry.OnboardingConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 /**
  * {@link OnboardingActivator}
@@ -72,11 +73,13 @@ public class OnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { UserService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+
         OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
         registry.open();
         this.registry = registry;
@@ -93,6 +96,8 @@ public class OnboardingActivator extends HousekeepingActivator {
             this.registry = null;
             registry.close();
         }
+
+        Services.setServiceLookup(null);
     }
 
 }
