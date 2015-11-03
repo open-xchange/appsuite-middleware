@@ -49,31 +49,37 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
 import java.util.Locale;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link DefaultOnboardingConfiguration}
+ * {@link TestEntity}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DefaultOnboardingConfiguration implements OnboardingConfiguration {
+public class TestEntity implements Entity {
 
     private String id;
     private String displayName;
-    private Platform platform;
-    private boolean enabled;
-    private List<Entity> path;
 
     /**
-     * Initializes a new {@link DefaultOnboardingConfiguration}.
+     * Initializes a new {@link TestEntity}.
      */
-    public DefaultOnboardingConfiguration() {
+    public TestEntity() {
         super();
     }
+
+    /**
+     * Initializes a new {@link TestEntity}.
+     * @param id
+     * @param displayName
+     */
+    public TestEntity(String id, String displayName) {
+        super();
+        this.id = id;
+        this.displayName = displayName;
+    }
+
 
     @Override
     public String getId() {
@@ -85,49 +91,22 @@ public class DefaultOnboardingConfiguration implements OnboardingConfiguration {
         return displayName;
     }
 
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        return enabled;
-    }
-
-    @Override
-    public Platform getPlatform() throws OXException {
-        return platform;
-    }
-
-    @Override
-    public List<Entity> getEntityPath(Session session) throws OXException {
-        return path;
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public Result execute(Session session) throws OXException {
-        return null;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
+    /**
+     * Sets the displayName
+     *
+     * @param displayName The displayName to set
+     */
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
     }
 
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPath(List<Entity> path) {
-        this.path = path;
+    /**
+     * Sets the identifier
+     *
+     * @param id The identifier to set
+     */
+    public void setId(String id) {
+        this.id = id;
     }
 
 }

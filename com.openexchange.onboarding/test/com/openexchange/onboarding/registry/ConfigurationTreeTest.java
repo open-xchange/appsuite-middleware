@@ -57,8 +57,8 @@ import java.util.List;
 import java.util.Locale;
 import org.json.JSONObject;
 import org.junit.Test;
-import com.openexchange.onboarding.DefaultEntity;
-import com.openexchange.onboarding.DefaultOnboardingConfiguration;
+import com.openexchange.onboarding.TestEntity;
+import com.openexchange.onboarding.TestOnboardingConfiguration;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
@@ -77,57 +77,57 @@ public class ConfigurationTreeTest {
         List<OnboardingConfiguration> configs = new ArrayList<>();
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPath(Arrays.<Entity> asList(new DefaultEntity("iOS", "iOS"), new DefaultEntity("iPad", "iPad"), new DefaultEntity("MailApp", "MailApp")));
+            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("MailApp", "MailApp")));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPath(Arrays.<Entity> asList(new DefaultEntity("iOS", "iOS"), new DefaultEntity("iPad", "iPad"), new DefaultEntity("EAS", "EAS")));
+            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("EAS", "EAS")));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPath(Arrays.<Entity> asList(new DefaultEntity("iOS", "iOS"), new DefaultEntity("iPhone", "iPhone"), new DefaultEntity("EAS", "EAS")));
+            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPhone", "iPhone"), new TestEntity("EAS", "EAS")));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("IMAP-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your IMAP account");
-            configuration.setPath(Arrays.<Entity> asList(new DefaultEntity("OSX", "OSX")));
+            configuration.setPath(Arrays.<Entity> asList(new TestEntity("OSX", "OSX")));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPath(Arrays.<Entity> asList(new DefaultEntity("Windows8-10", "Windows8-10"), new DefaultEntity("EmClient", "EmClient")));
+            configuration.setPath(Arrays.<Entity> asList(new TestEntity("Windows8-10", "Windows8-10"), new TestEntity("EmClient", "EmClient")));
             configuration.setPlatform(Platform.WINDOWS);
             configs.add(configuration);
         }
 
         {
-            DefaultOnboardingConfiguration configuration = new DefaultOnboardingConfiguration();
+            TestOnboardingConfiguration configuration = new TestOnboardingConfiguration();
             configuration.setId("Manual");
             configuration.setEnabled(true);
             configuration.setDisplayName("Manually do something");
