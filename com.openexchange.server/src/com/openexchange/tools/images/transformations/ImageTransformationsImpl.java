@@ -94,6 +94,7 @@ import com.openexchange.tools.images.impl.ImageInformation;
 import com.openexchange.tools.images.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.openexchange.tools.stream.CountingInputStream.IOExceptionCreator;
 
 /**
  * {@link ImageTransformationsImpl}
@@ -183,6 +184,14 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         });
     }
+
+    static final IOExceptionCreator IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR = new IOExceptionCreator() {
+
+        @Override
+        public IOException createIOException(long max) {
+            return new ImageTransformationDeniedIOException("Image transformation denied. Size is too big.");
+        }
+    };
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -527,7 +536,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
-            sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, "Image transformation denied. Size is too big.") : inputStream);
+            sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR) : inputStream);
 
             try {
                 metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(sink.getStream(), 65536), false);
@@ -538,7 +547,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             if (maxResolution > 0) {
                 ImageInformation imageInformation = getImageInformation(metadata);
                 if (null != imageInformation && (imageInformation.height * imageInformation.width) > maxResolution) {
-                    throw new IOException("Image transformation denied. Resolution is too high.");
+                    throw new ImageTransformationDeniedIOException("Image transformation denied. Resolution is too high.");
                 }
             }
 

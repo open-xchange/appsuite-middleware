@@ -104,6 +104,7 @@ import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
+import com.openexchange.tools.images.transformations.ImageTransformationDeniedIOException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
@@ -659,6 +660,8 @@ public class FileResponseRenderer implements ResponseRenderer {
             } else {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
+        } catch (ImageTransformationDeniedIOException e) {
+            sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (final Exception e) {
             final String message = "Exception while trying to output file" + (com.openexchange.java.Strings.isEmpty(fileName) ? "" : " " + fileName);
             LOG.error(message, e);
@@ -824,8 +827,10 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (markSupported) {
             stream.mark(131072); // 128KB
         }
+
         // Start transformations: scale, rotate, ...
-        final ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
+        ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
+
         // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
         if (null == rotate && false == DOWNLOAD.equalsIgnoreCase(delivery) || null != rotate && rotate.booleanValue()) {
