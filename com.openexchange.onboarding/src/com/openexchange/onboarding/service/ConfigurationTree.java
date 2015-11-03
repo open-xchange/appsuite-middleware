@@ -75,6 +75,7 @@ public class ConfigurationTree {
 
     private final RootElem root;
     private final Locale locale;
+    private final Session session;
 
     /**
      * Initializes a new {@link ConfigurationTreeTest}.
@@ -84,6 +85,7 @@ public class ConfigurationTree {
      */
     public ConfigurationTree(Collection<OnboardingConfiguration> configurations, Session session, Locale locale) throws OXException {
         super();
+        this.session = session;
         this.locale = locale;
         root = new RootElem();
         for (OnboardingConfiguration configuration : configurations) {
@@ -96,12 +98,13 @@ public class ConfigurationTree {
      *
      * @return The JSON representation
      * @throws JSONException If JSON representation cannot be returned
+     * @throws OXException If an Open-Xchange error occurs
      */
-    public JSONObject toJsonObject() throws JSONException {
+    public JSONObject toJsonObject() throws JSONException, OXException {
         JSONObject jObject = new JSONObject(root.elems.size());
         for (Map.Entry<Platform, NodeElem> entry : root.elems.entrySet()) {
             NodeElem nodeElem = entry.getValue();
-            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, locale);
+            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, session, locale);
         }
         return jObject;
     }
@@ -110,7 +113,7 @@ public class ConfigurationTree {
     public String toString() {
         try {
             return toJsonObject().toString();
-        } catch (JSONException e) {
+        } catch (Exception e) {
             return "toString() failed: " + e.getMessage();
         }
     }
@@ -141,16 +144,24 @@ public class ConfigurationTree {
             return null != value;
         }
 
-        void addToJsonObject(String id, JSONObject jObject, Locale locale) throws JSONException {
+        void addToJsonObject(String id, JSONObject jObject, Session session, Locale locale) throws JSONException, OXException {
             if (null != value) {
-                jObject.put(value.getId(), value.getDisplayName(locale));
+                JSONObject jConfig = new JSONObject(6);
+                jConfig.put("displayName", value.getDisplayName(locale));
+                jConfig.put("description", value.getDescription(session));
+                jObject.put(value.getId(), jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
                 for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
                     NodeElem childElem = entry.getValue();
-                    childElem.addToJsonObject(entry.getKey(), jChildren, locale);
+                    childElem.addToJsonObject(entry.getKey(), jChildren, session, locale);
                 }
-                jObject.put(id, jChildren);
+
+                JSONObject jEntity = new JSONObject(4);
+                jEntity.put("displayName", entity.getDisplayName(locale));
+                jEntity.put("children", jChildren);
+
+                jObject.put(id, jEntity);
             }
         }
     }

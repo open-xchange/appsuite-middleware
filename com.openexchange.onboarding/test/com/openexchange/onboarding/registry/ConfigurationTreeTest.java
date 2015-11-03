@@ -139,7 +139,7 @@ public class ConfigurationTreeTest {
         ConfigurationTree tree = new ConfigurationTree(configs, null, Locale.US);
 
         JSONObject jTree = tree.toJsonObject();
-        //System.out.println(jTree.toString(2));
+        // System.out.println(jTree.toString(2));
 
         assertEquals("Unexpected size", 2, jTree.length());
 
