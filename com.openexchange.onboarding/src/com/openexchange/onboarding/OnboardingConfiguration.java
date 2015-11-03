@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration {
+public interface OnboardingConfiguration extends Entity {
 
     /**
      * Checks if this configuration is enabled for session-associated user.
@@ -72,10 +72,10 @@ public interface OnboardingConfiguration {
     boolean isEnabled(Session session) throws OXException;
 
     /**
-     * Gets the support platform.
+     * Gets the associated platform.
      *
-     * @return The supported platform
-     * @throws OXException If the supported platform cannot be returned
+     * @return The supported
+     * @throws OXException If the platform cannot be returned
      */
     Platform getPlatform() throws OXException;
 
@@ -87,5 +87,22 @@ public interface OnboardingConfiguration {
      * @throws OXException If path to the target system/device cannot be returned
      */
     List<Entity> getEntityPath(Session session) throws OXException;
+
+    /**
+     * Gets the description for this on-boarding configuration.
+     *
+     * @param session The session providing user data
+     * @return The description
+     * @throws OXException If description cannot be returned
+     */
+    String getDescription(Session session) throws OXException;
+
+    /**
+     * Executes this on-boarding configuration.
+     *
+     * @return The result
+     * @throws OXException If execution fails
+     */
+    Result execute() throws OXException;
 
 }

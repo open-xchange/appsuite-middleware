@@ -59,6 +59,13 @@ package com.openexchange.onboarding;
 public interface Entity {
 
     /**
+     * Gets the identifier.
+     *
+     * @return The identifier
+     */
+    String getId();
+
+    /**
      * Gets the display name
      *
      * @return The display name

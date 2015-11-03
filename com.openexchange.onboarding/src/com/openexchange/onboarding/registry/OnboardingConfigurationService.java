@@ -47,50 +47,46 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.registry;
 
+import java.util.Collection;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.osgi.annotation.SingletonService;
+import com.openexchange.session.Session;
 
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * {@link OnboardingConfigurationService} - The service for {@link OnboardingConfiguration configurations}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements Entity {
+@SingletonService
+public interface OnboardingConfigurationService {
 
     /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
-     */
-    APPLE("Apple"),
-    /**
-     * The Android/Google platform for Android devices
-     */
-    ANDROID_GOOGLE("Android/Google"),
-    /**
-     * The Windows platform for Windows Desktop applications.
-     */
-    WINDOWS("Windows"),
-    ;
-
-    private final String displayName;
-
-    private Platform(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Gets the display name
+     * Gets all currently registered {@link OnboardingConfiguration configurations}.
      *
-     * @return The display name
+     * @return All configurations
+     * @throws OXException If configurations cannot be returned
      */
-    @Override
-    public String getDisplayName() {
-        return displayName;
-    }
+    Collection<OnboardingConfiguration> getAllConfigurations() throws OXException;
 
-    @Override
-    public String getId() {
-        return displayName;
-    }
+    /**
+     * Gets the specified {@link OnboardingConfiguration configurations}.
+     *
+     * @return The specified configuration
+     * @throws OXException If configuration cannot be returned
+     */
+    OnboardingConfiguration getConfiguration(String id) throws OXException;
+
+    /**
+     * Gets the currently available {@link OnboardingConfiguration configurations} for the session-associated user.
+     *
+     * @param session The session
+     * @return The currently available configurations
+     * @throws OXException If configurations cannot be returned
+     */
+    Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,48 +49,41 @@
 
 package com.openexchange.onboarding;
 
-
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * Default implementation of an {@link Icon}, based on a byte array.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements Entity {
+public class DefaultIcon implements Icon {
+
+    private static final long serialVersionUID = 5987572419974173720L;
+
+    private final String mimeType;
+    private final byte[] data;
 
     /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
+     * Initializes a new {@link DefaultIcon}.
      */
-    APPLE("Apple"),
-    /**
-     * The Android/Google platform for Android devices
-     */
-    ANDROID_GOOGLE("Android/Google"),
-    /**
-     * The Windows platform for Windows Desktop applications.
-     */
-    WINDOWS("Windows"),
-    ;
-
-    private final String displayName;
-
-    private Platform(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    @Override
-    public String getDisplayName() {
-        return displayName;
+    public DefaultIcon(byte[] data, String mimeType) {
+        super();
+        this.data = data;
+        this.mimeType = mimeType;
     }
 
     @Override
-    public String getId() {
-        return displayName;
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    @Override
+    public long getSize() {
+        return data.length;
+    }
+
+    @Override
+    public byte[] getData() {
+        return data;
     }
 
 }

@@ -49,48 +49,68 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Map;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * {@link Result} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements Entity {
+public class Result {
+
+    private final String resultText;
+    private final DynamicFormDescription formDescription;
+    private final Map<String, Object> formConfiguration;
 
     /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
-     */
-    APPLE("Apple"),
-    /**
-     * The Android/Google platform for Android devices
-     */
-    ANDROID_GOOGLE("Android/Google"),
-    /**
-     * The Windows platform for Windows Desktop applications.
-     */
-    WINDOWS("Windows"),
-    ;
-
-    private final String displayName;
-
-    private Platform(String displayName) {
-        this.displayName = displayName;
-    }
-
-    /**
-     * Gets the display name
+     * Initializes a new {@link Result}.
      *
-     * @return The display name
+     * @param resultText The result text that is supposed to be displayed to the user
      */
-    @Override
-    public String getDisplayName() {
-        return displayName;
+    public Result(String resultText) {
+        this(resultText, null, null);
     }
 
-    @Override
-    public String getId() {
-        return displayName;
+    /**
+     * Initializes a new {@link Result}.
+     *
+     * @param resultText The result text
+     * @param formConfiguration The form configuration
+     * @param formDescription The form description
+     */
+    public Result(String resultText, Map<String, Object> formConfiguration, DynamicFormDescription formDescription) {
+        super();
+        this.resultText = resultText;
+        this.formConfiguration = formConfiguration;
+        this.formDescription = formDescription;
     }
 
+    /**
+     * Gets the result text that is supposed to be displayed to the user.
+     *
+     * @return The result text
+     */
+    public String getResultText() {
+        return resultText;
+    }
+
+    /**
+     * Gets the form description.
+     *
+     * @return The form description or <code>null</code>
+     */
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
+    }
+
+    /**
+     * Gets the form configuration.
+     *
+     * @return The form configuration or <code>null</code>
+     */
+    public Map<String, Object> getFormConfiguration() {
+        return formConfiguration;
+    }
 }

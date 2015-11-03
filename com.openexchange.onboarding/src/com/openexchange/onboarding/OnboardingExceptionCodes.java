@@ -75,6 +75,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * An SQL error occurred: %1$s
      */
     SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 3),
+    /**
+     * No such configuration for identifier: %1$s
+     */
+    NOT_FOUND("No such configuration for identifier: %1$s", null, Category.CATEGORY_ERROR, 4),
     ;
 
     /** The error code prefix for on-boarding module */
