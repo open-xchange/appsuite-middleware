@@ -348,9 +348,9 @@ public class NotificationMail {
     }
 
     private String getUserDiff() {
+        StringBuilder sb = new StringBuilder(" Changed Users: ");
         try {
             if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
-                StringBuilder sb = new StringBuilder(" Changed Users: ");
                 FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
                 Difference extraInfo = (Difference) userChange.getExtraInfo();
                 if (!extraInfo.getAdded().isEmpty()) {
@@ -367,7 +367,7 @@ public class NotificationMail {
         } catch (Exception e) {
             return "Error";
         }
-        return "";
+        return sb.toString();
     }
 
     private String diffs() {
