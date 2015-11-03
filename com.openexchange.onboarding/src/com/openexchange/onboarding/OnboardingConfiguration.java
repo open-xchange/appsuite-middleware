@@ -80,11 +80,12 @@ public interface OnboardingConfiguration {
     Platform getPlatform() throws OXException;
 
     /**
-     * Gets the path to the target system or device, on which on-boarding is supposed to happen.
+     * Gets the path to the target system or device, on which on-boarding is supposed to happen (excluding the platform).
      *
+     * @param session The session providing user data
      * @return The path to the target system/device
      * @throws OXException If path to the target system/device cannot be returned
      */
-    List<Entity> getEntityPath() throws OXException;
+    List<Entity> getEntityPath(Session session) throws OXException;
 
 }
