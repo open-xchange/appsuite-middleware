@@ -63,11 +63,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.java.AsciiReader;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -167,7 +165,7 @@ public final class OXFolderLoader {
                     final InputStream jsonBlobStream = rs.getBinaryStream(12);
                     if (!rs.wasNull() && null != jsonBlobStream) {
                         try {
-                            folderObj.setMeta(new JSONObject(new AsciiReader(jsonBlobStream)).asMap());
+                            folderObj.setMeta(OXFolderUtility.deserializeMeta(jsonBlobStream));
                         } finally {
                             Streams.close(jsonBlobStream);
                         }

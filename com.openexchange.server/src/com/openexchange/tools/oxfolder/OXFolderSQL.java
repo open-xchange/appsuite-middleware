@@ -59,6 +59,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -70,14 +71,9 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import org.json.JSONException;
-import org.json.JSONInputStream;
-import org.json.JSONObject;
-import org.json.JSONValue;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
-import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -86,6 +82,7 @@ import com.openexchange.groupware.Types;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.impl.IDGenerator;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
@@ -1452,6 +1449,7 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(false);
             }
             try {
+                InputStream metaStream = null;
                 PreparedStatement stmt = null;
                 try {
                     // Acquire lock
@@ -1481,16 +1479,11 @@ public final class OXFolderSQL {
                         stmt.setInt(13, 0); // default_flag
                     }
                     {
-                        final Map<String, Object> meta = folder.getMeta();
-                        if (null == meta || meta.isEmpty()) {
-                            stmt.setNull(14, java.sql.Types.BLOB); // meta
+                        metaStream = OXFolderUtility.serializeMeta(folder.getMeta());
+                        if (null == metaStream) {
+                            stmt.setNull(14, java.sql.Types.BLOB);
                         } else {
-                            final Object coerced = JSONCoercion.coerceToJSON(meta);
-                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
-                                stmt.setNull(14, java.sql.Types.BLOB); // meta
-                            } else {
-                                stmt.setBinaryStream(14, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
-                            }
+                            stmt.setBinaryStream(14, metaStream); // meta
                         }
                     }
                     stmt.setInt(15, ctx.getContextId());
@@ -1548,6 +1541,7 @@ public final class OXFolderSQL {
                         stmt.close();
                         stmt = null;
                     }
+                    Streams.close(metaStream);
                 }
             } catch (final SQLException e) {
                 if (startedTransaction) {
@@ -1642,6 +1636,7 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(false);
             }
             PreparedStatement stmt = null;
+            InputStream metaStream = null;
             try {
                 // Acquire lock
                 lock(folder.getObjectID(), ctx.getContextId(), writeCon);
@@ -1657,16 +1652,11 @@ public final class OXFolderSQL {
                         "SELECT fname,fuid FROM oxfolder_tree WHERE cid=? AND parent=? AND parent>?) AS ft WHERE ft.fname=? AND ft.fuid<>?);");
                     stmt.setString(pos++, folder.getFolderName());
                     if (containsMeta) {
-                        final Map<String, Object> meta = folder.getMeta();
-                        if (null == meta || meta.isEmpty()) {
-                            stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                        metaStream = OXFolderUtility.serializeMeta(folder.getMeta());
+                        if (null == metaStream) {
+                            stmt.setNull(pos++, java.sql.Types.BLOB);
                         } else {
-                            final Object coerced = JSONCoercion.coerceToJSON(meta);
-                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
-                                stmt.setNull(pos++, java.sql.Types.BLOB); // meta
-                            } else {
-                                stmt.setBinaryStream(pos++, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
-                            }
+                            stmt.setBinaryStream(pos++, metaStream); // meta
                         }
                     }
                     stmt.setLong(pos++, lastModified);
@@ -1694,16 +1684,11 @@ public final class OXFolderSQL {
                         "changing_date = ?, changed_from = ?, " + "permission_flag = ?, module = ? " +
                         (containsCreatedBy ? ", created_from = ? " : "") + "WHERE cid = ? AND fuid = ?");
                     if (containsMeta) {
-                        final Map<String, Object> meta = folder.getMeta();
-                        if (null == meta || meta.isEmpty()) {
-                            stmt.setNull(pos++, java.sql.Types.BLOB); // meta
+                        metaStream = OXFolderUtility.serializeMeta(folder.getMeta());
+                        if (null == metaStream) {
+                            stmt.setNull(pos++, java.sql.Types.BLOB);
                         } else {
-                            final Object coerced = JSONCoercion.coerceToJSON(meta);
-                            if (null == coerced || JSONObject.NULL.equals(coerced)) {
-                                stmt.setNull(pos++, java.sql.Types.BLOB); // meta
-                            } else {
-                                stmt.setBinaryStream(pos++, new JSONInputStream((JSONValue) coerced, "US-ASCII")); // meta
-                            }
+                            stmt.setBinaryStream(pos++, metaStream); // meta
                         }
                     }
                     stmt.setLong(pos++, lastModified);
@@ -1767,6 +1752,7 @@ public final class OXFolderSQL {
                     stmt.close();
                     stmt = null;
                 }
+                Streams.close(metaStream);
             }
             if (startedTransaction) {
                 writeCon.commit();

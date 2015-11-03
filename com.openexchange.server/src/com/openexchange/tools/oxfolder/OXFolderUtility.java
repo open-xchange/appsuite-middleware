@@ -55,6 +55,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.linked.TIntLinkedList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -62,6 +63,12 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONInputStream;
+import org.json.JSONObject;
+import org.json.JSONValue;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -78,6 +85,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
 import com.openexchange.i18n.LocalizableArgument;
+import com.openexchange.java.AsciiReader;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -1097,6 +1105,33 @@ public final class OXFolderUtility {
             return FolderStrings.FIELD_FOLDER_NAME;
         }
         return null;
+    }
+
+    /**
+     * Deserializes a an arbitrary meta map (as used in a folder's meta field) from the supplied input stream
+     *
+     * @param inputStream The input stream to deserialize
+     * @return The deserialized map
+     */
+    public static Map<String, Object> deserializeMeta(InputStream inputStream) throws JSONException {
+        return new JSONObject(new AsciiReader(inputStream)).asMap();
+    }
+
+    /**
+     * Serializes an arbitrary meta map (as used in a folder's meta field) to an input stream.
+     *
+     * @param meta The map to serialize, or <code>null</code>
+     * @return The serialized map data, or <code>null</code> if the map is empty
+     */
+    public static InputStream serializeMeta(Map<String, Object> meta) throws JSONException {
+        if (null == meta || meta.isEmpty()) {
+            return null;
+        }
+        Object coerced = JSONCoercion.coerceToJSON(meta);
+        if (null == coerced || JSONObject.NULL.equals(coerced)) {
+            return null;
+        }
+        return new JSONInputStream((JSONValue) coerced, "US-ASCII");
     }
 
 }
