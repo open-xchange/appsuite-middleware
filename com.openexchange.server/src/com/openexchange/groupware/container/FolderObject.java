@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.container;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -66,6 +68,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.OXCloneable;
@@ -77,6 +80,7 @@ import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.oxfolder.OXFolderLoader;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.oxfolder.OXFolderUtility;
 
 /**
  * {@link FolderObject} - Represents a folder.
@@ -1470,6 +1474,9 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             if (b_type) {
                 clone.setType(type);
             }
+            if (b_map) {
+                clone.setMap(copyMap(map));
+            }
             return clone;
         } catch (final CloneNotSupportedException exc) {
             return null;
@@ -1572,6 +1579,18 @@ public class FolderObject extends FolderChildObject implements Cloneable {
             copy.add(iter.next().deepClone());
         }
         return copy;
+    }
+
+    private static final Map<String, Object> copyMap(Map<String, Object> original) throws CloneNotSupportedException {
+        InputStream meta = null;
+        try {
+             meta = OXFolderUtility.serializeMeta(original);
+             return OXFolderUtility.deserializeMeta(meta);
+        } catch (JSONException e) {
+            throw new CloneNotSupportedException(e.getMessage());
+        } finally {
+            Streams.close(meta);
+        }
     }
 
     private static final ArrayList<Integer> copyIntArrayList(final ArrayList<Integer> original) {
