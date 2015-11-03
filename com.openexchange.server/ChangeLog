@@ -1,3 +1,7 @@
+* 2014-10-27 - thorben.betten@open-xchange.com
+
+ - Fix for bug 35198: Use Jericho HTML parser to perform necessary modifications
+
 * 2014-12-16 - thorben.betten@open-xchange.com
 
  - Fix for bug 35866: Allow deep-parsing of nested messages only on first level + improved handing with binary content

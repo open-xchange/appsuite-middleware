@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.images.scheduler.Scheduler;
@@ -76,7 +77,11 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         @Override
         public IOException newUnexpectedError(final Throwable t) {
-            return new IOException(t);
+            if (t instanceof java.util.concurrent.TimeoutException) {
+                return new IOException("Image transformation timed out", t);
+            }
+            String message = t.getMessage();
+            return new IOException(null == message ? "Image transformation failed" : message, t);
         }
     };
 
@@ -103,14 +108,14 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     }
 
     @Override
-    protected BufferedImage getImage(final String formatName) throws IOException {
-        final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
+    protected BufferedImage getImage(String formatName) throws IOException {
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-        final boolean success = Scheduler.getInstance().execute(optSource, ft);
+        boolean success = Scheduler.getInstance().execute(optSource, ft);
         if (!success) {
             throw new IOException("Image transformation rejected");
         }
-        return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+        return ThreadPools.getFrom(ft, waitTimeoutSeconds(), TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     /**
@@ -130,7 +135,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         private final String formatName;
 
-        CallableImpl(final String formatName) {
+        CallableImpl(String formatName) {
             this.formatName = formatName;
         }
 
