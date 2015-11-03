@@ -49,14 +49,15 @@
 
 package com.openexchange.webdav.action;
 
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavDeleteAction extends AbstractAction {
 
 	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
+    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
 		req.getResource().delete();
+		res.setStatus(HttpServletResponse.SC_NO_CONTENT);
 	}
 
 }
