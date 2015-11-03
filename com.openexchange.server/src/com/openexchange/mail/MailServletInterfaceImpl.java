@@ -3951,7 +3951,19 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         mp.setGroupPermission(false);
                         toCreate.addPermission(mp);
                     }
+                    try {
                     mailAccess.getFolderStorage().createFolder(toCreate);
+                    } catch (final OXException e) {
+                        if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                            if (mailAccess.getFolderStorage().exists(archiveFullname)) {
+                                fn = archiveFullname;
+                            } else {
+                                throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
+                            }
+                        } else {
+                            throw e;
+                        }
+                    }
                     CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
                 }
 
@@ -4131,7 +4143,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     mp.setGroupPermission(false);
                     toCreate.addPermission(mp);
                 }
-                mailAccess.getFolderStorage().createFolder(toCreate);
+                try {
+                    mailAccess.getFolderStorage().createFolder(toCreate);
+                } catch (final OXException e) {
+                    if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                        //Using parent folder as fallback
+                        if (mailAccess.getFolderStorage().exists(archiveFullname)) {
+                            fn = archiveFullname;
+                        } else {
+                            throw e;
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
                 CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
             }
 
