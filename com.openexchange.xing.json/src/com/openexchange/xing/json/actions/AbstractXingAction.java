@@ -74,6 +74,7 @@ import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.exception.XingException;
+import com.openexchange.xing.exception.XingPermissionDeniedException;
 import com.openexchange.xing.exception.XingUnlinkedException;
 import com.openexchange.xing.json.XingRequest;
 import com.openexchange.xing.session.WebAuthSession;
@@ -117,7 +118,9 @@ public abstract class AbstractXingAction implements AJAXActionService {
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         } catch (final XingUnlinkedException e) {
-            throw XingExceptionCodes.UNLINKED_ERROR.create();
+            throw XingExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
+        } catch (final XingPermissionDeniedException e) {
+            throw XingExceptionCodes.INSUFFICIENT_PRIVILEGES.create(e, new Object[0]);
         } catch (final XingException e) {
             throw XingExceptionCodes.XING_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -235,7 +238,7 @@ public abstract class AbstractXingAction implements AJAXActionService {
         }
         return pv;
     }
-    
+
     /**
      * Get the specified integer parameter from the specified request.
      *
