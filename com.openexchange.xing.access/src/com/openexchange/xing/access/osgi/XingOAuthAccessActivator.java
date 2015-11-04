@@ -57,12 +57,14 @@ import org.osgi.service.event.EventHandler;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.API;
 import com.openexchange.oauth.OAuthAccount;
+import com.openexchange.oauth.OAuthExceptionCodes;
 import com.openexchange.oauth.OAuthService;
 import com.openexchange.oauth.OAuthServiceMetaData;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondEventConstants;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.xing.access.XingExceptionCodes;
 import com.openexchange.xing.access.XingOAuthAccess;
 import com.openexchange.xing.access.XingOAuthAccessProvider;
 import com.openexchange.xing.access.internal.Services;
@@ -127,8 +129,15 @@ public final class XingOAuthAccessActivator extends HousekeepingActivator {
 
             @Override
             public int getXingOAuthAccount(Session session) throws OXException {
-                final OAuthService oAuthService = getService(OAuthService.class);
-                return oAuthService.getDefaultAccount(API.XING, session).getId();
+                try {
+                    final OAuthService oAuthService = getService(OAuthService.class);
+                    return oAuthService.getDefaultAccount(API.XING, session).getId();
+                } catch (OXException e) {
+                    if (OAuthExceptionCodes.ACCOUNT_NOT_FOUND.equals(e)) {
+                        throw XingExceptionCodes.NO_OAUTH_ACCOUNT.create(e, session.getUserId(), session.getContextId());
+                    }
+                    throw e;
+                }
             }
 
             @Override

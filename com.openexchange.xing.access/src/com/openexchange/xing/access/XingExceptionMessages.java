@@ -118,6 +118,9 @@ public final class XingExceptionMessages implements LocalizableStrings {
     // The XING app that you are using does not hold the required permissions in order to perform the requested action
     public static final String INSUFFICIENT_PRIVILEGES_MSG = "The XING app that you are using does not hold the required permissions in order to perform the requested action";
 
+    // No XING OAuth access available for user %1$s in context %2$s.
+    public static final String NO_OAUTH_ACCOUNT_MSG = "No XING OAuth access available. Please create a XING OAuth account.";
+
     /**
      * Initializes a new {@link XingExceptionMessages}.
      */
