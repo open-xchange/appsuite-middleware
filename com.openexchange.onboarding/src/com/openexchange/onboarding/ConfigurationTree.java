@@ -54,7 +54,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ConfigurationTree} - Represents an on-borading configuration tree for a certain user.
+ * {@link ConfigurationTree} - Represents an on-boarding configuration tree for a certain user.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
