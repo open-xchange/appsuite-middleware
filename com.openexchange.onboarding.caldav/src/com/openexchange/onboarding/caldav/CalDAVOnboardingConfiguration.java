@@ -59,6 +59,7 @@ import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
@@ -67,19 +68,19 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link ProfileiPadCalDAVOnboardingConfiguration}
+ * {@link CalDAVOnboardingConfiguration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ProfileiPadCalDAVOnboardingConfiguration implements OnboardingConfiguration {
+public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ProfileiPadCalDAVOnboardingConfiguration}.
+     * Initializes a new {@link CalDAVOnboardingConfiguration}.
      */
-    public ProfileiPadCalDAVOnboardingConfiguration(ServiceLookup services) {
+    public CalDAVOnboardingConfiguration(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -127,7 +128,7 @@ public class ProfileiPadCalDAVOnboardingConfiguration implements OnboardingConfi
     }
 
     @Override
-    public Result execute(Session session) throws OXException {
+    public Result execute(OnboardingSelection selection, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }

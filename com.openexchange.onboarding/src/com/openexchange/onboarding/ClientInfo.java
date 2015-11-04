@@ -49,62 +49,20 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingConfiguration} - Represents an on-boarding configuration suitable for configuring/integrating a client for communicating
- * with the Open-Xchange Middleware.
+ * {@link ClientInfo} - Information for a client that initiated an on-boarding action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration extends Entity {
+public interface ClientInfo {
 
     /**
-     * Checks if this configuration is enabled for session-associated user.
+     * Gets the <code>User-Agent</code> string
      *
-     * @param session The session providing user data
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If check fails
+     * @return The <code>User-Agent</code> string
      */
-    boolean isEnabled(Session session) throws OXException;
-
-    /**
-     * Gets the associated platform.
-     *
-     * @return The supported
-     * @throws OXException If the platform cannot be returned
-     */
-    Platform getPlatform() throws OXException;
-
-    /**
-     * Gets the path to the dedicated on-boarding configuration option (excluding the platform).
-     *
-     * @param session The session providing user data
-     * @return The path to the dedicated on-boarding configuration option.
-     * @throws OXException If path cannot be returned
-     */
-    List<Entity> getEntityPath(Session session) throws OXException;
-
-    /**
-     * Gets the description for this on-boarding configuration.
-     *
-     * @param session The session providing user data
-     * @return The description
-     * @throws OXException If description cannot be returned
-     */
-    String getDescription(Session session) throws OXException;
-
-    /**
-     * Executes this on-boarding configuration.
-     *
-     * @param selection The selected configuration option
-     * @param session The session providing user data
-     * @return The result
-     * @throws OXException If execution fails
-     */
-    Result execute(OnboardingSelection selection, Session session) throws OXException;
+    String getUserAgent();
 
 }
