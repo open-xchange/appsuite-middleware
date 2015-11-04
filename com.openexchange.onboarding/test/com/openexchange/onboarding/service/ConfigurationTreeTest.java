@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.onboarding.registry;
+package com.openexchange.onboarding.service;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.onboarding.TestEntity;
 import com.openexchange.onboarding.TestOnboardingConfiguration;
+import com.openexchange.onboarding.internal.ConfigurationTreeImpl;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
-import com.openexchange.onboarding.service.ConfigurationTree;
 
 /**
- * {@link ConfigurationTree}
+ * {@link ConfigurationTreeImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
@@ -136,7 +135,7 @@ public class ConfigurationTreeTest {
             configs.add(configuration);
         }
 
-        ConfigurationTree tree = new ConfigurationTree(configs, null, Locale.US);
+        ConfigurationTree tree = new ConfigurationTreeImpl(configs, null);
 
         JSONObject jTree = tree.toJsonObject();
         // System.out.println(jTree.toString(2));

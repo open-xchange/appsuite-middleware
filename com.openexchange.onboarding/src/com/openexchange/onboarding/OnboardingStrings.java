@@ -67,4 +67,15 @@ public class OnboardingStrings implements LocalizableStrings {
         super();
     }
 
+    // The name for Apple platform
+    public static final String PLATFORM_APPLE = "Apple";
+
+    // The name for Windows platform
+    public static final String PLATFORM_WINDOWS = "Windows";
+
+    // The name for Android/Google platform
+    public static final String PLATFORM_ANDROID_GOOGLE = "Android";
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
 }

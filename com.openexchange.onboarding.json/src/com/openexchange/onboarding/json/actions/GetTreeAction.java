@@ -49,12 +49,9 @@
 
 package com.openexchange.onboarding.json.actions;
 
-import java.util.Collection;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.Utils;
 import com.openexchange.onboarding.service.ConfigurationTree;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
@@ -81,8 +78,7 @@ public class GetTreeAction extends AbstractOnboardingAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
-        Collection<OnboardingConfiguration> availableConfigurations = onboardingService.getAvailableConfigurationsFor(session);
-        ConfigurationTree configurationTree = new ConfigurationTree(availableConfigurations, session, Utils.getLocaleFor(session));
+        ConfigurationTree configurationTree =  onboardingService.getConfigurationTreeFor(session);
 
         return new AJAXRequestResult(configurationTree, "configurationTree");
     }

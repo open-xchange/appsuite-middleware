@@ -89,4 +89,13 @@ public interface OnboardingConfigurationService {
      */
     Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
 
+    /**
+     * Gets the currently applicable on-boarding configuration tree for specified user.
+     *
+     * @param session The session
+     * @return The configuration tree
+     * @throws OXException If configuration tree cannot be generated
+     */
+    ConfigurationTree getConfigurationTreeFor(Session session) throws OXException;
+
 }

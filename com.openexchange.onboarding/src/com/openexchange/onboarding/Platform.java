@@ -49,8 +49,8 @@
 
 package com.openexchange.onboarding;
 
-import java.util.Locale;
-import com.openexchange.java.Strings;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link Platform} - A supported on-boarding platform.
@@ -63,33 +63,40 @@ public enum Platform implements Entity {
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.
      */
-    APPLE("Apple"),
+    APPLE("apple", OnboardingStrings.PLATFORM_APPLE, "platform_icon_apple"),
     /**
      * The Android/Google platform for Android devices
      */
-    ANDROID_GOOGLE("Android/Google"),
+    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_GOOGLE, "platform_icon_android"),
     /**
      * The Windows platform for Windows Desktop applications.
      */
-    WINDOWS("Windows"),
+    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS, "platform_icon_windows"),
     ;
 
-    private final String displayName;
     private final String id;
+    private final String i18nDisplayName;
+    private final String imageNameProperty;
 
-    private Platform(String displayName) {
-        this.displayName = displayName;
-        id = Strings.asciiLowerCase(displayName);
+    private Platform(String id, String i18nDisplayName, String imageNameProperty) {
+        this.i18nDisplayName = i18nDisplayName;
+        this.id = id;
+        this.imageNameProperty = imageNameProperty;
     }
 
     @Override
-    public String getDisplayName(Locale locale) {
-        return displayName;
+    public String getDisplayName(Session session) throws OXException {
+        return OnboardingUtility.getTranslationFor(i18nDisplayName, session);
     }
 
     @Override
     public String getId() {
         return id;
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return OnboardingUtility.loadIconImage(imageNameProperty, session);
     }
 
 }

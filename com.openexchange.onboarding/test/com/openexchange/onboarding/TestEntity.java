@@ -49,7 +49,8 @@
 
 package com.openexchange.onboarding;
 
-import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link TestEntity}
@@ -71,8 +72,6 @@ public class TestEntity implements Entity {
 
     /**
      * Initializes a new {@link TestEntity}.
-     * @param id
-     * @param displayName
      */
     public TestEntity(String id, String displayName) {
         super();
@@ -80,15 +79,19 @@ public class TestEntity implements Entity {
         this.displayName = displayName;
     }
 
-
     @Override
     public String getId() {
         return id;
     }
 
     @Override
-    public String getDisplayName(Locale locale) {
+    public String getDisplayName(Session session) {
         return displayName;
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return null;
     }
 
     /**

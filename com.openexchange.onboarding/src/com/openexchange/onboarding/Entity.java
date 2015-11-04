@@ -49,7 +49,8 @@
 
 package com.openexchange.onboarding;
 
-import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link Entity} - An on-boarding entity.
@@ -67,11 +68,21 @@ public interface Entity {
     String getId();
 
     /**
-     * Gets the display name
+     * Gets the display name appropriate for the specified session
      *
-     * @param locale The locale to use
+     * @param session The session to use
      * @return The display name
+     * @throws OXException If display name cannot be returned
      */
-    String getDisplayName(Locale locale);
+    String getDisplayName(Session session) throws OXException;
+
+    /**
+     * Gets the icon associated with this on-boarding entity.
+     *
+     * @param session The session to use
+     * @return The icon
+     * @throws OXException If icon cannot be returned
+     */
+    Icon getIcon(Session session) throws OXException;
 
 }

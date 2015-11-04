@@ -49,25 +49,39 @@
 
 package com.openexchange.onboarding;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.Locale;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link Utils} - Utility class for on-boarding module.
+ * {@link OnboardingUtility} - Utility class for on-boarding module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class Utils {
+public class OnboardingUtility {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingUtility.class);
 
     /**
-     * Initializes a new {@link Utils}.
+     * Initializes a new {@link OnboardingUtility}.
      */
-    private Utils() {
+    private OnboardingUtility() {
         super();
     }
 
@@ -88,6 +102,67 @@ public class Utils {
         }
         UserService service = Services.getService(UserService.class);
         return service.getUser(session.getUserId(), session.getContextId()).getLocale();
+    }
+
+    /**
+     * Gets the translation for specified i18n string
+     *
+     * @param i18nString The i18n string to translate
+     * @param session The session from requesting user
+     * @return The translated string
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getTranslationFor(String i18nString, Session session) throws OXException {
+        return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+    }
+
+    /**
+     * Loads an icon image
+     *
+     * @param imageNameProperty The name of the property for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param session The session from requesting user
+     * @return The loaded icon or <code>null</code>
+     * @throws OXException If loading icon fails
+     */
+    public static Icon loadIconImage(String imageNameProperty, Session session) throws OXException {
+        MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
+
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(imageNameProperty, String.class);
+        if (null == property || !property.isDefined()) {
+            return null;
+        }
+
+        String imageName = property.get();
+        if (Strings.isEmpty(imageName)) {
+            return null;
+        }
+
+        String templatesPath = getTemplatesPath();
+        if (Strings.isEmpty(templatesPath)) {
+            return null;
+        }
+
+        try {
+            File image = new File(new File(templatesPath), imageName);
+            byte[] imageBytes = Streams.stream2bytes(new FileInputStream(image));
+            return new DefaultIcon(imageBytes, mimeTypeMap.getContentType(imageName));
+        } catch (IOException e) {
+            LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
+            return null;
+        }
+    }
+
+    /**
+     * Gets the template path
+     *
+     * @return The template path
+     */
+    public static String getTemplatesPath() {
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        return configService.getProperty("com.openexchange.templating.path");
     }
 
 }

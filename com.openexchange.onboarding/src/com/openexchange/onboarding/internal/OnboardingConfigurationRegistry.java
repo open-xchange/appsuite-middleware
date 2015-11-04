@@ -62,6 +62,7 @@ import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
+import com.openexchange.onboarding.service.ConfigurationTree;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.session.Session;
 
@@ -112,6 +113,13 @@ public class OnboardingConfigurationRegistry extends ServiceTracker<OnboardingCo
             }
         }
         return retval;
+    }
+
+
+    @Override
+    public ConfigurationTree getConfigurationTreeFor(Session session) throws OXException {
+        Collection<OnboardingConfiguration> availableConfigurations = getAvailableConfigurationsFor(session);
+        return new ConfigurationTreeImpl(availableConfigurations, session);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

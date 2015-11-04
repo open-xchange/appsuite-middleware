@@ -49,6 +49,9 @@
 
 package com.openexchange.onboarding.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -73,7 +76,7 @@ public class OnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class };
     }
 
     @Override

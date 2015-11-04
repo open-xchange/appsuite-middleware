@@ -49,49 +49,17 @@
 
 package com.openexchange.onboarding.service;
 
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.Entity;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.Platform;
-import com.openexchange.onboarding.registry.ConfigurationTreeTest;
-import com.openexchange.session.Session;
 
 /**
- * {@link ConfigurationTreeTest}
+ * {@link ConfigurationTree} - Represents an on-borading configuration tree for a certain user.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTree {
-
-    private final RootElem root;
-    private final Locale locale;
-    private final Session session;
-
-    /**
-     * Initializes a new {@link ConfigurationTreeTest}.
-     *
-     * @param configurations The configurations from which to build the tree
-     * @throws OXException If building the tree fails
-     */
-    public ConfigurationTree(Collection<OnboardingConfiguration> configurations, Session session, Locale locale) throws OXException {
-        super();
-        this.session = session;
-        this.locale = locale;
-        root = new RootElem();
-        for (OnboardingConfiguration configuration : configurations) {
-            root.add(configuration, session);
-        }
-    }
+public interface ConfigurationTree {
 
     /**
      * Converts this tree into its JSON representation
@@ -100,112 +68,6 @@ public class ConfigurationTree {
      * @throws JSONException If JSON representation cannot be returned
      * @throws OXException If an Open-Xchange error occurs
      */
-    public JSONObject toJsonObject() throws JSONException, OXException {
-        JSONObject jObject = new JSONObject(root.elems.size());
-        for (Map.Entry<Platform, NodeElem> entry : root.elems.entrySet()) {
-            NodeElem nodeElem = entry.getValue();
-            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, session, locale);
-        }
-        return jObject;
-    }
-
-    @Override
-    public String toString() {
-        try {
-            return toJsonObject().toString();
-        } catch (Exception e) {
-            return "toString() failed: " + e.getMessage();
-        }
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
-    private static class NodeElem {
-
-        final Map<String, NodeElem> children;
-        final Entity entity;
-        final OnboardingConfiguration value;
-
-        NodeElem(Entity entity) {
-            super();
-            children = new HashMap<String, NodeElem>(4);
-            this.entity = entity;
-            value = null;
-        }
-
-        NodeElem(OnboardingConfiguration value) {
-            super();
-            children = null;
-            entity = null;
-            this.value = value;
-        }
-
-        boolean isLeaf() {
-            return null != value;
-        }
-
-        void addToJsonObject(String id, JSONObject jObject, Session session, Locale locale) throws JSONException, OXException {
-            if (null != value) {
-                JSONObject jConfig = new JSONObject(6);
-                jConfig.put("displayName", value.getDisplayName(locale));
-                jConfig.put("description", value.getDescription(session));
-                jObject.put(value.getId(), jConfig);
-            } else {
-                JSONObject jChildren = new JSONObject(children.size());
-                for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
-                    NodeElem childElem = entry.getValue();
-                    childElem.addToJsonObject(entry.getKey(), jChildren, session, locale);
-                }
-
-                JSONObject jEntity = new JSONObject(4);
-                jEntity.put("displayName", entity.getDisplayName(locale));
-                jEntity.put("children", jChildren);
-
-                jObject.put(id, jEntity);
-            }
-        }
-    }
-
-    private static class RootElem {
-
-        final Map<Platform, NodeElem> elems;
-
-        RootElem() {
-            super();
-            elems = new EnumMap<Platform, NodeElem>(Platform.class);
-        }
-
-        void add(OnboardingConfiguration configuration, Session session) throws OXException {
-            Platform platform = configuration.getPlatform();
-
-            NodeElem nodeElem = elems.get(platform);
-            if (null == nodeElem) {
-                nodeElem = new NodeElem(platform);
-                elems.put(platform, nodeElem);
-            }
-
-            List<Entity> entityPath = configuration.getEntityPath(session);
-            for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
-                Entity entity = it.next();
-                NodeElem treeElem = nodeElem.children.get(entity.getId());
-                if (null == treeElem) {
-                    NodeElem ne = new NodeElem(entity);
-                    nodeElem.children.put(entity.getId(), ne);
-                    nodeElem = ne;
-                } else {
-                    if (treeElem.isLeaf()) {
-                        NodeElem ne = new NodeElem(entity);
-                        nodeElem.children.put(entity.getId(), ne);
-                        ne.children.put(treeElem.value.getId(), treeElem);
-                        nodeElem = ne;
-                    } else {
-                        nodeElem = treeElem;
-                    }
-                }
-            }
-
-            nodeElem.children.put(configuration.getId(), new NodeElem(configuration));
-        }
-    }
+    JSONObject toJsonObject() throws JSONException, OXException;
 
 }

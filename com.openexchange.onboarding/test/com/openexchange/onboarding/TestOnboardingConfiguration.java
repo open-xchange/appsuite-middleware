@@ -50,7 +50,6 @@
 package com.openexchange.onboarding;
 
 import java.util.List;
-import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -81,8 +80,13 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public String getDisplayName(Locale locale) {
+    public String getDisplayName(Session session) {
         return displayName;
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return null;
     }
 
     @Override
