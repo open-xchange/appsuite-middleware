@@ -49,11 +49,13 @@
 
 package com.openexchange.onboarding.caldav;
 
+import java.util.ArrayList;
 import java.util.List;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -112,8 +114,11 @@ public class ProfileiPadCalDAVOnboardingConfiguration implements OnboardingConfi
 
     @Override
     public List<Entity> getEntityPath(Session session) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
+        List<Entity> path = new ArrayList<Entity>(6);
+        path.add(new DefaultEntity("onboarding.caldav.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
+        path.add(new DefaultEntity("onboarding.caldav.ios.ipad", "com.openexchange.onboarding.ipad.displayName", "com.openexchange.onboarding.ipad.iconName"));
+        path.add(new DefaultEntity("onboarding.caldav.ios.ipad.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
+        return path;
     }
 
     @Override
