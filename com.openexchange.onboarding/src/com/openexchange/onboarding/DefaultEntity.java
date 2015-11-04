@@ -53,40 +53,34 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * {@link DefaultEntity} - The default entity implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements Entity {
-
-    /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
-     */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE, "platform_icon_apple"),
-    /**
-     * The Android/Google platform for Android devices
-     */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_GOOGLE, "platform_icon_android"),
-    /**
-     * The Windows platform for Windows Desktop applications.
-     */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS, "platform_icon_windows"),
-    ;
+public class DefaultEntity implements Entity {
 
     private final String id;
-    private final String i18nDisplayName;
+    private final String displayNameProperty;
     private final String imageNameProperty;
 
-    private Platform(String id, String i18nDisplayName, String imageNameProperty) {
-        this.i18nDisplayName = i18nDisplayName;
+    /**
+     * Initializes a new {@link DefaultEntity}.
+     *
+     * @param id The identifier
+     * @param displayNameProperty The property name for the display name
+     * @param imageNameProperty The property name for the icon image
+     */
+    public DefaultEntity(String id, String displayNameProperty, String imageNameProperty) {
+        super();
         this.id = id;
+        this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFor(i18nDisplayName, session);
+        return OnboardingUtility.getTranslationFromProperty(displayNameProperty, session);
     }
 
     @Override

@@ -117,20 +117,44 @@ public class OnboardingUtility {
     }
 
     /**
-     * Loads an icon image
+     * Gets the translation for referenced i18n string.
      *
-     * @param imageNameProperty The name of the property for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param propertyName The property name for the i18n string to translate
+     * @param session The session from requesting user
+     * @return The translated string
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getTranslationFromProperty(String propertyName, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return null;
+        }
+
+        String i18nString = property.get();
+        if (Strings.isEmpty(i18nString)) {
+            return null;
+        }
+        return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+    }
+
+    /**
+     * Loads an icon image for referenced property.
+     *
+     * @param propertyName The name of the property for the icon image; e.g. <code>"platform_icon_apple"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
      */
-    public static Icon loadIconImage(String imageNameProperty, Session session) throws OXException {
+    public static Icon loadIconImageFromProperty(String propertyName, Session session) throws OXException {
         MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
 
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
-        ComposedConfigProperty<String> property = view.property(imageNameProperty, String.class);
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
             return null;
         }
