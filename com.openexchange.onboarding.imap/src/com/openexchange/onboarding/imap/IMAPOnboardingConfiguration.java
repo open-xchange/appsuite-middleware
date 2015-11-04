@@ -113,18 +113,20 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
     private final ServiceLookup services;
+    private final Platform platform;
 
     /**
      * Initializes a new {@link IMAPOnboardingConfiguration}.
      */
-    public IMAPOnboardingConfiguration(ServiceLookup services) {
+    public IMAPOnboardingConfiguration(ServiceLookup services, Platform platform) {
         super();
         this.services = services;
+        this.platform = platform;
     }
 
     @Override
     public String getId() {
-        return "com.openexchange.onboarding.imap.apple";
+        return "com.openexchange.onboarding." + platform.getId() + ".imap";
     }
 
     @Override
@@ -146,7 +148,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public Platform getPlatform() {
-        return Platform.APPLE;
+        return platform;
     }
 
     @Override
@@ -158,7 +160,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
 
             @Override
             public String getId() {
-                return "com.openexchange.onboarding.imap.apple.desktop";
+                return "com.openexchange.onboarding." + platform.getId();
             }
 
             @Override

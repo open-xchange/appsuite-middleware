@@ -51,10 +51,10 @@ package com.openexchange.onboarding.imap.osgi;
 
 import com.openexchange.mail.service.MailService;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.imap.IMAPOnboardingConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link IMAPOnboardingConfigurationActivator}
@@ -78,8 +78,9 @@ public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected void startBundle() throws Exception {
-        IMAPOnboardingConfiguration config = new IMAPOnboardingConfiguration(this);
-        registerService(OnboardingConfiguration.class, config);
+        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.ANDROID_GOOGLE));
+        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.APPLE));
+        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.WINDOWS));
     }
 
     @Override
