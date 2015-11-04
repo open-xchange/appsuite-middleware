@@ -55,6 +55,7 @@ import java.io.InputStream;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.images.scheduler.Scheduler;
@@ -105,6 +106,16 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
      */
     public ImageTransformationsTask(final InputStream sourceImageStream, final Object optSource) {
         super(sourceImageStream, optSource);
+    }
+
+    /**
+     * Initializes a new {@link ImageTransformationsTask}.
+     *
+     * @param imageFile The image file
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
+     */
+    public ImageTransformationsTask(IFileHolder imageFile, Object optSource) {
+        super(imageFile, optSource);
     }
 
     @Override

@@ -53,12 +53,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleOp;
+import com.openexchange.tools.images.ImageInformation;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.impl.AutoDimensionConstrain;
 import com.openexchange.tools.images.impl.ContainDimensionConstrain;
 import com.openexchange.tools.images.impl.CoverDimensionConstrain;
-import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link ScaleTransformation}
