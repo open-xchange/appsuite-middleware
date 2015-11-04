@@ -47,22 +47,34 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.tools.images;
 
 /**
- * {@link ImageInformation}
+ * {@link ImageInformation} - Provides basic image information (orientation, width, and height).
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
 public class ImageInformation {
 
+    /** The image orientation */
     public final int orientation;
 
+    /** The image width */
     public final int width;
 
+    /** The image height */
     public final int height;
 
+    /**
+     * Initializes a new {@link ImageInformation}.
+     *
+     * @param orientation The image orientation
+     * @param width The image width
+     * @param height The image height
+     */
     public ImageInformation(int orientation, int width, int height) {
+        super();
         this.orientation = orientation;
         this.width = width;
         this.height = height;
@@ -70,6 +82,6 @@ public class ImageInformation {
 
     @Override
     public String toString() {
-        return String.format("%dx%d,%d", this.width, this.height, this.orientation);
+        return new StringBuilder().append(width).append('x').append(height).append(',').append(orientation).toString();
     }
 }
