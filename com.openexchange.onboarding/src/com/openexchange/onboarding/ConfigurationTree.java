@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.onboarding.service;
+package com.openexchange.onboarding;
 
 import org.json.JSONException;
 import org.json.JSONObject;

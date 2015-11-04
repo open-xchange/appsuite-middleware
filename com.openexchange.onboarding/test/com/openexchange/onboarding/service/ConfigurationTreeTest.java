@@ -59,6 +59,7 @@ import org.junit.Test;
 import com.openexchange.onboarding.TestEntity;
 import com.openexchange.onboarding.TestOnboardingConfiguration;
 import com.openexchange.onboarding.internal.ConfigurationTreeImpl;
+import com.openexchange.onboarding.ConfigurationTree;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;

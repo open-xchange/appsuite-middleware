@@ -52,7 +52,7 @@ package com.openexchange.onboarding.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.service.ConfigurationTree;
+import com.openexchange.onboarding.ConfigurationTree;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;

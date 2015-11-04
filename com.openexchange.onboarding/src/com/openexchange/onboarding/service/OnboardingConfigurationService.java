@@ -51,6 +51,7 @@ package com.openexchange.onboarding.service;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.ConfigurationTree;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
