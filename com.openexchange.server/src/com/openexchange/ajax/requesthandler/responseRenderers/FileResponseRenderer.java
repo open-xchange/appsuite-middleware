@@ -745,6 +745,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // Check if there is any need left to trigger image transformation
+        IFileHolder file = fileHolder;
         {
             boolean transform = false;
             if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
@@ -753,25 +754,42 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (!transform && (request.isSet("width") || request.isSet("height"))) {
                 transform = true;
             }
-            final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-            if (!transform && (null != rotate && rotate.booleanValue())) {
-                transform = true;
+            if (!transform) {
+                final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+                if (null != rotate && rotate.booleanValue()) {
+                    transform = true;
+                }
             }
-            final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
-            if (!transform && (null != compress && compress.booleanValue())) {
-                transform = true;
+            if (!transform) {
+                final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
+                if (null != compress && compress.booleanValue()) {
+                    transform = true;
+                }
             }
             // Rotation/compression only required for JPEG
             if (!transform) {
                 final String formatName = toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
                 if (("jpeg".equals(formatName) || "jpg".equals(formatName)) && !DOWNLOAD.equalsIgnoreCase(delivery)) {
-                    // Check for possible compression
-                    transform = true;
+                    // Ensure IFileHolder is repetitive
+                    if (!file.repetitive()) {
+                        file = new ThresholdFileHolder(file);
+                    }
+
+                    // Acquire stream and check for possible compression
+                    InputStream stream = file.getStream();
+                    if (null == stream) {
+                        // Huh...?
+                        LOG.warn("(Possible) Image file misses stream data");
+                        return file;
+                    }
+                    if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
+                        transform = true;
+                    }
                 }
             }
 
             if (!transform) {
-                return fileHolder;
+                return file;
             }
         }
 
@@ -814,39 +832,27 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // OK, so far we assume image transformation is needed
-        IFileHolder file = fileHolder;
-
-        // Build transformations
-        InputStream stream = file.getStream();
-        if (null == stream) {
-            LOG.warn("(Possible) Image file misses stream data");
-            return file;
+        // Ensure IFileHolder is repetitive
+        if (!file.repetitive()) {
+            file = new ThresholdFileHolder(file);
         }
 
-        // Check for an animated .gif image
+        // Validate...
         {
-            if (file.repetitive()) {
-                if (ImageUtils.isAnimatedGif(stream)) {
-                    return fileHolder;
-                }
-                stream = file.getStream();
-            } else {
-                final AtomicReference<InputStream> ref = new AtomicReference<InputStream>();
-                if (ImageUtils.isAnimatedGif(stream, ref)) {
-                    return new FileHolder(ref.get(), -1, file.getContentType(), file.getName());
-                }
-                stream = ref.get();
+            InputStream stream = file.getStream();
+            if (null == stream) {
+                LOG.warn("(Possible) Image file misses stream data");
+                return file;
+            }
+
+            // Check for an animated .gif image
+            if (ImageUtils.isAnimatedGif(stream)) {
+                return fileHolder;
             }
         }
 
-        // Mark stream if possible
-        final boolean markSupported = file.repetitive() ? false : stream.markSupported();
-        if (markSupported) {
-            stream.mark(131072); // 128KB
-        }
-
         // Start transformations: scale, rotate, ...
-        ImageTransformations transformations = scaler.transfom(stream, request.getSession().getSessionID());
+        ImageTransformations transformations = scaler.transfom(file, request.getSession().getSessionID());
 
         // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
@@ -904,14 +910,14 @@ public class FileResponseRenderer implements ResponseRenderer {
                 transformed = transformedImage.getImageData();
             } catch (final IOException ioe) {
                 if ("Unsupported Image Type".equals(ioe.getMessage())) {
-                    return handleFailure(file, stream, markSupported);
+                    return handleFailure(file);
                 }
                 // Rethrow...
                 throw ioe;
             }
             if (null == transformed) {
                 LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                return handleFailure(file, stream, markSupported);
+                return handleFailure(file);
             }
             // Return immediately if not cacheable
             if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
@@ -966,26 +972,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file);
-                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath());
+                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath(), e);
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from {}", file.getName());
+                    LOG.error("Unable to transform image from {}", file.getName(), e);
                 }
             } else {
-                LOG.error("Unable to transform image from {}", file.getName());
+                LOG.error("Unable to transform image from {}", file.getName(), e);
             }
             return file.repetitive() ? file : null;
         }
     }
 
-    private IFileHolder handleFailure(final IFileHolder file, final InputStream stream, final boolean markSupported) {
-        if (markSupported) {
-            try {
-                stream.reset();
-                return file;
-            } catch (final Exception e) {
-                LOG.warn("Error resetting input stream", e);
-            }
-        }
+    private IFileHolder handleFailure(IFileHolder file) {
         LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
     }
