@@ -67,6 +67,7 @@ import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
 import com.openexchange.server.ServiceLookup;
@@ -182,7 +183,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute(Session session) throws OXException {
+    public Result execute(OnboardingSelection selection, Session session) throws OXException {
         MailService mailService = services.getService(MailService.class);
         SMTPConfig smtpConfig = new SMTPConfig();
         TransportConfig.getTransportConfig(smtpConfig, session, 0);

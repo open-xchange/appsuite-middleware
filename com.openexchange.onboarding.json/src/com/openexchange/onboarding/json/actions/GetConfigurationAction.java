@@ -56,6 +56,7 @@ import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
@@ -87,7 +88,8 @@ public class GetConfigurationAction extends AbstractOnboardingAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         OnboardingConfiguration config = onboardingService.getConfiguration(id);
-        Result onboardingResult = config.execute(session);
+        OnboardingSelection selection = null; // TODO: Parse from request
+        Result onboardingResult = config.execute(selection, session);
         if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
             try {
                 return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null));
