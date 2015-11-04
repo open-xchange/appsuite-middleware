@@ -60,6 +60,7 @@ import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
+import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 /**
@@ -121,9 +122,9 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     }
 
     @Override
-    protected BufferedImage getImage(String formatName) throws IOException {
+    protected BufferedImage getImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
         CountDownLatch latch = new CountDownLatch(1);
-        GetImageCallable getImageCallable = new GetImageCallable(formatName, latch);
+        GetImageCallable getImageCallable = new GetImageCallable(formatName, new LatchBackedSignaler(signaler, latch));
         FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(getImageCallable);
 
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
@@ -152,11 +153,12 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
      * Gets the resulting image after applying all transformations.
      *
      * @param formatName the image format to use, or <code>null</code> if not relevant
+     * @param signaler The optional signaler or <code>null</code>
      * @return The transformed image
      * @throws IOException if an I/O error occurs
      */
-    protected BufferedImage doGetImage(final String formatName) throws IOException {
-        return super.getImage(formatName);
+    protected BufferedImage doGetImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
+        return super.getImage(formatName, signaler);
     }
 
     // --------------------------------------------------------------------------------------------------------- //
@@ -164,18 +166,37 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     private final class GetImageCallable implements Callable<BufferedImage> {
 
         private final String formatName;
-        private final CountDownLatch latch;
+        private final ImageTransformationSignaler signaler;
 
-        GetImageCallable(String formatName, CountDownLatch latch) {
+        GetImageCallable(String formatName, ImageTransformationSignaler signaler) {
             super();
             this.formatName = formatName;
-            this.latch = latch;
+            this.signaler = signaler;
         }
 
         @Override
         public BufferedImage call() throws Exception {
+            return doGetImage(formatName, signaler);
+        }
+    }
+
+    private static final class LatchBackedSignaler implements ImageTransformationSignaler {
+
+        private final ImageTransformationSignaler delegate;
+        private final CountDownLatch latch;
+
+        LatchBackedSignaler(ImageTransformationSignaler signaler, CountDownLatch latch) {
+            super();
+            this.latch = latch;
+            this.delegate = signaler;
+        }
+
+        @Override
+        public void onImageRead() {
+            if (null != delegate) {
+                try { delegate.onImageRead(); } catch (Exception x) { /* ignore */ }
+            }
             latch.countDown();
-            return doGetImage(formatName);
         }
     }
 
