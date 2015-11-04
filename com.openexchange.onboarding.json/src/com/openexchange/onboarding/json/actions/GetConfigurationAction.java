@@ -59,6 +59,7 @@ import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -83,7 +84,7 @@ public class GetConfigurationAction extends AbstractOnboardingAction {
         OnboardingConfigurationService onboardingService = getOnboardingService();
         String id = requestData.getParameter("id");
         if (Strings.isEmpty(id)) {
-            // Exception
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
         OnboardingConfiguration config = onboardingService.getConfiguration(id);
         Result onboardingResult = config.execute(session);
@@ -91,8 +92,7 @@ public class GetConfigurationAction extends AbstractOnboardingAction {
             try {
                 return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null));
             } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
         return new AJAXRequestResult(onboardingResult.getResultText());
