@@ -137,7 +137,8 @@ public class OnboardingConfigurationRegistry extends ServiceTracker<OnboardingCo
     }
 
     @Override
-    public void removedService(ServiceReference<OnboardingConfiguration> reference, OnboardingConfiguration service) {
+    public void removedService(ServiceReference<OnboardingConfiguration> reference, OnboardingConfiguration configuration) {
+        configurations.remove(configuration.getId());
         context.ungetService(reference);
     }
 
