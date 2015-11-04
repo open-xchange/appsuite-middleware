@@ -84,6 +84,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageInformation;
 import com.openexchange.tools.images.ImageTransformationReloadable;
+import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
@@ -293,7 +294,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             return sourceImage;
         }
         // Get BufferedImage
-        return getImage(null);
+        return getImage(null, null);
     }
 
     @Override
@@ -303,7 +304,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     private byte[] innerGetBytes(final String imageFormat) throws IOException {
-        return write(getImage(imageFormat), imageFormat);
+        return write(getImage(imageFormat, null), imageFormat);
     }
 
     @Override
@@ -328,7 +329,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     @Override
     public TransformedImage getTransformedImage(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
-        BufferedImage bufferedImage = getImage(imageFormat);
+        BufferedImage bufferedImage = getImage(imageFormat, null);
         return writeTransformedImage(bufferedImage, imageFormat);
     }
 
@@ -336,7 +337,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Gets a value indicating whether the denoted format name leads to transformations or not.
      *
      * @param formatName The format name
-     * @return <code>true</code>, if there are transformations for the targte image format, <code>false</code>, otherwise
+     * @return <code>true</code>, if there are transformations for the target image format, <code>false</code>, otherwise
      */
     private boolean needsTransformation(String formatName) {
         if (false == canRead(formatName)) {
@@ -353,12 +354,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
     /**
      * Gets the resulting image after applying all transformations.
      *
-     * @param formatName the image format to use, or <code>null</code> if not relevant
+     * @param formatName The image format to use, or <code>null</code> if not relevant
+     * @param signaler The optional signaler or <code>null</code>
      * @return The transformed image
      * @throws IOException if an I/O error occurs
      */
-    protected BufferedImage getImage(String formatName) throws IOException {
-        BufferedImage image = getSourceImage(formatName);
+    protected BufferedImage getImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
+        BufferedImage image = getSourceImage(formatName, signaler);
 
         if (null != image && image.getHeight() > 3 && image.getWidth() > 3) {
             ImageInformation imageInformation = null != this.metadata ? getImageInformation(this.metadata) : null;
@@ -376,19 +378,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Gets the source image, either from the supplied buffered image or the supplied stream, extracting image metadata as needed.
      *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
+     * @param signaler The optional signaler or <code>null</code>
      * @return The source image
      * @throws IOException
      */
-    private BufferedImage getSourceImage(String formatName) throws IOException {
+    private BufferedImage getSourceImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
         if (null == sourceImage) {
             if (null != sourceImageStream) {
                 long maxSize = maxSize();
                 long maxResolution = maxResolution();
-                sourceImage = needsMetadata(formatName, maxSize, maxResolution) ? readAndExtractMetadataFromStream(sourceImageStream, formatName, maxSize, maxResolution) : read(sourceImageStream, formatName);
+                sourceImage = needsMetadata(formatName, maxSize, maxResolution) ? readAndExtractMetadataFromStream(sourceImageStream, formatName, maxSize, maxResolution, signaler) : read(sourceImageStream, formatName, signaler);
             } else if (null != sourceImageFile) {
                 long maxSize = maxSize();
                 long maxResolution = maxResolution();
-                sourceImage = needsMetadata(formatName, maxSize, maxResolution) ? readAndExtractMetadataFromFile(sourceImageFile, formatName, maxSize, maxResolution) : read(getFileStream(sourceImageFile), formatName);
+                sourceImage = needsMetadata(formatName, maxSize, maxResolution) ? readAndExtractMetadataFromFile(sourceImageFile, formatName, maxSize, maxResolution, signaler) : read(getFileStream(sourceImageFile), formatName, signaler);
             }
         }
         return sourceImage;
@@ -546,12 +549,13 @@ public class ImageTransformationsImpl implements ImageTransformations {
      *
      * @param inputStream The stream to read the image from
      * @param formatName The format name
+     * @param signaler The optional signaler or <code>null</code>
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage read(InputStream inputStream, String formatName) throws IOException {
+    private BufferedImage read(InputStream inputStream, String formatName, ImageTransformationSignaler signaler) throws IOException {
         try {
-            return ImageIO.read(inputStream);
+            return imageIoRead(inputStream, signaler);
         } catch (final RuntimeException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
@@ -567,17 +571,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @param formatName The format name
      * @param maxSize The max. size for an image or less than/equal to 0 (zero) for no size limitation
      * @param maxResolution The max. resolution for an image or less than/equal to 0 (zero) for no resolution limitation
+     * @param signaler The optional signaler or <code>null</code>
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage readAndExtractMetadataFromStream(InputStream inputStream, String formatName, long maxSize, long maxResolution) throws IOException {
+    private BufferedImage readAndExtractMetadataFromStream(InputStream inputStream, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
         ThresholdFileHolder sink = null;
         try {
             sink = new ThresholdFileHolder();
             sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR) : inputStream);
 
             try {
-                metadata = ImageMetadataReader.readMetadata(ImageTransformationUtility.bufferedInputStreamFor(sink.getStream()), false);
+                metadata = ImageMetadataReader.readMetadata(ImageTransformationUtility.bufferedInputStreamFor(getFileStream(sink)), false);
             } catch (ImageProcessingException e) {
                 LOG.debug("error getting metadata for {}", formatName, e);
             }
@@ -592,14 +597,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
             File tempFile = sink.getTempFile();
             if (null == tempFile) {
                 // Everything held in memory - don't care
-                return ImageIO.read(sink.getStream());
+                return imageIoRead(getFileStream(sink), signaler);
             }
 
-            // Read from file
-            BufferedImage bufferedImage = ImageIO.read(tempFile);
+            BufferedImage bufferedImage = imageIORead(tempFile, signaler);
             sink = null; // Avoid preliminary closing in 'finally' clause
             return bufferedImage;
         } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
@@ -616,10 +624,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @param formatName The format name
      * @param maxSize The max. size for an image or less than/equal to 0 (zero) for no size limitation
      * @param maxResolution The max. resolution for an image or less than/equal to 0 (zero) for no resolution limitation
+     * @param signaler The optional signaler or <code>null</code>
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution) throws IOException {
+    private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
         try {
             if (imageFile.getLength() > maxSize) {
                 throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(maxSize);
@@ -641,15 +650,51 @@ public class ImageTransformationsImpl implements ImageTransformations {
             File tempFile = imageFile instanceof ThresholdFileHolder ? ((ThresholdFileHolder) imageFile).getTempFile() : null;
             if (null == tempFile) {
                 // Everything held in memory - don't care
-                return ImageIO.read(getFileStream(imageFile));
+                return imageIoRead(getFileStream(imageFile), signaler);
             }
 
             // Read from file
-            BufferedImage bufferedImage = ImageIO.read(tempFile);
+            BufferedImage bufferedImage = imageIORead(tempFile, signaler);
             return bufferedImage;
         } catch (IllegalArgumentException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
+        }
+    }
+
+    /**
+     * Returns a {@link BufferedImage} as the result of decoding a supplied {@code InputStream}.
+     *
+     * @param in The input stream to read from
+     * @param signaler The optional signaler or <code>null</code>
+     * @return The resulting {@code BufferedImage} instance
+     * @throws IOException If an I/O error occurs
+     */
+    private BufferedImage imageIoRead(InputStream in, ImageTransformationSignaler signaler) throws IOException {
+        onImageRead(signaler);
+        return ImageIO.read(in);
+    }
+
+    /**
+     * Returns a {@link BufferedImage} as the result of decoding a supplied file.
+     *
+     * @param file The file to read from
+     * @param signaler The optional signaler or <code>null</code>
+     * @return The resulting {@code BufferedImage} instance
+     * @throws IOException If an I/O error occurs
+     */
+    private BufferedImage imageIORead(File file, ImageTransformationSignaler signaler) throws IOException {
+        onImageRead(signaler);
+        return ImageIO.read(file);
+    }
+
+    private static void onImageRead(ImageTransformationSignaler signaler) {
+        if (null != signaler) {
+            try {
+                signaler.onImageRead();
+            } catch (Exception e) {
+                LOG.debug("Signaler could not be called", e);
+            }
         }
     }
 
