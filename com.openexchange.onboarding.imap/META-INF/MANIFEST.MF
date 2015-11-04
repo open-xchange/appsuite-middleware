@@ -1,0 +1,23 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Imap
+Bundle-SymbolicName: com.openexchange.onboarding.imap
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
+ com.openexchange.groupware.ldap,
+ com.openexchange.i18n,
+ com.openexchange.mail.api,
+ com.openexchange.mail.config,
+ com.openexchange.mail.service,
+ com.openexchange.mail.transport.config,
+ com.openexchange.onboarding,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.smtp.config,
+ com.openexchange.user,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.onboarding.imap.osgi.IMAPOnboardingConfigurationActivator
