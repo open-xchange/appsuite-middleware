@@ -52,6 +52,7 @@ package com.openexchange.tools.images;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -110,6 +111,16 @@ public interface ImageTransformationService {
      * @throws IOException If an I/O error occurs
      */
     ImageTransformations transfom(InputStream imageStream, Object source) throws IOException;
+
+    /**
+     * Initializes a new {@link ImageTransformations} working on the supplied source image stream.
+     *
+     * @param imageFile The source image to use
+     * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
+     * @return A new {@link ImageTransformations} instance for the stream
+     * @throws IOException If an I/O error occurs
+     */
+    ImageTransformations transfom(IFileHolder imageFile, Object source) throws IOException;
 
     // ----------------------------------------------------------------------------------------------------------- //
 

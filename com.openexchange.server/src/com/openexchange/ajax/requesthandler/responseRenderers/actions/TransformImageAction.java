@@ -61,6 +61,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -133,6 +134,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         }
 
         // Check if there is any need left to trigger image transformation
+        IFileHolder file = fileHolder;
         {
             boolean transform = false;
             if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
@@ -141,9 +143,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
             if (!transform && (request.isSet("width") || request.isSet("height"))) {
                 transform = true;
             }
-            final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
-            if (!transform && (null != rotate && rotate.booleanValue())) {
-                transform = true;
+            if (!transform) {
+                final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
+                if (null != rotate && rotate.booleanValue()) {
+                    transform = true;
+                }
             }
             final Boolean compress = request.isSet("compress") ? request.getParameter("compress", Boolean.class) : null;
             if (!transform && (null != compress && compress.booleanValue())) {
@@ -151,15 +155,28 @@ public class TransformImageAction implements IFileResponseRendererAction {
             }
             // Rotation/compression only required for JPEG
             if (!transform) {
-                final String formatName = com.openexchange.java.Strings.toLowerCase(ImageTransformationUtility.getImageFormat(fileHolder.getContentType()));
+                final String formatName = com.openexchange.java.Strings.toLowerCase(ImageTransformationUtility.getImageFormat(file.getContentType()));
                 if (("jpeg".equals(formatName) || "jpg".equals(formatName)) && !IDataWrapper.DOWNLOAD.equalsIgnoreCase(delivery)) {
-                    // Check for possible compression
-                    transform = true;
+                    // Ensure IFileHolder is repetitive
+                    if (!file.repetitive()) {
+                        file = new ThresholdFileHolder(file);
+                    }
+
+                    // Acquire stream and check for possible compression
+                    InputStream stream = file.getStream();
+                    if (null == stream) {
+                        // Huh...?
+                        LOG.warn("(Possible) Image file misses stream data");
+                        return file;
+                    }
+                    if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
+                        transform = true;
+                    }
                 }
             }
 
             if (!transform) {
-                return fileHolder;
+                return file;
             }
         }
 
@@ -202,41 +219,29 @@ public class TransformImageAction implements IFileResponseRendererAction {
         }
 
         // OK, so far we assume image transformation is needed
-        IFileHolder file = fileHolder;
-
-        // Build transformations
-        InputStream stream = file.getStream();
-        if (null == stream) {
-            LOG.warn("(Possible) Image file misses stream data");
-            return file;
+        // Ensure IFileHolder is repetitive
+        if (!file.repetitive()) {
+            file = new ThresholdFileHolder(file);
         }
 
-        // Check for an animated .gif image
+        // Validate...
         {
-            if (file.repetitive()) {
-                if (ImageUtils.isAnimatedGif(stream)) {
-                    return fileHolder;
-                }
-                stream = file.getStream();
-            } else {
-                final AtomicReference<InputStream> ref = new AtomicReference<InputStream>();
-                if (ImageUtils.isAnimatedGif(stream, ref)) {
-                    return new FileHolder(ref.get(), -1, file.getContentType(), file.getName());
-                }
-                stream = ref.get();
+            InputStream stream = file.getStream();
+            if (null == stream) {
+                LOG.warn("(Possible) Image file misses stream data");
+                return file;
             }
-        }
 
-        // Mark stream if possible
-        final boolean markSupported = file.repetitive() ? false : stream.markSupported();
-        if (markSupported) {
-            stream.mark(131072); // 128KB
+            // Check for an animated .gif image
+            if (ImageUtils.isAnimatedGif(stream)) {
+                return fileHolder;
+            }
         }
 
         // Start transformations: scale, rotate, ...
         ImageTransformations transformations;
         try {
-            transformations = scaler.transfom(stream, request.getSession().getSessionID());
+            transformations = scaler.transfom(file, request.getSession().getSessionID());
         } catch (ImageTransformationDeniedIOException e) {
             // Quit with 404
             throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
@@ -298,14 +303,14 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 transformed = transformedImage.getImageData();
             } catch (final IOException ioe) {
                 if ("Unsupported Image Type".equals(ioe.getMessage())) {
-                    return handleFailure(file, stream, markSupported);
+                    return handleFailure(file);
                 }
                 // Rethrow...
                 throw ioe;
             }
             if (null == transformed) {
                 LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                return handleFailure(file, stream, markSupported);
+                return handleFailure(file);
             }
 
             // Return immediately if not cacheable
@@ -319,7 +324,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
             final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = fileContentType;
-            final AbstractTask<Void> task = new AbstractTask<Void>() {
+            AbstractTask<Void> task = new AbstractTask<Void>() {
 
                 @Override
                 public Void call() {
@@ -335,7 +340,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
             };
 
             // Acquire thread pool service
-            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
+            ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
             if (null == threadPool) {
                 final Thread thread = Thread.currentThread();
                 boolean ran = false;
@@ -362,12 +367,12 @@ public class TransformImageAction implements IFileResponseRendererAction {
             if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
                     final File tmpFile = writeBrokenImage2Disk(file, tmpDirReference);
-                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath());
+                    LOG.error("Unable to transform image from {}. Unparseable image file is written to disk at: {}", file.getName(), tmpFile.getPath(), e);
                 } catch (final Exception x) {
-                    LOG.error("Unable to transform image from {}", file.getName());
+                    LOG.error("Unable to transform image from {}", file.getName(), e);
                 }
             } else {
-                LOG.error("Unable to transform image from {}", file.getName());
+                LOG.error("Unable to transform image from {}", file.getName(), e);
             }
 
             IFileHolder returnValue = file.repetitive() ? file : null;
@@ -409,15 +414,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         return true;
     }
 
-    private IFileHolder handleFailure(final IFileHolder file, final InputStream stream, final boolean markSupported) {
-        if (markSupported) {
-            try {
-                stream.reset();
-                return file;
-            } catch (final Exception e) {
-                LOG.warn("Error resetting input stream", e);
-            }
-        }
+    private IFileHolder handleFailure(IFileHolder file) {
         LOG.warn("Unable to transform image from {}", file.getName());
         return file.repetitive() ? file : null;
     }

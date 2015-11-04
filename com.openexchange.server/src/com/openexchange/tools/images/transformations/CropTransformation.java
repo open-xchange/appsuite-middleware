@@ -54,8 +54,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.IndexColorModel;
 import java.io.IOException;
+import com.openexchange.tools.images.ImageInformation;
 import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link CropTransformation}
