@@ -54,8 +54,8 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import com.openexchange.tools.images.ImageInformation;
 import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.impl.ImageInformation;
 
 /**
  * {@link RotateTransformation}
@@ -66,8 +66,43 @@ public class RotateTransformation implements ImageTransformation {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RotateTransformation.class);
 
-    public RotateTransformation() {
+    private static final RotateTransformation INSTANCE = new RotateTransformation();
+
+    /**
+     * Gets the instance
+     *
+     * @return The instance
+     */
+    public static RotateTransformation getInstance() {
+        return INSTANCE;
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private RotateTransformation() {
         super();
+    }
+
+    /**
+     * Checks if specified image information imply that rotation is needed
+     *
+     * @param imageInformation The image information to examine
+     * @return <code>true</code> if rotation is needed; otherwise <code>false</code>
+     */
+    public boolean needsRotation(ImageInformation imageInformation) {
+        if (null == imageInformation) {
+            // No image information available, unable to rotate image
+            return false;
+        }
+
+        AffineTransform exifTransformation = getExifTransformation(imageInformation);
+        if (null == exifTransformation) {
+            // No EXIF transformation available, unable to rotate image
+            return false;
+        }
+
+        // Rotation required
+        return true;
     }
 
     @Override
