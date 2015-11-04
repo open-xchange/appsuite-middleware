@@ -579,7 +579,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             try {
                 metadata = ImageMetadataReader.readMetadata(ImageTransformationUtility.bufferedInputStreamFor(sink.getStream()), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata for {}", formatName, e);
+                LOG.debug("error getting metadata for {}", formatName, e);
             }
 
             if (maxResolution > 0) {
