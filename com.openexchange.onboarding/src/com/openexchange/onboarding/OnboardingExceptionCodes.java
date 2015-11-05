@@ -79,6 +79,14 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * No such configuration for identifier: %1$s
      */
     NOT_FOUND("No such configuration for identifier: %1$s", null, Category.CATEGORY_ERROR, 4),
+    /**
+     * Entity selection not specified: %1$s
+     */
+    ENTITY_ID_MISSING("Entity selection not specified: %1$s", null, Category.CATEGORY_ERROR, 5),
+    /**
+     * Entity selection not supported: %1$s
+     */
+    ENTITY_NOT_SUPPORTED("Entity selection not supported: %1$s", OnboardingExceptionMessages.ENTITY_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 6),
     ;
 
     /** The error code prefix for on-boarding module */

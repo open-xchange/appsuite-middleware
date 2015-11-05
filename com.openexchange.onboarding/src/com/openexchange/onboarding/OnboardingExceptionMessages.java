@@ -65,4 +65,8 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     private OnboardingExceptionMessages() {
         super();
     }
+
+    // Your selection is not supported.
+    public static final String ENTITY_NOT_SUPPORTED_MSG = "Your selection is not supported.";
+
 }

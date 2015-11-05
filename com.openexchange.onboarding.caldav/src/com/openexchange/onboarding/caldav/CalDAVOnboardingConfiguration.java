@@ -62,6 +62,7 @@ import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
@@ -72,6 +73,7 @@ import com.openexchange.uadetector.UserAgentParser;
 import net.sf.uadetector.OperatingSystem;
 import net.sf.uadetector.OperatingSystemFamily;
 import net.sf.uadetector.ReadableDeviceCategory;
+import net.sf.uadetector.ReadableDeviceCategory.Category;
 import net.sf.uadetector.ReadableUserAgent;
 
 
@@ -131,21 +133,53 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             path.add(new DefaultEntity("apple.ios.ipad.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
             paths.add(new DefaultEntityPath(path));
         }
+        {
+            List<Entity> path = new ArrayList<Entity>(6);
+            path.add(new DefaultEntity("apple.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
+            path.add(new DefaultEntity("apple.ios.iphone", "com.openexchange.onboarding.iphone.displayName", "com.openexchange.onboarding.iphone.iconName"));
+            path.add(new DefaultEntity("apple.ios.iphone.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
+            paths.add(new DefaultEntityPath(path));
+        }
         return paths;
     }
 
     @Override
     public String getDescription(OnboardingSelection selection, Session session) throws OXException {
+        String entityId = selection.getLastPathEntityId();
+        if (null == entityId) {
+            throw OnboardingExceptionCodes.ENTITY_ID_MISSING.create();
+        }
 
+        if ("apple.ios.ipad.caldav".equals(entityId)) {
+            return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.ipad.profile.description", session);
+        } else if ("apple.ios.iphone.caldav".equals(entityId)) {
+            return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.iphone.profile.description", session);
+        }
 
-        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.ipad.profile.description", session);
+        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityId);
     }
 
     @Override
     public Result execute(OnboardingSelection selection, Session session) throws OXException {
-        // TODO Auto-generated method stub
+        String entityId = selection.getLastPathEntityId();
+        if (null == entityId) {
+            throw OnboardingExceptionCodes.ENTITY_ID_MISSING.create();
+        }
+
+        if ("apple.ios.ipad.caldav".equals(entityId)) {
+            if (isIPad(selection.getClientInfo())) {
+
+            }
+        } else if ("apple.ios.iphone.caldav".equals(entityId)) {
+            if (isIPhone(selection.getClientInfo())) {
+
+            }
+        }
+
         return null;
     }
+
+    // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
 
     private boolean isIPad(ClientInfo clientInfo) {
         String userAgent = clientInfo.getUserAgent();
@@ -162,7 +196,25 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         }
 
         ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
-        return true;
+        return Category.TABLET.equals(deviceCategory.getCategory());
+    }
+
+    private boolean isIPhone(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return Category.SMARTPHONE.equals(deviceCategory.getCategory());
     }
 
 }
