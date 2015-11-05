@@ -98,14 +98,15 @@ public class AutoUpdateActivator extends HousekeepingActivator implements Bundle
         @Override
         public void handleLogin(LoginResult login) throws OXException {
             try {
-                if (COLLECTOR == null || EXECUTOR == null) {
-                    return;
-                }
                 ConfigView view = getService(ConfigViewFactory.class).getView(login.getUser().getId(), login.getContext().getContextId());
-
                 if (!view.opt("com.openexchange.subscribe.autorun", boolean.class, false)) {
                     return;
                 }
+                if (COLLECTOR == null || EXECUTOR == null) {
+                    LOG.warn("Autoupdate of subscriptions enabled but collector {} or executor {} not available.", COLLECTOR, EXECUTOR);
+                    return;
+                }
+
                 Context ctx = login.getContext();
                 Session session = login.getSession();
                 String secret = getService(SecretService.class).getSecret(session);
