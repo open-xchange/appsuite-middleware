@@ -60,9 +60,40 @@ import com.openexchange.session.Session;
  */
 public class DefaultEntity implements Entity {
 
+    /**
+     * Creates a new {@code DefaultEntity} instance
+     *
+     * @param id The identifier
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @param withDescription <code>true</code> to also set the description property; otherwise <code>false</code>
+     * @return A new {@code DefaultEntity} instance
+     */
+    public static DefaultEntity newInstance(String id, String prefix, boolean withDescription) {
+        return new DefaultEntity(id, prefix, withDescription);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     private final String id;
     private final String displayNameProperty;
     private final String imageNameProperty;
+    private final String descriptionProperty;
+
+    private DefaultEntity(String id, String prefix, boolean withDescription) {
+        super();
+        int len = prefix.length();
+        StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
+
+        this.id = id;
+
+        this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
+
+        propertyNameBuilder.setLength(len);
+        this.imageNameProperty = propertyNameBuilder.append("iconName").toString();
+
+        propertyNameBuilder.setLength(len);
+        this.descriptionProperty = withDescription ? propertyNameBuilder.append("description").toString() : null;
+    }
 
     /**
      * Initializes a new {@link DefaultEntity}.
@@ -70,12 +101,14 @@ public class DefaultEntity implements Entity {
      * @param id The identifier
      * @param displayNameProperty The property name for the display name
      * @param imageNameProperty The property name for the icon image
+     * @param descriptionProperty The property name for the description or <code>null</code>
      */
-    public DefaultEntity(String id, String displayNameProperty, String imageNameProperty) {
+    public DefaultEntity(String id, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
         super();
         this.id = id;
         this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
+        this.descriptionProperty = descriptionProperty;
     }
 
     @Override
@@ -91,6 +124,11 @@ public class DefaultEntity implements Entity {
     @Override
     public Icon getIcon(Session session) throws OXException {
         return OnboardingUtility.loadIconImageFromProperty(imageNameProperty, session);
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return null == descriptionProperty ? null : OnboardingUtility.getTranslationFromProperty(descriptionProperty, session);
     }
 
 }

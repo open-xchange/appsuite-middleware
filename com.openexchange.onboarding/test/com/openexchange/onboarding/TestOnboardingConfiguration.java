@@ -64,6 +64,7 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     private String id;
     private String displayName;
     private Platform platform;
+    private String description;
     private boolean enabled;
     private List<EntityPath> paths;
 
@@ -105,18 +106,22 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public List<OnboardingSelection> getPossibilities(String entityId, Session session) throws OXException {
-        return null;
+    public String getDescription(Session session) throws OXException {
+        return description;
     }
 
     @Override
-    public String getDescription(OnboardingRequest selection, Session session) throws OXException {
+    public List<OnboardingSelection> getSelections(String entityId, ClientInfo clientInfo, Session session) throws OXException {
         return null;
     }
 
     @Override
     public Result execute(OnboardingRequest selection, Session session) throws OXException {
         return null;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setId(String id) {

@@ -60,9 +60,39 @@ import com.openexchange.session.Session;
  */
 public class DefaultOnboardingSelection implements OnboardingSelection {
 
+    /**
+     * Creates a new {@code DefaultOnboardingSelection} instance
+     *
+     * @param id The identifier
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @return A new {@code DefaultOnboardingSelection} instance
+     */
+    public static DefaultOnboardingSelection newInstance(String id, String prefix) {
+        return new DefaultOnboardingSelection(id, prefix);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
     private final String id;
     private final String displayNameProperty;
     private final String imageNameProperty;
+    private final String descriptionProperty;
+
+    private DefaultOnboardingSelection(String id, String prefix) {
+        super();
+        int len = prefix.length();
+        StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
+
+        this.id = id;
+
+        this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
+
+        propertyNameBuilder.setLength(len);
+        this.imageNameProperty = propertyNameBuilder.append("iconName").toString();
+
+        propertyNameBuilder.setLength(len);
+        this.descriptionProperty = propertyNameBuilder.append("description").toString();
+    }
 
     /**
      * Initializes a new {@link DefaultOnboardingSelection}.
@@ -71,11 +101,12 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
      * @param displayNameProperty The property name for the display name
      * @param imageNameProperty The property name for the icon image
      */
-    public DefaultOnboardingSelection(String id, String displayNameProperty, String imageNameProperty) {
+    public DefaultOnboardingSelection(String id, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
         super();
         this.id = id;
         this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
+        this.descriptionProperty = descriptionProperty;
     }
 
     @Override
@@ -91,6 +122,11 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     @Override
     public Icon getIcon(Session session) throws OXException {
         return OnboardingUtility.loadIconImageFromProperty(imageNameProperty, session);
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return null == descriptionProperty ? null : OnboardingUtility.getTranslationFromProperty(descriptionProperty, session);
     }
 
 }

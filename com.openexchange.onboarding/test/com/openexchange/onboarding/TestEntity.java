@@ -94,6 +94,12 @@ public class TestEntity implements Entity {
         return null;
     }
 
+    @Override
+    public String getDescription(Session session) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
     /**
      * Sets the displayName
      *

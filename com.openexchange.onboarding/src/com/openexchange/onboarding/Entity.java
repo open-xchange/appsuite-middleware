@@ -85,4 +85,13 @@ public interface Entity {
      */
     Icon getIcon(Session session) throws OXException;
 
+    /**
+     * Gets the optional description for this entity
+     *
+     * @param session The session to use
+     * @return The description or <code>null</code>
+     * @throws OXException If description cannot be returned
+     */
+    String getDescription(Session session) throws OXException;
+
 }

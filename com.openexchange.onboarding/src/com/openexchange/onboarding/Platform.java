@@ -63,25 +63,27 @@ public enum Platform implements Entity {
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE, "platform_icon_apple"),
+    APPLE("apple", OnboardingStrings.PLATFORM_APPLE, "platform_icon_apple", "com.openexchange.onboarding.apple.description"),
     /**
      * The Android/Google platform for Android devices
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_GOOGLE, "platform_icon_android"),
+    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_GOOGLE, "platform_icon_android", "com.openexchange.onboarding.android.description"),
     /**
      * The Windows platform for Windows Desktop applications.
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS, "platform_icon_windows"),
+    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS, "platform_icon_windows", "com.openexchange.onboarding.windows.description"),
     ;
 
     private final String id;
     private final String i18nDisplayName;
     private final String imageNameProperty;
+    private final String descriptionProperty;
 
-    private Platform(String id, String i18nDisplayName, String imageNameProperty) {
+    private Platform(String id, String i18nDisplayName, String imageNameProperty, String descriptionProperty) {
         this.i18nDisplayName = i18nDisplayName;
         this.id = id;
         this.imageNameProperty = imageNameProperty;
+        this.descriptionProperty = descriptionProperty;
     }
 
     @Override
@@ -97,6 +99,11 @@ public enum Platform implements Entity {
     @Override
     public Icon getIcon(Session session) throws OXException {
         return OnboardingUtility.loadIconImageFromProperty(imageNameProperty, session);
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(descriptionProperty, session);
     }
 
 }

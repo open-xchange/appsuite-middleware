@@ -64,12 +64,15 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.DefaultEntityPath;
+import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
 import com.openexchange.server.ServiceLookup;
@@ -177,6 +180,11 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
             public Icon getIcon(Session session) {
                 return null;
             }
+
+            @Override
+            public String getDescription(Session session) throws OXException {
+                return null;
+            }
         });
         paths.add(new DefaultEntityPath(path));
 
@@ -185,8 +193,15 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public String getDescription(OnboardingRequest selection, Session session) {
+    public String getDescription(Session session) {
         return "IMAP configuration";
+    }
+
+    @Override
+    public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
+        List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
+        selections.add(DefaultOnboardingSelection.newInstance("imap.display", "com.openexchange.onboarding.imap.display."));
+        return selections;
     }
 
     @Override
