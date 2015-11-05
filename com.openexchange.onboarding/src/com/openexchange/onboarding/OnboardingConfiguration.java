@@ -80,22 +80,23 @@ public interface OnboardingConfiguration extends Entity {
     Platform getPlatform() throws OXException;
 
     /**
-     * Gets the path to the dedicated on-boarding configuration option (excluding the platform).
+     * Gets the paths to the dedicated on-boarding configuration options (excluding the platform).
      *
      * @param session The session providing user data
-     * @return The path to the dedicated on-boarding configuration option.
-     * @throws OXException If path cannot be returned
+     * @return The paths to the dedicated on-boarding configuration options.
+     * @throws OXException If paths cannot be returned
      */
-    List<Entity> getEntityPath(Session session) throws OXException;
+    List<EntityPath> getEntityPaths(Session session) throws OXException;
 
     /**
      * Gets the description for this on-boarding configuration.
      *
+     * @param selection The selected configuration option
      * @param session The session providing user data
      * @return The description
      * @throws OXException If description cannot be returned
      */
-    String getDescription(Session session) throws OXException;
+    String getDescription(OnboardingSelection selection, Session session) throws OXException;
 
     /**
      * Executes this on-boarding configuration.

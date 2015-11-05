@@ -64,7 +64,9 @@ import com.openexchange.mail.api.MailConfig.PasswordSource;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
+import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingSelection;
@@ -153,11 +155,13 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public List<Entity> getEntityPath(Session session) {
+    public List<EntityPath> getEntityPaths(Session session) {
 
         //TODO: new entity enum
-        List<Entity> list = new ArrayList<Entity>(1);
-        list.add(new Entity() {
+        List<EntityPath> paths = new ArrayList<EntityPath>(1);
+
+        List<Entity> path = new ArrayList<Entity>(1);
+        path.add(new Entity() {
 
             @Override
             public String getId() {
@@ -174,11 +178,14 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
                 return null;
             }
         });
-        return list;
+        paths.add(new DefaultEntityPath(path));
+
+
+        return paths;
     }
 
     @Override
-    public String getDescription(Session session) {
+    public String getDescription(OnboardingSelection selection, Session session) {
         return "IMAP configuration";
     }
 

@@ -58,5 +58,5 @@ package com.openexchange.onboarding;
  */
 public interface EntityPath extends Iterable<Entity> {
 
-
+    // No additional methods
 }

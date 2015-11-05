@@ -65,7 +65,7 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     private String displayName;
     private Platform platform;
     private boolean enabled;
-    private List<Entity> path;
+    private List<EntityPath> paths;
 
     /**
      * Initializes a new {@link TestOnboardingConfiguration}.
@@ -100,12 +100,12 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public List<Entity> getEntityPath(Session session) throws OXException {
-        return path;
+    public List<EntityPath> getEntityPaths(Session session) throws OXException {
+        return paths;
     }
 
     @Override
-    public String getDescription(Session session) throws OXException {
+    public String getDescription(OnboardingSelection selection, Session session) throws OXException {
         return null;
     }
 
@@ -130,8 +130,8 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
         this.enabled = enabled;
     }
 
-    public void setPath(List<Entity> path) {
-        this.path = path;
+    public void setPaths(List<EntityPath> paths) {
+        this.paths = paths;
     }
 
 }

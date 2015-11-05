@@ -60,7 +60,9 @@ import com.openexchange.onboarding.TestEntity;
 import com.openexchange.onboarding.TestOnboardingConfiguration;
 import com.openexchange.onboarding.internal.ConfigurationTreeImpl;
 import com.openexchange.onboarding.ConfigurationTree;
+import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
 
@@ -81,7 +83,7 @@ public class ConfigurationTreeTest {
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("MailApp", "MailApp")));
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("MailApp", "MailApp")))));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
@@ -91,7 +93,7 @@ public class ConfigurationTreeTest {
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("EAS", "EAS")));
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("EAS", "EAS")))));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
@@ -101,7 +103,7 @@ public class ConfigurationTreeTest {
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPhone", "iPhone"), new TestEntity("EAS", "EAS")));
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPhone", "iPhone"), new TestEntity("EAS", "EAS")))));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
@@ -111,7 +113,7 @@ public class ConfigurationTreeTest {
             configuration.setId("IMAP-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your IMAP account");
-            configuration.setPath(Arrays.<Entity> asList(new TestEntity("OSX", "OSX")));
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("OSX", "OSX")))));
             configuration.setPlatform(Platform.APPLE);
             configs.add(configuration);
         }
@@ -121,7 +123,7 @@ public class ConfigurationTreeTest {
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPath(Arrays.<Entity> asList(new TestEntity("Windows8-10", "Windows8-10"), new TestEntity("EmClient", "EmClient")));
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("Windows8-10", "Windows8-10"), new TestEntity("EmClient", "EmClient")))));
             configuration.setPlatform(Platform.WINDOWS);
             configs.add(configuration);
         }
@@ -131,7 +133,7 @@ public class ConfigurationTreeTest {
             configuration.setId("Manual");
             configuration.setEnabled(true);
             configuration.setDisplayName("Manually do something");
-            configuration.setPath(Arrays.<Entity> asList());
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList())));
             configuration.setPlatform(Platform.WINDOWS);
             configs.add(configuration);
         }

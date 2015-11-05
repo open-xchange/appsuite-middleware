@@ -49,34 +49,62 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
- * {@link OnboardingSelection} - Represents a certain selection a user has chosen from configuration tree.
+ * {@link DefaultEntityPath} - The default {@code EntityPath} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingSelection {
+public class DefaultEntityPath implements EntityPath {
+
+    private final Collection<Entity> col;
 
     /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
-     *
-     * @return The on-boarding configuration identifier
+     * Initializes a new {@link DefaultEntityPath}.
      */
-    String getConfigurationId();
+    public DefaultEntityPath(Collection<Entity> col) {
+        super();
+        this.col = col;
+    }
 
-    /**
-     * Gets the identifier of the last entity on the path to the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav"</code>
-     *
-     * @return The identifier of the last entity on path
-     */
-    String getLastPathEntityId();
+    @Override
+    public Iterator<Entity> iterator() {
+        return new UnmodifiableIterator<Entity>(col.iterator());
+    }
 
-    /**
-     * Gets the client information
-     *
-     * @return The client information
-     */
-    ClientInfo getClientInfo();
+    // --------------------------------------------------------------------------------------------------------
+
+    private static class UnmodifiableIterator<E> implements Iterator<E> {
+
+        private final Iterator<E> iter;
+
+        UnmodifiableIterator(Iterator<E> iter) {
+            super();
+            this.iter = iter;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        @Override
+        public E next() {
+            return iter.next();
+        }
+
+        /**
+         * Guaranteed to throw an exception and leave the underlying data unmodified.
+         *
+         * @throws UnsupportedOperationException always
+         */
+        @Override
+        public final void remove() {
+            throw new UnsupportedOperationException("Iterator.remove() not supported");
+        }
+    }
 
 }

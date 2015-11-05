@@ -60,6 +60,7 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.ConfigurationTree;
 import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.ConfigurationTreeTest;
@@ -141,7 +142,6 @@ public class ConfigurationTreeImpl implements ConfigurationTree {
             if (null != value) {
                 JSONObject jConfig = new JSONObject(6);
                 jConfig.put("displayName", value.getDisplayName(session));
-                jConfig.put("description", value.getDescription(session));
                 jObject.put(value.getId(), jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
@@ -177,27 +177,29 @@ public class ConfigurationTreeImpl implements ConfigurationTree {
                 elems.put(platform, nodeElem);
             }
 
-            List<Entity> entityPath = configuration.getEntityPath(session);
-            for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
-                Entity entity = it.next();
-                NodeElem treeElem = nodeElem.children.get(entity.getId());
-                if (null == treeElem) {
-                    NodeElem ne = new NodeElem(entity);
-                    nodeElem.children.put(entity.getId(), ne);
-                    nodeElem = ne;
-                } else {
-                    if (treeElem.isLeaf()) {
+            List<EntityPath> entityPaths = configuration.getEntityPaths(session);
+            for (EntityPath entityPath : entityPaths) {
+                for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
+                    Entity entity = it.next();
+                    NodeElem treeElem = nodeElem.children.get(entity.getId());
+                    if (null == treeElem) {
                         NodeElem ne = new NodeElem(entity);
                         nodeElem.children.put(entity.getId(), ne);
-                        ne.children.put(treeElem.value.getId(), treeElem);
                         nodeElem = ne;
                     } else {
-                        nodeElem = treeElem;
+                        if (treeElem.isLeaf()) {
+                            NodeElem ne = new NodeElem(entity);
+                            nodeElem.children.put(entity.getId(), ne);
+                            ne.children.put(treeElem.value.getId(), treeElem);
+                            nodeElem = ne;
+                        } else {
+                            nodeElem = treeElem;
+                        }
                     }
                 }
-            }
 
-            nodeElem.children.put(configuration.getId(), new NodeElem(configuration));
+                nodeElem.children.put(configuration.getId(), new NodeElem(configuration));
+            }
         }
     }
 

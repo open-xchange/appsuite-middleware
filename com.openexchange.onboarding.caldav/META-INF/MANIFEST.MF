@@ -22,8 +22,11 @@ Import-Package: com.openexchange.config,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.tools.session,
+ com.openexchange.uadetector,
  com.openexchange.user,
+ net.sf.uadetector,
  org.json,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
+Bundle-Activator: com.openexchange.onboarding.caldav.osgi.CalDAVOnboardingActivator

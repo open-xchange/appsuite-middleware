@@ -47,36 +47,40 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.caldav.osgi;
+
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.caldav.CalDAVOnboardingConfiguration;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.uadetector.UserAgentParser;
 
 
 /**
- * {@link OnboardingSelection} - Represents a certain selection a user has chosen from configuration tree.
+ * {@link CalDAVOnboardingActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingSelection {
+public class CalDAVOnboardingActivator extends HousekeepingActivator {
 
     /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
-     *
-     * @return The on-boarding configuration identifier
+     * Initializes a new {@link CalDAVOnboardingActivator}.
      */
-    String getConfigurationId();
+    public CalDAVOnboardingActivator() {
+        super();
+    }
 
-    /**
-     * Gets the identifier of the last entity on the path to the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav"</code>
-     *
-     * @return The identifier of the last entity on path
-     */
-    String getLastPathEntityId();
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserAgentParser.class };
+    }
 
-    /**
-     * Gets the client information
-     *
-     * @return The client information
-     */
-    ClientInfo getClientInfo();
+    @Override
+    protected void startBundle() throws Exception {
+        CalDAVOnboardingConfiguration onboardingConfiguration = new CalDAVOnboardingConfiguration(this);
+        registerService(OnboardingConfiguration.class, onboardingConfiguration);
+    }
 
 }

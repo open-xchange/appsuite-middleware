@@ -55,8 +55,11 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.DefaultEntity;
+import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingSelection;
@@ -65,6 +68,11 @@ import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.uadetector.UserAgentParser;
+import net.sf.uadetector.OperatingSystem;
+import net.sf.uadetector.OperatingSystemFamily;
+import net.sf.uadetector.ReadableDeviceCategory;
+import net.sf.uadetector.ReadableUserAgent;
 
 
 /**
@@ -87,17 +95,17 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getId() {
-        return "com.openexchange.onboarding.caldav.ipad.profile";
+        return "com.openexchange.onboarding.caldav";
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.ipad.profile.displayName", session);
+        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.displayName", session);
     }
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty("com.openexchange.onboarding.caldav.ipad.profile.iconName", session);
+        return OnboardingUtility.loadIconImageFromProperty("com.openexchange.onboarding.caldav.iconName", session);
     }
 
     @Override
@@ -114,16 +122,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public List<Entity> getEntityPath(Session session) throws OXException {
-        List<Entity> path = new ArrayList<Entity>(6);
-        path.add(new DefaultEntity("onboarding.caldav.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
-        path.add(new DefaultEntity("onboarding.caldav.ios.ipad", "com.openexchange.onboarding.ipad.displayName", "com.openexchange.onboarding.ipad.iconName"));
-        path.add(new DefaultEntity("onboarding.caldav.ios.ipad.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
-        return path;
+    public List<EntityPath> getEntityPaths(Session session) throws OXException {
+        List<EntityPath> paths = new ArrayList<EntityPath>(6);
+        {
+            List<Entity> path = new ArrayList<Entity>(6);
+            path.add(new DefaultEntity("apple.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
+            path.add(new DefaultEntity("apple.ios.ipad", "com.openexchange.onboarding.ipad.displayName", "com.openexchange.onboarding.ipad.iconName"));
+            path.add(new DefaultEntity("apple.ios.ipad.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
+            paths.add(new DefaultEntityPath(path));
+        }
+        return paths;
     }
 
     @Override
-    public String getDescription(Session session) throws OXException {
+    public String getDescription(OnboardingSelection selection, Session session) throws OXException {
+
+
         return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.ipad.profile.description", session);
     }
 
@@ -131,6 +145,24 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     public Result execute(OnboardingSelection selection, Session session) throws OXException {
         // TODO Auto-generated method stub
         return null;
+    }
+
+    private boolean isIPad(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return true;
     }
 
 }
