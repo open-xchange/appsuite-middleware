@@ -52,7 +52,7 @@ package com.openexchange.onboarding.json.actions;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.ConfigurationTree;
+import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -78,9 +78,9 @@ public class GetTreeAction extends AbstractOnboardingAction {
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
-        ConfigurationTree configurationTree =  onboardingService.getConfigurationTreeFor(session);
+        OnboardingConfigurationTree configurationTree =  onboardingService.getConfigurationTreeFor(session);
 
-        return new AJAXRequestResult(configurationTree, "configurationTree");
+        return new AJAXRequestResult(configurationTree, "onboardingConfigurationTree");
     }
 
 }

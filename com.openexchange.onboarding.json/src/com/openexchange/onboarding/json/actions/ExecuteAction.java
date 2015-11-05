@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,70 @@
  *
  */
 
-package com.openexchange.onboarding.json.converter;
+package com.openexchange.onboarding.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
+import com.openexchange.java.Strings;
+import com.openexchange.onboarding.DefaultClientInfo;
+import com.openexchange.onboarding.DefaultOnboardingRequest;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
+
 /**
- * {@link ConfigurationTreeConverter}
+ * {@link ExecuteAction}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeConverter implements ResultConverter {
+public class ExecuteAction extends AbstractOnboardingAction {
 
     /**
-     * Initializes a new {@link ConfigurationTreeConverter}.
+     * Initializes a new {@link ExecuteAction}.
+     * @param services
      */
-    public ConfigurationTreeConverter() {
-        super();
+    public ExecuteAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public String getInputFormat() {
-        return "onboardingConfigurationTree";
-    }
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        OnboardingConfigurationService onboardingService = getOnboardingService();
 
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
+        String configurationId = requestData.getParameter("configurationId");
+        if (Strings.isEmpty(configurationId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("configurationId");
+        }
 
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
+        OnboardingConfiguration config = onboardingService.getConfiguration(configurationId);
 
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-        if (resultObject instanceof OnboardingConfigurationTree) {
-            try {
-                OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
-                JSONObject jConfigurationTree = configurationTree.toJsonObject();
-                result.setResultObject(jConfigurationTree, "json");
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        String selectionId = requestData.getParameter("selectionId");
+        if (Strings.isEmpty(selectionId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("selectionId");
+        }
+
+        Result onboardingResult = config.execute(new DefaultOnboardingRequest(configurationId, selectionId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData))), session);
+
+        try {
+            if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
+                return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null), "json");
             }
+
+            JSONObject jResult = new JSONObject(2);
+            jResult.put("result", onboardingResult.getResultText());
+            return new AJAXRequestResult(jResult, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

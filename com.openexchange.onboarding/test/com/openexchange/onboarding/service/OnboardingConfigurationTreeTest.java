@@ -58,8 +58,8 @@ import org.json.JSONObject;
 import org.junit.Test;
 import com.openexchange.onboarding.TestEntity;
 import com.openexchange.onboarding.TestOnboardingConfiguration;
-import com.openexchange.onboarding.internal.ConfigurationTreeImpl;
-import com.openexchange.onboarding.ConfigurationTree;
+import com.openexchange.onboarding.internal.OnboardingConfigurationTreeImpl;
+import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
@@ -67,12 +67,12 @@ import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
 
 /**
- * {@link ConfigurationTreeImpl}
+ * {@link OnboardingConfigurationTreeImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeTest {
+public class OnboardingConfigurationTreeTest {
 
     @Test
     public void testConfigTree() throws Exception {
@@ -138,7 +138,7 @@ public class ConfigurationTreeTest {
             configs.add(configuration);
         }
 
-        ConfigurationTree tree = new ConfigurationTreeImpl(configs, null);
+        OnboardingConfigurationTree tree = new OnboardingConfigurationTreeImpl(configs, null);
 
         JSONObject jTree = tree.toJsonObject();
         // System.out.println(jTree.toString(2));

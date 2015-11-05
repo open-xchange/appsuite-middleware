@@ -49,6 +49,8 @@
 
 package com.openexchange.onboarding.json.converter;
 
+import java.util.Collection;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -56,28 +58,28 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
+import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ConfigurationTreeConverter}
+ * {@link SelectionConverter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeConverter implements ResultConverter {
+public class SelectionConverter implements ResultConverter {
 
     /**
-     * Initializes a new {@link ConfigurationTreeConverter}.
+     * Initializes a new {@link SelectionConverter}.
      */
-    public ConfigurationTreeConverter() {
+    public SelectionConverter() {
         super();
     }
 
     @Override
     public String getInputFormat() {
-        return "onboardingConfigurationTree";
+        return "onboardingSelection";
     }
 
     @Override
@@ -93,15 +95,38 @@ public class ConfigurationTreeConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        if (resultObject instanceof OnboardingConfigurationTree) {
+        if (resultObject instanceof OnboardingSelection) {
             try {
-                OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
-                JSONObject jConfigurationTree = configurationTree.toJsonObject();
-                result.setResultObject(jConfigurationTree, "json");
+                OnboardingSelection selection = (OnboardingSelection) resultObject;
+                result.setResultObject(toJson(selection, session), "json");
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+        } else {
+            @SuppressWarnings("unchecked") final Collection<OnboardingSelection> selections = (Collection<OnboardingSelection>) resultObject;
+            try {
+                JSONArray jSelections = new JSONArray(selections.size());
+
+                for (OnboardingSelection selection : selections) {
+                    jSelections.put(toJson(selection, session));
+                }
+
+                result.setResultObject(jSelections, "json");
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         }
+    }
+
+    private JSONObject toJson(OnboardingSelection selection, ServerSession session) throws OXException, JSONException {
+        JSONObject jSelection = new JSONObject(6);
+
+        jSelection.put("id", selection.getId());
+        jSelection.put("displayName", selection.getDisplayName(session));
+        jSelection.put("description", selection.getDescription(session));
+        jSelection.put("icon", selection.getIcon(session));
+
+        return jSelection;
     }
 
 }

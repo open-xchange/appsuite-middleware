@@ -58,33 +58,33 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.ConfigurationTree;
+import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
-import com.openexchange.onboarding.service.ConfigurationTreeTest;
+import com.openexchange.onboarding.service.OnboardingConfigurationTreeTest;
 import com.openexchange.session.Session;
 
 /**
- * {@link ConfigurationTreeTest}
+ * {@link OnboardingConfigurationTreeTest}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeImpl implements ConfigurationTree {
+public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationTree {
 
     private final RootElem root;
     private final Session session;
 
     /**
-     * Initializes a new {@link ConfigurationTreeTest}.
+     * Initializes a new {@link OnboardingConfigurationTreeTest}.
      *
      * @param configurations The configurations from which to build the tree
      * @param session The session to use
      * @throws OXException If building the tree fails
      */
-    public ConfigurationTreeImpl(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
+    public OnboardingConfigurationTreeImpl(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
         super();
         this.session = session;
         root = new RootElem();

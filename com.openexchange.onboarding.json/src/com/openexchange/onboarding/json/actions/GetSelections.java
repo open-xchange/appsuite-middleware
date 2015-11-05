@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,48 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.json.actions;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.List;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.DefaultClientInfo;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ConfigurationTree} - Represents an on-boarding configuration tree for a certain user.
+ * {@link GetSelections}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface ConfigurationTree {
+public class GetSelections extends AbstractOnboardingAction {
 
     /**
-     * Converts this tree into its JSON representation
+     * Initializes a new {@link GetSelections}.
      *
-     * @return The JSON representation
-     * @throws JSONException If JSON representation cannot be returned
-     * @throws OXException If an Open-Xchange error occurs
+     * @param services
      */
-    JSONObject toJsonObject() throws JSONException, OXException;
+    public GetSelections(ServiceLookup services) {
+        super(services);
+    }
+
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        OnboardingConfigurationService onboardingService = getOnboardingService();
+
+        String configurationId = requestData.requireParameter("configurationId");
+        String lastEntityId = requestData.requireParameter("entityId");
+
+        OnboardingConfiguration configuration = onboardingService.getConfiguration(configurationId);
+        List<OnboardingSelection> selections = configuration.getSelections(lastEntityId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData)), session);
+
+        return new AJAXRequestResult(selections, "onboardingSelection");
+    }
 
 }

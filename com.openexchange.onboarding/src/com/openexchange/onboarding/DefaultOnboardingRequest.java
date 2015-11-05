@@ -47,56 +47,48 @@
  *
  */
 
-package com.openexchange.onboarding.service;
+package com.openexchange.onboarding;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingConfigurationService} - The service for {@link OnboardingConfiguration configurations}.
+ * {@link DefaultOnboardingRequest} - The default <code>OnboardingRequest</code> implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-@SingletonService
-public interface OnboardingConfigurationService {
+public class DefaultOnboardingRequest implements OnboardingRequest {
+
+    private final String configurationId;
+    private final String selectionId;
+    private final ClientInfo clientInfo;
 
     /**
-     * Gets all currently registered {@link OnboardingConfiguration configurations}.
+     * Initializes a new {@link DefaultOnboardingRequest}.
      *
-     * @return All configurations
-     * @throws OXException If configurations cannot be returned
+     * @param configurationId The configuration identifier
+     * @param selectionId The selection identifier
+     * @param clientInfo The client information
      */
-    Collection<OnboardingConfiguration> getAllConfigurations() throws OXException;
+    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo) {
+        super();
+        this.configurationId = configurationId;
+        this.selectionId = selectionId;
+        this.clientInfo = clientInfo;
+    }
 
-    /**
-     * Gets the specified {@link OnboardingConfiguration configurations}.
-     *
-     * @return The specified configuration
-     * @throws OXException If configuration cannot be returned
-     */
-    OnboardingConfiguration getConfiguration(String id) throws OXException;
+    @Override
+    public String getConfigurationId() {
+        return configurationId;
+    }
 
-    /**
-     * Gets the currently available {@link OnboardingConfiguration configurations} for the session-associated user.
-     *
-     * @param session The session
-     * @return The currently available configurations
-     * @throws OXException If configurations cannot be returned
-     */
-    Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
+    @Override
+    public String getSelectionId() {
+        return selectionId;
+    }
 
-    /**
-     * Gets the currently applicable on-boarding configuration tree for specified user.
-     *
-     * @param session The session
-     * @return The configuration tree
-     * @throws OXException If configuration tree cannot be generated
-     */
-    OnboardingConfigurationTree getConfigurationTreeFor(Session session) throws OXException;
+    @Override
+    public ClientInfo getClientInfo() {
+        return clientInfo;
+    }
 
 }

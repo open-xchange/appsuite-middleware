@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,57 +47,27 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
+package com.openexchange.onboarding;
 
 import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.Result;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
- * {@link GetConfigurationAction}
+ * {@link OnboardingConfigurationTree} - Represents an on-boarding configuration tree for a certain user.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetConfigurationAction extends AbstractOnboardingAction {
+public interface OnboardingConfigurationTree {
 
     /**
-     * Initializes a new {@link GetConfigurationAction}.
-     * @param services
+     * Converts this tree into its JSON representation
+     *
+     * @return The JSON representation
+     * @throws JSONException If JSON representation cannot be returned
+     * @throws OXException If an Open-Xchange error occurs
      */
-    public GetConfigurationAction(ServiceLookup services) {
-        super(services);
-    }
-
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
-        String id = requestData.getParameter("id");
-        if (Strings.isEmpty(id)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
-        }
-        OnboardingConfiguration config = onboardingService.getConfiguration(id);
-        OnboardingRequest selection = null; // TODO: Parse from request
-        Result onboardingResult = config.execute(selection, session);
-        if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
-            try {
-                return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null));
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
-        }
-        return new AJAXRequestResult(onboardingResult.getResultText());
-    }
+    JSONObject toJsonObject() throws JSONException, OXException;
 
 }
