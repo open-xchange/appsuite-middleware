@@ -49,6 +49,7 @@
 
 package com.openexchange.uadetector;
 
+import com.openexchange.osgi.annotation.SingletonService;
 import net.sf.uadetector.ReadableUserAgent;
 import net.sf.uadetector.UserAgentFamily;
 import net.sf.uadetector.UserAgentStringParser;
@@ -60,6 +61,7 @@ import net.sf.uadetector.UserAgentStringParser;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface UserAgentParser {
 
     /**
