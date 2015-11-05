@@ -3562,6 +3562,11 @@ msgstr ""
 msgid "Result"
 msgstr ""
 
+#. Your selection is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:70
+msgid "Your selection is not supported."
+msgstr ""
+
 #. The name for Apple platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:71
 msgid "Apple"
