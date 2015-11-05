@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The On-Boardin bundle for CalDAV
-Bundle-SymbolicName: com.openexchange.onboarding.caldav
+Bundle-Name: The On-Boarding Bundle for composing plist profiles
+Bundle-SymbolicName: com.openexchange.onboarding.plist
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -14,26 +14,8 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.sr;version="4.2.0",
  com.ctc.wstx.stax;version="4.2.0",
  com.ctc.wstx.sw;version="4.2.0",
- com.openexchange.config,
- com.openexchange.config.cascade,
- com.openexchange.datatypes.genericonf,
- com.openexchange.exception,
- com.openexchange.groupware.contexts,
- com.openexchange.groupware.ldap,
- com.openexchange.i18n,
- com.openexchange.i18n.tools,
  com.openexchange.java,
- com.openexchange.log,
- com.openexchange.mime,
- com.openexchange.onboarding,
- com.openexchange.osgi,
- com.openexchange.osgi.annotation,
- com.openexchange.server,
- com.openexchange.session,
  com.openexchange.tools,
- com.openexchange.tools.session,
- com.openexchange.uadetector,
- com.openexchange.user,
  com.sun.istack.internal,
  com.sun.xml.internal.ws,
  com.sun.xml.internal.ws.addressing,
@@ -135,4 +117,6 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-Activator: com.openexchange.onboarding.caldav.osgi.CalDAVOnboardingActivator
+Export-Package: com.openexchange.onboarding.plist,
+ com.openexchange.onboarding.plist.xml,
+ com.openexchange.onboarding.plist.xml.helper
