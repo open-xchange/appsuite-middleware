@@ -52,9 +52,7 @@ package com.openexchange.tools.images.transformations;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InterruptedIOException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.threadpool.ThreadPools;
@@ -111,29 +109,12 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
     @Override
     protected BufferedImage getImage(String formatName) throws IOException {
-        CountDownLatch latch = new CountDownLatch(1);
-        GetImageCallable getImageCallable = new GetImageCallable(formatName, latch);
-        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(getImageCallable);
-
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
         boolean success = Scheduler.getInstance().execute(optSource, ft);
         if (!success) {
             throw new IOException("Image transformation rejected");
         }
-
-        // Await until actual processing happens
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            // Keep interrupted state
-            Thread.currentThread().interrupt();
-            InterruptedIOException ioe = new InterruptedIOException("Awaiting image transformation interrupted");
-            ioe.initCause(e);
-            throw ioe;
-        }
-
-        // Image transformation initiated
-        // Get result from scheduled task; waiting for at most the configured time for the computation to complete
         return ThreadPools.getFrom(ft, waitTimeoutSeconds(), TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
@@ -150,20 +131,16 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
     // --------------------------------------------------------------------------------------------------------- //
 
-    private final class GetImageCallable implements Callable<BufferedImage> {
+    private final class CallableImpl implements Callable<BufferedImage> {
 
         private final String formatName;
-        private final CountDownLatch latch;
 
-        GetImageCallable(String formatName, CountDownLatch latch) {
-            super();
+        CallableImpl(String formatName) {
             this.formatName = formatName;
-            this.latch = latch;
         }
 
         @Override
         public BufferedImage call() throws Exception {
-            latch.countDown();
             return doGetImage(formatName);
         }
     }
