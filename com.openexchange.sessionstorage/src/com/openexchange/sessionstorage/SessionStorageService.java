@@ -109,7 +109,7 @@ public interface SessionStorageService {
     boolean addSessionIfAbsent(Session session) throws OXException;
 
     /**
-     * Remove the session with given session Id from session storage
+     * Removes the session with given session Id from session storage
      *
      * @param sessionId The session Id
      * @throws OXException If no session with given session Id found
@@ -123,10 +123,19 @@ public interface SessionStorageService {
      * @return List with removed sessions
      * @throws OXException If no session with given session Id found
      */
-    public List<Session> removeSessions(List<String> sessionIds) throws OXException;
+    List<Session> removeSessions(List<String> sessionIds) throws OXException;
 
     /**
-     * Remove all sessions for user with given user Id and context Id from session storage
+     * Removes all locally available sessions for the denoted user from session storage.
+     *
+     * @param userId The user Id
+     * @param contextId The context Id
+     * @throws OXException If remove of user sessions failed
+     */
+    Session[] removeLocalUserSessions(int userId, int contextId) throws OXException;
+
+    /**
+     * Removes all sessions for the denoted user from session storage.
      *
      * @param userId The user Id
      * @param contextId The context Id
@@ -135,7 +144,15 @@ public interface SessionStorageService {
     Session[] removeUserSessions(int userId, int contextId) throws OXException;
 
     /**
-     * Remove all sessions from context with given context Id
+     * Removes all locally available sessions for the denoted context from session storage.
+     *
+     * @param contextId The context Id
+     * @throws OXException If remove of context sessions failed
+     */
+    void removeLocalContextSessions(int contextId) throws OXException;
+
+    /**
+     * Removes all sessions for the denoted context from session storage.
      *
      * @param contextId The context Id
      * @throws OXException If remove of context sessions failed
@@ -143,7 +160,7 @@ public interface SessionStorageService {
     void removeContextSessions(int contextId) throws OXException;
 
     /**
-     * Check for active sessions in context with given context Id
+     * Checks for active sessions in context with given context Id
      *
      * @param contextId The context Id
      * @return <code>true</code> if context has active sessions, otherwise <code>false</code>
@@ -152,7 +169,7 @@ public interface SessionStorageService {
     boolean hasForContext(int contextId) throws OXException;
 
     /**
-     * Get all sessions from user with given user Id and context Id
+     * Gets all sessions from user with given user Id and context Id
      *
      * @param userId The user Id
      * @param contextId The context Id
@@ -162,7 +179,7 @@ public interface SessionStorageService {
     Session[] getUserSessions(int userId, int contextId) throws OXException;
 
     /**
-     * Get an active session from user with given user Id and context Id
+     * Gets an active session from user with given user Id and context Id
      *
      * @param userId The user Id
      * @param contextId The context Id
@@ -172,7 +189,7 @@ public interface SessionStorageService {
     Session getAnyActiveSessionForUser(int userId, int contextId) throws OXException;
 
     /**
-     * Get the first found session from user with given user Id and context Id
+     * Gets the first found session from user with given user Id and context Id
      *
      * @param userId The user Id
      * @param contextId The context Id
@@ -182,21 +199,21 @@ public interface SessionStorageService {
     Session findFirstSessionForUser(int userId, int contextId) throws OXException;
 
     /**
-     * Get a list of all stored sessions
+     * Gets a list of all stored sessions
      *
      * @return A list of all stored sessions
      */
     List<Session> getSessions();
 
     /**
-     * Get the number of active sessions in session storage
+     * Gets the number of active sessions in session storage
      *
      * @return The number of active sessions
      */
     int getNumberOfActiveSessions();
 
     /**
-     * Get session identified by given random token
+     * Gets session identified by given random token
      *
      * @param randomToken The random token
      * @param newIP New IP of client
@@ -206,7 +223,7 @@ public interface SessionStorageService {
     Session getSessionByRandomToken(String randomToken, String newIP) throws OXException;
 
     /**
-     * Get session identified by given alternative Id
+     * Gets session identified by given alternative Id
      *
      * @param altId The alternative Id
      * @return The session identified by given alternative Id
@@ -224,7 +241,7 @@ public interface SessionStorageService {
     Session getCachedSession(String sessionId) throws OXException;
 
     /**
-     * Change password in session with given session Id
+     * Changes password in session with given session Id
      *
      * @param sessionId The session Id
      * @param newPassword The new password
@@ -260,7 +277,7 @@ public interface SessionStorageService {
     void setHash(String sessionId, String hash) throws OXException;
 
     /**
-     * Check authId for duplicates
+     * Checks authId for duplicates
      *
      * @param login Login name to check
      * @param authId AuthId to check
@@ -269,7 +286,7 @@ public interface SessionStorageService {
     void checkAuthId(String login, String authId) throws OXException;
 
     /**
-     * Clean up session storage
+     * Cleans up session storage
      *
      * @throws OXException On error while clearing
      */

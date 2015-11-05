@@ -313,4 +313,16 @@ public class TestSessionStorageService implements SessionStorageService {
         return null;
     }
 
+    @Override
+    public Session[] removeLocalUserSessions(int userId, int contextId) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public void removeLocalContextSessions(int contextId) throws OXException {
+        // TODO Auto-generated method stub
+
+    }
+
 }

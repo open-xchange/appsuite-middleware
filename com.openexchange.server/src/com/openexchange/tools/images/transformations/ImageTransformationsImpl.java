@@ -57,7 +57,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,13 +66,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+import java.util.Map;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import org.apache.commons.io.FileUtils;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
@@ -81,18 +79,20 @@ import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.filemanagement.ManagedFile;
-import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.java.Streams;
-import com.openexchange.java.util.UUIDs;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.images.Constants;
+import com.openexchange.tools.images.ImageTransformationReloadable;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.images.impl.ImageInformation;
+import com.openexchange.tools.images.osgi.Services;
+import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
@@ -106,6 +106,85 @@ import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 public class ImageTransformationsImpl implements ImageTransformations {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationsImpl.class);
+
+    private static volatile Integer waitTimeoutSeconds;
+    static int waitTimeoutSeconds() {
+        Integer tmp = waitTimeoutSeconds;
+        if (null == tmp) {
+            synchronized (ImageTransformationsTask.class) {
+                tmp = waitTimeoutSeconds;
+                if (null == tmp) {
+                    int defaultValue = 10;
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Integer.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.waitTimeoutSeconds", defaultValue));
+                    waitTimeoutSeconds = tmp;
+                }
+            }
+        }
+        return tmp.intValue();
+    }
+
+    private static volatile Long maxSize;
+    static long maxSize() {
+        Long tmp = maxSize;
+        if (null == tmp) {
+            synchronized (ImageTransformationsTask.class) {
+                tmp = maxSize;
+                if (null == tmp) {
+                    int defaultValue = 5242880; // 5 MB
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxSize", defaultValue));
+                    maxSize = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    private static volatile Long maxResolution;
+    static long maxResolution() {
+        Long tmp = maxResolution;
+        if (null == tmp) {
+            synchronized (ImageTransformationsTask.class) {
+                tmp = maxResolution;
+                if (null == tmp) {
+                    int defaultValue = 12087962; // 4064 x 2704 (11.1 megapixels) + 10%
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxResolution", defaultValue));
+                    maxResolution = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    static {
+        ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
+
+            @Override
+            public void reloadConfiguration(ConfigurationService configService) {
+                waitTimeoutSeconds = null;
+                maxSize = null;
+                maxResolution = null;
+            }
+
+            @Override
+            public Map<String, String[]> getConfigFileNames() {
+                return null;
+            }
+        });
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
 
     private final TransformationContext transformationContext;
     private final InputStream sourceImageStream;
@@ -260,10 +339,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @throws IOException
      */
     private BufferedImage getSourceImage(String formatName) throws IOException {
-        if (null == this.sourceImage && null != this.sourceImageStream) {
-            this.sourceImage = needsMetadata(formatName) ? readAndExtractMetadata(sourceImageStream, formatName) : read(
-                sourceImageStream,
-                formatName);
+        if (null == sourceImage && null != sourceImageStream) {
+            long maxSize = maxSize();
+            long maxResolution = maxResolution();
+            sourceImage = needsMetadata(formatName, maxSize, maxResolution) ? readAndExtractMetadata(sourceImageStream, formatName, maxSize, maxResolution) : read(sourceImageStream, formatName);
         }
         return sourceImage;
     }
@@ -272,9 +351,15 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * Gets a value indicating whether additional metadata is required for one of the transformations or not.
      *
      * @param formatName The format to use, e.g. "jpeg" or "tiff"
+     * @param maxSize The max. size for an image
+     * @param maxResolution The max. resolution for an image
      * @return <code>true</code>, if metadata is needed, <code>false</code>, otherwise
      */
-    private boolean needsMetadata(String formatName) {
+    private boolean needsMetadata(String formatName, long maxSize, long maxResolution) {
+        if (maxSize > 0 || maxResolution > 0) {
+            // Limitations specified, thus meta-data is needed
+            return true;
+        }
         if (null == formatName || 0 == formatName.length()) {
             return false;
         }
@@ -429,57 +514,51 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     /**
-     * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract metadata information.
+     * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract meta-data information.
      *
      * @param inputStream The stream to read the image from
      * @param formatName The format name
+     * @param maxSize The max. size for an image or less than/equal to 0 (zero) for no size limitation
+     * @param maxResolution The max. resolution for an image or less than/equal to 0 (zero) for no resolution limitation
      * @return The buffered image
      * @throws IOException
      */
-    private BufferedImage readAndExtractMetadata(InputStream inputStream, String formatName) throws IOException {
-        ManagedFile managedFile = null;
+    private BufferedImage readAndExtractMetadata(InputStream inputStream, String formatName, long maxSize, long maxResolution) throws IOException {
+        ThresholdFileHolder sink = null;
         try {
-            ManagedFileManagement mfm = ServerServiceRegistry.getInstance().getService(ManagedFileManagement.class);
-            managedFile = mfm.createManagedFile(inputStream);
+            sink = new ThresholdFileHolder();
+            sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, "Image transformation denied. Size is too big.") : inputStream);
+
             try {
-                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(managedFile.getInputStream(), 65536), false);
+                metadata = ImageMetadataReader.readMetadata(new BufferedInputStream(sink.getStream(), 65536), false);
             } catch (ImageProcessingException e) {
-                LOG.warn("error getting metadata for {}", formatName, e);
+                LOG.debug("error getting metadata for {}", formatName, e);
             }
-            if (LOG.isTraceEnabled()) {
-                return traceImageIORead(managedFile, formatName);
+
+            if (maxResolution > 0) {
+                ImageInformation imageInformation = getImageInformation(metadata);
+                if (null != imageInformation && (imageInformation.height * imageInformation.width) > maxResolution) {
+                    throw new IOException("Image transformation denied. Resolution is too high.");
+                }
             }
-            return ImageIO.read(managedFile.getInputStream());
+
+            File tempFile = sink.getTempFile();
+            if (null == tempFile) {
+                // Everything held in memory - don't care
+                return ImageIO.read(sink.getStream());
+            }
+
+            // Read from file
+            BufferedImage bufferedImage = ImageIO.read(tempFile);
+            sink = null; // Avoid preliminary closing in 'finally' clause
+            return bufferedImage;
         } catch (OXException e) {
             throw new IOException("error accessing managed file", e);
         } catch (IllegalArgumentException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
         } finally {
-            if (managedFile != null) {
-                try {
-                    managedFile.delete();
-                } catch (final Exception x) {
-                    // Ignore
-                }
-            }
-        }
-    }
-
-    private BufferedImage traceImageIORead(ManagedFile manageFile, String formatName) throws IOException, OXException {
-        FileOutputStream fos = null;
-        final StringBuilder sb = new StringBuilder(128);
-        final UUID randomUUID = UUID.randomUUID();
-        final File f = new File(sb.append(FileUtils.getTempDirectoryPath()).append(File.separator).append(
-            UUIDs.getUnformattedString(randomUUID)).append("_TRACE.").append(formatName).toString());
-        try {
-            fos = new FileOutputStream(f);
-            org.apache.commons.io.IOUtils.copy(manageFile.getInputStream(), fos);
-            BufferedImage bi = ImageIO.read(manageFile.getInputStream());
-            return bi;
-        } finally {
-            f.delete();
-            Streams.close(fos);
+            Streams.close(sink);
         }
     }
 
