@@ -49,15 +49,48 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingSelection}
+ * {@link DefaultOnboardingSelection} - The default {@code OnboardingPossibility} implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingSelection extends Entity {
+public class DefaultOnboardingSelection implements OnboardingSelection {
 
-    // No additional methods
+    private final String id;
+    private final String displayNameProperty;
+    private final String imageNameProperty;
+
+    /**
+     * Initializes a new {@link DefaultOnboardingSelection}.
+     *
+     * @param id The identifier
+     * @param displayNameProperty The property name for the display name
+     * @param imageNameProperty The property name for the icon image
+     */
+    public DefaultOnboardingSelection(String id, String displayNameProperty, String imageNameProperty) {
+        super();
+        this.id = id;
+        this.displayNameProperty = displayNameProperty;
+        this.imageNameProperty = imageNameProperty;
+    }
+
+    @Override
+    public String getDisplayName(Session session) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(displayNameProperty, session);
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return OnboardingUtility.loadIconImageFromProperty(imageNameProperty, session);
+    }
 
 }

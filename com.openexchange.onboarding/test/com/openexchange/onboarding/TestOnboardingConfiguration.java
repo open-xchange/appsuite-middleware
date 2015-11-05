@@ -105,12 +105,17 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public String getDescription(OnboardingSelection selection, Session session) throws OXException {
+    public List<OnboardingSelection> getPossibilities(String entityId, Session session) throws OXException {
         return null;
     }
 
     @Override
-    public Result execute(OnboardingSelection selection, Session session) throws OXException {
+    public String getDescription(OnboardingRequest selection, Session session) throws OXException {
+        return null;
+    }
+
+    @Override
+    public Result execute(OnboardingRequest selection, Session session) throws OXException {
         return null;
     }
 

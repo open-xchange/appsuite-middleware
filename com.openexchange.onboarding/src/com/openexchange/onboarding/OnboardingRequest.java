@@ -51,13 +51,32 @@ package com.openexchange.onboarding;
 
 
 /**
- * {@link OnboardingSelection}
+ * {@link OnboardingRequest} - Represents an on-boarding request from a certain selection a user has chosen from configuration tree.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingSelection extends Entity {
+public interface OnboardingRequest {
 
-    // No additional methods
+    /**
+     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
+     *
+     * @return The on-boarding configuration identifier
+     */
+    String getConfigurationId();
+
+    /**
+     * Gets the identifier of the selection for the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav.profile.download"</code>
+     *
+     * @return The identifier of the selection
+     */
+    String getSelectionId();
+
+    /**
+     * Gets the client information
+     *
+     * @return The client information
+     */
+    ClientInfo getClientInfo();
 
 }

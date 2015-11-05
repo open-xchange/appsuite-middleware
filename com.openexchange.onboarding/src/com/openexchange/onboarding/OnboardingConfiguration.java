@@ -88,6 +88,8 @@ public interface OnboardingConfiguration extends Entity {
      */
     List<EntityPath> getEntityPaths(Session session) throws OXException;
 
+    List<OnboardingSelection> getPossibilities(String entityId, Session session) throws OXException;
+
     /**
      * Gets the description for this on-boarding configuration.
      *
@@ -96,7 +98,7 @@ public interface OnboardingConfiguration extends Entity {
      * @return The description
      * @throws OXException If description cannot be returned
      */
-    String getDescription(OnboardingSelection selection, Session session) throws OXException;
+    String getDescription(OnboardingRequest selection, Session session) throws OXException;
 
     /**
      * Executes this on-boarding configuration.
@@ -106,6 +108,6 @@ public interface OnboardingConfiguration extends Entity {
      * @return The result
      * @throws OXException If execution fails
      */
-    Result execute(OnboardingSelection selection, Session session) throws OXException;
+    Result execute(OnboardingRequest selection, Session session) throws OXException;
 
 }

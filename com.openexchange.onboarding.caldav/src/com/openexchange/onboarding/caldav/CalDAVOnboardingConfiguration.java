@@ -63,6 +63,7 @@ import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
+import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
@@ -127,14 +128,14 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
         {
-            List<Entity> path = new ArrayList<Entity>(6);
+            List<Entity> path = new ArrayList<Entity>(4);
             path.add(new DefaultEntity("apple.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
             path.add(new DefaultEntity("apple.ios.ipad", "com.openexchange.onboarding.ipad.displayName", "com.openexchange.onboarding.ipad.iconName"));
             path.add(new DefaultEntity("apple.ios.ipad.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
             paths.add(new DefaultEntityPath(path));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(6);
+            List<Entity> path = new ArrayList<Entity>(4);
             path.add(new DefaultEntity("apple.ios", "com.openexchange.onboarding.ios.displayName", "com.openexchange.onboarding.ios.iconName"));
             path.add(new DefaultEntity("apple.ios.iphone", "com.openexchange.onboarding.iphone.displayName", "com.openexchange.onboarding.iphone.iconName"));
             path.add(new DefaultEntity("apple.ios.iphone.caldav", "com.openexchange.onboarding.caldav.displayName", "com.openexchange.onboarding.caldav.iconName"));
@@ -144,9 +145,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public String getDescription(OnboardingSelection selection, Session session) throws OXException {
-        String entityId = selection.getLastPathEntityId();
-        if (null == entityId) {
+    public List<OnboardingSelection> getPossibilities(String entityId, Session session) throws OXException {
+        if ("apple.ios.ipad.caldav".equals(entityId)) {
+            // Via download or eMail
+
+        } else if ("apple.ios.iphone.caldav".equals(entityId)) {
+            // Via download, SMS or eMail
+
+        }
+
+        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityId);
+    }
+
+    @Override
+    public String getDescription(OnboardingRequest selection, Session session) throws OXException {
+        String selectionId = selection.getSelectionId();
+        if (null == selectionId) {
             throw OnboardingExceptionCodes.ENTITY_ID_MISSING.create();
         }
 
@@ -160,8 +174,8 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute(OnboardingSelection selection, Session session) throws OXException {
-        String entityId = selection.getLastPathEntityId();
+    public Result execute(OnboardingRequest selection, Session session) throws OXException {
+        String entityId = selection.getSelectionId();
         if (null == entityId) {
             throw OnboardingExceptionCodes.ENTITY_ID_MISSING.create();
         }
