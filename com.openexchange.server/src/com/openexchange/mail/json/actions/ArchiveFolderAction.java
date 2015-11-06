@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -107,7 +108,7 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             /*
