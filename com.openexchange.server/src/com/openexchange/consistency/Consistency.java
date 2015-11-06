@@ -662,12 +662,6 @@ public abstract class Consistency implements ConsistencyMBean {
             }
             LOG.info("Found {} infostore filepaths", dbfileset.size());
 
-            // Build the difference set of the database set, so that the final
-            // dbfileset contains all the members that aren't in the filestoreset
-            if (diffset(dbfileset, filestoreset, "database list", "filestore list")) {
-                // implement the solver for dbfiles here
-                dbSolver.solve(entity, dbfileset);
-            }
             if (isContext) {
                 // Get the referenced ones
                 SortedSet<String> attachmentset = attach.getAttachmentFileStoreLocationsperContext(entity.getContext());
@@ -689,6 +683,13 @@ public abstract class Consistency implements ConsistencyMBean {
                 joineddbfileset.addAll(vcardset);
 
                 LOG.info("Found {} filestore ids in total. There are {} files in the filespool. A difference of {}", joineddbfileset.size(), filestoreset.size(), Math.abs(joineddbfileset.size() - filestoreset.size()));
+
+                // Build the difference set of the database set, so that the final
+                // dbfileset contains all the members that aren't in the filestoreset
+                if (diffset(dbfileset, filestoreset, "database list", "filestore list")) {
+                    // implement the solver for dbfiles here
+                    dbSolver.solve(entity, dbfileset);
+                }
 
                 // Build the difference set of the attachment database set, so that the
                 // final attachmentset contains all the members that aren't in the
