@@ -183,13 +183,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
         });
     }
 
-    static final IOExceptionCreator IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR = new IOExceptionCreator() {
+    private static final IOExceptionCreator IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR = new IOExceptionCreator() {
 
         @Override
-        public IOException createIOException(long max) {
+        public IOException createIOException(long total, long max) {
+            if (total > 0 && max > 0) {
+                return new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Size is too big. (current=").append(total).append(", max=").append(max).append(')').toString());
+            }
             return new ImageTransformationDeniedIOException("Image transformation denied. Size is too big.");
         }
     };
+
+    private static IOException createResolutionExceededIOException(long maxResolution, int resolution) {
+        return new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
+    }
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -589,8 +596,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
             if (maxResolution > 0) {
                 ImageInformation imageInformation = getImageInformation(metadata);
-                if (null != imageInformation && (imageInformation.height * imageInformation.width) > maxResolution) {
-                    throw new ImageTransformationDeniedIOException("Image transformation denied. Resolution is too high.");
+                if (null != imageInformation) {
+                    int resolution = imageInformation.height * imageInformation.width;
+                    if (resolution > maxResolution) {
+                        throw createResolutionExceededIOException(maxResolution, resolution);
+                    }
                 }
             }
 
@@ -631,7 +641,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
         try {
             if (imageFile.getLength() > maxSize) {
-                throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(maxSize);
+                throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
             }
 
             try {
@@ -642,8 +652,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
             if (maxResolution > 0) {
                 ImageInformation imageInformation = getImageInformation(metadata);
-                if (null != imageInformation && (imageInformation.height * imageInformation.width) > maxResolution) {
-                    throw new ImageTransformationDeniedIOException("Image transformation denied. Resolution is too high.");
+                if (null != imageInformation) {
+                    int resolution = imageInformation.height * imageInformation.width;
+                    if (resolution > maxResolution) {
+                        throw createResolutionExceededIOException(maxResolution, resolution);
+                    }
                 }
             }
 
@@ -654,8 +667,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
 
             // Read from file
-            BufferedImage bufferedImage = imageIORead(tempFile, signaler);
-            return bufferedImage;
+            return imageIORead(tempFile, signaler);
         } catch (IllegalArgumentException e) {
             LOG.debug("error reading image from stream for {}", formatName, e);
             return null;
