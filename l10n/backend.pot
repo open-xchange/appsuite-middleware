@@ -4787,6 +4787,15 @@ msgid ""
 "(%2$s) already exists."
 msgstr ""
 
+#. *
+#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
+msgid ""
+"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"exists."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
 msgstr ""
