@@ -72,6 +72,7 @@ import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -249,10 +250,26 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         return imapServerInfo;
     }
 
-    private void openFolder(final int desiredMode, final IMAPFolder imapFolder) throws MessagingException {
+    private void openFolder(int desiredMode, IMAPFolder imapFolder) throws MessagingException {
+        openFolder(desiredMode, imapFolder, true);
+    }
+
+    private void openFolder(int desiredMode, IMAPFolder imapFolder, boolean recoverFromServerbug) throws MessagingException {
         try {
             imapFolder.open(desiredMode);
         } catch (final MessagingException e) {
+            if (recoverFromServerbug) {
+                Exception exception = e.getNextException();
+                if ((exception instanceof com.sun.mail.iap.CommandFailedException) && (imapServerInfo != null && imapServerInfo.getGreeting() != null && Strings.asciiLowerCase(imapServerInfo.getGreeting()).indexOf("dovecot") >= 0)) {
+                    String message = Strings.asciiLowerCase(exception.getMessage());
+                    if ((null != message) && (message.indexOf("[serverbug]") >= 0) && (message.indexOf("reopen the virtual mailbox") >= 0)) {
+                        // Retry to open the virtual mailbox
+                        openFolder(desiredMode, imapFolder, false);
+                        return;
+                    }
+                }
+            }
+
             if (toUpperCase(e.getMessage()).indexOf("[INUSE]") >= 0) {
                 FAIL_FAST.put(new StringBuilder(imapFolder.getFullName()).append('@').append(imapStore.toString()).toString(), new FailFastError(e));
             }
