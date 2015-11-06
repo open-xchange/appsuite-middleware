@@ -234,6 +234,30 @@ public class CompositionSpace {
     }
 
     /**
+     * Checks if specified mail path is already referenced by either as <code>replyFor</code> or <code>forwardsFor</code>.
+     *
+     * @param toCheck The mail path to check
+     * @return <code>true</code> if mail path is referenced by <code>replyFor</code>/<code>forwardsFor</code>; otherwise <code>false</code>
+     */
+    public boolean isMarkedAsReplyOrForward(MailPath toCheck) {
+        if (null == toCheck) {
+            return false;
+        }
+
+        if (toCheck.equals(this.replyFor)) {
+            return true;
+        }
+
+        for (MailPath forwardFor : forwardsFor) {
+            if (toCheck.equals(forwardFor)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Gets the <code>draftEditFor</code> references
      *
      * @return The <code>draftEditFor</code> references
