@@ -49,11 +49,13 @@
 
 package com.openexchange.http.grizzly.osgi;
 
+import java.lang.reflect.Field;
 import java.util.concurrent.ExecutorService;
 import javax.servlet.Filter;
 import org.glassfish.grizzly.comet.CometAddOn;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.OXHttpServer;
+import org.glassfish.grizzly.http.server.OXTCPNIOTransportFilter;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransport;
 import org.glassfish.grizzly.nio.transport.TCPNIOTransportBuilder;
@@ -75,6 +77,7 @@ import com.openexchange.http.grizzly.service.websocket.WebApplicationService;
 import com.openexchange.http.grizzly.service.websocket.impl.WebApplicationServiceImpl;
 import com.openexchange.http.grizzly.threadpool.GrizzlOXExecutorService;
 import com.openexchange.http.requestwatcher.osgi.services.RequestWatcherService;
+import com.openexchange.java.Reflections;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.ThreadControlService;
@@ -132,7 +135,7 @@ public class GrizzlyActivator extends HousekeepingActivator {
 
             // Set the transport
             {
-                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport();
+                TCPNIOTransport configuredTcpNioTransport = buildTcpNioTransport(getService(ConfigurationService.class));
                 networkListener.setTransport(configuredTcpNioTransport);
             }
 
@@ -202,21 +205,48 @@ public class GrizzlyActivator extends HousekeepingActivator {
     }
 
     /**
-     * Build a TCPNIOTransport using {c.o}.threadpool
+     * Builds a TCPNIOTransport using {c.o}.threadpool
      *
-     * @return The configure TCPNIOTransport
-     * @throws OXException If the Transport can't be build
+     * @param configurationService The configuration service to use to read settings for TCP NIO connections
+     * @return The configured <code>TCPNIOTransport</code> instance
+     * @throws OXException If the transport cannot be build
      */
-    private TCPNIOTransport buildTcpNioTransport() throws OXException {
-        final ThreadPoolService threadPoolService = getService(ThreadPoolService.class);
-        if (threadPoolService == null) {
+    private TCPNIOTransport buildTcpNioTransport(ConfigurationService configurationService) throws OXException {
+        if (getService(ThreadPoolService.class) == null) {
             throw GrizzlyExceptionCode.NEEDED_SERVICE_MISSING.create(ThreadPoolService.class.getSimpleName());
         }
-        final TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance().setKeepAlive(true).setTcpNoDelay(true);
-        final TCPNIOTransport transport = builder.build();
-        final ExecutorService executor = GrizzlOXExecutorService.createInstance();
+
+        // Determine settings for TCP NIO connections
+        boolean keepAlive = configurationService.getBoolProperty("com.openexchange.http.grizzly.keepAlive", true);
+        boolean tcpNoDelay = configurationService.getBoolProperty("com.openexchange.http.grizzly.tcpNoDelay", true);
+        int readTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.readTimeoutMillis", OXTCPNIOTransportFilter.DEFAULT_READ_TIMEOUT_MILLIS);
+        int writeTimeoutMillis = configurationService.getIntProperty("com.openexchange.http.grizzly.writeTimeoutMillis", OXTCPNIOTransportFilter.DEFAULT_WRITE_TIMEOUT_MILLIS);
+
+        // Build up the TCPNIOTransport to use
+        TCPNIOTransportBuilder builder = TCPNIOTransportBuilder.newInstance().setKeepAlive(keepAlive).setTcpNoDelay(tcpNoDelay).setClientSocketSoTimeout(readTimeoutMillis);
+        TCPNIOTransport transport = builder.build();
+        setTransportFilterUsingTimeouts(transport, readTimeoutMillis, writeTimeoutMillis);
+
+        // Apply ExecutorService backed by {c.o}.threadpool
+        ExecutorService executor = GrizzlOXExecutorService.createInstance();
         transport.setWorkerThreadPool(executor);
         return transport;
+    }
+
+    private void setTransportFilterUsingTimeouts(TCPNIOTransport transport, long readTimeoutMillis, long writeTimeoutMillis) throws OXException {
+        try {
+            Field defaultTransportFilterField = TCPNIOTransport.class.getDeclaredField("defaultTransportFilter");
+            Reflections.makeModifiable(defaultTransportFilterField);
+            defaultTransportFilterField.set(transport, new OXTCPNIOTransportFilter(transport, readTimeoutMillis, writeTimeoutMillis));
+        } catch (NoSuchFieldException e) {
+            throw new OXException(e);
+        } catch (SecurityException e) {
+            throw new OXException(e);
+        } catch (IllegalArgumentException e) {
+            throw new OXException(e);
+        } catch (IllegalAccessException e) {
+            throw new OXException(e);
+        }
     }
 
 }

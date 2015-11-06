@@ -115,6 +115,8 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
 
     private int imapConnectionTimeout;
 
+    private int fetchTimeout;
+
     private int imapTemporaryDown;
 
     private String imapAuthEnc;
@@ -274,6 +276,18 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         }
 
         {
+            final String fetchTimeoutMillisStr = configuration.getProperty("com.openexchange.imap.fetchTimeoutMillis", "10000").trim();
+            try {
+                fetchTimeout = Integer.parseInt(fetchTimeoutMillisStr);
+                logBuilder.append("\tIMAP FETCH Timeout: ").append(fetchTimeout).append('\n');
+            } catch (final NumberFormatException e) {
+                fetchTimeout = 10000;
+                logBuilder.append("\tIMAP FETCH Timeout: Invalid value \"").append(fetchTimeoutMillisStr).append(
+                    "\". Setting to fallback: ").append(fetchTimeout).append('\n');
+            }
+        }
+
+        {
             final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0").trim();
             try {
                 imapTemporaryDown = Integer.parseInt(imapTempDownStr);
@@ -425,6 +439,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
         supportsACLs = null;
         imapTimeout = 0;
         imapConnectionTimeout = 0;
+        fetchTimeout = 10000;
         imapTemporaryDown = 0;
         imapAuthEnc = null;
         entity2AclImpl = null;
@@ -482,6 +497,17 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
     @Override
     public int getImapConnectionTimeout() {
         return imapConnectionTimeout;
+    }
+
+    /**
+     * Gets the special timeout for FETCH commands.
+     * <p>
+     * Default is 10.000 milliseconds
+     *
+     * @return The special timeout for FETCH commands
+     */
+    public int getFetchTimeout() {
+        return fetchTimeout;
     }
 
     @Override
