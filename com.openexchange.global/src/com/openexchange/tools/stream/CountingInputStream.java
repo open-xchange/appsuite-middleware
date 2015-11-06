@@ -66,16 +66,17 @@ public class CountingInputStream extends FilterInputStream {
         /**
          * Create the appropriate {@code IOException} if specified max. number of bytes has been exceeded.
          *
+         * @param total The optional total size or <code>-1</code> if unknown
          * @param max The max. number of bytes that were exceeded
          * @return The appropriate {@code IOException} instance
          */
-        IOException createIOException(long max);
+        IOException createIOException(long total, long max);
     }
 
     private static final IOExceptionCreator DEFAULT_EXCEPTION_CREATOR = new IOExceptionCreator() {
 
         @Override
-        public IOException createIOException(long max) {
+        public IOException createIOException(long total, long max) {
             return new IOException(new StringBuilder(32).append("Max. byte count of ").append(max).append(" exceeded.").toString());
         }
     };
@@ -112,14 +113,22 @@ public class CountingInputStream extends FilterInputStream {
         this.exceptionCreator = null == exceptionCreator ? DEFAULT_EXCEPTION_CREATOR : exceptionCreator;
     }
 
-    private IOException createIOException(long max) {
-        return exceptionCreator.createIOException(max);
+    private void check(int consumed) throws IOException {
+        long max = this.max;
+        if (max > 0) {
+            if (count.addAndGet(consumed) > max) {
+                // Pass 0 (zero) as total size of the stream is unknown or requires to count the remaining bytes from stream respectively
+                throw exceptionCreator.createIOException(0L, max);
+            }
+        } else {
+            count.addAndGet(consumed);
+        }
     }
 
     /**
-     * Set the byte count back to 0L.
+     * Sets the byte count back to <code>0</code> (zero).
      *
-     * @return The count previous to resetting
+     * @return The previous count prior to resetting
      */
     public long resetByteCount() {
         final long tmp = count.get();
@@ -128,7 +137,9 @@ public class CountingInputStream extends FilterInputStream {
     }
 
     /**
-     * Returns the number of bytes read so far.
+     * Gets the number of bytes read so far.
+     *
+     * @return The number of bytes read so far
      */
     public long getCount() {
         return count.get();
@@ -136,48 +147,45 @@ public class CountingInputStream extends FilterInputStream {
 
     @Override
     public int read() throws IOException {
-        final int result = in.read();
-        final long max = this.max;
-        if (max > 0) {
-            if (count.addAndGet((result >= 0L) ? 1 : 0L) > max) {
-                throw createIOException(max);
-            }
-        } else {
-            count.addAndGet((result >= 0L) ? 1 : 0L);
+        int result = in.read();
+        if (result < 0) {
+            // The end of the stream is reached
+            return result;
         }
+
+        // Consumed 1 more byte from stream
+        check(1);
         return result;
     }
 
     @Override
-    public int read(final byte[] b) throws IOException {
-        final int result = super.read(b);
-        final long max = this.max;
-        if (max > 0) {
-            if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-                throw createIOException(max);
-            }
-        } else {
-            count.addAndGet((result >= 0L) ? result : 0L);
+    public int read(byte[] b) throws IOException {
+        int result = super.read(b);
+        if (result < 0) {
+            // There is no more data because the end of the stream has been reached.
+            return result;
         }
+
+        // Consumed more bytes from stream
+        check(result);
         return result;
     }
 
     @Override
-    public int read(final byte[] b, final int off, final int len) throws IOException {
-        final int result = in.read(b, off, len);
-        final long max = this.max;
-        if (max > 0) {
-            if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-                throw createIOException(max);
-            }
-        } else {
-            count.addAndGet((result >= 0L) ? result : 0L);
+    public int read(byte[] b, int off, int len) throws IOException {
+        int result = in.read(b, off, len);
+        if (result < 0) {
+            // There is no more data because the end of the stream has been reached.
+            return result;
         }
+
+        // Consumed more bytes from stream
+        check(result);
         return result;
     }
 
     @Override
-    public long skip(final long n) throws IOException {
+    public long skip(long n) throws IOException {
         final long result = in.skip(n);
         final long max = this.max;
         if (max > 0) {
@@ -188,7 +196,7 @@ public class CountingInputStream extends FilterInputStream {
     }
 
     @Override
-    public void mark(final int readlimit) {
+    public void mark(int readlimit) {
         /*
          * It's okay to mark even if mark isn't supported, as reset won't work
          */
@@ -201,7 +209,8 @@ public class CountingInputStream extends FilterInputStream {
         if (!in.markSupported()) {
             throw new IOException("Mark not supported");
         }
-        final long mark = this.mark;
+
+        long mark = this.mark;
         if (mark == -1) {
             throw new IOException("Mark not set");
         }
