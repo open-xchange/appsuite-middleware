@@ -63,9 +63,11 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import com.openexchange.database.IncorrectStringSQLException;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.calendar.OXCalendarExceptionCodes;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.search.Order;
@@ -305,6 +307,9 @@ public class RdbTaskStorage extends TaskStorage {
 
     @Override
     public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, int[] columns) throws OXException {
+        if (type == StorageType.ACTIVE) {
+            handleUID(ctx, con, task);
+        }
         final StringBuilder insert = new StringBuilder();
         insert.append("INSERT INTO ");
         insert.append(SQL.TASK_TABLES.get(type));
@@ -342,6 +347,35 @@ public class RdbTaskStorage extends TaskStorage {
             closeSQLStuff(null, stmt);
         }
     }
+
+    private void handleUID(Context ctx, Connection con, Task task) throws OXException {
+        if (task.containsUid()) {
+            if (checkUid(ctx, con, task.getUid())) {
+                throw OXCalendarExceptionCodes.TASK_UID_ALREDY_EXISTS.create(task.getTitle(), task.getUid());
+            }
+        } else {
+            task.setUid(UUID.randomUUID().toString());
+        }
+    }
+
+    private static boolean checkUid(Context ctx, Connection con, String uid) throws OXException {
+        StringBuilder select = new StringBuilder("Select id from task where uid=? and cid=?");
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try {
+            stmt = con.prepareStatement(select.toString());
+            stmt.setString(1, uid);
+            stmt.setInt(2, ctx.getContextId());
+            rs = stmt.executeQuery();
+            return rs.next();
+        } catch (SQLException e) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);
+        } finally {
+            DBUtils.closeResources(rs, stmt, null, true, ctx);
+        }
+    }
+
 
     /**
      * {@inheritDoc}
@@ -638,3 +672,4 @@ public class RdbTaskStorage extends TaskStorage {
         return retval;
     }
 }
+

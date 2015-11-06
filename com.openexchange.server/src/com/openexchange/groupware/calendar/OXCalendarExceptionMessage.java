@@ -217,4 +217,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String UID_ALREDY_EXISTS_MSG = "Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.";
 
+    /**
+     * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+     */
+    public static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.";
+
 }
