@@ -487,7 +487,9 @@ public final class CSSMatcher {
             }
             cssElemsBuffer.setLength(0);
             // Check block part
-            cssElemsBuffer.append(css.substring(end, index - 1));
+            if (end < length && end < index) {
+                cssElemsBuffer.append(css.substring(end, index - 1));
+            }
             modified |= checkCSS(cssElemsBuffer, styleMap, cssPrefix, removeIfAbsent, true);
             // Check selector part
             cssElemsBuffer.insert(0, prefixBlock(css.substring(start, end - 1), cssPrefix)).append('}').append('\n'); // Surround with block definition
