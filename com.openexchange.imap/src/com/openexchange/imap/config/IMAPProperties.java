@@ -275,7 +275,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
             }
         }
 
-        {
+        /*{
             final String fetchTimeoutMillisStr = configuration.getProperty("com.openexchange.imap.fetchTimeoutMillis", "10000").trim();
             try {
                 fetchTimeout = Integer.parseInt(fetchTimeoutMillisStr);
@@ -285,7 +285,7 @@ public final class IMAPProperties extends AbstractProtocolProperties implements 
                 logBuilder.append("\tIMAP FETCH Timeout: Invalid value \"").append(fetchTimeoutMillisStr).append(
                     "\". Setting to fallback: ").append(fetchTimeout).append('\n');
             }
-        }
+        }*/
 
         {
             final String imapTempDownStr = configuration.getProperty("com.openexchange.imap.imapTemporaryDown", "0").trim();
