@@ -3195,7 +3195,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if (users == null && cdao.getFolderMoveAction() != CalendarOperation.NO_MOVE_ACTION) {
             users = edao.getUsers();
-            CalendarOperation.fillUserParticipants(cdao);
+            CalendarOperation.fillUserParticipants(cdao, edao);
         }
 
         final Participant[] old_participants = edao.getParticipants();

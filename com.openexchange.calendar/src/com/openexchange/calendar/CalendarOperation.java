@@ -86,6 +86,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
@@ -988,7 +989,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setTimezone(timezone);
         }
         simpleDataCheck(cdao, edao, uid);
-        fillUserParticipants(cdao);
+        fillUserParticipants(cdao, edao);
         if (isInsert) {
             recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         }
@@ -1418,7 +1419,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         this.oids = oids;
     }
 
-    public static final void fillUserParticipants(final CalendarDataObject cdao) throws OXException {
+    public static final void fillUserParticipants(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         final Participant participants[] = cdao.getParticipants();
         final UserParticipant[] users = cdao.getUsers();
         if (participants == null) {
@@ -1435,7 +1436,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 final int m[] = g.getMember();
                 for (int element : m) {
                     final UserParticipant up = new UserParticipant(element);
-                    if (!userparticipants.containsUserParticipant(up)) {
+                    if (!userparticipants.containsUserParticipant(up) && shouldAdd((GroupParticipant) p, up, edao)) {
                         userparticipants.add(up, users);
                     }
                 }
@@ -1452,6 +1453,29 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (userparticipants != null) {
             cdao.setUsers(userparticipants.getUsers());
         }
+    }
+    
+    private static boolean shouldAdd(GroupParticipant gp, UserParticipant up, CalendarDataObject edao) {
+        if (edao == null) {
+            return true;
+        }
+        boolean containsGroup = false;
+        boolean containsUser = false;
+        for (Participant p : edao.getParticipants()) {
+            if (p.getType() == Participant.GROUP && p.getIdentifier() == gp.getIdentifier()) {
+                containsGroup = true;
+            }
+            if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
+                containsUser = true;
+            }
+        }
+        if (containsUser) {
+            return true;
+        }
+        if (containsGroup && !containsUser) {
+            return false;
+        }
+        return true;
     }
 
     static final Set<Participant> getNewParticipants(final Participant np[], final Participant op[]) {
