@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.update.service;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
 import com.openexchange.drive.update.files.UpdateFilesProvider;
@@ -128,10 +127,37 @@ public interface DriveUpdateService {
      */
     public long getFileSize(String fileName, String branding) throws OXException;
 
+    /**
+     * Initialize the DriveUpdateService
+     * 
+     * @param fileProvider
+     * @throws OXException
+     */
     public void init(UpdateFilesProvider fileProvider) throws OXException;
 
+    /**
+     * Retrieves the filename of the executable file for the given brand
+     * 
+     * @param branding
+     * @return
+     * @throws OXException
+     */
     public String getExeFileName(String branding) throws OXException;
 
+    /**
+     * Retrieves the filename of the windows installer file for the given brand
+     * 
+     * @param branding
+     * @return
+     * @throws OXException
+     */
     public String getMsiFileName(String branding) throws OXException;
+
+    /**
+     * Retrieves the system wide default branding name
+     * 
+     * @return
+     */
+    public String getDefaultBranding();
 
 }

@@ -174,4 +174,10 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         return provider.getIcon(branding);
     }
 
+    @Override
+    public String getDefaultBranding() {
+        ConfigurationService conf = Services.getService(ConfigurationService.class);
+        return conf.getProperty(Constants.BRANDING_FILE, "generic");
+    }
+
 }
