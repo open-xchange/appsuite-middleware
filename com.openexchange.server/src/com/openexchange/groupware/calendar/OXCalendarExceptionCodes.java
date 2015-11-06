@@ -473,7 +473,11 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
      */
-    UID_ALREDY_EXISTS(OXCalendarExceptionCodes.UID_ALREDY_EXISTS_MSG, OXCalendarExceptionMessage.UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),
+    APPOINTMENT_UID_ALREDY_EXISTS(OXCalendarExceptionCodes.APPOINTMENT_UID_ALREDY_EXISTS_MSG, OXCalendarExceptionMessage.UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),
+    /**
+     * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+     */
+    TASK_UID_ALREDY_EXISTS(OXCalendarExceptionCodes.TASK_UID_ALREDY_EXISTS_MSG, OXCalendarExceptionMessage.TASK_UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),
     /**
      * SQL Problem.
      */
@@ -711,7 +715,9 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
 
     private static final String CHANGE_EXCEPTION_TO_RECURRENCE_MSG = "Changing an exception into a series is not supported.";
 
-    private static final String UID_ALREDY_EXISTS_MSG = "Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.";
+    private static final String APPOINTMENT_UID_ALREDY_EXISTS_MSG = "Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.";
+
+    private static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.";
 
     private static final String SQL_ERROR_MSG = "SQL Problem.";
 
