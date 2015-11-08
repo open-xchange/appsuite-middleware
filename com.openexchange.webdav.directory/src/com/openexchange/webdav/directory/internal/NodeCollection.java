@@ -53,8 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
-import com.openexchange.webdav.acl.mixins.PrincipalURL;
+import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -81,7 +80,7 @@ public class NodeCollection extends AbstractCollection {
         this.node = node;
         this.factory = factory;
         this.url = url;
-        includeProperties(new CurrentUserPrincipal(factory.getSessionHolder()), new PrincipalURL(factory.getSessionHolder().getUser()));
+        includeProperties(new CurrentUserPrincipal(factory.getSessionHolder()));
     }
 
     @Override

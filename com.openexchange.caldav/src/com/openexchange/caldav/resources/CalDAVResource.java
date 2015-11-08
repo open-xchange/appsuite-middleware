@@ -50,16 +50,22 @@
 package com.openexchange.caldav.resources;
 
 import java.io.InputStream;
+import java.util.Date;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.Tools;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.dav.resources.CommonResource;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -73,12 +79,14 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public abstract class CalDAVResource<T extends CalendarObject> extends CommonResource<T> {
 
     public static final String EXTENSION_ICS = ".ics";
-    public static final String CONTENT_TYPE = "text/calendar";
 
-    private byte[] iCalFile = null;
-    private TimeZone timeZone = null;
+    private static final String CONTENT_TYPE = "text/calendar; charset=UTF-8";
+
     protected final GroupwareCaldavFactory factory;
+
     protected CalDAVFolderCollection<T> parent;
+    private byte[] iCalFile;
+    private TimeZone timeZone;
 
     public CalDAVResource(GroupwareCaldavFactory factory, CalDAVFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
         super(parent, object, url);
@@ -168,20 +176,47 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
             }
             return property;
         }
+        if (CaldavProtocol.CALENDARSERVER_NS.getURI().equals(namespace) && ("created-by".equals(name) || "updated-by".equals(name))) {
+            WebdavProperty property = new WebdavProperty(namespace, name);
+            if (null != object) {
+                int entityID;
+                Date timestamp;
+                if ("created-by".equals(name)) {
+                    entityID = object.getCreatedBy();
+                    timestamp = object.getCreationDate();
+                } else {
+                    entityID = object.getModifiedBy();
+                    timestamp = object.getLastModified();
+                }
+                try {
+                    User user = factory.getService(UserService.class).getUser(entityID, factory.getContext());
+                    property.setXML(true);
+                    property.setValue(new StringBuilder()
+                        .append("<CS:first-name>").append(user.getGivenName()).append("</CS:first-name>")
+                        .append("<CS:last-name>").append(user.getSurname()).append("</CS:last-name>")
+                        .append("<CS:dtstamp>").append(Tools.formatAsUTC(timestamp)).append("</CS:dtstamp>")
+                        .append("<D:href>mailto:").append(user.getMail()).append("</D:href>")
+                    .toString());
+                } catch (OXException e) {
+                    LOG.warn("error resolving user '{}'", entityID, e);
+                }
+            }
+            return property;
+        }
         return null;
     }
 
     @Override
     public CalDAVResource<T> move(WebdavPath dest, boolean noroot, boolean overwrite) throws WebdavProtocolException {
         WebdavResource destinationResource = factory.getState().resolveResource(dest);
-        CommonCollection destinationCollection = destinationResource.isCollection() ?
-            (CommonCollection)destinationResource : factory.getState().resolveCollection(dest.parent());
+        DAVCollection destinationCollection = destinationResource.isCollection() ?
+            (DAVCollection)destinationResource : factory.getState().resolveCollection(dest.parent());
         if (false == parent.getClass().isInstance(destinationCollection)) {
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
         CalDAVFolderCollection<T> targetCollection = null;
         try {
-            targetCollection = (CalDAVFolderCollection<T>)destinationCollection;
+            targetCollection = (CalDAVFolderCollection<T>) destinationCollection;
         } catch (ClassCastException e) {
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         }

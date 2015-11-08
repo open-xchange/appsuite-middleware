@@ -54,6 +54,8 @@ import java.util.Map;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.action.CardDAVMaxUploadSizeAction;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVPerformer;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.WebdavAction;
@@ -75,15 +77,13 @@ import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
-import com.openexchange.webdav.protocol.helpers.AbstractPerformer;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * The {@link CarddavPerformer} contains all the wiring for Carddav actions. This is the central entry point for Carddav requests.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CarddavPerformer extends AbstractPerformer {
+public class CarddavPerformer extends DAVPerformer {
 
     private static final Protocol PROTOCOL = new CarddavProtocol();
 
@@ -97,7 +97,7 @@ public class CarddavPerformer extends AbstractPerformer {
      */
     public CarddavPerformer(ServiceLookup services) {
         super();
-        this.factory = new GroupwareCarddavFactory(services, this);
+        this.factory = new GroupwareCarddavFactory(PROTOCOL, services, this);
         this.actions = initActions();
     }
 
@@ -129,7 +129,7 @@ public class CarddavPerformer extends AbstractPerformer {
     }
 
     @Override
-    protected AbstractWebdavFactory getFactory() {
+    protected DAVFactory getFactory() {
         return factory;
     }
 

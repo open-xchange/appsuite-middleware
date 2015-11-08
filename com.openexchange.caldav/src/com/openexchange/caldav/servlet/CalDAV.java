@@ -54,7 +54,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
-import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.Tools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -186,7 +185,7 @@ public class CalDAV extends OXServlet {
 
     private boolean checkPermission(HttpServletRequest req, ServerSession session) {
         try {
-            final ComposedConfigProperty<Boolean> property = CalDAVServiceLookup.getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            final ComposedConfigProperty<Boolean> property = performer.getFactory().getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
             if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
                 OAuthGrant oAuthGrant = (OAuthGrant) req.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
                 if (oAuthGrant == null) {

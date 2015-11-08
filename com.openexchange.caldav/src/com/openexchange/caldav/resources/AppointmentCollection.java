@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
@@ -64,7 +63,6 @@ import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.calendar.CalendarSql;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.search.Order;
@@ -84,10 +82,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         Appointment.RECURRENCE_ID, Appointment.CREATION_DATE, Appointment.CHANGE_EXCEPTIONS
     };
 
-    private final GroupwareCaldavFactory factory;
-    private AppointmentSQLInterface appointmentInterface = null;
-    private CalendarCollectionService calendarCollection;
-    private List<Appointment> knownAppointments = null;
+    private List<Appointment> knownAppointments;
 
     public AppointmentCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         this(factory, url, folder, NO_ORDER);
@@ -95,7 +90,6 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
 
     public AppointmentCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
-        this.factory = factory;
         includeProperties(
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VEVENT),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT),
@@ -121,7 +115,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     public CalendarDataObject[] loadChangeExceptions(Appointment recurringMaster, boolean applyPatches) throws OXException {
         CalendarDataObject[] changeExceptions = null;
         if (null != recurringMaster.getChangeException() && 0 < recurringMaster.getChangeException().length) {
-            changeExceptions = getCalendarCollection().getChangeExceptionsByRecurrence(
+            changeExceptions = factory.getCalendarUtilities().getChangeExceptionsByRecurrence(
                 recurringMaster.getRecurrenceID(), CalendarSql.EXCEPTION_FIELDS, factory.getSession());
             if (applyPatches && null != changeExceptions && 0 < changeExceptions.length) {
                 for (int i = 0; i < changeExceptions.length; i++) {
@@ -135,7 +129,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     @Override
     protected Collection<Appointment> getModifiedObjects(Date since) throws OXException {
         try {
-            return filter(getAppointmentInterface().getModifiedAppointmentsInFolder(
+            return filter(factory.getAppointmentInterface().getModifiedAppointmentsInFolder(
                 folderID, getIntervalStart(), getIntervalEnd(), BASIC_COLUMNS, since));
         } catch (SQLException e) {
             throw protocolException(e);
@@ -145,7 +139,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     @Override
     protected Collection<Appointment> getDeletedObjects(Date since) throws OXException {
         try {
-            return filter(getAppointmentInterface().getDeletedAppointmentsInFolder(folderID, BASIC_COLUMNS, since));
+            return filter(factory.getAppointmentInterface().getDeletedAppointmentsInFolder(folderID, BASIC_COLUMNS, since));
         } catch (SQLException e) {
             throw protocolException(e);
         }
@@ -179,7 +173,7 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
             }
         } else {
             try {
-                appointments = filter(getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS,
+                appointments = filter(factory.getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS,
                     getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER));
             } catch (SQLException e) {
                 throw protocolException(e);
@@ -201,13 +195,13 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
          * try to resolve object by UID / filename directly if not found
          */
         if (null == object) {
-            int objectID = getAppointmentInterface().resolveUid(resourceName);
+            int objectID = factory.getAppointmentInterface().resolveUid(resourceName);
             if (1 > objectID) {
-                objectID = getAppointmentInterface().resolveFilename(resourceName);
+                objectID = factory.getAppointmentInterface().resolveFilename(resourceName);
             }
             if (0 < objectID) {
                 try {
-                    object = getAppointmentInterface().getObjectById(objectID, folderID);
+                    object = factory.getAppointmentInterface().getObjectById(objectID, folderID);
                     if (null != knownAppointments) {
                         remember(object);
                     }
@@ -229,8 +223,8 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
     protected CalendarDataObject load(Appointment appointment, boolean applyPatches) throws OXException {
         try {
             CalendarDataObject cdo = 0 < appointment.getParentFolderID() ?
-                getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
-                getAppointmentInterface().getObjectById(appointment.getObjectID());
+                factory.getAppointmentInterface().getObjectById(appointment.getObjectID(), appointment.getParentFolderID()) :
+                    factory.getAppointmentInterface().getObjectById(appointment.getObjectID());
             if (null != knownAppointments) {
                 remember(appointment);
             }
@@ -240,25 +234,11 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         }
     }
 
-    private AppointmentSQLInterface getAppointmentInterface() {
-        if (null == this.appointmentInterface) {
-            this.appointmentInterface = factory.getAppointmentInterface();
-        }
-        return this.appointmentInterface;
-    }
-
-    private CalendarCollectionService getCalendarCollection() {
-        if (null == this.calendarCollection) {
-            this.calendarCollection = factory.getCalendarUtilities();
-        }
-        return this.calendarCollection;
-    }
-
     private void updateCache() throws OXException {
         this.knownAppointments = new ArrayList<Appointment>();
         SearchIterator<Appointment> searchIterator = null;
         try {
-            searchIterator = getAppointmentInterface().getAppointmentsBetweenInFolder(this.folderID, BASIC_COLUMNS,
+            searchIterator = factory.getAppointmentInterface().getAppointmentsBetweenInFolder(folderID, BASIC_COLUMNS,
                 getIntervalStart(), getIntervalEnd(), -1, Order.NO_ORDER);
             while (searchIterator.hasNext()) {
                 this.remember(searchIterator.next());

@@ -52,7 +52,6 @@ package com.openexchange.carddav.mixins;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-
 /**
  * {@link SupportedReportSet}
  *
@@ -60,15 +59,20 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
  */
 public class SupportedReportSet extends SingleXMLPropertyMixin {
 
-    private static final String NAME = "supported-report-set";
-
+    /**
+     * Initializes a new {@link SupportedReportSet}.
+     */
     public SupportedReportSet() {
-        super(Protocol.DAV_NS.getURI(), NAME);
+        super(Protocol.DAV_NS.getURI(), "supported-report-set");
     }
 
     @Override
     protected String getValue() {
-        return "<D:supported-report><D:report><CARD:addressbook-multiget/></D:report></D:supported-report><D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>";
+        return
+            "<D:supported-report><D:report><CARD:addressbook-multiget/></D:report></D:supported-report>" +
+            "<D:supported-report><D:report><CARD:addressbook-query/></D:report></D:supported-report>" +
+            "<D:supported-report><D:report><D:sync-collection/></D:report></D:supported-report>"
+        ;
     }
 
 }

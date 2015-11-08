@@ -49,15 +49,13 @@
 
 package com.openexchange.dav.carddav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertTrue;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
 import org.apache.jackrabbit.webdav.client.methods.PropFindMethod;
 import org.apache.jackrabbit.webdav.property.DavPropertyNameSet;
 import org.junit.Test;
 import org.w3c.dom.Node;
-
-import com.openexchange.dav.Config;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.carddav.CardDAVTest;
@@ -89,9 +87,7 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         final MultiStatusResponse response = assertSingleResponse(super.getWebDAVClient().doPropFind(propFind));
         final String principal = super.extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
-    	assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains(Config.getUsername()));
-        final String principalURL = super.extractHref(PropertyNames.PRINCIPAL_URL, response);
-    	assertTrue("username not found in href child of " + PropertyNames.PRINCIPAL_URL, principalURL.contains(Config.getUsername()));
+    	assertTrue("username not found in href child of " + PropertyNames.CURRENT_USER_PRINCIPAL, principal.contains("/" +  getClient().getValues().getUserId()));
     	final Node node = super.extractNodeValue(PropertyNames.RESOURCETYPE, response);
     	assertMatches(PropertyNames.COLLECTION, node);
 	}
@@ -101,12 +97,12 @@ public class CurrentUserPrincipalTest extends CardDAVTest {
 	 * @throws Exception
 	 */
 	@Test
-	public void testDiscoverCurrentUserPrincipalAtWellKnown() throws Exception {
+	public void testDiscoverCurrentUserPrincipalAtUnknown() throws Exception {
 		final DavPropertyNameSet props = new DavPropertyNameSet();
         props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         props.add(PropertyNames.PRINCIPAL_URL);
         props.add(PropertyNames.RESOURCETYPE);
-        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/.well-known/carddav",
+        final PropFindMethod propFind = new PropFindMethod(super.getWebDAVClient().getBaseURI() + "/gibt/es/nicht",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         super.getWebDAVClient().doPropFind(propFind, StatusCodes.SC_NOT_FOUND);
 	}

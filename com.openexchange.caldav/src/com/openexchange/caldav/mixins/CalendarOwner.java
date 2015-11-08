@@ -50,7 +50,8 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -95,7 +96,7 @@ public class CalendarOwner extends SingleXMLPropertyMixin {
         } catch (OXException e) {
             LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
         }
-        return null != owner ? "<D:href>/principals/users/" + owner.getLoginInfo() + "/</D:href>" : null;
+        return null != owner ? PrincipalURL.forUser(owner.getId()) : null;
     }
 
 }

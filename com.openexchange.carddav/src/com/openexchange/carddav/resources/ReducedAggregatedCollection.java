@@ -49,16 +49,11 @@
 
 package com.openexchange.carddav.resources;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
+import java.util.List;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.Tools;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.groupware.container.Contact;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents
@@ -68,60 +63,20 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class ReducedAggregatedCollection extends AggregatedCollection {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ReducedAggregatedCollection.class);
-
-    public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
+    /**
+     * Initializes a new {@link AggregatedCollection}.
+     *
+     * @param factory The factory
+     * @param url The WebDAV path
+     * @param displayName The displayname to use
+     */
+    public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
         super(factory, url, displayName);
-        LOG.debug("{}: initialized.", getUrl());
     }
 
-	@Override
-    protected Collection<Contact> getModifiedContacts(Date since) throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
-        for (UserizedFolder folder : factory.getState().getReducedFolders()) {
-            Collection<Contact> modifiedContacts = factory.getState().getModifiedContacts(since, folder.getID());
-            if (null != modifiedContacts) {
-                contacts.addAll(modifiedContacts);
-            }
-        }
-        return contacts;
-    }
-
-	@Override
-    protected Collection<Contact> getDeletedContacts(Date since) throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
-        for (UserizedFolder folder : factory.getState().getReducedFolders()) {
-            Collection<Contact> deletedContacts = factory.getState().getDeletedContacts(since, folder.getID());
-            if (null != deletedContacts) {
-                contacts.addAll(deletedContacts);
-            }
-        }
-        return contacts;
-    }
-
-	@Override
-    protected Collection<Contact> getContacts() throws OXException {
-        Collection<Contact> contacts = new ArrayList<Contact>();
-        for (UserizedFolder folder : factory.getState().getReducedFolders()) {
-            Collection<Contact> contactList = factory.getState().getContacts(folder.getID());
-            if (null != contactList) {
-                contacts.addAll(contactList);
-            }
-        }
-        return contacts;
-    }
-
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-	    try {
-	        Date lastModified = new Date(0);
-	        for (UserizedFolder folder : factory.getState().getReducedFolders()) {
-	            lastModified = Tools.getLatestModified(lastModified, factory.getState().getLastModified(folder));
-	        }
-	        return lastModified;
-	    } catch (OXException e) {
-	        throw protocolException(e);
-        }
+    @Override
+    protected List<UserizedFolder> getFolders() throws OXException {
+        return factory.getState().getReducedFolders();
     }
 
 }

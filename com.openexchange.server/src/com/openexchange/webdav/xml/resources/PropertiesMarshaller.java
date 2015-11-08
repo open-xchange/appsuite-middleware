@@ -102,7 +102,7 @@ public class PropertiesMarshaller implements ResourceMarshaller {
 	@Override
 	public List<Element> marshal(final WebdavResource resource) throws WebdavProtocolException {
 		final Element response =  new Element("response",DAV_NS);
-		response.addContent(marshalHREF(resource.getUrl(), resource.getResourceType() != null)); //TODO: Fix the new bug here
+		response.addContent(marshalHREF(resource.getUrl(), resource.isCollection()));
 		if (resource.exists()) {
 			final Multistatus<Iterable<WebdavProperty>> multistatus = getProps(resource);
 			for(final int statusCode : multistatus.getStatusCodes()) {

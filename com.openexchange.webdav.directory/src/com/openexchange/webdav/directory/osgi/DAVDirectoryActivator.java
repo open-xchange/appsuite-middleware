@@ -81,7 +81,7 @@ public class DAVDirectoryActivator extends HousekeepingActivator {
             }
 
         });
-        WebdavDirectoryPerformer.getInstance().getFactory().mkdirs("principals", "users");
+//        WebdavDirectoryPerformer.getInstance().getFactory().mkdirs("principals", "users");
         openTrackers();
     }
 }

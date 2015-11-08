@@ -52,25 +52,28 @@ package com.openexchange.caldav.resources;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.Tools;
+import com.openexchange.caldav.mixins.CalendarColor;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.FolderService;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.server.impl.OCLPermission;
-import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -87,18 +90,19 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
 
     private String displayName;
     private ContentType contentType;
+    private Map<String, Object> meta;
 
     /**
      * Initializes a new {@link UndecidedFolderCollection}.
      *
      * @param factory The underlying CalDAV factory
      * @param url The target WebDAV path
-     * @throws OXException
      */
     public UndecidedFolderCollection(GroupwareCaldavFactory factory, WebdavPath url) throws OXException {
         super(factory, url, null);
         this.contentType = CalendarContentType.getInstance();
         this.displayName = "New Folder";
+        this.meta = new HashMap<String, Object>();
     }
 
     @Override
@@ -122,20 +126,27 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
                 throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
             }
         }
+        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
+            String value = CalendarColor.parse(prop);
+            meta.put("color", value);
+        }
     }
 
     @Override
     public void create() throws WebdavProtocolException {
         try {
-            UserizedFolder parentFolder = factory.getFolderService().getDefaultFolder(factory.getUser(), factory.getState().getTreeID(),
-                this.contentType, factory.getSession(), null);
-            FolderObject newFolder = new FolderObject();
-            newFolder.setFolderName(displayName);
-            newFolder.setParentFolderID(Tools.parse(parentFolder.getID()));
-            newFolder.setType(FolderObject.PRIVATE);
-            newFolder.setModule(contentType.getModule());
-            newFolder.addPermission(getDefaultPermissions());
-            newFolder = OXFolderManager.getInstance(factory.getSession()).createFolder(newFolder, true, System.currentTimeMillis());
+            FolderService folderService = factory.getFolderService();
+            UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), factory.getState().getTreeID(), contentType, factory.getSession(), null);
+            AbstractFolder folder = prepareUpdatableFolder();
+            folder.setParentID(parentFolder.getID());
+            folder.setName(displayName);
+            folder.setType(parentFolder.getType());
+            folder.setContentType(contentType);
+            folder.setTreeID(parentFolder.getTreeID());
+            folder.setPermissions(new Permission[] { getDefaultAdminPermissions(factory.getUser().getId()) });
+            meta.put("resourceName", getUrl().name());
+            folder.setMeta(meta);
+            factory.getFolderService().createFolder(folder, factory.getSession(), null);
         } catch (OXException e) {
             if ("FLD-0092".equals(e.getErrorCode())) {
                 /*
@@ -164,16 +175,8 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
     }
 
     @Override
-    public void save() throws WebdavProtocolException {
-    }
-
-    @Override
     public void setDisplayName(String displayName) throws WebdavProtocolException {
         this.displayName = displayName;
-    }
-
-    @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
     }
 
     @Override
@@ -204,18 +207,6 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
     @Override
     protected AbstractResource createResource(CalendarObject object, WebdavPath url) throws OXException {
         throw protocolException(HttpServletResponse.SC_FORBIDDEN);
-    }
-
-    private OCLPermission getDefaultPermissions() {
-        OCLPermission permission = new OCLPermission();
-        permission.setEntity(factory.getUser().getId());
-        permission.setFolderAdmin(true);
-        permission.setFolderPermission(OCLPermission.ADMIN_PERMISSION);
-        permission.setReadObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        permission.setWriteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        permission.setDeleteObjectPermission(OCLPermission.ADMIN_PERMISSION);
-        permission.setGroupPermission(false);
-        return permission;
     }
 
 }

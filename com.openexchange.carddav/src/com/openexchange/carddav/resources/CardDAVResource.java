@@ -51,21 +51,15 @@ package com.openexchange.carddav.resources;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
+import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
  * {@link CardDAVResource} - Abstract base class for CardDAV resources.
@@ -73,7 +67,9 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class CardDAVResource extends AbstractResource {
+public abstract class CardDAVResource extends DAVResource {
+
+    public static final String EXTENSION_VCF = ".vcf";
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVResource.class);
 
@@ -83,7 +79,6 @@ public abstract class CardDAVResource extends AbstractResource {
 	protected static final String ETAG_PREFIX = "http://www.open-xchange.com/carddav/";
 
     protected GroupwareCarddavFactory factory;
-    protected WebdavPath url;
 
     /**
      * Initializes a new {@link CardDAVResource}.
@@ -92,9 +87,8 @@ public abstract class CardDAVResource extends AbstractResource {
      * @param url The resource URL
      */
     public CardDAVResource(GroupwareCarddavFactory factory, WebdavPath url) {
-        super();
+        super(factory, url);
         this.factory = factory;
-        this.url = url;
         LOG.debug("{}: initialized.", getUrl());
     }
 
@@ -117,25 +111,6 @@ public abstract class CardDAVResource extends AbstractResource {
 	protected abstract String getUID();
 
 	@Override
-	protected WebdavFactory getFactory() {
-		return this.factory;
-	}
-
-	@Override
-	public WebdavPath getUrl() {
-		return this.url;
-	}
-
-	@Override
-	public String getLanguage() throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void setLanguage(String language) throws WebdavProtocolException {
-	}
-
-	@Override
 	public Long getLength() throws WebdavProtocolException {
 		if (exists()) {
 		    try {
@@ -145,14 +120,6 @@ public abstract class CardDAVResource extends AbstractResource {
             }
 		}
 		return 0L;
-	}
-
-	@Override
-	public void setLength(Long length) throws WebdavProtocolException {
-	}
-
-	@Override
-	public void setContentType(String type) throws WebdavProtocolException {
 	}
 
 	@Override
@@ -170,62 +137,8 @@ public abstract class CardDAVResource extends AbstractResource {
 	}
 
 	@Override
-	public String getSource() throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void setSource(String source) throws WebdavProtocolException {
-	}
-
-	@Override
-	public void lock(WebdavLock lock) throws WebdavProtocolException {
-	}
-
-	@Override
-	public List<WebdavLock> getLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	public WebdavLock getLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void unlock(String token) throws WebdavProtocolException {
-	}
-
-	@Override
-	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
 	public boolean hasBody() throws WebdavProtocolException {
 		return true;
-	}
-
-	@Override
-	public void setCreationDate(Date date) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
 	}
 
 	@Override
@@ -244,11 +157,6 @@ public abstract class CardDAVResource extends AbstractResource {
             return property;
         }
         return null;
-	}
-
-	@Override
-	protected boolean isset(Property p) {
-		return true;
 	}
 
 }

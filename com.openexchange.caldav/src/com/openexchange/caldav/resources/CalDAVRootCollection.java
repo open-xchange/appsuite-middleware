@@ -54,7 +54,9 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
+import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -80,7 +82,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractCollection;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CalDAVRootCollection extends CommonCollection {
+public class CalDAVRootCollection extends DAVCollection {
 
     /**
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
@@ -102,13 +104,8 @@ public class CalDAVRootCollection extends CommonCollection {
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
-            new ScheduleDefaultCalendarURL(factory)
+            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory)
         );
-    }
-
-    @Override
-    protected GroupwareCaldavFactory getFactory() {
-        return this.factory;
     }
 
     protected FolderService getFolderService() {
@@ -140,25 +137,17 @@ public class CalDAVRootCollection extends CommonCollection {
                     LOG.debug("{}: found child collection by name '{}'", this.getUrl(), name);
                     return createCollection(folder);
                 }
+                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
+                    LOG.debug("{}: found child collection by resource name '{}'", this.getUrl(), name);
+                    return createCollection(folder);
+                }
             }
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
             return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
-
         } catch (OXException e) {
             throw protocolException(e);
         }
-//        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
     }
-
-//    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
-//        if (TaskContentType.getInstance().equals(folder.getContentType())) {
-//            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
-//        } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-//            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
-//        } else {
-//            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
-//        }
-//    }
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {

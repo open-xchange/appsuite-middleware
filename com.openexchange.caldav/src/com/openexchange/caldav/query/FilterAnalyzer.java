@@ -61,6 +61,12 @@ import java.util.List;
  */
 public class FilterAnalyzer {
 
+    public static final FilterAnalyzer VEVENT_RANGE_QUERY_ANALYZER =
+        new FilterAnalyzerBuilder().compFilter("VCALENDAR").compFilter("VEVENT").timeRange().capture().end().end().end().build();
+
+    public static final FilterAnalyzer VTODO_RANGE_QUERY_ANALYZER =
+        new FilterAnalyzerBuilder().compFilter("VCALENDAR").compFilter("VTODO").timeRange().capture().end().end().end().build();
+
     private final List<AnalyzerElement> analyzers;
 
     public FilterAnalyzer(List<AnalyzerElement> analyzers) {

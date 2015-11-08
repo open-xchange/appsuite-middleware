@@ -71,6 +71,7 @@ import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.FreeBusyInformation;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.webdav.protocol.Protocol;
@@ -86,7 +87,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ScheduleOutboxCollection extends CommonCollection {
+public class ScheduleOutboxCollection extends DAVCollection {
 
     private static final String CALDAV_NS = CaldavProtocol.CAL_NS.getURI();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ScheduleOutboxCollection.class);

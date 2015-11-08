@@ -53,17 +53,11 @@ import java.util.EnumMap;
 import java.util.Map;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.WebdavPostAction;
 import com.openexchange.caldav.action.WebdavMkCalendarAction;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.data.conversion.ical.ICalEmitter;
-import com.openexchange.data.conversion.ical.ICalParser;
-import com.openexchange.folderstorage.FolderService;
-import com.openexchange.freebusy.service.FreeBusyService;
-import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
-import com.openexchange.groupware.calendar.CalendarCollectionService;
+import com.openexchange.caldav.action.WebdavPostAction;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVPerformer;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.user.UserService;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.WebdavAction;
@@ -83,19 +77,16 @@ import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
-import com.openexchange.webdav.protocol.helpers.AbstractPerformer;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * The {@link CaldavPerformer} contains all the wiring for caldav actions. This is the central entry point for caldav requests.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CaldavPerformer extends AbstractPerformer {
+public class CaldavPerformer extends DAVPerformer {
 
-    private final Protocol PROTOCOL = new CaldavProtocol();
+    private final CaldavProtocol PROTOCOL = new CaldavProtocol();
 
     private final GroupwareCaldavFactory factory;
     private final Map<WebdavMethod, WebdavAction> actions;
@@ -103,20 +94,11 @@ public class CaldavPerformer extends AbstractPerformer {
     /**
      * Initializes a new {@link CaldavPerformer}.
      *
-     * @param services
+     * @param services A service lookup reference
      */
     public CaldavPerformer(ServiceLookup services) {
         super();
-        this.factory = new GroupwareCaldavFactory(this,
-            services.getService(AppointmentSqlFactoryService.class),
-            services.getService(FolderService.class),
-            services.getService(ICalEmitter.class),
-            services.getService(ICalParser.class),
-            services.getService(UserService.class),
-            services.getService(CalendarCollectionService.class),
-            services.getService(ConfigViewFactory.class),
-            services.getService(FreeBusyService.class)
-        );
+        this.factory = new GroupwareCaldavFactory(PROTOCOL, services, this);
         this.actions = initActions();
     }
 
@@ -155,7 +137,7 @@ public class CaldavPerformer extends AbstractPerformer {
     }
 
     @Override
-    protected AbstractWebdavFactory getFactory() {
+    protected DAVFactory getFactory() {
         return factory;
     }
 

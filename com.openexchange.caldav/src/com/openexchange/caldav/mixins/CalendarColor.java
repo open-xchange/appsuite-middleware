@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.jdom2.Namespace;
 import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.java.Strings;

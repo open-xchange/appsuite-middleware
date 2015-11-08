@@ -70,9 +70,10 @@ import com.openexchange.caldav.Tools;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
-import com.openexchange.data.conversion.ical.ConversionWarning.Code;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.Truncated;
@@ -429,7 +430,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 appointmentToSave.setFilename(resourceName);
             }
         } else {
-            throw new ConversionError(0, Code.INSUFFICIENT_INFORMATION);
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-calendar-component", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
     }
 

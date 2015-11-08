@@ -65,6 +65,7 @@ import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.util.Utils;
+import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 
 public class WebdavProppatchAction extends AbstractAction {
 
@@ -97,9 +98,9 @@ public class WebdavProppatchAction extends AbstractAction {
 
             responseDoc.addContent(multistatus);
             final Element response = new Element("response", DAV_NS);
-            final Element href = new Element("href", DAV_NS);
 
-            href.setText(req.getURLPrefix() + req.getUrl());
+            PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
+            Element href = helper.marshalHREF(req.getUrl(), req.getResource().isCollection());
             response.addContent(href);
 
             multistatus.addContent(response);

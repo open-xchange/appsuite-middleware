@@ -49,20 +49,17 @@
 
 package com.openexchange.carddav.reports;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.Namespace;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.webdav.action.WebdavPropfindAction;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.actions.DAVPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
@@ -72,61 +69,34 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class AddressbookMultigetReport extends WebdavPropfindAction {
+public class AddressbookMultigetReport extends DAVPropfindAction {
 
     public static final String NAMESPACE = CarddavProtocol.CARD_NS.getURI();
-
     public static final String NAME = "addressbook-multiget";
 
-    public AddressbookMultigetReport(Protocol protocol) {
+    /**
+     * Initializes a new {@link AddressbookMultigetReport}.
+     *
+     * @param protocol The protocol
+     */
+    public AddressbookMultigetReport(DAVProtocol protocol) {
         super(protocol);
     }
 
     @Override
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
-        final Element response = new Element("multistatus", DAV_NS);
-
-        List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-        for (Namespace namespace : namespaces) {
-            response.addNamespaceDeclaration(namespace);
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        Document requestBody = optRequestBody(request);
+        List<Element> elements = new ArrayList<Element>();
+        ResourceMarshaller marshaller = getMarshaller(request, requestBody);
+        for (WebdavPath webdavPath : getPaths(request, requestBody)) {
+            elements.addAll(marshaller.marshal(request.getFactory().resolveResource(webdavPath)));
         }
-
-        final Document responseBody = new Document(response);
-
-        boolean forceAllProp = false;
-        Document requestBody = null;
-        try {
-            requestBody = req.getBodyAsDocument();
-        } catch (JDOMException e) {
-            forceAllProp = true;
-        } catch (IOException e) {
-            forceAllProp = true;
-        }
-
-        ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
-
-        List<WebdavPath> paths = getPaths(req, requestBody);
-
-        List<Element> all = new ArrayList<Element>();
-
-        for (WebdavPath webdavPath : paths) {
-            List<Element> marshalled = marshaller.marshal(req.getFactory().resolveResource(webdavPath));
-            all.addAll(marshalled);
-        }
-
-        response.addContent(all);
-
-        try {
-            res.setStatus(Protocol.SC_MULTISTATUS);
-            res.setContentType("text/xml; charset=UTF-8");
-            outputter.output(responseBody, res.getOutputStream());
-        } catch (final IOException e) {
-            // IGNORE
-        }
-
+        Element multistatusElement = prepareMultistatusElement();
+        multistatusElement.addContent(elements);
+        sendMultistatusResponse(response, multistatusElement);
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest req, Document requestBody) throws WebdavProtocolException {
+    private List<WebdavPath> getPaths(WebdavRequest request, Document requestBody) throws WebdavProtocolException {
         if (requestBody == null) {
             return Collections.emptyList();
         }
@@ -137,12 +107,12 @@ public class AddressbookMultigetReport extends WebdavPropfindAction {
         }
 
         List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = req.getURLPrefix().length();
+        int length = request.getURLPrefix().length();
         for (Object object : children) {
             Element href = (Element) object;
             String url = href.getText();
             url = url.substring(length);
-            paths.add(((GroupwareCarddavFactory) req.getFactory()).decode(new WebdavPath(url)));
+            paths.add(((GroupwareCarddavFactory) request.getFactory()).decode(new WebdavPath(url)));
         }
 
         return paths;

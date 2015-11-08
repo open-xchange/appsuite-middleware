@@ -53,9 +53,9 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * {@link StatusCodes}
- * 
+ *
  * Contains WebDAV HTTP status code constants.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class StatusCodes {
@@ -66,10 +66,11 @@ public final class StatusCodes {
 	public static final int SC_FORBIDDEN = HttpServletResponse.SC_FORBIDDEN;
 	public static final int SC_INTERNAL_SERVER_ERROR = HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
 	public static final int SC_UNAUTHORIZED =  HttpServletResponse.SC_UNAUTHORIZED;
-	public static final int SC_NOT_FOUND =  HttpServletResponse.SC_NOT_FOUND;
+    public static final int SC_NOT_FOUND =  HttpServletResponse.SC_NOT_FOUND;
+    public static final int SC_NO_CONTENT =  HttpServletResponse.SC_NO_CONTENT;
 	public static final int SC_MULTISTATUS = 207;
 
 	private StatusCodes() {
-		
+
 	}
 }

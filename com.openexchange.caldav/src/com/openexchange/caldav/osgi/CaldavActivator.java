@@ -50,9 +50,7 @@
 package com.openexchange.caldav.osgi;
 
 import org.osgi.service.http.HttpService;
-import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.Tools;
-import com.openexchange.caldav.mixins.CalendarUserAddressSet;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
@@ -61,6 +59,7 @@ import com.openexchange.caldav.servlet.CalDAV;
 import com.openexchange.caldav.servlet.CaldavPerformer;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.contact.ContactService;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.exception.OXException;
@@ -81,14 +80,11 @@ import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
 import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.DevNullServlet;
-import com.openexchange.webdav.acl.mixins.CurrentUserPrincipal;
-import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.helpers.PropertyMixin;
-import com.openexchange.webdav.protocol.helpers.PropertyMixinFactory;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 import com.openexchange.xml.jdom.JDOMParser;
 
@@ -112,13 +108,14 @@ public class CaldavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             ICalEmitter.class, ICalParser.class, AppointmentSqlFactoryService.class, CalendarCollectionService.class, FolderService.class,
-            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class, JDOMParser.class, GroupService.class };
+            UserService.class, ConfigViewFactory.class, HttpService.class, FreeBusyService.class, JDOMParser.class, GroupService.class,
+            ContactService.class, ResourceService.class
+        };
     }
 
     @Override
     protected void startBundle() throws Exception {
         try {
-            CalDAVServiceLookup.set(this);
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
             httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
@@ -128,26 +125,26 @@ public class CaldavActivator extends HousekeepingActivator {
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
 
-            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
-
-                @Override
-                public PropertyMixin create(SessionHolder sessionHolder) {
-                    return new CalendarUserAddressSet(sessionHolder);
-                }
-            });
-            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
-
-                @Override
-                public PropertyMixin create(SessionHolder sessionHolder) {
-                    return new CurrentUserPrincipal(sessionHolder);
-                }
-            });
+//            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
+//
+//                @Override
+//                public PropertyMixin create(SessionHolder sessionHolder) {
+//                    return new CalendarUserAddressSet(sessionHolder);
+//                }
+//            });
+//            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
+//
+//                @Override
+//                public PropertyMixin create(SessionHolder sessionHolder) {
+//                    return new CurrentUserPrincipal(sessionHolder);
+//                }
+//            });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDate());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
 
-            registerService(PathRegistration.class, new PathRegistration("caldav"));
+//            registerService(PathRegistration.class, new PathRegistration("caldav"));
 
             registerService(PreferencesItemService.class, new PreferencesItemService() {
 
@@ -240,7 +237,6 @@ public class CaldavActivator extends HousekeepingActivator {
             mixin.close();
             this.mixin = null;
         }
-        CalDAVServiceLookup.set(null);
         super.stopBundle();
     }
 

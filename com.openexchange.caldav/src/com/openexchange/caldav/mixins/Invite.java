@@ -50,10 +50,10 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CalDAVPermission;
-import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
@@ -115,15 +115,11 @@ public class Invite extends SingleXMLPropertyMixin {
     private String getEntityElements(Permission permission) throws OXException {
         StringBuilder stringBuilder = new StringBuilder();
         if (permission.isGroup()) {
-            Group group = CalDAVServiceLookup.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
+            Group group = factory.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
             stringBuilder.append("<D:href>/principals/groups/").append(group.getIdentifier())
                 .append("/</D:href><CS:common-name> + ").append(group.getDisplayName()).append("</CS:common-name>");
         } else {
             User user = factory.resolveUser(permission.getEntity());
-            String href = user.getLoginInfo();
-            if (Strings.isEmpty(href)) {
-                href = String.valueOf(user.getId());
-            }
             String commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {
                 commonName = user.getMail();
@@ -131,7 +127,7 @@ public class Invite extends SingleXMLPropertyMixin {
                     commonName = "User " + user.getId();
                 }
             }
-            stringBuilder.append("<D:href>/principals/users/").append(href).append("/</D:href><CS:common-name>").append(commonName).append("</CS:common-name>");
+            stringBuilder.append(PrincipalURL.forUser(user.getId())).append("<CS:common-name>").append(commonName).append("</CS:common-name>");
         }
         return stringBuilder.toString();
     }

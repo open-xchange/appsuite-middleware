@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.carddav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import java.util.Date;
 import java.util.Map;
 import org.junit.Before;
@@ -109,7 +111,7 @@ public class Bug21240Test extends CardDAVTest {
 		/*
 		 * delete contact
 		 */
-        assertEquals("response code wrong", StatusCodes.SC_OK, super.delete(pathUid));
+        assertEquals("response code wrong", StatusCodes.SC_NO_CONTENT, super.delete(pathUid));
         /*
          * verify deletion on server
          */

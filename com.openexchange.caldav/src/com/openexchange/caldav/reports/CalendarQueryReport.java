@@ -49,25 +49,19 @@
 
 package com.openexchange.caldav.reports;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
 import javax.servlet.http.HttpServletResponse;
-
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.Namespace;
-
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterParser;
-import com.openexchange.webdav.action.WebdavPropfindAction;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.actions.DAVPropfindAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
@@ -78,57 +72,31 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarQueryReport extends WebdavPropfindAction {
+public class CalendarQueryReport extends DAVPropfindAction {
 
     public static final String NAMESPACE = CaldavProtocol.CAL_NS.getURI();
-
     public static final String NAME = "calendar-query";
 
-    public CalendarQueryReport(final Protocol protocol) {
+    /**
+     * Initializes a new {@link CalendarQueryReport}.
+     *
+     * @param protocol The protocol
+     */
+    public CalendarQueryReport(DAVProtocol protocol) {
         super(protocol);
     }
 
     @Override
-    public void perform(final WebdavRequest req, final WebdavResponse res) throws WebdavProtocolException {
-        final Element response = new Element("multistatus", DAV_NS);
-
-        final List<Namespace> namespaces = protocol.getAdditionalNamespaces();
-        for (final Namespace namespace : namespaces) {
-            response.addNamespaceDeclaration(namespace);
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        Element multistatusElement = prepareMultistatusElement();
+        Document requestBody = optRequestBody(request);
+        ResourceMarshaller marshaller = getMarshaller(request, requestBody);
+        List<Element> elements = new ArrayList<Element>();
+        for (WebdavResource resource : getMatching(request, requestBody)) {
+            elements.addAll(marshaller.marshal(resource));
         }
-
-        final Document responseBody = new Document(response);
-
-        boolean forceAllProp = false;
-        Document requestBody = null;
-        try {
-            requestBody = req.getBodyAsDocument();
-        } catch (final JDOMException e) {
-            forceAllProp = true;
-        } catch (final IOException e) {
-            forceAllProp = true;
-        }
-
-        final ResourceMarshaller marshaller = getMarshaller(req, forceAllProp, requestBody, null);
-
-        final List<WebdavResource> resources = getMatching(req, requestBody);
-
-        final List<Element> all = new ArrayList<Element>();
-
-        for (final WebdavResource resource : resources) {
-            final List<Element> marshalled = marshaller.marshal(resource);
-            all.addAll(marshalled);
-        }
-
-        response.addContent(all);
-
-        try {
-            res.setStatus(Protocol.SC_MULTISTATUS);
-            res.setContentType("text/xml; charset=UTF-8");
-            outputter.output(responseBody, res.getOutputStream());
-        } catch (final IOException e) {
-            // IGNORE
-        }
+        multistatusElement.addContent(elements);
+        sendMultistatusResponse(response, multistatusElement);
     }
 
     private List<WebdavResource> getMatching(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {

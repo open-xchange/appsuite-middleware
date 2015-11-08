@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
@@ -72,15 +71,12 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 public class TaskCollection extends CalDAVFolderCollection<Task> {
 
     private static final int[] BASIC_COLUMNS = {
-        Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE
+        Task.UID, Task.FILENAME, Task.FOLDER_ID, Task.OBJECT_ID, Task.PARTICIPANTS, Task.LAST_MODIFIED, Task.CREATION_DATE,
+        Task.CREATED_BY, Task.MODIFIED_BY
     };
-
-    private final GroupwareCaldavFactory factory;
-    private TasksSQLInterface taskInterface = null;
 
     public TaskCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder, order);
-        this.factory = factory;
         includeProperties(
             new SupportedCalendarComponentSet(SupportedCalendarComponentSet.VTODO),
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VTODO)
@@ -91,26 +87,19 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
         this(factory, url, folder, NO_ORDER);
     }
 
-    private TasksSQLInterface getTaskInterface() {
-        if (null == this.taskInterface) {
-            this.taskInterface = factory.getTaskInterface();
-        }
-        return this.taskInterface;
-    }
-
     @Override
     protected Collection<Task> getModifiedObjects(Date since) throws OXException {
-        return filter(getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
+        return filter(factory.getTaskInterface().getModifiedTasksInFolder(folderID, BASIC_COLUMNS, since));
     }
 
     @Override
     protected Collection<Task> getDeletedObjects(Date since) throws OXException {
-        return filter(getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
+        return filter(factory.getTaskInterface().getDeletedTasksInFolder(folderID, BASIC_COLUMNS, since));
     }
 
     @Override
     protected Collection<Task> getObjects() throws OXException {
-        return filter(getTaskInterface().getTaskList(folderID, 0, -1, 0, Order.NO_ORDER, BASIC_COLUMNS));
+        return filter(factory.getTaskInterface().getTaskList(folderID, 0, -1, 0, Order.NO_ORDER, BASIC_COLUMNS));
     }
 
     @Override
@@ -119,7 +108,7 @@ public class TaskCollection extends CalDAVFolderCollection<Task> {
     }
 
     protected Task load(Task task) throws OXException {
-        return getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
+        return factory.getTaskInterface().getTaskById(task.getObjectID(), task.getParentFolderID());
     }
 
     @Override

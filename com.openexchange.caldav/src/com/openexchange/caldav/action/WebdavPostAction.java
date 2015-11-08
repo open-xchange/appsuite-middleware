@@ -72,6 +72,11 @@ public class WebdavPostAction extends AbstractAction {
 
     protected final GroupwareCaldavFactory factory;
 
+    /**
+     * Initializes a new {@link WebdavPostAction}.
+     *
+     * @param factory The factory
+     */
     public WebdavPostAction(GroupwareCaldavFactory factory) {
 	    this.factory = factory;
 	}
@@ -81,18 +86,6 @@ public class WebdavPostAction extends AbstractAction {
 		WebdavResource resource = request.getResource();
 		if (null != request.getHeader("content-length")) {
 			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		String contentType = request.getHeader("content-type");
-		if (null == contentType || false == contentType.toLowerCase().contains("text/calendar")) {
-			/*
-			 * only 'text/calendar' files supported
-			 */
-			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        } else if (false == resource instanceof com.openexchange.caldav.resources.ScheduleOutboxCollection) {
-			/*
-			 * only the schedule-outbox resource can fulfill the request
-			 */
-			throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 		}
 		/*
 		 * put request body

@@ -69,6 +69,7 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.dav.DAVFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -83,7 +84,6 @@ import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
@@ -94,17 +94,16 @@ import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * {@link GroupwareCarddavFactory}
@@ -112,29 +111,30 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class GroupwareCarddavFactory extends AbstractWebdavFactory {
+public class GroupwareCarddavFactory extends DAVFactory {
 
     private static final String OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY = "com.openexchange.carddav.overridenextsynctoken";
     private static final String FOLDER_BLACKLIST_PROPERTY = "com.openexchange.carddav.ignoreFolders";
     private static final String FOLDER_TRRE_ID_PROPERTY = "com.openexchange.carddav.tree";
-    private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCarddavFactory.class);
 
-    private final SessionHolder sessionHolder;
     private final ThreadLocal<State> stateHolder;
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link GroupwareCarddavFactory}.
      *
+     * @param protocol The protocol
      * @param services A service lookup reference
      * @param sessionHolder The session holder to use
      */
-    public GroupwareCarddavFactory(ServiceLookup services, SessionHolder sessionHolder) {
-        super();
-        this.sessionHolder = sessionHolder;
-        this.services = services;
+    public GroupwareCarddavFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
+        super(protocol, services, sessionHolder);
         this.stateHolder = new ThreadLocal<State>();
+    }
+
+    @Override
+    protected String getURLPrefix() {
+        return "/carddav/";
     }
 
     @Override
@@ -147,11 +147,6 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     public void endRequest(int status) {
         stateHolder.set(null);
         super.endRequest(status);
-    }
-
-    @Override
-    public CarddavProtocol getProtocol() {
-        return PROTOCOL;
     }
 
     @Override
@@ -184,27 +179,15 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     }
 
     public User resolveUser(int userID) throws OXException {
-        return services.getService(UserService.class).getUser(userID, getContext());
+        return getService(UserService.class).getUser(userID, getContext());
     }
 
     public FolderService getFolderService() {
-        return services.getService(FolderService.class);
-    }
-
-    public Context getContext() {
-        return sessionHolder.getContext();
-    }
-
-    public Session getSession() {
-        return sessionHolder.getSessionObject();
-    }
-
-    public User getUser() {
-        return sessionHolder.getUser();
+        return getService(FolderService.class);
     }
 
     public ContactService getContactService() throws OXException {
-        return services.getService(ContactService.class);
+        return getService(ContactService.class);
     }
 
     public State getState() {
@@ -212,19 +195,19 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     }
 
     public VCardService getVCardService() {
-        return services.getService(VCardService.class);
+        return getService(VCardService.class);
     }
 
     public VCardStorageService getVCardStorageService(int contextId) {
-        VCardStorageFactory vCardStorageFactory = services.getOptionalService(VCardStorageFactory.class);
+        VCardStorageFactory vCardStorageFactory = getOptionalService(VCardStorageFactory.class);
         if (vCardStorageFactory != null) {
-            return vCardStorageFactory.getVCardStorageService(services.getService(ConfigViewFactory.class), contextId);
+            return vCardStorageFactory.getVCardStorageService(getService(ConfigViewFactory.class), contextId);
         }
         return null;
     }
 
     public String getConfigValue(String key, String defaultValue) throws OXException {
-        ConfigView view = services.getService(ConfigViewFactory.class).getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ConfigView view = getService(ConfigViewFactory.class).getView(getUser().getId(), getContext().getContextId());
         ComposedConfigProperty<String> property = view.property(key, String.class);
         return property.isDefined() ? property.get() : defaultValue;
     }
@@ -238,7 +221,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
      * @return The coerced value or <code>defaultValue</code> if absent
      */
     public <T> T optConfigValue(String property, Class<T> coerceTo, T defaultValue) throws OXException {
-        ConfigView view = services.getService(ConfigViewFactory.class).getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ConfigView view = getService(ConfigViewFactory.class).getView(getUser().getId(), getContext().getContextId());
         return view.opt(property, coerceTo, defaultValue);
     }
 
@@ -255,26 +238,24 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     /**
      * Sets the next sync token for the current user to the supplied value.
      *
-     * @param value
+     * @param value The overridden value
      */
     public void setOverrideNextSyncToken(String value) {
         try {
-            services.getService(UserService.class).setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, this.getUser().getId(), this.getContext());
+            getService(UserService.class).setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, getUser().getId(), getContext());
         } catch (OXException e) {
             LOG.error("", e);
         }
     }
 
     /**
-     * Gets a value indicating the overridden sync token for the current user
-     * if defined
+     * Gets a value indicating the overridden sync token for the current user if defined
      *
-     * @return the value of the overridden sync-token, or <code>null</code> if
-     *         not set
+     * @return The value of the overridden sync-token, or <code>null</code> if not set
      */
     public String getOverrideNextSyncToken() {
         try {
-            return services.getService(UserService.class).getUserAttribute(getOverrideNextSyncTokenAttributeName(), this.getUser().getId(), this.getContext());
+            return getService(UserService.class).getUserAttribute(getOverrideNextSyncTokenAttributeName(), getUser().getId(), getContext());
         } catch (OXException e) {
             LOG.error("", e);
         }
@@ -282,7 +263,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
     }
 
     private String getOverrideNextSyncTokenAttributeName() {
-        String userAgent = (String) this.getSession().getParameter("user-agent");
+        String userAgent = (String) getSession().getParameter("user-agent");
         return null != userAgent ? OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY + userAgent.hashCode() : OVERRIDE_NEXT_SYNC_TOKEN_PROPERTY;
     }
 
@@ -473,7 +454,7 @@ public class GroupwareCarddavFactory extends AbstractWebdavFactory {
             return folders;
         }
 
-        private List<UserizedFolder> getDeletedFolders(Date since) throws OXException {
+        public List<UserizedFolder> getDeletedFolders(Date since) throws OXException {
             List<UserizedFolder> folders = new ArrayList<UserizedFolder>();
             FolderService folderService = this.factory.getFolderService();
             FolderResponse<UserizedFolder[][]> updatedFoldersResponse = folderService.getUpdates(FolderStorage.REAL_TREE_ID, since, false, new ContentType[] { ContactContentType.getInstance() }, this.factory.getSession(), null);
