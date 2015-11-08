@@ -109,6 +109,7 @@ public class JsonFileMetadata extends AbstractJsonMetadata {
         jsonObject.put("modified", file.getLastModified().getTime());
         jsonObject.put("created_by", file.getCreatedBy());
         jsonObject.put("modified_by", file.getModifiedBy());
+        jsonObject.putOpt("content_type", DriveUtils.determineMimeType(file));
         jsonObject.putOpt("preview", session.getLinkGenerator().getFilePreviewLink(file));
         jsonObject.putOpt("thumbnail", session.getLinkGenerator().getFileThumbnailLink(file));
         for (FileStorageCapability capability : specialCapabilities) {
