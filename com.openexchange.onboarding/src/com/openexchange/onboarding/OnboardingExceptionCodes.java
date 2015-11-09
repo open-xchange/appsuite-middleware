@@ -99,6 +99,7 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * An XML write error occurred: %1$s
      */
     XML_ERROR("An XML write error occurred: %1$s", null, Category.CATEGORY_USER_INPUT, 9),
+
     ;
 
     /** The error code prefix for on-boarding module */

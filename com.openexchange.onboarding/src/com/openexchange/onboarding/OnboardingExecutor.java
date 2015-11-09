@@ -49,36 +49,25 @@
 
 package com.openexchange.onboarding;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingStrings} - Translatable string literals for on-boarding module.
+ * {@link OnboardingExecutor} - Executes a certain on-boarding request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingStrings implements LocalizableStrings {
+public interface OnboardingExecutor {
 
     /**
-     * Initializes a new {@link OnboardingStrings}.
+     * Executes specified on-boarding request.
+     *
+     * @param request The on-boarding request
+     * @param session The session providing user data
+     * @return The result
+     * @throws OXException If execution fails
      */
-    private OnboardingStrings() {
-        super();
-    }
-
-    // The name for Apple platform
-    public static final String PLATFORM_APPLE = "Apple";
-
-    // The name for Windows platform
-    public static final String PLATFORM_WINDOWS = "Windows";
-
-    // The name for Android/Google platform
-    public static final String PLATFORM_ANDROID_GOOGLE = "Android";
-
-    // ----------------------------------------------------------------------------------------------------------------------
-
-    // E-Mail successfully sent
-    public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
+    Result execute(OnboardingRequest request, Session session) throws OXException;
 
 }

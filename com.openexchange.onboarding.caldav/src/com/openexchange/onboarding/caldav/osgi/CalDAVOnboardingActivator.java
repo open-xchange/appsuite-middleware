@@ -51,6 +51,7 @@ package com.openexchange.onboarding.caldav.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.caldav.CalDAVOnboardingConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -79,6 +80,9 @@ public class CalDAVOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        trackService(MailService.class);
+        openTrackers();
+
         CalDAVOnboardingConfiguration onboardingConfiguration = new CalDAVOnboardingConfiguration(this);
         registerService(OnboardingConfiguration.class, onboardingConfiguration);
     }
