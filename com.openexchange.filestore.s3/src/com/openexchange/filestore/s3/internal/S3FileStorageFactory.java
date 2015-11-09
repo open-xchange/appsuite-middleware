@@ -75,6 +75,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.AmazonS3EncryptionClient;
 import com.amazonaws.services.s3.S3ClientOptions;
+import com.amazonaws.services.s3.model.AmazonS3Exception;
 import com.amazonaws.services.s3.model.CryptoConfiguration;
 import com.amazonaws.services.s3.model.EncryptionMaterials;
 import com.amazonaws.services.s3.model.Region;
@@ -135,6 +136,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
 
     @Override
     public S3FileStorage getFileStorage(URI uri) throws OXException {
+        try{
         S3FileStorage storage = storages.get(uri);
         if (null == storage) {
             LOG.debug("Initializing S3 client for {}", uri);
@@ -155,7 +157,15 @@ public class S3FileStorageFactory implements FileStorageProvider {
                 storage = newStorage;
             }
         }
-        return storage;
+            return storage;
+        }catch(OXException ex){
+            if(ex.getCause() instanceof AmazonS3Exception && ((AmazonS3Exception)ex.getCause()).getStatusCode() == 400){
+                // throw a simple OXException here to be able to forward this exception to rmi clients (Bug #42102)
+                throw new OXException(S3ExceptionCode.BadRequest.getNumber(), S3ExceptionMessages.BadRequest_MSG);
+            }else{
+                throw ex;
+            }
+        }
     }
 
     @Override
