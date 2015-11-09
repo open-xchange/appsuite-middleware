@@ -191,7 +191,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     public Result execute(OnboardingRequest selection, Session session) throws OXException {
         String entityId = selection.getSelectionId();
         if (null == entityId) {
-            throw OnboardingExceptionCodes.ENTITY_ID_MISSING.create();
+            throw OnboardingExceptionCodes.CONFIGURATION_ID_MISSING.create();
         }
 
         if ("apple.ios.ipad.caldav".equals(entityId)) {

@@ -69,4 +69,7 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     // Your selection is not supported.
     public static final String ENTITY_NOT_SUPPORTED_MSG = "Your selection is not supported.";
 
+    // The chosen configuration is not supported.
+    public static final String CONFIGURATION_NOT_SUPPORTED_MSG = "The chosen configuration is not supported.";
+
 }
