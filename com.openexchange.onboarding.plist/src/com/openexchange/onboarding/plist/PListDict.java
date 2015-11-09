@@ -54,7 +54,6 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
@@ -73,7 +72,7 @@ import com.openexchange.onboarding.plist.xml.StaxUtils;
  */
 public class PListDict implements PListElement {
 
-    public static PListDict newInstanceFor(String payloadIdentifier, String payloadType, String payloadDisplayName, UUID payloadUUID, int payloadVersion) {
+    public static PListDict newInstanceFor(String payloadIdentifier, String payloadType, String payloadDisplayName, String payloadUUID, int payloadVersion) {
         PListDict dict = new PListDict();
         dict.setPayloadIdentifier(payloadIdentifier).setPayloadType(payloadType).setPayloadDisplayName(payloadDisplayName);
         dict.setPayloadUUID(payloadUUID).setPayloadVersion(payloadVersion);
@@ -111,8 +110,8 @@ public class PListDict implements PListElement {
         return this;
     }
 
-    public PListDict setPayloadUUID(UUID payloadUUID) {
-        elements.add(new PListStringValue("PayloadUUID", payloadUUID.toString()));
+    public PListDict setPayloadUUID(String payloadUUID) {
+        elements.add(new PListStringValue("PayloadUUID", payloadUUID));
         return this;
     }
 

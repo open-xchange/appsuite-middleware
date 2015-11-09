@@ -50,6 +50,7 @@
 package com.openexchange.onboarding.json.actions;
 
 import java.util.List;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -79,7 +80,7 @@ public class GetSelections extends AbstractOnboardingAction {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
         String configurationId = requestData.requireParameter("configurationId");

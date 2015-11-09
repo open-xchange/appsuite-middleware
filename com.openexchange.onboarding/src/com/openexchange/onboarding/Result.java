@@ -64,6 +64,9 @@ public class Result {
     private final DynamicFormDescription formDescription;
     private final Map<String, Object> formConfiguration;
 
+    private final Object resultObject;
+    private final String format;
+
     /**
      * Initializes a new {@link Result}.
      *
@@ -85,6 +88,42 @@ public class Result {
         this.resultText = resultText;
         this.formConfiguration = formConfiguration;
         this.formDescription = formDescription;
+        resultObject = null;
+        format = null;
+    }
+
+    /**
+     * Initializes a new {@link Result}.
+     *
+     * @param resultObject The result object; e.g. <code>IFileHolder</code>
+     * @param format The result object's format; e.g. <code>"file"</code>
+     */
+    public Result(Object resultObject, String format) {
+        super();
+        this.resultObject = resultObject;
+        this.format = format;
+
+        resultText = null;
+        formConfiguration = null;
+        formDescription = null;
+    }
+
+    /**
+     * Gets the result object
+     *
+     * @return The result object or <code>null</code>
+     */
+    public Object getResultObject() {
+        return resultObject;
+    }
+
+    /**
+     * Gets the format
+     *
+     * @return The format or <code>null</code>
+     */
+    public String getFormat() {
+        return format;
     }
 
     /**

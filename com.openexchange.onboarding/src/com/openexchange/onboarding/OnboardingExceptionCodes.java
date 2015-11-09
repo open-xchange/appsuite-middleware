@@ -95,6 +95,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * Configuration not supported: %1$s
      */
     CONFIGURATION_NOT_SUPPORTED("Configuration not supported: %1$s", OnboardingExceptionMessages.CONFIGURATION_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 8),
+    /**
+     * An XML write error occurred: %1$s
+     */
+    XML_ERROR("An XML write error occurred: %1$s", null, Category.CATEGORY_USER_INPUT, 9),
     ;
 
     /** The error code prefix for on-boarding module */

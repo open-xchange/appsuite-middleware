@@ -205,7 +205,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute(OnboardingRequest selection, Session session) throws OXException {
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
         MailService mailService = services.getService(MailService.class);
         SMTPConfig smtpConfig = new SMTPConfig();
         TransportConfig.getTransportConfig(smtpConfig, session, 0);

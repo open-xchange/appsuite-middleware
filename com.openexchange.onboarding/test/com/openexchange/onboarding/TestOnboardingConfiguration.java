@@ -116,7 +116,7 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute(OnboardingRequest selection, Session session) throws OXException {
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
         return null;
     }
 

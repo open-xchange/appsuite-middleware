@@ -51,10 +51,14 @@ package com.openexchange.onboarding.caldav;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.CommonEntity;
 import com.openexchange.onboarding.DefaultEntity;
@@ -70,6 +74,8 @@ import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.plist.PListDict;
+import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.uadetector.UserAgentParser;
@@ -122,7 +128,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     public boolean isEnabled(Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.carddav.enabled", boolean.class);
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.caldav.enabled", boolean.class);
         return null != property && property.isDefined() && property.get().booleanValue();
     }
 
@@ -187,24 +193,78 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(lastEntityId);
     }
 
+    private static final String PROFILE_CALDAV_DEFAULT_UUID = "c454c731-b93d-428e-8b7f-d158db3726ef";
+    private static final String PROFILE_CALDAV_DEFAULT_CONTENT_UUID = "6af5eca3-4249-4e2c-8eba-4ae7c8ed204b";
+
     @Override
-    public Result execute(OnboardingRequest selection, Session session) throws OXException {
-        String entityId = selection.getSelectionId();
-        if (null == entityId) {
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
+        String selectionId = request.getSelectionId();
+        if (null == selectionId) {
             throw OnboardingExceptionCodes.CONFIGURATION_ID_MISSING.create();
         }
 
-        if ("apple.ios.ipad.caldav".equals(entityId)) {
-            if (isIPad(selection.getClientInfo())) {
-
+        ClientInfo clientInfo = request.getClientInfo();
+        if ("apple.ios.ipad.caldav.download".equals(selectionId)) {
+            if (isIPad(clientInfo)) {
+                return generatePListResult(request, session);
             }
-        } else if ("apple.ios.iphone.caldav".equals(entityId)) {
-            if (isIPhone(selection.getClientInfo())) {
 
+        } else if ("apple.ios.iphone.caldav.download".equals(selectionId)) {
+            if (isIPhone(clientInfo)) {
+                return generatePListResult(request, session);
             }
+
+
         }
 
         return null;
+    }
+
+    private Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
+        try {
+            PListDict payloadContent = new PListDict();
+            payloadContent.setPayloadType("com.apple.caldav.account");
+            payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
+            payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
+            payloadContent.addStringValue("CalDAVUsername", session.getLogin());
+            payloadContent.addStringValue("CalDAVPassword", session.getPassword());
+            payloadContent.addStringValue("CalDAVHostname", getCalDAVUrl(request, session));
+            payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.plist.accountDescription", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session));
+
+            PListDict pListDict = new PListDict();
+            pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadIdentifier", "com.open-xchange", session));
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadUUID", PROFILE_CALDAV_DEFAULT_UUID, session));
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadContent(payloadContent);
+
+            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            fileHolder.setDisposition("attachment");
+            fileHolder.setName("caldav.plist");
+            fileHolder.setContentType("application/xml"); // Or application/x-plist ?
+            fileHolder.setDelivery("download");
+            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
+            pListDict.write(writer);
+            return new Result(fileHolder, "file");
+        } catch (XMLStreamException e) {
+            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private String getCalDAVUrl(OnboardingRequest request, Session session) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.caldav.url", String.class);
+        if (null == property || !property.isDefined()) {
+            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+        }
+
+        String value = property.get();
+        if (Strings.isEmpty(value)) {
+            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+        }
+
+        return value;
     }
 
     // --------------------------------------------- User-Agent parsing --------------------------------------------------------------

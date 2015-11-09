@@ -102,11 +102,11 @@ public interface OnboardingConfiguration extends Entity {
     /**
      * Executes this on-boarding configuration.
      *
-     * @param selection The selected configuration option
+     * @param request The configuration request providing selected options
      * @param session The session providing user data
      * @return The result
      * @throws OXException If execution fails
      */
-    Result execute(OnboardingRequest selection, Session session) throws OXException;
+    Result execute(OnboardingRequest request, Session session) throws OXException;
 
 }

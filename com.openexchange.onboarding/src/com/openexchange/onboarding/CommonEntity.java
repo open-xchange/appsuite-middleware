@@ -61,33 +61,33 @@ import com.openexchange.session.Session;
 public enum CommonEntity implements Entity {
 
     /**
-     * The entity for Apple iOS
+     * The entity for Apple iOS; <code>"apple.ios"</code>
      */
     APPLE_IOS(DefaultEntity.newInstance("apple.ios", "com.openexchange.onboarding.ios.", false), Platform.APPLE),
     /**
-     * The entity for Apple OSX
+     * The entity for Apple OSX; <code>"apple.osx"</code>
      */
     APPLE_OSX(DefaultEntity.newInstance("apple.osx", "com.openexchange.onboarding.osx.", false), Platform.APPLE),
     /**
-     * The entity for Apple iPad (via iOS)
+     * The entity for Apple iPad (via iOS); <code>"apple.ios.ipad"</code>
      */
     APPLE_IOS_IPAD(DefaultEntity.newInstance("apple.ios.ipad", "com.openexchange.onboarding.ipad.", false), Platform.APPLE),
     /**
-     * The entity for Apple iPhone (via iOS)
+     * The entity for Apple iPhone (via iOS); <code>"apple.ios.iphone"</code>
      */
     APPLE_IOS_IPHONE(DefaultEntity.newInstance("apple.ios.iphone", "com.openexchange.onboarding.iphone.", false), Platform.APPLE),
 
     /**
-     * The entity for Android/Google tablet
+     * The entity for Android/Google tablet; <code>"android.tablet"</code>
      */
     ANDROID_TABLET(DefaultEntity.newInstance("android.tablet", "com.openexchange.onboarding.android.tablet.", false), Platform.ANDROID_GOOGLE),
     /**
-     * The entity for Android/Google phone
+     * The entity for Android/Google phone; <code>"android.phone"</code>
      */
     ANDROID_PHONE(DefaultEntity.newInstance("android.phone", "com.openexchange.onboarding.android.phone.", false), Platform.ANDROID_GOOGLE),
 
     /**
-     * The entity for Windows Desktop 8 + 10
+     * The entity for Windows Desktop 8 + 10; <code>"windows.desktop"</code>
      */
     WINDOWS_DESKTOP_8_10(DefaultEntity.newInstance("windows.desktop", "com.openexchange.onboarding.windows.desktop.", false), Platform.WINDOWS),
 

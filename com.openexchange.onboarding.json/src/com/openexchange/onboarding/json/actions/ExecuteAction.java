@@ -84,7 +84,7 @@ public class ExecuteAction extends AbstractOnboardingAction {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
         String configurationId = requestData.getParameter("configurationId");
@@ -99,19 +99,22 @@ public class ExecuteAction extends AbstractOnboardingAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("selectionId");
         }
 
-        Result onboardingResult = config.execute(new DefaultOnboardingRequest(configurationId, selectionId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData))), session);
+        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(configurationId, selectionId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData)), requestData.getHostData());
+        Result onboardingResult = config.execute(onboardingRequest, session);
 
-        try {
-            if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
-                return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null), "json");
-            }
-
-            JSONObject jResult = new JSONObject(2);
-            jResult.put("result", onboardingResult.getResultText());
-            return new AJAXRequestResult(jResult, "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        Object resultObject = onboardingResult.getResultObject();
+        if (null != resultObject) {
+            String format = onboardingResult.getFormat();
+            return null == format ? new AJAXRequestResult(resultObject) : new AJAXRequestResult(resultObject, format);
         }
+
+        if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
+            return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null), "json");
+        }
+
+        JSONObject jResult = new JSONObject(2);
+        jResult.put("result", onboardingResult.getResultText());
+        return new AJAXRequestResult(jResult, "json");
     }
 
 }
