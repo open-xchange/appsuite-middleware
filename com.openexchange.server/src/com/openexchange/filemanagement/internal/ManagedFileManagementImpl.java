@@ -121,7 +121,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         private final ConcurrentMap<String, ManagedFileImpl> tfiles;
         private final int time2live;
         private final AtomicReference<File> tmpDirReference;
-        private final String defaultPrefix;
+        final String defaultPrefix;
 
         /**
          * Initializes a new {@link FileManagementTask}.
@@ -138,8 +138,8 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
         @Override
         public void run() {
             try {
-                // Grab all existing files belonging to this JVM instance (at least those with default prefix)
-                Map<String, File> existentFiles = new HashMap<String, File>(256, 0.9f);
+                // Grab all existing files belonging to this JVM instance (at least those with default prefix) older than 30 minutes
+                Map<String, File> orphanedFiles = null;
                 {
                     File directory = tmpDirReference.get();
                     if (!directory.canRead()) {
@@ -147,7 +147,7 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                         return;
                     }
                     final long stamp = System.currentTimeMillis() - 1800000; // Older than 30 minutes
-                    File[] listedFiles = directory.listFiles(new FileFilter() {
+                    File[] expiredFiles = directory.listFiles(new FileFilter() {
 
                         @Override
                         public boolean accept(File file) {
@@ -155,21 +155,23 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             return file.isFile() && file.getName().startsWith(defaultPrefix) && file.lastModified() < stamp;
                         }
                     });
-                    if (listedFiles.length == 0) {
-                        // No files available at the moment
-                        return;
-                    }
-                    for (File tmpFile : listedFiles) {
-                        existentFiles.put(tmpFile.getName(), tmpFile);
+                    if (expiredFiles != null) {
+                        int numberOfExpiredFiles = expiredFiles.length;
+                        if (numberOfExpiredFiles > 0) {
+                            orphanedFiles = new HashMap<String, File>(numberOfExpiredFiles, 0.9f);
+                            for (File tmpFile : expiredFiles) {
+                                orphanedFiles.put(tmpFile.getName(), tmpFile);
+                            }
+                        }
                     }
                 }
 
-                // Check for expired files
+                // Check for expired ManagedFile entries
                 long now = System.currentTimeMillis();
-                for (Iterator<ManagedFileImpl> iter = tfiles.values().iterator(); iter.hasNext();) {
-                    ManagedFileImpl cur = iter.next();
+                for (Iterator<ManagedFileImpl> filesIter = tfiles.values().iterator(); filesIter.hasNext();) {
+                    ManagedFileImpl cur = filesIter.next();
                     if (null == cur) {
-                        iter.remove();
+                        filesIter.remove();
                     } else {
                         // Expired if deleted OR time-to-live has elapsed
                         int optTimeToLive = cur.optTimeToLive();
@@ -178,23 +180,28 @@ public final class ManagedFileManagementImpl implements ManagedFileManagement {
                             File file = cur.getFilePlain();
                             String fname = null != file && file.exists() ? file.getName() : "";
                             cur.delete();
-                            iter.remove();
+                            filesIter.remove();
                             logger.debug("Removed expired managed file {}", fname);
                         } else {
-                            // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
-                            existentFiles.remove(cur.getFilePlain().getName());
+                            // For Safety's sake, cleanse from orphaned files
+                            if (null != orphanedFiles) {
+                                // Use getFileName() so that the underlying ManagedFile is not 'touched' again (something that will reset the LastAccess timestamp)
+                                orphanedFiles.remove(cur.getFilePlain().getName());
+                            }
                         }
                     }
                 }
 
                 // Check for orphaned files belonging to this JVM instance
-                for (Map.Entry<String, File> entry : existentFiles.entrySet()) {
-                    String name = entry.getKey();
-                    File orphaned = entry.getValue();
-                    if (!orphaned.delete()) {
-                        logger.warn("Temporary file could not be deleted: {}", name);
+                if (null != orphanedFiles) {
+                    for (Map.Entry<String, File> entry : orphanedFiles.entrySet()) {
+                        String name = entry.getKey();
+                        File orphaned = entry.getValue();
+                        if (!orphaned.delete()) {
+                            logger.warn("Temporary file could not be deleted: {}", name);
+                        }
+                        logger.debug("Removed orphaned managed file {}", name);
                     }
-                    logger.debug("Removed orphaned managed file {}", name);
                 }
             } catch (Exception t) {
                 logger.error("", t);
