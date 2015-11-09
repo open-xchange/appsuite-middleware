@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding.caldav;
 
+import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,6 +67,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringWriter;
@@ -170,6 +172,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 return sendEmailResult(request, session);
             }
         });
+
+        executors.put("apple.ios.ipad.caldav.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
+
+        executors.put("apple.ios.iphone.caldav.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
     }
 
     @Override
@@ -239,6 +257,9 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             // The eMail selection
             selections.add(DefaultOnboardingSelection.newInstance("apple.ios.ipad.caldav.email", "com.openexchange.onboarding.caldav.email."));
 
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.ipad.caldav.display", "com.openexchange.onboarding.caldav.display."));
+
             return selections;
         } else if ("apple.ios.iphone.caldav".equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
@@ -254,6 +275,9 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             // The eMail selection
             selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.email", "com.openexchange.onboarding.caldav.email."));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.display", "com.openexchange.onboarding.caldav.display."));
 
             return selections;
         }
@@ -275,6 +299,29 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
         return onboardingExecutor.execute(request, session);
     }
+
+    // --------------------------------------------- Display utils --------------------------------------------------------------
+
+    private final static String CALDAV_LOGIN_FIELD = "login";
+    private final static String CALDAV_PASSWORD_FIELD = "password";
+    private final static String CALDAV_HOST_FIELD = "hostName";
+
+    Result displayResult(OnboardingRequest request, Session session) throws OXException {
+        String resultText = OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_SETTINGS, session);
+
+        DynamicFormDescription form = new DynamicFormDescription();
+        form.add(custom("text", CALDAV_LOGIN_FIELD, CalDAVFormDisplayNames.CALDAV_LOGIN_DISPLAY_NAME))
+            .add(custom("text", CALDAV_PASSWORD_FIELD, CalDAVFormDisplayNames.CALDAV_PASSWORD_DISPLAY_NAME))
+            .add(custom("text", CALDAV_HOST_FIELD, CalDAVFormDisplayNames.CALDAV_HOST_DISPLAY_NAME));
+
+        Map<String, Object> formContent = new HashMap<String, Object>();
+        formContent.put(CALDAV_LOGIN_FIELD, session.getLogin());
+        formContent.put(CALDAV_PASSWORD_FIELD, session.getPassword());
+        formContent.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
+
+        return new Result(resultText, formContent, form);
+    }
+
 
     // --------------------------------------------- E-Mail utils --------------------------------------------------------------
 
@@ -298,7 +345,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             {
                 UserSettingMail userSettingMail = getUserSettingMail(session);
                 mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(userSettingMail.getSendAddr()));
-                mimeMessage.setSubject("Your CalDAV profile", "UTF-8");
+                mimeMessage.setSubject(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8");
                 mimeMessage.setHeader("Auto-Submitted", "auto-generated");
             }
 
@@ -306,7 +353,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             {
                 MimeBodyPart textBodyPart = new MimeBodyPart();
-                MessageUtility.setText("Your CalDAV profile", "UTF-8", textBodyPart);
+                MessageUtility.setText(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8", textBodyPart);
                 textBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/plain; charset=UTF-8"));
                 mimeMultipart.addBodyPart(textBodyPart);

@@ -51,27 +51,20 @@ package com.openexchange.onboarding.caldav;
 
 import com.openexchange.i18n.LocalizableStrings;
 
-
 /**
- * {@link CalDAVOnboardingStrings}
+ * {@link CalDAVFormDisplayNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class CalDAVOnboardingStrings implements LocalizableStrings {
+public class CalDAVFormDisplayNames implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link CalDAVOnboardingStrings}.
-     */
-    private CalDAVOnboardingStrings() {
+    public final static String CALDAV_LOGIN_DISPLAY_NAME = "User";
+    public final static String CALDAV_PASSWORD_DISPLAY_NAME = "Password";
+    public final static String CALDAV_HOST_DISPLAY_NAME = "Host name";
+
+    private CalDAVFormDisplayNames() {
         super();
     }
-
-    // A description for a CaldAV account on a mobile device
-    public static final String CALDAV_ACCOUNT_DESCRIPTION = "The CalDAV account for synchronizing calendar entries with Open-Xchange Server.";
-
-    public static final String CALDAV_TEXT_PROFILE = "Your CalDAV profile";
-
-    public static final String CALDAV_TEXT_SETTINGS = "Your CalDAV settings";
 
 }

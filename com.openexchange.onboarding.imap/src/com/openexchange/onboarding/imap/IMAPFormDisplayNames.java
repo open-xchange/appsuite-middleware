@@ -47,31 +47,25 @@
  *
  */
 
-package com.openexchange.onboarding.caldav;
+package com.openexchange.onboarding.imap;
 
 import com.openexchange.i18n.LocalizableStrings;
 
+public class IMAPFormDisplayNames implements LocalizableStrings {
 
-/**
- * {@link CalDAVOnboardingStrings}
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
- */
-public class CalDAVOnboardingStrings implements LocalizableStrings {
+    public final static String IMAP_LOGIN_DISPLAY_NAME = "IMAP login";
+    public final static String IMAP_PASSWORD_DISPLAY_NAME = "IMAP password";
+    public final static String IMAP_SERVER_DISPLAY_NAME = "IMAP server";
+    public final static String IMAP_PORT_DISPLAY_NAME = "IMAP port";
+    public final static String IMAP_SECURE_DISPLAY_NAME = "IMAP encryption";
+    public final static String SMTP_LOGIN_DISPLAY_NAME = "Transport login";
+    public final static String SMTP_PASSWORD_DISPLAY_NAME = "Transport password";
+    public final static String SMTP_SERVER_DISPLAY_NAME = "Transport server";
+    public final static String SMTP_PORT_DISPLAY_NAME = "Transport port";
+    public final static String SMTP_SECURE_DISPLAY_NAME = "Transport encryption";
 
-    /**
-     * Initializes a new {@link CalDAVOnboardingStrings}.
-     */
-    private CalDAVOnboardingStrings() {
+    private IMAPFormDisplayNames() {
         super();
     }
-
-    // A description for a CaldAV account on a mobile device
-    public static final String CALDAV_ACCOUNT_DESCRIPTION = "The CalDAV account for synchronizing calendar entries with Open-Xchange Server.";
-
-    public static final String CALDAV_TEXT_PROFILE = "Your CalDAV profile";
-
-    public static final String CALDAV_TEXT_SETTINGS = "Your CalDAV settings";
 
 }
