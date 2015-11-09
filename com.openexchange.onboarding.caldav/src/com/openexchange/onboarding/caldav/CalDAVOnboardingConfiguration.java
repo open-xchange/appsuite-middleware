@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.ClientInfo;
+import com.openexchange.onboarding.CommonEntity;
 import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
@@ -135,15 +136,15 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
         {
             List<Entity> path = new ArrayList<Entity>(4);
-            path.add(DefaultEntity.newInstance("apple.ios", "com.openexchange.onboarding.ios.", false));
-            path.add(DefaultEntity.newInstance("apple.ios.ipad", "com.openexchange.onboarding.ipad.", false));
+            path.add(CommonEntity.APPLE_IOS);
+            path.add(CommonEntity.APPLE_IOS_IPAD);
             path.add(DefaultEntity.newInstance("apple.ios.ipad.caldav", "com.openexchange.onboarding.caldav.", true));
             paths.add(new DefaultEntityPath(path));
         }
         {
             List<Entity> path = new ArrayList<Entity>(4);
-            path.add(DefaultEntity.newInstance("apple.ios", "com.openexchange.onboarding.ios.", false));
-            path.add(DefaultEntity.newInstance("apple.ios.iphone", "com.openexchange.onboarding.iphone.", false));
+            path.add(CommonEntity.APPLE_IOS);
+            path.add(CommonEntity.APPLE_IOS_IPHONE);
             path.add(DefaultEntity.newInstance("apple.ios.iphone.caldav", "com.openexchange.onboarding.caldav.", true));
             paths.add(new DefaultEntityPath(path));
         }
