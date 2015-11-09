@@ -156,6 +156,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
     public static final String FILE_SAVE_ABORTED_MSG = "The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.";
 
+    // Bad or expired access token. Need to re-authenticate user.
+    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

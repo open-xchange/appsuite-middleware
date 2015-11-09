@@ -316,6 +316,10 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * The storage backend denied this request because of a exceeded rate limit.
      */
     STORAGE_RATE_LIMIT("The storage backend denied this request because of a exceeded rate limit.", Category.CATEGORY_CAPACITY, 63),
+    /**
+     * Bad or expired access token. Need to re-authenticate user.
+     */
+    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_USER_INPUT, 64, FileStorageExceptionMessages.UNLINKED_ERROR_MSG),
 
     ;
 
