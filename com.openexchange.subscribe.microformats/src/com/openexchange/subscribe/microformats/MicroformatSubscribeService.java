@@ -64,7 +64,6 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringReader;
@@ -96,36 +95,6 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
      */
     public MicroformatSubscribeService() {
         super();
-    }
-
-    @Override
-    public boolean isCreateModifyEnabled() {
-        ConfigurationService configService = OXMFServiceRegistry.getInstance().getService(ConfigurationService.class);
-        return null != configService && configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false);
-    }
-
-    @Override
-    public void subscribe(Subscription subscription) throws OXException {
-        if (false == isCreateModifyEnabled()) {
-            throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
-        }
-        super.subscribe(subscription);
-    }
-
-    @Override
-    public void touch(Context ctx, int subscriptionId) throws OXException {
-        if (false == isCreateModifyEnabled()) {
-            throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
-        }
-        super.touch(ctx, subscriptionId);
-    }
-
-    @Override
-    public void update(final Subscription subscription) throws OXException {
-        if (false == isCreateModifyEnabled()) {
-            throw OXMFSubscriptionErrorMessage.FORBIDDEN_CREATE_MODIFY.create();
-        }
-        super.update(subscription);
     }
 
     @Override
@@ -259,6 +228,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
     }
 
     private static volatile Set<Pattern> allowedHosts;
+
     private static Set<Pattern> allowedHosts() {
         Set<Pattern> tmp = allowedHosts;
         if (null == allowedHosts) {
@@ -320,8 +290,7 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
         }
     }
 
-    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] {
-        '.', '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
+    private static final gnu.trove.set.TIntSet SPECIALS = new gnu.trove.set.hash.TIntHashSet(new int[] { '.', '+', '(', ')', '[', ']', '$', '^', '.', '{', '}', '|', '\\' });
 
     /**
      * Converts specified wild-card string to a regular expression

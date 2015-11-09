@@ -70,8 +70,4 @@ public class OXMFErrorStrings implements LocalizableStrings{
 
     // The string cannot be parsed to a valid URL.
     public static final String INVALID_URL = "You provided an invalid URL.";
-
-    // The operation is forbidden
-    public static final String FORBIDDEN_CREATE_MODIFY_MESSAGE = "The operation is forbidden.";
-
 }

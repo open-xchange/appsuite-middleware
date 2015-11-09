@@ -64,6 +64,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
@@ -71,6 +72,7 @@ import com.openexchange.subscribe.SubscribeService;
 import com.openexchange.subscribe.Subscription;
 import com.openexchange.subscribe.SubscriptionSource;
 import com.openexchange.subscribe.SubscriptionSourceDiscoveryService;
+import com.openexchange.subscribe.json.SubscriptionJSONErrorMessages;
 import com.openexchange.subscribe.json.SubscriptionJSONParser;
 import com.openexchange.subscribe.json.SubscriptionJSONWriter;
 import com.openexchange.tools.QueryStringPositionComparator;
@@ -82,6 +84,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:karsten.will@open-xchange.com">Karsten Will</a>
  */
 public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAction {
+
+    protected static final String MICROFORMATS_ID = "com.openexchange.subscribe.microformats";
 
     /**
      * Initializes a new {@link AbstractSubscribeAction}.
@@ -110,10 +114,7 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
         final List<SubscriptionSource> sources = getDiscovery(session).getSources();
         final List<Subscription> allSubscriptions = new ArrayList<Subscription>(10);
         for (final SubscriptionSource subscriptionSource : sources) {
-            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(
-                session.getContext(),
-                folder,
-                secret);
+            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(session.getContext(), folder, secret);
             allSubscriptions.addAll(subscriptions);
         }
         return allSubscriptions;
@@ -159,13 +160,7 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
         final JSONArray rows = new JSONArray();
         final SubscriptionJSONWriter writer = new SubscriptionJSONWriter();
         for (final Subscription subscription : allSubscriptions) {
-            final JSONArray row = writer.writeArray(
-                subscription,
-                basicColumns,
-                dynamicColumns,
-                dynamicColumnOrder,
-                subscription.getSource().getFormDescription(),
-                tz);
+            final JSONArray row = writer.writeArray(subscription, basicColumns, dynamicColumns, dynamicColumnOrder, subscription.getSource().getFormDescription(), tz);
             rows.put(row);
         }
         return rows;
@@ -189,4 +184,20 @@ public abstract class AbstractSubscribeAction extends AbstractSubscribeSourcesAc
         return service.loadSubscription(session.getContext(), id, secret);
     }
 
+    private boolean isCreateModifyEnabled() {
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        return null != configService && configService.getBoolProperty("com.openexchange.subscribe.microformats.createModifyEnabled", false);
+    }
+
+    /**
+     * Checks if the given subscription is allowed to become execute. Currently this check is only against OXMF subscriptions
+     * 
+     * @param subscription The {@link Subscription} to check
+     * @throws OXException Thrown if the {@link Subscription} the subscription is defined as not allowed to update/create
+     */
+    protected void checkAllowed(Subscription subscription) throws OXException {
+        if (subscription.containsSource() && subscription.getSource().getId().startsWith(MICROFORMATS_ID) && !isCreateModifyEnabled()) {
+            throw SubscriptionJSONErrorMessages.FORBIDDEN_CREATE_MODIFY.create();
+        }
+    }
 }
