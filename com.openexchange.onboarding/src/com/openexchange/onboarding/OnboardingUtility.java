@@ -220,7 +220,7 @@ public class OnboardingUtility {
             return null;
         }
 
-        return loadIconImageFromTemplate(imageName);
+        return loadIconImage(imageName);
     }
 
     /**
@@ -242,7 +242,7 @@ public class OnboardingUtility {
         }
 
         String imageName = property.get();
-        return Strings.isEmpty(imageName) ? loadIconImageFromTemplate(defaultImageName) : loadIconImageFromTemplate(imageName);
+        return Strings.isEmpty(imageName) ? loadIconImage(defaultImageName) : loadIconImage(imageName);
     }
 
     /**
@@ -251,7 +251,7 @@ public class OnboardingUtility {
      * @param imageName The image name; e.g. <code>"platform_icon_apple"</code>
      * @return The loaded icon image or <code>null</code>
      */
-    public static Icon loadIconImageFromTemplate(String imageName) {
+    public static Icon loadIconImage(String imageName) {
         String templatesPath = getTemplatesPath();
         if (Strings.isEmpty(templatesPath)) {
             return null;
