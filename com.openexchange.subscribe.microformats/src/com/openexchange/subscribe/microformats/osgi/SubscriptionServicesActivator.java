@@ -72,17 +72,17 @@ import com.openexchange.subscribe.microformats.transformers.MapToContactObjectTr
 import com.openexchange.subscribe.microformats.transformers.MapToDocumentMetadataHolderTransformer;
 
 /**
- * {@link SubcriptionServicesActivator}
+ * {@link SubscriptionServicesActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SubcriptionServicesActivator extends HousekeepingActivator {
+public class SubscriptionServicesActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link SubcriptionServicesActivator}.
+     * Initializes a new {@link SubscriptionServicesActivator}.
      */
-    public SubcriptionServicesActivator() {
+    public SubscriptionServicesActivator() {
         super();
     }
 

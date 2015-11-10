@@ -78,6 +78,8 @@ public class UpdateSubscriptionAction extends AbstractSubscribeAction {
 		final ServerSession session = subscribeRequest.getServerSession();
         Subscription subscription = getSubscription(subscribeRequest.getRequestData(), session, services.getService(SecretService.class).getSecret(session));
 
+        checkAllowed(subscription);
+        
 		final SubscribeService subscribeService = subscription.getSource().getSubscribeService();
         subscribeService.update(subscription);
 

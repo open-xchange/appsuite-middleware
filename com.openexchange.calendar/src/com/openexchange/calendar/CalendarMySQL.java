@@ -3195,7 +3195,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if (users == null && cdao.getFolderMoveAction() != CalendarOperation.NO_MOVE_ACTION) {
             users = edao.getUsers();
-            CalendarOperation.fillUserParticipants(cdao);
+            CalendarOperation.fillUserParticipants(cdao, edao);
         }
 
         final Participant[] old_participants = edao.getParticipants();
@@ -3709,7 +3709,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             calc_date = edao.getStartDate();
                         }
 
-                        if (cdao.containsEndDate()) {
+                        if (cdao.getEndDate() != null) {
                             end_date = cdao.getEndDate();
                         } else {
                             end_date = edao.getEndDate();

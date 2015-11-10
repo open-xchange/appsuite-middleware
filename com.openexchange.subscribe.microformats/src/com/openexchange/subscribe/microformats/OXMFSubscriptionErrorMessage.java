@@ -74,10 +74,6 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
      * The string cannot be parsed to a valid URL.
      */
     INVALID_URL(CATEGORY_USER_INPUT, 7, OXMFErrorStrings.INVALID_URL, "The string cannot be parsed to a valid URL."),
-    /**
-     * The operation is forbidden according to configuration.
-     */
-    FORBIDDEN_CREATE_MODIFY(CATEGORY_USER_INPUT, 8, OXMFErrorStrings.FORBIDDEN_CREATE_MODIFY_MESSAGE, "The operation is forbidden according to configuration.")
 
     ;
 
@@ -155,7 +151,9 @@ public enum OXMFSubscriptionErrorMessage implements DisplayableOXExceptionCode {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.exception.DisplayableOXExceptionCode#getDisplayMessage()
      */
     @Override

@@ -1642,6 +1642,7 @@ msgstr ""
 #. label of username input field
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -1830,6 +1831,12 @@ msgid ""
 "warnings for details."
 msgstr ""
 
+#. Bad or expired access token. Need to re-authenticate user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
+msgid "Bad or expired access token. Need to re-authenticate user."
+msgstr ""
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -1988,6 +1995,14 @@ msgstr ""
 #. The e-mail address you provided does not match any account on record.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:151
 msgid "The e-mail address you provided does not match any account on record."
+msgstr ""
+
+#. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
+msgid ""
+"The S3 storage responds with \"Bad Request\". Please check whether com."
+"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"configured for this filestore."
 msgstr ""
 
 #. No such document: %1$s
@@ -3447,132 +3462,79 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:93
+#. The identifier for user module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
+msgid "User"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:64
+msgid "Host name"
+msgstr ""
+
+#. A description for a CaldAV account on a mobile device
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:71
+msgid ""
+"The CalDAV account for synchronizing calendar entries with Open-Xchange "
+"Server."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:73
+msgid "Your CalDAV profile"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:75
+msgid "Your CalDAV settings"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:56
 msgid "IMAP login"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:94
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:57
 msgid "IMAP password"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:95
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:58
 msgid "IMAP server"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:96
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:59
 msgid "IMAP port"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:97
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:60
 msgid "IMAP encryption"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:61
 msgid "Transport login"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:99
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:62
 msgid "Transport password"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:100
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:63
 msgid "Transport server"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:64
 msgid "Transport port"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:102
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:65
 msgid "Transport encryption"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:110
-msgid "imapLogin"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:111
-msgid "imapPassword"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:112
-msgid "imapServer"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:113
-msgid "imapPort"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:114
-msgid "imapSecure"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:115
-msgid "smtpLogin"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:116
-msgid "smtpPassword"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:117
-msgid "smtpServer"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:118
-msgid "smtpPort"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:119
-msgid "smtpSecure"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:135
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:171
-msgid "com.openexchange.onboarding."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:135
-msgid ".imap"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:140
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:197
-msgid "IMAP configuration"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:176
-msgid "Desktop/OSX"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:203
-msgid "imap.display"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:203
-msgid "com.openexchange.onboarding.imap.display."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:235
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:236
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:237
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:238
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:239
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:240
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:241
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:242
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:243
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:244
-msgid "text"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingConfiguration.java:258
-msgid "Result"
 msgstr ""
 
 #. Your selection is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:70
 msgid "Your selection is not supported."
+msgstr ""
+
+#. The chosen configuration is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:73
+msgid "The chosen configuration is not supported."
 msgstr ""
 
 #. The name for Apple platform
@@ -3588,6 +3550,12 @@ msgstr ""
 #. The name for Android/Google platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:77
 msgid "Android"
+msgstr ""
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. E-Mail successfully sent
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:82
+msgid "E-Mail successfully sent"
 msgstr ""
 
 #. *
@@ -4250,11 +4218,6 @@ msgstr ""
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
-msgstr ""
-
-#. The identifier for user module
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
-msgid "User"
 msgstr ""
 
 #. The identifier for group module
@@ -8551,6 +8514,11 @@ msgstr ""
 msgid "The subscription you requested is unkonwn!"
 msgstr ""
 
+#. The operation is forbidden
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
+msgid "The operation is forbidden."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
 msgid "OXMF Contacts"
 msgstr ""
@@ -8583,11 +8551,6 @@ msgstr ""
 #. The string cannot be parsed to a valid URL.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
 msgid "You provided an invalid URL."
-msgstr ""
-
-#. The operation is forbidden
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "The operation is forbidden."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
@@ -8829,11 +8792,6 @@ msgstr ""
 #. Missing configuration for account "%1$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:77
 msgid "Missing configuration for account \"%1$s\"."
-msgstr ""
-
-#. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
-msgid "Bad or expired access token. Need to re-authenticate user."
 msgstr ""
 
 #. E-Mail address is invalid

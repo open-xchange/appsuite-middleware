@@ -50,12 +50,16 @@
 package com.openexchange.onboarding.json.actions;
 
 import static com.openexchange.osgi.Tools.requireService;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -91,6 +95,7 @@ public abstract class AbstractOnboardingAction implements AJAXActionService {
 
     /**
      * Gets a {@link Translator} for the session users locale.
+     *
      * @param session The session
      * @return The translator
      * @throws OXException
@@ -100,4 +105,23 @@ public abstract class AbstractOnboardingAction implements AJAXActionService {
         return translatorFactory.translatorFor(session.getUser().getLocale());
     }
 
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            return doPerform(requestData, session);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    /**
+     * Performs given request.
+     *
+     * @param requestData The request to perform
+     * @param session The session providing needed user data
+     * @return The result yielded for given request
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException;
 }

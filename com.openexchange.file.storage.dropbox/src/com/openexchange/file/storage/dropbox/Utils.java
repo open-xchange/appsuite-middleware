@@ -53,6 +53,7 @@ import java.util.Date;
 import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -204,6 +205,9 @@ public final class Utils {
             }
 
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(), msg);
+        }
+        if (DropboxUnlinkedException.class.isInstance(e)) {
+            return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
         }
         if (DropboxException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());

@@ -258,6 +258,12 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void writeErrorAsJsCallback(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        if (httpResponse.isCommitted()) {
+            // Cannot do anything about it as response is already committed. Just log that OXException...
+            LOG.error("", e);
+            return;
+        }
+
         try {
             // As API response
             APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);

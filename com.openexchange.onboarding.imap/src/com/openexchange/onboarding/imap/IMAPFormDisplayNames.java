@@ -47,43 +47,25 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.imap;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.i18n.LocalizableStrings;
 
-/**
- * {@link OnboardingRequest} - Represents an on-boarding request from a certain selection a user has chosen from configuration tree.
- *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
- */
-public interface OnboardingRequest {
+public class IMAPFormDisplayNames implements LocalizableStrings {
 
-    /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
-     *
-     * @return The on-boarding configuration identifier
-     */
-    String getConfigurationId();
+    public final static String IMAP_LOGIN_DISPLAY_NAME = "IMAP login";
+    public final static String IMAP_PASSWORD_DISPLAY_NAME = "IMAP password";
+    public final static String IMAP_SERVER_DISPLAY_NAME = "IMAP server";
+    public final static String IMAP_PORT_DISPLAY_NAME = "IMAP port";
+    public final static String IMAP_SECURE_DISPLAY_NAME = "IMAP encryption";
+    public final static String SMTP_LOGIN_DISPLAY_NAME = "Transport login";
+    public final static String SMTP_PASSWORD_DISPLAY_NAME = "Transport password";
+    public final static String SMTP_SERVER_DISPLAY_NAME = "Transport server";
+    public final static String SMTP_PORT_DISPLAY_NAME = "Transport port";
+    public final static String SMTP_SECURE_DISPLAY_NAME = "Transport encryption";
 
-    /**
-     * Gets the identifier of the selection for the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav.profile.download"</code>
-     *
-     * @return The identifier of the selection
-     */
-    String getSelectionId();
+    private IMAPFormDisplayNames() {
+        super();
+    }
 
-    /**
-     * Gets the client information
-     *
-     * @return The client information
-     */
-    ClientInfo getClientInfo();
-
-    /**
-     * Gets the associated host data
-     *
-     * @return The host data
-     */
-    HostData getHostData();
 }

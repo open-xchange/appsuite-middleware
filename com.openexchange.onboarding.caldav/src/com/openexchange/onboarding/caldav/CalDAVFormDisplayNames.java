@@ -47,43 +47,24 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.caldav;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link OnboardingRequest} - Represents an on-boarding request from a certain selection a user has chosen from configuration tree.
+ * {@link CalDAVFormDisplayNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingRequest {
+public class CalDAVFormDisplayNames implements LocalizableStrings {
 
-    /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
-     *
-     * @return The on-boarding configuration identifier
-     */
-    String getConfigurationId();
+    public final static String CALDAV_LOGIN_DISPLAY_NAME = "User";
+    public final static String CALDAV_PASSWORD_DISPLAY_NAME = "Password";
+    public final static String CALDAV_HOST_DISPLAY_NAME = "Host name";
 
-    /**
-     * Gets the identifier of the selection for the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav.profile.download"</code>
-     *
-     * @return The identifier of the selection
-     */
-    String getSelectionId();
+    private CalDAVFormDisplayNames() {
+        super();
+    }
 
-    /**
-     * Gets the client information
-     *
-     * @return The client information
-     */
-    ClientInfo getClientInfo();
-
-    /**
-     * Gets the associated host data
-     *
-     * @return The host data
-     */
-    HostData getHostData();
 }

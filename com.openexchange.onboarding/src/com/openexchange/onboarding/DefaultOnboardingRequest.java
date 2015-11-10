@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
  * {@link DefaultOnboardingRequest} - The default <code>OnboardingRequest</code> implementation.
@@ -61,6 +62,7 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
     private final String configurationId;
     private final String selectionId;
     private final ClientInfo clientInfo;
+    private final HostData hostData;
 
     /**
      * Initializes a new {@link DefaultOnboardingRequest}.
@@ -68,12 +70,14 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
      * @param configurationId The configuration identifier
      * @param selectionId The selection identifier
      * @param clientInfo The client information
+     * @param hostData The host data
      */
-    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo) {
+    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo, HostData hostData) {
         super();
         this.configurationId = configurationId;
         this.selectionId = selectionId;
         this.clientInfo = clientInfo;
+        this.hostData = hostData;
     }
 
     @Override
@@ -89,6 +93,11 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
     @Override
     public ClientInfo getClientInfo() {
         return clientInfo;
+    }
+
+    @Override
+    public HostData getHostData() {
+        return hostData;
     }
 
 }

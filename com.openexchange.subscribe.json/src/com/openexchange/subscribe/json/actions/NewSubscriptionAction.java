@@ -79,7 +79,7 @@ public class NewSubscriptionAction extends AbstractSubscribeAction {
         if (null == subscriptionSource) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("source");
         }
-
+        checkAllowed(subscription);
         subscriptionSource.getSubscribeService().subscribe(subscription);
 
         return new AJAXRequestResult(Integer.valueOf(subscription.getId()), "json");

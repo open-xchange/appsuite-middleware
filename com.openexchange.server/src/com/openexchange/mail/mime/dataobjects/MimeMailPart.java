@@ -90,7 +90,6 @@ import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
-import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -343,13 +342,13 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
         if (isMulti) {
             return null;
         }
-        
+
         ThresholdFileHolder backup = null;
         try {
             final Object obj = part.getContent();
             if (obj instanceof MimeMessage) {
                 MailMessage mContent;
-                
+
                 MimeMessage nestedMessage = (MimeMessage) obj;
                 String encoding = MimeMessageUtility.getHeader(MessageHeaders.HDR_CONTENT_TRANSFER_ENC, null, part);
                 if ("quoted-printable".equalsIgnoreCase(encoding)) {
@@ -369,7 +368,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
                 } else {
                     mContent = MimeMessageConverter.convertMessage(nestedMessage, false);
                 }
-                
+
                 return mContent;
             } else if (obj instanceof Part) {
                 return MimeMessageConverter.convertPart((Part) obj, false);
@@ -393,7 +392,7 @@ public final class MimeMailPart extends MailPart implements MimeRawSource, MimeC
             }
         }
     }
-    
+
     @Override
     public DataHandler getDataHandler() throws OXException {
         final Part part = this.part;

@@ -53,12 +53,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Locale;
+import java.util.Map;
 import org.slf4j.Logger;
+import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -121,7 +124,7 @@ public class OnboardingUtility {
      *
      * @param propertyName The property name for the i18n string to translate
      * @param session The session from requesting user
-     * @return The translated string
+     * @return The translated string or <code>null</code>
      * @throws OXException If translated string cannot be returned
      */
     public static String getTranslationFromProperty(String propertyName, Session session) throws OXException {
@@ -138,6 +141,59 @@ public class OnboardingUtility {
             return null;
         }
         return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+    }
+
+    /**
+     * Gets the translation for referenced i18n string; returns translation for default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param translateDefaultValue Whether specified default value is supposed to be translated
+     * @param session The session from requesting user
+     * @return The translated string or <code>defaultValue</code>
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getTranslationFromProperty(String propertyName, String defaultValue, boolean translateDefaultValue, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(session)).getString(defaultValue) : defaultValue;
+        }
+
+        String i18nString = property.get();
+        if (Strings.isEmpty(i18nString)) {
+            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(session)).getString(defaultValue) : defaultValue;
+        }
+        return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+    }
+
+    /**
+     * Gets the translation for referenced i18n string; returns translation for default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param translateDefaultValue Whether specified default value is supposed to be translated
+     * @param session The session from requesting user
+     * @return The translated string or <code>defaultValue</code>
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getValueFromProperty(String propertyName, String defaultValue, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        String value = property.get();
+        if (Strings.isEmpty(value)) {
+            return defaultValue;
+        } else {
+            return value;
+        }
     }
 
     /**
@@ -187,6 +243,77 @@ public class OnboardingUtility {
     public static String getTemplatesPath() {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         return configService.getProperty("com.openexchange.templating.path");
+    }
+
+    /**
+     * Constructs a URL to this server, injecting the host name and optionally the JVM route.
+     *
+     * <pre>
+     *  &lt;protocol&gt; + "://" + &lt;hostname&gt; + "/" + &lt;path&gt; + &lt;jvm-route&gt; + "?" + &lt;query-string&gt;
+     * </pre>
+     *
+     * @param hostData The host data
+     * @param optProtocol The protocol to use (HTTP or HTTPS). If <code>null</code>, defaults to the protocol used for this request.
+     * @param optPath The path on the server. If <code>null</code> no path is inserted
+     * @param withRoute Whether to include the JVM route in the server URL or not
+     * @param params The query string parameters. If <code>null</code> no query is included
+     * @return A string builder with the URL so far, ready for meddling.
+     */
+    public static StringBuilder constructURLWithParameters(HostData hostData, String optProtocol, String optPath, boolean withRoute, Map<String, String> params) {
+        final StringBuilder url = new StringBuilder(128);
+        // Protocol/schema
+        {
+            String prot = optProtocol;
+            if (prot == null) {
+                prot = hostData.isSecure() ? "https://" : "http://";
+            }
+            url.append(prot);
+            if (!prot.endsWith("://")) {
+                url.append("://");
+            }
+        }
+        // Host name
+        url.append(hostData.getHost());
+        {
+            // ... and port
+            int port = hostData.getPort();
+            if ((hostData.isSecure() && port != 443) || (!hostData.isSecure() && port != 80)) {
+                url.append(':').append(port);
+            }
+        }
+        // Path
+        if (optPath != null) {
+            if (!optPath.startsWith("/")) {
+                url.append('/');
+            }
+            url.append(optPath);
+        }
+        // JVM route
+        if (withRoute) {
+            url.append(";jsessionid=").append(hostData.getRoute());
+        }
+        // Query string
+        if (params != null) {
+            boolean first = true;
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                if (!Strings.isEmpty(key)) {
+                    if (first) {
+                        url.append('?');
+                        first = false;
+                    } else {
+                        url.append('&');
+                    }
+                    url.append(AJAXUtility.encodeUrl(key, true));
+                    String value = entry.getValue();
+                    if (!Strings.isEmpty(value)) {
+                        url.append('=').append(AJAXUtility.encodeUrl(value, true));
+                    }
+                }
+            }
+        }
+        // Return URL
+        return url;
     }
 
 }

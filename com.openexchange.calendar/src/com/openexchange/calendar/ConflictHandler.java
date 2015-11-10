@@ -113,7 +113,7 @@ public class ConflictHandler {
             return NO_CONFLICTS;
         } else if (cdao.isSingle() && cdao.getEndDate() != null && recColl.checkMillisInThePast(cdao.getEndDate().getTime())) {
             return NO_CONFLICTS; // Past single apps should never conflict
-        } else if (cdao.isSequence() && recColl.checkMillisInThePast(recColl.getMaxUntilDate(cdao).getTime())) {
+        } else if (cdao.isSequence() && recColl.checkMillisInThePast((cdao.getStartDate() != null ? recColl.getMaxUntilDate(cdao) : recColl.getMaxUntilDate(edao)).getTime())) {
             return NO_CONFLICTS; // Past series apps should never conflict
         } else if (!create && !cdao.containsShownAs() && isFree()) {
             //if (cdao.getShownAs() == CalendarDataObject.FREE) {
@@ -156,8 +156,8 @@ public class ConflictHandler {
          * Using original method {@link #resolveResourceConflicts(Date, Date)}
          * for non series appointments.
          */
-        Date start = cdao.getStartDate();
-        Date end = cdao.getEndDate();
+        Date start = cdao.getStartDate() != null ? cdao.getStartDate() : edao.getStartDate();
+        Date end = cdao.getEndDate() != null ? cdao.getEndDate() : edao.getEndDate();
         if (cdao.getRecurrenceType() == CalendarObject.NO_RECURRENCE) {
             if (request_participants) {
                 return resolveParticipantConflicts(start, end);

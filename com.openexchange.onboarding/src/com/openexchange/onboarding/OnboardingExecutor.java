@@ -49,41 +49,25 @@
 
 package com.openexchange.onboarding;
 
-import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingRequest} - Represents an on-boarding request from a certain selection a user has chosen from configuration tree.
+ * {@link OnboardingExecutor} - Executes a certain on-boarding request.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingRequest {
+public interface OnboardingExecutor {
 
     /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
+     * Executes specified on-boarding request.
      *
-     * @return The on-boarding configuration identifier
+     * @param request The on-boarding request
+     * @param session The session providing user data
+     * @return The result
+     * @throws OXException If execution fails
      */
-    String getConfigurationId();
+    Result execute(OnboardingRequest request, Session session) throws OXException;
 
-    /**
-     * Gets the identifier of the selection for the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav.profile.download"</code>
-     *
-     * @return The identifier of the selection
-     */
-    String getSelectionId();
-
-    /**
-     * Gets the client information
-     *
-     * @return The client information
-     */
-    ClientInfo getClientInfo();
-
-    /**
-     * Gets the associated host data
-     *
-     * @return The host data
-     */
-    HostData getHostData();
 }

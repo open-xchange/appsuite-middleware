@@ -57,7 +57,6 @@ import java.util.Map;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.i18n.LocalizableStrings;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -87,25 +86,6 @@ import com.openexchange.user.UserService;
  * @since v7.8.1
  */
 public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
-
-    public static class IMAPFormDisplayNames implements LocalizableStrings {
-
-        public final static String IMAP_LOGIN_DISPLAY_NAME = "IMAP login";
-        public final static String IMAP_PASSWORD_DISPLAY_NAME = "IMAP password";
-        public final static String IMAP_SERVER_DISPLAY_NAME = "IMAP server";
-        public final static String IMAP_PORT_DISPLAY_NAME = "IMAP port";
-        public final static String IMAP_SECURE_DISPLAY_NAME = "IMAP encryption";
-        public final static String SMTP_LOGIN_DISPLAY_NAME = "Transport login";
-        public final static String SMTP_PASSWORD_DISPLAY_NAME = "Transport password";
-        public final static String SMTP_SERVER_DISPLAY_NAME = "Transport server";
-        public final static String SMTP_PORT_DISPLAY_NAME = "Transport port";
-        public final static String SMTP_SECURE_DISPLAY_NAME = "Transport encryption";
-
-        private IMAPFormDisplayNames() {
-            super();
-        }
-
-    }
 
     private final static String IMAP_LOGIN_FIELD = "imapLogin";
     private final static String IMAP_PASSWORD_FIELD = "imapPassword";
@@ -205,7 +185,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Result execute(OnboardingRequest selection, Session session) throws OXException {
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
         MailService mailService = services.getService(MailService.class);
         SMTPConfig smtpConfig = new SMTPConfig();
         TransportConfig.getTransportConfig(smtpConfig, session, 0);

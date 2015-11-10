@@ -60,7 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration extends Entity {
+public interface OnboardingConfiguration extends Entity, OnboardingExecutor {
 
     /**
      * Checks if this configuration is enabled for session-associated user.
@@ -98,15 +98,5 @@ public interface OnboardingConfiguration extends Entity {
      * @throws OXException If denoted entity has no selections or selections cannot be returned
      */
     List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException;
-
-    /**
-     * Executes this on-boarding configuration.
-     *
-     * @param selection The selected configuration option
-     * @param session The session providing user data
-     * @return The result
-     * @throws OXException If execution fails
-     */
-    Result execute(OnboardingRequest selection, Session session) throws OXException;
 
 }

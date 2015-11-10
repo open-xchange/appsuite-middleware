@@ -235,17 +235,17 @@ public class HttpServletResponseWrapper implements HttpServletResponse {
      */
     @Override
     public void setHeader(String headerName, String headerValue) {
-        Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
-
         if (httpServletResponse.isCommitted()) {
             throw new IllegalStateException("Response is already committed");
         }
 
         if (headerValue == null) {
+            Response internalResponse = ServletUtils.getInternalResponse(httpServletResponse);
             HttpResponsePacket httpResponsePacket = internalResponse.getResponse();
             MimeHeaders responseMimeHeaders = httpResponsePacket.getHeaders();
             responseMimeHeaders.removeHeader(headerName);
-        } else { // delegate to the original response implementation
+        } else {
+            // Delegate to the original response implementation
             httpServletResponse.setHeader(headerName, headerValue);
         }
     }

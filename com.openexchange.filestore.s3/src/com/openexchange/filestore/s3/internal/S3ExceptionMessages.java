@@ -150,6 +150,9 @@ public final class S3ExceptionMessages implements LocalizableStrings {
     // The e-mail address you provided does not match any account on record.
     public static final String UnresolvableGrantByEmailAddress_MSG = "The e-mail address you provided does not match any account on record.";
 
+    // The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
+    public static final String BadRequest_MSG = "The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.";
+
     /**
      * Initializes a new {@link S3ExceptionMessages}.
      */

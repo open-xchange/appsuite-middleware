@@ -78,4 +78,7 @@ public class OnboardingStrings implements LocalizableStrings {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
+    // E-Mail successfully sent
+    public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
+
 }

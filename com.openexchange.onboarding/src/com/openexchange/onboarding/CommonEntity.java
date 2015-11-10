@@ -49,99 +49,85 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link TestOnboardingConfiguration}
+ * {@link CommonEntity} - An enumeration for common entities without a description.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TestOnboardingConfiguration implements OnboardingConfiguration {
-
-    private String id;
-    private String displayName;
-    private Platform platform;
-    private String description;
-    private boolean enabled;
-    private List<EntityPath> paths;
+public enum CommonEntity implements Entity {
 
     /**
-     * Initializes a new {@link TestOnboardingConfiguration}.
+     * The entity for Apple iOS; <code>"apple.ios"</code>
      */
-    public TestOnboardingConfiguration() {
-        super();
+    APPLE_IOS(DefaultEntity.newInstance("apple.ios", "com.openexchange.onboarding.ios.", false), Platform.APPLE),
+    /**
+     * The entity for Apple OSX; <code>"apple.osx"</code>
+     */
+    APPLE_OSX(DefaultEntity.newInstance("apple.osx", "com.openexchange.onboarding.osx.", false), Platform.APPLE),
+    /**
+     * The entity for Apple iPad (via iOS); <code>"apple.ios.ipad"</code>
+     */
+    APPLE_IOS_IPAD(DefaultEntity.newInstance("apple.ios.ipad", "com.openexchange.onboarding.ipad.", false), Platform.APPLE),
+    /**
+     * The entity for Apple iPhone (via iOS); <code>"apple.ios.iphone"</code>
+     */
+    APPLE_IOS_IPHONE(DefaultEntity.newInstance("apple.ios.iphone", "com.openexchange.onboarding.iphone.", false), Platform.APPLE),
+
+    /**
+     * The entity for Android/Google tablet; <code>"android.tablet"</code>
+     */
+    ANDROID_TABLET(DefaultEntity.newInstance("android.tablet", "com.openexchange.onboarding.android.tablet.", false), Platform.ANDROID_GOOGLE),
+    /**
+     * The entity for Android/Google phone; <code>"android.phone"</code>
+     */
+    ANDROID_PHONE(DefaultEntity.newInstance("android.phone", "com.openexchange.onboarding.android.phone.", false), Platform.ANDROID_GOOGLE),
+
+    /**
+     * The entity for Windows Desktop 8 + 10; <code>"windows.desktop"</code>
+     */
+    WINDOWS_DESKTOP_8_10(DefaultEntity.newInstance("windows.desktop", "com.openexchange.onboarding.windows.desktop.", false), Platform.WINDOWS),
+
+    ;
+
+    private final Entity delegate;
+    private final Platform platform;
+
+    private CommonEntity(Entity delegate, Platform platform) {
+        this.delegate = delegate;
+        this.platform = platform;
     }
 
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName(Session session) {
-        return displayName;
-    }
-
-    @Override
-    public Icon getIcon(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        return enabled;
-    }
-
-    @Override
-    public Platform getPlatform() throws OXException {
+    /**
+     * Gets the platform associated with this entity
+     *
+     * @return The platform
+     */
+    public Platform getPlatform() {
         return platform;
     }
 
     @Override
-    public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        return paths;
+    public String getId() {
+        return delegate.getId();
+    }
+
+    @Override
+    public String getDisplayName(Session session) throws OXException {
+        return delegate.getDisplayName(session);
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return delegate.getIcon(session);
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return description;
-    }
-
-    @Override
-    public List<OnboardingSelection> getSelections(String entityId, ClientInfo clientInfo, Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        return null;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPaths(List<EntityPath> paths) {
-        this.paths = paths;
+        return delegate.getDescription(session);
     }
 
 }
