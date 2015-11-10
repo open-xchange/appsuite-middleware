@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,39 +49,40 @@
 
 package com.openexchange.ajax.contact;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import com.openexchange.ajax.contact.action.AutocompleteRequest;
+import com.openexchange.ajax.framework.CommonSearchResponse;
 
-public final class ContactBugTestSuite extends TestSuite {
 
-    private ContactBugTestSuite() {
-        super();
+/**
+ * {@link Bug42225Test} - Empty query string leads to SQLException
+ *
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.1
+ */
+public class Bug42225Test extends AbstractManagedContactTest {
+
+    /**
+     * Initializes a new {@link Bug42225Test}.
+     * @param name
+     */
+    public Bug42225Test(String name) {
+        super(name);
     }
 
-    public static Test suite() {
-        final TestSuite tests = new TestSuite();
-        tests.addTestSuite(Bug4409Test.class);
-        tests.addTestSuite(Bug6335Test.class);
-        tests.addTestSuite(Bug12716Test.class);
-        tests.addTestSuite(Bug13931Test.class);
-        tests.addTestSuite(Bug13960Test.class);
-        tests.addTestSuite(Bug15317Test.class);
-        tests.addTestSuite(Bug15315Test.class);
-        tests.addTestSuite(Bug15937Test.class);
-        tests.addTestSuite(Bug16515Test.class);
-        tests.addTestSuite(Bug16618Test.class);
-        tests.addTestSuite(Bug17513Test.class);
-        tests.addTestSuite(Bug13915FileAsViaJSON.class);
-        tests.addTestSuite(Bug18608Test_SpecialCharsInEmailTest.class);
-        tests.addTestSuite(Bug19827Test.class);
-        tests.addTestSuite(Bug25300Test.class);
-        tests.addTestSuite(Bug28185Test.class);
-        tests.addTestSuite(Bug31993Test.class);
-        tests.addTestSuite(Bug34075Test.class);
-        tests.addTestSuite(Bug32635Test.class);
-        tests.addTestSuite(Bug35059Test.class);
-        tests.addTestSuite(Bug36943Test.class);
-        tests.addTestSuite(Bug42225Test.class);
-        return tests;
+    public void testBug42225() throws Exception {
+        AutocompleteRequest req = new AutocompleteRequest("", false, String.valueOf(client.getValues().getPrivateContactFolder()), new int[] { 500 }, false);
+        CommonSearchResponse resp = client.execute(req);
+        assertFalse("Response has error.", resp.hasError());
     }
+
+    @Override
+    public void setUp() throws Exception {
+        super.setUp();
+    }
+
+    @Override
+    public void tearDown() throws Exception {
+        super.tearDown();
+    }
+
 }
