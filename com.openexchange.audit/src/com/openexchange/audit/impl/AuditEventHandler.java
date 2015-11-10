@@ -381,6 +381,8 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append("EVENT TYPE: UPDATE; ");
         } else if (commonEvent.getAction() == CommonEvent.DELETE) {
             logBuilder.append("EVENT TYPE: DELETE; ");
+        } else {
+            logBuilder.append("EVENT TYPE: " + commonEvent.getAction() + "; ");
         }
 
         synchronized (logDateFormat) {

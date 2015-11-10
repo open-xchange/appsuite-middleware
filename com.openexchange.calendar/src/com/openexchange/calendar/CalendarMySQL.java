@@ -3709,7 +3709,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                             calc_date = edao.getStartDate();
                         }
 
-                        if (cdao.containsEndDate()) {
+                        if (cdao.getEndDate() != null) {
                             end_date = cdao.getEndDate();
                         } else {
                             end_date = edao.getEndDate();
