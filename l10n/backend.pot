@@ -3578,6 +3578,17 @@ msgstr ""
 msgid "E-Mail successfully sent"
 msgstr ""
 
+#. ----------------------------------------------------------------------------------------------------------------------
+#. Used when rendering a form in which the user is supposed to enter an E-Mail address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:98
+msgid "E-Mail address"
+msgstr ""
+
+#. Used when rendering a form in which the user is supposed to enter a phone number address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:101
+msgid "Phone number"
+msgstr ""
+
 #. *
 #. * New password too short.
 #.
