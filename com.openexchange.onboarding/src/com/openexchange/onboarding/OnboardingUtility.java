@@ -195,11 +195,7 @@ public class OnboardingUtility {
         }
 
         String value = property.get();
-        if (Strings.isEmpty(value)) {
-            return defaultValue;
-        } else {
-            return value;
-        }
+        return Strings.isEmpty(value) ? defaultValue : value;
     }
 
     /**
@@ -211,8 +207,6 @@ public class OnboardingUtility {
      * @throws OXException If loading icon fails
      */
     public static Icon loadIconImageFromProperty(String propertyName, Session session) throws OXException {
-        MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
-
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -226,6 +220,38 @@ public class OnboardingUtility {
             return null;
         }
 
+        return loadIconImageFromTemplate(imageName);
+    }
+
+    /**
+     * Loads an icon image for referenced property.
+     *
+     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onbaording.apple.icon"</code>
+     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param session The session from requesting user
+     * @return The loaded icon or <code>null</code>
+     * @throws OXException If loading icon fails
+     */
+    public static Icon loadIconImageFromProperty(String propertyName, String defaultImageName, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return null;
+        }
+
+        String imageName = property.get();
+        return Strings.isEmpty(imageName) ? loadIconImageFromTemplate(defaultImageName) : loadIconImageFromTemplate(imageName);
+    }
+
+    /**
+     * Loads the named icon image from template path.
+     *
+     * @param imageName The image name; e.g. <code>"platform_icon_apple"</code>
+     * @return The loaded icon image or <code>null</code>
+     */
+    public static Icon loadIconImageFromTemplate(String imageName) {
         String templatesPath = getTemplatesPath();
         if (Strings.isEmpty(templatesPath)) {
             return null;
@@ -234,7 +260,9 @@ public class OnboardingUtility {
         try {
             File image = new File(new File(templatesPath), imageName);
             byte[] imageBytes = Streams.stream2bytes(new FileInputStream(image));
-            return new DefaultIcon(imageBytes, mimeTypeMap.getContentType(imageName));
+
+            MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
+            return new DefaultIcon(imageBytes, null == mimeTypeMap ? null : mimeTypeMap.getContentType(imageName));
         } catch (IOException e) {
             LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
             return null;
