@@ -219,65 +219,60 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Platform getPlatform() throws OXException {
-        return Platform.APPLE;
-    }
-
-    @Override
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
         {
             List<Entity> path = new ArrayList<Entity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPAD);
-            path.add(DefaultEntity.newInstance("apple.ios.ipad.caldav", "com.openexchange.onboarding.caldav.", true));
-            paths.add(new DefaultEntityPath(path));
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
         {
             List<Entity> path = new ArrayList<Entity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
-            path.add(DefaultEntity.newInstance("apple.ios.iphone.caldav", "com.openexchange.onboarding.caldav.", true));
-            paths.add(new DefaultEntityPath(path));
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
         return paths;
     }
 
     @Override
     public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
-        if ("apple.ios.ipad.caldav".equals(lastEntityId)) {
+        if ((CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(2);
 
             // Via download or eMail
             if (isIPad(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance("apple.ios.ipad.caldav.download", "com.openexchange.onboarding.caldav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.download", "com.openexchange.onboarding.caldav.download."));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.ipad.caldav.email", "com.openexchange.onboarding.caldav.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.email", "com.openexchange.onboarding.caldav.email."));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.ipad.caldav.display", "com.openexchange.onboarding.caldav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.display", "com.openexchange.onboarding.caldav.display."));
 
             return selections;
-        } else if ("apple.ios.iphone.caldav".equals(lastEntityId)) {
+        } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
 
             // Via download, SMS or eMail
             if (isIPhone(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.download", "com.openexchange.onboarding.caldav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.download", "com.openexchange.onboarding.caldav.download."));
 
                 // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.sms", "com.openexchange.onboarding.caldav.sms."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.sms", "com.openexchange.onboarding.caldav.sms."));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.email", "com.openexchange.onboarding.caldav.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.email", "com.openexchange.onboarding.caldav.email."));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance("apple.ios.iphone.caldav.display", "com.openexchange.onboarding.caldav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.display", "com.openexchange.onboarding.caldav.display."));
 
             return selections;
         }
@@ -421,7 +416,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment");
-            fileHolder.setName("caldav.plist");
+            fileHolder.setName("caldav.mobileconfig");
             fileHolder.setContentType("application/xml"); // Or application/x-plist ?
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());

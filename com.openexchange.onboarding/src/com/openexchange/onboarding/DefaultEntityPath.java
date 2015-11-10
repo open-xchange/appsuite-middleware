@@ -51,6 +51,7 @@ package com.openexchange.onboarding;
 
 import java.util.Collection;
 import java.util.Iterator;
+import org.apache.commons.lang.Validate;
 
 /**
  * {@link DefaultEntityPath} - The default {@code EntityPath} implementation.
@@ -60,14 +61,23 @@ import java.util.Iterator;
  */
 public class DefaultEntityPath implements EntityPath {
 
+    private final Platform platform;
     private final Collection<Entity> col;
 
     /**
      * Initializes a new {@link DefaultEntityPath}.
      */
-    public DefaultEntityPath(Collection<Entity> col) {
+    public DefaultEntityPath(Platform platform, Collection<Entity> col) {
         super();
+        Validate.notNull(platform, "Platform must not be null.");
+        Validate.notNull(col, "Collection must not be null.");
+        this.platform = platform;
         this.col = col;
+    }
+
+    @Override
+    public Platform getPlatform() {
+        return platform;
     }
 
     @Override

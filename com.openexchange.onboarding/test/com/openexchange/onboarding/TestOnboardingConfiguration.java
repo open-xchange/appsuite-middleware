@@ -63,7 +63,6 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
 
     private String id;
     private String displayName;
-    private Platform platform;
     private String description;
     private boolean enabled;
     private List<EntityPath> paths;
@@ -96,11 +95,6 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public Platform getPlatform() throws OXException {
-        return platform;
-    }
-
-    @Override
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
         return paths;
     }
@@ -130,10 +124,6 @@ public class TestOnboardingConfiguration implements OnboardingConfiguration {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
-    }
-
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
     }
 
     public void setEnabled(boolean enabled) {

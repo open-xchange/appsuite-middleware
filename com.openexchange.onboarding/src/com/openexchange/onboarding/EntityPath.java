@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.exception.OXException;
 
 /**
  * {@link EntityPath} - Represents a path in the configuration tree to a certain on-boarding configuration option.
@@ -58,5 +59,12 @@ package com.openexchange.onboarding;
  */
 public interface EntityPath extends Iterable<Entity> {
 
-    // No additional methods
+    /**
+     * Gets the associated platform.
+     *
+     * @return The supported
+     * @throws OXException If the platform cannot be returned
+     */
+    Platform getPlatform() throws OXException;
+
 }

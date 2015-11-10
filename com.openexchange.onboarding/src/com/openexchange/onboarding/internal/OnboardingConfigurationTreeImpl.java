@@ -169,16 +169,15 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
         }
 
         void add(OnboardingConfiguration configuration, Session session) throws OXException {
-            Platform platform = configuration.getPlatform();
+            for (EntityPath entityPath : configuration.getEntityPaths(session)) {
+                Platform platform = entityPath.getPlatform();
 
-            NodeElem nodeElem = elems.get(platform);
-            if (null == nodeElem) {
-                nodeElem = new NodeElem(platform);
-                elems.put(platform, nodeElem);
-            }
+                NodeElem nodeElem = elems.get(platform);
+                if (null == nodeElem) {
+                    nodeElem = new NodeElem(platform);
+                    elems.put(platform, nodeElem);
+                }
 
-            List<EntityPath> entityPaths = configuration.getEntityPaths(session);
-            for (EntityPath entityPath : entityPaths) {
                 for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
                     Entity entity = it.next();
                     NodeElem treeElem = nodeElem.children.get(entity.getId());

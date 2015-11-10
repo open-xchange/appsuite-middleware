@@ -49,9 +49,10 @@
 
 package com.openexchange.onboarding.imap.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.context.ContextService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.imap.IMAPOnboardingConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
@@ -73,14 +74,12 @@ public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, MailService.class };
+        return new Class<?>[] { UserService.class, ContextService.class, CapabilityService.class, MailService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.ANDROID_GOOGLE));
-        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.APPLE));
-        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this, Platform.WINDOWS));
+        registerService(OnboardingConfiguration.class, new IMAPOnboardingConfiguration(this));
     }
 
     @Override

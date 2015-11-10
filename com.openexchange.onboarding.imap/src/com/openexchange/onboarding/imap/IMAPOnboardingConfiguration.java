@@ -54,9 +54,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.api.MailConfig.PasswordSource;
@@ -64,6 +65,8 @@ import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.onboarding.ClientInfo;
+import com.openexchange.onboarding.CommonEntity;
+import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Entity;
@@ -72,17 +75,19 @@ import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPConfig;
-import com.openexchange.user.UserService;
 
 /**
  * {@link IMAPOnboardingConfiguration}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
 public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
@@ -99,82 +104,71 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
     private final ServiceLookup services;
-    private final Platform platform;
+    private final String id;
 
     /**
      * Initializes a new {@link IMAPOnboardingConfiguration}.
      */
-    public IMAPOnboardingConfiguration(ServiceLookup services, Platform platform) {
+    public IMAPOnboardingConfiguration(ServiceLookup services) {
         super();
+        id = "com.openexchange.onboarding.imap";
         this.services = services;
-        this.platform = platform;
     }
 
     @Override
     public String getId() {
-        return "com.openexchange.onboarding." + platform.getId() + ".imap";
+        return id;
     }
 
     @Override
-    public String getDisplayName(Session session) {
-        return "IMAP configuration";
+    public String getDisplayName(Session session) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", session);
     }
 
     @Override
-    public Icon getIcon(Session session) {
-        return null;
+    public Icon getIcon(Session session) throws OXException {
+        return OnboardingUtility.loadIconImageFromProperty(id + ".iconName", session);
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(id + ".description", session);
     }
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        User user = userService.getUser(session.getUserId(), session.getContextId());
-        return user.isMailEnabled();
-    }
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
 
-    @Override
-    public Platform getPlatform() {
-        return platform;
+        return capabilityService.getCapabilities(session).contains(Permission.WEBMAIL.getCapabilityName());
     }
 
     @Override
     public List<EntityPath> getEntityPaths(Session session) {
-
-        //TODO: new entity enum
-        List<EntityPath> paths = new ArrayList<EntityPath>(1);
-
-        List<Entity> path = new ArrayList<Entity>(1);
-        path.add(new Entity() {
-
-            @Override
-            public String getId() {
-                return "com.openexchange.onboarding." + platform.getId();
-            }
-
-            @Override
-            public String getDisplayName(Session session) {
-                return "Desktop/OSX";
-            }
-
-            @Override
-            public Icon getIcon(Session session) {
-                return null;
-            }
-
-            @Override
-            public String getDescription(Session session) throws OXException {
-                return null;
-            }
-        });
-        paths.add(new DefaultEntityPath(path));
-
-
+        List<EntityPath> paths = new ArrayList<EntityPath>(6);
+        {
+            List<Entity> path = new ArrayList<Entity>(3);
+            path.add(CommonEntity.APPLE_IOS);
+            path.add(CommonEntity.APPLE_IOS_IPAD);
+            path.add(DefaultEntity.newInstance((CommonEntity.APPLE_IOS_IPAD.getId() + ".imap"), "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+        }
+        {
+            List<Entity> path = new ArrayList<Entity>(3);
+            path.add(CommonEntity.APPLE_IOS);
+            path.add(CommonEntity.APPLE_IOS_IPHONE);
+            path.add(DefaultEntity.newInstance((CommonEntity.APPLE_IOS_IPHONE.getId() + ".imap"), "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+        }
+        {
+            List<Entity> path = new ArrayList<Entity>(2);
+            path.add(CommonEntity.WINDOWS_DESKTOP_8_10);
+            path.add(DefaultEntity.newInstance(CommonEntity.WINDOWS_DESKTOP_8_10.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.WINDOWS, path));
+        }
         return paths;
-    }
-
-    @Override
-    public String getDescription(Session session) {
-        return "IMAP configuration";
     }
 
     @Override
