@@ -125,6 +125,7 @@ import net.sf.uadetector.ReadableUserAgent;
 public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     private final ServiceLookup services;
+    private final String id;
     private final Map<String, OnboardingExecutor> executors;
 
     /**
@@ -133,6 +134,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     public CalDAVOnboardingConfiguration(ServiceLookup services) {
         super();
         this.services = services;
+        id = "com.openexchange.onboarding.caldav";
         executors = new HashMap<String, OnboardingExecutor>(8);
 
         executors.put("apple.ios.ipad.caldav.download", new OnboardingExecutor() {
@@ -192,22 +194,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getId() {
-        return "com.openexchange.onboarding.caldav";
+        return id;
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.displayName", session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", session);
     }
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty("com.openexchange.onboarding.caldav.iconName", session);
+        return OnboardingUtility.loadIconImageFromProperty(id + ".iconName", session);
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.description", session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".description", session);
     }
 
     @Override
