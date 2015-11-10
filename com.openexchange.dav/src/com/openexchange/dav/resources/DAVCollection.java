@@ -91,6 +91,11 @@ public abstract class DAVCollection extends AbstractCollection {
         LOG.debug("{}: initialized.", getUrl());
     }
 
+    /**
+     * Gets the collection's sync token based on the last modification timestamp.
+     *
+     * @return The sync token
+     */
     public String getSyncToken() throws WebdavProtocolException {
         Date lastModified = getLastModified();
         return null == lastModified ? "0" : String.valueOf(lastModified.getTime());

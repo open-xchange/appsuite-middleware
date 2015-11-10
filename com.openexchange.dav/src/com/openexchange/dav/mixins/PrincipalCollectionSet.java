@@ -71,11 +71,6 @@ public class PrincipalCollectionSet extends SingleXMLPropertyMixin {
     @Override
     protected String getValue() {
         return "<D:href>/principals/</D:href>";
-    //        return new StringBuilder(128)
-    //            .append("<D:href>").append(UserPrincipalCollection.URL).append("</D:href>")
-    //            .append("<D:href>").append(GroupPrincipalCollection.URL).append("</D:href>")
-    //            .append("<D:href>").append(ResourcePrincipalCollection.URL).append("</D:href>")
-    //        .toString();
     }
 
 }

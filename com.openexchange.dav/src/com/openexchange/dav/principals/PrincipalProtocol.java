@@ -55,6 +55,7 @@ import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.principals.reports.PrincipalMatchReport;
 import com.openexchange.dav.principals.reports.PrinicpalSearchPropertySetReport;
+import com.openexchange.dav.reports.ExpandPropertyReport;
 import com.openexchange.dav.reports.PrinicpalPropertySearchReport;
 import com.openexchange.webdav.action.WebdavAction;
 
@@ -78,10 +79,15 @@ public class PrincipalProtocol extends DAVProtocol {
     public WebdavAction getReportAction(String ns, String name) {
         if (PrincipalMatchReport.NAMESPACE.equals(ns) && PrincipalMatchReport.NAME.equals(name)) {
             return new PrincipalMatchReport(this);
-        } else if (PrinicpalSearchPropertySetReport.NAMESPACE.equals(ns) && PrinicpalSearchPropertySetReport.NAME.equals(name)) {
+        }
+        if (PrinicpalSearchPropertySetReport.NAMESPACE.equals(ns) && PrinicpalSearchPropertySetReport.NAME.equals(name)) {
             return new PrinicpalSearchPropertySetReport(this);
-        } else if (PrinicpalPropertySearchReport.NAMESPACE.equals(ns) && PrinicpalPropertySearchReport.NAME.equals(name)) {
+        }
+        if (PrinicpalPropertySearchReport.NAMESPACE.equals(ns) && PrinicpalPropertySearchReport.NAME.equals(name)) {
             return new PrinicpalPropertySearchReport(this);
+        }
+        if (ExpandPropertyReport.NAMESPACE.equals(ns) && ExpandPropertyReport.NAME.equals(name)) {
+            return new ExpandPropertyReport(this);
         }
         return null;
     }

@@ -47,37 +47,50 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.files;
+package com.openexchange.data.conversion.ical.ical4j.osgi;
 
-import java.util.List;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.Type;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Participants;
+import com.openexchange.group.GroupService;
 
 /**
- * {@link DeleteAction}
+ * {@link GroupServiceTracker}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-@Action(method = RequestMethod.PUT, name = "delete", description = "Delete infoitems", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "timestamp", description = "Timestamp of the last update of the deleted infoitems."),
-    @Parameter(name = "hardDelete", type=Type.BOOLEAN, description = "Optional, defaults to \"false\". If set to \"true\", the file is deleted permanently. Otherwise, and if the underlying storage supports a trash folder and the file is not yet located below the trash folder, it is moved to the trash folder.")
-}, requestBody = "An array with objects to delete. The fields for the object are described in Full identifier for an infostore document.", responseDescription = "An array with [[]].")
-public class DeleteAction extends AbstractWriteAction {
+public class GroupServiceTracker implements ServiceTrackerCustomizer<GroupService, GroupService> {
+
+    private final BundleContext context;
+
+    /**
+     * Initializes a new {@link GroupServiceTracker}.
+     *
+     * @param context The bundle context
+     */
+    public GroupServiceTracker(BundleContext context) {
+        super();
+        this.context = context;
+    }
 
     @Override
-    public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
-        request.requireBody().require(Param.TIMESTAMP);
-        boolean hardDelete = "true".equals(request.getParameter("hardDelete"));
-        hardDelete = true;
-        IDBasedFileAccess fileAccess = request.getFileAccess();
-        List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
-        return result(conflicting, request);
+    public GroupService addingService(ServiceReference<GroupService> reference) {
+        GroupService service = context.getService(reference);
+        Participants.setGroupService(service);
+        return service;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<GroupService> reference, GroupService service) {
+        // no
+    }
+
+    @Override
+    public void removedService(ServiceReference<GroupService> reference, GroupService service) {
+        Participants.setGroupService(null);
+        context.ungetService(reference);
     }
 
 }

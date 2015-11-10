@@ -184,7 +184,6 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * update appointment
              */
             if (false == Patches.Incoming.tryRestoreParticipants(originalAppointment, appointmentToSave)) {
-                Patches.Incoming.patchResources(originalAppointment, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingAliases(factory, appointmentToSave);
                 Patches.Incoming.patchParticipantListRemovingDoubleUsers(appointmentToSave);
                 Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(

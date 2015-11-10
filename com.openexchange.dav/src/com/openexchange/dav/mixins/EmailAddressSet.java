@@ -50,6 +50,7 @@
 package com.openexchange.dav.mixins;
 
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
@@ -75,7 +76,10 @@ public class EmailAddressSet extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:email-address>" + user.getMail() +"</D:email-address>";
+        if (Strings.isNotEmpty(user.getMail())) {
+            return "<D:email-address>" + user.getMail() +"</D:email-address>";
+        }
+        return null;
     }
 
 }

@@ -56,38 +56,39 @@ import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 /**
  * {@link PrincipalURL}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
 public class PrincipalURL extends SingleXMLPropertyMixin {
 
     /**
-     * Gets the principal URL value inside an <code>href</code>-XML element
+     * Gets the principal URL value.
      *
      * @param userID The identifier of the user to get the principal URL for
      * @return The principal URL
      */
     public static String forUser(int userID) {
-        return "<D:href>/principals/users/" + userID + "</D:href>";
+        return "/principals/users/" + userID;
     }
 
     /**
-     * Gets the principal URL value inside an <code>href</code>-XML element
+     * Gets the principal URL value.
      *
      * @param groupID The identifier of the group to get the principal URL for
      * @return The principal URL
      */
     public static String forGroup(int groupID) {
-        return "<D:href>/principals/groups/" + groupID + "</D:href>";
+        return "/principals/groups/" + groupID;
     }
 
     /**
-     * Gets the principal URL value inside an <code>href</code>-XML element
+     * Gets the principal URL value.
      *
      * @param resourceID The identifier of the resource to get the principal URL for
      * @return The principal URL
      */
     public static String forResource(int resourceID) {
-        return "<D:href>/principals/resources/" + resourceID + "</D:href>";
+        return "/principals/resources/" + resourceID;
     }
 
     private static final String PROPERTY_NAME = "principal-URL";
@@ -108,16 +109,21 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
+        String url;
         switch (type) {
             case INDIVIDUAL:
-                return forUser(principalID);
+                url = forUser(principalID);
+                break;
             case GROUP:
-                return forGroup(principalID);
+                url = forGroup(principalID);
+                break;
             case RESOURCE:
-                return forResource(principalID);
+                url = forResource(principalID);
+                break;
             default:
                 throw new IllegalArgumentException(type.toString());
         }
+        return "<D:href>" + url + "</D:href>";
     }
 
 }

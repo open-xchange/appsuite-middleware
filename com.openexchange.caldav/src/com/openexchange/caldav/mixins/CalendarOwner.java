@@ -96,7 +96,7 @@ public class CalendarOwner extends SingleXMLPropertyMixin {
         } catch (OXException e) {
             LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
         }
-        return null != owner ? PrincipalURL.forUser(owner.getId()) : null;
+        return null != owner ? "<D:href>" + PrincipalURL.forUser(owner.getId()) + "</D:href>" : null;
     }
 
 }

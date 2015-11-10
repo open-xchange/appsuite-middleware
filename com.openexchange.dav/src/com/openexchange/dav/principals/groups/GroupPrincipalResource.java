@@ -51,11 +51,14 @@ package com.openexchange.dav.principals.groups;
 
 import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.mixins.CalendarUserAddressSet;
 import com.openexchange.dav.mixins.CalendarUserType;
 import com.openexchange.dav.mixins.DisplayName;
+import com.openexchange.dav.mixins.ExpandedGroupMemberSet;
 import com.openexchange.dav.mixins.GroupMemberSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
+import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.group.Group;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -81,7 +84,10 @@ public class GroupPrincipalResource extends DAVResource {
         super(factory, new WebdavPath("principals", "groups", String.valueOf(group.getIdentifier())));
         this.group = group;
         includeProperties(new DisplayName(group.getDisplayName()), new CalendarUserType(CUType.GROUP), new RecordType(RecordType.RECORD_TYPE_GROUPS),
-            new GroupMemberSet(group.getMember()), new PrincipalURL(group.getIdentifier(), CUType.GROUP));
+            new GroupMemberSet(group.getMember()), new PrincipalURL(group.getIdentifier(), CUType.GROUP), new ExpandedGroupMemberSet(group.getMember()),
+            new ResourceId(factory.getContext().getContextId(), group.getIdentifier(), CUType.GROUP),
+            new CalendarUserAddressSet(factory.getContext().getContextId(), group)
+        );
     }
 
     @Override

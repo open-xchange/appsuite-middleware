@@ -82,9 +82,9 @@ public class ACL extends SinglePropertyMixin {
             property.setXML(true);
             StringBuilder stringBuilder = new StringBuilder();
             for (Permission permission : permissions) {
-                stringBuilder.append("<D:ace><D:principal>")
+                stringBuilder.append("<D:ace><D:principal><D:href>")
                     .append(permission.isGroup() ? PrincipalURL.forGroup(permission.getEntity()) : PrincipalURL.forUser(permission.getEntity()))
-                    .append("</D:principal><D:grant>");
+                    .append("</D:href></D:principal><D:grant>");
                 List<Privilege> privileges = Privilege.getApplying(permission);
                 if (null != privileges && 0 < privileges.size()) {
                     for (Privilege privilege : privileges) {

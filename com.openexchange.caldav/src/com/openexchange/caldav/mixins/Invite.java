@@ -127,7 +127,7 @@ public class Invite extends SingleXMLPropertyMixin {
                     commonName = "User " + user.getId();
                 }
             }
-            stringBuilder.append(PrincipalURL.forUser(user.getId())).append("<CS:common-name>").append(commonName).append("</CS:common-name>");
+            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(user.getId())).append("</D:href><CS:common-name>").append(commonName).append("</CS:common-name>");
         }
         return stringBuilder.toString();
     }

@@ -143,9 +143,15 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
 
     protected abstract String getFileExtension();
 
+    /**
+     * Gets the value of the collection's CTag. This default implementation constructs the CTag based on the sync token - override if
+     * applicable.
+     *
+     * @return The CTag value
+     */
     public String getCTag() throws WebdavProtocolException {
         String folderID = null != getFolder() ? getFolder().getID() : "0";
-        return "http://www.open-xchange.com/ctags/" + folderID + "-" + getSyncToken();
+        return folderID + '-' + getSyncToken();
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.data.conversion.ical.ical4j.internal.calendar;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -60,6 +61,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Parameter;
@@ -85,8 +88,11 @@ import com.openexchange.data.conversion.ical.ical4j.internal.OXResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.ResourceResolver;
 import com.openexchange.data.conversion.ical.ical4j.internal.UserResolver;
 import com.openexchange.exception.OXException;
+import com.openexchange.group.Group;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.ResourceParticipant;
 import com.openexchange.groupware.container.UserParticipant;
@@ -99,18 +105,32 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.resource.Resource;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Participants<T extends CalendarComponent, U extends CalendarObject> extends AbstractVerifyingAttributeConverter<T,U> {
 
-    private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Participants.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Participants.class);
+    private static final AtomicReference<GroupService> GROUP_SERVICE_REFERENCE = new AtomicReference<GroupService>();
 
     public static UserResolver userResolver = UserResolver.EMPTY;
 
     public static ResourceResolver resourceResolver = new OXResourceResolver();
 
+    /**
+     * Sets the group service reference.
+     *
+     * @param groupService The group service
+     */
+    public static void setGroupService(GroupService groupService) {
+        GROUP_SERVICE_REFERENCE.set(groupService);
+    }
+
+    /**
+     * Initializes a new {@link Participants}.
+     */
     public Participants() {
         super();
     }
@@ -133,12 +153,28 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 case Participant.RESOURCE:
                     resources.add((ResourceParticipant) p);
+                    addResourceAttendee((ResourceParticipant) p, component, ctx);
                     break;
                 default:
             }
         }
         if(resources.isEmpty()) { return; }
         setResources(index, component, resources, ctx);
+    }
+
+    protected void addResourceAttendee(ResourceParticipant resourceParticipant, T component, Context ctx) {
+        Attendee attendee = new Attendee();
+        try {
+            attendee.setValue("urn:uuid:" + encode(ctx.getContextId(), Participant.RESOURCE, resourceParticipant.getIdentifier()));
+            ParameterList parameters = attendee.getParameters();
+            parameters.add(CuType.RESOURCE);
+            parameters.add(PartStat.ACCEPTED);
+            parameters.add(Role.REQ_PARTICIPANT);
+            parameters.add(new Cn(resourceParticipant.getDisplayName()));
+            component.getProperties().add(attendee);
+        } catch (URISyntaxException e) {
+            LOG.error("", e); // Shouldn't happen
+        }
     }
 
     private void setResources(final int index, final T component,
@@ -282,48 +318,53 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
 
     @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
-        final PropertyList properties = component.getProperties(Property.ATTENDEE);
-        final Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();
-        final List<String> resourceNames = new LinkedList<String>();
+        Map<String, ICalParticipant> mails = new HashMap<String, ICalParticipant>();
+        String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
+        List<Resource> resources = new ArrayList<Resource>();
+        List<Group> groups = new ArrayList<Group>();
 
-        final String comment = component.getProperty(Property.COMMENT) == null ? null : component.getProperty(Property.COMMENT).getValue();
-
-        for(int i = 0, size = properties.size(); i < size; i++) {
-            final Attendee attendee = (Attendee) properties.get(i);
-            if (attendee.getParameter(Parameter.CUTYPE) != null && CuType.RESOURCE.equals(attendee.getParameter(Parameter.CUTYPE))) {
-                final Parameter cn = attendee.getParameter(Parameter.CN);
-                if (cn != null) {
-                    resourceNames.add(cn.getValue());
+        PropertyList properties = component.getProperties(Property.ATTENDEE);
+        for (int i = 0, size = properties.size(); i < size; i++) {
+            Attendee attendee = (Attendee) properties.get(i);
+            URI uri = attendee.getCalAddress();
+            if (CuType.RESOURCE.equals(attendee.getParameter(Parameter.CUTYPE))) {
+                try {
+                    resources.add(parseResourceAttendee(index, ctx, attendee));
+                } catch (ConversionWarning e) {
+                    warnings.add(e);
                 }
-            } else {
-                final URI uri = attendee.getCalAddress();
-                if (null != uri) {
-                    String specificPart = uri.getSchemeSpecificPart();
-                    if (false == Strings.isEmpty(specificPart)) {
-                        String mail = null;
-                        if ("mailto".equalsIgnoreCase(uri.getScheme())) {
-                            /*
-                             * mailto-scheme -> e-mail address
-                             */
-                            mail = uri.getSchemeSpecificPart();
-                        } else if (Uris.INVALID_SCHEME.equals(uri.getScheme())) {
-                            /*
-                             * try and parse value as quoted internet address (best effort)
-                             */
-                            try {
-                                mail = new QuotedInternetAddress(specificPart).getAddress();
-                            } catch (AddressException e) {
-                                // ignore
-                            }
-                        }
+            } else if (CuType.GROUP.equals(attendee.getParameter(Parameter.CUTYPE))) {
+                try {
+                    groups.add(parseGroupAttendee(index, ctx, attendee));
+                } catch (ConversionWarning e) {
+                    warnings.add(e);
+                }
+            } else if (null != uri) {
+                String specificPart = uri.getSchemeSpecificPart();
+                if (false == Strings.isEmpty(specificPart)) {
+                    String mail = null;
+                    if ("mailto".equalsIgnoreCase(uri.getScheme())) {
                         /*
-                         * add iCal participant if parsed successfully
+                         * mailto-scheme -> e-mail address
                          */
-                        if (false == Strings.isEmpty(mail)) {
-                            mail = IDNA.toIDN(mail);
-                            final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
-                            mails.put(mail, icalP);
+                        mail = uri.getSchemeSpecificPart();
+                    } else if (Uris.INVALID_SCHEME.equals(uri.getScheme())) {
+                        /*
+                         * try and parse value as quoted internet address (best effort)
+                         */
+                        try {
+                            mail = new QuotedInternetAddress(specificPart).getAddress();
+                        } catch (AddressException e) {
+                            // ignore
                         }
+                    }
+                    /*
+                     * add iCal participant if parsed successfully
+                     */
+                    if (false == Strings.isEmpty(mail)) {
+                        mail = IDNA.toIDN(mail);
+                        final ICalParticipant icalP = createIcalParticipant(attendee, mail, comment);
+                        mails.put(mail, icalP);
                     }
                 }
             }
@@ -393,29 +434,33 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             cObj.setConfirmations(confirmableParticipants.toArray(new ConfirmableParticipant[confirmableParticipants.size()]));
         }
 
+        for (Group group : groups) {
+            GroupParticipant groupParticipant = new GroupParticipant(group.getIdentifier());
+            groupParticipant.setDisplayName(group.getDisplayName());
+            cObj.addParticipant(groupParticipant);
+        }
+
         final PropertyList resourcesList = component.getProperties(Property.RESOURCES);
+        final List<String> resourceNames = new LinkedList<String>();
         for (int i = 0, size = resourcesList.size(); i < size; i++) {
-            final Resources resources = (Resources) resourcesList.get(i);
-            final Iterator<?> resObjects = resources.getResources().iterator();
+            final Resources resourcesProperty = (Resources) resourcesList.get(i);
+            final Iterator<?> resObjects = resourcesProperty.getResources().iterator();
             while (resObjects.hasNext()) {
                 resourceNames.add(resObjects.next().toString());
             }
         }
-        final List<Resource> resources;
         try {
-            resources = resourceResolver.find(resourceNames, ctx);
+            resources.addAll(resourceResolver.find(resourceNames, ctx));
         } catch (final OXException e) {
             throw new ConversionError(index, e);
         }
 
         for (final Resource resource : resources) {
-            cObj.addParticipant(new ResourceParticipant(resource.getIdentifier()));
+            cObj.addParticipant(new ResourceParticipant(resource));
             resourceNames.remove(resource.getDisplayName());
         }
         for (final String resourceName : resourceNames) {
-            final ConversionWarning warning = new ConversionWarning(index,
-                Code.CANT_RESOLVE_RESOURCE, resourceName);
-            warnings.add(warning);
+            warnings.add(new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, resourceName));
         }
     }
 
@@ -466,4 +511,120 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             this.message = message;
         }
     }
+
+    /**
+     * Tries to resolve a resource from an <code>ATTENDEE</code> component.
+     *
+     * @param index The current index in the parsed iCal file
+     * @param context The context
+     * @param attendee The attendee to parse
+     * @return The parsed resource
+     */
+    private static Resource parseResourceAttendee(int index, Context context, Attendee attendee) throws ConversionWarning {
+        /*
+         * try to decode urn:uuid
+         */
+        URI uri = attendee.getCalAddress();
+        if (null != uri && "urn".equals(uri.getScheme())) {
+            String specificPart = uri.getSchemeSpecificPart();
+            if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
+                try {
+                    UUID uuid = UUID.fromString(specificPart.substring(5));
+                    if (context.getContextId() == decodeContextID(uuid) && Participant.RESOURCE == decodeType(uuid)) {
+                        return resourceResolver.load(decodeEntity(uuid), context);
+                    }
+                } catch (IllegalArgumentException | OXException e) {
+                    throw new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, e, specificPart);
+                }
+            }
+        }
+        /*
+         * lookup by common name as fallback
+         */
+        Parameter cnParameter = attendee.getParameter(Parameter.CN);
+        if (null != cnParameter && Strings.isNotEmpty(cnParameter.getValue())) {
+            List<Resource> foundResources = null;
+            try {
+                foundResources = resourceResolver.find(Collections.singletonList(cnParameter.getValue()), context);
+            } catch (OXException e) {
+                throw new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, e, cnParameter.getValue());
+            }
+            if (null != foundResources && 1 == foundResources.size()) {
+                return foundResources.get(0);
+            }
+        }
+        throw new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, attendee.toString());
+    }
+
+    /**
+     * Tries to resolve a group from an <code>ATTENDEE</code> component.
+     *
+     * @param index The current index in the parsed iCal file
+     * @param context The context
+     * @param attendee The attendee to parse
+     * @return The parsed group
+     */
+    private static Group parseGroupAttendee(int index, Context context, Attendee attendee) throws ConversionWarning {
+        GroupService groupService = GROUP_SERVICE_REFERENCE.get();
+        if (null == groupService) {
+            throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, ServiceExceptionCode.absentService(GroupService.class), attendee.toString());
+        }
+        /*
+         * try to decode urn:uuid
+         */
+        URI uri = attendee.getCalAddress();
+        if (null != uri && "urn".equals(uri.getScheme())) {
+            String specificPart = uri.getSchemeSpecificPart();
+            if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
+                try {
+                    UUID uuid = UUID.fromString(specificPart.substring(5));
+                    if (context.getContextId() == decodeContextID(uuid) && Participant.GROUP == decodeType(uuid)) {
+                        return groupService.getGroup(context, decodeEntity(uuid));
+                    }
+                } catch (IllegalArgumentException | OXException e) {
+                    throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, e, specificPart);
+                }
+            }
+        }
+        /*
+         * lookup by common name as fallback
+         */
+        Parameter cnParameter = attendee.getParameter(Parameter.CN);
+        if (null != cnParameter && Strings.isNotEmpty(cnParameter.getValue())) {
+            Group[] foundGroups = null;
+            try {
+                foundGroups = groupService.search(context, cnParameter.getValue(), false);
+            } catch (OXException e) {
+                throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, e, cnParameter.getValue());
+            }
+            if (null != foundGroups && 1 == foundGroups.length) {
+                return foundGroups[0];
+            }
+        }
+        throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, attendee.toString());
+    }
+
+    private static UUID encode(int contextID, int type, int entity) {
+        long lsb = entity;
+        long cid = contextID & 0xffffffffL;
+        long msb = cid << 16;
+        msb += type;
+        return new UUID(msb, lsb);
+    }
+
+    private static int decodeContextID(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        return (int) msb >> 16;
+    }
+
+    private static int decodeType(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        long cid = msb >> 16;
+        return (int) (msb - (cid << 16));
+    }
+
+    private static int decodeEntity(UUID encoded) {
+        return (int) encoded.getLeastSignificantBits();
+    }
+
 }

@@ -49,34 +49,36 @@
 
 package com.openexchange.dav.mixins;
 
-import com.openexchange.dav.DAVProtocol;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link ExpandedGroupMemberSet}
+ * {@link GroupMembership}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class ExpandedGroupMemberSet extends SingleXMLPropertyMixin {
+public class GroupMembership extends SingleXMLPropertyMixin {
 
-    private final int[] members;
+    private final int[] groups;
 
     /**
-     * Initializes a new {@link ExpandedGroupMemberSet}.
+     * Initializes a new {@link GroupMembership}.
      *
-     * @param members The group members
+     * @param groups The identifiers of those groups the user is a member of
      */
-    public ExpandedGroupMemberSet(int[] members) {
-        super(DAVProtocol.CALENDARSERVER_NS.getURI(), "expanded-group-member-set");
-        this.members = members;
+    public GroupMembership(int[] groups) {
+        super(Protocol.DAV_NS.getURI(), "group-membership");
+        this.groups = groups;
     }
 
     @Override
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
-        for (int member : members) {
-            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(member)).append("</D:href>");
+        if (null != groups) {
+            for (int group : groups) {
+                stringBuilder.append("<D:href>").append(PrincipalURL.forGroup(group)).append("</D:href>");
+            }
         }
         return stringBuilder.toString();
     }

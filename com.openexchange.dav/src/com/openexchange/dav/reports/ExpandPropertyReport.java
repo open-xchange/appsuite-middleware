@@ -61,13 +61,13 @@ import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
-import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
+import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
 
 /**
  * {@link ExpandPropertyReport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
 public class ExpandPropertyReport extends DAVPropfindAction {
 
@@ -84,7 +84,7 @@ public class ExpandPropertyReport extends DAVPropfindAction {
     }
 
     @Override
-    public void perform(WebdavRequest request, WebdavResponse res) throws WebdavProtocolException {
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
         Document requestBody = optRequestBody(request);
         if (null == requestBody) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
@@ -93,22 +93,46 @@ public class ExpandPropertyReport extends DAVPropfindAction {
         if (null == rootElement || false == "expand-property".equals(rootElement.getName()) || false == Protocol.DAV_NS.getURI().equals(rootElement.getNamespaceURI())) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
-
         Element multistatusElement = prepareMultistatusElement();
-        PropertiesMarshaller marshaller = new PropfindPropNamesMarshaller(request.getURLPrefix(), request.getCharset());
-        for (Element requestedProperty : rootElement.getChildren()) {
-            WebdavProperty property = request.getResource().getProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
-            if (null != property) {
-                Element marshalledProperty = marshaller.marshalProperty(property, protocol);
-                List<Element> hrefElements = marshalledProperty.getChildren("href", Protocol.DAV_NS);
-                for (Element hrefElement : hrefElements) {
-                    WebdavResource expandedResource = request.getFactory().resolveResource(hrefElement.getValue());
-                    multistatusElement.addContent(marshaller.marshal(expandedResource));
+        multistatusElement.addContent(expandProperty(request, rootElement.getChildren("property", Protocol.DAV_NS), request.getResource()));
+        sendMultistatusResponse(response, multistatusElement);
+    }
+
+    private Element expandProperty(WebdavRequest request, List<Element> requestedProperties, WebdavResource resource) throws WebdavProtocolException {
+        PropfindResponseMarshaller marshaller = new PropfindResponseMarshaller(request.getURLPrefix(), request.getCharset(), request.isBrief());
+        Element responseElement =  new Element("response", Protocol.DAV_NS);
+        responseElement.addContent(marshaller.marshalHREF(resource.getUrl(), resource.isCollection()));
+        if (false == resource.exists()) {
+            responseElement.addContent(marshaller.marshalStatus(HttpServletResponse.SC_NOT_FOUND));
+        } else {
+            Element propstatElement = new Element("propstat", Protocol.DAV_NS);
+            Element propElement = new Element("prop", Protocol.DAV_NS);
+            for (Element requestedProperty : requestedProperties) {
+                String name = requestedProperty.getAttribute("name").getValue();
+                String namespace = requestedProperty.getAttribute("namespace").getValue();
+                WebdavProperty property = resource.getProperty(namespace, name);
+                if (null != property) {
+                    Element marshalledProperty = marshaller.marshalProperty(property, protocol);
+                    List<Element> propertiesToExpand = requestedProperty.getChildren("property", Protocol.DAV_NS);
+                    if (0 < propertiesToExpand.size()) {
+                        Element expandedElement = new Element(marshalledProperty.getName(), marshalledProperty.getNamespace());
+                        for (Element hrefElement : marshalledProperty.getChildren("href", Protocol.DAV_NS)) {
+                            WebdavResource expandedResource = request.getFactory().resolveResource(hrefElement.getValue());
+                            List<Element> expandedProperties = requestedProperty.getChildren("property", Protocol.DAV_NS);
+                            Element expandedProperty = expandProperty(request, expandedProperties, expandedResource);
+                            expandedElement.addContent(expandedProperty);
+                        }
+                        propElement.addContent(expandedElement);
+                    } else {
+                        propElement.addContent(marshalledProperty);
+                    }
                 }
             }
+            propstatElement.addContent(propElement);
+            propstatElement.addContent(marshaller.marshalStatus(HttpServletResponse.SC_OK));
+            responseElement.addContent(propstatElement);
         }
-
-        sendMultistatusResponse(res, multistatusElement);
+        return responseElement;
     }
 
 }

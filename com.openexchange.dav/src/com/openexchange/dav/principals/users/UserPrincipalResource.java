@@ -58,10 +58,12 @@ import com.openexchange.dav.mixins.CalendarUserType;
 import com.openexchange.dav.mixins.DisplayName;
 import com.openexchange.dav.mixins.EmailAddressSet;
 import com.openexchange.dav.mixins.FirstName;
+import com.openexchange.dav.mixins.GroupMembership;
 import com.openexchange.dav.mixins.LastName;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
+import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -88,9 +90,13 @@ public class UserPrincipalResource extends DAVResource {
         super(factory, url);
         this.user = user;
         includeProperties(new PrincipalURL(user.getId(), CUType.INDIVIDUAL), new AddressbookHomeSet(),
-            new CalendarHomeSet(), new EmailAddressSet(user), new PrincipalCollectionSet(), new CalendarUserAddressSet(user),
+            new CalendarHomeSet(), new EmailAddressSet(user), new PrincipalCollectionSet(),
+            new CalendarUserAddressSet(factory.getContext().getContextId(), user),
             new DisplayName(user.getDisplayName()), new FirstName(user), new LastName(user),
-            new CalendarUserType(CUType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER));
+            new CalendarUserType(CUType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER),
+            new ResourceId(factory.getContext().getContextId(), user.getId(), CUType.INDIVIDUAL),
+            new GroupMembership(user.getGroups())
+            );
     }
 
     /**

@@ -74,7 +74,7 @@ public class GroupMemberSet extends SingleXMLPropertyMixin {
     protected String getValue() {
         StringBuilder stringBuilder = new StringBuilder();
         for (int member : members) {
-            stringBuilder.append(PrincipalURL.forUser(member));
+            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(member)).append("</D:href>");
         }
         return stringBuilder.toString();
     }

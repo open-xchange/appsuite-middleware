@@ -51,10 +51,12 @@ package com.openexchange.dav.principals.resources;
 
 import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.mixins.CalendarUserAddressSet;
 import com.openexchange.dav.mixins.CalendarUserType;
 import com.openexchange.dav.mixins.DisplayName;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.RecordType;
+import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.DAVResource;
 import com.openexchange.resource.Resource;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -79,8 +81,10 @@ public class ResourcePrincipalResource extends DAVResource {
     public ResourcePrincipalResource(DAVFactory factory, Resource resource) {
         super(factory, new WebdavPath("principals", "resources", String.valueOf(resource.getIdentifier())));
         this.resource = resource;
-        includeProperties(new DisplayName(resource.getDisplayName()), new CalendarUserType(CUType.RESOURCE), new RecordType(RecordType.RECORD_TYPE_RESOURCES),
-            new PrincipalURL(resource.getIdentifier(), CUType.RESOURCE));
+        includeProperties(new DisplayName(resource.getDisplayName()), new CalendarUserType(CUType.RESOURCE),
+            new RecordType(RecordType.RECORD_TYPE_RESOURCES), new PrincipalURL(resource.getIdentifier(), CUType.RESOURCE),
+            new CalendarUserAddressSet(factory.getContext().getContextId(), resource),
+            new ResourceId(factory.getContext().getContextId(), resource.getIdentifier(), CUType.RESOURCE));
     }
 
     @Override

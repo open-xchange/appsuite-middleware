@@ -76,7 +76,7 @@ public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return PrincipalURL.forUser(sessionHolder.getSessionObject().getUserId());
+        return "<D:href>" + PrincipalURL.forUser(sessionHolder.getSessionObject().getUserId()) + "</D:href>";
     }
 
 }

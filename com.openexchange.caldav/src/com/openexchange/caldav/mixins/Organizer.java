@@ -88,7 +88,7 @@ public class Organizer extends SingleXMLPropertyMixin {
                 LOG.warn("error determining owner from folder collection '{}'", collection.getFolder(), e);
             }
         }
-        return null != user ? PrincipalURL.forUser(user.getId()) : null;
+        return null != user ? "<D:href>" + PrincipalURL.forUser(user.getId()) + "</D:href>": null;
     }
 
 }

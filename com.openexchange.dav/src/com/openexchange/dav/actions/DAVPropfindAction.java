@@ -73,6 +73,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  * {@link DAVPropfindAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
 public abstract class DAVPropfindAction extends WebdavPropfindAction {
 
@@ -87,6 +88,12 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
         super(protocol);
     }
 
+    /**
+     * Prepares an XML element ready to be used as root element for a multistatus response, containing any additionally defined
+     * namespace declarations of the underlying protocol.
+     *
+     * @return A new multistatus element
+     */
     protected Element prepareMultistatusElement() {
         Element multistatusElement = new Element("multistatus", DAV_NS);
         for (Namespace namespace : protocol.getAdditionalNamespaces()) {
@@ -95,10 +102,25 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
         return multistatusElement;
     }
 
+    /**
+     * Gets a resource marshaller appropriate for the supplied request.
+     *
+     * @param request The WebDAV request
+     * @param requestBody The request body document, or <code>null</code> if not available
+     * @return The resource marshaller
+     */
     protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody) throws WebdavProtocolException {
         return getMarshaller(request, requestBody, request.getURLPrefix());
     }
 
+    /**
+     * Gets a resource marshaller appropriate for the supplied request.
+     *
+     * @param request The WebDAV request
+     * @param requestBody The request body document, or <code>null</code> if not available
+     * @param urlPrefix The URL prefix to use for marshalling
+     * @return The resource marshaller
+     */
     protected ResourceMarshaller getMarshaller(WebdavRequest request, Document requestBody, String urlPrefix) throws WebdavProtocolException {
         /*
          * prepare loading hints
@@ -138,7 +160,7 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
             marshaller = responseMarshaller;
         }
         /*
-         * pre-load
+         * pre-load as needed
          */
         preLoad(loadingHints);
         /*
@@ -147,6 +169,12 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
         return 0 == depth ? marshaller : new RecursiveMarshaller(marshaller, depth, protocol.getRecursiveMarshallingLimit());
     }
 
+    /**
+     * Optionally extracts the request body document from a WebDAV request.
+     *
+     * @param request The WebDAV request
+     * @return The response body, or <code>null</code> if there is none or no document could be parsed
+     */
     protected Document optRequestBody(WebdavRequest request) {
         try {
             return request.getBodyAsDocument();
@@ -156,13 +184,26 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
         }
     }
 
+    /**
+     * Sends a multistatus response.
+     *
+     * @param response The WebDAV response to write to
+     * @param multistatusElement The root element for the multistatus response
+     */
     protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
         sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
     }
 
+    /**
+     * Sends a XML response document.
+     *
+     * @param response The WebDAV response to write to
+     * @param responseBody The response body document
+     * @param status The HTTP status code to use
+     */
     protected void sendXMLResponse(WebdavResponse response, Document responseBody, int status) {
         try {
-            response.setStatus(Protocol.SC_MULTISTATUS);
+            response.setStatus(status);
             response.setContentType("text/xml; charset=UTF-8");
             OUTPUTTER.output(responseBody, response.getOutputStream());
         } catch (IOException e) {

@@ -51,7 +51,6 @@ package com.openexchange.dav.mixins;
 
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-
 /**
  * {@link RecordType}
  *
