@@ -332,13 +332,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
+        Map<String, Object> formContent = request.getFormContent();
+        if (null == formContent) {
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        }
+
+        String emailAddress = (String) formContent.get(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        if (Strings.isEmpty(emailAddress)) {
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        }
+
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
             MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
 
             {
-                UserSettingMail userSettingMail = getUserSettingMail(session);
-                mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(userSettingMail.getSendAddr()));
+                mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(emailAddress));
                 mimeMessage.setSubject(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8");
                 mimeMessage.setHeader("Auto-Submitted", "auto-generated");
             }

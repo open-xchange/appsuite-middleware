@@ -77,16 +77,28 @@ public enum CommonFormDescription {
     ;
 
     private final DynamicFormDescription formDescription;
+    private final String firstFormElementName;
 
     private CommonFormDescription(FormElement... elements) {
         if (null != elements && elements.length > 0) {
             DynamicFormDescription formDescription = new DynamicFormDescription();
-            for (FormElement formElement : elements) {
+
+            // First form element
+            {
+                FormElement formElement = elements[0];
+                firstFormElementName = formElement.toString();
                 formDescription.add(formElement);
             }
+
+            // Remaining ones (if any)
+            for (int i = 1; i < elements.length; i++) {
+                formDescription.add(elements[i]);
+            }
+
             this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
         } else {
             this.formDescription = null;
+            this.firstFormElementName = null;
         }
     }
 
@@ -97,6 +109,15 @@ public enum CommonFormDescription {
      */
     public DynamicFormDescription getFormDescription() {
         return formDescription;
+    }
+
+    /**
+     * Gets the name of the first form element
+     *
+     * @return The name of the first form element or <code>null</code>
+     */
+    public String getFirstFormElementName() {
+        return firstFormElementName;
     }
 
 }

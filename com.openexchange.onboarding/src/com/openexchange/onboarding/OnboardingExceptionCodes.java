@@ -98,7 +98,11 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An XML write error occurred: %1$s
      */
-    XML_ERROR("An XML write error occurred: %1$s", null, Category.CATEGORY_USER_INPUT, 9),
+    XML_ERROR("An XML write error occurred: %1$s", null, Category.CATEGORY_ERROR, 9),
+    /**
+     * Missing the following form field: %1$s
+     */
+    MISSING_FORM_FIELD("Missing the following form field: %1$s", null, Category.CATEGORY_ERROR, 10),
 
     ;
 
