@@ -67,14 +67,25 @@ public class OnboardingStrings implements LocalizableStrings {
         super();
     }
 
-    // The name for Apple platform
-    public static final String PLATFORM_APPLE = "Apple";
+    // The display name for Apple platform
+    public static final String PLATFORM_APPLE_DISPLAY_NAME = "Apple";
 
-    // The name for Windows platform
-    public static final String PLATFORM_WINDOWS = "Windows";
+    // The description for Apple platform
+    public static final String PLATFORM_APPLE_DESCRIPTION = "The Apple platform";
 
-    // The name for Android/Google platform
-    public static final String PLATFORM_ANDROID_GOOGLE = "Android";
+
+    // The display name for Windows platform
+    public static final String PLATFORM_WINDOWS_DISPLAY_NAME = "Windows";
+
+    // The description for Apple platform
+    public static final String PLATFORM_WINDOWS_DESCRIPTION = "The Windows platform";
+
+
+    // The display name for Android/Google platform
+    public static final String PLATFORM_ANDROID_DISPLAY_NAME = "Android";
+
+    // The description for Apple platform
+    public static final String PLATFORM_ANDROID_DESCRIPTION = "The Android/Google platform";
 
     // ----------------------------------------------------------------------------------------------------------------------
 

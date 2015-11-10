@@ -226,7 +226,7 @@ public class OnboardingUtility {
     /**
      * Loads an icon image for referenced property.
      *
-     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onbaording.apple.icon"</code>
+     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
      * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>

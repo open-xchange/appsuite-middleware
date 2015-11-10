@@ -64,8 +64,8 @@ public class DefaultEntity implements Entity {
      * Creates a new {@code DefaultEntity} instance
      *
      * @param id The identifier
-     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
-     * @param withDescription <code>true</code> to also set the description property; otherwise <code>false</code>
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav."</code>
+     * @param withDescription <code>true</code> to also look-up the description property; otherwise <code>false</code>
      * @return A new {@code DefaultEntity} instance
      */
     public static DefaultEntity newInstance(String id, String prefix, boolean withDescription) {
@@ -89,7 +89,7 @@ public class DefaultEntity implements Entity {
         this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
 
         propertyNameBuilder.setLength(len);
-        this.imageNameProperty = propertyNameBuilder.append("iconName").toString();
+        this.imageNameProperty = propertyNameBuilder.append("icon").toString();
 
         propertyNameBuilder.setLength(len);
         this.descriptionProperty = withDescription ? propertyNameBuilder.append("description").toString() : null;

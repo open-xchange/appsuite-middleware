@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -138,23 +137,36 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             return null != value;
         }
 
-        void addToJsonObject(String id, JSONObject jObject, Session session) throws JSONException, OXException {
+        void addToJsonObject(String entityId, JSONObject jObject, Session session) throws JSONException, OXException {
             if (null != value) {
                 JSONObject jConfig = new JSONObject(6);
-                jConfig.put("displayName", value.getDisplayName(session));
+                put2Json("displayName", value.getDisplayName(session), jConfig);
+                put2Json("description", value.getDescription(session), jConfig);
+                put2Json("icon", value.getIcon(session), jConfig);
+                jConfig.put("entityId", entityId);
                 jObject.put(value.getId(), jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
                 for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
                     NodeElem childElem = entry.getValue();
-                    childElem.addToJsonObject(entry.getKey(), jChildren, session);
+                    childElem.addToJsonObject(childElem.isLeaf() ? entityId : entry.getKey(), jChildren, session);
                 }
 
                 JSONObject jEntity = new JSONObject(4);
-                jEntity.put("displayName", entity.getDisplayName(session));
+                put2Json("displayName", entity.getDisplayName(session), jEntity);
+                put2Json("description", entity.getDescription(session), jEntity);
+                put2Json("icon", entity.getIcon(session), jEntity);
                 jEntity.put("children", jChildren);
 
-                jObject.put(id, jEntity);
+                jObject.put(entityId, jEntity);
+            }
+        }
+
+        private static void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
+            if (null == value) {
+                jObject.put(key, JSONObject.NULL);
+            } else {
+                jObject.put(key, value);
             }
         }
     }

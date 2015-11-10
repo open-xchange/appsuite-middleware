@@ -195,7 +195,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME, true, session);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".description", session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".description", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session);
     }
 
     @Override
