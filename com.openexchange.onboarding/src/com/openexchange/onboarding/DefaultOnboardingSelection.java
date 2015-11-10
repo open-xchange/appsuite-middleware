@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -66,10 +67,37 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
      * @param id The identifier
      * @param configurationId The identifier of the associated on-boarding configuration
      * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @param formDescription The optional form description (in case this selection requires input) or <code>null</code>
      * @return A new {@code DefaultOnboardingSelection} instance
      */
     public static DefaultOnboardingSelection newInstance(String id, String configurationId, String prefix) {
-        return new DefaultOnboardingSelection(id, configurationId, prefix);
+        return newInstance(id, configurationId, prefix, CommonFormDescription.NONE.getFormDescription());
+    }
+
+    /**
+     * Creates a new {@code DefaultOnboardingSelection} instance
+     *
+     * @param id The identifier
+     * @param configurationId The identifier of the associated on-boarding configuration
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @param formDescription The optional form description (in case this selection requires input) or <code>null</code>
+     * @return A new {@code DefaultOnboardingSelection} instance
+     */
+    public static DefaultOnboardingSelection newInstance(String id, String configurationId, String prefix, CommonFormDescription commonFormDescription) {
+        return newInstance(id, configurationId, prefix, null == commonFormDescription ? null : commonFormDescription.getFormDescription());
+    }
+
+    /**
+     * Creates a new {@code DefaultOnboardingSelection} instance
+     *
+     * @param id The identifier
+     * @param configurationId The identifier of the associated on-boarding configuration
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @param formDescription The optional form description (in case this selection requires input) or <code>null</code>
+     * @return A new {@code DefaultOnboardingSelection} instance
+     */
+    public static DefaultOnboardingSelection newInstance(String id, String configurationId, String prefix, DynamicFormDescription formDescription) {
+        return new DefaultOnboardingSelection(id, configurationId, prefix, formDescription);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -79,14 +107,16 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     private final String displayNameProperty;
     private final String imageNameProperty;
     private final String descriptionProperty;
+    private final DynamicFormDescription formDescription;
 
-    private DefaultOnboardingSelection(String id, String configurationId, String prefix) {
+    private DefaultOnboardingSelection(String id, String configurationId, String prefix, DynamicFormDescription formDescription) {
         super();
         int len = prefix.length();
         StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
 
         this.id = id;
         this.configurationId = configurationId;
+        this.formDescription = formDescription;
 
         this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
 
@@ -104,14 +134,21 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
      * @param configurationId The identifier of the associated on-boarding configuration
      * @param displayNameProperty The property name for the display name
      * @param imageNameProperty The property name for the icon image
+     * @param formDescription The optional form description (in case this selection requires input) or <code>null</code>
      */
-    public DefaultOnboardingSelection(String id, String configurationId, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
+    public DefaultOnboardingSelection(String id, String configurationId, String displayNameProperty, String imageNameProperty, String descriptionProperty, DynamicFormDescription formDescription) {
         super();
         this.id = id;
         this.configurationId = configurationId;
+        this.formDescription = formDescription;
         this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
         this.descriptionProperty = descriptionProperty;
+    }
+
+    @Override
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
     }
 
     @Override

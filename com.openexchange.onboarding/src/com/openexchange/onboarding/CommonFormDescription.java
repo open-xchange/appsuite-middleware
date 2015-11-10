@@ -49,55 +49,54 @@
 
 package com.openexchange.onboarding;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.FormElement;
+import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 
 /**
- * {@link OnboardingStrings} - Translatable string literals for on-boarding module.
+ * {@link CommonFormDescription} - An enumeration for common form descriptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingStrings implements LocalizableStrings {
+public enum CommonFormDescription {
 
     /**
-     * Initializes a new {@link OnboardingStrings}.
+     * The common form description in case the user is not supposed to enter anything.
      */
-    private OnboardingStrings() {
-        super();
+    NONE(new FormElement[0]),
+    /**
+     * The common form description in case the user is supposed to enter an E-Mail address.
+     */
+    EMAIL_ADDRESS(FormElement.input("email", OnboardingStrings.FORM_EMAIL, true, null)),
+    /**
+     * The common form description in case the user is supposed to enter a phone number.
+     */
+    PHONE_NUMBER(FormElement.input("number", OnboardingStrings.FORM_EMAIL, true, null)),
+
+    ;
+
+    private final DynamicFormDescription formDescription;
+
+    private CommonFormDescription(FormElement... elements) {
+        if (null != elements && elements.length > 0) {
+            DynamicFormDescription formDescription = new DynamicFormDescription();
+            for (FormElement formElement : elements) {
+                formDescription.add(formElement);
+            }
+            this.formDescription = new ReadOnlyDynamicFormDescription(formDescription);
+        } else {
+            this.formDescription = null;
+        }
     }
 
-    // The display name for Apple platform
-    public static final String PLATFORM_APPLE_DISPLAY_NAME = "Apple";
-
-    // The description for Apple platform
-    public static final String PLATFORM_APPLE_DESCRIPTION = "The Apple platform";
-
-
-    // The display name for Windows platform
-    public static final String PLATFORM_WINDOWS_DISPLAY_NAME = "Windows";
-
-    // The description for Apple platform
-    public static final String PLATFORM_WINDOWS_DESCRIPTION = "The Windows platform";
-
-
-    // The display name for Android/Google platform
-    public static final String PLATFORM_ANDROID_DISPLAY_NAME = "Android";
-
-    // The description for Apple platform
-    public static final String PLATFORM_ANDROID_DESCRIPTION = "The Android/Google platform";
-
-    // ----------------------------------------------------------------------------------------------------------------------
-
-    // E-Mail successfully sent
-    public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
-
-    // ----------------------------------------------------------------------------------------------------------------------
-
-    // Used when rendering a form in which the user is supposed to enter an E-Mail address
-    public static final String FORM_EMAIL = "E-Mail address";
-
-    // Used when rendering a form in which the user is supposed to enter a phone number address
-    public static final String FORM_PHONE = "Phone number";
+    /**
+     * Gets the (read-only) form description
+     *
+     * @return The form description or <code>null</code>
+     */
+    public DynamicFormDescription getFormDescription() {
+        return formDescription;
+    }
 
 }

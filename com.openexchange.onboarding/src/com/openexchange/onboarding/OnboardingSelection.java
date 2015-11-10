@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 /**
  * {@link OnboardingSelection}
@@ -64,5 +65,12 @@ public interface OnboardingSelection extends Entity {
      * @return The on-boarding configuration identifier
      */
     String getConfigurationId();
+
+    /**
+     * Gets the optional form description.
+     *
+     * @return The form description or <code>null</code>
+     */
+    DynamicFormDescription getFormDescription();
 
 }

@@ -57,7 +57,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -126,6 +129,13 @@ public class SelectionConverter implements ResultConverter {
         put2Json("displayName", selection.getDisplayName(session), jSelection);
         put2Json("description", selection.getDescription(session), jSelection);
         put2Json("icon", selection.getIcon(session), jSelection);
+
+        DynamicFormDescription formDescription = selection.getFormDescription();
+        if (null == formDescription) {
+            jSelection.put("form", JSONObject.NULL);
+        } else {
+            jSelection.put("form", new FormDescriptionWriter(StringHelper.translatorFor(session.getUser().getLocale())).write(formDescription));
+        }
 
         return jSelection;
     }

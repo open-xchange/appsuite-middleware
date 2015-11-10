@@ -90,6 +90,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.CommonEntity;
+import com.openexchange.onboarding.CommonFormDescription;
 import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
@@ -248,7 +249,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email.", CommonFormDescription.EMAIL_ADDRESS));
 
             // The display settings selection
             selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
@@ -263,11 +264,11 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.download", id, "com.openexchange.onboarding.caldav.download."));
 
                 // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.sms", id, "com.openexchange.onboarding.caldav.sms."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.sms", id, "com.openexchange.onboarding.caldav.sms.", CommonFormDescription.PHONE_NUMBER));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email.", CommonFormDescription.EMAIL_ADDRESS));
 
             // The display settings selection
             selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
