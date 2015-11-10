@@ -119,11 +119,8 @@ import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
-import com.openexchange.mail.MailPath;
-import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.config.MailReloadable;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -405,96 +402,67 @@ public class MimeMessageFiller {
             /*
              * Get from
              */
-            InternetAddress from = mail.getFrom()[0];
-            InternetAddress sender = null;
-            if (false) {
-                final MailPath msgref = mail.getMsgref();
-                if (msgref != null) {
-                    final ComposeType sendType = mail.getSendType();
-                    if (ComposeType.REPLY.equals(sendType) || ComposeType.FORWARD.equals(sendType)) {
-                        MailAccess<?, ?> access = null;
+            InternetAddress[] fromAddresses = mail.getFrom();
+            if (fromAddresses.length > 0) {
+                InternetAddress from = mail.getFrom()[0];
+                mimeMessage.setFrom(from);
+                /*
+                 * Determine sender
+                 */
+                InternetAddress sender = null;
+                {
+                    final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
+                    if (null != mass) {
                         try {
-                            access = MailAccess.getInstance(session, msgref.getAccountId());
-                            access.connect();
-                            final MailFolder refFolder = access.getFolderStorage().getFolder(msgref.getFolder());
-                            if (refFolder.isShared()) {
-                                final String owner = refFolder.getOwner();
-                                if (null != owner) {
-                                    final User[] users = UserStorage.getInstance().searchUserByMailLogin(owner, ctx);
-                                    if (null != users && users.length > 0) {
-                                        final InternetAddress onBehalfOf = new QuotedInternetAddress(users[0].getMail(), true);
-                                        sender = from;
-                                        from = onBehalfOf;
-                                    }
-                                }
-                            }
-                        } catch (final Exception e) {
-                            // Ignore
-                            LOG.warn("Couldn't resolve on-behalf-of address.", e);
-                        } finally {
-                            if (null != access) {
-                                access.close(true);
-                            }
-                        }
-                    }
-                }
-            }
-            mimeMessage.setFrom(from);
-            /*
-             * Determine sender
-             */
-            if (null == sender) {
-                final MailAccountStorageService mass = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-                if (null != mass) {
-                    try {
-                        final int userId = session.getUserId();
-                        final int contextId = session.getContextId();
-                        int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
-                        if (id < 0) {
-                            id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+                            final int userId = session.getUserId();
+                            final int contextId = session.getContextId();
+                            int id = mass.getByPrimaryAddress(from.getAddress(), userId, contextId);
                             if (id < 0) {
-                                /*
-                                 * No appropriate mail account found which matches from address
-                                 */
-                                final String sendAddr = usm.getSendAddr();
-                                if (sendAddr != null && sendAddr.length() > 0) {
-                                    try {
-                                        sender = new QuotedInternetAddress(sendAddr, true);
-                                    } catch (final AddressException e) {
-                                        LOG.error("Default send address cannot be parsed", e);
+                                id = mass.getByPrimaryAddress(IDNA.toIDN(from.getAddress()), userId, contextId);
+                                if (id < 0) {
+                                    /*
+                                     * No appropriate mail account found which matches from address
+                                     */
+                                    final String sendAddr = usm.getSendAddr();
+                                    if (sendAddr != null && sendAddr.length() > 0) {
+                                        try {
+                                            sender = new QuotedInternetAddress(sendAddr, true);
+                                        } catch (final AddressException e) {
+                                            LOG.error("Default send address cannot be parsed", e);
+                                        }
                                     }
                                 }
                             }
+                        } catch (final OXException e) {
+                            /*
+                             * Conflict during look-up
+                             */
+                            LOG.debug("", e);
                         }
-                    } catch (final OXException e) {
-                        /*
-                         * Conflict during look-up
-                         */
-                        LOG.debug("", e);
                     }
                 }
-            }
-            final Set<InternetAddress> aliases;
-            final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
-            final User user = userService.getUser(session.getUserId(), ctx);
-            aliases = new LinkedHashSet<InternetAddress>();
-            for (final String alias : user.getAliases()) {
-                aliases.add(new QuotedInternetAddress(alias));
-            }
-            if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
-                MsisdnUtility.addMsisdnAddress(aliases, session);
-                final String address = from.getAddress();
-                final int pos = address.indexOf('/');
-                if (pos > 0) {
-                    from.setAddress(address.substring(0, pos));
+                final Set<InternetAddress> aliases;
+                final UserService userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
+                final User user = userService.getUser(session.getUserId(), ctx);
+                aliases = new LinkedHashSet<InternetAddress>();
+                for (final String alias : user.getAliases()) {
+                    aliases.add(new QuotedInternetAddress(alias));
                 }
-            }
-            /*
-             * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
-             * Field.
-             */
-            if (sender != null && !from.equals(sender) && !aliases.contains(from)) {
-                mimeMessage.setSender(sender);
+                if (MailProperties.getInstance().isSupportMsisdnAddresses()) {
+                    MsisdnUtility.addMsisdnAddress(aliases, session);
+                    final String address = from.getAddress();
+                    final int pos = address.indexOf('/');
+                    if (pos > 0) {
+                        from.setAddress(address.substring(0, pos));
+                    }
+                }
+                /*
+                 * Taken from RFC 822 section 4.4.2: In particular, the "Sender" field MUST be present if it is NOT the same as the "From"
+                 * Field.
+                 */
+                if (sender != null && !from.equals(sender) && !aliases.contains(from)) {
+                    mimeMessage.setSender(sender);
+                }
             }
         }
         /*
