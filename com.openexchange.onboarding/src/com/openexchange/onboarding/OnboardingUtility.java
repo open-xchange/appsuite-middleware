@@ -352,6 +352,12 @@ public class OnboardingUtility {
 
     // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
 
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an iPad device
+     *
+     * @param clientInfo The client infor to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPad device; otherwise <code>false</code>
+     */
     public static boolean isIPad(ClientInfo clientInfo) {
         String userAgent = clientInfo.getUserAgent();
         if (null == userAgent) {
@@ -370,6 +376,12 @@ public class OnboardingUtility {
         return Category.TABLET.equals(deviceCategory.getCategory());
     }
 
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an iPhone device
+     *
+     * @param clientInfo The client infor to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPhone device; otherwise <code>false</code>
+     */
     public static boolean isIPhone(ClientInfo clientInfo) {
         String userAgent = clientInfo.getUserAgent();
         if (null == userAgent) {
