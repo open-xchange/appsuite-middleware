@@ -174,7 +174,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     @Override
     public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
         List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
-        selections.add(DefaultOnboardingSelection.newInstance("imap.display", "com.openexchange.onboarding.imap.display."));
+        selections.add(DefaultOnboardingSelection.newInstance("imap.display", id, "com.openexchange.onboarding.imap.display."));
         return selections;
     }
 

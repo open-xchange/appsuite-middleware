@@ -58,6 +58,11 @@ package com.openexchange.onboarding;
  */
 public interface OnboardingSelection extends Entity {
 
-    // No additional methods
+    /**
+     * Gets the identifier of the associated on-boarding configuration
+     *
+     * @return The on-boarding configuration identifier
+     */
+    String getConfigurationId();
 
 }

@@ -143,13 +143,14 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
                 put2Json("displayName", value.getDisplayName(session), jConfig);
                 put2Json("description", value.getDescription(session), jConfig);
                 put2Json("icon", value.getIcon(session), jConfig);
+                jConfig.put("id", value.getId());
                 jConfig.put("entityId", entityId);
-                jObject.put(value.getId(), jConfig);
+                jObject.put(entityId, jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
                 for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
                     NodeElem childElem = entry.getValue();
-                    childElem.addToJsonObject(childElem.isLeaf() ? entityId : entry.getKey(), jChildren, session);
+                    childElem.addToJsonObject(entry.getKey(), jChildren, session);
                 }
 
                 JSONObject jEntity = new JSONObject(4);
@@ -184,32 +185,30 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             for (EntityPath entityPath : configuration.getEntityPaths(session)) {
                 Platform platform = entityPath.getPlatform();
 
-                NodeElem nodeElem = elems.get(platform);
-                if (null == nodeElem) {
-                    nodeElem = new NodeElem(platform);
-                    elems.put(platform, nodeElem);
+                NodeElem prevElem = elems.get(platform);
+                if (null == prevElem) {
+                    prevElem = new NodeElem(platform);
+                    elems.put(platform, prevElem);
                 }
 
-                for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
+                boolean leaf = false;
+                for (Iterator<Entity> it = entityPath.iterator(); !leaf;) {
                     Entity entity = it.next();
-                    NodeElem treeElem = nodeElem.children.get(entity.getId());
-                    if (null == treeElem) {
-                        NodeElem ne = new NodeElem(entity);
-                        nodeElem.children.put(entity.getId(), ne);
-                        nodeElem = ne;
+
+                    leaf = !it.hasNext();
+                    if (leaf) {
+                        prevElem.children.put(entity.getId(), new NodeElem(configuration));
                     } else {
-                        if (treeElem.isLeaf()) {
+                        NodeElem nextElem = prevElem.children.get(entity.getId());
+                        if (null == nextElem) {
                             NodeElem ne = new NodeElem(entity);
-                            nodeElem.children.put(entity.getId(), ne);
-                            ne.children.put(treeElem.value.getId(), treeElem);
-                            nodeElem = ne;
+                            prevElem.children.put(entity.getId(), ne);
+                            prevElem = ne;
                         } else {
-                            nodeElem = treeElem;
+                            prevElem = nextElem;
                         }
                     }
                 }
-
-                nodeElem.children.put(configuration.getId(), new NodeElem(configuration));
             }
         }
     }

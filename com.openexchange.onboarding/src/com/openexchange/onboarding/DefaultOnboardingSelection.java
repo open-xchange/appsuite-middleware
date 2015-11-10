@@ -64,26 +64,29 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
      * Creates a new {@code DefaultOnboardingSelection} instance
      *
      * @param id The identifier
+     * @param configurationId The identifier of the associated on-boarding configuration
      * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
      * @return A new {@code DefaultOnboardingSelection} instance
      */
-    public static DefaultOnboardingSelection newInstance(String id, String prefix) {
-        return new DefaultOnboardingSelection(id, prefix);
+    public static DefaultOnboardingSelection newInstance(String id, String configurationId, String prefix) {
+        return new DefaultOnboardingSelection(id, configurationId, prefix);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final String id;
+    private final String configurationId;
     private final String displayNameProperty;
     private final String imageNameProperty;
     private final String descriptionProperty;
 
-    private DefaultOnboardingSelection(String id, String prefix) {
+    private DefaultOnboardingSelection(String id, String configurationId, String prefix) {
         super();
         int len = prefix.length();
         StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
 
         this.id = id;
+        this.configurationId = configurationId;
 
         this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
 
@@ -98,15 +101,22 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
      * Initializes a new {@link DefaultOnboardingSelection}.
      *
      * @param id The identifier
+     * @param configurationId The identifier of the associated on-boarding configuration
      * @param displayNameProperty The property name for the display name
      * @param imageNameProperty The property name for the icon image
      */
-    public DefaultOnboardingSelection(String id, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
+    public DefaultOnboardingSelection(String id, String configurationId, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
         super();
         this.id = id;
+        this.configurationId = configurationId;
         this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
         this.descriptionProperty = descriptionProperty;
+    }
+
+    @Override
+    public String getConfigurationId() {
+        return configurationId;
     }
 
     @Override

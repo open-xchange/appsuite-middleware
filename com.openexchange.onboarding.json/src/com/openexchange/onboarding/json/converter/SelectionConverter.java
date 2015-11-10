@@ -121,12 +121,21 @@ public class SelectionConverter implements ResultConverter {
     private JSONObject toJson(OnboardingSelection selection, ServerSession session) throws OXException, JSONException {
         JSONObject jSelection = new JSONObject(6);
 
-        jSelection.put("id", selection.getId());
-        jSelection.put("displayName", selection.getDisplayName(session));
-        jSelection.put("description", selection.getDescription(session));
-        jSelection.put("icon", selection.getIcon(session));
+        jSelection.put("selectionId", selection.getId());
+        jSelection.put("configurationId", selection.getConfigurationId());
+        put2Json("displayName", selection.getDisplayName(session), jSelection);
+        put2Json("description", selection.getDescription(session), jSelection);
+        put2Json("icon", selection.getIcon(session), jSelection);
 
         return jSelection;
+    }
+
+    private void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
+        if (null == value) {
+            jObject.put(key, JSONObject.NULL);
+        } else {
+            jObject.put(key, value);
+        }
     }
 
 }
