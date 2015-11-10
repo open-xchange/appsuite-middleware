@@ -50,6 +50,8 @@
 package com.openexchange.onboarding.caldav;
 
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
+import static com.openexchange.onboarding.OnboardingUtility.isIPad;
+import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -108,12 +110,6 @@ import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.uadetector.UserAgentParser;
-import net.sf.uadetector.OperatingSystem;
-import net.sf.uadetector.OperatingSystemFamily;
-import net.sf.uadetector.ReadableDeviceCategory;
-import net.sf.uadetector.ReadableDeviceCategory.Category;
-import net.sf.uadetector.ReadableUserAgent;
 
 
 /**
@@ -443,44 +439,6 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         }
 
         return value;
-    }
-
-    // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
-
-    boolean isIPad(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem operatingSystem = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
-        return Category.TABLET.equals(deviceCategory.getCategory());
-    }
-
-    boolean isIPhone(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem operatingSystem = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
-        return Category.SMARTPHONE.equals(deviceCategory.getCategory());
     }
 
 }

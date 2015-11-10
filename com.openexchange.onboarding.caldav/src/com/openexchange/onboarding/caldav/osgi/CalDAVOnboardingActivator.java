@@ -55,7 +55,6 @@ import com.openexchange.mail.service.MailService;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.caldav.CalDAVOnboardingConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.uadetector.UserAgentParser;
 
 
 /**
@@ -75,7 +74,7 @@ public class CalDAVOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserAgentParser.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override

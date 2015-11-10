@@ -54,6 +54,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import net.sf.uadetector.OperatingSystem;
+import net.sf.uadetector.OperatingSystemFamily;
+import net.sf.uadetector.ReadableDeviceCategory;
+import net.sf.uadetector.ReadableUserAgent;
+import net.sf.uadetector.ReadableDeviceCategory.Category;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
@@ -69,6 +74,7 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
 /**
@@ -314,6 +320,44 @@ public class OnboardingUtility {
         }
         // Return URL
         return url;
+    }
+
+    // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
+
+    public static boolean isIPad(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return Category.TABLET.equals(deviceCategory.getCategory());
+    }
+
+    public static boolean isIPhone(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return Category.SMARTPHONE.equals(deviceCategory.getCategory());
     }
 
 }
