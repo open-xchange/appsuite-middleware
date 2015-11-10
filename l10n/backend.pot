@@ -3472,18 +3472,23 @@ msgstr ""
 msgid "Host name"
 msgstr ""
 
-#. A description for a CaldAV account on a mobile device
+#. The default display name for a CaldAV account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:71
+msgid "CalDAV"
+msgstr ""
+
+#. A description for a CaldAV account on a mobile device
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:74
 msgid ""
 "The CalDAV account for synchronizing calendar entries with Open-Xchange "
 "Server."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:76
 msgid "Your CalDAV profile"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:75
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:78
 msgid "Your CalDAV settings"
 msgstr ""
 
@@ -3537,24 +3542,39 @@ msgstr ""
 msgid "The chosen configuration is not supported."
 msgstr ""
 
-#. The name for Apple platform
+#. The display name for Apple platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:71
 msgid "Apple"
 msgstr ""
 
-#. The name for Windows platform
+#. The description for Apple platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:74
+msgid "The Apple platform"
+msgstr ""
+
+#. The display name for Windows platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:78
 msgid "Windows"
 msgstr ""
 
-#. The name for Android/Google platform
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:77
+#. The description for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:81
+msgid "The Windows platform"
+msgstr ""
+
+#. The display name for Android/Google platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:85
 msgid "Android"
+msgstr ""
+
+#. The description for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:88
+msgid "The Android/Google platform"
 msgstr ""
 
 #. ----------------------------------------------------------------------------------------------------------------------
 #. E-Mail successfully sent
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:82
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:93
 msgid "E-Mail successfully sent"
 msgstr ""
 
