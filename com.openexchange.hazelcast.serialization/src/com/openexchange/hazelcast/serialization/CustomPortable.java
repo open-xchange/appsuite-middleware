@@ -138,9 +138,6 @@ public interface CustomPortable extends Portable {
      * <li><code>  24</code>: com.openexchange.sessiond.serialization.PortableUserSessionsCleaner, used via
      * {@link com.openexchange.hazelcast.serialization.CustomPortable.PORTABLE_USER_SESSIONS_CLEANER_CLASS_ID}</li>
      * <li><code>  25</code>: com.openexchange.sessiond.serialization.PortableSessionFilterApplier</li>     *
-     * <li><code>  18</code>: com.openexchange.sessiond.portable.PortableTokenSessionControl</li>
-     * <li><code>  19</code>: com.openexchange.sessiond.serialization.PortableContextSessionsCleaner</li>
-     *
      *
      * <li><code>  101</code>: com.openexchange.push.impl.credstorage.inmemory.portable.PortableCredentials</li>
      * <li><code>  102</code>: com.openexchange.push.impl.portable.PortablePushUser</li>
