@@ -66,11 +66,13 @@ import javax.mail.internet.MimeMultipart;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -108,6 +110,7 @@ import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.plist.PListDict;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -211,10 +214,16 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.caldav.enabled", boolean.class);
-        return null != property && property.isDefined() && property.get().booleanValue();
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
+        }
+
+        if (false == capabilityService.getCapabilities(session).contains(Permission.CALDAV.getCapabilityName())) {
+            return false;
+        }
+
+        return OnboardingUtility.getBoolValue("com.openexchange.onboarding.caldav.enabled", true, session);
     }
 
     @Override
@@ -232,6 +241,12 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+        }
+        {
+            List<Entity> path = new ArrayList<Entity>(4);
+            path.add(CommonEntity.APPLE_OSX);
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
         return paths;

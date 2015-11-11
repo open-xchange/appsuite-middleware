@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding.caldav.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
@@ -74,7 +75,7 @@ public class CalDAVOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, CapabilityService.class };
     }
 
     @Override
