@@ -77,7 +77,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class RevokeOAuthClientManagementCLT extends BasicCommandlineOptions {
+public class RevokeOAuthClientManagementCLT extends AbstractOAuthCLT {
 
 
     private static final String CLIENT_ID_LONG = "id";
@@ -142,7 +142,6 @@ public class RevokeOAuthClientManagementCLT extends BasicCommandlineOptions {
             sysexit(1);
         } catch (RemoteClientManagementException e) {
             printError(e.getMessage(), parser);
-            parser.printUsage();
             sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
         } catch (InvalidCredentialsException e) {
             printServerException(e, parser);

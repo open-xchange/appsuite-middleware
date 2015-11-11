@@ -69,25 +69,24 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 
 /**
- * {@link RemoveOAuthClientManagementCLT}
+ * {@link DisableOAuthClientManagementCLT}
  *
- * A CLT to remove an oauth client
+ * A CLT to enable or disable an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class RemoveOAuthClientManagementCLT extends AbstractOAuthCLT {
+public class DisableOAuthClientManagementCLT extends AbstractOAuthCLT {
 
     private static final String CLIENT_ID_LONG = "id";
-
     private CLIOption clientID = null;
 
     public static void main(String[] args) {
-        new RemoveOAuthClientManagementCLT().execute(args);
+        new DisableOAuthClientManagementCLT().execute(args);
     }
 
     private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("removeoauthclient");
+        final AdminParser parser = new AdminParser("disableoauthclient");
         setOptions(parser);
         FileInputStream fis = null;
         BufferedInputStream bis = null;
@@ -101,15 +100,17 @@ public class RemoveOAuthClientManagementCLT extends AbstractOAuthCLT {
                 sysexit(1);
             }
 
-                String id = checkEmpty(this.clientID, (String) parser.getOptionValue(this.clientID));
-                boolean retval = remote.unregisterClient(id, auth);
-                if (retval) {
-                System.out.println("The removal of oauth client with id " + id + " was successful!");
-                    sysexit(0);
-                } else {
-                System.out.println("The removal of oauth client with id " + id + " has failed!");
-                    sysexit(1);
-                }
+
+            String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
+            boolean retval = false;
+            retval = remote.disableClient(id, auth);
+            if (retval) {
+                System.out.println("Disabling the oauth client was successful!");
+                sysexit(0);
+            } else {
+                System.out.println("Disabling the oauth client has failed!");
+                sysexit(0);
+            }
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
             parser.printUsage();
@@ -179,8 +180,9 @@ public class RemoveOAuthClientManagementCLT extends AbstractOAuthCLT {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
         this.clientID = setLongOpt(parser, CLIENT_ID_LONG, "id", "The id of the oauth client", true, true, false);
     }
+
+
 }
 
