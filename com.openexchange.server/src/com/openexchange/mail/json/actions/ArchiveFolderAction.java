@@ -190,7 +190,7 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
                         toCreate.addPermission(mp);
                     }
                     mailAccess.getFolderStorage().createFolder(toCreate);
-                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+                    CacheFolderStorage.getInstance().removeFromCache(MailFolderUtility.prepareFullname(accountId, archiveFullname), "0", true, session);
                 }
 
                 List<String> ids = entry.getValue();
