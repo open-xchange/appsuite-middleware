@@ -47,63 +47,43 @@
  *
  */
 
-package com.openexchange.onboarding.json.converter;
+package com.openexchange.onboarding.carddav.osgi;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.service.MailService;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.carddav.CardDAVOnboardingConfiguration;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link ConfigurationTreeConverter}
+ * {@link CardDAVOnboardingActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeConverter implements ResultConverter {
+public class CardDAVOnboardingActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link ConfigurationTreeConverter}.
+     * Initializes a new {@link CardDAVOnboardingActivator}.
      */
-    public ConfigurationTreeConverter() {
+    public CardDAVOnboardingActivator() {
         super();
     }
 
     @Override
-    public String getInputFormat() {
-        return "onboardingConfigurationTree";
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
-    public String getOutputFormat() {
-        return "json";
-    }
+    protected void startBundle() throws Exception {
+        trackService(MailService.class);
+        openTrackers();
 
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-        if (!(resultObject instanceof OnboardingConfigurationTree)) {
-            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingConfigurationTree.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-        }
-
-        try {
-            OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
-            JSONObject jConfigurationTree = configurationTree.toJsonObject();
-            result.setResultObject(jConfigurationTree, "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
+        CardDAVOnboardingConfiguration onboardingConfiguration = new CardDAVOnboardingConfiguration(this);
+        registerService(OnboardingConfiguration.class, onboardingConfiguration);
     }
 
 }

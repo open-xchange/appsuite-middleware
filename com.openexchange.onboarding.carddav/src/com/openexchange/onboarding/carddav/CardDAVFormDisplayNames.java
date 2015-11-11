@@ -47,63 +47,24 @@
  *
  */
 
-package com.openexchange.onboarding.json.converter;
+package com.openexchange.onboarding.carddav;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.ajax.requesthandler.Converter;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ConfigurationTreeConverter}
+ * {@link CardDAVFormDisplayNames}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationTreeConverter implements ResultConverter {
+public class CardDAVFormDisplayNames implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link ConfigurationTreeConverter}.
-     */
-    public ConfigurationTreeConverter() {
+    public final static String CARDDAV_LOGIN_DISPLAY_NAME = "User";
+    public final static String CARDDAV_PASSWORD_DISPLAY_NAME = "Password";
+    public final static String CARDDAV_HOST_DISPLAY_NAME = "Host name";
+
+    private CardDAVFormDisplayNames() {
         super();
-    }
-
-    @Override
-    public String getInputFormat() {
-        return "onboardingConfigurationTree";
-    }
-
-    @Override
-    public String getOutputFormat() {
-        return "json";
-    }
-
-    @Override
-    public Quality getQuality() {
-        return Quality.GOOD;
-    }
-
-    @Override
-    public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
-        Object resultObject = result.getResultObject();
-        if (!(resultObject instanceof OnboardingConfigurationTree)) {
-            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingConfigurationTree.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
-        }
-
-        try {
-            OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
-            JSONObject jConfigurationTree = configurationTree.toJsonObject();
-            result.setResultObject(jConfigurationTree, "json");
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
     }
 
 }

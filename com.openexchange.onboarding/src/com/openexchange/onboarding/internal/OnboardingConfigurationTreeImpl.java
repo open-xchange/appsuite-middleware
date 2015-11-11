@@ -54,12 +54,15 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
+import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingConfigurationTreeTest;
@@ -167,7 +170,11 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             if (null == value) {
                 jObject.put(key, JSONObject.NULL);
             } else {
-                jObject.put(key, value);
+                if (value instanceof Icon) {
+                    jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+                } else {
+                    jObject.put(key, value);
+                }
             }
         }
     }
