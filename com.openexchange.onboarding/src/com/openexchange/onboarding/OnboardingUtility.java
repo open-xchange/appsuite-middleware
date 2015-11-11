@@ -114,6 +114,27 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the value for specified <code>boolean</code> property.
+     *
+     * @param propertyName The name of the <code>boolean</code> property
+     * @param defaultValue The default <code>boolean</code> value
+     * @param session The session from requesting user
+     * @return The <code>boolean</code> value or <code>defaultValue</code> (if absent)
+     * @throws OXException If <code>boolean</code> value cannot be returned
+     */
+    public static boolean getBoolValue(String propertyName, boolean defaultValue, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        return property.get().booleanValue();
+    }
+
+    /**
      * Gets the translation for specified i18n string
      *
      * @param i18nString The i18n string to translate
