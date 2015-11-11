@@ -72,12 +72,8 @@ import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageCapabilityTools;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
-import com.openexchange.file.storage.FileStorageFolderType;
-import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
@@ -256,56 +252,65 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
             term = new TitleTerm("*", true, true);
         }
 
-        SearchIterator<File> it = null;
-        try {
-            List<String> folderIds;
-            String startFolderId = searchRequest.getFolderId();
-            if (startFolderId == null) {
-                FolderType folderType = searchRequest.getFolderType();
-                if (folderType == null) {
-                    FileStorageFolder rootFolder = accountAccess.getRootFolder();
-                    folderIds = findSubfolders(new FolderID(accountAccess.getService().getId(), accountAccess.getAccountId(), rootFolder.getId()).toUniqueID(), folderAccess);
-                } else {
-                    folderIds = determineFoldersForType(folderType, accountAccess, folderAccess, session);
+        String folderID = searchRequest.getFolderId();
+        if (Strings.isEmpty(folderID)) {
+            if (null != searchRequest.getFolderType()) {
+                if (false == FileID.INFOSTORE_SERVICE_ID.equals(accountAccess.getService().getId())) {
+                    throw FindExceptionCode.INVALID_FOLDER_TYPE.create(searchRequest.getFolderType());
                 }
+                String infostoreId;
+                switch (searchRequest.getFolderType()) {
+                    case PUBLIC:
+                        infostoreId = String.valueOf(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID);
+                        break;
+                    case SHARED:
+                        infostoreId = String.valueOf(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID);
+                        break;
+                    default:
+                        infostoreId = accountAccess.getFolderAccess().getPersonalFolder().getId();
+                        break;
+                }
+                folderID = new FolderID(FileID.INFOSTORE_SERVICE_ID, FileID.INFOSTORE_ACCOUNT_ID, infostoreId).toUniqueID();
+            } else if (null != accountAccess) {
+                folderID = new FolderID(accountAccess.getService().getId(), accountAccess.getAccountId(), accountAccess.getRootFolder().getId()).toUniqueID();
             } else {
-                folderIds = findSubfolders(startFolderId, folderAccess);
+                folderID = FileStorageFileAccess.ALL_FOLDERS;
             }
-
-            it = fileAccess.search(folderIds, term, fields, Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
-            List<Document> results = new LinkedList<Document>();
-            while (it.hasNext()) {
-                results.add(new FileDocument(it.next()));
-            }
-            return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
-        } finally {
-            SearchIterators.close(it);
         }
+
+        List<Document> results = new ArrayList<Document>();
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = fileAccess.search(folderID, true, term, fields, Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            while (searchIterator.hasNext()) {
+                results.add(new FileDocument(searchIterator.next()));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
     private SearchResult simpleSearch(SearchRequest searchRequest, ServerSession session, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, IDBasedFileAccess fileAccess, List<Field> fields) throws OXException {
         // Search by simple pattern as fallback and filter folders manually
         List<String> queries = searchRequest.getQueries();
         String pattern = null != queries && 0 < queries.size() ? queries.get(0) : "*";
-        List<File> files = new ArrayList<File>(30);
-
-        List<String> folderIds;
-        String startFolderId = searchRequest.getFolderId();
-        if (startFolderId == null) {
-            FileStorageFolder rootFolder = accountAccess.getRootFolder();
-            folderIds = findSubfolders(new FolderID(accountAccess.getService().getId(), accountAccess.getAccountId(), rootFolder.getId()).toUniqueID(), folderAccess);
-        } else {
-            folderIds = findSubfolders(startFolderId, folderAccess);
-        }
-
-        SearchIterator<File> it = fileAccess.search(pattern, fields, FileStorageFileAccess.ALL_FOLDERS, File.Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
-        while (it.hasNext()) {
-            File file = it.next();
-            if (folderIds.contains(file.getFolderId())) {
-                files.add(file);
+        String folderID = searchRequest.getFolderId();
+        if (Strings.isEmpty(folderID)) {
+            if (null != accountAccess) {
+                folderID = new FolderID(accountAccess.getService().getId(), accountAccess.getAccountId(), accountAccess.getRootFolder().getId()).toUniqueID();
+            } else {
+                folderID = FileStorageFileAccess.ALL_FOLDERS;
             }
         }
-
+        List<File> files;
+        SearchIterator<File> searchIterator = null;
+        try {
+            searchIterator = fileAccess.search(pattern, fields, folderID, true, File.Field.TITLE, SortDirection.DEFAULT, searchRequest.getStart(), searchRequest.getStart() + searchRequest.getSize());
+            files = SearchIterators.asList(searchIterator);
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
         // Filter according to file type facet if defined
         String fileType = extractFileType(searchRequest.getActiveFacets(DriveFacetType.FILE_TYPE));
         if (null != fileType) {
@@ -345,79 +350,6 @@ public class BasicDriveDriver extends AbstractModuleSearchDriver {
 
         FileStorageService fsService = Services.getFileStorageServiceRegistry().getFileStorageService(idParts.get(0));
         return fsService.getAccountAccess(idParts.get(1), session);
-    }
-
-    private List<String> determineFoldersForType(FolderType folderType, FileStorageAccountAccess accountAccess, IDBasedFolderAccess folderAccess, ServerSession session) throws OXException {
-        List<String> folderIDs;
-        switch (folderType) {
-            // Probably no other file storage despite infostore will ever implement folder types.
-            // For performance reasons we therefore limit the folder-lookup to infostore folders.
-            case PUBLIC:
-            {
-                folderIDs = findSubfolders(Integer.toString(FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID), folderAccess);
-                break;
-            }
-
-            case SHARED:
-            {
-                folderIDs = findSubfolders(Integer.toString(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID), folderAccess);
-                break;
-            }
-
-            default:
-            {
-                FileStorageFolder personalFolder = accountAccess.getFolderAccess().getPersonalFolder();
-                folderIDs = findSubfolders(personalFolder.getId(), folderAccess);
-                break;
-            }
-        }
-
-        return folderIDs;
-    }
-
-    /**
-     * Return all visible and readable folders that are below given folder, including that folder itself.
-     * Folders not belonging to the same service and account as the given folder will be ignored.
-     */
-    private List<String> findSubfolders(String folderId, IDBasedFolderAccess folderAccess) throws OXException {
-        List<String> folderIds = new LinkedList<>();
-        FileStorageFolder folder = folderAccess.getFolder(folderId);
-        FolderID qualifiedID = new FolderID(folderId);
-        boolean ignoreTrash = isTrashFolder(folder) == false;
-        findSubfoldersRecursive(folder, folderAccess, qualifiedID.getService(), qualifiedID.getAccountId(), ignoreTrash, folderIds);
-        return folderIds;
-    }
-
-    private void findSubfoldersRecursive(FileStorageFolder folder, IDBasedFolderAccess folderAccess, String serviceId, String accountId, boolean ignoreTrash, List<String> folderIds) throws OXException {
-        FileStoragePermission permission = folder.getOwnPermission();
-        boolean traverseSubfolders = permission == null || permission.getFolderPermission() >= FileStoragePermission.READ_FOLDER;
-        boolean canReadFiles = permission == null || permission.getReadPermission() >= FileStoragePermission.READ_OWN_OBJECTS;
-        if (traverseSubfolders || canReadFiles) {
-            FolderID qualifiedID = new FolderID(folder.getId());
-            boolean isCorrectAccount = qualifiedID.getService().equals(serviceId) && qualifiedID.getAccountId().equals(accountId);
-            boolean noTrashOrDontIgnore = (ignoreTrash == false) || (ignoreTrash && isTrashFolder(folder) == false);
-            if (canReadFiles && isCorrectAccount && noTrashOrDontIgnore) {
-                folderIds.add(folder.getId());
-            }
-
-            if (traverseSubfolders && isCorrectAccount && noTrashOrDontIgnore) {
-                FileStorageFolder[] fileStorageFolderIds = folderAccess.getSubfolders(folder.getId(), true);
-                if (fileStorageFolderIds != null && fileStorageFolderIds.length > 0) {
-                    for (FileStorageFolder f : fileStorageFolderIds) {
-                        findSubfoldersRecursive(f, folderAccess, serviceId, accountId, ignoreTrash, folderIds);
-                    }
-                }
-            }
-        }
-    }
-
-    private static boolean isTrashFolder(FileStorageFolder folder) {
-        if (folder instanceof TypeAware) {
-            FileStorageFolderType type = ((TypeAware) folder).getType();
-            return type == FileStorageFolderType.TRASH_FOLDER;
-        }
-
-        return false;
     }
 
     /**
