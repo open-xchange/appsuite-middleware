@@ -1271,6 +1271,12 @@ ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /o
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
