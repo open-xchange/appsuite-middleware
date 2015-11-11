@@ -50,9 +50,6 @@
 package com.openexchange.onboarding.carddav;
 
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
-import static com.openexchange.onboarding.OnboardingUtility.isIPad;
-import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
-import static com.openexchange.onboarding.OnboardingUtility.isOSX;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -142,10 +139,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
-                if (isIPad(request.getClientInfo())) {
-                    return generatePListResult(request, session);
-                }
-                throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
+                return generatePListResult(request, session);
             }
         });
 
@@ -153,10 +147,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
-                if (isIPhone(request.getClientInfo())) {
-                    return generatePListResult(request, session);
-                }
-                throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
+                return generatePListResult(request, session);
             }
         });
 
@@ -164,10 +155,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
-                if (isOSX(request.getClientInfo())) {
-                    return generatePListResult(request, session);
-                }
-                throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
+                return generatePListResult(request, session);
             }
         });
 
@@ -288,7 +276,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(2);
 
             // Via download or eMail
-            if (isIPad(clientInfo)) {
+            {
                 // The download selection
                 selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
             }
@@ -304,7 +292,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
 
             // Via download, SMS or eMail
-            if (isIPhone(clientInfo)) {
+            {
                 // The download selection
                 selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
 
@@ -323,7 +311,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
 
             // Via download or eMail
-            if (isIPhone(clientInfo)) {
+            {
                 // The download selection
                 selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
             }
