@@ -50,7 +50,18 @@
 package com.openexchange.tools.images;
 
 import static com.openexchange.java.Strings.toLowerCase;
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.imageio.ImageIO;
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.jpeg.JpegDirectory;
+import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
 /**
@@ -153,6 +164,75 @@ public class ImageTransformationUtility {
      */
     public static boolean supportsTransparency(String formatName) {
         return false == "jpeg".equalsIgnoreCase(formatName) && false == "jpg".equalsIgnoreCase(formatName);
+    }
+
+    /**
+     * Returns a buffered {@link InputStream} for specified stream.
+     *
+     * @param in The stream
+     * @return A new buffered input stream
+     */
+    public static BufferedInputStream bufferedInputStreamFor(InputStream in) {
+        if (null == in) {
+            return null;
+        }
+        if ((in instanceof BufferedInputStream)) {
+            return (BufferedInputStream) in;
+        }
+        return new BufferedInputStream(in, 65536);
+    }
+
+    /**
+     * Extracts image information from the supplied metadata.
+     *
+     * @param metadata The metadata to extract the image information
+     * @return The image information, or <code>null</code> if none could be extracted
+     */
+    public static ImageInformation getImageInformation(Metadata metadata) {
+        if (null == metadata) {
+            return null;
+        }
+        int orientation = 1;
+        int width = 0;
+        int height = 0;
+        try {
+            Directory directory = metadata.getDirectory(ExifIFD0Directory.class);
+            if (null != directory) {
+                orientation = directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+            }
+            JpegDirectory jpegDirectory = metadata.getDirectory(JpegDirectory.class);
+            if (null != jpegDirectory) {
+                width = jpegDirectory.getImageWidth();
+                height = jpegDirectory.getImageHeight();
+            }
+        } catch (MetadataException e) {
+            LOG.debug("Unable to retrieve image information.", e);
+            return null;
+        }
+        return new ImageInformation(orientation, width, height);
+    }
+
+    /**
+     * Checks if rotate transformation is required.
+     *
+     * @param in The image input stream to check
+     * @return <code>true</code> if rotate transformation is required; otherwise <code>false</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static boolean requiresRotateTransformation(InputStream in) throws IOException {
+        if (null == in) {
+            return false;
+        }
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(bufferedInputStreamFor(in), false);
+            ImageInformation imageInformation = getImageInformation(metadata);
+            return RotateTransformation.getInstance().needsRotation(imageInformation);
+        } catch (ImageProcessingException e) {
+            LOG.debug("error getting metadata.", e);
+        }
+
+        // RotateTransformation does nothing if 'ImageInformation' is absent
+        return false;
     }
 
 }
