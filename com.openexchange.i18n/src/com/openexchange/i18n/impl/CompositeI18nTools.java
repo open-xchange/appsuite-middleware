@@ -85,10 +85,10 @@ public class CompositeI18nTools implements I18nService {
     }
 
     @Override
-    public String getL10NLocalized(String messageContext, String key) {
+    public String getL10NContextLocalized(String messageContext, String key) {
         for (I18nService tool : tools) {
             if (tool.hasKey(messageContext, key)) {
-                return tool.getL10NLocalized(messageContext, key);
+                return tool.getL10NContextLocalized(messageContext, key);
             }
         }
         return key;
@@ -127,6 +127,11 @@ public class CompositeI18nTools implements I18nService {
     @Override
     public Locale getLocale() {
         return locale;
+    }
+
+    @Override
+    public String getL10NLocalized(String key) {
+        return getLocalized(key);
     }
 
 }

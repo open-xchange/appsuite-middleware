@@ -60,14 +60,24 @@ public interface I18nService {
 
     static final String LANGUAGE = "language";
 
-    String getLocalized(String key);
+    String getLocalized(String key);    
 
     boolean hasKey(String key);
 
     boolean hasKey(String context, String key);
 
     /**
-     * Localizes the give key in the given context.
+     * Localizes the given key.
+     * This method is also a marker for xgettext to generate the translation templates.
+     * For wrapping this with additional functionality, you must just keep the method signature identical and the call must contain the strings rather than variables.
+     * 
+     * @param key
+     * @return
+     */
+    String getL10NLocalized(String key);
+
+    /**
+     * Localizes the given key in the given context.
      * This method is also a marker for xgettext to generate the translation templates.
      * If you want something translated with a context you should use this method to avoid ambiguous keys which might have different translations depending on the context.
      * For wrapping this with additional functionality, you must just keep the method signature identical and the call must contain the strings rather than variables.
@@ -78,10 +88,10 @@ public interface I18nService {
      * @param key
      * @return
      */
-    String getL10NLocalized(String messageContext, String key);
+    String getL10NContextLocalized(String messageContext, String key);
 
     /**
-     * Localizes the give key in the given context depending on the number.
+     * Localizes the given key in the given context depending on the number.
      * This method is also a marker for xgettext to generate the translation templates.
      * If you want something translated with a context you should use this method to avoid ambiguous keys which might have different translations depending on the context.
      * The plural form describes the number used for the translation. 0 means singular, everything >0 is a plural form. There should only be one english plural form, but other languages might have additional forms.

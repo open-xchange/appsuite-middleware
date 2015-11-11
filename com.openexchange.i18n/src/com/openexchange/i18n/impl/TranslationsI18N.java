@@ -74,7 +74,7 @@ public class TranslationsI18N implements I18nService {
     }
 
     @Override
-    public String getL10NLocalized(String messageContext, String key) {
+    public String getL10NContextLocalized(String messageContext, String key) {
         String t = translations.translate(messageContext, key);
         if (t == null) {
             return key;
@@ -123,6 +123,11 @@ public class TranslationsI18N implements I18nService {
         }
         builder.append('}');
         return builder.toString();
+    }
+
+    @Override
+    public String getL10NLocalized(String key) {
+        return getLocalized(key);
     }
 
 }
