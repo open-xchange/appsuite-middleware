@@ -170,7 +170,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
             List<Entity> path = new ArrayList<Entity>(2);
             path.add(CommonEntity.APPLE_OSX);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
-            paths.add(new DefaultEntityPath(Platform.WINDOWS, path));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
 
         if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.android.tablet.enabled", true, session)) {
