@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.onboarding.caldav;
+package com.openexchange.onboarding.carddav;
 
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import static com.openexchange.onboarding.OnboardingUtility.isIPad;
@@ -114,27 +114,27 @@ import com.openexchange.tools.session.ServerSession;
 
 
 /**
- * {@link CalDAVOnboardingConfiguration}
+ * {@link CardDAVOnboardingConfiguration}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
+public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     private final ServiceLookup services;
     private final String id;
     private final Map<String, OnboardingExecutor> executors;
 
     /**
-     * Initializes a new {@link CalDAVOnboardingConfiguration}.
+     * Initializes a new {@link CardDAVOnboardingConfiguration}.
      */
-    public CalDAVOnboardingConfiguration(ServiceLookup services) {
+    public CardDAVOnboardingConfiguration(ServiceLookup services) {
         super();
         this.services = services;
-        id = "com.openexchange.onboarding.caldav";
+        id = "com.openexchange.onboarding.carddav";
         executors = new HashMap<String, OnboardingExecutor>(8);
 
-        executors.put("apple.ios.ipad.caldav.download", new OnboardingExecutor() {
+        executors.put("apple.ios.ipad.carddav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -145,7 +145,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.download", new OnboardingExecutor() {
+        executors.put("apple.ios.iphone.carddav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -156,7 +156,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.ipad.caldav.email", new OnboardingExecutor() {
+        executors.put("apple.ios.ipad.carddav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -164,7 +164,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.email", new OnboardingExecutor() {
+        executors.put("apple.ios.iphone.carddav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -172,7 +172,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.ipad.caldav.display", new OnboardingExecutor() {
+        executors.put("apple.ios.ipad.carddav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -180,7 +180,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.display", new OnboardingExecutor() {
+        executors.put("apple.ios.iphone.carddav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -196,7 +196,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME, true, session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME, true, session);
     }
 
     @Override
@@ -206,14 +206,14 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".description", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".description", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session);
     }
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.caldav.enabled", boolean.class);
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.carddav.enabled", boolean.class);
         return null != property && property.isDefined() && property.get().booleanValue();
     }
 
@@ -224,14 +224,14 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<Entity> path = new ArrayList<Entity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPAD);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
         {
             List<Entity> path = new ArrayList<Entity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav", "com.openexchange.onboarding.caldav.", true));
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
         return paths;
@@ -239,39 +239,39 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
-        if ((CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav").equals(lastEntityId)) {
+        if ((CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(2);
 
             // Via download or eMail
             if (isIPad(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.download", id, "com.openexchange.onboarding.caldav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email.", CommonFormDescription.EMAIL_ADDRESS));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
 
             return selections;
-        } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav").equals(lastEntityId)) {
+        } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
 
             // Via download, SMS or eMail
             if (isIPhone(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.download", id, "com.openexchange.onboarding.caldav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
 
                 // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.sms", id, "com.openexchange.onboarding.caldav.sms.", CommonFormDescription.PHONE_NUMBER));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.sms", id, "com.openexchange.onboarding.carddav.sms.", CommonFormDescription.PHONE_NUMBER));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email.", CommonFormDescription.EMAIL_ADDRESS));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
 
             return selections;
         }
@@ -296,22 +296,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     // --------------------------------------------- Display utils --------------------------------------------------------------
 
-    private final static String CALDAV_LOGIN_FIELD = "login";
-    private final static String CALDAV_PASSWORD_FIELD = "password";
-    private final static String CALDAV_HOST_FIELD = "hostName";
+    private final static String CARDDAV_LOGIN_FIELD = "login";
+    private final static String CARDDAV_PASSWORD_FIELD = "password";
+    private final static String CARDDAV_HOST_FIELD = "hostName";
 
     Result displayResult(OnboardingRequest request, Session session) throws OXException {
-        String resultText = OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_SETTINGS, session);
+        String resultText = OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_TEXT_SETTINGS, session);
 
         DynamicFormDescription form = new DynamicFormDescription();
-        form.add(custom("text", CALDAV_LOGIN_FIELD, CalDAVFormDisplayNames.CALDAV_LOGIN_DISPLAY_NAME))
-            .add(custom("text", CALDAV_PASSWORD_FIELD, CalDAVFormDisplayNames.CALDAV_PASSWORD_DISPLAY_NAME))
-            .add(custom("text", CALDAV_HOST_FIELD, CalDAVFormDisplayNames.CALDAV_HOST_DISPLAY_NAME));
+        form.add(custom("text", CARDDAV_LOGIN_FIELD, CardDAVFormDisplayNames.CARDDAV_LOGIN_DISPLAY_NAME))
+            .add(custom("text", CARDDAV_PASSWORD_FIELD, CardDAVFormDisplayNames.CARDDAV_PASSWORD_DISPLAY_NAME))
+            .add(custom("text", CARDDAV_HOST_FIELD, CardDAVFormDisplayNames.CARDDAV_HOST_DISPLAY_NAME));
 
         Map<String, Object> formContent = new HashMap<String, Object>();
-        formContent.put(CALDAV_LOGIN_FIELD, session.getLogin());
-        formContent.put(CALDAV_PASSWORD_FIELD, session.getPassword());
-        formContent.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
+        formContent.put(CARDDAV_LOGIN_FIELD, session.getLogin());
+        formContent.put(CARDDAV_PASSWORD_FIELD, session.getPassword());
+        formContent.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, session));
 
         return new Result(resultText, formContent, form);
     }
@@ -348,7 +348,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             {
                 mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(emailAddress));
-                mimeMessage.setSubject(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8");
+                mimeMessage.setSubject(OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_TEXT_PROFILE, session), "UTF-8");
                 mimeMessage.setHeader("Auto-Submitted", "auto-generated");
             }
 
@@ -356,7 +356,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             {
                 MimeBodyPart textBodyPart = new MimeBodyPart();
-                MessageUtility.setText(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8", textBodyPart);
+                MessageUtility.setText(OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_TEXT_PROFILE, session), "UTF-8", textBodyPart);
                 textBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                 textBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/plain; charset=UTF-8"));
                 mimeMultipart.addBodyPart(textBodyPart);
@@ -370,8 +370,8 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 plistBodyPart.setDataHandler(new DataHandler(new MessageDataSource(writer.toString(), "application/x-apple-aspen-config")));
 
                 plistBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig"));
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType("attachment; filename=caldav.mobileconfig"));
+                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("application/x-apple-aspen-config; charset=UTF-8; name=carddav.mobileconfig"));
+                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType("attachment; filename=carddav.mobileconfig"));
                 mimeMultipart.addBodyPart(plistBodyPart);
             } catch (final UnsupportedEncodingException e) {
                 throw new MessagingException("Unsupported encoding.", e);
@@ -395,23 +395,23 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
-    private static final String PROFILE_CALDAV_DEFAULT_UUID = "c454c731-b93d-428e-8b7f-d158db3726ef";
-    private static final String PROFILE_CALDAV_DEFAULT_CONTENT_UUID = "6af5eca3-4249-4e2c-8eba-4ae7c8ed204b";
+    private static final String PROFILE_CARDDAV_DEFAULT_UUID = "f264c731-b93d-428e-8b7f-d158db3726ef";
+    private static final String PROFILE_CARDDAV_DEFAULT_CONTENT_UUID = "a6f5eca3-4249-4e2c-8eba-4ae7c8ed204b";
 
     PListDict generatePList(OnboardingRequest request, Session session) throws OXException {
         PListDict payloadContent = new PListDict();
-        payloadContent.setPayloadType("com.apple.caldav.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
-        payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
-        payloadContent.addStringValue("CalDAVUsername", session.getLogin());
-        payloadContent.addStringValue("CalDAVPassword", session.getPassword());
-        payloadContent.addStringValue("CalDAVHostname", getCalDAVUrl(request, session));
-        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.plist.accountDescription", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session));
+        payloadContent.setPayloadType("com.apple.carddav.account");
+        payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentUUID", PROFILE_CARDDAV_DEFAULT_CONTENT_UUID, session));
+        payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentIdentifier", "com.open-xchange.carddav", session));
+        payloadContent.addStringValue("CardDAVUsername", session.getLogin());
+        payloadContent.addStringValue("CardDAVPassword", session.getPassword());
+        payloadContent.addStringValue("CardDAVHostname", getCardDAVUrl(request, session));
+        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.carddav.plist.accountDescription", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session));
 
         PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadIdentifier", "com.open-xchange", session));
+        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadIdentifier", "com.open-xchange", session));
         pListDict.setPayloadType("Configuration");
-        pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadUUID", PROFILE_CALDAV_DEFAULT_UUID, session));
+        pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadUUID", PROFILE_CARDDAV_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
         pListDict.setPayloadContent(payloadContent);
 
@@ -424,7 +424,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment");
-            fileHolder.setName("caldav.mobileconfig");
+            fileHolder.setName("carddav.mobileconfig");
             fileHolder.setContentType("application/x-apple-aspen-config"); // Or application/x-plist ?
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
@@ -435,17 +435,17 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         }
     }
 
-    private String getCalDAVUrl(OnboardingRequest request, Session session) throws OXException {
+    private String getCardDAVUrl(OnboardingRequest request, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.caldav.url", String.class);
+        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.carddav.url", String.class);
         if (null == property || !property.isDefined()) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/carddav", false, null).toString();
         }
 
         String value = property.get();
         if (Strings.isEmpty(value)) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/carddav", false, null).toString();
         }
 
         return value;
