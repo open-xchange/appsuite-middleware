@@ -367,11 +367,11 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(2048);
                 PListDict pListDict = generatePList(request, session);
                 pListDict.write(StaxUtils.createXMLStreamWriter(writer));
-                plistBodyPart.setDataHandler(new DataHandler(new MessageDataSource(writer.toString(), "application/xml")));
+                plistBodyPart.setDataHandler(new DataHandler(new MessageDataSource(writer.toString(), "application/x-apple-aspen-config")));
 
                 plistBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("application/xml; charset=UTF-8; name=caldav.plist"));
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType("attachment; filename=caldav.plist"));
+                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig"));
+                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType("attachment; filename=caldav.mobileconfig"));
                 mimeMultipart.addBodyPart(plistBodyPart);
             } catch (final UnsupportedEncodingException e) {
                 throw new MessagingException("Unsupported encoding.", e);
