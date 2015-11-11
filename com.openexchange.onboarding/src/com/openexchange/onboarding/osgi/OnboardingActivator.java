@@ -55,6 +55,7 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
 /**
@@ -76,7 +77,7 @@ public class OnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class };
+        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class };
     }
 
     @Override

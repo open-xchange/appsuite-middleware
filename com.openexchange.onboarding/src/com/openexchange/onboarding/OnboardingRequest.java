@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Map;
 import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
@@ -86,4 +87,11 @@ public interface OnboardingRequest {
      * @return The host data
      */
     HostData getHostData();
+
+    /**
+     * Gets the optional form content
+     *
+     * @return The form content or <code>null</code>
+     */
+    Map<String, Object> getFormContent();
 }

@@ -510,6 +510,22 @@ public interface FileStorageFileAccess extends TransactionAware {
     SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
+     * Searches for a given file.
+     *
+     * @param pattern The search pattern possibly containing wild-cards
+     * @param fields Which fields to load
+     * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return The search results
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(String pattern, List<File.Field> fields, String folderId, boolean includeSubfolders, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
      * Retrieves the parent account access.
      *
      * @return The parent account access

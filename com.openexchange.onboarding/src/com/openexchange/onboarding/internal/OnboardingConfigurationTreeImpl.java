@@ -53,14 +53,16 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
+import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingConfigurationTreeTest;
@@ -138,11 +140,15 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             return null != value;
         }
 
-        void addToJsonObject(String id, JSONObject jObject, Session session) throws JSONException, OXException {
+        void addToJsonObject(String entityId, JSONObject jObject, Session session) throws JSONException, OXException {
             if (null != value) {
                 JSONObject jConfig = new JSONObject(6);
-                jConfig.put("displayName", value.getDisplayName(session));
-                jObject.put(value.getId(), jConfig);
+                put2Json("displayName", value.getDisplayName(session), jConfig);
+                put2Json("description", value.getDescription(session), jConfig);
+                put2Json("icon", value.getIcon(session), jConfig);
+                jConfig.put("id", value.getId());
+                jConfig.put("entityId", entityId);
+                jObject.put(entityId, jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
                 for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
@@ -151,10 +157,24 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
                 }
 
                 JSONObject jEntity = new JSONObject(4);
-                jEntity.put("displayName", entity.getDisplayName(session));
+                put2Json("displayName", entity.getDisplayName(session), jEntity);
+                put2Json("description", entity.getDescription(session), jEntity);
+                put2Json("icon", entity.getIcon(session), jEntity);
                 jEntity.put("children", jChildren);
 
-                jObject.put(id, jEntity);
+                jObject.put(entityId, jEntity);
+            }
+        }
+
+        private static void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
+            if (null == value) {
+                jObject.put(key, JSONObject.NULL);
+            } else {
+                if (value instanceof Icon) {
+                    jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+                } else {
+                    jObject.put(key, value);
+                }
             }
         }
     }
@@ -169,36 +189,33 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
         }
 
         void add(OnboardingConfiguration configuration, Session session) throws OXException {
-            Platform platform = configuration.getPlatform();
+            for (EntityPath entityPath : configuration.getEntityPaths(session)) {
+                Platform platform = entityPath.getPlatform();
 
-            NodeElem nodeElem = elems.get(platform);
-            if (null == nodeElem) {
-                nodeElem = new NodeElem(platform);
-                elems.put(platform, nodeElem);
-            }
+                NodeElem prevElem = elems.get(platform);
+                if (null == prevElem) {
+                    prevElem = new NodeElem(platform);
+                    elems.put(platform, prevElem);
+                }
 
-            List<EntityPath> entityPaths = configuration.getEntityPaths(session);
-            for (EntityPath entityPath : entityPaths) {
-                for (Iterator<Entity> it = entityPath.iterator(); it.hasNext();) {
+                boolean leaf = false;
+                for (Iterator<Entity> it = entityPath.iterator(); !leaf;) {
                     Entity entity = it.next();
-                    NodeElem treeElem = nodeElem.children.get(entity.getId());
-                    if (null == treeElem) {
-                        NodeElem ne = new NodeElem(entity);
-                        nodeElem.children.put(entity.getId(), ne);
-                        nodeElem = ne;
+
+                    leaf = !it.hasNext();
+                    if (leaf) {
+                        prevElem.children.put(entity.getId(), new NodeElem(configuration));
                     } else {
-                        if (treeElem.isLeaf()) {
+                        NodeElem nextElem = prevElem.children.get(entity.getId());
+                        if (null == nextElem) {
                             NodeElem ne = new NodeElem(entity);
-                            nodeElem.children.put(entity.getId(), ne);
-                            ne.children.put(treeElem.value.getId(), treeElem);
-                            nodeElem = ne;
+                            prevElem.children.put(entity.getId(), ne);
+                            prevElem = ne;
                         } else {
-                            nodeElem = treeElem;
+                            prevElem = nextElem;
                         }
                     }
                 }
-
-                nodeElem.children.put(configuration.getId(), new NodeElem(configuration));
             }
         }
     }

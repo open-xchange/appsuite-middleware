@@ -243,6 +243,12 @@ public class AbstractFileStorageFileAccess implements FileStorageFileAccess {
     }
 
     @Override
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
     public FileStorageAccountAccess getAccountAccess() {
         // TODO Auto-generated method stub
         return null;

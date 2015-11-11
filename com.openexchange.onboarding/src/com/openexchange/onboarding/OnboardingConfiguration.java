@@ -72,14 +72,6 @@ public interface OnboardingConfiguration extends Entity, OnboardingExecutor {
     boolean isEnabled(Session session) throws OXException;
 
     /**
-     * Gets the associated platform.
-     *
-     * @return The supported
-     * @throws OXException If the platform cannot be returned
-     */
-    Platform getPlatform() throws OXException;
-
-    /**
      * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
      *
      * @param session The session providing user data

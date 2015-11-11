@@ -83,8 +83,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("MailApp", "MailApp")))));
-            configuration.setPlatform(Platform.APPLE);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.APPLE, Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("MailApp", "MailApp")))));
             configs.add(configuration);
         }
 
@@ -93,8 +92,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("EAS", "EAS")))));
-            configuration.setPlatform(Platform.APPLE);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.APPLE, Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPad", "iPad"), new TestEntity("EAS", "EAS")))));
             configs.add(configuration);
         }
 
@@ -103,8 +101,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("EAS-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your EAS account");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPhone", "iPhone"), new TestEntity("EAS", "EAS")))));
-            configuration.setPlatform(Platform.APPLE);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.APPLE, Arrays.<Entity> asList(new TestEntity("iOS", "iOS"), new TestEntity("iPhone", "iPhone"), new TestEntity("EAS", "EAS")))));
             configs.add(configuration);
         }
 
@@ -113,8 +110,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("IMAP-Profile");
             configuration.setEnabled(true);
             configuration.setDisplayName("Downloads a profile to configure your IMAP account");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("OSX", "OSX")))));
-            configuration.setPlatform(Platform.APPLE);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.APPLE, Arrays.<Entity> asList(new TestEntity("OSX", "OSX")))));
             configs.add(configuration);
         }
 
@@ -123,8 +119,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("MailApp-SMS");
             configuration.setEnabled(true);
             configuration.setDisplayName("Send an SMS to configure your MailApp");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList(new TestEntity("Windows8-10", "Windows8-10"), new TestEntity("EmClient", "EmClient")))));
-            configuration.setPlatform(Platform.WINDOWS);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.WINDOWS, Arrays.<Entity> asList(new TestEntity("Windows8-10", "Windows8-10"), new TestEntity("EmClient", "EmClient")))));
             configs.add(configuration);
         }
 
@@ -133,8 +128,7 @@ public class OnboardingConfigurationTreeTest {
             configuration.setId("Manual");
             configuration.setEnabled(true);
             configuration.setDisplayName("Manually do something");
-            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Arrays.<Entity> asList())));
-            configuration.setPlatform(Platform.WINDOWS);
+            configuration.setPaths(Arrays.<EntityPath> asList(new DefaultEntityPath(Platform.WINDOWS, Arrays.<Entity> asList())));
             configs.add(configuration);
         }
 

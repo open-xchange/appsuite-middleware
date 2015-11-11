@@ -2107,13 +2107,24 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
 
     @Override
     public SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
+        return search(session, query, folderId, false, cols, sortedBy, dir, start, end);
+    }
+
+    @Override
+    public SearchIterator<DocumentMetadata> search(ServerSession session, String query, int folderId, boolean includeSubfolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
         /*
          * get folders for search and corresponding permissions
          */
         List<Integer> all = new ArrayList<Integer>();
         List<Integer> own = new ArrayList<Integer>();
-        int[] requestedFolderIDs = NOT_SET == folderId || NO_FOLDER == folderId ? null : new int[] { folderId };
-        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, requestedFolderIDs, all, own);
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID;
+        if (NOT_SET == folderId || NO_FOLDER == folderId) {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, null, all, own);
+        } else if (includeSubfolders) {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, folderId, all, own);
+        } else {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, new int[] { folderId }, all, own);
+        }
         if (all.isEmpty() && own.isEmpty()) {
             return SearchIteratorAdapter.emptyIterator();
         }
@@ -2134,6 +2145,30 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         List<Integer> own = new ArrayList<Integer>();
         int[] requestedFolderIDs = null == folderIds || 0 == folderIds.length  ? null : folderIds;
         Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, requestedFolderIDs, all, own);
+        if (all.isEmpty() && own.isEmpty()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        /*
+         * perform search & enhance results with additional metadata as needed
+         */
+        Metadata[] fields = Tools.getFieldsToQuery(cols, Metadata.ID_LITERAL, Metadata.FOLDER_ID_LITERAL);
+        SearchIterator<DocumentMetadata> searchIterator = searchEngine.search(session, searchTerm, all, own, fields, sortedBy, dir, start, end);
+        return postProcessSearch(session, searchIterator, fields, permissionsByFolderID);
+    }
+
+    @Override
+    public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, int folderId, boolean includeSubfolders, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
+        /*
+         * get folders for search and corresponding permissions
+         */
+        List<Integer> all = new ArrayList<Integer>();
+        List<Integer> own = new ArrayList<Integer>();
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID;
+        if (includeSubfolders) {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, folderId, all, own);
+        } else {
+            permissionsByFolderID = Tools.gatherVisibleFolders(session, security, db, new int[] { folderId }, all, own);
+        }
         if (all.isEmpty() && own.isEmpty()) {
             return SearchIteratorAdapter.emptyIterator();
         }

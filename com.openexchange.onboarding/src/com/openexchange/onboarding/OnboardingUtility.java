@@ -54,6 +54,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
+import net.sf.uadetector.OperatingSystem;
+import net.sf.uadetector.OperatingSystemFamily;
+import net.sf.uadetector.ReadableDeviceCategory;
+import net.sf.uadetector.ReadableUserAgent;
+import net.sf.uadetector.ReadableDeviceCategory.Category;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
@@ -69,6 +74,7 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
 /**
@@ -189,11 +195,7 @@ public class OnboardingUtility {
         }
 
         String value = property.get();
-        if (Strings.isEmpty(value)) {
-            return defaultValue;
-        } else {
-            return value;
-        }
+        return Strings.isEmpty(value) ? defaultValue : value;
     }
 
     /**
@@ -205,8 +207,6 @@ public class OnboardingUtility {
      * @throws OXException If loading icon fails
      */
     public static Icon loadIconImageFromProperty(String propertyName, Session session) throws OXException {
-        MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
-
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -220,6 +220,38 @@ public class OnboardingUtility {
             return null;
         }
 
+        return loadIconImage(imageName);
+    }
+
+    /**
+     * Loads an icon image for referenced property.
+     *
+     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
+     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param session The session from requesting user
+     * @return The loaded icon or <code>null</code>
+     * @throws OXException If loading icon fails
+     */
+    public static Icon loadIconImageFromProperty(String propertyName, String defaultImageName, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return null;
+        }
+
+        String imageName = property.get();
+        return Strings.isEmpty(imageName) ? loadIconImage(defaultImageName) : loadIconImage(imageName);
+    }
+
+    /**
+     * Loads the named icon image from template path.
+     *
+     * @param imageName The image name; e.g. <code>"platform_icon_apple"</code>
+     * @return The loaded icon image or <code>null</code>
+     */
+    public static Icon loadIconImage(String imageName) {
         String templatesPath = getTemplatesPath();
         if (Strings.isEmpty(templatesPath)) {
             return null;
@@ -228,7 +260,9 @@ public class OnboardingUtility {
         try {
             File image = new File(new File(templatesPath), imageName);
             byte[] imageBytes = Streams.stream2bytes(new FileInputStream(image));
-            return new DefaultIcon(imageBytes, mimeTypeMap.getContentType(imageName));
+
+            MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
+            return new DefaultIcon(imageBytes, null == mimeTypeMap ? null : mimeTypeMap.getContentType(imageName));
         } catch (IOException e) {
             LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
             return null;
@@ -314,6 +348,56 @@ public class OnboardingUtility {
         }
         // Return URL
         return url;
+    }
+
+    // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
+
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an iPad device
+     *
+     * @param clientInfo The client infor to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPad device; otherwise <code>false</code>
+     */
+    public static boolean isIPad(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return Category.TABLET.equals(deviceCategory.getCategory());
+    }
+
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an iPhone device
+     *
+     * @param clientInfo The client infor to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPhone device; otherwise <code>false</code>
+     */
+    public static boolean isIPhone(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
+        return Category.SMARTPHONE.equals(deviceCategory.getCategory());
     }
 
 }

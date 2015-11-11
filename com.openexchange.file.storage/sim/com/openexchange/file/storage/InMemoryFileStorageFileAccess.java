@@ -394,6 +394,11 @@ public class InMemoryFileStorageFileAccess implements FileStorageFileAccess, Fil
     }
 
     @Override
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
+        return SearchIteratorAdapter.emptyIterator();
+    }
+
+    @Override
     public FileStorageAccountAccess getAccountAccess() {
         return new FileStorageAccountAccess() {
 

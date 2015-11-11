@@ -67,6 +67,9 @@ public class CalDAVOnboardingStrings implements LocalizableStrings {
         super();
     }
 
+    // The default display name for a CaldAV account
+    public static final String CALDAV_DISPLAY_NAME = "CalDAV";
+
     // A description for a CaldAV account on a mobile device
     public static final String CALDAV_ACCOUNT_DESCRIPTION = "The CalDAV account for synchronizing calendar entries with Open-Xchange Server.";
 

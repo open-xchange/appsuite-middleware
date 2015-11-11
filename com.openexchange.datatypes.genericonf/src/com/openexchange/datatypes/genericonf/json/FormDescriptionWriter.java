@@ -83,7 +83,7 @@ public class FormDescriptionWriter {
 
     public FormDescriptionWriter(Translator translator) {
         super();
-        this.translator = translator;
+        this.translator = null == translator ? Translator.EMPTY : translator;
     }
 
     public FormDescriptionWriter() {

@@ -49,17 +49,20 @@
 
 package com.openexchange.onboarding.json.actions;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.DefaultClientInfo;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
 import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
@@ -87,21 +90,40 @@ public class ExecuteAction extends AbstractOnboardingAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
+        // Check for configuration identifier
         String configurationId = requestData.getParameter("configurationId");
         if (Strings.isEmpty(configurationId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("configurationId");
         }
 
-        OnboardingConfiguration config = onboardingService.getConfiguration(configurationId);
-
+        // Check for selection identifier
         String selectionId = requestData.getParameter("selectionId");
         if (Strings.isEmpty(selectionId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("selectionId");
         }
 
-        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(configurationId, selectionId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData)), requestData.getHostData());
+        // Check for matching on-boarding configuration
+        OnboardingConfiguration config = onboardingService.getConfiguration(configurationId);
+        if (null == config) {
+            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(configurationId);
+        }
+
+        // Parse optional form content
+        Map<String, Object> formContent = null;
+        {
+            Object data = requestData.getData();
+            if (data instanceof JSONObject) {
+                JSONObject jFormContent = (JSONObject) data;
+                formContent = (Map<String, Object>) JSONCoercion.coerceToNative(jFormContent);
+            }
+        }
+
+        // Create on-boarding request & execute it
+        DefaultClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
+        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(configurationId, selectionId, clientInfo, requestData.getHostData(), formContent);
         Result onboardingResult = config.execute(onboardingRequest, session);
 
+        // Return execution result
         Object resultObject = onboardingResult.getResultObject();
         if (null != resultObject) {
             String format = onboardingResult.getFormat();

@@ -3952,7 +3952,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         toCreate.addPermission(mp);
                     }
                     try {
-                    mailAccess.getFolderStorage().createFolder(toCreate);
+                        mailAccess.getFolderStorage().createFolder(toCreate);
                     } catch (final OXException e) {
                         if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
                             if (mailAccess.getFolderStorage().exists(archiveFullname)) {
@@ -3964,7 +3964,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                             throw e;
                         }
                     }
-                    CacheFolderStorage.getInstance().removeFromCache(archiveFullname, "0", true, session);
+                    CacheFolderStorage.getInstance().removeFromCache(MailFolderUtility.prepareFullname(accountId, archiveFullname), "0", true, session);
                 }
 
                 List<String> ids = entry.getValue();

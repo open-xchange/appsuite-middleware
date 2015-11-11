@@ -148,7 +148,6 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
 		if (null == patterns || 0 == patterns.size()) {
             stringBuilder.append(getSelectClause(fields, forUser)).append(" WHERE ").append(getContextIDClause(contextID)).append(" AND ")
                 .append(getFolderIDsClause(folderIDs));
-            insertObjectUseCountClause(stringBuilder, autoCompleteParameters.getInteger(AutocompleteParameters.USER_ID, -1));
 	        if (requireEmail) {
 	            stringBuilder.append(" AND (").append(getEMailAutoCompleteClause(ignoreDistributionLists)).append(')');
 	        } else if (ignoreDistributionLists) {

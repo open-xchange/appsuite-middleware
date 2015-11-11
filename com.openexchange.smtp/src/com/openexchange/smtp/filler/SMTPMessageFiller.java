@@ -54,8 +54,10 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.CompositionParameters;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.filler.SessionCompositionParameters;
@@ -105,25 +107,34 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @param mail The source mail
      * @param smtpMessage The SMTP message to fill
      * @param type The compose type
+     * @param accountId The identifier of the associated account
+     * @param session The session
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If a mail error occurs
      * @throws IOException If an I/O error occurs
      */
-    public void fillMail(final ComposedMailMessage mail, final SMTPMessage smtpMessage, final ComposeType type) throws MessagingException, OXException, IOException {
+    public void fillMail(ComposedMailMessage mail, SMTPMessage smtpMessage, ComposeType type) throws MessagingException, OXException, IOException {
         if (null != type) {
             mail.setSendType(type);
         }
-        /*
-         * Set headers
-         */
+
+        // Set headers
         setMessageHeaders(mail, smtpMessage);
-        /*
-         * Set common headers
-         */
+        if (!mail.containsFrom() || mail.getFrom().length == 0) {
+            String envelopeFrom = compositionParameters.getEnvelopeFrom();
+            if (!Strings.isEmpty(envelopeFrom)) {
+                try {
+                    smtpMessage.setFrom(new QuotedInternetAddress(envelopeFrom));
+                } catch (MessagingException e) {
+                    // Failed to parse envelope-from
+                }
+            }
+        }
+
+        // Set common headers
         setCommonHeaders(smtpMessage);
-        /*
-         * Fill body
-         */
+
+        // Fill body
         fillMailBody(mail, smtpMessage, type);
     }
 

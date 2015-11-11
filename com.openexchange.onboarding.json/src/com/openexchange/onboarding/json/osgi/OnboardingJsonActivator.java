@@ -55,6 +55,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.onboarding.json.OnboardingActionFactory;
 import com.openexchange.onboarding.json.converter.ConfigurationTreeConverter;
+import com.openexchange.onboarding.json.converter.SelectionConverter;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 
 /**
@@ -82,6 +83,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
         logger.info("Starting bundle: \"com.openexchange.onboarding.json\"");
 
         registerService(ResultConverter.class, new ConfigurationTreeConverter());
+        registerService(ResultConverter.class, new SelectionConverter());
         registerModule(new OnboardingActionFactory(this), "onboarding");
     }
 
