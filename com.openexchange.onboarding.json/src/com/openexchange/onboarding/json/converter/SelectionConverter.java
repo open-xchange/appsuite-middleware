@@ -50,6 +50,7 @@
 package com.openexchange.onboarding.json.converter;
 
 import java.util.Collection;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -61,6 +62,8 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Charsets;
+import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -106,7 +109,11 @@ public class SelectionConverter implements ResultConverter {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         } else {
-            @SuppressWarnings("unchecked") final Collection<OnboardingSelection> selections = (Collection<OnboardingSelection>) resultObject;
+            if (!(resultObject instanceof Collection)) {
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingSelection.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+            }
+            @SuppressWarnings("unchecked")
+            Collection<OnboardingSelection> selections = (Collection<OnboardingSelection>) resultObject;
             try {
                 JSONArray jSelections = new JSONArray(selections.size());
 
@@ -144,7 +151,11 @@ public class SelectionConverter implements ResultConverter {
         if (null == value) {
             jObject.put(key, JSONObject.NULL);
         } else {
-            jObject.put(key, value);
+            if (value instanceof Icon) {
+                jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+            } else {
+                jObject.put(key, value);
+            }
         }
     }
 
