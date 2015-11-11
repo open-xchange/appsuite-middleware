@@ -752,9 +752,14 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, Field sort, SortDirection order, int start, int end) throws OXException {
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
             // Search by pattern
-            List<File> files = searchByFileNamePattern(pattern, folderId, fields, sort, order);
+            List<File> files = searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order);
 
             // Start, end...
             if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -807,12 +812,13 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      *
      * @param pattern The pattern to search for
      * @param folderId The parent folder identifier to restrict the search to, or <code>null</code> to search all folders
+     * @param includeSubfolders <code>true</code> to include subfolderes, <code>false</code>, otherwise
      * @param fields The fields to retrieve
      * @param sort The field to use to sort the results
      * @param order The sort order to apply
      * @return The found files
      */
-    private List<File> searchByFileNamePattern(String pattern, String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
+    private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             List<File> files = new ArrayList<File>();
@@ -820,8 +826,15 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              * build search query
              */
             StringBuilder stringBuilder = new StringBuilder(QUERY_STRING_FILES_ONLY_EXCLUDING_TRASH);
+            Map<String, Boolean> allowedFolders;
             if (null != folderId) {
-                stringBuilder.append(" and '").append(toGoogleDriveFolderId(folderId)).append("' in parents");
+                allowedFolders = new HashMap<String, Boolean>();
+                allowedFolders.put(folderId, Boolean.TRUE);
+                if (false == includeSubfolders) {
+                    stringBuilder.append(" and '").append(toGoogleDriveFolderId(folderId)).append("' in parents");
+                }
+            } else {
+                allowedFolders = null;
             }
             if (null != pattern) {
                 stringBuilder.append(" and title contains '").append(escape(pattern)).append('\'');
@@ -838,7 +851,17 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             do {
                 fileList = listRequest.execute();
                 for (com.google.api.services.drive.model.File file : fileList.getItems()) {
-                    GoogleDriveFile metadata = createFile(folderId, file.getId(), file, fields);
+                    GoogleDriveFile metadata = createFile(null, file.getId(), file, fields);
+                    if (null != allowedFolders) {
+                        Boolean allowed = allowedFolders.get(metadata.getFolderId());
+                        if (null == allowed) {
+                            allowed = Boolean.valueOf(includeSubfolders && isSubfolderOf(drive, metadata.getFolderId(), folderId));
+                            allowedFolders.put(metadata.getFolderId(), allowed);
+                        }
+                        if (false == allowed.booleanValue()) {
+                            continue; // skip this file
+                        }
+                    }
                     if (null == fields || fields.contains(Field.VERSION) || fields.contains(Field.NUMBER_OF_VERSIONS)) {
                         List<Revision> revisions = optRevisions(drive, metadata.getId());
                         if (null != revisions && 0 < revisions.size()) {
@@ -865,6 +888,31 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    /**
+     * Gets a value indicating whether a folder is a subfolder (at any level) of a parent folder.
+     *
+     * @param drive A reference to the drive service
+     * @param folderId The identifier of the folder to check
+     * @param parentFolderId The identifier of the parent folder, or <code>null</code> to fall back to the root folder
+     * @return <code>true</code> if the folder  is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
+     */
+    private boolean isSubfolderOf(Drive drive, String folderId, String parentFolderId) throws OXException, IOException {
+        String driveId = toGoogleDriveFolderId(folderId);
+        String rootDriveId = getRootFolderId();
+        String parentDriveId = null != parentFolderId ? toGoogleDriveFolderId(parentFolderId) : rootDriveId;
+        if (parentDriveId.equals(rootDriveId)) {
+            return true;
+        }
+        if (driveId.equals(rootDriveId) || driveId.equals(parentDriveId)) {
+            return false;
+        }
+        do {
+            com.google.api.services.drive.model.File dir = drive.files().get(driveId).execute();
+            driveId = dir.getParents().get(0).getId();
+        } while (false == driveId.equals(parentDriveId) && false == driveId.equals(rootDriveId));
+        return driveId.equals(parentDriveId);
     }
 
     @Override

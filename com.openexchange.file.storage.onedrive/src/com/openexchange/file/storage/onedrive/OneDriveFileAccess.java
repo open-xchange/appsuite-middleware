@@ -88,6 +88,7 @@ import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageSequenceNumberProvider;
 import com.openexchange.file.storage.FileTimedResult;
@@ -720,6 +721,18 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final Map<String, Boolean> allowedFolders;
+        if (null != folderId) {
+            allowedFolders = new HashMap<String, Boolean>();
+            allowedFolders.put(folderId, Boolean.TRUE);
+        } else {
+            allowedFolders = null;
+        }
         return perform(new OneDriveClosure<SearchIterator<File>>() {
 
             @Override
@@ -727,7 +740,6 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpRequestBase request = null;
                 try {
                     List<File> files = new LinkedList<File>();
-                    String fid = null == folderId ? null : toOneDriveFolderId(folderId);
                     int limit = 100;
                     int offset = 0;
                     int resultsFound;
@@ -749,13 +761,18 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                         for (int i = 0; i < length; i++) {
                             JSONObject jItem = jData.getJSONObject(i);
                             if (isFile(jItem)) {
-                                if (null != fid) {
-                                    if (fid.equals(jItem.optString("parent_id", null))) {
-                                        files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
+                                OneDriveFile metadata = new OneDriveFile(jItem.getString("parent_id"), jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem);
+                                if (null != allowedFolders) {
+                                    Boolean allowed = allowedFolders.get(metadata.getFolderId());
+                                    if (null == allowed) {
+                                        allowed = Boolean.valueOf(includeSubfolders && isSubfolderOf(metadata.getFolderId(), folderId));
+                                        allowedFolders.put(metadata.getFolderId(), allowed);
                                     }
-                                } else {
-                                    files.add(new OneDriveFile(folderId, jItem.getString("id"), userId, getRootFolderId()).parseOneDriveFile(jItem));
+                                    if (false == allowed.booleanValue()) {
+                                        continue; // skip this file
+                                    }
                                 }
+                                files.add(metadata);
                             }
                         }
 
@@ -792,6 +809,31 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
             }
 
         });
+    }
+
+    /**
+     * Gets a value indicating whether a folder is a subfolder (at any level) of a parent folder.
+     *
+     * @param folderId The identifier of the folder to check
+     * @param parentFolderId The identifier of the parent folder, or <code>null</code> to fall back to the root folder
+     * @return <code>true</code> if the folder  is a subfolder (at any level) of the parent folder, <code>false</code>, otherwise
+     */
+    private boolean isSubfolderOf(String folderId, String parentFolderId) throws OXException, IOException {
+        String rootId = FileStorageFolder.ROOT_FULLNAME;
+        String parentId = null != parentFolderId ? parentFolderId : rootId;
+        String id = folderId;
+        if (parentId.equals(rootId)) {
+            return true;
+        }
+        if (id.equals(rootId) || id.equals(parentId)) {
+            return false;
+        }
+        FileStorageFolderAccess folderAccess = getAccountAccess().getFolderAccess();
+        do {
+            FileStorageFolder folder = folderAccess.getFolder(id);
+            id = folder.getParentId();
+        } while (false == id.equals(parentId) && false == id.equals(rootId));
+        return id.equals(parentId);
     }
 
     @Override

@@ -587,7 +587,12 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
-        return getSearchIterator(searchInFolder(folderId, pattern), sort, order, start, end);
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return getSearchIterator(searchInFolder(folderId, pattern, includeSubfolders), sort, order, start, end);
     }
 
     private void gatherAllFiles(final String path, final List<File> files) throws DropboxException, OXException {
@@ -633,11 +638,10 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
      *
      * @param folderId The ID of the folder to search in, or <code>null</code> to search in all folders
      * @param pattern The pattern
+     * @param includeSubfolders <code>true</code> to include subfolderes, <code>false</code>, otherwise
      * @return The found files
-     * @throws OXException
-     * @throws DropboxException
      */
-    private List<File> searchInFolder(String folderId, String pattern) throws OXException {
+    private List<File> searchInFolder(String folderId, String pattern, boolean includeSubfolders) throws OXException {
         String path = toPath(folderId);
         try {
             if (null == path) {
@@ -649,7 +653,7 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
                 /*
                  * specific folder
                  */
-                return searchInPath(path, pattern, false);
+                return searchInPath(path, pattern, includeSubfolders);
             }
         } catch (Exception e) {
             throw handle(e, path);

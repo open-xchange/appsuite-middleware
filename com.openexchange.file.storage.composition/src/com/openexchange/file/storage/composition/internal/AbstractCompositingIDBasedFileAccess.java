@@ -1295,7 +1295,31 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     @Override
+    public SearchIterator<File> search(String folderId, boolean includeSubfolders, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        /*
+         * perform search in single storage
+         */
+        FolderID folderID = new FolderID(folderId);
+        FileStorageFileAccess fileAccess = getFileAccess(folderID.getService(), folderID.getAccountId());
+        if (false == FileStorageTools.supports(fileAccess, FileStorageCapability.SEARCH_BY_TERM)) {
+            throw FileStorageExceptionCodes.OPERATION_NOT_SUPPORTED.create(fileAccess.getAccountAccess().getService());
+        }
+        SearchIterator<File> searchIterator = ((FileStorageAdvancedSearchFileAccess) fileAccess).search(
+            folderID.getFolderId(), includeSubfolders, searchTerm, fields, sort, order, start, end);
+        if (null == searchIterator) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        FileStorageAccountAccess accountAccess = fileAccess.getAccountAccess();
+        return fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId());
+    }
+
+    @Override
     public SearchIterator<File> search(final String query, final List<Field> columns, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return search(query, columns, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(final String query, final List<Field> columns, final String folderId, boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         // Check pattern
         checkPatternLength(query);
 
@@ -1307,6 +1331,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 query,
                 cols,
                 id.getFolderId(),
+                includeSubfolders,
                 sort,
                 order,
                 start,
@@ -1322,7 +1347,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
         }
         if (1 == numOfStorages) {
             final FileStorageFileAccess files = all.get(0);
-            final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+            final SearchIterator<File> result = files.search(query, cols, FileStorageFileAccess.ALL_FOLDERS, sort, order, start, end);
             if (result == null) {
                 return SearchIteratorAdapter.emptyIterator();
             }
@@ -1345,7 +1370,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 @Override
                 public SearchIterator<File> call() {
                     try {
-                        final SearchIterator<File> result = files.search(query, cols, folderId, sort, order, start, end);
+                        final SearchIterator<File> result = files.search(query, cols, FileStorageFileAccess.ALL_FOLDERS, sort, order, start, end);
                         if (result != null) {
                             final FileStorageAccountAccess accountAccess = files.getAccountAccess();
                             return fixIDs(result, accountAccess.getService().getId(), accountAccess.getAccountId());

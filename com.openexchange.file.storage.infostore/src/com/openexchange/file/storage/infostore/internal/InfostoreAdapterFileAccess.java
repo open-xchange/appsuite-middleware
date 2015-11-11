@@ -584,8 +584,13 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         int folder = (folderId == null) ? InfostoreSearchEngine.NO_FOLDER : Integer.parseInt(folderId);
-        return new InfostoreSearchIterator(search.search(session, pattern, folder, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
+        return new InfostoreSearchIterator(search.search(session, pattern, folder, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
@@ -605,6 +610,20 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         searchTerm.visit(visitor);
         return new InfostoreSearchIterator(search.search(
             session, visitor.getInfostoreTerm(), fids.toArray(), getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
+    }
+
+    @Override
+    public SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
+        int fid;
+        try {
+            fid = Integer.parseInt(folderId);
+        } catch (NumberFormatException e) {
+            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderId);
+        }
+        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+        searchTerm.visit(visitor);
+        return new InfostoreSearchIterator(search.search(
+            session, visitor.getInfostoreTerm(), fid, includeSubfolders, getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
     }
 
     @Override
