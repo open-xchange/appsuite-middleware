@@ -52,6 +52,7 @@ package com.openexchange.onboarding.carddav;
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import static com.openexchange.onboarding.OnboardingUtility.isIPad;
 import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
+import static com.openexchange.onboarding.OnboardingUtility.isOSX;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,7 +138,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         id = "com.openexchange.onboarding.carddav";
         executors = new HashMap<String, OnboardingExecutor>(8);
 
-        executors.put("apple.ios.ipad.carddav.download", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -148,18 +149,30 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.carddav.download", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
-                if (isIPad(request.getClientInfo())) {
+                if (isIPhone(request.getClientInfo())) {
                     return generatePListResult(request, session);
                 }
                 throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
             }
         });
 
-        executors.put("apple.ios.ipad.carddav.email", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.download", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                if (isOSX(request.getClientInfo())) {
+                    return generatePListResult(request, session);
+                }
+                throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
+            }
+        });
+
+
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -167,7 +180,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.carddav.email", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -175,7 +188,16 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.ipad.carddav.display", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.email", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return sendEmailResult(request, session);
+            }
+        });
+
+
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -183,7 +205,15 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.carddav.display", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
+
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -287,6 +317,22 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             // The display settings selection
             selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
+
+            return selections;
+        } else if ((CommonEntity.APPLE_OSX.getId() + ".carddav").equals(lastEntityId)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
+
+            // Via download or eMail
+            if (isIPhone(clientInfo)) {
+                // The download selection
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
+            }
+
+            // The eMail selection
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
 
             return selections;
         }

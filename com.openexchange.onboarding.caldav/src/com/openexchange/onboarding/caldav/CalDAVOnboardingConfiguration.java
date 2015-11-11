@@ -52,6 +52,7 @@ package com.openexchange.onboarding.caldav;
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import static com.openexchange.onboarding.OnboardingUtility.isIPad;
 import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
+import static com.openexchange.onboarding.OnboardingUtility.isOSX;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -137,7 +138,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         id = "com.openexchange.onboarding.caldav";
         executors = new HashMap<String, OnboardingExecutor>(8);
 
-        executors.put("apple.ios.ipad.caldav.download", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -148,18 +149,30 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.download", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.download", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
-                if (isIPad(request.getClientInfo())) {
+                if (isIPhone(request.getClientInfo())) {
                     return generatePListResult(request, session);
                 }
                 throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
             }
         });
 
-        executors.put("apple.ios.ipad.caldav.email", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".caldav.download", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                if (isOSX(request.getClientInfo())) {
+                    return generatePListResult(request, session);
+                }
+                throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(request.getSelectionId());
+            }
+        });
+
+
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -167,7 +180,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.email", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.email", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -175,7 +188,16 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.ipad.caldav.display", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".caldav.email", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return sendEmailResult(request, session);
+            }
+        });
+
+
+        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".caldav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -183,7 +205,15 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             }
         });
 
-        executors.put("apple.ios.iphone.caldav.display", new OnboardingExecutor() {
+        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
+
+        executors.put(CommonEntity.APPLE_OSX.getId() + ".caldav.display", new OnboardingExecutor() {
 
             @Override
             public Result execute(OnboardingRequest request, Session session) throws OXException {
@@ -287,6 +317,22 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             // The display settings selection
             selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
+
+            return selections;
+        } else if ((CommonEntity.APPLE_OSX.getId() + ".caldav").equals(lastEntityId)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
+
+            // Via download or eMail
+            if (isIPhone(clientInfo)) {
+                // The download selection
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".caldav.download", id, "com.openexchange.onboarding.caldav.download."));
+            }
+
+            // The eMail selection
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".caldav.email", id, "com.openexchange.onboarding.caldav.email.", CommonFormDescription.EMAIL_ADDRESS));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".caldav.display", id, "com.openexchange.onboarding.caldav.display."));
 
             return selections;
         }
