@@ -54,11 +54,9 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import com.openexchange.ajax.Client;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
@@ -245,17 +243,7 @@ public class LabelHelper {
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
 		final String template = patternSlashFixer.matcher(config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]")).replaceAll("/");
-
-        String clientID = config.getProperty(Property.HTTP_AUTH_CLIENT.getPropertyName(), Property.HTTP_AUTH_CLIENT.getDefaultValue());
-        Client client = Client.getClientByID(clientID);
-        String webpath;
-        if (client != null) {
-            webpath = client.getUIWebPath();
-        }
-        else {
-            webpath = "/ox6/index.html";
-        }
-
+		String webpath = config.getProperty("com.openexchange.UIWebPath", "/appsuite/");
 		if (webpath.startsWith("/")) {
 		    webpath = webpath.substring(1, webpath.length());
 		}
