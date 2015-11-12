@@ -144,6 +144,7 @@ public class ActionCommand extends ControlOrActionCommand {
             retval.put(":days", Integer.valueOf(1));
             retval.put(":addresses", Integer.valueOf(1));
             retval.put(":subject", Integer.valueOf(1));
+            retval.put(":from", Integer.valueOf(1));
             return retval;
         }
 

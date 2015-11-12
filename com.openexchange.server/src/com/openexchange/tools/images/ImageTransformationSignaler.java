@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,19 @@
  *
  */
 
-package com.openexchange.tools.images.transformations;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import com.openexchange.tools.images.ImageInformation;
+package com.openexchange.tools.images;
 
 /**
- * {@link ImageTransformation}
+ * {@link ImageTransformationSignaler} - Call-back class for signaling certain image transformation events.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface ImageTransformation {
+public interface ImageTransformationSignaler {
 
     /**
-     * Performs the image transformation.
-     *
-     * @param sourceImage The source image
-     * @param transformationContext The transformation context
-     * @param imageInformation The additional image information, or <code>null</code> if not needed
-     * @return The resulting image
+     * Invoked if actual image is read into an in-memory {@code BufferedImage} instance.
      */
-    BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException;
-
-    /**
-     * Gets a value indicating whether the supplied image format is supported by the transformation or not.
-     *
-     * @param formatName The image format name, e.g. <code>jpeg</code> or <code>tiff</code>
-     * @return <code>true</code>, if the format is supported, <code>false</code>, otherwise
-     */
-    boolean supports(String formatName);
-
-    /**
-     * Gets a value indicating whether the transformation needs additional image information or not.
-     *
-     * @return <code>true</code>, if additional information is required, <code>false</code>, otherwise
-     */
-    boolean needsImageInformation();
+    void onImageRead();
 
 }

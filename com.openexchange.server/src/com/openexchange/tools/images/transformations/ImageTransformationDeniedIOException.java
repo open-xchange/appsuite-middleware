@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,40 +49,53 @@
 
 package com.openexchange.tools.images.transformations;
 
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import com.openexchange.tools.images.ImageInformation;
 
 /**
- * {@link ImageTransformation}
+ * {@link ImageTransformationDeniedIOException} - The special I/O error signaling that image transformation has been denied.
+ * <p>
+ * Image either exceeds allowed max. size or resolution.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface ImageTransformation {
+public class ImageTransformationDeniedIOException extends IOException {
+
+    private static final long serialVersionUID = 6657928423486571747L;
 
     /**
-     * Performs the image transformation.
-     *
-     * @param sourceImage The source image
-     * @param transformationContext The transformation context
-     * @param imageInformation The additional image information, or <code>null</code> if not needed
-     * @return The resulting image
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
      */
-    BufferedImage perform(BufferedImage sourceImage, TransformationContext transformationContext, ImageInformation imageInformation) throws IOException;
+    public ImageTransformationDeniedIOException() {
+        super();
+    }
 
     /**
-     * Gets a value indicating whether the supplied image format is supported by the transformation or not.
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
      *
-     * @param formatName The image format name, e.g. <code>jpeg</code> or <code>tiff</code>
-     * @return <code>true</code>, if the format is supported, <code>false</code>, otherwise
+     * @param message The detail message
+     * @param cause The cause
      */
-    boolean supports(String formatName);
+    public ImageTransformationDeniedIOException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
     /**
-     * Gets a value indicating whether the transformation needs additional image information or not.
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
      *
-     * @return <code>true</code>, if additional information is required, <code>false</code>, otherwise
+     * @param message The detail message
      */
-    boolean needsImageInformation();
+    public ImageTransformationDeniedIOException(String message) {
+        super(message);
+    }
+
+    /**
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     *
+     * @param cause The cause
+     */
+    public ImageTransformationDeniedIOException(Throwable cause) {
+        super(cause);
+    }
 
 }

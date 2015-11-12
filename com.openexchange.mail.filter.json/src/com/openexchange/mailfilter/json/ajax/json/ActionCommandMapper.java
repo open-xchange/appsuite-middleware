@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,6 +65,7 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
@@ -157,6 +159,17 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 final String subject = object.getString(subjectFieldname);
                 arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.SUBJECT));
                 arrayList.add(stringToList(subject));
+            }
+            final String fromFieldName = VacationActionFields.FROM.getFieldname();
+            if (object.has(fromFieldName)) {
+                String from = object.getString(fromFieldName);
+                try {
+                     new QuotedInternetAddress(from, true);
+                } catch (AddressException e) {
+                    throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
+                }
+                arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
+                arrayList.add(stringToList(from));
             }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
@@ -300,6 +313,11 @@ final class ActionCommandMapper implements Mapper<Rule> {
                 final List<String> subject = tagarguments.get(VacationActionFields.SUBJECT.getTagname());
                 if (null != subject) {
                     tmp.put(VacationActionFields.SUBJECT.getFieldname(), subject.get(0));
+                }
+                final List<String> from = tagarguments.get(VacationActionFields.FROM.getTagname());
+                if (null != from) {
+                    String decodedFrom = MimeMessageUtility.decodeEnvelopeSubject(from.get(0));
+                    tmp.put(VacationActionFields.FROM.getFieldname(), decodedFrom);
                 }
                 tmp.put(VacationActionFields.TEXT.getFieldname(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
             } else if (ActionCommand.Commands.ENOTIFY.equals(actionCommand.getCommand())) {

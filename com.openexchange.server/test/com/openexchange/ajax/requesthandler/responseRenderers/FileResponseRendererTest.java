@@ -61,6 +61,7 @@ import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
+import com.openexchange.ajax.container.IFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
@@ -937,10 +938,9 @@ public class FileResponseRendererTest extends TestCase {
     private static final class TestableImageTransformationService implements ImageTransformationService {
 
         private final byte[] imageData;
-
         private final int expenses;
 
-        public TestableImageTransformationService(byte[] imageData, int expenses) {
+        TestableImageTransformationService(byte[] imageData, int expenses) {
             super();
             this.imageData = imageData;
             this.expenses = expenses;
@@ -963,6 +963,11 @@ public class FileResponseRendererTest extends TestCase {
 
         @Override
         public ImageTransformations transfom(InputStream imageStream, Object source) throws IOException {
+            return new TestableImageTransformations(imageData, expenses);
+        }
+
+        @Override
+        public ImageTransformations transfom(IFileHolder imageFile, Object source) throws IOException {
             return new TestableImageTransformations(imageData, expenses);
         }
 
