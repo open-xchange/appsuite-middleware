@@ -224,7 +224,7 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.eas.displayName", session);
+        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", EASOnboardingStrings.EAS_DISPLAY_NAME, true, session);
     }
 
     @Override
