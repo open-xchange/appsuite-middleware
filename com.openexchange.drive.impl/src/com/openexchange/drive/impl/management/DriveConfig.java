@@ -58,7 +58,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
-import com.openexchange.ajax.Client;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.DriveClientType;
@@ -530,15 +529,7 @@ public class DriveConfig implements Initialization {
             "m=infostore&f=[folder]");
         directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
             "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
-        String clientID = configService.getProperty("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml");
-        Client client = Client.getClientByID(clientID);
-        if (client != null) {
-            uiWebPath = client.getUIWebPath();
-        }
-        else {
-            uiWebPath = "/ox6/index.html";
-        }
-
+        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
         dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
         /*
          * version restrictions

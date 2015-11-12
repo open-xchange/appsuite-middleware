@@ -51,10 +51,8 @@ package com.openexchange.share.servlet.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import com.openexchange.ajax.Client;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.session.Session;
 import com.openexchange.share.ShareTarget;
@@ -147,15 +145,7 @@ public class ShareRedirectUtils {
     public static String getLoginLink() {
         ConfigurationService configService = ShareServiceLookup.getService(ConfigurationService.class);
         String loginLink = configService.getProperty("com.openexchange.share.loginLink", "/[uiwebpath]/ui");
-        String clientID = configService.getProperty(Property.HTTP_AUTH_CLIENT.getPropertyName(), Property.HTTP_AUTH_CLIENT.getDefaultValue());
-        Client client = Client.getClientByID(clientID);
-        String uiWebPath;
-        if (client != null) {
-            uiWebPath = client.getUIWebPath();
-        }
-        else {
-            uiWebPath = "/appsuite";
-        }
+        String uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
         return P_UIWEBPATH.matcher(loginLink).replaceAll(Matcher.quoteReplacement(trimSlashes(uiWebPath)));
     }
 

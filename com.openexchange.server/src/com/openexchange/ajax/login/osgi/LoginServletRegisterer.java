@@ -64,7 +64,6 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.Client;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionServletInterceptor;
 import com.openexchange.ajax.login.HashCalculator;
@@ -149,15 +148,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
                 login.addRequestHandler(entry.getKey(), entry.getValue());
             }
             final Dictionary<String, String> params = new Hashtable<String, String>(32);
-            addProperty(params, Property.HTTP_AUTH_CLIENT);
-            String clientID = params.get(Property.HTTP_AUTH_CLIENT.getPropertyName());
-            Client client = Client.getClientByID(clientID);
-            if (client != null) {
-                params.put(Property.UI_WEB_PATH.getPropertyName(), client.getUIWebPath().trim());
-            }
-            else {
-                params.put(Property.UI_WEB_PATH.getPropertyName(), "/appsuite");
-            }
+            addProperty(params, Property.UI_WEB_PATH);
             addProperty(params, Property.COOKIE_HASH);
             addProperty(params, Property.COOKIE_TTL);
             addProperty(params, Property.COOKIE_FORCE_HTTPS);
@@ -172,6 +163,7 @@ public class LoginServletRegisterer implements ServiceTrackerCustomizer<Object, 
             }
             addProperty(params, ConfigurationProperty.SESSIOND_AUTOLOGIN);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_AUTOLOGIN);
+            addProperty(params, ConfigurationProperty.HTTP_AUTH_CLIENT);
             addProperty(params, ConfigurationProperty.HTTP_AUTH_VERSION);
             addProperty(params, ConfigurationProperty.ERROR_PAGE_TEMPLATE);
             addProperty(params, ConfigurationProperty.INSECURE);

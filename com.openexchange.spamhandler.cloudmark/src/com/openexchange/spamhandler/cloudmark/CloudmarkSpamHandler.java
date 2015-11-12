@@ -53,6 +53,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -106,7 +107,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
-                    if (isEmpty(targetSpamEmailAddress)) {
+                    if (Strings.isEmpty(targetSpamEmailAddress)) {
                         LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress', cannot process spam reporting to server.");
                     } else {
                         SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance()
@@ -159,7 +160,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             for (int i = 0; i < mailMessage.length; i++) {
                 final MailTransport transport = MailTransport.getInstance(session);
                 try {
-                    if (isEmpty(targetHamEmailAddress)) {
+                    if (Strings.isEmpty(targetHamEmailAddress)) {
                         LOG.debug("There is no value configured for 'com.openexchange.spamhandler.cloudmark.targetHamEmailAddress', cannot process ham reporting to server.");
                     } else {
                         SendRawProperties sendRawProperties = MailTransport.SendRawProperties.newInstance()
@@ -179,13 +180,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             if (move) {
                 String targetSpamFolder = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamFolder", "1").trim();
                 if (!targetSpamFolder.equals("0")) {
-                    try {
-                        mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
-                    } finally {
-                        if (null != mailAccess) {
-                            mailAccess.close(true);
-                        }
-                    }
+                    mailAccess.getMessageStorage().moveMessages(fullname, "INBOX", mailIDs, true);
                 }
             }
         } finally {
@@ -204,18 +199,6 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     @Override
     public boolean isCreateConfirmedHam() {
         return false;
-    }
-
-    private static boolean isEmpty(final String string) {
-        if (null == string) {
-            return true;
-        }
-        final int len = string.length();
-        boolean isWhitespace = true;
-        for (int i = 0; isWhitespace && i < len; i++) {
-            isWhitespace = com.openexchange.java.Strings.isWhitespace(string.charAt(i));
-        }
-        return isWhitespace;
     }
 
     /**
@@ -240,4 +223,5 @@ public final class CloudmarkSpamHandler extends SpamHandler {
             return null;
         }
     }
+
 }
