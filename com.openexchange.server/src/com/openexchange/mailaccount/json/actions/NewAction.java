@@ -158,10 +158,14 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
         boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+
+        // Check credentials validity
+        boolean valid = true;
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
                 if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
+                    valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(0, warning);
@@ -172,7 +176,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         // Check standard folder names against full names
-        if (!pop3) {
+        if (!pop3 && valid) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = getMailAccess(accountDescription, session, warnings);
@@ -213,7 +217,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
                 Map<String, String> defaultFolderNames = null;
-                if (!pop3) {
+                if (!pop3 && valid) {
                     MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
                     mailAccess = getMailAccess(accountDescription, session, warnings);
                     mailAccess.connect(false);
@@ -225,7 +229,9 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                     mailAccess = null;
                 }
 
-                newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
+                if (valid) {
+                    newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
+                }
                 wcon.commit();
                 rollback = false;
             } catch (SQLException e) {

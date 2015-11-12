@@ -391,9 +391,9 @@ public class LabelHelper {
 			String msg = null;
 	        String statusString = null;
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_ON_YOUR_BEHALF_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg = Messages.DECLINE_ON_YOUR_BEHALF_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg = Messages.TENTATIVE_ON_YOUR_BEHALF_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
+	        case DECLINE: msg = Messages.DECLINE_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
 	        case NONE: msg = Messages.NONE_ON_YOUR_BEHALF_INTRO; statusString = Messages.NONE; break;
 	        }
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
@@ -424,17 +424,17 @@ public class LabelHelper {
     protected class OnBehalfOfAnother implements DelegationState {
 
 		@Override
-        public String statusChange(final NotificationParticipant participant,
-				final ConfirmStatus status) {
+        public String statusChange(final NotificationParticipant participant, final ConfirmStatus status) {
 			String msg = null;
-	        String statusString = null;
+	        String statusString = "";
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_ON_BEHALF_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg =Messages.DECLINE_ON_BEHALF_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg =Messages.TENTATIVE_ON_BEHALF_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_ON_BEHALF_INTRO; break;
+	        case DECLINE: msg = Messages.DECLINE_ON_BEHALF_INTRO; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_ON_BEHALF_INTRO; break;
 	        case NONE: msg = Messages.NONE_ON_BEHALF_INTRO; statusString = Messages.NONE; break;
 	        }
-	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);		}
+	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+	    }
 
 		@Override
         public String getDeleteIntroduction() {
@@ -461,14 +461,13 @@ public class LabelHelper {
     protected class OnNoOnesBehalf implements DelegationState {
 
 		@Override
-        public String statusChange(final NotificationParticipant participant,
-				final ConfirmStatus status) {
+        public String statusChange(final NotificationParticipant participant, final ConfirmStatus status) {
 			String msg = null;
-	        String statusString = null;
+	        String statusString = "";
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg = Messages.DECLINE_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg = Messages.TENTATIVE_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_INTRO; break;
+	        case DECLINE: msg = Messages.DECLINE_INTRO; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_INTRO; break;
 	        case NONE: msg = Messages.NONE_INTRO; statusString = Messages.NONE; break;
 	        }
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);

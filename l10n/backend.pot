@@ -1643,6 +1643,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -3464,11 +3465,13 @@ msgstr ""
 
 #. The identifier for user module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:62
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
 msgid "User"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:64
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:64
 msgid "Host name"
 msgstr ""
 
@@ -3490,6 +3493,26 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:78
 msgid "Your CalDAV settings"
+msgstr ""
+
+#. The default display name for a CardDAV account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:71
+msgid "CardDAV"
+msgstr ""
+
+#. A description for a CardDAV account on a mobile device
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:74
+msgid ""
+"The CardDAV account for synchronizing contact entries with Open-Xchange "
+"Server."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:76
+msgid "Your CardDAV profile"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:78
+msgid "Your CardDAV settings"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:56
@@ -3576,6 +3599,17 @@ msgstr ""
 #. E-Mail successfully sent
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:93
 msgid "E-Mail successfully sent"
+msgstr ""
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. Used when rendering a form in which the user is supposed to enter an E-Mail address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:98
+msgid "E-Mail address"
+msgstr ""
+
+#. Used when rendering a form in which the user is supposed to enter a phone number address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:101
+msgid "Phone number"
 msgstr ""
 
 #. *

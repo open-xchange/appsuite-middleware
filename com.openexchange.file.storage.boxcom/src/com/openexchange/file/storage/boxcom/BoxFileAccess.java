@@ -674,6 +674,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
     @Override
     public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(final String pattern, List<Field> fields, final String folderId, final boolean includeSubfolders, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
         return perform(new BoxClosure<SearchIterator<File>>() {
 
             @Override
@@ -698,7 +703,11 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
                     resultsFound = entries.size();
                     for (BoxTypedObject typedObject : entries) {
                         BoxFile boxfile = (BoxFile) typedObject;
-                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(toFileStorageFolderId(boxfile.getParent().getId()), boxfile.getId(), userId, rootFolderId).parseBoxFile(boxfile));
+                        String parentFolderId = toFileStorageFolderId(boxfile.getParent().getId());
+                        if (null != folderId && false == includeSubfolders && false == folderId.equals(parentFolderId)) {
+                            continue;
+                        }
+                        files.add(new com.openexchange.file.storage.boxcom.BoxFile(parentFolderId, boxfile.getId(), userId, rootFolderId).parseBoxFile(boxfile));
                     }
 
                     offset += limit;

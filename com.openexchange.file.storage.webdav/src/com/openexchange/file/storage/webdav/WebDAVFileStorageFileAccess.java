@@ -1091,6 +1091,23 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         return getSortedRangeFrom(results, sort, order, start, end);
     }
 
+    @Override
+    public SearchIterator<File> search(String folderId, boolean includeSubfolders, final SearchTerm<?> searchTerm, final List<Field> fields, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        final List<File> results;
+        {
+            final FieldCollectorVisitor fieldCollector = new FieldCollectorVisitor(Field.ID, Field.FOLDER_ID);
+            searchTerm.visit(fieldCollector);
+
+            final List<Field> fieldz = new ArrayList<Field>(fields);
+            fieldz.addAll(fieldCollector.getFields());
+
+            final WebDAVSearchVisitor visitor = new WebDAVSearchVisitor(fieldz, this);
+            searchTerm.visit(visitor);
+            results = visitor.getResults();
+        }
+        return getSortedRangeFrom(results, sort, order, start, end);
+    }
+
     /**
      * Recursively searches using given term.
      *
@@ -1194,6 +1211,11 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
 
     @Override
     public SearchIterator<File> search(final String pattern, final List<Field> fields, final String folderId, final Field sort, final SortDirection order, final int start, final int end) throws OXException {
+        return search(pattern, fields, folderId, false, sort, order, start, end);
+    }
+
+    @Override
+    public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         final List<File> results;
         if (ALL_FOLDERS == folderId) {
             /*
@@ -1201,6 +1223,9 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
              */
             results = new ArrayList<File>();
             recursiveSearchFile(pattern, rootUri, fields, results);
+        } else if (includeSubfolders) {
+            results = new ArrayList<File>();
+            recursiveSearchFile(pattern, folderId, fields, results);
         } else {
             /*
              * Get files from folder

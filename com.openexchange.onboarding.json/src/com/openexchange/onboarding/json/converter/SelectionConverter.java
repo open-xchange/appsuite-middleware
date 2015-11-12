@@ -50,6 +50,7 @@
 package com.openexchange.onboarding.json.converter;
 
 import java.util.Collection;
+import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -57,7 +58,12 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.datatypes.genericonf.DynamicFormDescription;
+import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
+import com.openexchange.java.Charsets;
+import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -103,7 +109,11 @@ public class SelectionConverter implements ResultConverter {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }
         } else {
-            @SuppressWarnings("unchecked") final Collection<OnboardingSelection> selections = (Collection<OnboardingSelection>) resultObject;
+            if (!(resultObject instanceof Collection)) {
+                throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingSelection.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+            }
+            @SuppressWarnings("unchecked")
+            Collection<OnboardingSelection> selections = (Collection<OnboardingSelection>) resultObject;
             try {
                 JSONArray jSelections = new JSONArray(selections.size());
 
@@ -121,12 +131,32 @@ public class SelectionConverter implements ResultConverter {
     private JSONObject toJson(OnboardingSelection selection, ServerSession session) throws OXException, JSONException {
         JSONObject jSelection = new JSONObject(6);
 
-        jSelection.put("id", selection.getId());
-        jSelection.put("displayName", selection.getDisplayName(session));
-        jSelection.put("description", selection.getDescription(session));
-        jSelection.put("icon", selection.getIcon(session));
+        jSelection.put("selectionId", selection.getId());
+        jSelection.put("configurationId", selection.getConfigurationId());
+        put2Json("displayName", selection.getDisplayName(session), jSelection);
+        put2Json("description", selection.getDescription(session), jSelection);
+        put2Json("icon", selection.getIcon(session), jSelection);
+
+        DynamicFormDescription formDescription = selection.getFormDescription();
+        if (null == formDescription) {
+            jSelection.put("form", JSONObject.NULL);
+        } else {
+            jSelection.put("form", new FormDescriptionWriter(StringHelper.translatorFor(session.getUser().getLocale())).write(formDescription));
+        }
 
         return jSelection;
+    }
+
+    private void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
+        if (null == value) {
+            jObject.put(key, JSONObject.NULL);
+        } else {
+            if (value instanceof Icon) {
+                jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+            } else {
+                jObject.put(key, value);
+            }
+        }
     }
 
 }

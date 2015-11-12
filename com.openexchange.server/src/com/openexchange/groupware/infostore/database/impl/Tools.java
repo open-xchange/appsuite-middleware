@@ -51,6 +51,7 @@ package com.openexchange.groupware.infostore.database.impl;
 
 import static com.openexchange.java.Autoboxing.I;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +78,7 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
+import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderIteratorSQL;
 import com.openexchange.tools.session.ServerSession;
 
@@ -223,12 +225,12 @@ public class Tools {
      * @param context The context
      * @param user The user
      * @param userPermissions The user's permission bits
-     * @param requestedFolderIDs The folder identifiers requested from the client, or <code>null</code> to use all visible ones
+     * @param requestedFolderIDs The folder identifiers requested from the client, or <code>null</code> to use all visible ones (excluding trash folders)
      * @param all A collection to add the IDs of folders the user is able to read "all" items from
      * @param own A collection to add the IDs of folders the user is able to read only "own" items from
      * @return The effective permissions of all resulting folders, mapped to the corresponding folder identifiers
      */
-    public static Map<Integer, EffectiveInfostoreFolderPermission> gatherVisibleFolders(InfostoreSecurity security, Connection connection, Context context, User user, UserPermissionBits userPermissions, int[] requestedFolderIDs, Collection<Integer> all, Collection<Integer> own) throws OXException {
+    private static Map<Integer, EffectiveInfostoreFolderPermission> gatherVisibleFolders(InfostoreSecurity security, Connection connection, Context context, User user, UserPermissionBits userPermissions, int[] requestedFolderIDs, Collection<Integer> all, Collection<Integer> own) throws OXException {
         Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
         if (null != requestedFolderIDs) {
             /*
@@ -236,14 +238,10 @@ public class Tools {
              */
             for (int folderID : requestedFolderIDs) {
                 EffectiveInfostoreFolderPermission infostorePermission = security.getFolderPermission(folderID, context, user, userPermissions, connection);
-                if (infostorePermission.canReadAllObjects()) {
-                    all.add(I(folderID));
-                } else if (infostorePermission.canReadOwnObjects()) {
-                    own.add(I(folderID));
-                } else {
+                if (false == infostorePermission.canReadOwnObjects()) {
                     throw InfostoreExceptionCodes.NO_READ_PERMISSION.create();
                 }
-                permissionsByFolderID.put(I(folderID), infostorePermission);
+                trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
             }
         } else {
             /*
@@ -251,18 +249,16 @@ public class Tools {
              */
             SearchIterator<FolderObject> searchIterator = null;
             try {
-                searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfType(user.getId(), user.getGroups(),
-                    userPermissions.getAccessibleModules(), FolderObject.PUBLIC, new int[] { FolderObject.INFOSTORE }, context, connection);
+                searchIterator = OXFolderIteratorSQL.getAllVisibleFoldersIteratorOfModule(
+                    user.getId(), user.getGroups(), userPermissions.getAccessibleModules(), FolderObject.INFOSTORE, context, connection);
                 while (searchIterator.hasNext()) {
                     FolderObject folder = searchIterator.next();
+                    if (FolderObject.TRASH == folder.getType()) {
+                        continue;
+                    }
                     EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userPermissions);
                     EffectiveInfostoreFolderPermission infostorePermission = new EffectiveInfostoreFolderPermission(permission, folder.getCreatedBy());
-                    if (infostorePermission.canReadAllObjects()) {
-                        all.add(I(folder.getObjectID()));
-                    } else if (infostorePermission.canReadOwnObjects()) {
-                        own.add(I(folder.getObjectID()));
-                    }
-                    permissionsByFolderID.put(I(folder.getObjectID()), infostorePermission);
+                    trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
                 }
             } finally {
                 SearchIterators.close(searchIterator);
@@ -272,12 +268,51 @@ public class Tools {
              */
             int sharedFilesFolderID = FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID;
             EffectiveInfostoreFolderPermission infostorePermission = security.getFolderPermission(sharedFilesFolderID, context, user, userPermissions, connection);
-            if (infostorePermission.canReadAllObjects()) {
-                all.add(I(sharedFilesFolderID));
-            } else if (infostorePermission.canReadOwnObjects()) {
-                own.add(I(sharedFilesFolderID));
+            trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
+        }
+        return permissionsByFolderID;
+    }
+
+    /**
+     * Collects all infostore folders visible to a user below a specific one and puts their folder IDs into the supplied lists, depending
+     * on the user being allowed to read all contained items or only own ones.
+     *
+     * @param security A reference to the infostore security service
+     * @param connection A readable connection to the database
+     * @param context The context
+     * @param user The user
+     * @param userPermissions The user's permission bits
+     * @param rootFolderID The root folder identifier
+     * @param ignoreTrash <code>true</code> to ignore trash folders, <code>false</code>, otherwise
+     * @param all A collection to add the IDs of folders the user is able to read "all" items from
+     * @param own A collection to add the IDs of folders the user is able to read only "own" items from
+     * @return The effective permissions of all resulting folders, mapped to the corresponding folder identifiers
+     */
+    private static Map<Integer, EffectiveInfostoreFolderPermission> gatherVisibleFolders(InfostoreSecurity security, Connection connection, Context context, User user, UserPermissionBits userPermissions, int rootFolderID, boolean ignoreTrash, Collection<Integer> all, Collection<Integer> own) throws OXException {
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
+        /*
+         * gather all visible folders below the root folder and check their permissions
+         */
+        SearchIterator<FolderObject> searchIterator = null;
+        try {
+            searchIterator = OXFolderIteratorSQL.getVisibleSubfoldersIterator(rootFolderID, user.getId(), user.getGroups(), context, userPermissions, null, connection);
+            while (searchIterator.hasNext()) {
+                FolderObject folder = searchIterator.next();
+                if (ignoreTrash && FolderObject.TRASH == folder.getType()) {
+                    continue;
+                }
+                EffectivePermission permission = folder.getEffectiveUserPermission(user.getId(), userPermissions);
+                EffectiveInfostoreFolderPermission infostorePermission = new EffectiveInfostoreFolderPermission(permission, folder.getCreatedBy());
+                trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
+                /*
+                 * gather visible subfolders recursively
+                 */
+                permissionsByFolderID.putAll(gatherVisibleFolders(security, connection, context, user, userPermissions, folder.getObjectID(), ignoreTrash, all, own));
             }
-            permissionsByFolderID.put(I(sharedFilesFolderID), infostorePermission);
+        } catch (SQLException e) {
+            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            SearchIterators.close(searchIterator);
         }
         return permissionsByFolderID;
     }
@@ -364,6 +399,45 @@ public class Tools {
     }
 
     /**
+     * Collects all infostore folders visible to a user below a specific one and puts their folder IDs into the supplied lists, depending
+     * on the user being allowed to read all contained items or only own ones. Trash folders are excluded (in case the root folder is not
+     * a trash folder itself).
+     *
+     * @param session The session
+     * @param security A reference to the infostore security service
+     * @param dbProvider The database provider to use
+     * @param rootFolderID The root folder identifier
+     * @param all A collection to add the IDs of folders the user is able to read "all" items from
+     * @param own A collection to add the IDs of folders the user is able to read only "own" items from
+     * @return The effective permissions of all resulting folders, mapped to the corresponding folder identifiers
+     */
+    public static Map<Integer, EffectiveInfostoreFolderPermission> gatherVisibleFolders(ServerSession session, InfostoreSecurity security, DBProvider dbProvider, int rootFolderID, Collection<Integer> all, Collection<Integer> own) throws OXException {
+        Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID = new HashMap<Integer, EffectiveInfostoreFolderPermission>();
+        Connection connection = null;
+        try {
+            connection = dbProvider.getReadConnection(session.getContext());
+            /*
+             * get & add root folder
+             */
+            FolderObject rootFolder = new OXFolderAccess(connection, session.getContext()).getFolderObject(rootFolderID);
+            EffectivePermission permission = rootFolder.getEffectiveUserPermission(session.getUserId(), session.getUserPermissionBits());
+            EffectiveInfostoreFolderPermission infostorePermission = new EffectiveInfostoreFolderPermission(permission, rootFolder.getCreatedBy());
+            trackEffectivePermission(infostorePermission, permissionsByFolderID, all, own);
+            boolean ignoreTrash = FolderObject.TRASH != rootFolder.getType();
+            /*
+             * gather permissions of subfolders recursively
+             */
+            permissionsByFolderID.putAll(gatherVisibleFolders(
+                security, connection, session.getContext(), session.getUser(), session.getUserPermissionBits(), rootFolderID, ignoreTrash, all, own));
+            return permissionsByFolderID;
+        } finally {
+            if (null != connection) {
+                dbProvider.releaseReadConnection(session.getContext(), connection);
+            }
+        }
+    }
+
+    /**
      * Prepares an array of metadata fields to include in the read documents based on a client-supplied list and additional fields
      * required for additional result processing.
      *
@@ -381,6 +455,24 @@ public class Tools {
         Set<Metadata> fields = new HashSet<Metadata>(Arrays.asList(requestedFields));
         fields.addAll(Arrays.asList(requiredFields));
         return fields.toArray(new Metadata[fields.size()]);
+    }
+
+    /**
+     * Evaluates an effective infostore permission and puts it into different data structures for later usage.
+     *
+     * @param infostorePermission The infostore permission to track
+     * @param permissionsByFolderID The map holding the permissions mapped to their corresponding folder identifier
+     * @param all A collection to add the IDs of folders the user is able to read "all" items from
+     * @param own A collection to add the IDs of folders the user is able to read only "own" items from
+     */
+    private static void trackEffectivePermission(EffectiveInfostoreFolderPermission infostorePermission, Map<Integer, EffectiveInfostoreFolderPermission> permissionsByFolderID, Collection<Integer> all, Collection<Integer> own) throws OXException {
+        Integer id = I(infostorePermission.getFuid());
+        if (infostorePermission.canReadAllObjects()) {
+            all.add(id);
+        } else if (infostorePermission.canReadOwnObjects()) {
+            own.add(id);
+        }
+        permissionsByFolderID.put(id, infostorePermission);
     }
 
     /**

@@ -93,14 +93,16 @@ public class ConfigurationTreeConverter implements ResultConverter {
     @Override
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
-        if (resultObject instanceof OnboardingConfigurationTree) {
-            try {
-                OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
-                JSONObject jConfigurationTree = configurationTree.toJsonObject();
-                result.setResultObject(jConfigurationTree, "json");
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-            }
+        if (!(resultObject instanceof OnboardingConfigurationTree)) {
+            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingConfigurationTree.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+        }
+
+        try {
+            OnboardingConfigurationTree configurationTree = (OnboardingConfigurationTree) resultObject;
+            JSONObject jConfigurationTree = configurationTree.toJsonObject();
+            result.setResultObject(jConfigurationTree, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -539,6 +539,22 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
     /**
      * Search for a given file.
      *
+     * @param query The search query
+     * @param cols Which fields to load
+     * @param folderId In which folder to search. Pass ALL_FOLDERS to search in all folders.
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(String query, List<File.Field> cols, String folderId, boolean includeSubfolders, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Search for a given file.
+     *
      * @param folderIds The optional folder identifiers
      * @param searchTerm The search term
      * @param fields The fields to load
@@ -551,6 +567,22 @@ public interface IDBasedFileAccess extends TransactionAware, WarningsAware {
      * @throws OXException If operation fails
      */
     SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
+
+    /**
+     * Search for a given file.
+     *
+     * @param folderId The identifier of the folder to search in
+     * @param includeSubfolders <code>true</code> to include subfolders, <code>false</code>, otherwise
+     * @param searchTerm The search term
+     * @param fields The fields to load
+     * @param sort Which field to sort by. May be <code>null</code>.
+     * @param order The order in which to sort
+     * @param start A start index (inclusive) for the search results. Useful for paging.
+     * @param end An end index (exclusive) for the search results. Useful for paging.
+     * @return The found files
+     * @throws OXException If operation fails
+     */
+    SearchIterator<File> search(String folderId, boolean includeSubfolders, SearchTerm<?> searchTerm, List<Field> fields, File.Field sort, SortDirection order, int start, int end) throws OXException;
 
     /**
      * Gets the sequence numbers for the contents of the supplied folders to quickly determine which folders contain changes. An updated

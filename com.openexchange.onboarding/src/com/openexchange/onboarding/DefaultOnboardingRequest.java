@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Map;
 import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
@@ -63,6 +64,7 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
     private final String selectionId;
     private final ClientInfo clientInfo;
     private final HostData hostData;
+    private final Map<String, Object> formContent;
 
     /**
      * Initializes a new {@link DefaultOnboardingRequest}.
@@ -71,13 +73,20 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
      * @param selectionId The selection identifier
      * @param clientInfo The client information
      * @param hostData The host data
+     * @param formContent The optional form content or <code>null</code>
      */
-    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo, HostData hostData) {
+    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo, HostData hostData, Map<String, Object> formContent) {
         super();
         this.configurationId = configurationId;
         this.selectionId = selectionId;
         this.clientInfo = clientInfo;
         this.hostData = hostData;
+        this.formContent = formContent;
+    }
+
+    @Override
+    public Map<String, Object> getFormContent() {
+        return formContent;
     }
 
     @Override

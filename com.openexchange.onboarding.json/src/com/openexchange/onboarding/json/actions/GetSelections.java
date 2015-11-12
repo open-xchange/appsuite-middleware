@@ -83,7 +83,7 @@ public class GetSelections extends AbstractOnboardingAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingConfigurationService onboardingService = getOnboardingService();
 
-        String configurationId = requestData.requireParameter("configurationId");
+        String configurationId = requestData.requireParameter("id");
         String lastEntityId = requestData.requireParameter("entityId");
 
         OnboardingConfiguration configuration = onboardingService.getConfiguration(configurationId);

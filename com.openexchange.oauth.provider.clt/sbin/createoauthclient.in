@@ -71,6 +71,9 @@ case "${BNAME}" in
     "enableoauthclient")
     ACTION="EnableOAuthClientManagementCLT"
     ;;
+    "disableoauthclient")
+    ACTION="DisableOAuthClientManagementCLT"
+    ;;
     "getoauthclient")
     ACTION="GetOAuthClientManagementCLT"
     ;;

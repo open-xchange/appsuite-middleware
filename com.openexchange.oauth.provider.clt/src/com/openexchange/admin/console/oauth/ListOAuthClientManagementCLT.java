@@ -56,6 +56,8 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.BasicCommandlineOptions;
@@ -65,6 +67,7 @@ import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
+import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
@@ -78,7 +81,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
+public class ListOAuthClientManagementCLT extends AbstractOAuthCLT {
 
     private static final String GROUP_CTX_ID_LONG = "context-group-id";
     private static final char GROUP_CTX_ID_SHORT = 'c';
@@ -116,9 +119,15 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
                     sysexit(1);
                 }
 
+            if (null != parser.getOptionValue(this.csvOutputOption)) {
+
+                doCSVOutput(retval);
+
+            } else {
                 System.out.println("Following clients are registered: ");
                 for (ClientDto client : retval) {
                     printClient(client);
+                }
                 }
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
@@ -147,11 +156,13 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
             sysexit(1);
         } catch (RemoteClientManagementException e) {
             printError(e.getMessage(), parser);
-            parser.printUsage();
             sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
         } catch (InvalidCredentialsException e) {
             printServerException(e, parser);
             sysexit(SYSEXIT_INVALID_CREDENTIALS);
+        } catch (InvalidDataException e) {
+            printError(e.getMessage(), parser);
+            sysexit(1);
         } finally {
             if (fis != null) {
                 try {
@@ -168,6 +179,38 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
             }
 
         }
+
+    }
+
+    final static String[] OAUTH_CLIENT_COLUMNS = new String[] { "Client Id", "Name", "Enabled", "Description", "Website", "Contact address", "Default scope", "Redirect url's", "Client secret" };
+
+    /**
+     * @param retval
+     * @throws InvalidDataException
+     */
+    private void doCSVOutput(List<ClientDto> clients) throws InvalidDataException {
+
+        ArrayList<ArrayList<String>> data = new ArrayList<ArrayList<String>>();
+
+        for (ClientDto client : clients) {
+            ArrayList<String> list = new ArrayList<String>(OAUTH_CLIENT_COLUMNS.length);
+            list.add(client.getId());
+            list.add(client.getName());
+            list.add(Boolean.toString(client.isEnabled()));
+            list.add(client.getDescription());
+            list.add(client.getWebsite());
+            list.add(client.getContactAddress());
+            list.add(client.getDefaultScope());
+            StringBuilder urls = new StringBuilder();
+            for (String str : client.getRedirectURIs()) {
+                urls.append(str).append(", ");
+            }
+            list.add(urls.toString());
+            list.add(client.getSecret());
+            data.add(list);
+        }
+
+        this.doCSVOutput(Arrays.asList(OAUTH_CLIENT_COLUMNS), data);
 
     }
 
@@ -190,7 +233,7 @@ public class ListOAuthClientManagementCLT extends BasicCommandlineOptions {
 
     private void setOptions(final AdminParser parser) {
         setDefaultCommandLineOptionsWithoutContextID(parser);
-
+        setCSVOutputOption(parser);
         this.ctxGroupID = setShortLongOpt(parser, GROUP_CTX_ID_SHORT, GROUP_CTX_ID_LONG, "cgid", "The id of the context group", true);
     }
 

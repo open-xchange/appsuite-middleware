@@ -142,27 +142,51 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
 
-        return capabilityService.getCapabilities(session).contains(Permission.WEBMAIL.getCapabilityName());
+        if (false == capabilityService.getCapabilities(session).contains(Permission.WEBMAIL.getCapabilityName())) {
+            return false;
+        }
+
+        return OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.enabled", true, session);
     }
 
     @Override
-    public List<EntityPath> getEntityPaths(Session session) {
+    public List<EntityPath> getEntityPaths(Session session) throws OXException {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
-        {
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.ipad.enabled", true, session)) {
             List<Entity> path = new ArrayList<Entity>(3);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPAD);
             path.add(DefaultEntity.newInstance((CommonEntity.APPLE_IOS_IPAD.getId() + ".imap"), "com.openexchange.onboarding.imap.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
-        {
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.iphone.enabled", true, session)) {
             List<Entity> path = new ArrayList<Entity>(3);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
             path.add(DefaultEntity.newInstance((CommonEntity.APPLE_IOS_IPHONE.getId() + ".imap"), "com.openexchange.onboarding.imap.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
         }
-        {
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.osx.enabled", true, session)) {
+            List<Entity> path = new ArrayList<Entity>(2);
+            path.add(CommonEntity.APPLE_OSX);
+            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+        }
+
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.android.tablet.enabled", true, session)) {
+            List<Entity> path = new ArrayList<Entity>(2);
+            path.add(CommonEntity.ANDROID_TABLET);
+            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
+        }
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.android.phone.enabled", true, session)) {
+            List<Entity> path = new ArrayList<Entity>(2);
+            path.add(CommonEntity.ANDROID_PHONE);
+            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
+            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
+        }
+
+        if (OnboardingUtility.getBoolValue("com.openexchange.onboarding.imap.windows.enabled", true, session)) {
             List<Entity> path = new ArrayList<Entity>(2);
             path.add(CommonEntity.WINDOWS_DESKTOP_8_10);
             path.add(DefaultEntity.newInstance(CommonEntity.WINDOWS_DESKTOP_8_10.getId() + ".imap", "com.openexchange.onboarding.imap.", true));
@@ -174,7 +198,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     @Override
     public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
         List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
-        selections.add(DefaultOnboardingSelection.newInstance("imap.display", "com.openexchange.onboarding.imap.display."));
+        selections.add(DefaultOnboardingSelection.newInstance("imap.display", id, "com.openexchange.onboarding.imap.display."));
         return selections;
     }
 

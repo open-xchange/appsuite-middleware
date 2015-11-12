@@ -92,4 +92,12 @@ public class OnboardingStrings implements LocalizableStrings {
     // E-Mail successfully sent
     public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
 
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    // Used when rendering a form in which the user is supposed to enter an E-Mail address
+    public static final String FORM_EMAIL = "E-Mail address";
+
+    // Used when rendering a form in which the user is supposed to enter a phone number address
+    public static final String FORM_PHONE = "Phone number";
+
 }
