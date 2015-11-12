@@ -71,7 +71,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 /**
  * {@link EnableOAuthClientManagementCLT}
  *
- * A CLT to enable or disable an oauth client
+ * A CLT to enable an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
@@ -102,16 +102,16 @@ public class EnableOAuthClientManagementCLT extends AbstractOAuthCLT {
             }
 
 
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                boolean retval = false;
-                    retval = remote.enableClient(id, auth);
-                    if (retval) {
-                        System.out.println("Enabling the oauth client was successful!");
-                        sysexit(0);
-                    } else {
-                        System.out.println("Enabling the oauth client has failed!");
-                        sysexit(0);
-                    }
+            String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
+            boolean retval = false;
+            retval = remote.enableClient(id, auth);
+            if (retval) {
+                System.out.println("Enabling the oauth client was successful!");
+                sysexit(0);
+            } else {
+                System.out.println("Enabling the oauth client has failed!");
+                sysexit(0);
+            }
 
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);

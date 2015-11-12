@@ -71,7 +71,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 /**
  * {@link DisableOAuthClientManagementCLT}
  *
- * A CLT to enable or disable an oauth client
+ * A CLT to disable an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
