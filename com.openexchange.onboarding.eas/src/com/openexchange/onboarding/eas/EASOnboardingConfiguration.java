@@ -199,6 +199,22 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
                 return displayResult(request, session);
             }
         });
+
+        executors.put("android.phone.eas.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
+
+        executors.put("android.tablet.eas.display", new OnboardingExecutor() {
+
+            @Override
+            public Result execute(OnboardingRequest request, Session session) throws OXException {
+                return displayResult(request, session);
+            }
+        });
     }
 
     @Override
@@ -245,6 +261,18 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             path.add(CommonEntity.APPLE_OSX);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
             paths.add(new DefaultEntityPath(Platform.APPLE, path));
+        }
+        {
+            List<Entity> path = new ArrayList<Entity>(4);
+            path.add(CommonEntity.ANDROID_PHONE);
+            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
+            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
+        }
+        {
+            List<Entity> path = new ArrayList<Entity>(4);
+            path.add(CommonEntity.ANDROID_TABLET);
+            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
+            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
         }
         return paths;
     }
@@ -305,6 +333,14 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             // The display settings selection
             selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.display."));
 
+            return selections;
+        } else if ((CommonEntity.ANDROID_PHONE.getId() + ".eas").equals(lastEntityId)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download."));
+            return selections;
+        } else if ((CommonEntity.ANDROID_TABLET.getId() + ".eas").equals(lastEntityId)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download."));
             return selections;
         }
 
