@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,65 +47,23 @@
  *
  */
 
-package com.openexchange.onboarding.osgi;
+package com.openexchange.onboarding.notification;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.user.UserService;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link OnboardingActivator}
+ * {@link OnboardingNotificationStrings}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
+public class OnboardingNotificationStrings implements LocalizableStrings {
 
-    private volatile OnboardingConfigurationRegistry registry;
+    public static final String PROFILE_CREATED = "Your requested onboarding profile.";
 
-    /**
-     * Initializes a new {@link OnboardingActivator}.
-     */
-    public OnboardingActivator() {
+    private OnboardingNotificationStrings() {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
-            TranslatorFactory.class, ServerConfigService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
-        registry.open();
-        this.registry = registry;
-
-        registerService(OnboardingConfigurationService.class, registry);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        OnboardingConfigurationRegistry registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            registry.close();
-        }
-
-        Services.setServiceLookup(null);
     }
 
 }
