@@ -54,10 +54,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.tools.MailValidator;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.net.URIDefaults;
 
 /**
@@ -75,8 +80,27 @@ public class Guess extends AbstractConfigSource {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Guess.class);
 
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link Guess}.
+     */
+    public Guess(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
     @Override
-    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) {
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
+        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.autoconfig.allowGuess", boolean.class);
+        if (property.isDefined() && !property.get().booleanValue()) {
+            // Guessing is disabled
+            return null;
+        }
+
+        // Proceed...
         Autoconfig config = new Autoconfig();
 
         final Map<String, Object> properties = new HashMap<String, Object>(2);

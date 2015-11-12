@@ -125,7 +125,8 @@ public class ShareHelper {
     public DriveShareLink optLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
         ShareLink shareLink = getShareService().optLink(session.getServerSession(), shareTarget);
-        return null != shareLink ? new DefaultDriveShareLink(shareLink, target) : null;
+        DriveShareTarget resolvedTarget = new DriveShareTarget(shareTarget, target.getDrivePath(), target.getName(), target.getChecksum());
+        return null != shareLink ? new DefaultDriveShareLink(shareLink, resolvedTarget) : null;
     }
 
     /**

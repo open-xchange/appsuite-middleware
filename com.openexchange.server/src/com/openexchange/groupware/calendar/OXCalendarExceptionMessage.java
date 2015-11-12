@@ -212,4 +212,9 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String RECURRING_FOLDER_MOVE_MSG = "Moving a recurring appointment to another folder is not supported.";
 
+    /**
+     * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
+     */
+    public static final String UID_ALREDY_EXISTS_MSG = "Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.";
+
 }

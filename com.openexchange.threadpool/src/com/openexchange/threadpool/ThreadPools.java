@@ -53,12 +53,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import com.openexchange.exception.OXException;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
@@ -426,7 +428,7 @@ public final class ThreadPools {
      * @return The future's result
      * @throws OXException If an error occurs
      */
-    public static <V> V getFrom(final Future<V> f) throws OXException {
+    public static <V> V getFrom(Future<V> f) throws OXException {
         return getFrom(f, DEFAULT_EXCEPTION_FACTORY);
     }
 
@@ -438,20 +440,47 @@ public final class ThreadPools {
      * @return The future's result
      * @throws E If an error occurs
      */
-    public static <V, E extends Exception> V getFrom(final Future<V> f, final ExpectedExceptionFactory<E> factory) throws E {
+    public static <V, E extends Exception> V getFrom(Future<V> f, ExpectedExceptionFactory<E> factory) throws E {
+        return getFrom(f, 0, null, factory);
+    }
+
+    /**
+     * Gets the result from passed {@link Future} instance; waiting for at most the given time for the computation to complete if
+     * <tt>timeout</tt> argument is greater than <tt>0</tt> (zero).
+     *
+     * @param f The future
+     * @param timeout The maximum time to wait or less than or equal to <tt>0</tt> (zero) to wait forever
+     * @param unit The time unit of the <tt>timeout</tt> argument; or <tt>null</tt> if <tt>timeout</tt> argument is less than or equal to <tt>0</tt> (zero)
+     * @param factory The exception factory to launder possible exceptions
+     * @return The future's result
+     * @throws E If an error occurs
+     * @throws IllegalArgumentException If <tt>unit</tt> argument is <tt>null</tt>, but <tt>timeout</tt> argument is greater than <tt>0</tt> (zero)
+     */
+    public static <V, E extends Exception> V getFrom(Future<V> f, long timeout, TimeUnit unit, ExpectedExceptionFactory<E> factory) throws E {
         if (null == f) {
             return null;
+        }
+        if (timeout > 0 && null == unit) {
+            throw new IllegalArgumentException("unit is null");
         }
         ExpectedExceptionFactory<E> fac = factory;
         if (null == fac) {
             fac = (ExpectedExceptionFactory<E>) DEFAULT_EXCEPTION_FACTORY;
         }
+
         try {
-            return f.get();
-        } catch (final InterruptedException e) {
+            return timeout > 0 ? f.get(timeout, unit) : f.get();
+        } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+            f.cancel(true);
             throw factory.newUnexpectedError(e);
-        } catch (final ExecutionException e) {
+        } catch (TimeoutException e) {
+            f.cancel(true);
+            throw factory.newUnexpectedError(e);
+        } catch (CancellationException e) {
+            f.cancel(true);
+            throw factory.newUnexpectedError(e);
+        } catch (ExecutionException e) {
             throw launderThrowable(e, factory.getType());
         }
     }

@@ -81,6 +81,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Unexpected SQL Error!
      */
     CALENDAR_SQL_ERROR(OXCalendarExceptionCodes.CALENDAR_SQL_ERROR_MSG, OXExceptionStrings.SQL_ERROR_MSG, 5, Category.CATEGORY_ERROR) {
+        @Override
         public OXException create(final Throwable cause, final Object... args) {
             if (IncorrectStringSQLException.class.isInstance(cause)) {
                 IncorrectStringSQLException isse = (IncorrectStringSQLException) cause;
@@ -472,7 +473,7 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Cannot insert appointment (%1$s). An appointment with the unique identifier (%2$s) already exists.
      */
-    UID_ALREDY_EXISTS(OXCalendarExceptionCodes.UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),
+    UID_ALREDY_EXISTS(OXCalendarExceptionCodes.UID_ALREDY_EXISTS_MSG, OXCalendarExceptionMessage.UID_ALREDY_EXISTS_MSG, 100, Category.CATEGORY_USER_INPUT),
     /**
      * SQL Problem.
      */

@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 8
+%define        ox_release 9
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1244,6 +1244,20 @@ if ! grep "com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembers
 EOF
 fi
 
+# SoftwareChange_Request-2821
+ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy /opt/open-xchange/etc/autoconfig.properties
+ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.login /opt/open-xchange/etc/autoconfig.properties
+ox_remove_property com.openexchange.mail.autoconfig.ispdb.proxy.password /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.http.proxy "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.http.proxy.login "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.http.proxy.password "" /opt/open-xchange/etc/autoconfig.properties
+ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchange/etc/autoconfig.properties
+
+# SoftwareChange_Request-2831
+ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
+ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
@@ -1283,6 +1297,8 @@ exit 0
 %doc com.openexchange.server/doc/examples
 
 %changelog
+* Thu Nov 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-11-09 (2840)
 * Fri Oct 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-11-02 (2853)
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -61,9 +61,31 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class CountingInputStream extends FilterInputStream {
 
+    public static interface IOExceptionCreator {
+
+        /**
+         * Create the appropriate {@code IOException} if specified max. number of bytes has been exceeded.
+         *
+         * @param max The max. number of bytes that were exceeded
+         * @return The appropriate {@code IOException} instance
+         */
+        IOException createIOException(long max);
+    }
+
+    private static final IOExceptionCreator DEFAULT_EXCEPTION_CREATOR = new IOExceptionCreator() {
+
+        @Override
+        public IOException createIOException(long max) {
+            return new IOException(new StringBuilder(32).append("Max. byte count of ").append(max).append(" exceeded.").toString());
+        }
+    };
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
     private final AtomicLong count;
     private volatile long mark;
     private volatile long max;
+    private final IOExceptionCreator exceptionCreator;
 
     /**
      * Wraps another input stream, counting the number of bytes read.
@@ -71,11 +93,27 @@ public class CountingInputStream extends FilterInputStream {
      * @param in The input stream to be wrapped
      * @param max The maximum number of bytes allowed being read or <code>-1</code> for no limitation, just counting
      */
-    public CountingInputStream(final InputStream in, final long max) {
+    public CountingInputStream(InputStream in, long max) {
+        this(in, max, null);
+    }
+
+    /**
+     * Wraps another input stream, counting the number of bytes read.
+     *
+     * @param in The input stream to be wrapped
+     * @param max The maximum number of bytes allowed being read or <code>-1</code> for no limitation, just counting
+     * @param exceptionCreator The exception creator or <code>null</code>
+     */
+    public CountingInputStream(InputStream in, long max, IOExceptionCreator exceptionCreator) {
         super(in);
         this.max = max;
         count = new AtomicLong(0L);
         mark = -1L;
+        this.exceptionCreator = null == exceptionCreator ? DEFAULT_EXCEPTION_CREATOR : exceptionCreator;
+    }
+
+    private IOException createIOException(long max) {
+        return exceptionCreator.createIOException(max);
     }
 
     /**
@@ -102,7 +140,7 @@ public class CountingInputStream extends FilterInputStream {
         final long max = this.max;
         if (max > 0) {
             if (count.addAndGet((result >= 0L) ? 1 : 0L) > max) {
-                throw new IOException("Max. byte count of " + max + " exceeded.");
+                throw createIOException(max);
             }
         } else {
             count.addAndGet((result >= 0L) ? 1 : 0L);
@@ -116,7 +154,7 @@ public class CountingInputStream extends FilterInputStream {
         final long max = this.max;
         if (max > 0) {
             if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-                throw new IOException("Max. byte count of " + max + " exceeded.");
+                throw createIOException(max);
             }
         } else {
             count.addAndGet((result >= 0L) ? result : 0L);
@@ -130,7 +168,7 @@ public class CountingInputStream extends FilterInputStream {
         final long max = this.max;
         if (max > 0) {
             if (count.addAndGet((result >= 0L) ? result : 0L) > max) {
-                throw new IOException("Max. byte count of " + max + " exceeded.");
+                throw createIOException(max);
             }
         } else {
             count.addAndGet((result >= 0L) ? result : 0L);

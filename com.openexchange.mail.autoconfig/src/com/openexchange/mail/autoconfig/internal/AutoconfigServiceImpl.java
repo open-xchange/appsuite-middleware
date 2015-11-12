@@ -80,10 +80,10 @@ public class AutoconfigServiceImpl implements AutoconfigService {
     public AutoconfigServiceImpl(final ServiceLookup services) {
         sources = new LinkedList<ConfigSource>();
         sources.add(new ConfigurationFile(services));
-        sources.add(new ConfigServer());
+        sources.add(new ConfigServer(services));
         sources.add(new ISPDB(services));
         sources.add(new OutlookComConfigSource());
-        sources.add(new Guess());
+        sources.add(new Guess(services));
     }
 
     @Override

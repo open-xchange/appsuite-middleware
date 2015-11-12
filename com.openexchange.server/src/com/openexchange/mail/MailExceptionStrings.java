@@ -196,4 +196,6 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Denied to delete a standard/default folder like Trash
     public static final String NO_DEFAULT_FOLDER_DELETE_MSG = "Default folder must not be deleted";
 
+    public static final String ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG = "Archive folder does not allow subfolders.";
+
 }

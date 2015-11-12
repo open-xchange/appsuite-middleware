@@ -50,7 +50,9 @@
 package com.openexchange.tools.images.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.tools.images.ImageTransformationReloadable;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.impl.JavaImageTransformationService;
 import com.openexchange.tools.images.scheduler.Scheduler;
@@ -72,10 +74,13 @@ public class ImageToolsActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
         // Initialize through acquiring instance
         Scheduler.getInstance();
-        // Register service
+
+        // Register services
         registerService(ImageTransformationService.class, new JavaImageTransformationService());
+        registerService(Reloadable.class, ImageTransformationReloadable.getInstance());
     }
 
     @Override

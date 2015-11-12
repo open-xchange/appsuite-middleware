@@ -510,12 +510,37 @@ get_java_vm_type() {
 }
 
 get_ox_java_pid() {
-    local _ox_pid=$(ps ax | \
-        grep 'open-xchange' | \
-        grep 'java' | \
-        head -n 1 | \
-        awk '{print $1}')
-    echo "${_ox_pid}"
+    local _ox_default_pid_file=/var/run/open-xchange.pid
+    local _check_systemd_tool=$(type -P systemctl)
+
+    # First try to get ox pid from systemd
+    if [ -n "${_check_systemd_tool}" ]; then
+        local _ox_pid=$(systemctl show -p MainPID open-xchange.service | \
+            awk -F '=' '{print $2}')
+    fi
+
+    # Try next to get ox pid from default pid
+    if [ -z "${_ox_pid}" -a -f "${_ox_default_pid_file}" ]; then
+        # Only debian based distributions are pointing to the ox java pid
+        ox_system_type
+        DIST=${?}
+        if [ "${DEBIAN}" == "${DIST}" -o "${UCS}" == "${DIST}" ]; then
+             local _ox_pid=$(cat ${_ox_default_pid_file})
+        fi
+    fi
+
+    # Eval ox pid by process
+    if [ -z "${_ox_pid}" ]; then
+        local _ox_pid=$(ps ax | \
+            grep 'open-xchange' | \
+            grep 'java' | \
+            grep '\-server' | \
+            head -n 1 | \
+            awk '{print $1}')
+    fi
+    if [ -n "${_ox_pid}" -a '0' != "${_ox_pid}" ]; then
+        echo "${_ox_pid}"
+    fi
 }
 
 get_ox_user_ID() {

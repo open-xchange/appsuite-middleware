@@ -50,92 +50,123 @@
 package com.openexchange.mail.autoconfig.sources;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.NameValuePair;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.cookie.CookiePolicy;
-import org.apache.commons.httpclient.methods.GetMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Arrays;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.conn.params.ConnRoutePNames;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.autoconfig.Autoconfig;
 import com.openexchange.mail.autoconfig.xmlparser.AutoconfigParser;
 import com.openexchange.mail.autoconfig.xmlparser.ClientConfig;
+import com.openexchange.rest.client.httpclient.HttpClients;
+import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link ConfigServer}
  *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
-public class ConfigServer extends AbstractConfigSource {
+public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ConfigServer.class);
 
+    /**
+     * Initializes a new {@link ConfigServer}.
+     */
+    public ConfigServer(ServiceLookup services) {
+        super(services);
+    }
+
     @Override
     public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
-        // New HTTP client
-        final HttpClient client = new HttpClient();
-        final int timeout = 3000;
-        client.getParams().setSoTimeout(timeout);
-        client.getParams().setIntParameter("http.connection.timeout", timeout);
-        client.getParams().setParameter(HttpMethodParams.RETRY_HANDLER, new DefaultHttpMethodRetryHandler(0, false));
-        client.getParams().setParameter("http.protocol.single-cookie-header", Boolean.TRUE);
-        client.getParams().setCookiePolicy(CookiePolicy.BROWSER_COMPATIBILITY);
-
-        // GET method
-        String uri = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
-        final GetMethod getMethod = new GetMethod(uri);
-        try {
-            // Name-value-pairs
-            final List<NameValuePair> pairs = new ArrayList<NameValuePair>(4);
-            {
-                final NameValuePair pair = new NameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString());
-                pairs.add(pair);
+        URL url;
+        {
+            String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
+            try {
+                url = new URL(sUrl);
+            } catch (MalformedURLException e) {
+                LOG.warn("Unable to parse URL: {}", sUrl, e);
+                return null;
             }
-            getMethod.setQueryString(pairs.toArray(new NameValuePair[0]));
+        }
 
-            // Execute GET request
-            int statusCode = client.executeMethod(getMethod);
+        // New HTTP client
+        DefaultHttpClient httpclient = null;
+        try {
+
+            {
+                int timeout = 3000;
+                HttpClients.ClientConfig clientConfig = HttpClients.ClientConfig.newInstance().setConnectionTimeout(timeout).setSocketReadTimeout(timeout).setUserAgent("Open-Xchange Auto-Config Client");
+                httpclient = HttpClients.getHttpClient(clientConfig);
+            }
+
+            {
+                ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+                ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
+                HttpHost proxy = getHttpProxyIfEnabled(httpclient, view);
+                if (null != proxy) {
+                    httpclient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
+                }
+            }
+
+            HttpHost target = new HttpHost(url.getHost(), -1, url.getProtocol());
+            HttpGet req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
+
+            HttpResponse rsp = httpclient.execute(target, req);
+            int statusCode = rsp.getStatusLine().getStatusCode();
             if (statusCode != 200) {
                 LOG.info("Could not retrieve config XML from autoconfig server. Return code was: {}", statusCode);
+
                 // Try 2nd URL
-                uri = new StringBuilder(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
-                getMethod.setURI(new URI(uri, false));
-                statusCode = client.executeMethod(getMethod);
+                {
+                    String sUrl = new StringBuilder(64).append("http://").append(emailDomain).append("/.well-known/autoconfig/mail/config-v1.1.xml").toString();
+                    try {
+                        url = new URL(sUrl);
+                    } catch (MalformedURLException e) {
+                        LOG.warn("Unable to parse URL: {}", sUrl, e);
+                        return null;
+                    }
+                }
+                req = new HttpGet(url.getPath() + "?" + URLEncodedUtils.format(Arrays.<NameValuePair> asList(new BasicNameValuePair("emailaddress", new StringBuilder(emailLocalPart).append('@').append(emailDomain).toString())), "UTF-8"));
+                rsp = httpclient.execute(target, req);
+                statusCode = rsp.getStatusLine().getStatusCode();
                 if (statusCode != 200) {
                     LOG.info("Could not retrieve config XML from main domain. Return code was: {}", statusCode);
                     return null;
                 }
             }
 
-            ClientConfig clientConfig = new AutoconfigParser().getConfig(getMethod.getResponseBodyAsStream());
+            ClientConfig clientConfig = new AutoconfigParser().getConfig(rsp.getEntity().getContent());
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
             return autoconfig;
-
-        } catch (OXException e) {
-            if (3 != e.getCode() || !"MAIL-AUTOCONFIG".equals(e.getPrefix())) {
-                throw e;
+        } catch (ClientProtocolException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        } catch (IOException e) {
+            LOG.warn("Could not retrieve config XML.", e);
+            return null;
+        } finally {
+            // When HttpClient instance is no longer needed,
+            // shut down the connection manager to ensure
+            // immediate deallocation of all system resources
+            if (null != httpclient) {
+                httpclient.getConnectionManager().shutdown();
             }
-            // No valid XML received...
-            LOG.info("No valid XML received from URI: {}", uri, e.getCause());
-        } catch (HttpException e) {
-            LOG.warn("Could not retrieve config XML.", e);
-        } catch (final java.net.UnknownHostException e) {
-            // Obviously that host does not exist
-            LOG.debug("Could not retrieve config XML, because of an unknown host for URL: {}", uri, e);
-        } catch (final java.net.ConnectException e) {
-            LOG.debug("Could not connect to {}.", uri, e);
-        } catch (final IOException e) {
-            LOG.warn("Could not retrieve config XML.", e);
         }
-        return null;
     }
 }
 

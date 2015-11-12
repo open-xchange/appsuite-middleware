@@ -50,6 +50,7 @@
 package com.openexchange.file.storage.json.actions.files;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -151,10 +152,22 @@ public class SaveAsAction extends AbstractWriteAction {
             session.getContext(),
             user,
             userConfiguration);
-
-        fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER);
-
-        return new AJAXRequestResult(file.getId(), new Date(file.getSequenceNumber()));
+        /*
+         * save attachment in storage, ignoring potential warnings
+         */
+        List<Field> modifiedColumns = null != sentColumns ? new ArrayList<Field>(sentColumns) : new ArrayList<Field>();
+        modifiedColumns.add(Field.FILENAME);
+        modifiedColumns.add(Field.FILE_SIZE);
+        modifiedColumns.add(Field.FILE_MIMETYPE);
+        modifiedColumns.add(Field.TITLE);
+        modifiedColumns.add(Field.DESCRIPTION);
+        String newID = fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
+        AJAXRequestResult result = new AJAXRequestResult(newID, new Date(file.getSequenceNumber()));
+        List<OXException> warnings = fileAccess.getAndFlushWarnings();
+        if (null != warnings && 0 < warnings.size()) {
+            result.addWarnings(warnings);
+        }
+        return result;
     }
 
     protected AttachmentField getMatchingAttachmentField(final File.Field fileField) {

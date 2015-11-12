@@ -52,10 +52,16 @@ package com.openexchange.tools.images.transformations;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
+import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 /**
@@ -76,7 +82,11 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         @Override
         public IOException newUnexpectedError(final Throwable t) {
-            return new IOException(t);
+            if (t instanceof java.util.concurrent.TimeoutException) {
+                return new IOException("Image transformation timed out", t);
+            }
+            String message = t.getMessage();
+            return new IOException(null == message ? "Image transformation failed" : message, t);
         }
     };
 
@@ -102,41 +112,107 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
         super(sourceImageStream, optSource);
     }
 
+    /**
+     * Initializes a new {@link ImageTransformationsTask}.
+     *
+     * @param imageFile The image file
+     * @param optSource The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
+     */
+    public ImageTransformationsTask(IFileHolder imageFile, Object optSource) {
+        super(imageFile, optSource);
+    }
+
     @Override
-    protected BufferedImage getImage(final String formatName) throws IOException {
-        final FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new CallableImpl(formatName));
+    protected BufferedImage getImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
+        CountDownLatch latch = new CountDownLatch(1);
+        GetImageCallable getImageCallable = new GetImageCallable(formatName, latch, signaler);
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(getImageCallable);
+
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-        final boolean success = Scheduler.getInstance().execute(optSource, ft);
+        boolean success = Scheduler.getInstance().execute(optSource, ft);
         if (!success) {
             throw new IOException("Image transformation rejected");
         }
-        return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+
+        // Await until actual processing happens
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            InterruptedIOException ioe = new InterruptedIOException("Awaiting image transformation interrupted");
+            ioe.initCause(e);
+            throw ioe;
+        }
+
+        // Image transformation initiated
+        // Get result from scheduled task; waiting for at most the configured time for the computation to complete
+        return ThreadPools.getFrom(ft, waitTimeoutSeconds(), TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     /**
      * Gets the resulting image after applying all transformations.
      *
      * @param formatName the image format to use, or <code>null</code> if not relevant
+     * @param signaler The optional signaler or <code>null</code>
      * @return The transformed image
      * @throws IOException if an I/O error occurs
      */
-    protected BufferedImage doGetImage(final String formatName) throws IOException {
-        return super.getImage(formatName);
+    protected BufferedImage doGetImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
+        return super.getImage(formatName, signaler);
     }
 
     // --------------------------------------------------------------------------------------------------------- //
 
-    private final class CallableImpl implements Callable<BufferedImage> {
+    private final class GetImageCallable implements Callable<BufferedImage> {
 
         private final String formatName;
+        private final LatchBackedSignaler signaler;
 
-        CallableImpl(final String formatName) {
+        GetImageCallable(String formatName, CountDownLatch latch, ImageTransformationSignaler signaler) {
+            super();
             this.formatName = formatName;
+            this.signaler = new LatchBackedSignaler(signaler, latch);
         }
 
         @Override
         public BufferedImage call() throws Exception {
-            return doGetImage(formatName);
+            try {
+                return doGetImage(formatName, signaler);
+            } finally {
+                // Ensure latch get counted down
+                signaler.redeem();
+            }
+        }
+    }
+
+    private static final class LatchBackedSignaler implements ImageTransformationSignaler {
+
+        private final ImageTransformationSignaler delegate;
+        private final AtomicReference<CountDownLatch> latchRef;
+
+        LatchBackedSignaler(ImageTransformationSignaler signaler, CountDownLatch latch) {
+            super();
+            this.latchRef = new AtomicReference<CountDownLatch>(latch);
+            this.delegate = signaler;
+        }
+
+        @Override
+        public void onImageRead() {
+            if (null != delegate) {
+                try { delegate.onImageRead(); } catch (Exception x) { /* ignore */ }
+            }
+            redeem();
+        }
+
+        /**
+         * Redeems the latch
+         */
+        public void redeem() {
+            CountDownLatch latch = latchRef.getAndSet(null);
+            if (null != latch) {
+                latch.countDown();
+            }
         }
     }
 

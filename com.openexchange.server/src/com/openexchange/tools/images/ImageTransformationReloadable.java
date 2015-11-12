@@ -47,29 +47,64 @@
  *
  */
 
-package com.openexchange.tools.images.impl;
+package com.openexchange.tools.images;
+
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 
 /**
- * {@link ImageInformation}
+ * {@link ImageTransformationReloadable} - Collects reloadables for image transformation module.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.6.0
  */
-public class ImageInformation {
+public final class ImageTransformationReloadable implements Reloadable {
 
-    public final int orientation;
+    private static final ImageTransformationReloadable INSTANCE = new ImageTransformationReloadable();
 
-    public final int width;
+    /**
+     * Gets the instance.
+     *
+     * @return The instance
+     */
+    public static ImageTransformationReloadable getInstance() {
+        return INSTANCE;
+    }
 
-    public final int height;
+    // --------------------------------------------------------------------------------------------------- //
 
-    public ImageInformation(int orientation, int width, int height) {
-        this.orientation = orientation;
-        this.width = width;
-        this.height = height;
+    private final List<Reloadable> reloadables;
+
+    /**
+     * Initializes a new {@link ImageTransformationReloadable}.
+     */
+    private ImageTransformationReloadable() {
+        super();
+        reloadables = new CopyOnWriteArrayList<Reloadable>();
+    }
+
+    /**
+     * Adds given {@link Reloadable} instance.
+     *
+     * @param reloadable The instance to add
+     */
+    public void addReloadable(Reloadable reloadable) {
+        reloadables.add(reloadable);
     }
 
     @Override
-    public String toString() {
-        return String.format("%dx%d,%d", this.width, this.height, this.orientation);
+    public void reloadConfiguration(ConfigurationService configService) {
+        for (Reloadable reloadable : reloadables) {
+            reloadable.reloadConfiguration(configService);
+        }
     }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
+    }
+
 }

@@ -112,6 +112,7 @@ import com.openexchange.mail.mime.HeaderCollection;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.session.Session;
 import com.openexchange.version.Version;
 import com.sun.mail.iap.Argument;
 import com.sun.mail.iap.BadCommandException;
@@ -2082,8 +2083,8 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, IMAPServerInfo serverInfo) throws MessagingException {
-        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, serverInfo);
+    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, IMAPServerInfo serverInfo, Session session) throws MessagingException {
+        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, serverInfo, session);
     }
 
     /**
@@ -2099,7 +2100,7 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final IMAPServerInfo serverInfo, final Session session) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -2121,7 +2122,7 @@ public final class IMAPCommandsCollection {
                             IMAPStore imapStore = (IMAPStore) folder.getStore();
                             if (imapStore.hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY() && imapStore.hasCapability("SORT=DISPLAY"));
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY(session) && imapStore.hasCapability("SORT=DISPLAY"));
                                 if (tmp.length > 256) {
                                     /*
                                      * Sort all
@@ -2150,6 +2151,8 @@ public final class IMAPCommandsCollection {
                             final int[] ni = new int[limit];
                             System.arraycopy(tmp, 0, ni, 0, limit);
                             newMsgSeqNums = ni;
+                        } catch (final OXException e) {
+                            throw wrapException(e, null);
                         } catch (final MessagingException e) {
                             throw wrapException(e, null);
                         } catch (final RuntimeException e) {

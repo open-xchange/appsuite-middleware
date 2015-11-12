@@ -618,6 +618,7 @@ public final class Tools {
         preparedSearchObject.setPattern(contactSearch.getPattern());
         preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
         preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
+        preparedSearchObject.setExactMatch(contactSearch.isExactMatch());
         preparedSearchObject.setCatgories(contactSearch.getCatgories());
         preparedSearchObject.setCityBusiness(contactSearch.getCityBusiness());
         preparedSearchObject.setCompany(contactSearch.getCompany());
@@ -706,6 +707,7 @@ public final class Tools {
         boolean prependWildcard = false == contactSearch.isOrSearch() && false == contactSearch.isEmailAutoComplete();
         boolean appendWildcard = false == contactSearch.isExactMatch();
         preparedSearchObject.setOrSearch(contactSearch.isOrSearch());
+        preparedSearchObject.setExactMatch(contactSearch.isExactMatch());
         preparedSearchObject.setEmailAutoComplete(contactSearch.isEmailAutoComplete());
         preparedSearchObject.setFolders(contactSearch.getFolders());
         preparedSearchObject.setCatgories(addWildcards(contactSearch.getCatgories(), true, true));
