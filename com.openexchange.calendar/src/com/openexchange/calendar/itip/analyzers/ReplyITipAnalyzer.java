@@ -276,16 +276,10 @@ public class ReplyITipAnalyzer extends AbstractITipAnalyzer {
 				}
 			}
 
-			String stateChange = "";
 			if (newStatus != null) {
-				switch (newStatus) {
-				case ACCEPT: stateChange = Messages.ACCEPTED; break;
-				case DECLINE: stateChange = Messages.DECLINED; break;
-				case TENTATIVE: stateChange = Messages.TENTATIVELY_ACCEPTED; break;
-				}
 				change.setIntroduction(new Sentence(Messages.COUNTER_REPLY_INTRO)
 				.add(displayName, ArgumentType.PARTICIPANT)
-				.add(stateChange, ArgumentType.STATUS, newStatus).getMessage(wrapper, locale));
+				.addStatus(newStatus).getMessage(wrapper, locale));
 			}
 
 			final ChangeDescriber cd = new ChangeDescriber(new Rescheduling(),

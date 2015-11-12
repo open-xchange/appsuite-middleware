@@ -115,14 +115,6 @@ public class Participants implements ChangeDescriptionGenerator{
 
     }};
 
-    private static final Map<ChangeType, String> STATE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-
-        put(ChangeType.ACCEPT,  Messages.ACCEPTED);
-        put(ChangeType.DECLINE, Messages.DECLINED);
-        put(ChangeType.TENTATIVE, Messages.TENTATIVELY_ACCEPTED);
-     }};
-
-
     private static final Map<ChangeType,String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
         put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
         put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
@@ -226,9 +218,9 @@ public class Participants implements ChangeDescriptionGenerator{
 //            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
             }
         }
 
@@ -245,9 +237,9 @@ public class Participants implements ChangeDescriptionGenerator{
 //            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
             }
         }
 

@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import com.openexchange.calendar.itip.ContextSensitiveMessages;
 import com.openexchange.calendar.itip.generators.changes.PassthroughWrapper;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
 import com.openexchange.i18n.tools.StringHelper;
@@ -83,6 +84,10 @@ public class Sentence {
     public Sentence add(Object argument) {
         return add(argument, ArgumentType.NONE);
     }
+    
+    public Sentence addStatus(ConfirmStatus status) {
+        return add("", ArgumentType.STATUS, status);
+    }
 
 
     public String getMessage(TypeWrapper wrapper, Locale locale) {
@@ -95,10 +100,19 @@ public class Sentence {
             Object[] extraInfo = extra.get(i);
             if (argument instanceof String) {
 				String str = (String) argument;
-				if (type == ArgumentType.STATUS || type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
+				if (type == ArgumentType.SHOWN_AS && str != null && str.trim().length() != 0) {
 					argument = sh.getString(str);
 				}
 			}
+            if (type == ArgumentType.STATUS) {
+                ConfirmStatus status = (ConfirmStatus) extraInfo[0];
+                switch (status) {
+                    case ACCEPT: argument = ContextSensitiveMessages.accepted(locale, ContextSensitiveMessages.Context.VERB); break;
+                    case DECLINE: argument = ContextSensitiveMessages.declined(locale, ContextSensitiveMessages.Context.VERB); break;
+                    case TENTATIVE: argument = ContextSensitiveMessages.tentative(locale, ContextSensitiveMessages.Context.VERB); break;
+                    case NONE: argument = sh.getString((String)argument);
+                }
+            }
             switch (type) {
             case NONE: wrapped.add(wrapper.none(argument)); break;
             case ORIGINAL: wrapped.add(wrapper.original(argument)); break;
