@@ -1621,10 +1621,12 @@ msgid "Login"
 msgstr ""
 
 #. label of username input field
+#. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:63
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -3326,7 +3328,9 @@ msgid "Allow"
 msgstr ""
 
 #. label of password input field
+#. Username
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:90
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:64
 msgid "Username"
 msgstr ""
 
@@ -3496,6 +3500,33 @@ msgstr ""
 msgid "Your CardDAV settings"
 msgstr ""
 
+#. Host
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:70
+msgid "Host"
+msgstr ""
+
+#. Microsoft Exchange Active-Sync
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:64
+msgid "Microsoft Exchange Active-Sync"
+msgstr ""
+
+#. The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:67
+msgid ""
+"The Microsoft Exchange Active-Sync account for synchronizing with Open-"
+"Xchange Server."
+msgstr ""
+
+#. Your Microsoft Exchange Active-Sync profile
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:70
+msgid "Your Microsoft Exchange Active-Sync profile"
+msgstr ""
+
+#. Your Microsoft Exchange Active-Sync settings
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:73
+msgid "Your Microsoft Exchange Active-Sync settings"
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:56
 msgid "IMAP login"
 msgstr ""
@@ -3591,6 +3622,10 @@ msgstr ""
 #. Used when rendering a form in which the user is supposed to enter a phone number address
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:101
 msgid "Phone number"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:63
+msgid "Your requested onboarding profile."
 msgstr ""
 
 #. *
