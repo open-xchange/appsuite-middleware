@@ -1,0 +1,30 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange onboarding EAS bundle
+Bundle-SymbolicName: com.openexchange.onboarding.eas
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
+ com.openexchange.datatypes.genericonf,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.mail.dataobjects.compose,
+ com.openexchange.mail.transport,
+ com.openexchange.notification.mail,
+ com.openexchange.onboarding,
+ com.openexchange.onboarding.notification.mail,
+ com.openexchange.onboarding.plist,
+ com.openexchange.onboarding.plist.xml,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.tools.session,
+ javax.xml.stream,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.onboarding.eas.osgi.OnboardingEASActivator
