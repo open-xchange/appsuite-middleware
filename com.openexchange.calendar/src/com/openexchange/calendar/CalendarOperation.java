@@ -1454,7 +1454,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setUsers(userparticipants.getUsers());
         }
     }
-    
+
+    /**
+     * Checks if a user participant should be added to the new list of users.
+     * Depends on the existtence of the user in the old Calendar Object and if the user is participant of the group.
+     * 
+     * @param gp
+     * @param up
+     * @param edao
+     * @return
+     */
     private static boolean shouldAdd(GroupParticipant gp, UserParticipant up, CalendarDataObject edao) {
         if (edao == null) {
             return true;
@@ -1467,6 +1476,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
             if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
                 containsUser = true;
+            }
+        }
+        if (!containsUser) { //double check
+            for (UserParticipant u : edao.getUsers()) {
+                if (u.getIdentifier() == up.getIdentifier()) {
+                    containsUser = true;
+                    break;
+                }
             }
         }
         if (containsUser) {
