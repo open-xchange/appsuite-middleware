@@ -51,11 +51,8 @@ package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
 import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -75,7 +72,6 @@ import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.PluginException;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.OXTaskMgmtInterface;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -1748,6 +1744,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 if (tool.isContextAdmin(ctx, user.getId().intValue())) {
                     throw new InvalidDataException("Admin delete not supported");
                 }
+                if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
+                    Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
+                    if (!slaveUsers.isEmpty()) {
+                        String affectedUsers = mapToString(slaveUsers);
+                        throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. "
+                            + "Before deleting this user you must move the filestores of the affected users either to the context filestore or "
+                            + "to another master filestore or to a user filestore with the appropriate commandline tools. "
+                            + "Affected users are: " + affectedUsers);
+                    }
+                }
             }
         } catch (final InvalidDataException e1) {
             LOGGER.error("", e1);
@@ -1849,6 +1855,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             throw new StorageException(sb.toString());
         }
+    }
+
+    private String mapToString(Map<Integer, List<Integer>> map) {
+        StringBuilder builder = new StringBuilder();
+        for (Integer cid : map.keySet()) {
+            builder.append("\nCID: ").append(cid).append(", User IDs: ");
+            List<Integer> ids = map.get(cid);
+            for (Integer id : ids) {
+                builder.append(id).append(",");
+            }
+            builder.setLength(builder.length() - 1);
+        }
+        return builder.toString();
     }
 
     @Override
