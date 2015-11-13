@@ -814,7 +814,7 @@ public final class FolderWriter {
      * @param folder The folder to determine the supported capabilities for
      * @return The supported capabilities
      */
-    private static Set<String> getSupportedCapabilities(UserizedFolder folder) {
+    static Set<String> getSupportedCapabilities(UserizedFolder folder) {
         Set<String> capabilities = folder.getSupportedCapabilities();
         if (null == capabilities || 0 == capabilities.size()) {
             return capabilities;
