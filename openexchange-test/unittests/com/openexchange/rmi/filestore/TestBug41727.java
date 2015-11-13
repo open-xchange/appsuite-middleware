@@ -127,12 +127,12 @@ public class TestBug41727 {
             oxuser = (OXUserInterface) Naming.lookup(RMI_HOST + OXUserInterface.RMI_NAME);
             // Create user A
             long start = System.currentTimeMillis();
-            someUser = oxuser.create(context, createUser("thorben.betten@premium"), getContextAdminCredentials());
+            someUser = oxuser.create(context, createUser(), getContextAdminCredentials());
             System.out.println("User A '" + someUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
 
             // Create user B
             start = System.currentTimeMillis();
-            masterUser = oxuser.create(context, createUser("tobias.friedrich@premium"), getContextAdminCredentials());
+            masterUser = oxuser.create(context, createUser(), getContextAdminCredentials());
             System.out.println("Master user '" + masterUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,7 +233,7 @@ public class TestBug41727 {
         return filestore;
     }
 
-    private User createUser(String imapLogin) {
+    private User createUser() {
         UUID random = UUID.randomUUID();
         User oxuser = new User();
         oxuser.setName(random.toString());
@@ -244,7 +244,7 @@ public class TestBug41727 {
         oxuser.setEmail1("oxuser" + random + "@example.com");
         oxuser.setPassword("secret");
         oxuser.setImapServer("dovecot.devel.open-xchange.com");
-        oxuser.setImapLogin(imapLogin);
+        oxuser.setImapLogin(random + "@" + random);
         return oxuser;
     }
 
