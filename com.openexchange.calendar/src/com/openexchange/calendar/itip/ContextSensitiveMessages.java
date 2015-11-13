@@ -50,6 +50,8 @@
 package com.openexchange.calendar.itip;
 
 import java.util.Locale;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.server.services.I18nServices;
 
@@ -60,6 +62,8 @@ import com.openexchange.server.services.I18nServices;
  * @since v7.8.1
  */
 public class ContextSensitiveMessages {
+    
+    private static final Logger LOG = LoggerFactory.getLogger(ContextSensitiveMessages.class);
 
     public enum Context {
         VERB, ADJECTIVE;
@@ -67,6 +71,10 @@ public class ContextSensitiveMessages {
 
     public static String accepted(Locale locale, Context ctxt) {
         I18nService i18nService = I18nServices.getInstance().getService(locale);
+        if (i18nService == null) {
+            LOG.debug("No service for {}  found. Using default for bundle ", locale);
+            return "accepted";
+        }
 
         switch (ctxt) {
             case VERB:
@@ -82,6 +90,10 @@ public class ContextSensitiveMessages {
 
     public static String declined(Locale locale, Context ctxt) {
         I18nService i18nService = I18nServices.getInstance().getService(locale);
+        if (i18nService == null) {
+            LOG.debug("No service for {}  found. Using default for bundle ", locale);
+            return "declined";
+        }
 
         switch (ctxt) {
             case VERB:
@@ -97,6 +109,10 @@ public class ContextSensitiveMessages {
 
     public static String tentative(Locale locale, Context ctxt) {
         I18nService i18nService = I18nServices.getInstance().getService(locale);
+        if (i18nService == null) {
+            LOG.debug("No service for {}  found. Using default for bundle ", locale);
+            return "tentatively accepted";
+        }
 
         switch (ctxt) {
             case VERB:
