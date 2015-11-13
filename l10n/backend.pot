@@ -1611,6 +1611,18 @@ msgstr ""
 msgid "The supplied metadata could not be parsed: \"%1$s\""
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:93
+msgid ""
+"The maximum number of synchronizable directories (%1$d) is exceeded. Please "
+"remove some directories and try again, or select another root folder."
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
+msgid ""
+"The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please "
+"remove some files and try again."
+msgstr ""
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
