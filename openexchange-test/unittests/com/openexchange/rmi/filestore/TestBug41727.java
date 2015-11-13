@@ -127,12 +127,12 @@ public class TestBug41727 {
             oxuser = (OXUserInterface) Naming.lookup(RMI_HOST + OXUserInterface.RMI_NAME);
             // Create user A
             long start = System.currentTimeMillis();
-            someUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            someUser = oxuser.create(context, createUser("thorben.betten@premium"), getContextAdminCredentials());
             System.out.println("User A '" + someUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
 
             // Create user B
             start = System.currentTimeMillis();
-            masterUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            masterUser = oxuser.create(context, createUser("tobias.friedrich@premium"), getContextAdminCredentials());
             System.out.println("Master user '" + masterUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -148,6 +148,20 @@ public class TestBug41727 {
                 fail("Unable to create physical filestore '" + path.getAbsolutePath() + "'.");
             }
             System.out.println("Created physical filestore under '" + path.getAbsolutePath() + "'");
+
+            //Manually create filestore locations
+            //4581_ctx_4_user_store
+            File userFilestore = new File("/tmp/bug41727/" + context.getId() + "_ctx_" + someUser.getId() + "_user_store");
+            created = userFilestore.mkdir();
+            if (!created) {
+                fail("Unable to create physical filestore '" + path.getAbsolutePath() + "' for user '" + someUser.getId() + "'");
+            }
+
+            File masterFilestore = new File("/tmp/bug41727/" + context.getId() + "_ctx_" + masterUser.getId() + "_user_store");
+            created = masterFilestore.mkdir();
+            if (!created) {
+                fail("Unable to create physical filestore '" + path.getAbsolutePath() + "' for master user '" + masterUser.getId() + "'");
+            }
         }
 
         // 4) Register filestore
@@ -184,7 +198,7 @@ public class TestBug41727 {
             e.printStackTrace();
             fail("Unable to move user's filestore to master user's filestore: " + e.getMessage());
         }
-        
+
         // 7) Delete master user
         try {
             long start = System.currentTimeMillis();
@@ -194,7 +208,7 @@ public class TestBug41727 {
             e.printStackTrace();
             fail("Unable to delete master user '" + masterUser.getId() + "'");
         }
-        
+
         // 8) Delete the other user
         try {
             long start = System.currentTimeMillis();
@@ -219,7 +233,7 @@ public class TestBug41727 {
         return filestore;
     }
 
-    private User createUser() {
+    private User createUser(String imapLogin) {
         UUID random = UUID.randomUUID();
         User oxuser = new User();
         oxuser.setName(random.toString());
@@ -230,7 +244,7 @@ public class TestBug41727 {
         oxuser.setEmail1("oxuser" + random + "@example.com");
         oxuser.setPassword("secret");
         oxuser.setImapServer("dovecot.devel.open-xchange.com");
-        oxuser.setImapLogin(random + "@" + random);
+        oxuser.setImapLogin(imapLogin);
         return oxuser;
     }
 
