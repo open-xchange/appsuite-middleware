@@ -120,20 +120,20 @@ public class TestBug41727 {
         }
 
         // 2) Create users in context
-        User userA = null;
-        User userB = null;
+        User someUser = null;
+        User masterUser = null;
         OXUserInterface oxuser = null;
         try {
             oxuser = (OXUserInterface) Naming.lookup(RMI_HOST + OXUserInterface.RMI_NAME);
             // Create user A
             long start = System.currentTimeMillis();
-            userA = oxuser.create(context, createUser(), getContextAdminCredentials());
-            System.out.println("User A '" + userA.getId() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
+            someUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            System.out.println("User A '" + someUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
 
             // Create user B
             start = System.currentTimeMillis();
-            userB = oxuser.create(context, createUser(), getContextAdminCredentials());
-            System.out.println("User B '" + userB.getId() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
+            masterUser = oxuser.create(context, createUser(), getContextAdminCredentials());
+            System.out.println("Master user '" + masterUser.getImapLogin() + "' was successfully created in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
             fail("Unable to create users: " + e.getMessage());
@@ -164,25 +164,45 @@ public class TestBug41727 {
         // 5) Assign both users to the same file storage
         try {
             long start = System.currentTimeMillis();
-            oxuser.moveFromContextToUserFilestore(context, userA, filestore, 500000L, getContextAdminCredentials());
-            System.out.println("Moved user '" + userA.getId() + "' to filestore '" + filestore.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
+            oxuser.moveFromContextToUserFilestore(context, someUser, filestore, 500000L, getContextAdminCredentials());
+            System.out.println("Moved user '" + someUser.getId() + "' to filestore '" + filestore.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
 
             start = System.currentTimeMillis();
-            oxuser.moveFromContextToUserFilestore(context, userB, filestore, 500000L, getContextAdminCredentials());
-            System.out.println("Moved user '" + userB.getId() + "' to filestore '" + filestore.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
+            oxuser.moveFromContextToUserFilestore(context, masterUser, filestore, 500000L, getContextAdminCredentials());
+            System.out.println("Moved master user '" + masterUser.getId() + "' to filestore '" + filestore.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
             fail("Unable to move users from context to user filestores: " + e.getMessage());
         }
 
-        // 6) Move user's B filestore to user's A filestore with move master
+        // 6) Move user's A filestore to user's B filestore with move master
         try {
             long start = System.currentTimeMillis();
-            oxuser.moveFromUserFilestoreToMaster(context, userB, userA, getContextAdminCredentials());
-            System.out.println("Moved user '" + userB.getId() + "' to filestore '" + filestore.getId() + "' of user '" + userA.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
+            oxuser.moveFromUserFilestoreToMaster(context, someUser, masterUser, getContextAdminCredentials());
+            System.out.println("Moved user '" + someUser.getId() + "' to filestore '" + filestore.getId() + "' of master user '" + masterUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
-            fail("Unable to move user's B filestore to user's A master filestore: " + e.getMessage());
+            fail("Unable to move user's filestore to master user's filestore: " + e.getMessage());
+        }
+        
+        // 7) Delete master user
+        try {
+            long start = System.currentTimeMillis();
+            oxuser.delete(context, masterUser, getContextAdminCredentials());
+            System.out.println("Deleted master user '" + masterUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unable to delete master user '" + masterUser.getId() + "'");
+        }
+        
+        // 8) Delete the other user
+        try {
+            long start = System.currentTimeMillis();
+            oxuser.delete(context, someUser, getContextAdminCredentials());
+            System.out.println("Deleted user '" + someUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail("Unable to delete user '" + someUser.getId() + "'");
         }
     }
 
@@ -206,8 +226,8 @@ public class TestBug41727 {
         oxuser.setDisplay_name("oxuser" + random);
         oxuser.setGiven_name("oxuser" + random);
         oxuser.setSur_name("oxuser" + random);
-        oxuser.setPrimaryEmail("oxuser" + random + "@orange.fr");
-        oxuser.setEmail1("oxuser" + random + "@orange.fr");
+        oxuser.setPrimaryEmail("oxuser" + random + "@example.com");
+        oxuser.setEmail1("oxuser" + random + "@example.com");
         oxuser.setPassword("secret");
         oxuser.setImapServer("dovecot.devel.open-xchange.com");
         oxuser.setImapLogin(random + "@" + random);
