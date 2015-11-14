@@ -181,9 +181,21 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String MAX_DRIVE_ATTACHMENTS_EXCEEDED_MSG = "The maximum number of files that may be attached to an E-Mail is exceeded. Max. is %1$s.";
 
+    // Denied to update a standard/default folder like Trash
+    public static final String NO_DEFAULT_FOLDER_UPDATE_MSG = "Default folder must not be updated";
+
     // The client request is not permitted.
     public static final String REQUEST_NOT_PERMITTED_MSG = "The client request is not permitted.";
 
+    // Sending the message denied.
     public static final String SEND_DENIED = "Sending the message denied.";
+
+    // Denied to rename a standard/default folder like Trash
+    public static final String NO_DEFAULT_FOLDER_RENAME_MSG = "Default folder must not be renamed";
+
+    // Denied to delete a standard/default folder like Trash
+    public static final String NO_DEFAULT_FOLDER_DELETE_MSG = "Default folder must not be deleted";
+
+    public static final String ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG = "Archive folder does not allow subfolders.";
 
 }

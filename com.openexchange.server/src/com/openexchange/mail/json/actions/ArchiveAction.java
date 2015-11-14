@@ -165,9 +165,9 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                 }
 
                 // Iterate map
-                final Reference<Exception> exceptionRef = new Reference<Exception>();
+                final Reference<OXException> exceptionRef = new Reference<OXException>();
                 final Calendar cal = Calendar.getInstance(TimeZoneUtils.getTimeZone("UTC"));
-                m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
+                boolean success = m.forEachEntry(new TIntObjectProcedure<Map<String, List<String>>>() {
 
                     @Override
                     public boolean execute(int accountId, Map<String, List<String>> mapping) {
@@ -201,8 +201,14 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                             }
 
                             proceed = true;
-                        } catch (Exception e) {
-                            exceptionRef.setValue(e);
+                        } catch (OXException e) {
+                            if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                                exceptionRef.setValue(MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e));
+                            } else {
+                                exceptionRef.setValue(e);
+                            }
+                        } catch (RuntimeException e) {
+                            exceptionRef.setValue(new OXException(e));
                         } finally {
                             if (null != mailAccess) {
                                 mailAccess.close(true);
@@ -211,6 +217,10 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                         return proceed;
                     }
                 });
+
+                if (!success) {
+                    throw exceptionRef.getValue();
+                }
             } else {
                 // Expect array of identifiers: ["1234","1235",...,"1299"]
                 FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(sourceFolder);
@@ -247,7 +257,14 @@ public final class ArchiveAction extends AbstractArchiveMailAction {
                         return new AJAXRequestResult(Boolean.TRUE, "native");
                     }
 
-                    move2Archive(msgs, fullName, archiveFullname, separator, mailAccess);
+                    try {
+                        move2Archive(msgs, fullName, archiveFullname, separator, mailAccess);
+                    } catch (final OXException e) {
+                        if (SUBFOLDERS_NOT_ALLOWED_PREFIX.equals(e.getPrefix()) && e.getCode() == SUBFOLDERS_NOT_ALLOWED_ERROR_CODE) {
+                            throw MailExceptionCode.ARCHIVE_SUBFOLDER_NOT_ALLOWED.create(e);
+                        }
+                        throw e;
+                    }
                 } finally {
                     if (null != mailAccess) {
                         mailAccess.close(true);

@@ -91,7 +91,10 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public abstract class AbstractArchiveMailAction extends AbstractMailAction {
-	
+
+    protected static final int SUBFOLDERS_NOT_ALLOWED_ERROR_CODE = 2012;
+    protected static final String SUBFOLDERS_NOT_ALLOWED_PREFIX = "IMAP";
+
 	private static final String CAPABILITY_ARCHIVE_EMAILS = "archive_emails";
 
     /**
@@ -101,7 +104,7 @@ public abstract class AbstractArchiveMailAction extends AbstractMailAction {
     protected AbstractArchiveMailAction(ServiceLookup services) {
         super(services);
     }
-    
+
     @Override
     protected final AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
         // Check required "archive_emails" capability
