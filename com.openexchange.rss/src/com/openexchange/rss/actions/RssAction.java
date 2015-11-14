@@ -169,7 +169,7 @@ public class RssAction implements AJAXActionService {
                 } catch (UnsupportedEncodingException e) {
                     /* yeah, right... not happening for UTF-8 */
                 } catch (IOException e) {
-                    throw RssExceptionCodes.IO_ERROR.create(e, url.toString());
+                    throw RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
                 } catch (ParsingFeedException parsingException) {
                     final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
                     if (1 == urls.size()) {
