@@ -75,6 +75,7 @@ import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
@@ -198,7 +199,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     @Override
     public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
         List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
-        selections.add(DefaultOnboardingSelection.newInstance("imap.display", id, "com.openexchange.onboarding.imap.display."));
+        selections.add(DefaultOnboardingSelection.newInstance("imap.display", id, "com.openexchange.onboarding.imap.display.", OnboardingType.DISPLAY));
         return selections;
     }
 

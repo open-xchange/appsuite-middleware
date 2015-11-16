@@ -91,6 +91,7 @@ import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingStrings;
+import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
@@ -267,14 +268,14 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             // Via download or eMail
             {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
 
             return selections;
         } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav").equals(lastEntityId)) {
@@ -283,17 +284,17 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             // Via download, SMS or eMail
             {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
 
                 // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.sms", id, "com.openexchange.onboarding.carddav.sms.", CommonFormDescription.PHONE_NUMBER));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.sms", id, "com.openexchange.onboarding.carddav.sms.", OnboardingType.SMS));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
 
             return selections;
         } else if ((CommonEntity.APPLE_OSX.getId() + ".carddav").equals(lastEntityId)) {
@@ -302,14 +303,14 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             // Via download or eMail
             {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", CommonFormDescription.EMAIL_ADDRESS));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
 
             return selections;
         }

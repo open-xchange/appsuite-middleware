@@ -53,13 +53,17 @@ import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.OnboardingConfigurationTree;
+import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
@@ -76,18 +80,28 @@ import com.openexchange.session.Session;
  */
 public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationTree {
 
+    static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OnboardingConfigurationTreeImpl.class);
+
     private final RootElem root;
     private final Session session;
+    private final boolean withSelections;
+    final OnboardingConfigurationRegistry registry;
+    final ClientInfo clientInfo;
 
     /**
      * Initializes a new {@link OnboardingConfigurationTreeTest}.
      *
      * @param configurations The configurations from which to build the tree
+     * @param withSelections <code>true</code> to include selections in tree; otherwise <code>false</code>
      * @param session The session to use
+     * @param registry The on-boarding registry
      * @throws OXException If building the tree fails
      */
-    public OnboardingConfigurationTreeImpl(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
+    public OnboardingConfigurationTreeImpl(Collection<OnboardingConfiguration> configurations, boolean withSelections, ClientInfo clientInfo, Session session, OnboardingConfigurationRegistry registry) throws OXException {
         super();
+        this.registry = registry;
+        this.clientInfo = clientInfo;
+        this.withSelections = withSelections;
         this.session = session;
         root = new RootElem();
         for (OnboardingConfiguration configuration : configurations) {
@@ -100,7 +114,7 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
         JSONObject jObject = new JSONObject(root.elems.size());
         for (Map.Entry<Platform, NodeElem> entry : root.elems.entrySet()) {
             NodeElem nodeElem = entry.getValue();
-            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, session);
+            nodeElem.addToJsonObject(entry.getKey().getId(), jObject, withSelections, session);
         }
         return jObject;
     }
@@ -116,7 +130,7 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
-    private static class NodeElem {
+    private class NodeElem {
 
         final Map<String, NodeElem> children;
         final Entity entity;
@@ -136,11 +150,7 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             this.value = value;
         }
 
-        boolean isLeaf() {
-            return null != value;
-        }
-
-        void addToJsonObject(String entityId, JSONObject jObject, Session session) throws JSONException, OXException {
+        void addToJsonObject(String entityId, JSONObject jObject, boolean withSelections, Session session) throws JSONException, OXException {
             if (null != value) {
                 JSONObject jConfig = new JSONObject(6);
                 put2Json("displayName", value.getDisplayName(session), jConfig);
@@ -148,12 +158,29 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
                 put2Json("icon", value.getIcon(session), jConfig);
                 jConfig.put("id", value.getId());
                 jConfig.put("entityId", entityId);
+
+                if (withSelections) {
+                    try {
+                        OnboardingConfiguration configuration = registry.getConfiguration(value.getId());
+                        List<OnboardingSelection> selections = configuration.getSelections(entityId, clientInfo, session);
+
+                        JSONObject jSelections = new JSONObject(selections.size());
+                        for (OnboardingSelection selection : selections) {
+                            jSelections.put(selection.getId(), toJson(selection, session));
+                        }
+                        jConfig.put("selections", jSelections);
+                    } catch (OXException e) {
+                        LOGGER.warn("Unable to request selections for '{}' from '{}' on-boarding configuration", entityId, value.getId(), e);
+                        jConfig.put("selections", JSONObject.NULL);
+                    }
+                }
+
                 jObject.put(entityId, jConfig);
             } else {
                 JSONObject jChildren = new JSONObject(children.size());
                 for (Map.Entry<String, NodeElem> entry : children.entrySet()) {
                     NodeElem childElem = entry.getValue();
-                    childElem.addToJsonObject(entry.getKey(), jChildren, session);
+                    childElem.addToJsonObject(entry.getKey(), jChildren, withSelections, session);
                 }
 
                 JSONObject jEntity = new JSONObject(4);
@@ -166,7 +193,20 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
             }
         }
 
-        private static void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
+        private JSONObject toJson(OnboardingSelection selection, Session session) throws OXException, JSONException {
+            JSONObject jSelection = new JSONObject(6);
+
+            jSelection.put("selectionId", selection.getId());
+            jSelection.put("configurationId", selection.getConfigurationId());
+            put2Json("displayName", selection.getDisplayName(session), jSelection);
+            put2Json("description", selection.getDescription(session), jSelection);
+            put2Json("icon", selection.getIcon(session), jSelection);
+            put2Json("type", selection.getType().getId(), jSelection);
+
+            return jSelection;
+        }
+
+        private void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
             if (null == value) {
                 jObject.put(key, JSONObject.NULL);
             } else {
@@ -179,7 +219,7 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
         }
     }
 
-    private static class RootElem {
+    private class RootElem {
 
         final Map<Platform, NodeElem> elems;
 
