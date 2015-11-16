@@ -364,9 +364,9 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
 
             PListDict pListDict = generatePList(request, session);
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("application/x-apple-aspen-config; charset=UTF-8; name=eas.mobileconfig");
-            fileHolder.setName("attachment; filename=eas.mobileconfig");
-            fileHolder.setContentType("application/xml"); // Or application/x-plist ?
+            fileHolder.setDisposition("attachment; filename=eas.mobileconfig");
+            fileHolder.setName("eas.mobileconfig");
+            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=eas.mobileconfig"); // Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
             pListDict.write(writer);
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
