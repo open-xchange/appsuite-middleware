@@ -2793,7 +2793,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet result = null;
         try {
             con = cache.getConnectionForContext(contextId);
-            stmt = con.prepareStatement("SELECT id, cid FROM user WHERE cid = ? AND filestore_owner = userId AND filestore_id > 0");
+            stmt = con.prepareStatement("SELECT id, cid FROM user WHERE cid = ? AND filestore_owner = ? AND filestore_id > 0");
             stmt.setInt(1, contextId);
             stmt.setInt(2, userId);
             result = stmt.executeQuery();
