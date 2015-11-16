@@ -80,7 +80,7 @@ public class OnboardingProfileCreatedNotificationMail {
 
     private static final String PROFILE_CREATED = "profile_created";
 
-    public static MailData createNotificationMail(Session session, String mailAddress) throws OXException {
+    public static MailData createNotificationMail(String mailAddress, String hostName, Session session) throws OXException {
         InternetAddress recipient = null;
         try {
             recipient = new InternetAddress(mailAddress);
@@ -107,7 +107,7 @@ public class OnboardingProfileCreatedNotificationMail {
         Translator translator = factory.translatorFor(userService.getUser(session.getUserId(), session.getContextId()).getLocale());
         String notification = translator.translate(OnboardingNotificationStrings.PROFILE_CREATED);
 
-        ServerConfig serverConfig = serverConfigService.getServerConfig("", session.getUserId(), session.getContextId());
+        ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
 
         Map<String, Object> vars = new HashMap<String, Object>();
         vars.put(PROFILE_CREATED, notification);

@@ -50,20 +50,15 @@
 package com.openexchange.onboarding.caldav;
 
 import static com.openexchange.datatypes.genericonf.FormElement.custom;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.activation.DataHandler;
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeBodyPart;
-import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMessage.RecipientType;
-import javax.mail.internet.MimeMultipart;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
@@ -72,22 +67,15 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
-import com.openexchange.java.UnsynchronizedStringWriter;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
-import com.openexchange.mail.mime.MessageHeaders;
-import com.openexchange.mail.mime.MimeDefaultSession;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mail.mime.datasource.MessageDataSource;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.notification.mail.MailData;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.CommonEntity;
 import com.openexchange.onboarding.CommonFormDescription;
@@ -106,6 +94,7 @@ import com.openexchange.onboarding.OnboardingStrings;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.PListDict;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
@@ -358,46 +347,18 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
-            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            MailData data = OnboardingProfileCreatedNotificationMail.createNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
-            {
-                mimeMessage.setRecipient(RecipientType.TO, new QuotedInternetAddress(emailAddress));
-                mimeMessage.setSubject(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8");
-                mimeMessage.setHeader("Auto-Submitted", "auto-generated");
-            }
-
-            MimeMultipart mimeMultipart = new MimeMultipart();
-
-            {
-                MimeBodyPart textBodyPart = new MimeBodyPart();
-                MessageUtility.setText(OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_PROFILE, session), "UTF-8", textBodyPart);
-                textBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                textBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("text/plain; charset=UTF-8"));
-                mimeMultipart.addBodyPart(textBodyPart);
-            }
-
-            try {
-                MimeBodyPart plistBodyPart = new MimeBodyPart();
-                UnsynchronizedStringWriter writer = new UnsynchronizedStringWriter(2048);
-                PListDict pListDict = generatePList(request, session);
-                pListDict.write(StaxUtils.createXMLStreamWriter(writer));
-                plistBodyPart.setDataHandler(new DataHandler(new MessageDataSource(writer.toString(), "application/x-apple-aspen-config")));
-
-                plistBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig"));
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType("attachment; filename=caldav.mobileconfig"));
-                mimeMultipart.addBodyPart(plistBodyPart);
-            } catch (final UnsupportedEncodingException e) {
-                throw new MessagingException("Unsupported encoding.", e);
-            }
-
-            mimeMessage.setContent(mimeMultipart);
-            mimeMessage.saveChanges();
-
-            ComposedMailMessage composedMailMessage = new ContentAwareComposedMailMessage(mimeMessage, session.getContextId());
-            transport.sendMailMessage(composedMailMessage, ComposeType.NEW);
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
+            PListDict pListDict = generatePList(request, session);
+            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            fileHolder.setDisposition("attachment; filename=caldav.mobileconfig");
+            fileHolder.setName("caldav.mobileconfig");
+            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig"); // Or application/x-plist ?
+            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
+            pListDict.write(writer);
+            NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
+            ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
+            transport.sendMailMessage(message, ComposeType.NEW);
         } catch (XMLStreamException e) {
             throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
         } finally {
