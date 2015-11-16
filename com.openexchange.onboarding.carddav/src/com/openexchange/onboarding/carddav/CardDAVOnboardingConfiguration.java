@@ -382,7 +382,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createNotificationMail(emailAddress, request.getHostData().getHost(), session);
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
             PListDict pListDict = generatePList(request, session);
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();

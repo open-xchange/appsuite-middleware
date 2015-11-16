@@ -60,10 +60,14 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class OnboardingNotificationStrings implements LocalizableStrings {
 
-    public static final String PROFILE_CREATED = "Your requested onboarding profile.";
-
     private OnboardingNotificationStrings() {
         super();
     }
+
+    // Your requested on-boarding profile.
+    public static final String PROFILE_CREATED = "Your requested on-boarding profile.";
+
+    // Your on-boarding information.
+    public static final String DEFAULT = "Your onboarding information.";
 
 }
