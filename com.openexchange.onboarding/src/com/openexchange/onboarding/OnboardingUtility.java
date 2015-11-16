@@ -222,7 +222,7 @@ public class OnboardingUtility {
     /**
      * Loads an icon image for referenced property.
      *
-     * @param propertyName The name of the property for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
@@ -248,7 +248,7 @@ public class OnboardingUtility {
      * Loads an icon image for referenced property.
      *
      * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
-     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple.png"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
@@ -269,7 +269,7 @@ public class OnboardingUtility {
     /**
      * Loads the named icon image from template path.
      *
-     * @param imageName The image name; e.g. <code>"platform_icon_apple"</code>
+     * @param imageName The image name; e.g. <code>"platform_icon_apple.png"</code>
      * @return The loaded icon image or <code>null</code>
      */
     public static Icon loadIconImage(String imageName) {

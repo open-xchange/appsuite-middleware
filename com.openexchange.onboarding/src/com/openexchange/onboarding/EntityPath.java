@@ -62,7 +62,7 @@ public interface EntityPath extends Iterable<Entity> {
     /**
      * Gets the associated platform.
      *
-     * @return The supported
+     * @return The supported platform
      * @throws OXException If the platform cannot be returned
      */
     Platform getPlatform() throws OXException;
