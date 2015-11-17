@@ -46,64 +46,66 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
-
 package com.openexchange.admin.console.user;
 
-import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
-import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
+import com.openexchange.admin.rmi.exceptions.DuplicateExtensionException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class List extends ListCoreExtended {
+public abstract class ListCoreExtended extends ListCore {
 
-    public static void main(final String[] args) {
-        new List(args);
-    }
-
-    public List(final String[] args2) {
-
-        final AdminParser parser = new AdminParser("listuser");
-
-        commonfunctions(parser, args2);
+    @Override
+    protected final void setOptions(final AdminParser parser) {
+        super.setOptions(parser);
+        this.searchOption = setShortLongOpt(parser, OPT_NAME_SEARCHPATTERN, OPT_NAME_SEARCHPATTERN_LONG, "The search pattern which is used for listing. This applies to name.", true, NeededQuadState.notneeded);
+        this.ignoreCaseOption = setShortLongOpt(parser, OPT_NAME_IGNORECASE, OPT_NAME_IGNORECASE_LONG, "Whether to perform look-up case-insensitive", false, NeededQuadState.notneeded);
     }
 
     @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        return maincall(parser, oxusr, search_pattern, ignoreCase, ctx, auth, false, false);
-    }
+    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws Exception {
+        try {
+            String pattern = (String) parser.getOptionValue(this.searchOption);
+            if (null == pattern) {
+                pattern = "*";
+            }
 
-    @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth, includeGuests, excludeUsers) : oxusr.list(ctx, search_pattern, auth, includeGuests, excludeUsers);
-        if( allusers.length == 0 ) {
-            return new User[0];
+            Boolean ignoreCase = (Boolean) parser.getOptionValue(this.ignoreCaseOption);
+            if (null == ignoreCase) {
+                ignoreCase = Boolean.FALSE;
+            }
+
+            Boolean includeGuests = (Boolean) parser.getOptionValue(this.includeGuestsOption);
+            if (null == includeGuests) {
+                includeGuests = Boolean.FALSE;
+            }
+
+            Boolean excludeUsers = (Boolean) parser.getOptionValue(this.excludeUsersOption);
+            if (null == excludeUsers) {
+                excludeUsers = Boolean.FALSE;
+            }
+
+            return maincall(parser, oxusr, pattern, ignoreCase.booleanValue(), ctx, auth, includeGuests.booleanValue(), excludeUsers.booleanValue());
+        } catch (final Exception e) {
+            throw e;
         }
-        return oxusr.getData(ctx, allusers, auth);
     }
 
-    @Override
-    protected void setFurtherOptions(final AdminParser parser) {
-        setIncludeGuestsOption(parser);
-        setExcludeUsersOption(parser);
-    }
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
-    @Override
-    protected ArrayList<String> getColumnsOfAllExtensions(final User user) {
-        return new ArrayList<String>();
-    }
+    protected abstract User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException, DuplicateExtensionException;
 
-    @Override
-    protected ArrayList<String> getDataOfAllExtensions(final User user) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-        return new ArrayList<String>();
-    }
+
+
+
 }

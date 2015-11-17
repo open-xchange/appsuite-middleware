@@ -114,6 +114,9 @@ case "${CMDARR[0]}" in
     "list")
     ACTION="List"
     ;;
+    "listusersbyaliasdomain")
+    ACTION="ListUsersByAliasDomain"
+    ;;
 esac
 
 JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"

@@ -2695,4 +2695,33 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         return capabilitiesSource;
     }
+
+    @Override
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        if (aliasDomain == null) {
+            throw new InvalidDataException("Invalid alias domain");
+        }
+        if (context == null) {
+            throw new InvalidDataException("Invalid context id.");
+        }
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        try {
+            basicauth.doAuthentication(auth, context);
+            contextcheck(context);
+            User users[] = oxu.listUsersByAliasDomain(context, aliasDomain);
+
+            return users;
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
+    }
 }

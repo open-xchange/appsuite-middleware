@@ -53,6 +53,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -64,37 +66,37 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class List extends ListCoreExtended {
+public class ListUsersByAliasDomain extends ListCore {
+
+    private static final String ALIAS_DOMAIN = "alias-domain";
+    private static final char ALIAS_DOMAIN_SHORT = 'd';
+    private static CLIOption alias_domain_cli_option;
 
     public static void main(final String[] args) {
-        new List(args);
+        new ListUsersByAliasDomain(args);
     }
 
-    public List(final String[] args2) {
+    public ListUsersByAliasDomain(final String[] args2) {
 
-        final AdminParser parser = new AdminParser("listuser");
+        final AdminParser parser = new AdminParser("listuserbyaliasdomain");
 
         commonfunctions(parser, args2);
     }
 
-    @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        return maincall(parser, oxusr, search_pattern, ignoreCase, ctx, auth, false, false);
-    }
 
     @Override
-    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final String search_pattern, final boolean ignoreCase, final Context ctx, final Credentials auth, final boolean includeGuests, final boolean excludeUsers) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        final User[] allusers = ignoreCase ? oxusr.listCaseInsensitive(ctx, search_pattern, auth, includeGuests, excludeUsers) : oxusr.list(ctx, search_pattern, auth, includeGuests, excludeUsers);
-        if( allusers.length == 0 ) {
+    protected User[] maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        String domain = (String) parser.getOptionValue(alias_domain_cli_option);
+        User[] ids = oxusr.listByAliasDomain(ctx, domain, auth);
+        if (ids.length == 0) {
             return new User[0];
         }
-        return oxusr.getData(ctx, allusers, auth);
+        return oxusr.getData(ctx, ids, auth);
     }
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        setIncludeGuestsOption(parser);
-        setExcludeUsersOption(parser);
+        alias_domain_cli_option = setShortLongOpt(parser, ALIAS_DOMAIN_SHORT, ALIAS_DOMAIN, "The domain of the user alius.", true, NeededQuadState.needed);
     }
 
     @Override

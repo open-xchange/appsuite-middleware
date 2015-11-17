@@ -341,6 +341,16 @@ public abstract class OXUserStorageInterface {
     public abstract User[] listUsersWithOwnFilestore(final Context context, final Integer filestore_id) throws StorageException;
 
     /**
+     * Retrieve all users with given alias domain
+     * 
+     * @param context The context
+     * @param aliasDomain The alias domain
+     * @return The users
+     * @throws StorageException
+     */
+    public abstract User[] listUsersByAliasDomain(final Context context, String aliasDomain) throws StorageException;
+
+    /**
      * Delete an user or multiple from given context in given connection
      */
     public abstract void delete(final Context ctx, final User[] user_ids, final Connection write_ox_con ) throws StorageException;
