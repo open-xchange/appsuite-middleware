@@ -153,6 +153,8 @@ public class User {
 
     private String mail_folder_trash_name;
 
+    private String mail_folder_archive_full_name;
+
     private String mail_folder_confirmed_spam_name;
 
     private String mail_folder_confirmed_ham_name;
@@ -1054,6 +1056,24 @@ public class User {
      */
     final public void setMail_folder_trash_name(final String mail_folder_trash_name) {
         this.mail_folder_trash_name = mail_folder_trash_name;
+    }
+
+    /**
+     * Returns the mail folder full-name of the archive folder of this user object
+     *
+     * @return A {@link String} containing the mail folder full-name of the archive folder
+     */
+    final public String getMail_folder_archive_full_name() {
+        return mail_folder_archive_full_name;
+    }
+
+    /**
+     * Sets the mail folder full-name of the archive folder of this user object
+     *
+     * @param mail_folder_archive_full_name A {@link String} containing the mail folder full-name of the archive folder
+     */
+    final public void setMail_folder_archive_full_name(final String mail_folder_archive_full_name) {
+        this.mail_folder_archive_full_name = mail_folder_archive_full_name;
     }
 
     /**

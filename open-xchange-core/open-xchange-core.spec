@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 39
+%define        ox_release 40
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1206,6 +1206,12 @@ ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /o
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1246,6 +1252,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Wed Nov 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-11-16 (2862)
 * Fri Nov 06 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-11-09 (2841)
 * Fri Oct 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
