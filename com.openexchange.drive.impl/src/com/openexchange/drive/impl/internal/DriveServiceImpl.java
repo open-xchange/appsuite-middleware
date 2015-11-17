@@ -256,9 +256,9 @@ public class DriveServiceImpl implements DriveService {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateFileVersions(originalVersions);
         DriveVersionValidator.validateFileVersions(clientVersions);
-        int maxFilesPerDiretory = DriveConfig.getInstance().getMaxFilesPerDiretory();
-        if (-1 != maxFilesPerDiretory && null != clientVersions && maxFilesPerDiretory < clientVersions.size()) {
-            OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDiretory, path);
+        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory();
+        if (-1 != maxFilesPerDirectory && null != clientVersions && maxFilesPerDirectory < clientVersions.size()) {
+            OXException error = DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
             LOG.debug("Client synchronization aborted for {}", session, error);
             List<AbstractAction<FileVersion>> actionsForClient = new ArrayList<AbstractAction<FileVersion>>(1);
             actionsForClient.add(new ErrorFileAction(null, null, null, path, error, false, true));
@@ -273,7 +273,7 @@ public class DriveServiceImpl implements DriveService {
             driveSession.getStorage().createFolder(path);
             List<ServerFileVersion> serverVersions;
             try {
-                serverVersions = driveSession.getServerFiles(path, maxFilesPerDiretory);
+                serverVersions = driveSession.getServerFiles(path, maxFilesPerDirectory);
             } catch (OXException e) {
                 if ("DRV-0036".equals(e.getErrorCode())) {
                     /*
