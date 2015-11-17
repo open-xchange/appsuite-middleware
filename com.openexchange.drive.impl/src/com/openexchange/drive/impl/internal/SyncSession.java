@@ -290,9 +290,9 @@ public class SyncSession {
     public List<ServerFileVersion> getServerFiles(String path, int limit) throws OXException {
         FileStorageFolder folder = getStorage().getFolder(path);
         List<File> files = getStorage().getFilesInFolder(folder.getId());
-        int maxFilesPerDiretory = DriveConfig.getInstance().getMaxFilesPerDiretory();
-        if (-1 != maxFilesPerDiretory && files.size() > maxFilesPerDiretory) {
-            throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDiretory, path);
+        int maxFilesPerDirectory = DriveConfig.getInstance().getMaxFilesPerDirectory();
+        if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
+            throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
         }
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
         List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());

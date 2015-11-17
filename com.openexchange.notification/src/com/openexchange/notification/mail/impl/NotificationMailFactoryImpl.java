@@ -61,6 +61,7 @@ import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -118,6 +119,13 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
     private final TemplateService templateService;
     private final HtmlService htmlService;
 
+    /**
+     * Initializes a new {@link NotificationMailFactoryImpl}.
+     *
+     * @param configService The configuration service to use
+     * @param templateService The template service to use
+     * @param htmlService The HTML service to use
+     */
     public NotificationMailFactoryImpl(ConfigurationService configService, TemplateService templateService, HtmlService htmlService) {
         super();
         this.configService = configService;
@@ -127,68 +135,7 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
 
     @Override
     public ComposedMailMessage createMail(MailData data) throws OXException {
-        try {
-            NotificationMailConfig mailConfig = data.getMailConfig();
-            Map<String, Object> templateVars = getMutableTemplateVars(data);
-            applyStyle(mailConfig, templateVars);
-            FooterImage footerImage = applyFooter(mailConfig, templateVars);
-
-            String htmlContent = compileTemplate(data.getTemplateName(), templateVars);
-            String textContent = data.getTextContent();
-            if (textContent == null) {
-                textContent = htmlService.html2text(htmlContent, true);
-            }
-
-            ContentType textContentType = new ContentType().setPrimaryType("text").setSubType("plain").setCharsetParameter("UTF-8");
-            MimeBodyPart textPart = new MimeBodyPart();
-            textPart.setDataHandler(new DataHandler(new MessageDataSource(textContent, textContentType)));
-            textPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, textContentType.toString());
-
-            ContentType htmlContentType = new ContentType().setPrimaryType("text").setSubType("html").setCharsetParameter("UTF-8");
-            MimeBodyPart htmlPart = new MimeBodyPart();
-            htmlPart.setDataHandler(new DataHandler(new MessageDataSource(htmlContent, htmlContentType)));
-            htmlPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, htmlContentType.toString());
-
-            if (footerImage != null) {
-                if (!mailConfig.embedFooterImage()) {
-                    MimeBodyPart imagePart = new MimeBodyPart();
-                    imagePart.setDisposition("inline; filename=\"" + footerImage.getFileName() + "\"");
-                    imagePart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, footerImage.getContentType() + "; name=\"" + footerImage.getFileName() + "\"");
-                    imagePart.setContentID("<" + footerImage.getContentId() + ">");
-                    imagePart.setHeader("X-Attachment-Id", footerImage.getContentId());
-                    imagePart.setDataHandler(new DataHandler(new MessageDataSource(footerImage.getData(), footerImage.getContentType())));
-
-                    MimeMultipart relatedMultipart = new MimeMultipart("related");
-                    relatedMultipart.addBodyPart(htmlPart);
-                    relatedMultipart.addBodyPart(imagePart);
-                    MimeBodyPart tmp = new MimeBodyPart();
-                    MessageUtility.setContent(relatedMultipart, tmp);
-                    htmlPart = tmp;
-                }
-            }
-
-            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
-            mimeMessage.addRecipient(javax.mail.internet.MimeMessage.RecipientType.TO, data.getRecipient());
-            if (data.getSender() != null) {
-                mimeMessage.addFrom(new Address[] { data.getSender() });
-            } else if (data.getSendingUser() != null) {
-                mimeMessage.addFrom(getSenderAddress(data.getSendingUser(), data.getContext()));
-            }
-            mimeMessage.setSubject(data.getSubject(), "UTF-8");
-            mimeMessage.setHeader("Auto-Submitted", "auto-generated");
-            for (Entry<String, String> header : data.getMailHeaders().entrySet()) {
-                mimeMessage.addHeader(header.getKey(), header.getValue());
-            }
-
-            MimeMultipart multipart = new MimeMultipart("alternative");
-            multipart.addBodyPart(textPart);
-            multipart.addBodyPart(htmlPart);
-            mimeMessage.setContent(multipart);
-            mimeMessage.saveChanges();
-            return new ContentAwareComposedMailMessage(mimeMessage, data.getContext().getContextId());
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        }
+        return createMail(data, Collections.<IFileHolder> emptyList());
     }
 
     @Override
@@ -204,6 +151,7 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
             if (textContent == null) {
                 textContent = htmlService.html2text(htmlContent, true);
             }
+
             ContentType textContentType = new ContentType().setPrimaryType("text").setSubType("plain").setCharsetParameter("UTF-8");
             MimeBodyPart textPart = new MimeBodyPart();
             textPart.setDataHandler(new DataHandler(new MessageDataSource(textContent, textContentType)));
@@ -245,17 +193,33 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
                 mimeMessage.addHeader(header.getKey(), header.getValue());
             }
 
-            MimeMultipart multipart = new MimeMultipart("alternative");
-            multipart.addBodyPart(textPart);
-            multipart.addBodyPart(htmlPart);
+            MimeMultipart multipart;
+            if (null == attachments || attachments.isEmpty()) {
+                // No attachment specified
+                multipart = new MimeMultipart("alternative");
+                multipart.addBodyPart(textPart);
+                multipart.addBodyPart(htmlPart);
+            } else {
+                // Compose multipart for "alternative" content
+                MimeMultipart alternativeMultipart = new MimeMultipart("alternative");
+                alternativeMultipart.addBodyPart(textPart);
+                alternativeMultipart.addBodyPart(htmlPart);
+                MimeBodyPart tmp = new MimeBodyPart();
+                MessageUtility.setContent(alternativeMultipart, tmp);
 
-            for (IFileHolder attachment : attachments) {
-                MimeBodyPart plistBodyPart = new MimeBodyPart();
-                plistBodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getStream(), "application/x-apple-aspen-config")));
-                plistBodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(attachment.getContentType()));
-                plistBodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType(attachment.getDisposition()));
-                multipart.addBodyPart(plistBodyPart);
+                // Create primary multipart and append "alternative" multipart as well as attachments to it
+                multipart = new MimeMultipart("mixed");
+                multipart.addBodyPart(tmp);
+
+                for (IFileHolder attachment : attachments) {
+                    String contentType = attachment.getContentType();
+                    MimeBodyPart bodyPart = new MimeBodyPart();
+                    bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getStream(), new ContentType(contentType).getBaseType())));
+                    bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
+                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType(attachment.getDisposition()));
+                    multipart.addBodyPart(bodyPart);
+                }
             }
 
             mimeMessage.setContent(multipart);

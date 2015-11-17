@@ -60,6 +60,7 @@ import com.openexchange.onboarding.TestEntity;
 import com.openexchange.onboarding.TestOnboardingConfiguration;
 import com.openexchange.onboarding.internal.OnboardingConfigurationTreeImpl;
 import com.openexchange.onboarding.OnboardingConfigurationTree;
+import com.openexchange.onboarding.DefaultClientInfo;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.Entity;
 import com.openexchange.onboarding.EntityPath;
@@ -132,7 +133,7 @@ public class OnboardingConfigurationTreeTest {
             configs.add(configuration);
         }
 
-        OnboardingConfigurationTree tree = new OnboardingConfigurationTreeImpl(configs, null);
+        OnboardingConfigurationTree tree = new OnboardingConfigurationTreeImpl(configs, false, new DefaultClientInfo("Mozilla"), null, null);
 
         JSONObject jTree = tree.toJsonObject();
         // System.out.println(jTree.toString(2));

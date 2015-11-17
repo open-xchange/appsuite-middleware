@@ -3624,8 +3624,14 @@ msgstr ""
 msgid "Phone number"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:63
-msgid "Your requested onboarding profile."
+#. Your requested on-boarding profile.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:68
+msgid "Your requested on-boarding profile."
+msgstr ""
+
+#. Your on-boarding information.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:71
+msgid "Your onboarding information."
 msgstr ""
 
 #. *

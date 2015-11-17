@@ -117,7 +117,7 @@ public class DriveConfig implements Initialization {
     private String uiWebPath;
     private String dispatcherPrefix;
     private int maxDirectories;
-    private int maxFilesPerDiretory;
+    private int maxFilesPerDirectory;
     private Set<String> enabledServices;
     private Set<String> excludedFolders;
 
@@ -391,12 +391,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Gets the maxFilesPerDiretory
+     * Gets the maxFilesPerDirectory
      *
-     * @return The maxFilesPerDiretory
+     * @return The maxFilesPerDirectory
      */
-    public int getMaxFilesPerDiretory() {
-        return maxFilesPerDiretory;
+    public int getMaxFilesPerDirectory() {
+        return maxFilesPerDirectory;
     }
 
     /**
@@ -493,7 +493,7 @@ public class DriveConfig implements Initialization {
          * restrictions
          */
         maxDirectories = configService.getIntProperty("com.openexchange.drive.maxDirectories", 65535);
-        maxFilesPerDiretory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDiretory", 65535);
+        maxFilesPerDirectory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDirectory", 65535);
         String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.enabledServices", "com.openexchange.infostore"));
         enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
         String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.excludedFolders"));

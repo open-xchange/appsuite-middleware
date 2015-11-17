@@ -47,46 +47,52 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
+package com.openexchange.onboarding;
 
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.DefaultClientInfo;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link GetTreeAction}
+ * {@link OnboardingType} - The on-boarding type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetTreeAction extends AbstractOnboardingAction {
+public enum OnboardingType {
 
     /**
-     * Initializes a new {@link GetTreeAction}.
-     *
-     * @param services
+     * The download on-boarding type; required data/resources are provided through a file download
      */
-    public GetTreeAction(ServiceLookup services) {
-        super(services);
+    DOWNLOAD("download"),
+    /**
+     * The E-Mail on-boarding type; required data/resources are provided through an E-Mail
+     */
+    EMAIL("email"),
+    /**
+     * The SMS on-boarding type; required data/resources are provided through an SMS
+     */
+    SMS("sms"),
+    /**
+     * The display on-boarding type; required data/resources are displayed to the user
+     */
+    DISPLAY("display"),
+    /**
+     * The link on-boarding type; required data/resources are provided through an URI
+     */
+    LINK("link"),
+    ;
+
+    private final String id;
+
+    private OnboardingType(String id) {
+        this.id = id;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
-
-        boolean withSelections = AJAXRequestDataTools.parseBoolParameter("withSelections", requestData, true);
-        ClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
-        OnboardingConfigurationTree configurationTree =  onboardingService.getConfigurationTreeFor(withSelections, clientInfo, session);
-
-        return new AJAXRequestResult(configurationTree, "onboardingConfigurationTree");
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
     }
 
 }

@@ -92,6 +92,7 @@ import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingStrings;
+import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
@@ -305,14 +306,14 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             // Via download or eMail
             if (isIPad(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.download", id, "com.openexchange.onboarding.eas.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.download", id, "com.openexchange.onboarding.eas.download.", OnboardingType.DOWNLOAD));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.email", id, "com.openexchange.onboarding.eas.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.email", id, "com.openexchange.onboarding.eas.email.", OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.display.", OnboardingType.DISPLAY));
 
             return selections;
         } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas").equals(lastEntityId)) {
@@ -321,26 +322,26 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             // Via download, SMS or eMail
             if (isIPhone(clientInfo)) {
                 // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.download", id, "com.openexchange.onboarding.eas.download."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.download", id, "com.openexchange.onboarding.eas.download.", OnboardingType.DOWNLOAD));
 
                 // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.sms", id, "com.openexchange.onboarding.eas.sms."));
+                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.sms", id, "com.openexchange.onboarding.eas.sms.", OnboardingType.SMS));
             }
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.email", id, "com.openexchange.onboarding.eas.email."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.email", id, "com.openexchange.onboarding.eas.email.", OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.display."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.display.", OnboardingType.DISPLAY));
 
             return selections;
         } else if ((CommonEntity.ANDROID_PHONE.getId() + ".eas").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download.", OnboardingType.DOWNLOAD));
             return selections;
         } else if ((CommonEntity.ANDROID_TABLET.getId() + ".eas").equals(lastEntityId)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(1);
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download."));
+            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".eas.display", id, "com.openexchange.onboarding.eas.download.", OnboardingType.DOWNLOAD));
             return selections;
         }
 
@@ -360,13 +361,13 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createNotificationMail(session, emailAddress);
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
             PListDict pListDict = generatePList(request, session);
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("application/x-apple-aspen-config; charset=UTF-8; name=eas.mobileconfig");
-            fileHolder.setName("attachment; filename=eas.mobileconfig");
-            fileHolder.setContentType("application/xml"); // Or application/x-plist ?
+            fileHolder.setDisposition("attachment; filename=eas.mobileconfig");
+            fileHolder.setName("eas.mobileconfig");
+            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=eas.mobileconfig"); // Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
             pListDict.write(writer);
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
