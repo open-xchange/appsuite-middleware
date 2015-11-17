@@ -31,6 +31,13 @@ postFix() {
         ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
     fi
 
+    # SoftwareChange_Request-2850
+    PFILE=/opt/open-xchange/etc/drive.properties
+    ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
+    ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
+    ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
+    ox_add_property com.openexchange.drive.excludedFolders "" $PFILE
+
     ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 }
 
