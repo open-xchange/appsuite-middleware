@@ -49,7 +49,6 @@
 
 package com.openexchange.onboarding.caldav;
 
-import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,7 +62,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
@@ -307,17 +305,12 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result displayResult(OnboardingRequest request, Session session) throws OXException {
         String resultText = OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_TEXT_SETTINGS, session);
 
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(custom("text", CALDAV_LOGIN_FIELD, CalDAVFormDisplayNames.CALDAV_LOGIN_DISPLAY_NAME))
-            .add(custom("text", CALDAV_PASSWORD_FIELD, CalDAVFormDisplayNames.CALDAV_PASSWORD_DISPLAY_NAME))
-            .add(custom("text", CALDAV_HOST_FIELD, CalDAVFormDisplayNames.CALDAV_HOST_DISPLAY_NAME));
-
         Map<String, Object> formContent = new HashMap<String, Object>();
         formContent.put(CALDAV_LOGIN_FIELD, session.getLogin());
         formContent.put(CALDAV_PASSWORD_FIELD, session.getPassword());
         formContent.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
 
-        return new Result(resultText, formContent, form);
+        return new Result(resultText, formContent);
     }
 
 

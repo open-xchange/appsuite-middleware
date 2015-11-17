@@ -49,13 +49,11 @@
 
 package com.openexchange.onboarding.imap;
 
-import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.mail.api.MailAccess;
@@ -230,18 +228,6 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
             String smtpPassword = smtpConfig.getPassword();
             boolean smtpSecure = smtpConfig.isSecure();
 
-            DynamicFormDescription form = new DynamicFormDescription();
-            form.add(custom("text", IMAP_LOGIN_FIELD, IMAPFormDisplayNames.IMAP_LOGIN_DISPLAY_NAME))
-                .add(custom("text", IMAP_PASSWORD_FIELD, IMAPFormDisplayNames.IMAP_PASSWORD_DISPLAY_NAME))
-                .add(custom("text", IMAP_SERVER_FIELD, IMAPFormDisplayNames.IMAP_SERVER_DISPLAY_NAME))
-                .add(custom("text", IMAP_PORT_FIELD, IMAPFormDisplayNames.IMAP_PORT_DISPLAY_NAME))
-                .add(custom("text", IMAP_SECURE_FIELD, IMAPFormDisplayNames.IMAP_SECURE_DISPLAY_NAME))
-                .add(custom("text", SMTP_LOGIN_FIELD, IMAPFormDisplayNames.SMTP_LOGIN_DISPLAY_NAME))
-                .add(custom("text", SMTP_PASSWORD_FIELD, IMAPFormDisplayNames.SMTP_PASSWORD_DISPLAY_NAME))
-                .add(custom("text", SMTP_SERVER_FIELD, IMAPFormDisplayNames.SMTP_SERVER_DISPLAY_NAME))
-                .add(custom("text", SMTP_PORT_FIELD, IMAPFormDisplayNames.SMTP_PORT_DISPLAY_NAME))
-                .add(custom("text", SMTP_SECURE_FIELD, IMAPFormDisplayNames.SMTP_SECURE_DISPLAY_NAME));
-
             Map<String, Object> formContent = new HashMap<String, Object>();
             formContent.put(IMAP_LOGIN_FIELD, imapLogin);
             formContent.put(IMAP_PASSWORD_FIELD, imapPassword);
@@ -254,7 +240,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
             formContent.put(SMTP_PORT_FIELD, new Integer(smtpPort));
             formContent.put(SMTP_SECURE_FIELD, new Boolean(smtpSecure));
 
-            Result result = new Result("Result", formContent, form);
+            Result result = new Result("Result", formContent);
             return result;
         } finally {
             access.close();

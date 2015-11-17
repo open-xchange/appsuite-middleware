@@ -56,7 +56,6 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.DefaultClientInfo;
@@ -130,8 +129,13 @@ public class ExecuteAction extends AbstractOnboardingAction {
             return null == format ? new AJAXRequestResult(resultObject) : new AJAXRequestResult(resultObject, format);
         }
 
-        if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
-            return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null), "json");
+        Map<String, Object> formConfiguration = onboardingResult.getFormConfiguration();
+        if (null != formConfiguration) {
+            JSONObject json = new JSONObject(formConfiguration.size());
+            for (String key : formConfiguration.keySet()) {
+                json.put(key, formConfiguration.get(key));
+            }
+            return new AJAXRequestResult(json, "json");
         }
 
         JSONObject jResult = new JSONObject(2);

@@ -49,7 +49,6 @@
 
 package com.openexchange.onboarding.carddav;
 
-import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -63,7 +62,6 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
@@ -342,17 +340,12 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result displayResult(OnboardingRequest request, Session session) throws OXException {
         String resultText = OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_TEXT_SETTINGS, session);
 
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(custom("text", CARDDAV_LOGIN_FIELD, CardDAVFormDisplayNames.CARDDAV_LOGIN_DISPLAY_NAME))
-            .add(custom("text", CARDDAV_PASSWORD_FIELD, CardDAVFormDisplayNames.CARDDAV_PASSWORD_DISPLAY_NAME))
-            .add(custom("text", CARDDAV_HOST_FIELD, CardDAVFormDisplayNames.CARDDAV_HOST_DISPLAY_NAME));
-
         Map<String, Object> formContent = new HashMap<String, Object>();
         formContent.put(CARDDAV_LOGIN_FIELD, session.getLogin());
         formContent.put(CARDDAV_PASSWORD_FIELD, session.getPassword());
         formContent.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, session));
 
-        return new Result(resultText, formContent, form);
+        return new Result(resultText, formContent);
     }
 
 

@@ -49,7 +49,6 @@
 
 package com.openexchange.onboarding.eas;
 
-import static com.openexchange.datatypes.genericonf.FormElement.custom;
 import static com.openexchange.onboarding.OnboardingUtility.isIPad;
 import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
 import java.util.ArrayList;
@@ -67,7 +66,6 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -402,17 +400,12 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
     Result displayResult(OnboardingRequest request, Session session) throws OXException {
         String resultText = OnboardingUtility.getTranslationFor(EASOnboardingStrings.EAS_TEXT_SETTINGS, session);
 
-        DynamicFormDescription form = new DynamicFormDescription();
-        form.add(custom("text", EAS_LOGIN_FIELD, OnboardingUtility.getTranslationFor(EASDisplayNames.EAS_LOGIN, session)))
-            .add(custom("text", EAS_PASSWORD_FIELD, OnboardingUtility.getTranslationFor(EASDisplayNames.EAS_PASSWORD, session)))
-            .add(custom("text", EAS_HOST_FIELD, OnboardingUtility.getTranslationFor(EASDisplayNames.EAS_HOST, session)));
-
         Map<String, Object> formContent = new HashMap<String, Object>();
         formContent.put(EAS_LOGIN_FIELD, session.getLogin());
         formContent.put(EAS_PASSWORD_FIELD, session.getPassword());
         formContent.put(EAS_HOST_FIELD, getEASUrl(request, session));
 
-        return new Result(resultText, formContent, form);
+        return new Result(resultText, formContent);
     }
 
     private final static String EAS_LOGIN_FIELD = "login";
