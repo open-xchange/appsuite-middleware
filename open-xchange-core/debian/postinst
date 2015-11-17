@@ -70,7 +70,7 @@ dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/management.p
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/groupware/templating.properties \
       /opt/open-xchange/etc/templating.properties 6.20.99 open-xchange-templating \
       -- $1 $(dpkg-query -W -f='${Config-Version}' open-xchange-templating)
-      
+
 COMMONCONFFILES="excludedupdatetasks.properties foldercache.properties transport.properties"
 
 for FILE in ${COMMONCONFFILES}; do
@@ -1106,6 +1106,12 @@ ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchan
 ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
 
 # SoftwareChange_Request-2884
 if [ -e /opt/open-xchange/etc/guard.properties ]; then
