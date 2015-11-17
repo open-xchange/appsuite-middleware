@@ -1621,12 +1621,8 @@ msgid "Login"
 msgstr ""
 
 #. label of username input field
-#. Password
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.webdav/src/com/openexchange/file/storage/webdav/FormStrings.java:63
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:87
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:63
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:67
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.crawler/src/com/openexchange/subscribe/crawler/internal/FormStrings.java:63
 msgid "Password"
 msgstr ""
@@ -3328,9 +3324,7 @@ msgid "Allow"
 msgstr ""
 
 #. label of password input field
-#. Username
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth.provider.impl/src/com/openexchange/oauth/provider/impl/servlets/OAuthProviderStrings.java:90
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:64
 msgid "Username"
 msgstr ""
 
@@ -3448,18 +3442,6 @@ msgid ""
 "Configuration -> Accounts. Then try again."
 msgstr ""
 
-#. The identifier for user module
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:62
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
-msgid "User"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVFormDisplayNames.java:64
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVFormDisplayNames.java:64
-msgid "Host name"
-msgstr ""
-
 #. The default display name for a CaldAV account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:71
 msgid "CalDAV"
@@ -3500,11 +3482,6 @@ msgstr ""
 msgid "Your CardDAV settings"
 msgstr ""
 
-#. Host
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASDisplayNames.java:70
-msgid "Host"
-msgstr ""
-
 #. Microsoft Exchange Active-Sync
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:64
 msgid "Microsoft Exchange Active-Sync"
@@ -3527,44 +3504,19 @@ msgstr ""
 msgid "Your Microsoft Exchange Active-Sync settings"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:56
-msgid "IMAP login"
+#. OX Mail
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:64
+msgid "OX Mail"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:57
-msgid "IMAP password"
+#. OX Mail App
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:67
+msgid "OX Mail App"
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:58
-msgid "IMAP server"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:59
-msgid "IMAP port"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:60
-msgid "IMAP encryption"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:61
-msgid "Transport login"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:62
-msgid "Transport password"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:63
-msgid "Transport server"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:64
-msgid "Transport port"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPFormDisplayNames.java:65
-msgid "Transport encryption"
+#. Get OX Mail app
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:70
+msgid "Get OX Mail app"
 msgstr ""
 
 #. Your selection is not supported.
@@ -4304,6 +4256,11 @@ msgstr ""
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
+msgstr ""
+
+#. The identifier for user module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizerStrings.java:71
+msgid "User"
 msgstr ""
 
 #. The identifier for group module
