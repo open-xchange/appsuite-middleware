@@ -57,7 +57,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
@@ -124,9 +123,24 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
     @Override
     protected BufferedImage getImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
+        int waitTimeoutSeconds = waitTimeoutSeconds();
+        if (waitTimeoutSeconds <= 0) {
+            // No wait timeout configured
+            FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new GetImageCallable(formatName, null, signaler));
+
+            // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
+            boolean success = Scheduler.getInstance().execute(optSource, ft);
+            if (!success) {
+                throw new IOException("Image transformation rejected");
+            }
+
+            // Get result from scheduled task; waiting for as long as it needs
+            return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+        }
+
+        // Wait timeout configured - Use a CountDownLatch to let timeout jump in if actual image processing happens
         CountDownLatch latch = new CountDownLatch(1);
-        GetImageCallable getImageCallable = new GetImageCallable(formatName, latch, signaler);
-        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(getImageCallable);
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new GetImageCallable(formatName, latch, signaler));
 
         // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
         boolean success = Scheduler.getInstance().execute(optSource, ft);
@@ -147,7 +161,7 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         // Image transformation initiated
         // Get result from scheduled task; waiting for at most the configured time for the computation to complete
-        return ThreadPools.getFrom(ft, waitTimeoutSeconds(), TimeUnit.SECONDS, EXCEPTION_FACTORY);
+        return ThreadPools.getFrom(ft, waitTimeoutSeconds, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     /**
@@ -168,20 +182,27 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
         private final String formatName;
         private final LatchBackedSignaler signaler;
+        private final CountDownLatch optLatch;
 
-        GetImageCallable(String formatName, CountDownLatch latch, ImageTransformationSignaler signaler) {
+        GetImageCallable(String formatName, CountDownLatch optLatch, ImageTransformationSignaler delegate) {
             super();
             this.formatName = formatName;
-            this.signaler = new LatchBackedSignaler(signaler, latch);
+            this.optLatch = optLatch;
+            this.signaler = new LatchBackedSignaler(optLatch, delegate);
         }
 
         @Override
         public BufferedImage call() throws Exception {
+            CountDownLatch latch = this.optLatch;
+            if (null == latch) {
+                return doGetImage(formatName, signaler);
+            }
+
+            // If not null, ensure that latch is counted down
             try {
                 return doGetImage(formatName, signaler);
             } finally {
-                // Ensure latch get counted down
-                signaler.redeem();
+                latch.countDown();
             }
         }
     }
@@ -189,27 +210,24 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
     private static final class LatchBackedSignaler implements ImageTransformationSignaler {
 
         private final ImageTransformationSignaler delegate;
-        private final AtomicReference<CountDownLatch> latchRef;
+        private final CountDownLatch optLatch;
 
-        LatchBackedSignaler(ImageTransformationSignaler signaler, CountDownLatch latch) {
+        LatchBackedSignaler(CountDownLatch optLatch, ImageTransformationSignaler delegate) {
             super();
-            this.latchRef = new AtomicReference<CountDownLatch>(latch);
-            this.delegate = signaler;
+            this.optLatch = optLatch;
+            this.delegate = delegate;
         }
 
         @Override
         public void onImageRead() {
+            // Delegate
+            ImageTransformationSignaler delegate = this.delegate;
             if (null != delegate) {
                 try { delegate.onImageRead(); } catch (Exception x) { /* ignore */ }
             }
-            redeem();
-        }
 
-        /**
-         * Redeems the latch
-         */
-        public void redeem() {
-            CountDownLatch latch = latchRef.getAndSet(null);
+            // Count down latch
+            CountDownLatch latch = this.optLatch;
             if (null != latch) {
                 latch.countDown();
             }

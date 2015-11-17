@@ -54,11 +54,10 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.tools.images.osgi.Services;
 
 /**
@@ -171,7 +170,7 @@ public final class Scheduler {
         this.numThreads = numThreads;
 
         // Initialize fixed thread pool
-        ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new SchedulerThreadFactory());
+        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads);
         newPool.prestartAllCoreThreads();
         pool = newPool;
         taskManagers = new HashMap<Object, TaskManager>(256);
@@ -235,7 +234,10 @@ public final class Scheduler {
 
     // ----------------------------------------------------------------------------------------------- //
 
-    private final class Selector implements Runnable {
+    /**
+     * The Selector waiting for incoming image processing tasks.
+     */
+    public final class Selector implements Runnable {
 
         Selector() {
             super();
@@ -278,14 +280,19 @@ public final class Scheduler {
                     } catch (InterruptedException e) {
                         // Handle in outer try-catch clause
                         throw e;
-                    } catch (Exception e) {
-                        LOGGER.info("Image transformation failed", e);
+                    } catch (Throwable t) {
+                        // The RuntimeException or Error that caused execution to terminate abruptly.
+                        ExceptionUtils.handleThrowable(t);
+
+                        LOGGER.info("Image transformation selector '{}' terminated abruptly.", currentThread.getName(), t);
                     }
                 }
             } catch (InterruptedException e) {
                 currentThread.interrupt();
                 LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
             }
+
+            // Other unexpected/abrupt termination reasons are handled in SchedulerThreadPoolExecutor.afterExecute() implementation
 
             LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
         }
