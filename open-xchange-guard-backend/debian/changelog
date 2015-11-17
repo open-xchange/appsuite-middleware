@@ -1,3 +1,9 @@
+open-xchange-guard-backend (7.6.2-22) stable; urgency=medium
+
+  * Build for patch 2015-11-16 (2862)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 11 Nov 2015 16:38:20 +0100
+
 open-xchange-guard-backend (7.6.2-21) stable; urgency=medium
 
   * Build for patch 2015-11-09 (2841)

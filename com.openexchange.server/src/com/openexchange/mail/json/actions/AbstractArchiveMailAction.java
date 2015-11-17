@@ -50,7 +50,12 @@
 package com.openexchange.mail.json.actions;
 
 import java.util.EnumSet;
+
+import org.json.JSONException;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.cache.CacheFolderStorage;
@@ -75,6 +80,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -85,6 +91,8 @@ import com.openexchange.tools.session.ServerSession;
  * @since v7.8.0
  */
 public abstract class AbstractArchiveMailAction extends AbstractMailAction {
+	
+	private static final String CAPABILITY_ARCHIVE_EMAILS = "archive_emails";
 
     /**
      * Initializes a new {@link AbstractArchiveMailAction}.
@@ -93,6 +101,30 @@ public abstract class AbstractArchiveMailAction extends AbstractMailAction {
     protected AbstractArchiveMailAction(ServiceLookup services) {
         super(services);
     }
+    
+    @Override
+    protected final AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+        // Check required "archive_emails" capability
+        {
+            CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null != capabilityService && !capabilityService.getCapabilities(req.getSession()).contains(CAPABILITY_ARCHIVE_EMAILS)) {
+                throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail-archive");
+            }
+        }
+
+        // Continue...
+        return performArchive(req);
+    }
+
+    /**
+     * Performs specified mail archive request.
+     *
+     * @param req The mail archive request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult performArchive(MailRequest req) throws OXException, JSONException;
 
     /**
      * Checks the archive full name for given arguments
