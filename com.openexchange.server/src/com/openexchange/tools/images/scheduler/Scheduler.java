@@ -52,11 +52,12 @@ package com.openexchange.tools.images.scheduler;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.LinkedBlockingDeque;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.tools.images.osgi.Services;
 
 /**
@@ -69,6 +70,49 @@ public final class Scheduler {
 
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(Scheduler.class);
+
+    private static interface TaskManager {
+
+        /**
+         * Removes the next available task from this executer
+         *
+         * @return The next task or <code>null</code>
+         */
+        Runnable remove();
+
+        /**
+         * Adds given task to this executer.
+         *
+         * @param task The task to add
+         */
+        void add(Runnable task);
+
+        /**
+         * Gets the key object
+         *
+         * @return The key object
+         */
+        Object getExecuterKey();
+    }
+
+    /** The poison element */
+    static final TaskManager POISON = new TaskManager() {
+
+        @Override
+        public Runnable remove() {
+            return null;
+        }
+
+        @Override
+        public void add(Runnable task) {
+            // Nothing
+        }
+
+        @Override
+        public Object getExecuterKey() {
+            return null;
+        }
+    };
 
     private static volatile Scheduler instance;
 
@@ -110,26 +154,51 @@ public final class Scheduler {
     // ------------------------------------------------------------------------------------------------ //
 
     private final ExecutorService pool;
-    final Map<Object, TaskExecuter> runningThreads;
+    private final int numThreads;
+    final BlockingDeque<TaskManager> roundRobinQueue;
+    final Map<Object, TaskManager> taskManagers;
 
     /**
      * Initializes a new {@link Scheduler}.
      */
     private Scheduler() {
         super();
-        final ConfigurationService configService = Services.getService(ConfigurationService.class);
-        final int defaultNumThreads = 10;
-        final int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.tools.images.scheduler.numThreads", defaultNumThreads);
-        final ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new SchedulerThreadFactory());
+        // Determine number of threads to utilize
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        int defaultNumThreads = 10;
+        int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.tools.images.scheduler.numThreads", defaultNumThreads);
+        this.numThreads = numThreads;
+
+        // Initialize fixed thread pool
+        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads, this);
         newPool.prestartAllCoreThreads();
         pool = newPool;
-        runningThreads = new HashMap<Object, TaskExecuter>(256);
+        taskManagers = new HashMap<Object, TaskManager>(256);
+        roundRobinQueue = new LinkedBlockingDeque<TaskManager>();
+
+        // Start selector threads
+        for (int i = numThreads; i-- > 0;) {
+            newPool.execute(new Selector());
+        }
+    }
+
+    /**
+     * Creates a new <code>Selector</code> instance.
+     *
+     * @return The new <code>Selector</code> instance
+     */
+    public Selector newSelector() {
+        return new Selector();
     }
 
     /**
      * Shuts-down this scheduler.
      */
     private void stop() {
+        for (int i = numThreads; i-- > 0;) {
+            roundRobinQueue.offerFirst(POISON);
+        }
+
         try {
             pool.shutdownNow();
         } catch (final Exception x) {
@@ -145,93 +214,126 @@ public final class Scheduler {
      * @return <code>true</code> if successfully scheduled for being executed; otherwise <code>false</code> to signal that task cannot be
      *         accepted for execution.
      */
-    public boolean execute(final Object optKey, final Runnable task) {
-        final Object key = null == optKey ? Thread.currentThread() : optKey;
-        TaskExecuter executer = null;
-        synchronized (runningThreads) {
-            final TaskExecuter runningExecutor = runningThreads.get(key);
-            if (runningExecutor == null) {
+    public boolean execute(Object optKey, Runnable task) {
+        // Determine the key to use
+        Object key = null == optKey ? Thread.currentThread() : optKey;
+
+        // Add to task to either an existing or to a newly created task manager
+        TaskManager newManager = null;
+        synchronized (taskManagers) {
+            TaskManager existingManager = taskManagers.get(key);
+            if (existingManager == null) {
                 // None present, yet. Create a new executer.
-                executer = new TaskExecuter(task, key);
-                runningThreads.put(key, executer);
+                newManager = new TaskManagerImpl(task, key);
+                taskManagers.put(key, newManager);
             } else {
                 // Use existing one
-                runningExecutor.add(task);
+                existingManager.add(task);
             }
         }
 
-        // Delegate to new executer if not null
-        if (executer != null) {
-            return executeTask(executer);
+        // Add to round-robin queue in case task manager was newly created
+        if (null != newManager) {
+            roundRobinQueue.offerLast(newManager);
         }
 
         // Otherwise passed to an already existing executer
         return true;
     }
 
-    /**
-     * Execute the task in a free thread or create a new one.
-     *
-     * @param executer The task to execute
-     * @return <code>true</code> if successfully scheduled for being executed; otherwise <code>false</code> to signal that task cannot be
-     *         accepted for execution.
-     */
-    private boolean executeTask(final TaskExecuter executer) {
-        try {
-            pool.execute(executer);
-        } catch (final Throwable t) {
-            LOGGER.warn("Couldn't execute image transformation task.", t);
-            return false;
-        }
-        return true;
-    }
-
     // ----------------------------------------------------------------------------------------------- //
 
-    private final class TaskExecuter implements Runnable {
+    /**
+     * The Selector waiting for incoming image processing tasks.
+     */
+    public final class Selector implements Runnable {
 
-        private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
-        private final Object taskKey;
-
-        TaskExecuter(final Runnable task, final Object key) {
+        Selector() {
             super();
-            taskKey = key;
-            tasks.addLast(task);
         }
 
         @Override
         public void run() {
-            final Thread currentThread = Thread.currentThread();
-            boolean running;
-            do {
-                Runnable task = null;
-                synchronized (tasks) {
-                    task = tasks.removeFirst();
-                }
+            // Remember associated worker thread
+            Thread currentThread = Thread.currentThread();
 
-                // Perform image transformation
-                task.run();
+            try {
+                // Perform image processing until aborted
+                boolean aborted = false;
+                while (!aborted) {
+                    try {
+                        TaskManager manager = roundRobinQueue.takeFirst();
+                        if (POISON == manager) {
+                            aborted = true;
+                        } else {
+                            // Check next available task
+                            Runnable task;
+                            synchronized (taskManagers) {
+                                task = manager.remove();
+                                if (null == task) {
+                                    taskManagers.remove(manager.getExecuterKey());
+                                }
+                            }
 
-                // Check for more...
-                synchronized (runningThreads) {
-                    running = !tasks.isEmpty();
-                    if (!running) {
-                        runningThreads.remove(taskKey);
+                            if (null != task) {
+                                // Re-add to round-robin queue for next processing
+                                roundRobinQueue.offerLast(manager);
+
+                                // Perform image transformation task
+                                task.run();
+                            }
+
+                            // Check thread status
+                            aborted = currentThread.isInterrupted();
+                        }
+                    } catch (InterruptedException e) {
+                        // Handle in outer try-catch clause
+                        throw e;
+                    } catch (RuntimeException e) {
+                        LOGGER.info("Image transformation failed.", e);
+                    } catch (Throwable t) {
+                        // The Exception or Error that caused execution to terminate abruptly.
+                        ExceptionUtils.handleThrowable(t);
+
+                        LOGGER.info("Image transformation failed", t);
                     }
                 }
-            } while (running && !currentThread.isInterrupted());
+            } catch (InterruptedException e) {
+                currentThread.interrupt();
+                LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
+            }
+
+            // Other unexpected/abrupt termination reasons are handled in SchedulerThreadPoolExecutor.afterExecute() implementation
+
+            LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+        }
+    } // End of class Selector
+
+    private final class TaskManagerImpl implements TaskManager {
+
+        private final LinkedList<Runnable> tasks = new LinkedList<Runnable>();
+        private final Object taskKey;
+
+        TaskManagerImpl(final Runnable task, final Object key) {
+            super();
+            taskKey = key;
+            tasks.offer(task);
         }
 
-        /**
-         * Adds given task to this executer.
-         *
-         * @param task The task to add
-         */
-        void add(final Runnable task) {
-            synchronized (tasks) {
-                tasks.addLast(task);
-            }
+        @Override
+        public Object getExecuterKey() {
+            return taskKey;
         }
-    } // End of class TaskExecuter
+
+        @Override
+        public Runnable remove() { // Gets only called when holding lock
+            return tasks.poll();
+        }
+
+        @Override
+        public void add(Runnable task) { // Gets only called when holding lock
+            tasks.offer(task);
+        }
+    } // End of class TaskManagerImpl
 
 }
