@@ -273,6 +273,17 @@ public class OXFolderAccess {
     }
 
     /**
+     * Determines if denoted folder has sub-folders.
+     *
+     * @param folderId The folder ID
+     * @return <code>true</code> if folder has sub-folders; otherwise <code>false</code>
+     * @throws OXException If operation fails
+     */
+    public final boolean hasSubfolders(final int folderId) throws OXException {
+        return getFolderObject(folderId).hasSubfolders();
+    }
+
+    /**
      * Determines if folder is shared. <b>NOTE:</b> This method assumes that given user has read access!
      *
      * @param folderId The folder ID

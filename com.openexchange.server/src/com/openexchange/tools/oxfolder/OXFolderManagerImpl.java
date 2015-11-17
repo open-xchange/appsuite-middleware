@@ -68,9 +68,11 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.fields.FolderChildFields;
@@ -103,6 +105,8 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlResult;
+import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.infostore.facade.impl.EventFiringInfostoreFacadeImpl;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
@@ -138,6 +142,26 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(OXFolderManagerImpl.class);
 
     private static final int[] SYSTEM_PUBLIC_FOLDERS = { FolderObject.SYSTEM_PUBLIC_FOLDER_ID, FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID };
+
+    private static volatile Boolean setAdminAsCreatorForPublicDriveFolder;
+    private static boolean setAdminAsCreatorForPublicDriveFolder() {
+        Boolean tmp = setAdminAsCreatorForPublicDriveFolder;
+        if (null == tmp) {
+            synchronized (OXFolderManagerImpl.class) {
+                tmp = setAdminAsCreatorForPublicDriveFolder;
+                if (null == tmp) {
+                    boolean defaultValue = false;
+                    ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == service) {
+                        return defaultValue;
+                    }
+                    tmp = Boolean.valueOf(service.getBoolProperty("com.openexchange.infostore.setAdminAsCreatorForPublicDriveFolder", defaultValue));
+                    setAdminAsCreatorForPublicDriveFolder = tmp;
+                }
+            }
+        }
+        return tmp.booleanValue();
+    }
 
     /**
      * No options.
@@ -309,7 +333,17 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             throw OXFolderExceptionCode.INVALID_TYPE.create(Integer.valueOf(parentFolder.getObjectID()), OXFolderUtility.folderType2String(folderObj.getType()), Integer.valueOf(ctx.getContextId()));
         }
         /*
-         * Check if parent folder is a shared folder
+         * Check folder module
+         */
+        if (!isKnownModule(folderObj.getModule())) {
+            throw OXFolderExceptionCode.UNKNOWN_MODULE.create(OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+        }
+        if (!OXFolderUtility.checkFolderModuleAgainstParentModule(parentFolder.getObjectID(), parentFolder.getModule(), folderObj.getModule(), ctx.getContextId())) {
+            throw OXFolderExceptionCode.INVALID_MODULE.create(Integer.valueOf(parentFolder.getObjectID()), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+        }
+        /*
+         * Check if parent folder is a shared folder OR
+         * if folder is a public InfoStore folder and setting context admin as creator is desired
          */
         if (parentFolder.isShared(user.getId())) {
             /*
@@ -320,15 +354,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
              * Set folder creator for next permission check and for proper insert value
              */
             folderObj.setCreatedBy(parentFolder.getCreatedBy());
-        }
-        /*
-         * Check folder module
-         */
-        if (!isKnownModule(folderObj.getModule())) {
-            throw OXFolderExceptionCode.UNKNOWN_MODULE.create(OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
-        }
-        if (!OXFolderUtility.checkFolderModuleAgainstParentModule(parentFolder.getObjectID(), parentFolder.getModule(), folderObj.getModule(), ctx.getContextId())) {
-            throw OXFolderExceptionCode.INVALID_MODULE.create(Integer.valueOf(parentFolder.getObjectID()), OXFolderUtility.folderModule2String(folderObj.getModule()), Integer.valueOf(ctx.getContextId()));
+        } else if (FolderObject.INFOSTORE == folderObj.getModule() && setAdminAsCreatorForPublicDriveFolder() && isPublicInfoStoreFolder(parentFolder)) {
+            folderObj.setCreatedBy(ctx.getMailadmin());
         }
         OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userPerms, ctx);
         /*
@@ -455,6 +482,19 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+    private boolean isPublicInfoStoreFolder(FolderObject parentFolder) throws OXException {
+        int fuid = parentFolder.getObjectID();
+        if (fuid <= FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID) {
+            return false;
+        }
+        if (FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == fuid) {
+            return true;
+        }
+
+        // Recursive check with grand parent
+        return isPublicInfoStoreFolder(getOXFolderAccess().getFolderObject(parentFolder.getParentFolderID()));
+    }
+
     private int generateFolderID() throws OXException {
         int fuid = -1;
         boolean created = false;
@@ -526,11 +566,13 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         final boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         int oldParentId = originalFolder.getParentFolderID();
+        Map<Integer, Integer> folderId2OldOwner = null;
         FolderObject storageObject = originalFolder.clone();
         try {
             if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
                 final int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                     // Reload storage's folder for following update
                     storageObject = getFolderFromMaster(fo.getObjectID());
@@ -539,18 +581,25 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             } else if (fo.containsFolderName()) {
                 final int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                    // Perform move
+                    folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                 } else {
                     rename(fo, storageObject, lastModified);
                 }
             } else if (performMove) {
-                /*
-                 * Perform move
-                 */
+                // Perform move
+                folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                 move(fo.getObjectID(), fo.getParentFolderID(), fo.getCreatedBy(), null, storageObject, lastModified);
             }
         } catch (SQLException e) {
             throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        }
+        /*
+         * Possibly changed file storage?
+         */
+        if (null != folderId2OldOwner) {
+            adjustFileStorageLocations(folderId2OldOwner);
         }
         /*
          * Finally update cache
@@ -610,6 +659,76 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 if (create && wc != null) {
                     DBPool.closeWriterAfterReading(ctx, wc);
                     wc = null;
+                }
+            }
+        }
+    }
+
+    private Map<Integer, Integer> determineCurrentOwnerships(FolderObject folder) throws OXException {
+        Map<Integer, Integer> folderId2OldOwner;
+        List<Integer> folderIds = new ArrayList<Integer>(8);
+        folderIds.add(Integer.valueOf(folder.getObjectID()));
+        if (folder.hasSubfolders()) {
+            try {
+                folderIds.addAll(OXFolderSQL.getSubfolderIDs(folder.getObjectID(), writeCon, ctx, true));
+            } catch (SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            }
+        }
+        folderId2OldOwner = new LinkedHashMap<Integer, Integer>(folderIds.size());
+        for (Integer folderId : folderIds) {
+            folderId2OldOwner.put(folderId, Integer.valueOf(getFolderFromMaster(folderId.intValue()).getCreatedBy()));
+        }
+        return folderId2OldOwner;
+    }
+
+    private void adjustFileStorageLocations(Map<Integer, Integer> folderId2OldOwner) throws OXException {
+        List<Map<Integer, List<VersionControlResult>>> results = new LinkedList<Map<Integer, List<VersionControlResult>>>();
+        boolean error = true;
+        try {
+            for (Entry<Integer, Integer> f2o : folderId2OldOwner.entrySet()) {
+                int folderId = f2o.getKey().intValue();
+                int newOwner = getFolderOwnerFromMaster(folderId);
+                int oldOwner = f2o.getValue().intValue();
+                if (oldOwner != newOwner) {
+                    // File storage location might be changed due to changed ownership
+                    Connection wc = writeCon;
+                    boolean create = (wc == null);
+                    Map<Integer, List<VersionControlResult>> modified = null;
+                    try {
+                        if (create) {
+                            wc = DBPool.pickupWriteable(ctx);
+                        }
+                        modified = VersionControlUtil.changeFileStoreLocationsIfNecessary(oldOwner, newOwner, folderId, ctx, wc);
+                        if (!modified.isEmpty()) {
+                            results.add(modified);
+                        }
+                    } finally {
+                        if (create && wc != null) {
+                            if (null != modified && !modified.isEmpty()) {
+                                DBPool.closeWriterSilent(ctx, wc);
+                            } else {
+                                DBPool.closeWriterAfterReading(ctx, wc);
+                            }
+                            wc = null;
+                        }
+                    }
+                }
+            }
+            error = false;
+        } finally {
+            if (error) {
+                Connection wc = writeCon;
+                boolean create = (wc == null);
+                try {
+                    for (Map<Integer,List<VersionControlResult>> resultMap : results) {
+                        VersionControlUtil.restoreVersionControl(resultMap, ctx, wc);
+                    }
+                } finally {
+                    if (create && wc != null) {
+                        DBPool.closeWriterSilent(ctx, wc);
+                        wc = null;
+                    }
                 }
             }
         }
@@ -677,7 +796,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                  */
                 throw OXFolderExceptionCode.NO_FOLDER_MODULE_UPDATE.create();
             }
-            final FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
+            FolderObject parent = getFolderFromMaster(storageObj.getParentFolderID());
             if (!OXFolderUtility.checkFolderModuleAgainstParentModule(parent.getObjectID(), parent.getModule(), fo.getModule(), ctx.getContextId())) {
                 throw OXFolderExceptionCode.INVALID_MODULE.create(Integer.valueOf(parent.getObjectID()), OXFolderUtility.folderModule2String(fo.getModule()), Integer.valueOf(ctx.getContextId()));
             }
@@ -694,7 +813,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Check Permissions
          */
         fo.setType(storageObj.getType());
-        if (options != OPTION_OVERRIDE_CREATED_BY) {
+        if ((options & OPTION_OVERRIDE_CREATED_BY) <= 0) {
             fo.setCreatedBy(storageObj.getCreatedBy());
         }
         fo.setDefaultFolder(storageObj.isDefaultFolder());
@@ -830,6 +949,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
+    private int getFolderOwnerFromMaster(final int folderId) throws OXException {
+        return getFolderFromMaster(folderId).getCreatedBy();
+    }
+
+    private boolean hasSubfoldersFromMaster(final int folderId) throws OXException {
+        return getFolderFromMaster(folderId).hasSubfolders();
+    }
+
     protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
         return getFolderFromMaster(folderId, false);
     }
@@ -962,13 +1089,14 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @param createdBy The user who created the folder
      * @param newName The new folder name, or <code>null</code> if unchanged
      * @param storageSrc The folder being moved, reloaded from the storage
-     * @param lastModified The new timestamp to store as last modification date
+     * @param lastModified The new time stamp to store as last modification date
      */
-    private void move(final int folderId, final int targetFolderId, final int createdBy, String newName, final FolderObject storageSrc, final long lastModified) throws OXException, SQLException {
+    private void move(int folderId, int targetFolderId, int createdBy, String newName, FolderObject storageSrc, long lastModified) throws OXException, SQLException {
         /*
          * Folder is already in target folder and does not need to be renamed
          */
-        if (storageSrc.getParentFolderID() == targetFolderId && (null == newName || newName.equals(storageSrc.getFolderName()))) {
+        int oldParentId = storageSrc.getParentFolderID();
+        if (oldParentId == targetFolderId && (null == newName || newName.equals(storageSrc.getFolderName()))) {
             return;
         }
         /*
@@ -1053,13 +1181,19 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
          * Now treat as an insert after actual move if not moved below trash
          */
         if (FolderObject.TRASH != storageDest.getType()) {
-            processInsertedFolderThroughMove(
-                getFolderFromMaster(folderId), new CheckPermissionOnInsert(session, writeCon, ctx), lastModified);
+            processInsertedFolderThroughMove(getFolderFromMaster(folderId), new CheckPermissionOnInsert(session, writeCon, ctx), lastModified);
         }
         /*
          * Inherit folder type recursively if move from or to special folder
          */
-        adjustFolderTypeOnMove(storageSrc, storageDest, true);
+        {
+            int optNewOwner = FolderObject.TRASH == storageDest.getType() ? user.getId() : 0;
+            adjustFolderTypeOnMove(storageSrc, storageDest, true, optNewOwner);
+        }
+        /*
+         * Adjust owner (if necessary)
+         */
+        changeOwnerOnMove(storageSrc, targetFolderId, oldParentId, true);
         /*
          * Update last-modified time stamps
          */
@@ -1098,13 +1232,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @param sourceFolder The folder being moved
      * @param destinationFolder The destination folder, i.e. the new parent folder
      * @param recursive <code>true</code> to inherit the new folder type to any subfolders recursively, <code>false</code>, otherwise
+     * @param optNewOwner The optional new owner or less than/equal to <code>0</code> (zero)
      * @return <code>true</code> if the folder type was adjusted, <code>false</code>, otherwise
      */
-    private boolean adjustFolderTypeOnMove(FolderObject sourceFolder, FolderObject destinationFolder, boolean recursive) throws OXException, SQLException {
+    private boolean adjustFolderTypeOnMove(FolderObject sourceFolder, FolderObject destinationFolder, boolean recursive, int optNewOwner) throws OXException, SQLException {
         if (sourceFolder.getType() != destinationFolder.getType()) {
-            int[] inheritingTypes = {
-                FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES
-            };
+            int[] inheritingTypes = { FolderObject.TRASH, FolderObject.DOCUMENTS, FolderObject.PICTURES, FolderObject.MUSIC, FolderObject.VIDEOS, FolderObject.TEMPLATES };
             if (contains(inheritingTypes, destinationFolder.getType()) || contains(inheritingTypes, sourceFolder.getType())) {
                 List<Integer> folderIDs;
                 if (false == recursive || false == sourceFolder.hasSubfolders()) {
@@ -1115,7 +1248,27 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(sourceFolder.getObjectID(), readCon, ctx, true));
                 }
                 int type = FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID == destinationFolder.getObjectID() ? FolderObject.PUBLIC : destinationFolder.getType();
-                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, folderIDs);
+                return 0 < OXFolderSQL.updateFolderType(writeCon, ctx, type, optNewOwner, folderIDs);
+            }
+        }
+        return false;
+    }
+
+    private boolean changeOwnerOnMove(FolderObject fo, int newParentId, int oldParentId, boolean recursive) throws OXException, SQLException {
+        if (FolderObject.INFOSTORE == fo.getModule() && (newParentId > 0 && newParentId != oldParentId) && setAdminAsCreatorForPublicDriveFolder()) {
+            boolean isPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(newParentId));
+            boolean wasPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(oldParentId));
+            if (isPublicInfoStoreFolder != wasPublicInfoStoreFolder) {
+                List<Integer> folderIDs;
+                if (false == recursive || false == fo.hasSubfolders()) {
+                    folderIDs = Collections.singletonList(Integer.valueOf(fo.getObjectID()));
+                } else {
+                    folderIDs = new ArrayList<Integer>();
+                    folderIDs.add(Integer.valueOf(fo.getObjectID()));
+                    folderIDs.addAll(OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true));
+                }
+
+                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, isPublicInfoStoreFolder ? ctx.getMailadmin() : user.getId(), folderIDs);
             }
         }
         return false;

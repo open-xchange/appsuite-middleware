@@ -53,12 +53,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import org.slf4j.Logger;
 import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.exception.OXException;
@@ -78,6 +82,8 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
  * @since v7.8.0
  */
 public final class VersionControlUtil {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(VersionControlUtil.class);
 
     /**
      * Initializes a new {@link VersionControlUtil}.
@@ -120,10 +126,10 @@ public final class VersionControlUtil {
             }
             List<DocumentMetadata> l = new LinkedList<DocumentMetadata>();
             do {
-                DocumentMetadataImpl version = new DocumentMetadataImpl();
-                version.setId(id);
                 String filestoreLocation = rs.getString(2);
                 if (!rs.wasNull()) {
+                    DocumentMetadataImpl version = new DocumentMetadataImpl();
+                    version.setId(id);
                     version.setVersion(rs.getInt(1));
                     version.setFilestoreLocation(filestoreLocation);
                     l.add(version);
@@ -135,6 +141,78 @@ public final class VersionControlUtil {
         } finally {
             Databases.closeSQLStuff(rs, stmt);
         }
+    }
+
+    private static List<Integer> loadDocumentsFromFolder(long folderId, int contextId, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = con.prepareStatement("SELECT i.id FROM infostore AS i LEFT JOIN infostore_document AS d ON i.cid=d.cid AND i.id=d.infostore_id WHERE i.cid=? AND i.folder_id=? AND d.file_store_location IS NOT NULL");
+            stmt.setInt(1, contextId);
+            stmt.setLong(2, folderId);
+
+            rs = stmt.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptyList();
+            }
+
+            Set<Integer> documents = new LinkedHashSet<Integer>();
+            do {
+                documents.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
+            return new ArrayList<Integer>(documents);
+        } catch (SQLException e) {
+            throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
+     * Changes the file storage locations for all document versions located in specified folder (if necessary) having its owner changed.
+     *
+     * @param previousOwner The previous folder owner
+     * @param newOwner The new folder owner
+     * @param folderId The folder identifier
+     * @param context The context
+     * @param con The connection to use
+     * @return The version control results
+     * @throws OXException If operation fails
+     */
+    public static Map<Integer, List<VersionControlResult>> changeFileStoreLocationsIfNecessary(int previousOwner, int newOwner, long folderId, Context context, Connection con) throws OXException {
+        if (previousOwner == newOwner) {
+            return Collections.emptyMap();
+        }
+
+        int contextId = context.getContextId();
+        QuotaFileStorageService qfs = FileStorages.getQuotaFileStorageService();
+        QuotaFileStorage prevFs = qfs.getQuotaFileStorage(previousOwner, contextId);
+        QuotaFileStorage newFs = qfs.getQuotaFileStorage(newOwner, contextId);
+        if (prevFs.getUri().equals(newFs.getUri())) {
+            return Collections.emptyMap();
+        }
+
+        // Need to transfer affected files
+        // Load affected versions
+        List<Integer> documents = loadDocumentsFromFolder(folderId, contextId, con);
+        if (documents.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<Integer, List<VersionControlResult>> resultMap = new LinkedHashMap<Integer, List<VersionControlResult>>(documents.size());
+
+        for (Integer id : documents) {
+            DocumentMetadataImpl document = new DocumentMetadataImpl();
+            document.setId(id.intValue());
+
+            moveVersions(document, prevFs, newFs, resultMap, context, con);
+        }
+
+        if (false == resultMap.isEmpty()) {
+            applyVersionControl(resultMap, context, con);
+        }
+
+        return resultMap;
     }
 
     /**
@@ -197,19 +275,8 @@ public final class VersionControlUtil {
                 if (srcFs.getUri().equals(destFs.getUri())) {
                     // Same, so nothing to do
                 } else {
-                    // Determine affected document versions
-                    List<DocumentMetadata> versions = loadVersionsFor(document.getId(), contextId, con);
-
-                    // And move them to new file storage location
-                    List<VersionControlResult> results = new LinkedList<VersionControlResult>();
-                    for (DocumentMetadata version : versions) {
-                        String copiedLocation = destFs.saveNewFile(srcFs.getFile(version.getFilestoreLocation()));
-                        srcFs.deleteFile(version.getFilestoreLocation());
-                        results.add(new VersionControlResult(srcFs, destFs, version.getVersion(), version.getFilestoreLocation(), copiedLocation));
-                    }
-
-                    // Put into result map
-                    resultMap.put(id, results);
+                    // Move all versions associated with current document
+                    moveVersions(document, srcFs, destFs, resultMap, context, con);
                 }
             }
         }
@@ -221,8 +288,37 @@ public final class VersionControlUtil {
         return resultMap;
     }
 
+    private static void moveVersions(DocumentMetadata document, QuotaFileStorage srcFs, QuotaFileStorage destFs, Map<Integer, List<VersionControlResult>> resultMap, Context context, Connection con) throws OXException {
+        // Determine affected document versions
+        List<DocumentMetadata> versions = loadVersionsFor(document.getId(), context.getContextId(), con);
+
+        // And move them to new file storage location
+        List<VersionControlResult> results = new LinkedList<VersionControlResult>();
+
+        // Put into result map
+        resultMap.put(Integer.valueOf(document.getId()), results);
+
+        // Move versions to new file storage
+        for (DocumentMetadata version : versions) {
+            String copiedLocation;
+            try {
+                copiedLocation = destFs.saveNewFile(srcFs.getFile(version.getFilestoreLocation()));
+            } catch (OXException e) {
+                try {
+                    restoreVersionControl(resultMap, context, con);
+                } catch (Exception x) {
+                    LOG.warn("Failed to restore file storage locations", x);
+                }
+                throw e;
+            }
+            srcFs.deleteFile(version.getFilestoreLocation());
+            results.add(new VersionControlResult(srcFs, destFs, version.getVersion(), version.getFilestoreLocation(), copiedLocation));
+        }
+    }
+
     private static void applyVersionControl(Map<Integer, List<VersionControlResult>> resultMap, Context context, Connection con) throws OXException {
         PreparedStatement stmt = null;
+        boolean error = true;
         try {
             stmt = con.prepareStatement("UPDATE infostore_document SET file_store_location=? WHERE cid=? AND infostore_id=? AND version_number=?");
 
@@ -239,10 +335,18 @@ public final class VersionControlUtil {
             }
 
             stmt.executeBatch();
+            error = false;
         } catch (SQLException e) {
             throw InfostoreExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } finally {
             Databases.closeSQLStuff(stmt);
+            if (error) {
+                try {
+                    restoreVersionControl(resultMap, context, con);
+                } catch (Exception e) {
+                    LOG.warn("Failed to restore file storage locations", e);
+                }
+            }
         }
     }
 

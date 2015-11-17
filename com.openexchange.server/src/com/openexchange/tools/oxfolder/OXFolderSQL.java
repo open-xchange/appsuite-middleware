@@ -486,6 +486,21 @@ public final class OXFolderSQL {
      * @return The number of updated entries in the database
      */
     public static int updateFolderType(Connection writeConnection, Context context, int type, List<Integer> folderIDs) throws OXException, SQLException {
+        return updateFolderType(writeConnection, context, type, 0, folderIDs);
+    }
+
+    /**
+     * Updates the "type" of one or more folders identified by their identifiers. Usually used when moving a folder (and its subfolders)
+     * from or to the trash folder.
+     *
+     * @param writeConnection A writable connection or <code>null</code> to fetch a new one from pool
+     * @param context The context
+     * @param type The type to set
+     * @param optNewOwner The optional new owner or less than/equal to <code>0</code> (zero)
+     * @param folderIDs The IDs of the folders to update
+     * @return The number of updated entries in the database
+     */
+    public static int updateFolderType(Connection writeConnection, Context context, int type, int optNewOwner, List<Integer> folderIDs) throws OXException, SQLException {
         if (null == folderIDs || 0 == folderIDs.size()) {
             return 0;
         }
@@ -512,7 +527,12 @@ public final class OXFolderSQL {
             for (int i = 0; i < folderIDs.size(); i += UPDATE_CHUNK_SIZE) {
                 int length = Math.min(folderIDs.size(), i + UPDATE_CHUNK_SIZE) - i;
                 List<Integer> ids = folderIDs.subList(i, i + length);
-                StringBuilder stringBuilder = new StringBuilder("UPDATE oxfolder_tree SET type=? WHERE cid=? AND fuid");
+                StringBuilder stringBuilder = new StringBuilder("UPDATE oxfolder_tree SET type=?");
+                if (optNewOwner > 0) {
+                    stringBuilder.append(", created_from=?");
+                }
+                stringBuilder.append(" WHERE cid=? AND fuid");
+
                 if (1 == ids.size()) {
                     stringBuilder.append("=?;");
                 } else {
@@ -525,10 +545,102 @@ public final class OXFolderSQL {
                 PreparedStatement stmt = null;
                 try {
                     stmt = writeConnection.prepareStatement(stringBuilder.toString());
-                    stmt.setInt(1, type);
-                    stmt.setInt(2, context.getContextId());
+                    int pos = 0;
+                    stmt.setInt(++pos, type);
+                    if (optNewOwner > 0) {
+                        stmt.setInt(++pos, optNewOwner);
+                    }
+                    stmt.setInt(++pos, context.getContextId());
+                    int off = ++pos;
                     for (int j = 0; j < ids.size(); j++) {
-                        stmt.setInt(j + 3, ids.get(j).intValue());
+                        stmt.setInt(j + off, ids.get(j).intValue());
+                    }
+                    updated += executeUpdate(stmt);
+                } finally {
+                    closeSQLStuff(stmt);
+                }
+            }
+            /*
+             * commit if appropriate
+             */
+            if (startedTransaction) {
+                writeConnection.commit();
+                rollback = false;
+                writeConnection.setAutoCommit(true);
+            }
+        } finally {
+            /*
+             * cleanup
+             */
+            if (startedTransaction && rollback) {
+                if (null != writeConnection) {
+                    writeConnection.rollback();
+                    writeConnection.setAutoCommit(true);
+                }
+            }
+            if (closeWriteConnection) {
+                DBPool.closeWriterSilent(context, writeConnection);
+            }
+        }
+        return updated;
+    }
+
+    /**
+     * Updates the "owner" of one or more folders identified by their identifiers. Usually used when moving a folder.
+     *
+     * @param writeConnection A writable connection or <code>null</code> to fetch a new one from pool
+     * @param context The context
+     * @param newOwner The owner to set
+     * @param folderIDs The IDs of the folders to update
+     * @return The number of updated entries in the database
+     */
+    public static int updateFolderOwner(Connection writeConnection, Context context, int newOwner, List<Integer> folderIDs) throws OXException, SQLException {
+        if (null == folderIDs || 0 == folderIDs.size()) {
+            return 0;
+        }
+        int updated = 0;
+        boolean closeWriteConnection = false;
+        boolean rollback = false;
+        boolean startedTransaction = false;
+        try {
+            /*
+             * fetch connection if needed
+             */
+            if (null == writeConnection) {
+                writeConnection = DBPool.pickupWriteable(context);
+                closeWriteConnection = true;
+            }
+            startedTransaction = writeConnection.getAutoCommit();
+            if (startedTransaction) {
+                writeConnection.setAutoCommit(false);
+                rollback = true;
+            }
+            /*
+             * perform update chunkwise
+             */
+            for (int i = 0; i < folderIDs.size(); i += UPDATE_CHUNK_SIZE) {
+                int length = Math.min(folderIDs.size(), i + UPDATE_CHUNK_SIZE) - i;
+                List<Integer> ids = folderIDs.subList(i, i + length);
+                StringBuilder stringBuilder = new StringBuilder("UPDATE oxfolder_tree SET created_from=? WHERE cid=? AND fuid");
+
+                if (1 == ids.size()) {
+                    stringBuilder.append("=?;");
+                } else {
+                    stringBuilder.append(" IN (?");
+                    for (int j = 1; j < ids.size(); j++) {
+                        stringBuilder.append(",?");
+                    }
+                    stringBuilder.append(");");
+                }
+                PreparedStatement stmt = null;
+                try {
+                    stmt = writeConnection.prepareStatement(stringBuilder.toString());
+                    int pos = 0;
+                    stmt.setInt(++pos, newOwner);
+                    stmt.setInt(++pos, context.getContextId());
+                    int off = ++pos;
+                    for (int j = 0; j < ids.size(); j++) {
+                        stmt.setInt(j + off, ids.get(j).intValue());
                     }
                     updated += executeUpdate(stmt);
                 } finally {
