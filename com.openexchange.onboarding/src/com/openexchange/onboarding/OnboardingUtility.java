@@ -440,4 +440,52 @@ public class OnboardingUtility {
         return Category.SMARTPHONE.equals(deviceCategory.getCategory());
     }
 
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an Android phone
+     *
+     * @param clientInfo The client info to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android phone; otherwise <code>false</code>
+     */
+    public static boolean isAndroidPhone(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem os = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory device = agent.getDeviceCategory();
+        return Category.SMARTPHONE.equals(device.getCategory());
+    }
+
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an Android tablet
+     *
+     * @param clientInfo The client info to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android tablet; otherwise <code>false</code>
+     */
+    public static boolean isAndroidTablet(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem os = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory device = agent.getDeviceCategory();
+        return Category.TABLET.equals(device.getCategory());
+    }
+
 }
