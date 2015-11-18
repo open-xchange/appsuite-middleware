@@ -286,6 +286,22 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link ListByAliasDomainResponse }
+     *
+     */
+    public ListByAliasDomainResponse createListByAliasDomainResponse() {
+        return new ListByAliasDomainResponse();
+    }
+
+    /**
+     * Create an instance of {@link ListByAliasDomain }
+     *
+     */
+    public ListByAliasDomain createListByAliasDomain() {
+        return new ListByAliasDomain();
+    }
+
+    /**
      * Create an instance of {@link Exists }
      *
      */

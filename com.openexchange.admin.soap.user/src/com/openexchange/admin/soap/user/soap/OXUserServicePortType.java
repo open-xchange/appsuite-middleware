@@ -288,22 +288,16 @@ public interface OXUserServicePortType {
     ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception, NoSuchFilestoreException_Exception, DatabaseUpdateException_Exception, NoSuchUserException_Exception;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
+    @Action(input = "urn:listByAliasDomain", output = "urn:listByAliasDomainResponse", fault = { @FaultAction(className = StorageException_Exception.class, value = "urn:listByAliasDomainStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listByAliasDomainInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listByAliasDomainInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listByAliasDomainNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listByAliasDomainRemoteException") })
+    @RequestWrapper(localName = "listByAliasDomain", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.ListByAliasDomain")
+    @WebMethod(action = "urn:listByAliasDomain")
+    @ResponseWrapper(localName = "listByAliasDomainResponse", targetNamespace = "http://soap.admin.openexchange.com", className = "com.openexchange.admin.soap.user.soap.ListByAliasDomainResponse")
+    public java.util.List<com.openexchange.admin.soap.user.dataobjects.User> listByAliasDomain(
+        @WebParam(name = "ctx", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Context ctx,
+        @WebParam(name = "alias_domain", targetNamespace = "http://soap.admin.openexchange.com") java.lang.String aliasDomain,
+        @WebParam(name = "auth", targetNamespace = "http://soap.admin.openexchange.com") com.openexchange.admin.soap.user.dataobjects.Credentials auth
+        ) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception;
 
     @WebResult(name = "return", targetNamespace = "http://soap.admin.openexchange.com")
     @Action(input = "urn:list", output = "urn:listResponse", fault = {@FaultAction(className = StorageException_Exception.class, value = "urn:listStorageException"), @FaultAction(className = InvalidCredentialsException_Exception.class, value = "urn:listInvalidCredentialsException"), @FaultAction(className = InvalidDataException_Exception.class, value = "urn:listInvalidDataException"), @FaultAction(className = NoSuchContextException_Exception.class, value = "urn:listNoSuchContextException"), @FaultAction(className = RemoteException_Exception.class, value = "urn:listRemoteException"), @FaultAction(className = DatabaseUpdateException_Exception.class, value = "urn:listDatabaseUpdateException")})
