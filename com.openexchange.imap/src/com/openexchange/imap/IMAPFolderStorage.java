@@ -571,7 +571,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         } else {
             mfi.setDefaultFolder(false);
             mfi.setDefaultFolderType(DefaultFolderType.NONE);
-            mfi.setParentFullname(entry.getParent().getFullName());
+            mfi.setParentFullname(entry.getParent() == null ? null : entry.getParent().getFullName());
             mfi.setFullname(fullName);
         }
 
