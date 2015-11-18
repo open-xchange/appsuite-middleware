@@ -96,7 +96,7 @@ public class ListUsersByAliasDomain extends ListCore {
 
     @Override
     protected void setFurtherOptions(final AdminParser parser) {
-        alias_domain_cli_option = setShortLongOpt(parser, ALIAS_DOMAIN_SHORT, ALIAS_DOMAIN, "The domain of the user alius.", true, NeededQuadState.needed);
+        alias_domain_cli_option = setShortLongOpt(parser, ALIAS_DOMAIN_SHORT, ALIAS_DOMAIN, "The domain of the user aliases.", true, NeededQuadState.needed);
     }
 
     @Override
