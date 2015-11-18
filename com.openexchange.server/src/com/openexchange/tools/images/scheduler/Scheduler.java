@@ -170,7 +170,7 @@ public final class Scheduler {
         this.numThreads = numThreads;
 
         // Initialize fixed thread pool
-        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads);
+        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads, this);
         newPool.prestartAllCoreThreads();
         pool = newPool;
         taskManagers = new HashMap<Object, TaskManager>(256);
@@ -180,6 +180,15 @@ public final class Scheduler {
         for (int i = numThreads; i-- > 0;) {
             newPool.execute(new Selector());
         }
+    }
+
+    /**
+     * Creates a new <code>Selector</code> instance.
+     *
+     * @return The new <code>Selector</code> instance
+     */
+    public Selector newSelector() {
+        return new Selector();
     }
 
     /**
@@ -280,11 +289,13 @@ public final class Scheduler {
                     } catch (InterruptedException e) {
                         // Handle in outer try-catch clause
                         throw e;
+                    } catch (RuntimeException e) {
+                        LOGGER.info("Image transformation failed.", e);
                     } catch (Throwable t) {
-                        // The RuntimeException or Error that caused execution to terminate abruptly.
+                        // The Exception or Error that caused execution to terminate abruptly.
                         ExceptionUtils.handleThrowable(t);
 
-                        LOGGER.info("Image transformation selector '{}' terminated abruptly.", currentThread.getName(), t);
+                        LOGGER.info("Image transformation failed", t);
                     }
                 }
             } catch (InterruptedException e) {

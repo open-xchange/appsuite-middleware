@@ -54,6 +54,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.timer.TimerService;
+import com.openexchange.tools.images.osgi.Services;
 import com.openexchange.tools.images.scheduler.Scheduler.Selector;
 
 /**
@@ -66,14 +68,18 @@ public class SchedulerThreadPoolExecutor extends ThreadPoolExecutor {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SchedulerThreadPoolExecutor.class);
 
+    private final Scheduler scheduler;
+
     /**
      * Initializes a new {@link SchedulerThreadPoolExecutor}.
      *
      * @param nThreads The number of threads in the pool
+     * @param scheduler The parental {@link Scheduler} instance owning this thread pool
      */
-    public SchedulerThreadPoolExecutor(int nThreads) {
+    public SchedulerThreadPoolExecutor(int nThreads, Scheduler scheduler) {
         // See java.util.concurrent.Executors.newFixedThreadPool(int, ThreadFactory)
         super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new SchedulerThreadFactory());
+        this.scheduler = scheduler;
     }
 
     @Override
@@ -85,8 +91,31 @@ public class SchedulerThreadPoolExecutor extends ThreadPoolExecutor {
             ExceptionUtils.handleThrowable(t);
 
             if (r instanceof Selector) {
-                LOG.info("Image transformation selector '{}' terminated abruptly.", Thread.currentThread().getName(), t);
+                LOG.info("Image transformation selector thread '{}' terminated abruptly.", Thread.currentThread().getName(), t);
+
+                TimerService optService = Services.optService(TimerService.class);
+                if (null != optService) {
+                    optService.schedule(new SelectorAdder(this, scheduler.newSelector()), 1, TimeUnit.SECONDS);
+                }
             }
+        }
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private static final class SelectorAdder implements Runnable {
+
+        private final SchedulerThreadPoolExecutor threadPool;
+        private final Selector selector;
+
+        SelectorAdder(SchedulerThreadPoolExecutor threadPool, Selector selector) {
+            this.threadPool = threadPool;
+            this.selector = selector;
+        }
+
+        @Override
+        public void run() {
+            threadPool.execute(selector);
         }
     }
 
