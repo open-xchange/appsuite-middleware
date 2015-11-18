@@ -116,6 +116,11 @@ case "${CMDARR[0]}" in
     ;;
     "listusersbyaliasdomain")
     ACTION="ListUsersByAliasDomain"
+    MODULE=user
+    ;;
+     "listuserfilestores")
+    ACTION="ListUserFilestores"
+    MODULE=user
     ;;
 esac
 
