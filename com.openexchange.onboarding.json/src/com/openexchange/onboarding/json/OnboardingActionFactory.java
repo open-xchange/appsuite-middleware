@@ -56,8 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.json.actions.ExecuteAction;
-import com.openexchange.onboarding.json.actions.GetSelections;
-import com.openexchange.onboarding.json.actions.GetTreeAction;
+import com.openexchange.onboarding.json.actions.ConfigAction;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -78,8 +77,7 @@ public class OnboardingActionFactory implements AJAXActionServiceFactory {
     public OnboardingActionFactory(ServiceLookup services) {
         super();
         actions = new HashMap<String, AJAXActionService>(4, 0.9F);
-        actions.put("getTree", new GetTreeAction(services));
-        actions.put("getSelections", new GetSelections(services));
+        actions.put("config", new ConfigAction(services));
         actions.put("execute", new ExecuteAction(services));
     }
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,65 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
-
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.DefaultClientInfo;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.onboarding;
 
 /**
- * {@link GetTreeAction}
+ * {@link CommonForms} - An enumeration for common form descriptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetTreeAction extends AbstractOnboardingAction {
+public enum CommonForms {
 
     /**
-     * Initializes a new {@link GetTreeAction}.
-     *
-     * @param services
+     * The common form description in case the user is not supposed to enter anything.
      */
-    public GetTreeAction(ServiceLookup services) {
-        super(services);
+    NONE(new String[0]),
+    /**
+     * The common form description in case the user is supposed to enter an E-Mail address.
+     */
+    EMAIL_ADDRESS("email"),
+    /**
+     * The common form description in case the user is supposed to enter a phone number.
+     */
+    PHONE_NUMBER("number"),
+
+    ;
+
+    private final String[] elementNames;
+    private final String firstElementName;
+
+    private CommonForms(String... elementNames) {
+        if (null != elementNames && elementNames.length > 0) {
+            // First form element
+            {
+                String name = elementNames[0];
+                firstElementName = name;
+            }
+
+            this.elementNames = elementNames;
+        } else {
+            this.firstElementName = null;
+            this.elementNames = null;
+        }
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
+    /**
+     * Gets the element names
+     *
+     * @return The element names or <code>null</code>
+     */
+    public String[] getElementNames() {
+        return elementNames;
+    }
 
-        boolean withSelections = AJAXRequestDataTools.parseBoolParameter("withSelections", requestData, true);
-        ClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
-        OnboardingConfigurationTree configurationTree =  onboardingService.getConfigurationTreeFor(withSelections, clientInfo, session);
-
-        return new AJAXRequestResult(configurationTree, "onboardingConfigurationTree");
+    /**
+     * Gets the name of the first element
+     *
+     * @return The name of the first element or <code>null</code>
+     */
+    public String getFirstElementName() {
+        return firstElementName;
     }
 
 }

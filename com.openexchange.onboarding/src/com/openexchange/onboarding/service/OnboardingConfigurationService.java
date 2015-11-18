@@ -51,8 +51,6 @@ package com.openexchange.onboarding.service;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
-import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -92,14 +90,12 @@ public interface OnboardingConfigurationService {
     Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
 
     /**
-     * Gets the currently applicable on-boarding configuration tree for specified user.
+     * Gets the on-boarding view for specified session
      *
-     * @param withSelections <code>true</code> to include selections in tree; otherwise <code>false</code>
-     * @param clientInfo The client information
      * @param session The session
-     * @return The configuration tree
-     * @throws OXException If configuration tree cannot be generated
+     * @return The on-boarding view
+     * @throws OXException If view cannot be returned
      */
-    OnboardingConfigurationTree getConfigurationTreeFor(boolean withSelections, ClientInfo clientInfo, Session session) throws OXException;
+    OnboardingView getViewFor(Session session) throws OXException;
 
 }

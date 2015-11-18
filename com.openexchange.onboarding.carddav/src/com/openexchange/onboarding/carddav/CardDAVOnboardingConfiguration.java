@@ -76,7 +76,7 @@ import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.ClientInfo;
 import com.openexchange.onboarding.CommonEntity;
-import com.openexchange.onboarding.CommonFormDescription;
+import com.openexchange.onboarding.CommonForms;
 import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
@@ -366,12 +366,12 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
         Map<String, Object> formContent = request.getFormContent();
         if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstFormElementName());
         }
 
-        String emailAddress = (String) formContent.get(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstFormElementName());
         if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstFormElementName());
         }
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());

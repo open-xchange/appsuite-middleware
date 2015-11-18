@@ -75,8 +75,7 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.CommonFormDescription;
+import com.openexchange.onboarding.CommonForms;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Device;
@@ -211,7 +210,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     }
 
     @Override
-    public List<OnboardingSelection> getSelections(EntityPath entityPath, ClientInfo clientInfo, Session session) throws OXException {
+    public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
         if (entityPath.matches(Device.APPLE_IPAD, Module.CALENDAR)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
@@ -309,12 +308,12 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
         Map<String, Object> formContent = request.getFormContent();
         if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         }
 
-        String emailAddress = (String) formContent.get(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         }
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());

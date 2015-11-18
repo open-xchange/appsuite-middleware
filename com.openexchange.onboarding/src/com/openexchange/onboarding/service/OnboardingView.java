@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,49 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.service;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
+import java.util.EnumSet;
+import java.util.List;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Module;
+import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.Platform;
 
 /**
- * {@link OnboardingConfigurationTree} - Represents an on-boarding configuration tree for a certain user.
+ * {@link OnboardingView} - Represents a certain on-boarding view associated with a certain session.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfigurationTree {
+public interface OnboardingView {
 
     /**
-     * Converts this tree into its JSON representation
+     * Gets the available platforms for this view
      *
-     * @return The JSON representation
-     * @throws JSONException If JSON representation cannot be returned
-     * @throws OXException If an Open-Xchange error occurs
+     * @return The platforms
      */
-    JSONObject toJsonObject() throws JSONException, OXException;
+    EnumSet<Platform> getPlatforms();
+
+    /**
+     * Gets the available devices for this view
+     *
+     * @return The devices
+     */
+    EnumSet<Device> getDevices();
+
+    /**
+     * Gets the available modules for this view
+     *
+     * @return The modules
+     */
+    EnumSet<Module> getModules();
+
+    /**
+     * Gets the available selections for this view
+     *
+     * @return The selections
+     */
+    List<OnboardingSelection> getSelections();
 
 }

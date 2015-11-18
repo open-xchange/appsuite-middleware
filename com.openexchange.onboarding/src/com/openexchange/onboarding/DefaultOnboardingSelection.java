@@ -52,6 +52,7 @@ package com.openexchange.onboarding;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -107,7 +108,11 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
         OnboardingConfiguration configuration;
         {
             String serviceId = compositeId.substring(off, pos);
-            configuration = Services.getService(OnboardingConfigurationService.class).getConfiguration(serviceId);
+            OnboardingConfigurationService onboardingConfigurationService = Services.optService(OnboardingConfigurationService.class);
+            if (null == onboardingConfigurationService) {
+                throw ServiceExceptionCode.absentService(OnboardingConfigurationService.class);
+            }
+            configuration = onboardingConfigurationService.getConfiguration(serviceId);
         }
 
         off = pos + 1;

@@ -75,11 +75,10 @@ public interface OnboardingConfiguration extends IdEntity, OnboardingExecutor {
      * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
      *
      * @param entityPath The entity path
-     * @param clientInfo The client information
      * @param session The session providing user data
      * @return The available selections
      * @throws OXException If denoted entity has no selections or selections cannot be returned
      */
-    List<OnboardingSelection> getSelections(EntityPath entityPath, ClientInfo clientInfo, Session session) throws OXException;
+    List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException;
 
 }

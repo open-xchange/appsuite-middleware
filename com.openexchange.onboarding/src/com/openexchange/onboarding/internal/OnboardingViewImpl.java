@@ -47,49 +47,94 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
+package com.openexchange.onboarding.internal;
 
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.DefaultClientInfo;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.EntityPath;
+import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingSelection;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.onboarding.Platform;
+import com.openexchange.onboarding.service.OnboardingView;
+import com.openexchange.session.Session;
 
 /**
- * {@link GetSelections}
+ * {@link OnboardingViewImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetSelections extends AbstractOnboardingAction {
+public class OnboardingViewImpl implements OnboardingView {
+
+    private final EnumSet<Platform> platforms;
+    private final EnumSet<Device> devices;
+    private final EnumSet<Module> modules;
+    private final List<OnboardingSelection> selections;
 
     /**
-     * Initializes a new {@link GetSelections}.
-     *
-     * @param services
+     * Initializes a new {@link OnboardingViewImpl}.
      */
-    public GetSelections(ServiceLookup services) {
-        super(services);
+    public OnboardingViewImpl() {
+        super();
+        platforms = EnumSet.noneOf(Platform.class);
+        devices = EnumSet.noneOf(Device.class);
+        modules = EnumSet.noneOf(Module.class);
+        selections = new LinkedList<OnboardingSelection>();
+    }
+
+    /**
+     * Adds the specified on-boarding configurations to this view
+     *
+     * @param configurations The configurations to add
+     * @param session The session providing user data
+     * @throws OXException If adding to this view fails
+     */
+    public void add(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
+        for (OnboardingConfiguration configuration : configurations) {
+            add(configuration, session);
+        }
+    }
+
+    /**
+     * Adds the specified on-boarding configuration to this view
+     *
+     * @param configuration The configuration to add
+     * @param session The session providing user data
+     * @throws OXException If adding to this view fails
+     */
+    public void add(OnboardingConfiguration configuration, Session session) throws OXException {
+        List<EntityPath> entityPaths = configuration.getEntityPaths(session);
+        for (EntityPath entityPath : entityPaths) {
+            platforms.add(entityPath.getPlatform());
+            devices.add(entityPath.getDevice());
+            modules.add(entityPath.getModule());
+            selections.addAll(configuration.getSelections(entityPath, session));
+        }
     }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
+    public EnumSet<Platform> getPlatforms() {
+        return platforms;
+    }
 
-        String configurationId = requestData.requireParameter("id");
-        String lastEntityId = requestData.requireParameter("entityId");
+    @Override
+    public EnumSet<Device> getDevices() {
+        return devices;
+    }
 
-        OnboardingConfiguration configuration = onboardingService.getConfiguration(configurationId);
-        List<OnboardingSelection> selections = configuration.getSelections(lastEntityId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData)), session);
+    @Override
+    public EnumSet<Module> getModules() {
+        return modules;
+    }
 
-        return new AJAXRequestResult(selections, "onboardingSelection");
+    @Override
+    public List<OnboardingSelection> getSelections() {
+        return selections;
     }
 
 }
