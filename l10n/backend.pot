@@ -73,7 +73,9 @@ msgstr ""
 msgid "Create, modify and delete appointments."
 msgstr ""
 
+#. The display name for calendar module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr ""
@@ -2246,7 +2248,9 @@ msgid "Folders"
 msgstr ""
 
 #. Search in Persons.
+#. The display name for contacts module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr ""
@@ -3560,19 +3564,112 @@ msgid "The Android/Google platform"
 msgstr ""
 
 #. ----------------------------------------------------------------------------------------------------------------------
-#. E-Mail successfully sent
+#. The display name for E-Mail module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:93
+msgid "E-Mail"
+msgstr ""
+
+#. The description for E-Mail module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:96
+msgid "The E-Mail module for accessing/synchronizing E-Mails."
+msgstr ""
+
+#. The description for contacts module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:103
+msgid "The contacts module for accessing/synchronizing contacts."
+msgstr ""
+
+#. The description for calendar module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:110
+msgid "The calendar module for accessing/synchronizing events."
+msgstr ""
+
+#. The display name for Drive module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
+msgid "Drive"
+msgstr ""
+
+#. The description for Drive module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:117
+msgid "The Drive module for accessing/synchronizing files."
+msgstr ""
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. The display name for an Apple Mac
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:122
+msgid "Apple Mac"
+msgstr ""
+
+#. The description for an Apple Mac
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:125
+msgid "The device for an Apple Mac"
+msgstr ""
+
+#. The display name for an Apple iPad
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:129
+msgid "Apple iPad"
+msgstr ""
+
+#. The description for an Apple iPad
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:132
+msgid "The device for an Apple iPad"
+msgstr ""
+
+#. The display name for an Apple iPhone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:136
+msgid "Apple iPhone"
+msgstr ""
+
+#. The description for an Apple iPhone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:139
+msgid "The device for an Apple iPhone"
+msgstr ""
+
+#. The display name for an Android/Google tablet
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:143
+msgid "Android tablet"
+msgstr ""
+
+#. The description for an Android/Google tablet
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:146
+msgid "The device for an Android/Google tablet"
+msgstr ""
+
+#. The display name for an Android/Google phone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:150
+msgid "Android phone"
+msgstr ""
+
+#. The description for an Android/Google phone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:153
+msgid "The device for an Android/Google phone"
+msgstr ""
+
+#. The display name for a Windows Desktop
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:157
+msgid "Windows Desktop"
+msgstr ""
+
+#. The description for a Windows Desktop
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:160
+msgid "The device for a Windows Desktop"
+msgstr ""
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. E-Mail successfully sent
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:165
 msgid "E-Mail successfully sent"
 msgstr ""
 
 #. ----------------------------------------------------------------------------------------------------------------------
 #. Used when rendering a form in which the user is supposed to enter an E-Mail address
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:98
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:170
 msgid "E-Mail address"
 msgstr ""
 
 #. Used when rendering a form in which the user is supposed to enter a phone number address
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:101
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:173
 msgid "Phone number"
 msgstr ""
 
@@ -5075,10 +5172,6 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
-msgid "Drive"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
