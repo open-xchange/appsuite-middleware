@@ -60,16 +60,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration extends Entity, OnboardingExecutor {
-
-    /**
-     * Checks if this configuration is enabled for session-associated user.
-     *
-     * @param session The session providing user data
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If check fails
-     */
-    boolean isEnabled(Session session) throws OXException;
+public interface OnboardingConfiguration extends IdEntity, OnboardingExecutor {
 
     /**
      * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
@@ -83,12 +74,12 @@ public interface OnboardingConfiguration extends Entity, OnboardingExecutor {
     /**
      * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
      *
-     * @param lastEntityId The identifier of the last entity on a certain path
+     * @param entityPath The entity path
      * @param clientInfo The client information
      * @param session The session providing user data
      * @return The available selections
      * @throws OXException If denoted entity has no selections or selections cannot be returned
      */
-    List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException;
+    List<OnboardingSelection> getSelections(EntityPath entityPath, ClientInfo clientInfo, Session session) throws OXException;
 
 }

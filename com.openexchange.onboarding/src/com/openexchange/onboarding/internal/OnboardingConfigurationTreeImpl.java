@@ -64,7 +64,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.IdEntity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -133,10 +133,10 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
     private class NodeElem {
 
         final Map<String, NodeElem> children;
-        final Entity entity;
+        final IdEntity entity;
         final OnboardingConfiguration value;
 
-        NodeElem(Entity entity) {
+        NodeElem(IdEntity entity) {
             super();
             children = new HashMap<String, NodeElem>(4);
             this.entity = entity;
@@ -239,8 +239,8 @@ public class OnboardingConfigurationTreeImpl implements OnboardingConfigurationT
                 }
 
                 boolean leaf = false;
-                for (Iterator<Entity> it = entityPath.iterator(); !leaf;) {
-                    Entity entity = it.next();
+                for (Iterator<IdEntity> it = entityPath.iterator(); !leaf;) {
+                    IdEntity entity = it.next();
 
                     leaf = !it.hasNext();
                     if (leaf) {

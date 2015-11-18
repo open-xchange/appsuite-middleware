@@ -49,89 +49,19 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link TestOnboardingConfiguration}
+ * {@link IdEntity} - An on-boarding entity with an identifier.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TestOnboardingConfiguration implements OnboardingConfiguration {
-
-    private String id;
-    private String displayName;
-    private String description;
-    private boolean enabled;
-    private List<EntityPath> paths;
+public interface IdEntity extends Entity {
 
     /**
-     * Initializes a new {@link TestOnboardingConfiguration}.
+     * Gets the identifier.
+     *
+     * @return The identifier
      */
-    public TestOnboardingConfiguration() {
-        super();
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName(Session session) {
-        return displayName;
-    }
-
-    @Override
-    public Icon getIcon(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        return enabled;
-    }
-
-    @Override
-    public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        return paths;
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        return description;
-    }
-
-    @Override
-    public List<OnboardingSelection> getSelections(String entityId, ClientInfo clientInfo, Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        return null;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPaths(List<EntityPath> paths) {
-        this.paths = paths;
-    }
+    String getId();
 
 }

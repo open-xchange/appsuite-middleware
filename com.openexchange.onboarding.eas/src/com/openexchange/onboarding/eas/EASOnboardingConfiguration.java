@@ -81,7 +81,7 @@ import com.openexchange.onboarding.CommonFormDescription;
 import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.IdEntity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -242,36 +242,36 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
     public List<EntityPath> getEntityPaths(Session session) {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPAD);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_OSX);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.ANDROID_PHONE);
             path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
-            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.ANDROID_GOOGLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.ANDROID_TABLET);
             path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".eas", "com.openexchange.onboarding.eas.", true));
-            paths.add(new DefaultEntityPath(Platform.ANDROID_GOOGLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.ANDROID_GOOGLE));
         }
         return paths;
     }

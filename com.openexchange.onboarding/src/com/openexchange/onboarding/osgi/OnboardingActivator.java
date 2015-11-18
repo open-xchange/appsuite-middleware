@@ -91,6 +91,7 @@ public class OnboardingActivator extends HousekeepingActivator {
         OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
         registry.open();
         this.registry = registry;
+        addService(OnboardingConfigurationService.class, registry);
 
         registerService(OnboardingConfigurationService.class, registry);
     }
@@ -102,10 +103,21 @@ public class OnboardingActivator extends HousekeepingActivator {
         OnboardingConfigurationRegistry registry = this.registry;
         if (null != registry) {
             this.registry = null;
+            removeService(OnboardingConfigurationService.class);
             registry.close();
         }
 
         Services.setServiceLookup(null);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

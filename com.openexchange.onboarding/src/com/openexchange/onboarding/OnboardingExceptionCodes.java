@@ -103,6 +103,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * Missing the following form field: %1$s
      */
     MISSING_FORM_FIELD("Missing the following form field: %1$s", null, Category.CATEGORY_ERROR, 10),
+    /**
+     * Invalid composite identifier: %1$s
+     */
+    INVALID_COMPOSITE_ID("Invalid composite identifier: %1$s", null, Category.CATEGORY_ERROR, 11),
 
     ;
 

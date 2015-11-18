@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,25 +53,40 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * {@link Device} - An enumeration for available on-boarding devices.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements IdEntity {
+public enum Device implements IdEntity {
 
     /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
+     * The device for an Apple Mac; <code>"apple.mac"</code>
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "platform_icon_apple.png"),
+    APPLE_MAC(Platform.APPLE.getId() + ".mac", OnboardingStrings.DEVICE_APPLE_MAC_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_MAC_DESCRIPTION, "device_icon_apple_mac.png", Platform.APPLE),
     /**
-     * The Android/Google platform for Android devices
+     * The device for an Apple iPad; <code>"apple.ipad"</code>
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "platform_icon_android.png"),
+    APPLE_IPAD(Platform.APPLE.getId() + ".ipad", OnboardingStrings.DEVICE_APPLE_IPAD_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_IPAD_DESCRIPTION, "device_icon_apple_ipad.png", Platform.APPLE),
     /**
-     * The Windows platform for Windows Desktop applications.
+     * The device for an Apple iPhone; <code>"apple.iphone"</code>
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "platform_icon_windows.png"),
+    APPLE_IPHONE(Platform.APPLE.getId() + ".iphone", OnboardingStrings.DEVICE_APPLE_IPHONE_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_IPHONE_DESCRIPTION, "device_icon_apple_iphone.png", Platform.APPLE),
+
+    /**
+     * The device for an Android/Google tablet; <code>"android.tablet"</code>
+     */
+    ANDROID_TABLET(Platform.ANDROID_GOOGLE.getId() + ".tablet", OnboardingStrings.DEVICE_ANDROID_TABLET_DISPLAY_NAME, OnboardingStrings.DEVICE_ANDROID_TABLET_DESCRIPTION, "device_icon_android_tablet.png", Platform.ANDROID_GOOGLE),
+    /**
+     * The device for an Android/Google phone; <code>"android.phone"</code>
+     */
+    ANDROID_PHONE(Platform.ANDROID_GOOGLE.getId() + ".phone", OnboardingStrings.DEVICE_ANDROID_PHONE_DISPLAY_NAME, OnboardingStrings.DEVICE_ANDROID_PHONE_DESCRIPTION, "device_icon_android_phone.png", Platform.ANDROID_GOOGLE),
+
+    /**
+     * The device for a Windows Desktop 8 + 10; <code>"windows.desktop"</code>
+     */
+    WINDOWS_DESKTOP_8_10(Platform.WINDOWS.getId() + ".desktop", OnboardingStrings.DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME, OnboardingStrings.DEVICE_WINDOWS_DESKTOP_DESCRIPTION, "device_icon_windows_desktop.png", Platform.WINDOWS),
+
     ;
 
     private final String id;
@@ -85,8 +100,11 @@ public enum Platform implements IdEntity {
     private final String defaultIcon;
     private final String defaultDescription;
 
-    private Platform(String id, String defaultDisplayName, String defaultDescription, String defaultIcon) {
+    private final Platform platform;
+
+    private Device(String id, String defaultDisplayName, String defaultDescription, String defaultIcon, Platform platform) {
         this.id = id;
+        this.platform = platform;
 
         String prefix = "com.openexchange.onboarding." + id;
         enabledProperty = prefix + ".enabled";
@@ -102,6 +120,15 @@ public enum Platform implements IdEntity {
     @Override
     public boolean isEnabled(Session session) throws OXException {
         return OnboardingUtility.getBoolValue(enabledProperty, true, session);
+    }
+
+    /**
+     * Gets the platform associated with this entity
+     *
+     * @return The platform
+     */
+    public Platform getPlatform() {
+        return platform;
     }
 
     @Override
@@ -125,21 +152,22 @@ public enum Platform implements IdEntity {
     }
 
     /**
-     * Gets the platform for specified identifier
+     * Gets the device for specified identifier
      *
      * @param id The identifier to look-up
-     * @return The associated platform or <code>null</code>
+     * @return The associated device or <code>null</code>
      */
-    public static Platform platformFor(String id) {
+    public static Device deviceFor(String id) {
         if (null == id) {
             return null;
         }
 
-        for (Platform platform : values()) {
-            if (id.equals(platform.getId())) {
-                return platform;
+        for (Device device : values()) {
+            if (id.equals(device.getId())) {
+                return device;
             }
         }
         return null;
     }
+
 }

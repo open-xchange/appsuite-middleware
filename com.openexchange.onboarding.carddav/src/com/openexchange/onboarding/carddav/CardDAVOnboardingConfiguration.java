@@ -80,7 +80,7 @@ import com.openexchange.onboarding.CommonFormDescription;
 import com.openexchange.onboarding.DefaultEntity;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.IdEntity;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -236,24 +236,24 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
         List<EntityPath> paths = new ArrayList<EntityPath>(6);
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPAD);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_IOS);
             path.add(CommonEntity.APPLE_IOS_IPHONE);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         {
-            List<Entity> path = new ArrayList<Entity>(4);
+            List<IdEntity> path = new ArrayList<IdEntity>(4);
             path.add(CommonEntity.APPLE_OSX);
             path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
+            paths.add(new DefaultEntityPath(path, Platform.APPLE));
         }
         return paths;
     }
