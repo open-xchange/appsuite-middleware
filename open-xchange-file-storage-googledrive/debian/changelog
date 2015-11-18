@@ -1,3 +1,9 @@
+open-xchange-file-storage-googledrive (7.8.0-10) stable; urgency=medium
+
+  * Build for patch 2015-11-23 (2878)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 18 Nov 2015 10:37:19 +0100
+
 open-xchange-file-storage-googledrive (7.8.0-9) stable; urgency=medium
 
   * Build for patch 2015-11-09 (2840)
