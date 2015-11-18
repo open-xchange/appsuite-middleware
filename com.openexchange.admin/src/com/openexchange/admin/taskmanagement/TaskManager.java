@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -184,6 +185,7 @@ public class TaskManager {
      * @param furtherinformation Arbitrary information
      * @param cid The associated context identifier
      * @return The job identifier
+     * @throws RejectedExecutionException If the task cannot be accepted for execution
      */
     public <V> int addJob(Callable<V> jobcall, String typeofjob, String furtherinformation, int cid) {
         // Get next job identifier
