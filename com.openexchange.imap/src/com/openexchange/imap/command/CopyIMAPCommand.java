@@ -51,7 +51,6 @@ package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
 import java.util.Arrays;
-import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.java.Strings;
 import com.sun.mail.iap.Response;
@@ -215,13 +214,13 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     @Override
     protected boolean handleResponse(final Response response) throws MessagingException {
-        if (!response.isOK()) {
+        if (!response.isOK() || response.isUnTagged()) {
             return false;
         }
         if (fast) {
             return true;
         }
-        final String resp = response.toString().toLowerCase(Locale.ENGLISH);
+        final String resp = Strings.asciiLowerCase(response.toString());
         /*-
          * Parse response:
          *
@@ -231,8 +230,7 @@ public final class CopyIMAPCommand extends AbstractIMAPCommand<long[]> {
          */
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
-            LOG.warn("Missing COPYUID response code: {}", resp);
-            return true;
+            return false;
         }
         /*
          * Found COPYUID...
