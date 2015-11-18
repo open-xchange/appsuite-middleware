@@ -1,21 +1,24 @@
-Open-Xchange OAuth 2.0 Client Developer Guide
-=============================================
+---
+title: Developer Guide
+---
 
-General Assumptions
--------------------
+# Open-Xchange OAuth 2.0 Client Developer Guide
+
+## General Assumptions
+
 Starting with version 7.8.0 OX App Suite can act as an OAuth 2.0 provider that allows access to certain API calls. In terms of [RFC 6749](http://tools.ietf.org/html/rfc6749) the App Suite backend acts as `authorization server` and `resource server` while every user is a `resource owner`. Client applications must be of type `confidential` according to the `web application` profile, i.e. they must be able to securely store API access credentials on an application server without exposing them to the resource owner. The only supported grant type is `authorization code`. Every time a user grants access to his personal data, your application will receive both, an `access token` and a `refresh token`. The former one is a short-living token (usually one hour), that must be sent along with every API call. The latter one lives as long as the user does not revoke access for your application and can always be exchanged against a fresh token pair. The access token type is `bearer` as defined in [RFC 6750](http://tools.ietf.org/html/rfc6750).
 
 Before you can develop against the API of an OX App Suite deployment you must register your application at the according service provider. The registration process is out of scope here. Please contact your service provider for more information. As a result of the registration process you will get two tokens from your service provider: a `client identifier` and a `client secret`. The former one must be provided in every call targeting the authorization API. The latter one is only needed when an authorization code is exchanged for an access/refresh token pair and must strictly be kept secret.
 
 All calls towards the authorization or token endpoint enforce HTTPS. Plain HTTP calls result in redirects to the secure location. However you must never perform plain HTTP calls. Especially calls to the token endpoint will otherwise expose your client secret!
 
-Authorization Flow
-------------------
+## Authorization Flow
 
-###Step 1: Request an authorization code###
+### Step 1: Request an authorization code###
 
 `GET https://ox.example.com/appsuite/api/oauth/provider/authorization`
 
+``
 <table>
   <thead>
     <tr>
@@ -57,6 +60,7 @@ Authorization Flow
     </tr>
   </tbody>
 </table>
+```
 
 The response is a login screen. You propably want to display it within a popup window:
 ![OAuth Login Screen](login_screen.png "OAuth Login Screen")
@@ -69,6 +73,7 @@ This screen will present all necessary information to the user, i.e. which app t
     HTTP/1.1 302 Found
     Location: https://myclient.com/oauth/callback?code=07d3c9d7e6fc4e828c600bba0eee2ad0&state=1234
 
+```
 <table>
   <thead>
     <tr>
@@ -105,13 +110,15 @@ This screen will present all necessary information to the user, i.e. which app t
     </tr>
   </tbody>
 </table>
+```
 
-###Step 2: Obtain a token pair###
+### Step 2: Obtain a token pair###
 
 `POST https://ox.example.com/appsuite/api/oauth/provider/accessToken`
 
 The request body must be of type `application/x-www-form-urlencoded` containing the following parameters:
 
+```
 <table>
   <thead>
     <tr>
@@ -148,6 +155,7 @@ The request body must be of type `application/x-www-form-urlencoded` containing 
     </tr>
   </tbody>
 </table>
+```
 
 The response is in JSON format and contains either a token pair or an error code, depending on the succession of the request. A successful response looks like this:
 
@@ -176,11 +184,12 @@ An error response will look like this:
       "error_description": "invalid parameter value: client_id"
     }
 
-###Step 3: Refresh an access token###
+### Step 3: Refresh an access token###
 You must remember the `expires_in` value and obtain a new access token before this timeout is exceeded by transmitting the refresh token.
 
 `POST https://ox.example.com/appsuite/api/oauth/provider/accessToken`
 
+```
 <table>
   <thead>
     <tr>
@@ -212,10 +221,11 @@ You must remember the `expires_in` value and obtain a new access token before th
     </tr>
   </tbody>
 </table>
+```
 
 The response is the same as in step 2. Note that also a new refresh token is generated and contained in the response. The one that was used in the request is not valid any longer.
 
-###Step 4: Revoke requested access###
+### Step 4: Revoke requested access###
 If you don't longer need a formerly granted access, you are encouraged to revoke it. This will invalidate the according access and refresh token what is desired from a security perspective.
 
 `GET https://ox.example.com/appsuite/api/oauth/provider/revoke`
@@ -250,8 +260,7 @@ It's up to you if you want to invalidate by access or refresh token, as long as 
       "error_description": "invalid parameter value: access_token"
     }
 
-Available APIs
---------------
+## Available APIs
 
 With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org/wiki/index.php?title=HTTP_API). There are a few differences to the existing API documentation you have to keep in mind:
 
@@ -293,6 +302,7 @@ With OAuth you can access a subset of the existing [HTTP API](http://oxpedia.org
 
 Below is a table that describes all available modules and actions. Every action is bound to a specific scope. However some actions are available implicitly if access for any scope is granted. E.g. you may always request a users details or configuration if any kind of OAuth access is granted, but you may only change a users configuration, if the `write_userconfig` scope is granted. The view on the folder tree is always limited by the granted scope. E.g. if you were granted `read_contacts` you can also perform all read-only requests that target contact folders. In turn you may only create/modify/delete contact folders if obtained the `write_contacts` scope.
 
+```
 <table>
   <thead>
     <tr>
@@ -636,3 +646,5 @@ Below is a table that describes all available modules and actions. Every action 
     </tr>
   </tbody>
 </table>
+```
+

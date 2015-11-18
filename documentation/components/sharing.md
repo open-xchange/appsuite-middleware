@@ -1,4 +1,6 @@
-# Sharing and Guest Mode
+---
+title: Sharing and Guest Mode
+---
 
 ## Introduction
 

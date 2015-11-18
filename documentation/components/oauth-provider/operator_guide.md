@@ -1,11 +1,13 @@
-Open-Xchange OAuth 2.0 Provider Operator Guide
-==============================================
+---
+title: Operator Guide
+---
+
+# Open-Xchange OAuth 2.0 Provider Operator Guide
 
 With OX App Suite 7.8.0 a service provider can decide to publish a certain subset of the OX HTTP API via OAuth 2.0. See the [developer guide](developer_guide.html) for an overview of the available APIs. The feature as a whole is contained in separate optional packages and requires some configuration. Supported client applications must be of type `confidential` according to the `web application` profile defined in [RFC 6749](http://tools.ietf.org/html/rfc6749). Every application must be registered at the OX backend. The registration process is up to you, while the backend provides SOAP and RMI interfaces to persist those registrations and generates the client-specific credentials that are needed to gain access for granting users.
 
 
-Installation And Configuration
-------------------------------
+## Installation And Configuration
 
 The OAuth provider feature is separated into two packages `open-xchange-oauth-provider` and `open-xchange-admin-oauth-provider`. The former one needs to be installed on every groupware node, the latter one provides the client provisioning interfaces and may be installed on your dedicated provisioning nodes. On a Debian setup you would install those packages like so:
 
@@ -36,8 +38,7 @@ Configuration takes place in `/opt/open-xchange/etc/oauth-provider.properties`. 
 You may to decide how authorization codes are stored. Those codes are short-living one-time tokens that are generated when a user grants access. The client application will then exchange this code for a pair of access and refresh tokens. We store those codes in the hazelcast data grid per default. However you can choose to store them within the database. If using hazelcast, you can also adjust the parameters for the according distributed data structure in `/opt/open-xchange/etc/hazelcast/authcode.properties`.
 
 
-Client Provisioning
--------------------
+## Client Provisioning
 
 For every client application that you want to allow to access the OAuth APIs you need to persist some data. During the registration call a client ID and a secret are generated, which must be provided to the client developers.
 
@@ -93,7 +94,7 @@ The registration data consists of the following parameters:
 </table>
 
 
-###RMI Provisioning###
+### RMI Provisioning
 
 To use RMI as provisioning mechanism you need to link your code against the correct API classes. You'll find the according JAR files on your provisioning node. Navigate to `/opt/open-xchange/libs` and fetch `com.openexchange.admin.rmi.jar` and `com.openexchange.oauth.provider.rmi.jar`. Note that both files are symlinks. Besides the JARs you'll find the according JavaDoc in `/usr/share/doc/open-xchange-admin/javadoc` and `/usr/share/doc/open-xchange-oauth-provider/javadoc`. After adding both JARs to your classpath you can start development. The remote interface is `com.openexchange.oauth.provider.rmi.RemoteClientManagement`. Below you find an example of all operations that manipulate client data. Of course there are also methods to list and get all or certain registered clients.
 
@@ -221,18 +222,18 @@ To use RMI as provisioning mechanism you need to link your code against the corr
 
 
 
-###SOAP Provisioning###
+### SOAP Provisioning
 
 Besides RMI all provisioning calls are also available via [SOAP](http://oxpedia.org/wiki/index.php?title=Open-Xchange_Provisioning_using_SOAP). After everything orderly set up you can obtain the according WSDL via `https://ox-prov.coolhosting.me/webservices/OAuthClientService?wsdl`, while `ox-prov.coolhosting.me` denotes your provisioning node. Below you find example requests and responses for all operations.
 
 All operations require the master admin credentials. Icons raw bytes are always required/returned as a Base64-encoded strings.
 
 
-####List Clients####
+#### List Clients
 
 List all clients of a certain context group. Only IDs and names are returned.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -248,7 +249,7 @@ List all clients of a certain context group. Only IDs and names are returned.
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -265,11 +266,11 @@ List all clients of a certain context group. Only IDs and names are returned.
        </soap:Body>
     </soap:Envelope>
 
-####Get Client Details####
+#### Get Client Details
 
 Get the details of a client by its ID.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -285,7 +286,7 @@ Get the details of a client by its ID.
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
           <getClientByIdResponse xmlns="http://soap.provider.oauth.openexchange.com">
@@ -332,11 +333,11 @@ Get the details of a client by its ID.
        </soap:Body>
     </soap:Envelope>
 
-####Register Client####
+#### Register Client
 
 Register a new client. The response contains the whole client data along with the generated client ID and secret.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -390,7 +391,7 @@ Register a new client. The response contains the whole client data along with th
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -438,11 +439,11 @@ Register a new client. The response contains the whole client data along with th
        </soap:Body>
     </soap:Envelope>
 
-####Update Client####
+#### Update Client
 
 Already registered clients can be modified. The response contains the whole client data with all changes applied.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -466,7 +467,7 @@ Already registered clients can be modified. The response contains the whole clie
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -514,11 +515,11 @@ Already registered clients can be modified. The response contains the whole clie
        </soap:Body>
     </soap:Envelope>
 
-####Revoke Secret####
+#### Revoke Secret
 
 A clients secret can be revoked. This leads to a revocation of all grants authorized by any users for this client. A new secret is generated and part of the response.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -534,7 +535,7 @@ A clients secret can be revoked. This leads to a revocation of all grants author
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -582,10 +583,10 @@ A clients secret can be revoked. This leads to a revocation of all grants author
        </soap:Body>
     </soap:Envelope>
 
-####Unregister Client####
+#### Unregister Client
 Of course clients can be unregistered. This leads to a revocation of all grants authorized by any users for this client. If the client ID is invalid, the responses success value will be `false`.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -601,7 +602,7 @@ Of course clients can be unregistered. This leads to a revocation of all grants 
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response 
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -611,10 +612,10 @@ Of course clients can be unregistered. This leads to a revocation of all grants 
        </soap:Body>
     </soap:Envelope>
 
-####Disable Client####
+#### Disable Client
 Enabled clients can be disabled. This leads to a revocation of all grants authorized by any users for this client and no further grants can be requested. If the client was already disabled, the responses success value will be `false`.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -630,7 +631,7 @@ Enabled clients can be disabled. This leads to a revocation of all grants author
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response 
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>
@@ -640,11 +641,11 @@ Enabled clients can be disabled. This leads to a revocation of all grants author
        </soap:Body>
     </soap:Envelope>
 
-####Enable Client####
+#### Enable Client
 
 Disabled clients can of course be enabled again. If the client was already enabled, the responses success value will be `false`.
 
-#####Request#####
+##### Request
 
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
       xmlns:soap="http://soap.provider.oauth.openexchange.com">
@@ -660,7 +661,7 @@ Disabled clients can of course be enabled again. If the client was already enabl
        </soapenv:Body>
     </soapenv:Envelope>
 
-#####Response#####
+##### Response
 
     <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
        <soap:Body>

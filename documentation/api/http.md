@@ -1,5 +1,9 @@
-Introduction
-============
+---
+title: HTTP
+description: 
+---
+
+# Introduction
 
 This document defines the Open-Xchange HTTP API which is used by the new AJAX GUI. The first chapter describes general definitions and conventions which apply to all server modules. All other chapters describe individual server modules.
 
@@ -9,13 +13,13 @@ The client accesses the server through HTTP GET, POST and PUT requests. HTTP coo
 
 Text encoding is always UTF-8. Data is sent from the server to the client as `text/javascript` and interpreted by the client to obtain an ECMAScript object. The HTTP API uses only a small subset of the ECMAScript syntax. This subset is roughly described by the following BNF:
 
-	Value   ::= "null" | Boolean | Number | String | Array | Object
-	Boolean ::= "true" | "false"
-	Number  ::= see NumericLiteral in ECMA 262 3rd edition
-	String  ::= \"([^"\n\\]|\`\["\n\\]`)*\"
-	Array   ::= "[]" | "[" Value ("," Value)* "]"
-	Object  ::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
-	Name    ::= [A-Fa-f][0-9A-Fa-f_]*
+    Value   ::= "null" | Boolean | Number | String | Array | Object
+    Boolean ::= "true" | "false"
+    Number  ::= see NumericLiteral in ECMA 262 3rd edition
+    String  ::= \"([^"\n\\]|\`\["\n\\]`)*\"
+    Array   ::= "[]" | "[" Value ("," Value)* "]"
+    Object  ::= "{}" | "{" Name ":" Value ("," Name ":" Value)* "}"
+    Name    ::= [A-Fa-f][0-9A-Fa-f_]*
 
 Numbers are the standard signed integer and floating point numbers. Strings can contain any character, except double quotes, newlines and backslashes, which must be escaped by a backslash. Control characters in strings (other than newline) are not supported. Whitespace is allowed between any two tokens. See [JSON](http://json.org) and [ECMA 262, 3rd edition](http://www.ecma-international.org/publications/standards/Ecma-262.htm) for the formal definition.
 
@@ -40,7 +44,7 @@ The response body consists of an object, which contains up to four fields as des
 
 ### Error categories
 
-| Code | Identifier | Description |																										    
+| Code | Identifier | Description |                                                                                                         
 |:----:|------------|-------------|  
 |   1  | "USER\_INPUT"        | An error resulting from wrong or missing input from front-end (e.g. mandatory field missing). |  
 |   2  | "CONFIGURATION"      | An error related to user/system configuration which denies requested operation. |  
@@ -121,16 +125,16 @@ File uploads are made by sending a POST request that submits both the file and t
 
 Since the upload is performed directly by the browser and is not an Ajax call, the normal callback mechanism for asynchronous Javascript calls cannot be used to obtain the result. For this reason the server responds to these POST calls with a complete HTML page that performs the callback and should not be displayed to the user. The HTML response is functionally equivalent to:
 
-	<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-	<html>
-		<head>
-			<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
-			<script type="text/javascript">
-				(parent["callback_action"] || window.opener && window.opener["callback_action"])
-				({json})
-			</script>
-		</head>
-	</html>
+    <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+    <html>
+        <head>
+            <META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+            <script type="text/javascript">
+                (parent["callback_action"] || window.opener && window.opener["callback_action"])
+                ({json})
+            </script>
+        </head>
+    </html>
 
 The placeholders `{json}` is replaced by the response with the timestamp that would be expected from the corresponding PUT method. The placeholder `action` is replaced by the value of the parameter `action` of the request (except for the import bundle, which is named "import" instead of the action name for legacy purposes). The content-type of the answer is `text/html`.
 
