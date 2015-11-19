@@ -58,7 +58,10 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.internet.SharedInputStream;
@@ -377,6 +380,24 @@ public final class ThresholdFileHolder implements IFileHolder {
             Streams.close(out);
         }
         return this;
+    }
+
+    /**
+     * Gets the MD5 sum for this file holder's content
+     *
+     * @return The MD5 sum
+     * @throws OXException If MD5 sum cannot be returned
+     */
+    public String getMD5() throws OXException {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] digest = md5.digest(Streams.stream2bytes(getStream()));
+            return new BigInteger(1, digest).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
