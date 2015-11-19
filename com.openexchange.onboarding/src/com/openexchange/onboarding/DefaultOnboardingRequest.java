@@ -60,8 +60,7 @@ import com.openexchange.groupware.notify.hostname.HostData;
  */
 public class DefaultOnboardingRequest implements OnboardingRequest {
 
-    private final String configurationId;
-    private final String selectionId;
+    private final OnboardingSelection selection;
     private final ClientInfo clientInfo;
     private final HostData hostData;
     private final Map<String, Object> formContent;
@@ -75,10 +74,9 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
      * @param hostData The host data
      * @param formContent The optional form content or <code>null</code>
      */
-    public DefaultOnboardingRequest(String configurationId, String selectionId, ClientInfo clientInfo, HostData hostData, Map<String, Object> formContent) {
+    public DefaultOnboardingRequest(OnboardingSelection selection, ClientInfo clientInfo, HostData hostData, Map<String, Object> formContent) {
         super();
-        this.configurationId = configurationId;
-        this.selectionId = selectionId;
+        this.selection = selection;
         this.clientInfo = clientInfo;
         this.hostData = hostData;
         this.formContent = formContent;
@@ -90,13 +88,8 @@ public class DefaultOnboardingRequest implements OnboardingRequest {
     }
 
     @Override
-    public String getConfigurationId() {
-        return configurationId;
-    }
-
-    @Override
-    public String getSelectionId() {
-        return selectionId;
+    public OnboardingSelection getSelection() {
+        return selection;
     }
 
     @Override

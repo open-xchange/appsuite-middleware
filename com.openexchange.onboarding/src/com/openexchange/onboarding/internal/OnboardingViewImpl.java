@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,94 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.internal;
 
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.LinkedList;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.EntityPath;
+import com.openexchange.onboarding.Module;
+import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.Platform;
+import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingConfiguration} - Represents an on-boarding configuration suitable for configuring/integrating a client for communicating
- * with the Open-Xchange Middleware.
+ * {@link OnboardingViewImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration extends IdEntity, OnboardingExecutor {
+public class OnboardingViewImpl implements OnboardingView {
+
+    private final EnumSet<Platform> platforms;
+    private final EnumSet<Device> devices;
+    private final EnumSet<Module> modules;
+    private final List<OnboardingSelection> selections;
 
     /**
-     * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
-     *
-     * @param session The session providing user data
-     * @return The paths to the dedicated on-boarding configuration selections.
-     * @throws OXException If paths cannot be returned
+     * Initializes a new {@link OnboardingViewImpl}.
      */
-    List<EntityPath> getEntityPaths(Session session) throws OXException;
+    public OnboardingViewImpl() {
+        super();
+        platforms = EnumSet.noneOf(Platform.class);
+        devices = EnumSet.noneOf(Device.class);
+        modules = EnumSet.noneOf(Module.class);
+        selections = new LinkedList<OnboardingSelection>();
+    }
 
     /**
-     * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
+     * Adds the specified on-boarding configurations to this view
      *
-     * @param entityPath The entity path
+     * @param configurations The configurations to add
      * @param session The session providing user data
-     * @return The available selections
-     * @throws OXException If denoted entity has no selections or selections cannot be returned
+     * @throws OXException If adding to this view fails
      */
-    List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException;
+    public void add(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
+        for (OnboardingConfiguration configuration : configurations) {
+            add(configuration, session);
+        }
+    }
+
+    /**
+     * Adds the specified on-boarding configuration to this view
+     *
+     * @param configuration The configuration to add
+     * @param session The session providing user data
+     * @throws OXException If adding to this view fails
+     */
+    public void add(OnboardingConfiguration configuration, Session session) throws OXException {
+        List<EntityPath> entityPaths = configuration.getEntityPaths(session);
+        for (EntityPath entityPath : entityPaths) {
+            platforms.add(entityPath.getPlatform());
+            devices.add(entityPath.getDevice());
+            modules.add(entityPath.getModule());
+            selections.addAll(configuration.getSelections(entityPath, session));
+        }
+    }
+
+    @Override
+    public EnumSet<Platform> getPlatforms() {
+        return platforms;
+    }
+
+    @Override
+    public EnumSet<Device> getDevices() {
+        return devices;
+    }
+
+    @Override
+    public EnumSet<Module> getModules() {
+        return modules;
+    }
+
+    @Override
+    public List<OnboardingSelection> getSelections() {
+        return selections;
+    }
 
 }

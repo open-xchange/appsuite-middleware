@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,34 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
+package com.openexchange.onboarding.imap;
 
-import java.util.List;
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.DefaultClientInfo;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.OnboardingSelection;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link GetSelections}
+ * {@link IMAPOnboardingStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetSelections extends AbstractOnboardingAction {
+public class IMAPOnboardingStrings implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link GetSelections}.
-     *
-     * @param services
+     * Initializes a new {@link IMAPOnboardingStrings}.
      */
-    public GetSelections(ServiceLookup services) {
-        super(services);
+    private IMAPOnboardingStrings() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
+    // The default display name for an IMAP account
+    public static final String IMAP_DISPLAY_NAME = "IMAP";
 
-        String configurationId = requestData.requireParameter("id");
-        String lastEntityId = requestData.requireParameter("entityId");
+    // A description for an IMAP account on a mobile device
+    public static final String IMAP_ACCOUNT_DESCRIPTION = "The IMAP account for synchronizing E-Mails with Open-Xchange Server.";
 
-        OnboardingConfiguration configuration = onboardingService.getConfiguration(configurationId);
-        List<OnboardingSelection> selections = configuration.getSelections(lastEntityId, new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData)), session);
+    public static final String IMAP_TEXT_PROFILE = "Your IMAP profile";
 
-        return new AJAXRequestResult(selections, "onboardingSelection");
-    }
+    public static final String IMAP_TEXT_SETTINGS = "Your IMAP settings";
 
 }

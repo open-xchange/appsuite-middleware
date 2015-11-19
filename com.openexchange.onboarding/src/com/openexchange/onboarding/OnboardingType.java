@@ -95,4 +95,23 @@ public enum OnboardingType {
         return id;
     }
 
+    /**
+     * Gets the on-boarding type for specified identifier
+     *
+     * @param id The identifier to look-up
+     * @return The associated on-boarding type or <code>null</code>
+     */
+    public static OnboardingType typeFor(String id) {
+        if (null == id) {
+            return null;
+        }
+
+        for (OnboardingType type : values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        return null;
+    }
+
 }

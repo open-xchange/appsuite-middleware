@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,49 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.service;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import java.util.EnumSet;
+import java.util.List;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Module;
+import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.Platform;
 
 /**
- * {@link TestEntity}
+ * {@link OnboardingView} - Represents a certain on-boarding view associated with a certain session.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TestEntity implements Entity {
-
-    private String id;
-    private String displayName;
+public interface OnboardingView {
 
     /**
-     * Initializes a new {@link TestEntity}.
-     */
-    public TestEntity() {
-        super();
-    }
-
-    /**
-     * Initializes a new {@link TestEntity}.
-     */
-    public TestEntity(String id, String displayName) {
-        super();
-        this.id = id;
-        this.displayName = displayName;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public String getDisplayName(Session session) {
-        return displayName;
-    }
-
-    @Override
-    public Icon getIcon(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    /**
-     * Sets the displayName
+     * Gets the available platforms for this view
      *
-     * @param displayName The displayName to set
+     * @return The platforms
      */
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
+    EnumSet<Platform> getPlatforms();
 
     /**
-     * Sets the identifier
+     * Gets the available devices for this view
      *
-     * @param id The identifier to set
+     * @return The devices
      */
-    public void setId(String id) {
-        this.id = id;
-    }
+    EnumSet<Device> getDevices();
+
+    /**
+     * Gets the available modules for this view
+     *
+     * @return The modules
+     */
+    EnumSet<Module> getModules();
+
+    /**
+     * Gets the available selections for this view
+     *
+     * @return The selections
+     */
+    List<OnboardingSelection> getSelections();
 
 }

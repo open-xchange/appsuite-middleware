@@ -89,6 +89,78 @@ public class OnboardingStrings implements LocalizableStrings {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
+    // The display name for E-Mail module
+    public static final String MODULE_EMAIL_DISPLAY_NAME = "E-Mail";
+
+    // The description for E-Mail module
+    public static final String MODULE_EMAIL_DESCRIPTION = "The E-Mail module for accessing/synchronizing E-Mails.";
+
+
+    // The display name for contacts module
+    public static final String MODULE_CONTACTS_DISPLAY_NAME = "Contacts";
+
+    // The description for contacts module
+    public static final String MODULE_CONTACTS_DESCRIPTION = "The contacts module for accessing/synchronizing contacts.";
+
+
+    // The display name for calendar module
+    public static final String MODULE_CALENDAR_DISPLAY_NAME = "Calendar";
+
+    // The description for calendar module
+    public static final String MODULE_CALENDAR_DESCRIPTION = "The calendar module for accessing/synchronizing events.";
+
+
+    // The display name for Drive module
+    public static final String MODULE_DRIVE_DISPLAY_NAME = "Drive";
+
+    // The description for Drive module
+    public static final String MODULE_DRIVE_DESCRIPTION = "The Drive module for accessing/synchronizing files.";
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    // The display name for an Apple Mac
+    public static final String DEVICE_APPLE_MAC_DISPLAY_NAME = "Apple Mac";
+
+    // The description for an Apple Mac
+    public static final String DEVICE_APPLE_MAC_DESCRIPTION = "The device for an Apple Mac";
+
+
+    // The display name for an Apple iPad
+    public static final String DEVICE_APPLE_IPAD_DISPLAY_NAME = "Apple iPad";
+
+    // The description for an Apple iPad
+    public static final String DEVICE_APPLE_IPAD_DESCRIPTION = "The device for an Apple iPad";
+
+
+    // The display name for an Apple iPhone
+    public static final String DEVICE_APPLE_IPHONE_DISPLAY_NAME = "Apple iPhone";
+
+    // The description for an Apple iPhone
+    public static final String DEVICE_APPLE_IPHONE_DESCRIPTION = "The device for an Apple iPhone";
+
+
+    // The display name for an Android/Google tablet
+    public static final String DEVICE_ANDROID_TABLET_DISPLAY_NAME = "Android tablet";
+
+    // The description for an Android/Google tablet
+    public static final String DEVICE_ANDROID_TABLET_DESCRIPTION = "The device for an Android/Google tablet";
+
+
+    // The display name for an Android/Google phone
+    public static final String DEVICE_ANDROID_PHONE_DISPLAY_NAME = "Android phone";
+
+    // The description for an Android/Google phone
+    public static final String DEVICE_ANDROID_PHONE_DESCRIPTION = "The device for an Android/Google phone";
+
+
+    // The display name for a Windows Desktop
+    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Windows Desktop";
+
+    // The description for a Windows Desktop
+    public static final String DEVICE_WINDOWS_DESKTOP_DESCRIPTION = "The device for a Windows Desktop";
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
     // E-Mail successfully sent
     public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
 

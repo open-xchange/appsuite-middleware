@@ -49,89 +49,63 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link TestOnboardingConfiguration}
+ * {@link CommonForms} - An enumeration for common form descriptions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TestOnboardingConfiguration implements OnboardingConfiguration {
-
-    private String id;
-    private String displayName;
-    private String description;
-    private boolean enabled;
-    private List<EntityPath> paths;
+public enum CommonForms {
 
     /**
-     * Initializes a new {@link TestOnboardingConfiguration}.
+     * The common form description in case the user is not supposed to enter anything.
      */
-    public TestOnboardingConfiguration() {
-        super();
+    NONE(new String[0]),
+    /**
+     * The common form description in case the user is supposed to enter an E-Mail address.
+     */
+    EMAIL_ADDRESS("email"),
+    /**
+     * The common form description in case the user is supposed to enter a phone number.
+     */
+    PHONE_NUMBER("number"),
+
+    ;
+
+    private final String[] elementNames;
+    private final String firstElementName;
+
+    private CommonForms(String... elementNames) {
+        if (null != elementNames && elementNames.length > 0) {
+            // First form element
+            {
+                String name = elementNames[0];
+                firstElementName = name;
+            }
+
+            this.elementNames = elementNames;
+        } else {
+            this.firstElementName = null;
+            this.elementNames = null;
+        }
     }
 
-    @Override
-    public String getId() {
-        return id;
+    /**
+     * Gets the element names
+     *
+     * @return The element names or <code>null</code>
+     */
+    public String[] getElementNames() {
+        return elementNames;
     }
 
-    @Override
-    public String getDisplayName(Session session) {
-        return displayName;
-    }
-
-    @Override
-    public Icon getIcon(Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        return enabled;
-    }
-
-    @Override
-    public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        return paths;
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        return description;
-    }
-
-    @Override
-    public List<OnboardingSelection> getSelections(String entityId, ClientInfo clientInfo, Session session) throws OXException {
-        return null;
-    }
-
-    @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        return null;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
-    }
-
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public void setPaths(List<EntityPath> paths) {
-        this.paths = paths;
+    /**
+     * Gets the name of the first element
+     *
+     * @return The name of the first element or <code>null</code>
+     */
+    public String getFirstElementName() {
+        return firstElementName;
     }
 
 }

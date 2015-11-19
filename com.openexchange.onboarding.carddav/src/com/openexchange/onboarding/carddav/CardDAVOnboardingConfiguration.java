@@ -49,6 +49,7 @@
 
 package com.openexchange.onboarding.carddav;
 
+import static com.openexchange.onboarding.OnboardingSelectionKey.keyFor;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -70,17 +71,13 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.CommonEntity;
-import com.openexchange.onboarding.CommonFormDescription;
-import com.openexchange.onboarding.DefaultEntity;
+import com.openexchange.onboarding.CommonForms;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.Entity;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -88,10 +85,10 @@ import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.OnboardingSelectionKey;
 import com.openexchange.onboarding.OnboardingStrings;
 import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
-import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.PListDict;
@@ -99,7 +96,6 @@ import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 
 /**
@@ -111,8 +107,9 @@ import com.openexchange.tools.session.ServerSession;
 public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     private final ServiceLookup services;
-    private final String id;
-    private final Map<String, OnboardingExecutor> executors;
+    private final String propertyPrefix;
+    private final String identifier;
+    private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
 
     /**
      * Initializes a new {@link CardDAVOnboardingConfiguration}.
@@ -120,102 +117,71 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     public CardDAVOnboardingConfiguration(ServiceLookup services) {
         super();
         this.services = services;
-        id = "com.openexchange.onboarding.carddav";
-        executors = new HashMap<String, OnboardingExecutor>(8);
+        propertyPrefix = "com.openexchange.onboarding.carddav";
+        identifier = "carddav";
+        executors = new HashMap<OnboardingSelectionKey, OnboardingExecutor>(8);
 
-        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", new OnboardingExecutor() {
+        {
+            OnboardingExecutor downloadExecutor = new OnboardingExecutor() {
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return generatePListResult(request, session);
-            }
-        });
+                @Override
+                public Result execute(OnboardingRequest request, Session session) throws OXException {
+                    return generatePListResult(request, session);
+                }
+            };
 
-        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", new OnboardingExecutor() {
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
+        }
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return generatePListResult(request, session);
-            }
-        });
+        {
+            OnboardingExecutor emailExecutor = new OnboardingExecutor() {
 
-        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.download", new OnboardingExecutor() {
+                @Override
+                public Result execute(OnboardingRequest request, Session session) throws OXException {
+                    return sendEmailResult(request, session);
+                }
+            };
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return generatePListResult(request, session);
-            }
-        });
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
+        }
 
+        {
+            OnboardingExecutor displayExecutor = new OnboardingExecutor() {
 
-        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", new OnboardingExecutor() {
+                @Override
+                public Result execute(OnboardingRequest request, Session session) throws OXException {
+                    return displayResult(request, session);
+                }
+            };
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return sendEmailResult(request, session);
-            }
-        });
-
-        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", new OnboardingExecutor() {
-
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return sendEmailResult(request, session);
-            }
-        });
-
-        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.email", new OnboardingExecutor() {
-
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return sendEmailResult(request, session);
-            }
-        });
-
-
-        executors.put(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", new OnboardingExecutor() {
-
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return displayResult(request, session);
-            }
-        });
-
-        executors.put(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", new OnboardingExecutor() {
-
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return displayResult(request, session);
-            }
-        });
-
-        executors.put(CommonEntity.APPLE_OSX.getId() + ".carddav.display", new OnboardingExecutor() {
-
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return displayResult(request, session);
-            }
-        });
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
+        }
     }
 
     @Override
     public String getId() {
-        return id;
+        return identifier;
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME, true, session);
+        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".displayName", CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME, true, session);
     }
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(id + ".iconName", session);
+        return OnboardingUtility.loadIconImageFromProperty(propertyPrefix + ".iconName", session);
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".description", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session);
+        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".description", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session);
     }
 
     @Override
@@ -229,103 +195,78 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             return false;
         }
 
-        return OnboardingUtility.getBoolValue("com.openexchange.onboarding.caldav.enabled", true, session);
+        return OnboardingUtility.getBoolValue(propertyPrefix + ".enabled", true, session);
     }
 
     @Override
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        List<EntityPath> paths = new ArrayList<EntityPath>(6);
-        {
-            List<Entity> path = new ArrayList<Entity>(4);
-            path.add(CommonEntity.APPLE_IOS);
-            path.add(CommonEntity.APPLE_IOS_IPAD);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
-        }
-        {
-            List<Entity> path = new ArrayList<Entity>(4);
-            path.add(CommonEntity.APPLE_IOS);
-            path.add(CommonEntity.APPLE_IOS_IPHONE);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
-        }
-        {
-            List<Entity> path = new ArrayList<Entity>(4);
-            path.add(CommonEntity.APPLE_OSX);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav", "com.openexchange.onboarding.carddav.", true));
-            paths.add(new DefaultEntityPath(Platform.APPLE, path));
-        }
+        List<EntityPath> paths = new ArrayList<EntityPath>(4);
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR));
         return paths;
     }
 
     @Override
-    public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
-        if ((CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(2);
+    public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
+        if (entityPath.matches(Device.APPLE_IPAD, Module.CALENDAR, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
-            // Via download or eMail
-            {
-                // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
-            }
+            // The download selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
 
             return selections;
-        } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
+        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CALENDAR, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
-            // Via download, SMS or eMail
-            {
-                // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
+            // The download selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
 
-                // The SMS selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.sms", id, "com.openexchange.onboarding.carddav.sms.", OnboardingType.SMS));
-            }
+            // The download selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.SMS));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
 
             return selections;
-        } else if ((CommonEntity.APPLE_OSX.getId() + ".carddav").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
 
-            // Via download or eMail
-            {
-                // The download selection
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.download", id, "com.openexchange.onboarding.carddav.download.", OnboardingType.DOWNLOAD));
-            }
+        } else if (entityPath.matches(Device.APPLE_MAC, Module.CALENDAR, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
+
+            // The download selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.email", id, "com.openexchange.onboarding.carddav.email.", OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_OSX.getId() + ".carddav.display", id, "com.openexchange.onboarding.carddav.display.", OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
 
             return selections;
         }
 
-        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(lastEntityId);
+        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityPath.getCompositeId());
     }
 
     @Override
     public Result execute(OnboardingRequest request, Session session) throws OXException {
-        String selectionId = request.getSelectionId();
-        if (null == selectionId) {
-            throw OnboardingExceptionCodes.CONFIGURATION_ID_MISSING.create();
+        OnboardingSelection selection = request.getSelection();
+        if (!selection.isEnabled(session)) {
+            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
         }
 
-        OnboardingExecutor onboardingExecutor = executors.get(selectionId);
+        OnboardingExecutor onboardingExecutor = executors.get(new OnboardingSelectionKey(selection));
         if (null == onboardingExecutor) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selectionId);
+            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
         }
 
         return onboardingExecutor.execute(request, session);
@@ -355,23 +296,15 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         return TransportProviderRegistry.getTransportProvider("smtp");
     }
 
-    private UserSettingMail getUserSettingMail(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserSettingMail();
-        }
-
-        return UserSettingMailStorage.getInstance().getUserSettingMail(session);
-    }
-
     Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
         Map<String, Object> formContent = request.getFormContent();
         if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         }
 
-        String emailAddress = (String) formContent.get(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonFormDescription.EMAIL_ADDRESS.getFirstFormElementName());
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
         }
 
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());

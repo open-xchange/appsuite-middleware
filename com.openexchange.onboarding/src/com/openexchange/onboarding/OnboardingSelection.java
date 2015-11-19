@@ -58,11 +58,18 @@ package com.openexchange.onboarding;
 public interface OnboardingSelection extends Entity {
 
     /**
-     * Gets the identifier of the associated on-boarding configuration
+     * Gets the identifier; e.g. <code>"apple.ipad/calendar/caldav/download"</code>
      *
-     * @return The on-boarding configuration identifier
+     * @return The identifier
      */
-    String getConfigurationId();
+    String getCompositeId();
+
+    /**
+     * Gets the associated entity path
+     *
+     * @return The entity path
+     */
+    EntityPath getEntityPath();
 
     /**
      * Gets the on-boarding type for this selection; e.g. download, via E-Mail, via SMS, etc.

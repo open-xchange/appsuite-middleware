@@ -50,6 +50,9 @@
 package com.openexchange.onboarding;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.osgi.Services;
+import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
@@ -61,36 +64,100 @@ import com.openexchange.session.Session;
 public class DefaultOnboardingSelection implements OnboardingSelection {
 
     /**
+     * Parses the on-boarding selection from specified composite identifier
+     *
+     * @param compositeId The composite identifier
+     * @return The parsed on-boarding selection
+     * @throws OXException If composite identifier is invalid or cannot be parsed
+     */
+    public static DefaultOnboardingSelection parseFrom(String compositeId) throws OXException {
+        if (null == compositeId) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create("null");
+        }
+
+        char delim = '/';
+
+        int off = 0;
+        int pos = compositeId.indexOf(delim, off);
+        if (pos < 0) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        Device device = Device.deviceFor(compositeId.substring(off, pos));
+        if (null == device) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        off = pos + 1;
+        pos = compositeId.indexOf(delim, off);
+        if (pos < 0) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        Module module = Module.moduleFor(compositeId.substring(off, pos));
+        if (null == module) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        off = pos + 1;
+        pos = compositeId.indexOf(delim, off);
+        if (pos < 0) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        OnboardingConfiguration configuration;
+        {
+            String serviceId = compositeId.substring(off, pos);
+            OnboardingConfigurationService onboardingConfigurationService = Services.optService(OnboardingConfigurationService.class);
+            if (null == onboardingConfigurationService) {
+                throw ServiceExceptionCode.absentService(OnboardingConfigurationService.class);
+            }
+            configuration = onboardingConfigurationService.getConfiguration(serviceId);
+        }
+
+        off = pos + 1;
+
+        OnboardingType type = OnboardingType.typeFor(compositeId.substring(off));
+        if (null == type) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        return newInstance(new DefaultEntityPath(configuration, device.getPlatform(), device, module), type);
+    }
+
+    /**
      * Creates a new {@code DefaultOnboardingSelection} instance
      *
-     * @param id The identifier
-     * @param configurationId The identifier of the associated on-boarding configuration
-     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav.email."</code>
+     * @param entityPath The entity path associated with the selection
      * @param type The on-boarding type
      * @return A new {@code DefaultOnboardingSelection} instance
      */
-    public static DefaultOnboardingSelection newInstance(String id, String configurationId, String prefix, OnboardingType type) {
-        return new DefaultOnboardingSelection(id, configurationId, prefix, type);
+    public static DefaultOnboardingSelection newInstance(EntityPath entityPath, OnboardingType type) {
+        return new DefaultOnboardingSelection(entityPath, type);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final String id;
-    private final String configurationId;
+    private final String enabledProperty;
     private final String displayNameProperty;
     private final String imageNameProperty;
     private final String descriptionProperty;
     private final OnboardingType type;
+    private final EntityPath entityPath;
 
-    private DefaultOnboardingSelection(String id, String configurationId, String prefix, OnboardingType type) {
+    private DefaultOnboardingSelection(EntityPath entityPath, OnboardingType type) {
         super();
-        int len = prefix.length();
-        StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
+        StringBuilder propertyNameBuilder = new StringBuilder("com.openexchange.onboarding.").append(entityPath.getService().getId()).append('.').append(type.getId()).append('.');
+        int len = propertyNameBuilder.length();
 
-        this.id = id;
-        this.configurationId = configurationId;
+        this.id = new StringBuilder(entityPath.getCompositeId()).append('/').append(type.getId()).toString();
         this.type = type;
+        this.entityPath = entityPath;
 
+        this.enabledProperty = propertyNameBuilder.append("enabled").toString();
+
+        propertyNameBuilder.setLength(len);
         this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
 
         propertyNameBuilder.setLength(len);
@@ -100,23 +167,9 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
         this.descriptionProperty = propertyNameBuilder.append("description").toString();
     }
 
-    /**
-     * Initializes a new {@link DefaultOnboardingSelection}.
-     *
-     * @param id The identifier
-     * @param configurationId The identifier of the associated on-boarding configuration
-     * @param displayNameProperty The property name for the display name
-     * @param imageNameProperty The property name for the icon image
-     * @param type The on-boarding type
-     */
-    public DefaultOnboardingSelection(String id, String configurationId, String displayNameProperty, String imageNameProperty, String descriptionProperty, OnboardingType type) {
-        super();
-        this.id = id;
-        this.configurationId = configurationId;
-        this.type = type;
-        this.displayNameProperty = displayNameProperty;
-        this.imageNameProperty = imageNameProperty;
-        this.descriptionProperty = descriptionProperty;
+    @Override
+    public EntityPath getEntityPath() {
+        return entityPath;
     }
 
     @Override
@@ -125,8 +178,8 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     }
 
     @Override
-    public String getConfigurationId() {
-        return configurationId;
+    public boolean isEnabled(Session session) throws OXException {
+        return OnboardingUtility.getBoolValue(enabledProperty, true, session);
     }
 
     @Override
@@ -135,7 +188,7 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     }
 
     @Override
-    public String getId() {
+    public String getCompositeId() {
         return id;
     }
 

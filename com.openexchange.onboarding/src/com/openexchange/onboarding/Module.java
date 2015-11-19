@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,25 +53,29 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link Platform} - A supported on-boarding platform.
+ * {@link Module} - An enumeration for available on-boarding modules.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements IdEntity {
+public enum Module implements IdEntity {
 
     /**
-     * The Apple platform for OSX Desktop applications and iOS devices.
+     * The E-Mail module for accessing/synchronizing E-Mails.
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "platform_icon_apple.png"),
+    EMAIL("email", OnboardingStrings.MODULE_EMAIL_DISPLAY_NAME, OnboardingStrings.MODULE_EMAIL_DESCRIPTION, "module_icon_email.png"),
     /**
-     * The Android/Google platform for Android devices
+     * The contacts module for accessing/synchronizing contacts.
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "platform_icon_android.png"),
+    CONTACTS("contacts", OnboardingStrings.MODULE_CONTACTS_DISPLAY_NAME, OnboardingStrings.MODULE_CONTACTS_DESCRIPTION, "module_icon_contacts.png"),
     /**
-     * The Windows platform for Windows Desktop applications.
+     * The calendar module for accessing/synchronizing events.
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "platform_icon_windows.png"),
+    CALENDAR("calendar", OnboardingStrings.MODULE_CALENDAR_DISPLAY_NAME, OnboardingStrings.MODULE_CALENDAR_DESCRIPTION, "module_icon_calendar.png"),
+    /**
+     * The Drive module for accessing/synchronizing files.
+     */
+    DRIVE("drive", OnboardingStrings.MODULE_DRIVE_DISPLAY_NAME, OnboardingStrings.MODULE_DRIVE_DESCRIPTION, "module_icon_drive.png"),
     ;
 
     private final String id;
@@ -85,10 +89,10 @@ public enum Platform implements IdEntity {
     private final String defaultIcon;
     private final String defaultDescription;
 
-    private Platform(String id, String defaultDisplayName, String defaultDescription, String defaultIcon) {
+    private Module(String id, String defaultDisplayName, String defaultDescription, String defaultIcon) {
         this.id = id;
 
-        String prefix = "com.openexchange.onboarding." + id;
+        String prefix = "com.openexchange.onboarding.module." + id;
         enabledProperty = prefix + ".enabled";
         displayNameProperty = prefix + ".displayName";
         iconProperty = prefix + ".icon";
@@ -125,21 +129,22 @@ public enum Platform implements IdEntity {
     }
 
     /**
-     * Gets the platform for specified identifier
+     * Gets the module for specified identifier
      *
      * @param id The identifier to look-up
-     * @return The associated platform or <code>null</code>
+     * @return The associated module or <code>null</code>
      */
-    public static Platform platformFor(String id) {
+    public static Module moduleFor(String id) {
         if (null == id) {
             return null;
         }
 
-        for (Platform platform : values()) {
-            if (id.equals(platform.getId())) {
-                return platform;
+        for (Module module : values()) {
+            if (id.equals(module.getId())) {
+                return module;
             }
         }
         return null;
     }
+
 }
