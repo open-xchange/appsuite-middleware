@@ -114,7 +114,11 @@ public class ExecuteAction extends AbstractOnboardingAction {
         Object resultObject = onboardingResult.getResultObject();
         if (null != resultObject) {
             String format = onboardingResult.getFormat();
-            return null == format ? new AJAXRequestResult(resultObject) : new AJAXRequestResult(resultObject, format);
+            if (null == format) {
+                return new AJAXRequestResult(resultObject);
+            }
+            requestData.setFormat(format);
+            return new AJAXRequestResult(resultObject, format);
         }
 
         Map<String, Object> formConfiguration = onboardingResult.getFormConfiguration();

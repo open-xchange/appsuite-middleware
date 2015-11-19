@@ -445,7 +445,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.addStringValue("EmailAccountType", "EmailTypeIMAP");
 
         // Designates the full email address for the account. If not present in the payload, the device prompts for this string during profile installation.
-        payloadContent.addStringValue("EmailAccountType", getUserSettingMail(session).getSendAddr());
+        payloadContent.addStringValue("EmailAddress", getUserSettingMail(session).getSendAddr());
 
 
         // Designates the authentication scheme for incoming mail. Allowed values are EmailAuthPassword and EmailAuthNone.
@@ -532,6 +532,8 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
         pListDict.setPayloadType("Configuration");
         pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadUUID", PROFILE_IMAP_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
+        pListDict.setPayloadDisplayName(OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_DISPLAY_NAME, session));
+        // pListDict.setPayloadDescription(OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
         pListDict.setPayloadContent(payloadContent);
 
         return pListDict;
