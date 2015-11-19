@@ -152,14 +152,14 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         Databases.close(obj);
     }
 
-    private static void addTrace(final OXException dbe,
-        final PooledData<Connection> data) {
+    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
         if (null != data.getTrace()) {
             dbe.setStackTrace(data.getTrace());
         }
     }
 
     private static volatile Integer usageThreshold;
+
     private static int usageThreshold() {
         Integer tmp = usageThreshold;
         if (null == tmp) {
@@ -221,11 +221,15 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     addTrace(dbe, data);
                     String openStatement = "";
                     if (con instanceof com.mysql.jdbc.ConnectionImpl) {
-                        Field field = ((com.mysql.jdbc.ConnectionImpl) con).getClass().getField("openStatements");
-                        field.setAccessible(true);
-                        Map<Statement, Statement> open = (Map<Statement, Statement>) field.get(con);
-                        for (Entry<Statement, Statement> entry : open.entrySet()) {
-                            openStatement = entry.getKey().toString();
+                        try {
+                            Field field = ((com.mysql.jdbc.ConnectionImpl) con).getClass().getField("openStatements");
+                            field.setAccessible(true);
+                            Map<Statement, Statement> open = (Map<Statement, Statement>) field.get(con);
+                            for (Entry<Statement, Statement> entry : open.entrySet()) {
+                                openStatement = entry.getKey().toString();
+                            }
+                        } catch (NoSuchFieldException nsfe) {
+                            // Unable to retrieve openStatements content. Just log that there is an open statement...
                         }
                     }
                     ConnectionPool.LOG.error(openStatement, dbe);
