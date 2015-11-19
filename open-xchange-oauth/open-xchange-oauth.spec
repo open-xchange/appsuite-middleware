@@ -87,15 +87,20 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property com.openexchange.oauth.xing.consumerSecret REPLACE_THIS_WITH_YOUR_XING_PRODUCTIVE_CONSUMER_SECRET /opt/open-xchange/etc/xingoauth.properties
 
     # SoftwareChange_Request-2410
-    VALUE=$(ox_read_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties)
-    if [ "" != "$VALUE" ]; then
-        ox_add_property com.openexchange.oauth.twitter.apiKey "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
-        ox_remove_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties
-    fi
-    VALUE=$(ox_read_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties)
-    if [ "" != "$VALUE" ]; then
-        ox_add_property com.openexchange.oauth.twitter.apiSecret "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
-        ox_remove_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties
+    if [ -e /opt/open-xchange/etc/twitter.properties ]; then
+        VALUE=$(ox_read_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties)
+        if [ "" != "$VALUE" ]; then
+            ox_add_property com.openexchange.oauth.twitter.apiKey "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+            ox_remove_property com.openexchange.twitter.consumerKey /opt/open-xchange/etc/twitter.properties
+        fi
+        VALUE=$(ox_read_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties)
+        if [ "" != "$VALUE" ]; then
+            ox_add_property com.openexchange.oauth.twitter.apiSecret "$VALUE" /opt/open-xchange/etc/twitteroauth.properties
+            ox_remove_property com.openexchange.twitter.consumerSecret /opt/open-xchange/etc/twitter.properties
+        fi
+    else
+        ox_add_property com.openexchange.oauth.twitter.apiKey INSERT_YOUR_CONSUMER_KEY_HERE /opt/open-xchange/etc/twitteroauth.properties
+        ox_add_property com.openexchange.oauth.twitter.apiSecret INSERT_YOUR_CONSUMER_SECRET_HERE /opt/open-xchange/etc/twitteroauth.properties
     fi
 
     # SoftwareChange_Request-2532
