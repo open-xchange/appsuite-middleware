@@ -83,7 +83,7 @@ public class UploadChunk implements Closeable {
     public UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
         super();
         this.fileHolder = fileHolder;
-        this.md5digest = Base64.encode(md5digest);
+        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
     }
 
     /**
@@ -108,7 +108,7 @@ public class UploadChunk implements Closeable {
     /**
      * Gets the MD5 digest,
      *
-     * @return The MD5 digest
+     * @return The MD5 digest or <code>null</code>
      */
     public String getMD5Digest() {
         return md5digest;
