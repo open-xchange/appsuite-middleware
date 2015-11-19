@@ -93,6 +93,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
         }
 
         JSONArray result = new JSONArray(services.size() << 1);
+        AJAXRequestResult requestResult = new AJAXRequestResult(result);
+
         for (FileStorageService fsService : services) {
             // Get the accounts associated with current file storage service
             List<FileStorageAccount> userAccounts = null;
@@ -103,6 +105,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
             }
 
+
             // Iterate accounts and append its JSON representation
             for (FileStorageAccount account : userAccounts) {
                 try {
@@ -110,7 +113,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     result.put(writer.write(account, rootFolder));
                 } catch (OXException e) {
                     if (!e.equalsCode(6, "OAUTH")) {
-                        throw e;
+                        // Set as error
+                        requestResult.setException(e);
                     }
                     // "OAUTH-0006" --> OAuth account not found
                     try {
@@ -122,7 +126,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
             }
         }
 
-        return new AJAXRequestResult(result);
+        return requestResult;
     }
 
 }
