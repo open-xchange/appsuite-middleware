@@ -284,6 +284,9 @@ public class OnboardingUtility {
 
             MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
             return new DefaultIcon(imageBytes, null == mimeTypeMap ? null : mimeTypeMap.getContentType(imageName));
+        } catch (java.io.FileNotFoundException e) {
+            LOG.warn("Icon image {} does not exist in path {}.", imageName, templatesPath);
+            return null;
         } catch (IOException e) {
             LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
             return null;
