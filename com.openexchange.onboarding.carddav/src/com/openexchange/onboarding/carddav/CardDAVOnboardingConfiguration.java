@@ -130,9 +130,9 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingType.DOWNLOAD), downloadExecutor);
         }
 
         {
@@ -144,9 +144,9 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingType.EMAIL), emailExecutor);
         }
 
         {
@@ -158,9 +158,9 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingType.DISPLAY), displayExecutor);
         }
     }
 
@@ -201,15 +201,15 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     @Override
     public List<EntityPath> getEntityPaths(Session session) throws OXException {
         List<EntityPath> paths = new ArrayList<EntityPath>(4);
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS));
         return paths;
     }
 
     @Override
     public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
-        if (entityPath.matches(Device.APPLE_IPAD, Module.CALENDAR, identifier)) {
+        if (entityPath.matches(Device.APPLE_IPAD, Module.CONTACTS, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
@@ -222,7 +222,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
 
             return selections;
-        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CALENDAR, identifier)) {
+        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CONTACTS, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
@@ -239,7 +239,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             return selections;
 
-        } else if (entityPath.matches(Device.APPLE_MAC, Module.CALENDAR, identifier)) {
+        } else if (entityPath.matches(Device.APPLE_MAC, Module.CONTACTS, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
