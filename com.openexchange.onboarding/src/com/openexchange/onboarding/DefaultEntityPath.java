@@ -100,14 +100,22 @@ public class DefaultEntityPath implements EntityPath {
     }
 
     @Override
-    public boolean matches(Device device, Module module) {
+    public boolean matches(Device device, Module module, String serviceId) {
         if (this.device != device) {
             return false;
         }
         if (this.module != module) {
             return false;
         }
-        return true;
+        return service.getId().equals(serviceId);
+    }
+
+    @Override
+    public boolean matches(Device device, String serviceId) {
+        if (this.device != device) {
+            return false;
+        }
+        return service.getId().equals(serviceId);
     }
 
     @Override

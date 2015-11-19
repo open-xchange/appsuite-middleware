@@ -71,8 +71,6 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.mail.usersetting.UserSettingMail;
-import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.CommonForms;
@@ -98,7 +96,6 @@ import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link CalDAVOnboardingConfiguration}
@@ -211,7 +208,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     @Override
     public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
-        if (entityPath.matches(Device.APPLE_IPAD, Module.CALENDAR)) {
+        if (entityPath.matches(Device.APPLE_IPAD, Module.CALENDAR, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
@@ -224,7 +221,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
 
             return selections;
-        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CALENDAR)) {
+        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CALENDAR, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
@@ -241,7 +238,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
             return selections;
 
-        } else if (entityPath.matches(Device.APPLE_MAC, Module.CALENDAR)) {
+        } else if (entityPath.matches(Device.APPLE_MAC, Module.CALENDAR, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
@@ -295,14 +292,6 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
 
     private TransportProvider getTransportProvider() {
         return TransportProviderRegistry.getTransportProvider("smtp");
-    }
-
-    private UserSettingMail getUserSettingMail(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserSettingMail();
-        }
-
-        return UserSettingMailStorage.getInstance().getUserSettingMail(session);
     }
 
     Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {

@@ -47,77 +47,34 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.imap;
 
-import java.util.Iterator;
+import com.openexchange.i18n.LocalizableStrings;
+
 
 /**
- * {@link EntityPath} - Represents a path in the configuration to a certain on-boarding configuration option.
+ * {@link IMAPOnboardingStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface EntityPath {
+public class IMAPOnboardingStrings implements LocalizableStrings {
 
     /**
-     * Gets the composite identifier; e.g. <code>"apple.ipad/calendar/caldav"</code>
-     *
-     * @return The composite identifier
+     * Initializes a new {@link IMAPOnboardingStrings}.
      */
-    String getCompositeId();
+    private IMAPOnboardingStrings() {
+        super();
+    }
 
-    /**
-     * Gets the associated on-boarding configuration service.
-     *
-     * @return The on-boarding configuration service
-     */
-    OnboardingConfiguration getService();
+    // The default display name for an IMAP account
+    public static final String IMAP_DISPLAY_NAME = "IMAP";
 
-    /**
-     * Gets the associated platform.
-     *
-     * @return The supported platform
-     */
-    Platform getPlatform();
+    // A description for an IMAP account on a mobile device
+    public static final String IMAP_ACCOUNT_DESCRIPTION = "The IMAP account for synchronizing E-Mails with Open-Xchange Server.";
 
-    /**
-     * Gets the associated module.
-     *
-     * @return The supported module
-     */
-    Module getModule();
+    public static final String IMAP_TEXT_PROFILE = "Your IMAP profile";
 
-    /**
-     * Gets the associated device.
-     *
-     * @return The supported device
-     */
-    Device getDevice();
-
-    /**
-     * Checks if this entity path matches the specified arguments.
-     *
-     * @param device The device
-     * @param module The module
-     * @param serviceId The identifier of the on-boarding configuration service
-     * @return <code>true</code> if this entity path matches; otherwise <code>false</code>
-     */
-    boolean matches(Device device, Module module, String serviceId);
-
-    /**
-     * Checks if this entity path matches the specified arguments.
-     *
-     * @param device The device
-     * @param serviceId The identifier of the on-boarding configuration service
-     * @return <code>true</code> if this entity path matches; otherwise <code>false</code>
-     */
-    boolean matches(Device device, String serviceId);
-
-    /**
-     * Gets additional entity paths.
-     *
-     * @return An {@link Iterator} instance or <code>null</code>
-     */
-    Iterator<IdEntity> iterator();
+    public static final String IMAP_TEXT_SETTINGS = "Your IMAP settings";
 
 }

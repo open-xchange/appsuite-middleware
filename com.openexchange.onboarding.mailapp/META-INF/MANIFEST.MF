@@ -5,8 +5,10 @@ Bundle-SymbolicName: com.openexchange.onboarding.mailapp
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config,
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.onboarding,
  com.openexchange.osgi,

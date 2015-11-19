@@ -49,22 +49,19 @@
 
 package com.openexchange.onboarding.mailapp;
 
-import static com.openexchange.onboarding.OnboardingUtility.isAndroidPhone;
-import static com.openexchange.onboarding.OnboardingUtility.isAndroidTablet;
-import static com.openexchange.onboarding.OnboardingUtility.isIPad;
-import static com.openexchange.onboarding.OnboardingUtility.isIPhone;
+import static com.openexchange.onboarding.OnboardingSelectionKey.keyFor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.ClientInfo;
-import com.openexchange.onboarding.CommonEntity;
-import com.openexchange.onboarding.DefaultEntity;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.IdEntity;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -72,10 +69,12 @@ import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
+import com.openexchange.onboarding.OnboardingSelectionKey;
 import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -89,8 +88,9 @@ import com.openexchange.session.Session;
 public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
 
     private final ServiceLookup services;
-    private final String id;
-    private final Map<String, OnboardingExecutor> executors;
+    private final String propertyPrefix;
+    private final String identifier;
+    private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
 
     /**
      * Initializes a new {@link MailAppOnboardingConfiguration}.
@@ -98,140 +98,146 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
     public MailAppOnboardingConfiguration(ServiceLookup services) {
         super();
         this.services = services;
-        this.id = "com.openexchange.onboarding.mailapp";
-        this.executors = new HashMap<String, OnboardingExecutor>();
+        propertyPrefix = "com.openexchange.onboarding.mailapp";
+        identifier = "mailapp";
+        this.executors = new HashMap<OnboardingSelectionKey, OnboardingExecutor>(16);
 
-        OnboardingExecutor displayExecutor = new OnboardingExecutor() {
+        {
+            OnboardingExecutor displayExecutor = new OnboardingExecutor() {
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return displayResult(request, session);
-            }
-        };
-        this.executors.put("apple.ios.iphone.mailapp.display", displayExecutor);
-        this.executors.put("apple.ios.ipad.mailapp.display", displayExecutor);
-        this.executors.put("android.phone.mailapp.display", displayExecutor);
-        this.executors.put("android.tablet.mailapp.display", displayExecutor);
+                @Override
+                public Result execute(OnboardingRequest request, Session session) throws OXException {
+                    return displayResult(request, session);
+                }
+            };
 
-        OnboardingExecutor redirectExecutor = new OnboardingExecutor() {
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
+        }
 
-            @Override
-            public Result execute(OnboardingRequest request, Session session) throws OXException {
-                return redirectResult(request);
-            }
-        };
-        this.executors.put("apple.ios.iphone.mailapp.link", redirectExecutor);
-        this.executors.put("apple.ios.ipad.mailapp.link", redirectExecutor);
-        this.executors.put("android.phone.mailapp.link", redirectExecutor);
-        this.executors.put("android.tablet.mailapp.link", redirectExecutor);
+        {
+            OnboardingExecutor redirectExecutor = new OnboardingExecutor() {
+
+                @Override
+                public Result execute(OnboardingRequest request, Session session) throws OXException {
+                    return redirectResult(request);
+                }
+            };
+
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
+        }
     }
 
     @Override
     public String getId() {
-        return id;
+        return identifier;
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".displayName", MailAppOnboardingStrings.MAILAPP_DISPLAY_NAME, true, session);
+        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".displayName", MailAppOnboardingStrings.MAILAPP_DISPLAY_NAME, true, session);
     }
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty("com.openexchange.onboarding.mailapp.icon", session);
+        return OnboardingUtility.loadIconImageFromProperty(propertyPrefix + ".iconName", session);
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(id + ".description", MailAppOnboardingStrings.MAILAPP_DESCRIPTION, true, session);
+        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".description", MailAppOnboardingStrings.MAILAPP_DESCRIPTION, true, session);
     }
 
     @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        String selectionId = request.getSelectionId();
-        if (null == selectionId) {
-            throw OnboardingExceptionCodes.CONFIGURATION_ID_MISSING.create();
+    public boolean isEnabled(Session session) throws OXException {
+        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+        if (null == capabilityService) {
+            throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
 
-        OnboardingExecutor onboardingExecutor = executors.get(selectionId);
-        if (null == onboardingExecutor) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selectionId);
+        if (false == capabilityService.getCapabilities(session).contains(Permission.WEBMAIL.getCapabilityName())) {
+            return false;
         }
 
-        return onboardingExecutor.execute(request, session);
+        return OnboardingUtility.getBoolValue(propertyPrefix + ".enabled", true, session);
     }
 
     @Override
-    public boolean isEnabled(Session session) {
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-        return configService.getBoolProperty("com.openexchange.onboarding.mailapp.enabled", true);
-    }
-
-    @Override
-    public List<EntityPath> getEntityPaths(Session session) {
-        List<EntityPath> paths = new ArrayList<EntityPath>(5);
-        {
-            List<IdEntity> path = new ArrayList<IdEntity>(4);
-            path.add(CommonEntity.APPLE_IOS);
-            path.add(CommonEntity.APPLE_IOS_IPAD);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".mailapp", "com.openexchange.onboarding.mailapp.", true));
-            paths.add(new DefaultEntityPath(path, Platform.APPLE));
-        }
-        {
-            List<IdEntity> path = new ArrayList<IdEntity>(4);
-            path.add(CommonEntity.APPLE_IOS);
-            path.add(CommonEntity.APPLE_IOS_IPHONE);
-            path.add(DefaultEntity.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".mailapp", "com.openexchange.onboarding.mailapp.", true));
-            paths.add(new DefaultEntityPath(path, Platform.APPLE));
-        }
-        {
-            List<IdEntity> path = new ArrayList<IdEntity>(4);
-            path.add(CommonEntity.ANDROID_PHONE);
-            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".mailapp", "com.openexchange.onboarding.mailapp.", true));
-            paths.add(new DefaultEntityPath(path, Platform.ANDROID_GOOGLE));
-        }
-        {
-            List<IdEntity> path = new ArrayList<IdEntity>(4);
-            path.add(CommonEntity.ANDROID_TABLET);
-            path.add(DefaultEntity.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".mailapp", "com.openexchange.onboarding.mailapp.", true));
-            paths.add(new DefaultEntityPath(path, Platform.ANDROID_GOOGLE));
-        }
+    public List<EntityPath> getEntityPaths(Session session) throws OXException {
+        List<EntityPath> paths = new ArrayList<EntityPath>(4);
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL));
+        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL));
+        paths.add(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL));
+        paths.add(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL));
         return paths;
     }
 
     @Override
-    public List<OnboardingSelection> getSelections(String lastEntityId, ClientInfo clientInfo, Session session) throws OXException {
-        if ((CommonEntity.APPLE_IOS_IPAD.getId() + ".mailapp").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(2);
-            if (isIPad(clientInfo)) {
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".mailapp.download", id, "com.openexchange.onboarding.mailapp.link.", OnboardingType.LINK));
-            }
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPAD.getId() + ".mailapp.display", id, "com.openexchange.onboarding.mailapp.display.", OnboardingType.DISPLAY));
+    public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
+        if (entityPath.matches(Device.APPLE_IPAD, Module.EMAIL, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
+
+            // The link selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+
             return selections;
-        } else if ((CommonEntity.APPLE_IOS_IPHONE.getId() + ".mailapp").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
-            if (isIPhone(clientInfo)) {
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".mailapp.download", id, "com.openexchange.onboarding.mailapp.link.", OnboardingType.LINK));
-            }
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.APPLE_IOS_IPHONE.getId() + ".mailapp.display", id, "com.openexchange.onboarding.mailapp.display.", OnboardingType.DISPLAY));
+        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.EMAIL, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
+
+            // The link selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+
             return selections;
-        } else if ((CommonEntity.ANDROID_PHONE.getId() + ".mailapp").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
-            if (isAndroidPhone(clientInfo)) {
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".mailapp.download", id, "com.openexchange.onboarding.mailapp.link.", OnboardingType.LINK));
-            }
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_PHONE.getId() + ".mailapp.display", id, "com.openexchange.onboarding.mailapp.display.", OnboardingType.DISPLAY));
+
+        } else if (entityPath.matches(Device.ANDROID_PHONE, Module.EMAIL, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
+
+            // The link selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+
             return selections;
-        } else if ((CommonEntity.ANDROID_TABLET.getId() + ".mailapp").equals(lastEntityId)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(3);
-            if (isAndroidTablet(clientInfo)) {
-                selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".mailapp.download", id, "com.openexchange.onboarding.mailapp.link.", OnboardingType.LINK));
-            }
-            selections.add(DefaultOnboardingSelection.newInstance(CommonEntity.ANDROID_TABLET.getId() + ".mailapp.display", id, "com.openexchange.onboarding.mailapp.display.", OnboardingType.DISPLAY));
+        } else if (entityPath.matches(Device.ANDROID_TABLET, Module.EMAIL, identifier)) {
+            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
+
+            // The link selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+
+            // The display settings selection
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+
             return selections;
         }
 
-        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(lastEntityId);
+        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityPath.getCompositeId());
+    }
+
+    @Override
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
+        OnboardingSelection selection = request.getSelection();
+        if (!selection.isEnabled(session)) {
+            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
+        }
+
+        OnboardingExecutor onboardingExecutor = executors.get(new OnboardingSelectionKey(selection));
+        if (null == onboardingExecutor) {
+            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
+        }
+
+        return onboardingExecutor.execute(request, session);
     }
 
     Result displayResult(OnboardingRequest request, Session session) throws OXException {
@@ -248,12 +254,12 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
 
     private String getAppStoreLink(OnboardingRequest request) throws OXException {
         ConfigurationService configService = services.getService(ConfigurationService.class);
-        if (request.getSelectionId().startsWith(Platform.APPLE.getId())) {
+        if (request.getSelection().getCompositeId().startsWith(Platform.APPLE.getId())) {
             return configService.getProperty("com.openexchange.onboarding.mailapp.store.appstore");
-        } else if (request.getSelectionId().startsWith(Platform.ANDROID_GOOGLE.getId())) {
+        } else if (request.getSelection().getCompositeId().startsWith(Platform.ANDROID_GOOGLE.getId())) {
             return configService.getProperty("com.openexchange.onboarding.mailapp.store.playstore");
         }
-        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(request.getSelectionId());
+        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(request.getSelection().getCompositeId());
     }
 
 }
