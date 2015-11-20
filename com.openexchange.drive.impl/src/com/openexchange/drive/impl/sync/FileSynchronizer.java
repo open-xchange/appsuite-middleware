@@ -380,14 +380,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             /*
              * name clash for new/modified files, check file equivalence
              */
-            if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
-                /*
-                 * server's metadata file always wins, let client re-download the file
-                 */
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
-                return 1;
-            } else if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
+            if (Change.NONE.equals(Change.get(comparison.getClientVersion(), comparison.getServerVersion()))) {
                 /*
                  * same file version, let client update it's metadata
                  */
@@ -395,7 +388,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 result.addActionForClient(new AcknowledgeFileAction(session,
                     comparison.getOriginalVersion(), comparison.getClientVersion(), comparison, path, serverFileVersion.getFile()));
                 return 0;
-            } else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
+            } else if (session.getDriveSession().useDriveMeta() && DriveConstants.METADATA_FILENAME.equals(comparison.getServerVersion().getName())) {
+                /*
+                 * server's metadata file always wins, let client re-download the file
+                 */
+                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                return 1;
+            }  else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
                 comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
                 false == comparison.getClientVersion().getName().equals(comparison.getServerVersion().getName())) {
                 /*
