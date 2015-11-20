@@ -1146,7 +1146,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                         if (null == executionError) {
                             oxcox.enable(ctx);
                         } else {
-                            LOGGER.warn("An executino error occurred during \"movefilestore\" for context {}. Context will stay disabled.", ctx.getId(), executionError.getCause());
+                            LOGGER.warn("An execution error occurred during \"movefilestore\" for context {}. Context will stay disabled.", ctx.getId(), executionError.getCause());
                         }
                     }
                 });

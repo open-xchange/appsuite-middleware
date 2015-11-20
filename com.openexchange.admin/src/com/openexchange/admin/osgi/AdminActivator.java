@@ -80,6 +80,7 @@ import com.openexchange.admin.plugins.OXUserPluginInterface;
 import com.openexchange.admin.plugins.UserServiceInterceptorBridge;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.services.PluginInterfaces;
+import com.openexchange.admin.taskmanagement.TaskManager;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.admin.tools.PropertyHandlerExtended;
@@ -274,6 +275,14 @@ public class AdminActivator extends HousekeepingActivator {
     @Override
     public void stopBundle() throws Exception {
         cleanUp();
+
+        {
+            TaskManager taskManager = TaskManager.getInstance();
+            if (null != taskManager) {
+                taskManager.shutdown();
+            }
+        }
+
         PluginInterfaces.setInstance(null);
         final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdminActivator.class);
         log.info("Stopping RMI...");
