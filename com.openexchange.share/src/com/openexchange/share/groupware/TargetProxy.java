@@ -114,12 +114,25 @@ public interface TargetProxy {
     void removePermissions(List<TargetPermission> permissions);
 
     /**
+     * Marks this target proxy as "dirty", so that the underlying item is going to be updated independently of changed permission, i.e.
+     * after certain changes to a guest account have been performed like changing the password or expiry time.
+     */
+    void touch();
+
+    /**
      * Returns whether the underlying object has been modified.
      *
      * @return <code>true</code> if any destructive methods have been called on this instance
      *         (e.g. {@link #applyPermissions(List)}), otherwise <code>false</code>.
      */
     boolean wasModified();
+
+    /**
+     * Gets a value indicating whether the item has been marked for being "touched" or not.
+     *
+     * @return <code>true</code> if the underlying object was touched, <code>false</code>, otherwise
+     */
+    boolean wasTouched();
 
     /**
      * Returns the type of the {@link TargetProxy}

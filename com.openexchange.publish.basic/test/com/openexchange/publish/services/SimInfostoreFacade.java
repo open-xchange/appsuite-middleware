@@ -377,4 +377,9 @@ public class SimInfostoreFacade implements InfostoreFacade {
         return null;
     }
 
+    @Override
+    public void touch(int id, Context context) throws OXException {
+        //
+    }
+
 }

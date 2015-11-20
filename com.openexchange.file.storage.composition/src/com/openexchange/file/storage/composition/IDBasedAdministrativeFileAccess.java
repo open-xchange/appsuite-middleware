@@ -109,6 +109,14 @@ public interface IDBasedAdministrativeFileAccess {
     void saveFileMetadata(File document, long sequenceNumber, List<File.Field> modifiedColumns) throws OXException;
 
     /**
+     * Updates a files sequence number
+     *
+     * @param id The file whose sequence number should be updated
+     * @throws OXException If operation fails
+     */
+    void touch(String id) throws OXException;
+
+    /**
      * Removes the file with the given identifier. This method always results in a hard delete
      * of the according file.<br>
      * <br>

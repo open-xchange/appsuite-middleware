@@ -254,6 +254,37 @@ public class FileStorageHandler implements ModuleHandler {
         }
     }
 
+    @Override
+    public void touchObjects(List<TargetProxy> touched, HandlerParameters parameters) throws OXException {
+        ConnectionHolder.CONNECTION.set(parameters.getWriteCon());
+        try {
+            if (parameters.isAdministrative()) {
+                IDBasedAdministrativeFileAccess fileAccess = getAdministrativeFileAccess(parameters.getContext());
+                for (TargetProxy proxy : touched) {
+                    File file = ((FileTargetProxy) proxy).getFile();
+                    fileAccess.saveFileMetadata(file, file.getLastModified().getTime(), Collections.singletonList(Field.OBJECT_PERMISSIONS));
+                }
+            } else {
+                IDBasedFileAccess fileAccess = getFileAccess(parameters.getSession());
+                try {
+                    fileAccess.startTransaction();
+                    for (TargetProxy proxy : touched) {
+                        File file = ((FileTargetProxy) proxy).getFile();
+                        fileAccess.touch(file.getId());
+                    }
+                    fileAccess.commit();
+                } catch (OXException e) {
+                    fileAccess.rollback();
+                    throw e;
+                } finally {
+                    fileAccess.finish();
+                }
+            }
+        } finally {
+            ConnectionHolder.CONNECTION.set(null);
+        }
+    }
+
     private IDBasedAdministrativeFileAccess getAdministrativeFileAccess(Context context) throws OXException {
         IDBasedFileAccessFactory factory = requireService(IDBasedFileAccessFactory.class, services);
         return factory.createAccess(context.getContextId());

@@ -287,7 +287,9 @@ public class DefaultShareService implements ShareService {
         ConnectionHelper connectionHelper = new ConnectionHelper(session, services, true);
         try {
             connectionHelper.start();
-            TargetProxy targetProxy = moduleSupport.load(target, session);
+            TargetUpdate targetUpdate = moduleSupport.prepareUpdate(session, connectionHelper.getConnection());
+            targetUpdate.fetch(Collections.singletonList(target));
+            TargetProxy targetProxy = targetUpdate.get(target);
             if (false == targetProxy.mayAdjust()) {
                 throw ShareExceptionCodes.NO_EDIT_PERMISSIONS.create(I(session.getUserId()), target, I(session.getContextId()));
             }
@@ -310,6 +312,10 @@ public class DefaultShareService implements ShareService {
                 String expiryDateValue = null != linkUpdate.getExpiryDate() ? String.valueOf(linkUpdate.getExpiryDate().getTime()) : null;
                 userService.setAttribute(connectionHelper.getConnection(), ShareTool.EXPIRY_DATE_USER_ATTRIBUTE, expiryDateValue, guest.getId(), context);
                 guestUserUpdated = true;
+            }
+            if (guestUserUpdated) {
+                targetProxy.touch();
+                targetUpdate.run();
             }
             connectionHelper.commit();
             if (guestUserUpdated) {
