@@ -237,7 +237,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
 
-        return new AmazonS3ClientInfo(client, true);
+        return new AmazonS3ClientInfo(client, encrypted);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
