@@ -58,6 +58,12 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2492
     ox_add_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $PFILE
+
+    # SoftwareChange_Request-2864
+    ox_add_property com.openexchange.http.grizzly.keepAlive true $PFILE
+    ox_add_property com.openexchange.http.grizzly.tcpNoDelay true $PFILE
+    ox_add_property com.openexchange.http.grizzly.readTimeoutMillis 60000 $PFILE
+    ox_add_property com.openexchange.http.grizzly.writeTimeoutMillis 60000 $PFILE
 fi
 
 %clean
