@@ -184,6 +184,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "faxBusiness",
     "faxHome",
     "faxOther",
+    "filestoreId",
+    "filestoreName",
     "folderTree",
     "givenName",
     "guiPreferencesForSoap",
@@ -208,6 +210,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "mailenabled",
     "managerName",
     "maritalStatus",
+    "maxQuota",
     "middleName",
     "name",
     "nickname",
@@ -260,6 +263,7 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "uploadFileSizeLimit",
     "uploadFileSizeLimitPerFile",
     "url",
+    "usedQuota",
     "userAttributes",
     "userfield01",
     "userfield02",
@@ -344,6 +348,10 @@ public class User {
     @XmlElement(name = "fax_other", nillable = true)
     protected String faxOther;
     @XmlElement(nillable = true)
+    protected Integer filestoreId;
+    @XmlElement(name = "filestore_name", nillable = true)
+    protected String filestoreName;
+    @XmlElement(nillable = true)
     protected Integer folderTree;
     @XmlElement(name = "given_name", nillable = true)
     protected String givenName;
@@ -390,6 +398,8 @@ public class User {
     protected String managerName;
     @XmlElement(name = "marital_status", nillable = true)
     protected String maritalStatus;
+    @XmlElement(nillable = true)
+    protected Long maxQuota;
     @XmlElement(name = "middle_name", nillable = true)
     protected String middleName;
     @XmlElement(nillable = true)
@@ -493,6 +503,8 @@ public class User {
     protected Integer uploadFileSizeLimitPerFile;
     @XmlElement(nillable = true)
     protected String url;
+    @XmlElement(nillable = true)
+    protected Long usedQuota;
     @XmlElement(nillable = true)
     protected SOAPStringMapMap userAttributes;
     @XmlElement(nillable = true)
@@ -1244,6 +1256,54 @@ public class User {
     }
 
     /**
+     * Ruft den Wert der filestoreId-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link Integer }
+     *
+     */
+    public Integer getFilestoreId() {
+        return filestoreId;
+    }
+
+    /**
+     * Legt den Wert der filestoreId-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link Integer }
+     *
+     */
+    public void setFilestoreId(Integer value) {
+        this.filestoreId = value;
+    }
+
+    /**
+     * Ruft den Wert der filestoreName-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link String }
+     *
+     */
+    public String getFilestoreName() {
+        return filestoreName;
+    }
+
+    /**
+     * Legt den Wert der filestoreName-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *
+     */
+    public void setFilestoreName(String value) {
+        this.filestoreName = value;
+    }
+
+    /**
      * Ruft den Wert der folderTree-Eigenschaft ab.
      *
      * @return
@@ -1818,6 +1878,30 @@ public class User {
      */
     public void setMaritalStatus(String value) {
         this.maritalStatus = value;
+    }
+
+    /**
+     * Ruft den Wert der maxQuota-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link Long }
+     *
+     */
+    public Long getMaxQuota() {
+        return maxQuota;
+    }
+
+    /**
+     * Legt den Wert der maxQuota-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link Long }
+     *
+     */
+    public void setMaxQuota(Long value) {
+        this.maxQuota = value;
     }
 
     /**
@@ -3066,6 +3150,30 @@ public class User {
      */
     public void setUrl(String value) {
         this.url = value;
+    }
+
+    /**
+     * Ruft den Wert der usedQuota-Eigenschaft ab.
+     *
+     * @return
+     *     possible object is
+     *     {@link Long }
+     *
+     */
+    public Long getUsedQuota() {
+        return usedQuota;
+    }
+
+    /**
+     * Legt den Wert der usedQuota-Eigenschaft fest.
+     *
+     * @param value
+     *     allowed object is
+     *     {@link Long }
+     *
+     */
+    public void setUsedQuota(Long value) {
+        this.usedQuota = value;
     }
 
     /**
