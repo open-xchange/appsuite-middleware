@@ -54,8 +54,6 @@ import static com.openexchange.filestore.FileStorages.getFullyQualifyingUriForCo
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
-import java.util.Map;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -105,12 +103,14 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
      * @throws ProgrammErrorException If a program error occurs
      */
     @Override
-    protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        int contextId = ctx.getId().intValue();
+    protected void doCopy(final URI srcBaseUri, final URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        final int contextId = ctx.getId().intValue();
 
         // rsync can be used in case both file storages are disk-based storages
         boolean useRsync = "file".equalsIgnoreCase(srcBaseUri.getScheme()) && "file".equalsIgnoreCase(dstBaseUri.getScheme());
 
+        Runnable finalTask = null;
+        Reverter reverter = null;
         if (useRsync) {
             // Invoke rsync process
             URI srcFullUri = getFullyQualifyingUriForContext(contextId, srcBaseUri);
@@ -121,58 +121,138 @@ public class ContextFilestoreDataMover extends FilestoreDataMover {
                     throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
                 }
                 FileUtils.deleteDirectory(fsDirectory);
+
+                reverter = new Reverter() {
+
+                    @Override
+                    public void revertCopy() throws StorageException {
+                        URI dstFullUri = getFullyQualifyingUriForContext(contextId, dstBaseUri);
+                        File dfsDirectory = new File(dstFullUri);
+                        try {
+                            ArrayOutput output = new ShellExecutor().executeprocargs(new String[] { "rsync", "-a", dfsDirectory.getAbsolutePath(), ensureEndingSlash(srcBaseUri.getPath()).toString() });
+                            if (0 != output.exitstatus) {
+                                throw new ProgrammErrorException("Wrong exit status. Exit status was: " + output.exitstatus + " Stderr was: \n" + output.errOutput.toString() + '\n' + "and stdout was: \n" + output.stdOutput.toString());
+                            }
+                            FileUtils.deleteDirectory(dfsDirectory);
+                        } catch (Exception e) {
+                            LOGGER.error("{} failed to revert directory {}", Thread.currentThread().getName(), dfsDirectory.getAbsolutePath(), e);
+                        }
+                    }
+                };
             }
         } else {
             // Not possible to use rsync; e.g. move from disk to S3
-            URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
+            final URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, srcBaseUri));
             URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
 
             try {
                 // Grab associated file storages
-                FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
+                final FileStorage srcStorage = FileStorages.getFileStorageService().getFileStorage(srcFullUri);
                 FileStorage dstStorage = FileStorages.getFileStorageService().getFileStorage(dstFullUri);
 
                 // Copy each file from source to destination
-                Set<String> srcFiles = srcStorage.getFileList();
+                final Set<String> srcFiles = srcStorage.getFileList();
                 if (false == srcFiles.isEmpty()) {
-                    Map<String, String> prevFileName2newFileName = copyFiles(srcFiles, srcStorage, dstStorage);
+                    final CopyResult copyResult = copyFiles(srcFiles, srcStorage, dstStorage, srcFullUri, dstFullUri);
+                    reverter = copyResult.reverter;
 
-                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                    propagateNewLocations(prevFileName2newFileName);
+                    final Reverter rev = reverter;
+                    finalTask = new Runnable() {
 
-                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
-                }
+                        @Override
+                        public void run() {
+                            if (Operation.COPIED.equals(copyResult.operation)) {
+                                // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                                try {
+                                    propagateNewLocations(copyResult.prevFileName2newFileName);
+                                } catch (Exception e) {
+                                    LOGGER.error("{} failed to propagate new file storage locations. Going to revert copied files (if applicable) and cancel.", Thread.currentThread().getName(), e);
+                                    if (null != rev) {
+                                        try {
+                                            rev.revertCopy();
+                                        } catch (Exception x) {
+                                            LOGGER.error("{} failed to revert copied files", Thread.currentThread().getName(), x);
+                                        }
+                                    }
 
-                if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
-                    File fsDirectory = new File(srcFullUri);
-                    if (fsDirectory.exists()) {
-                        FileUtils.deleteDirectory(fsDirectory);
-                    }
+                                    // Abort...
+                                    return;
+                                }
+
+                                try {
+                                    // Delete copied files
+                                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                                } catch (Exception e) {
+                                    LOGGER.error("{} failed to delete copied files", Thread.currentThread().getName(), e);
+                                }
+                            } else {
+                                // Nothing to do...
+                            }
+
+                            // Delete source location
+                            if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                                File fsDirectory = new File(srcFullUri);
+                                if (fsDirectory.exists()) {
+                                    try {
+                                        FileUtils.deleteDirectory(fsDirectory);
+                                    } catch (Exception e) {
+                                        LOGGER.error("{} failed to delete source location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                                    }
+                                }
+                            }
+                        }
+                    };
+                } else {
+                    finalTask = new Runnable() {
+                        @Override
+                        public void run() {
+                            if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                                File fsDirectory = new File(srcFullUri);
+                                if (fsDirectory.exists()) {
+                                    try {
+                                        FileUtils.deleteDirectory(fsDirectory);
+                                    } catch (Exception e) {
+                                        LOGGER.error("{} failed to delete source location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                                    }
+                                }
+                            }
+                        }
+                    };
                 }
             } catch (OXException e) {
-                throw new StorageException(e);
-            } catch (SQLException e) {
                 throw new StorageException(e);
             }
         }
 
         // Apply changes to context & clear caches
+        boolean error = true;
         try {
             ctx.setFilestoreId(dstFilestore.getId());
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(ctx);
+            error = false;
 
-            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            Cache cache = cacheService.getCache("Filestore");
-            cache.clear();
-            Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-            qfsCache.invalidateGroup(Integer.toString(contextId));
-            Cache contextCache = cacheService.getCache("Context");
-            contextCache.remove(ctx.getId());
-        } catch (OXException e) {
-            throw new StorageException(e);
+            try {
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                Cache cache = cacheService.getCache("Filestore");
+                cache.clear();
+                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
+                qfsCache.invalidateGroup(Integer.toString(contextId));
+                Cache contextCache = cacheService.getCache("Context");
+                contextCache.remove(ctx.getId());
+            } catch (Exception e) {
+                LOGGER.error("Failed to invalidate caches. Restart recommended.", e);
+            }
+        } finally {
+            if (error && null != reverter) {
+                reverter.revertCopy();
+            }
         }
+
+        runSafely(finalTask);
+
+        LOGGER.info("Successfully moved files of context {}", contextId);
     }
 
 }

@@ -430,7 +430,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An executino error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"moveuserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -559,7 +559,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An executino error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromuserfilestoretomaster\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -706,7 +706,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An executino error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefrommastertouserfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -827,7 +827,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(user_id, ctx);
                     } else {
-                        LOGGER.warn("An executino error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromcontexttouserfilestore\" for user {} in context {}. User will stay disabled.", user_id, ctx.getId(), executionError.getCause());
                     }
                 }
             });
@@ -962,7 +962,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     if (null == executionError) {
                         oxuser.enableUser(userId, ctx);
                     } else {
-                        LOGGER.warn("An executino error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
+                        LOGGER.warn("An execution error occurred during \"movefromusertocontextfilestore\" for user {} in context {}. User will stay disabled.", userId, ctx.getId(), executionError.getCause());
                     }
                 }
             });

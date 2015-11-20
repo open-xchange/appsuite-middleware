@@ -49,12 +49,15 @@
 
 package com.openexchange.admin.tools.filestore;
 
+import static com.openexchange.java.Autoboxing.I;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Collections;
@@ -70,15 +73,19 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
+import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.osgi.FilestoreLocationUpdaterRegistry;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
+import com.openexchange.admin.rmi.exceptions.PoolException;
 import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 
 /**
@@ -311,23 +318,117 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @param files The files to copy
      * @param srcStorage The source storage
      * @param dstStorage The destination storage
+     * @param srcFullUri The fully qualifying URI from source storage
+     * @param dstFullUri The fully qualifying URI from destination storage
      * @return The old file name to new file name mapping; [src-file] --&gt; [dst-file]
-     * @throws OXException If copy operation fails
+     * @throws StorageException If copy operation fails
      */
-    protected Map<String, String> copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage) throws OXException {
+    protected CopyResult copyFiles(final Set<String> files, final FileStorage srcStorage, final FileStorage dstStorage, URI srcFullUri, URI dstFullUri) throws StorageException {
         if (files.isEmpty()) {
-            return Collections.emptyMap();
+            return new CopyResult(Collections.<String, String> emptyMap(), null);
         }
-        Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
-        for (String file : files) {
-            InputStream is = srcStorage.getFile(file);
-            String newFile = dstStorage.saveNewFile(is);
-            if (null != newFile) {
-                prevFileName2newFileName.put(file, newFile);
-                LOGGER.info("Copied file {} to {}", file, newFile);
+
+        final String threadName = Thread.currentThread().getName();
+        final Integer size = Integer.valueOf(files.size());
+
+        if ("file".equalsIgnoreCase(srcFullUri.getScheme()) && "file".equalsIgnoreCase(dstFullUri.getScheme())) {
+            // File-wise move possible
+            try {
+                final File srcParent = new File(srcFullUri);
+                final File dstParent = new File(dstFullUri);
+                long totalSize = 0L;
+
+                int i = 1;
+                for (String file : files) {
+                    File toCopy = new File(srcParent, file);
+                    long length = toCopy.length();
+                    FileUtils.moveFile(toCopy, new File(dstParent, file));
+
+                    if ((i % 10) == 0) {
+                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                    }
+                    i++;
+
+                    totalSize += length;
+                }
+
+                LOGGER.info("{} copied {} files.", threadName, size);
+
+                Reverter reverter = new Reverter() {
+
+                    @Override
+                    public void revertCopy() throws StorageException {
+                        int numReverted = 0;
+                        int i = 1;
+                        for (String file : files) {
+                            File toRevert = new File(dstParent, file);
+                            try {
+                                FileUtils.moveFile(toRevert, new File(srcParent, file));
+
+                                if ((i % 10) == 0) {
+                                    LOGGER.info("{} reverted {} files of {} in total", threadName, Integer.valueOf(i), size);
+                                }
+                                i++;
+                                numReverted++;
+                            } catch (IOException e) {
+                                LOGGER.error("{} failed to revert file {}", threadName, toRevert.getPath(), e);
+                            }
+                        }
+
+                        LOGGER.info("{} reverted {} files.", threadName, Integer.valueOf(numReverted));
+                    }
+                };
+
+                return new CopyResult(totalSize, reverter);
+            } catch (IOException e) {
+                throw new StorageException(e);
             }
         }
-        return prevFileName2newFileName;
+
+        // One-by-one...
+        try {
+            final Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
+
+            int i = 1;
+            for (String file : files) {
+                InputStream is = srcStorage.getFile(file);
+                String newFile = dstStorage.saveNewFile(is);
+                if (null != newFile) {
+                    prevFileName2newFileName.put(file, newFile);
+
+                    if ((i % 10) == 0) {
+                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                    }
+                    i++;
+                }
+            }
+
+            LOGGER.info("{} copied {} files.", threadName, size);
+
+            Reverter reverter = new Reverter() {
+
+                @Override
+                public void revertCopy() throws StorageException {
+                    String[] copiedFiles = prevFileName2newFileName.values().toArray(new String[size.intValue()]);
+                    try {
+                        dstStorage.deleteFiles(copiedFiles);
+                    } catch (OXException x) {
+                        // Failed bulk deletion - try one-by-one
+                        for (String copiedFile : prevFileName2newFileName.values()) {
+                            try {
+                                dstStorage.deleteFile(copiedFile);
+                            } catch (OXException e) {
+                                LOGGER.error("{} failed to revert file {}", threadName, copiedFile, e.getCause() == null ? e : e.getCause());
+                            }
+                        }
+                    }
+                }
+            };
+
+            return new CopyResult(prevFileName2newFileName, reverter);
+        } catch (OXException e) {
+            throw new StorageException(e);
+        }
     }
 
     /**
@@ -343,11 +444,22 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         }
         int contextId = ctx.getId().intValue();
         Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
         try {
+            Databases.startTransaction(con);
+            rollback = true;
+
             for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
                 updater.updateFileLocations(prevFileName2newFileName, contextId, con);
             }
+
+            con.commit();
+            rollback = false;
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
             Database.backNoTimeout(contextId, true, con);
         }
     }
@@ -421,6 +533,260 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      */
     protected void postDoCopy(Throwable thrown) {
         // Initially empty
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Signals what operation was performed to pass files to new file storage location.
+     */
+    static enum Operation {
+        /**
+         * Signals that files were moved to the new location; keeping file identifiers
+         */
+        MOVED,
+        /**
+         * Signals that files were copied to new location; new file identifiers
+         */
+        COPIED;
+    }
+
+    /**
+     * The result for {@link FilestoreDataMover#copyFiles(Set, FileStorage, FileStorage, URI, URI)} invocation.
+     */
+    static class CopyResult {
+
+        /** Signals what operation was performed to pass files to new file storage location */
+        final Operation operation;
+
+        /** The total size of all files passed to new file storage location; <code>0</code> in case {@link #operation} is {@link Operation#COPIED} */
+        final long totalSize;
+
+        /** A mapping for previous to new file name; <code>null</code> in case {@link #operation} is {@link Operation#MOVED} */
+        final Map<String, String> prevFileName2newFileName;
+
+        /** Reverts the previously copied files */
+        final Reverter reverter;
+
+        CopyResult(long totalSize, Reverter reverter) {
+            super();
+            operation = Operation.MOVED;
+            this.totalSize = totalSize;
+            prevFileName2newFileName = null;
+            this.reverter = reverter;
+        }
+
+        CopyResult(Map<String, String> prevFileName2newFileName, Reverter reverter) {
+            super();
+            operation = Operation.COPIED;
+            this.prevFileName2newFileName = prevFileName2newFileName;
+            totalSize = 0L;
+            this.reverter = reverter;
+        }
+    }
+
+    /**
+     * Used to revert previously copied files.
+     */
+    static interface Reverter {
+
+        /**
+         * Reverts the previously copied files.
+         */
+        void revertCopy() throws StorageException;
+    }
+
+    /**
+     * Runs the specified task safely.
+     *
+     * @param task The task
+     */
+    protected static void runSafely(Runnable task) {
+        if (null != task) {
+            try {
+                task.run();
+            } catch (Exception e) {
+                LOGGER.error("Unexpected exception while running task", e);
+            }
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    protected static final class IncrementUsage {
+
+        protected final long incrementUsage;
+        protected final int ownerId;
+        protected final int contextId;
+
+        protected IncrementUsage(long usage, int ownerId, int contextId) {
+            super();
+            this.incrementUsage = usage;
+            this.ownerId = ownerId;
+            this.contextId = contextId;
+        }
+    }
+
+    protected static IncrementUsage incUsage(long usage, int ownerId, int contextId) {
+        return new IncrementUsage(usage, ownerId, contextId);
+    }
+
+    protected static final class DecrementUsage {
+
+        protected final long decrementUsage;
+        protected final int ownerId;
+        protected final int contextId;
+
+        protected DecrementUsage(long usage, int ownerId, int contextId) {
+            super();
+            this.decrementUsage = usage;
+            this.ownerId = ownerId;
+            this.contextId = contextId;
+        }
+    }
+
+    protected static DecrementUsage decUsage(long usage, int ownerId, int contextId) {
+        return new DecrementUsage(usage, ownerId, contextId);
+    }
+
+    /**
+     * Increases/decreases the quota usages.
+     *
+     * @param incUsage The argument for increasing quota usage
+     * @param decUsage The argument for decreasing quota usage
+     * @throws StorageException If a database error occurs
+     */
+    protected static void changeUsage(DecrementUsage decUsage, IncrementUsage incUsage, int contextId) throws StorageException {
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            Databases.startTransaction(con);
+            rollback = true;
+
+            doDecUsage(decUsage.decrementUsage, decUsage.ownerId, contextId, con);
+            doIncUsage(incUsage.incrementUsage, incUsage.ownerId, contextId, con);
+
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+
+            if (null != con) {
+                try {
+                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    throw new StorageException(e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Increases the quota usage.
+     *
+     * @param usage The value by which the quota is supposed to be increased
+     * @throws StorageException If a database error occurs
+     */
+    private static void doIncUsage(long usage, int ownerId, int contextId, Connection con) throws StorageException {
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        try {
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
+            sstmt.setInt(1, contextId);
+            sstmt.setInt(2, ownerId);
+            rs = sstmt.executeQuery();
+            final long oldUsage;
+            if (rs.next()) {
+                oldUsage = rs.getLong(1);
+            } else {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
+            }
+
+            long newUsage = oldUsage + usage;
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
+            ustmt.setLong(1, newUsage);
+            ustmt.setInt(2, contextId);
+            ustmt.setInt(3, ownerId);
+            final int rows = ustmt.executeUpdate();
+            if (rows == 0) {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
+            }
+        } catch (Exception s) {
+            throw new StorageException(s);
+        } finally {
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(sstmt);
+            Databases.closeSQLStuff(ustmt);
+        }
+    }
+
+    /**
+     * Decreases the QuotaUsage.
+     *
+     * @param usage by that the Quota has to be decreased
+     * @throws StorageException If a database error occurs
+     */
+    private static void doDecUsage(long usage, int ownerId, int contextId, Connection con) throws StorageException {
+        PreparedStatement sstmt = null;
+        PreparedStatement ustmt = null;
+        ResultSet rs = null;
+        try {
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
+            sstmt.setInt(1, contextId);
+            sstmt.setInt(2, ownerId);
+            rs = sstmt.executeQuery();
+
+            long oldUsage;
+            if (rs.next()) {
+                oldUsage = rs.getLong("used");
+            } else {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.NO_USAGE_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.NO_USAGE.create(I(contextId));
+            }
+            long newUsage = oldUsage - usage;
+
+            if (newUsage < 0) {
+                newUsage = 0;
+                final OXException e = QuotaFileStorageExceptionCodes.QUOTA_UNDERRUN.create(I(ownerId), I(contextId));
+                LOGGER.error("", e);
+            }
+
+            ustmt = con.prepareStatement("UPDATE filestore_usage SET used=? WHERE cid=? AND user=?");
+            ustmt.setLong(1, newUsage);
+            ustmt.setInt(2, contextId);
+            ustmt.setInt(3, ownerId);
+
+            int rows = ustmt.executeUpdate();
+            if (1 != rows) {
+                if (ownerId > 0) {
+                    throw QuotaFileStorageExceptionCodes.UPDATE_FAILED_USER.create(I(ownerId), I(contextId));
+                }
+                throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
+            }
+        } catch (Exception s) {
+            throw new StorageException(s);
+        } finally {
+            Databases.closeSQLStuff(rs);
+            Databases.closeSQLStuff(sstmt);
+            Databases.closeSQLStuff(ustmt);
+        }
     }
 
 }

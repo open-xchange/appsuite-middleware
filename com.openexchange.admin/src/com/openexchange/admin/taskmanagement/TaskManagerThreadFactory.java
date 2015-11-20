@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,66 +47,47 @@
  *
  */
 
-package com.openexchange.contact.vcard.storage.impl;
+package com.openexchange.admin.taskmanagement;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.database.Databases;
-import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
-import com.openexchange.groupware.filestore.FileLocationHandler;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
- * {@link VCardFilestoreLocationUpdater} is responsible for updating persisted references on moved VCards
+ * {@link TaskManagerThreadFactory} - The thread factory for task manager.
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.8.0
  */
-public class VCardFilestoreLocationUpdater extends AbstractFileLocationHandler {
+ final class TaskManagerThreadFactory implements ThreadFactory {
+
+    private final AtomicInteger threadNumber;
+    private final String namePrefix;
 
     /**
-     * Initializes a new {@link VCardFilestoreLocationUpdater}.
+     * Initializes a new {@link TaskManagerThreadFactory}.
      */
-    public VCardFilestoreLocationUpdater() {
+    TaskManagerThreadFactory() {
         super();
+        threadNumber = new AtomicInteger();
+        this.namePrefix = "TaskManager-";
     }
 
     @Override
-    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        String selectStmt = "SELECT vCardId FROM prg_contacts WHERE cid=? AND vCardId IN ";
-        String updateStmt = "UPDATE prg_contacts SET vCardId = ? WHERE cid = ? AND vCardId = ?";
-        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
+    public Thread newThread(Runnable r) {
+        final Thread t = new Thread(r, getThreadName(threadNumber.incrementAndGet(), namePrefix));
+        t.setUncaughtExceptionHandler(TaskManagerUncaughtExceptionhandler.getInstance());
+        return t;
     }
 
-    @Override
-    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) {
-        // Files for VCards are always stored in context-related storage
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT vCardId FROM prg_contacts WHERE cid = ? AND vCardId IS NOT NULL");
-            stmt.setInt(1, contextId);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-            Set<String> locations = new LinkedHashSet<String>();
-            do {
-                locations.add(rs.getString(1));
-            } while (rs.next());
-            return locations;
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
+    private static String getThreadName(int threadNumber, String namePrefix) {
+        StringBuilder retval = new StringBuilder(namePrefix.length() + 7);
+        retval.append(namePrefix);
+        for (int i = threadNumber; i < 1000000; i *= 10) {
+            retval.append('0');
         }
+        retval.append(threadNumber);
+        return retval.toString();
     }
+
 }

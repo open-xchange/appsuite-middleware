@@ -58,6 +58,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Databases;
+import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
@@ -68,7 +69,7 @@ import com.openexchange.groupware.filestore.FileLocationHandler;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.0
  */
-public class AttachmentFilestoreLocationUpdater implements FileLocationHandler {
+public class AttachmentFilestoreLocationUpdater extends AbstractFileLocationHandler {
 
     /**
      * Initializes a new {@link AttachmentFilestoreLocationUpdater}.
@@ -79,19 +80,9 @@ public class AttachmentFilestoreLocationUpdater implements FileLocationHandler {
 
     @Override
     public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        try {
-            stmt = con.prepareStatement("UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?");
-            for (Map.Entry<String, String> entry : prevFileName2newFileName.entrySet()) {
-                stmt.setString(1, entry.getValue());
-                stmt.setInt(2, contextId);
-                stmt.setString(3, entry.getKey());
-                stmt.addBatch();
-            }
-            stmt.executeBatch();
-        } finally {
-            Databases.closeSQLStuff(stmt);
-        }
+        String selectStmt = "SELECT file_id FROM prg_attachment WHERE cid=? AND file_id IN ";
+        String updateStmt = "UPDATE prg_attachment SET file_id = ? WHERE cid = ? AND file_id = ?";
+        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
     }
 
     @Override

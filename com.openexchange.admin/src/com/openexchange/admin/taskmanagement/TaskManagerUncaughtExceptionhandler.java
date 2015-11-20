@@ -47,71 +47,42 @@
  *
  */
 
-package com.openexchange.snippet.rdb;
+package com.openexchange.admin.taskmanagement;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
-import com.openexchange.database.Databases;
-import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
-import com.openexchange.groupware.filestore.FileLocationHandler;
-import com.openexchange.snippet.ReferenceType;
-
+import java.lang.Thread.UncaughtExceptionHandler;
 
 /**
- * {@link RdbSnippetFilestoreLocationUpdater}
+ * {@link TaskManagerUncaughtExceptionhandler} - The uncaught exception handler for task manager.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @since 7.8.0
  */
-public class RdbSnippetFilestoreLocationUpdater extends AbstractFileLocationHandler {
+final class TaskManagerUncaughtExceptionhandler implements UncaughtExceptionHandler {
+
+    private static final TaskManagerUncaughtExceptionhandler INSTANCE = new TaskManagerUncaughtExceptionhandler();
 
     /**
-     * Initializes a new {@link RdbSnippetFilestoreLocationUpdater}.
+     * Gets the instance
+     *
+     * @return The instance
      */
-    public RdbSnippetFilestoreLocationUpdater() {
+    static TaskManagerUncaughtExceptionhandler getInstance() {
+        return INSTANCE;
+    }
+
+    // ---------------------------------------------------------------------------------------------- //
+
+    /**
+     * Initializes a new {@link TaskManagerUncaughtExceptionhandler}.
+     */
+    private TaskManagerUncaughtExceptionhandler() {
         super();
     }
 
     @Override
-    public void updateFileLocations(Map<String, String> prevFileName2newFileName, int contextId, Connection con) throws SQLException {
-        String selectStmt = "SELECT refId FROM snippet WHERE cid=? AND refId IN ";
-        String updateStmt = "UPDATE snippet SET refId = ? WHERE cid = ? AND refId = ?";
-        updateFileLocationsUsing(prevFileName2newFileName, contextId, selectStmt, updateStmt, con);
-    }
-
-    @Override
-    public Set<String> determineFileLocationsFor(int userId, int contextId, Connection con) throws SQLException {
-        // Files for attachment are always stored in context-related storage
-        return Collections.emptySet();
-    }
-
-    @Override
-    public Set<String> determineFileLocationsFor(int contextId, Connection con) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = con.prepareStatement("SELECT refId FROM preview WHERE cid=? AND refType=?");
-            stmt.setInt(1, contextId);
-            stmt.setInt(2, ReferenceType.FILE_STORAGE.getType());
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-            Set<String> locations = new LinkedHashSet<String>();
-            do {
-                locations.add(rs.getString(1));
-            } while (rs.next());
-            return locations;
-        } finally {
-            Databases.closeSQLStuff(rs, stmt);
-        }
+    public void uncaughtException(final Thread t, final Throwable e) {
+        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(TaskManagerUncaughtExceptionhandler.class);
+        LOG.error("Thread '{}' terminated abruptly with an uncaught RuntimeException or Error.", t.getName(), e);
     }
 
 }
