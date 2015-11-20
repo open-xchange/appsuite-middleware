@@ -131,6 +131,11 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
 
     }
 
+    @Override
+    protected void touchFolders(List<TargetProxy> proxies) throws OXException {
+        updateFolders(proxies);
+    }
+
     private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderObject> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         for (int module : objectsByModule.keySet()) {
             ModuleHandler handler = handlers.get(module);

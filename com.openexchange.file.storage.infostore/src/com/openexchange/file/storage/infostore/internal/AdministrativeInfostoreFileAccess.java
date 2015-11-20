@@ -174,4 +174,9 @@ public class AdministrativeInfostoreFileAccess extends InfostoreAccess implement
         return new InfostoreTimedResult(timedResult);
     }
 
+    @Override
+    public void touch(String folderId, String id) throws OXException {
+        getInfostore(folderId).touch(ID(id), context);;
+    }
+
 }

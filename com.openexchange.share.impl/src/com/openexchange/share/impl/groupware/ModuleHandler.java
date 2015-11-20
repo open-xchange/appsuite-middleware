@@ -119,6 +119,15 @@ public interface ModuleHandler {
     void updateObjects(List<TargetProxy> modified, HandlerParameters parameters) throws OXException;
 
     /**
+     * Writes all changes made to the passed target proxies to the underlying module-specific storage.
+     *
+     * @param modified The modified target proxies
+     * @param parameters The parameters
+     * @throws OXException
+     */
+    void touchObjects(List<TargetProxy> touched, HandlerParameters parameters) throws OXException;
+
+    /**
      * Gets a value indicating whether a share target is visible for the session's user or not, i.e. if the user has sufficient
      * permissions to read the folder or item represented by the share target.
      *

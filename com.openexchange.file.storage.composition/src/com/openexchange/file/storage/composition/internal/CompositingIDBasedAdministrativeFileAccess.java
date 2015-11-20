@@ -114,6 +114,13 @@ public class CompositingIDBasedAdministrativeFileAccess implements IDBasedAdmini
     }
 
     @Override
+    public void touch(final String id) throws OXException {
+        FileID fileID = toFileID(id);
+        AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());
+        fileAccess.touch(fileID.getFolderId(), fileID.getFileId());
+    }
+
+    @Override
     public void removeDocument(String id) throws OXException {
         FileID fileID = toFileID(id);
         AdministrativeFileStorageFileAccess fileAccess = requireFileAccess(fileID.getService(), fileID.getAccountId());

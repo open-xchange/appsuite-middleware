@@ -341,4 +341,9 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         return Results.emptyTimedResult();
     }
 
+    @Override
+    public void touch(int id, Context context) throws OXException {
+        //
+    }
+
 }

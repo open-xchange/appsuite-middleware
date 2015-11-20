@@ -588,6 +588,16 @@ public interface InfostoreFacade extends TransactionAware {
     void touch(int id, ServerSession session) throws OXException;
 
     /**
+     * Touches specified document.<br>
+     * <b>This method is only for administrative tasks, no permissions are checked!</b>
+     *
+     * @param id The document identifier
+     * @param context The context
+     * @throws OXException If operation fails
+     */
+    void touch(int id, Context context) throws OXException;
+
+    /**
      * Sets this facade's session holder.
      *
      * @param sessionHolder The session holder
