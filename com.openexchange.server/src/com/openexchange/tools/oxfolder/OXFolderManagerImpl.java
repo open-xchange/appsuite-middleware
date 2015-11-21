@@ -1256,8 +1256,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private boolean changeOwnerOnMove(FolderObject fo, int newParentId, int oldParentId, boolean recursive) throws OXException, SQLException {
         if (FolderObject.INFOSTORE == fo.getModule() && (newParentId > 0 && newParentId != oldParentId) && setAdminAsCreatorForPublicDriveFolder()) {
-            boolean isPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(newParentId));
-            boolean wasPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(oldParentId));
+            FolderObject newParent = getFolderFromMaster(newParentId);
+            boolean isPublicInfoStoreFolder = isPublicInfoStoreFolder(newParent);
+
+            FolderObject oldParent = getFolderFromMaster(oldParentId);
+            boolean wasPublicInfoStoreFolder = isPublicInfoStoreFolder(oldParent);
+
             if (isPublicInfoStoreFolder != wasPublicInfoStoreFolder) {
                 List<Integer> folderIDs;
                 if (false == recursive || false == fo.hasSubfolders()) {
@@ -1268,7 +1272,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true));
                 }
 
-                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, isPublicInfoStoreFolder ? ctx.getMailadmin() : user.getId(), folderIDs);
+                int newOwner = isPublicInfoStoreFolder ? ctx.getMailadmin() : newParent.getCreatedBy();
+                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
             }
         }
         return false;
