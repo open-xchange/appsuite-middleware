@@ -187,7 +187,7 @@ public class DovecotPushRESTService {
                         LOGGER.warn("Could not look-up an appropriate session for user {} in context {}. Hence cannot push 'new-message' event.", userId, contextId);
                     } else {
                         Map<String, Object> props = new LinkedHashMap<String, Object>(4);
-                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), props);
+                        setEventProperties(uid, folder, data.optString("from", null), data.optString("subject", null), data.optInt("unread", -1), props);
                         PushUtility.triggerOSGiEvent(MailFolderUtility.prepareFullname(MailAccount.DEFAULT_ID, "INBOX"), session, props, true, true);
                         LOGGER.info("Successfully parsed & triggered 'new-message' event for user {} in context {}", userId, contextId);
                     }
@@ -200,22 +200,25 @@ public class DovecotPushRESTService {
         }
     }
 
-    private void setEventProperties(long uid, String fullName, String from, String subject, Map<String, Object> props) {
+    private void setEventProperties(long uid, String fullName, String from, String subject, int unread, Map<String, Object> props) {
         props.put(PushEventConstants.PROPERTY_IDS, Long.toString(uid));
 
         try {
             Container<MailMessage> container = new Container<MailMessage>();
-            container.add(asMessage(uid, fullName, from, subject));
+            container.add(asMessage(uid, fullName, from, subject, unread));
             props.put(PushEventConstants.PROPERTY_CONTAINER, container);
         } catch (MessagingException e) {
             LOGGER.warn("Could not fetch message info.", e);
         }
     }
 
-    private MailMessage asMessage(long uid, String fullName, String from, String subject) throws MessagingException {
+    private MailMessage asMessage(long uid, String fullName, String from, String subject, int unread) throws MessagingException {
         MailMessage mailMessage = new IDMailMessage(Long.toString(uid), fullName);
         mailMessage.addFrom(QuotedInternetAddress.parseHeader(from, true));
         mailMessage.setSubject(subject);
+        if (unread >= 0) {
+            mailMessage.setUnreadMessages(unread);
+        }
         return mailMessage;
     }
 
