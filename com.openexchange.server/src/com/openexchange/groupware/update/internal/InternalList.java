@@ -590,6 +590,9 @@ public final class InternalList {
         // Re-executes PrgLinksAddPrimaryKeyUpdateTask --> Adds primary key to `prg_links` table
         list.add(new com.openexchange.groupware.update.tasks.PrgLinksAddPrimaryKeyUpdateTaskV2());
 
+        // Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
+        list.add(new com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
