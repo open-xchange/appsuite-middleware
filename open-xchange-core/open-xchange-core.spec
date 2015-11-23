@@ -1275,9 +1275,7 @@ if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
 fi
 
 # SoftwareChange_Request-2884
-if [ -e /opt/open-xchange/etc/guard.properties ]; then
-    ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc guard.properties guard-api.properties
-fi
+ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc guard.properties guard-api.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
