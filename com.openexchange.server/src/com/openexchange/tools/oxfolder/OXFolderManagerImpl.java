@@ -60,6 +60,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -1536,14 +1537,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 /*
                  * Load return value
                  */
-                fo.fill(FolderObject.loadFolderObjectFromDB(
-                    folderId,
-                    ctx,
-                    wc,
-                    true,
-                    false,
-                    "del_oxfolder_tree",
-                    "del_oxfolder_permissions"));
+                fo.fill(FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, false, "del_oxfolder_tree", "del_oxfolder_permissions"));
                 return fo;
             } finally {
                 if (create && wc != null) {
@@ -1564,56 +1558,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If deletion fails for any folder
      */
     void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
-        final DeleteValidatedFoldersProcedure procedure = new DeleteValidatedFoldersProcedure(lastModified, type);
-        if (!deleteableIDs.forEachEntry(procedure)) {
-            final OXException error = procedure.error;
-            if (null != error) {
-                throw error;
-            }
-        }
-    }
+        final TIntSet validatedFolders = new TIntHashSet();
+        TIntObjectProcedure<TIntObjectMap<?>> procedure = new TIntObjectProcedure<TIntObjectMap<?>>() {
 
-    private final class DeleteValidatedFoldersProcedure implements TIntObjectProcedure<TIntObjectMap<?>> {
-
-        public OXException error;
-
-        private final long lastModified;
-
-        private final int type;
-
-        public DeleteValidatedFoldersProcedure(final long lastModified, final int type) {
-            super();
-            this.lastModified = lastModified;
-            this.type = type;
-        }
-
-        @Override
-        public boolean execute(final int folderId, final TIntObjectMap<?> hashMap) {
-            if (null == error) {
-                try {
-                    if (null != hashMap) {
-                        final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
-                        deleteValidatedFolders(tmp, lastModified, type);
-                    }
-                    deleteValidatedFolder(folderId, lastModified, type, false);
-                    /*
-                     * Allow further executions
-                     */
-                    return true;
-                } catch (final OXException e) {
-                    error = e;
-                    /*
-                     * Deny further executions
-                     */
-                    return false;
+            @Override
+            public boolean execute(int folderId, TIntObjectMap<?> hashMap) {
+                if (null != hashMap) {
+                    final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
+                    tmp.forEachEntry(this);
                 }
+                validatedFolders.add(folderId);
+                return true;
             }
-            /*
-             * Deny further executions
-             */
-            return false;
+        };
+        deleteableIDs.forEachEntry(procedure);
+        for (int validatedFolder : validatedFolders.toArray()) {
+            deleteValidatedFolder(validatedFolder, lastModified, type, false);
         }
-
     }
 
     /**
