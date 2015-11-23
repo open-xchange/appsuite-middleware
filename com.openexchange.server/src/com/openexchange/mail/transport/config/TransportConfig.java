@@ -90,35 +90,31 @@ public abstract class TransportConfig extends MailConfig {
         /*
          * Fetch mail account
          */
-        final MailAccount mailAccount;
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        MailAccount mailAccount;
         {
-            final MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            MailAccountStorageService storage = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
             if (accountId == MailAccount.DEFAULT_ID) {
-                mailAccount = storage.getDefaultMailAccount(session.getUserId(), session.getContextId());
+                mailAccount = storage.getDefaultMailAccount(userId, contextId);
             } else {
-                mailAccount = storage.getMailAccount(accountId, session.getUserId(), session.getContextId());
+                mailAccount = storage.getMailAccount(accountId, userId, contextId);
             }
         }
         transportConfig.accountId = accountId;
-        fillLoginAndPassword(
-            transportConfig,
-            session,
-            UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLoginInfo(),
-            mailAccount);
+        fillLoginAndPassword(transportConfig, session, UserStorage.getInstance().getUser(userId, contextId).getLoginInfo(), mailAccount);
         String serverURL = TransportConfig.getTransportServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getTransportServerSource())) {
-                throw MailConfigException.create(new StringBuilder(128).append("Property \"").append(
-                    "com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
+                throw MailConfigException.create(new StringBuilder(128).append("Property \"").append("com.openexchange.mail.transportServer").append("\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(
-                session.getUserId()).append(" in context ").append(session.getContextId()).toString());
+            throw MailConfigException.create(new StringBuilder(128).append("Cannot determine transport server URL for user ").append(userId).append(" in context ").append(contextId).toString());
         }
         {
             /*
              * Remove ending '/' character
              */
-            final int lastPos = serverURL.length() - 1;
+            int lastPos = serverURL.length() - 1;
             if (serverURL.charAt(lastPos) == '/') {
                 serverURL = serverURL.substring(0, lastPos);
             }

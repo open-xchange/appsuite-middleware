@@ -281,9 +281,9 @@ public abstract class MailConfig {
         /*
          * Fetch mail account
          */
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-        final MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        MailAccount mailAccount = ServerServiceRegistry.getServize(MailAccountStorageService.class, true).getMailAccount(accountId, userId, contextId);
         mailConfig.accountId = accountId;
         mailConfig.session = session;
         mailConfig.applyStandardNames(mailAccount);
@@ -291,18 +291,15 @@ public abstract class MailConfig {
         String serverURL = MailConfig.getMailServerURL(mailAccount);
         if (serverURL == null) {
             if (ServerSource.GLOBAL.equals(MailProperties.getInstance().getMailServerSource())) {
-                throw MailConfigException.create(
-                    new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append(
-                        "\" not set in mail properties").toString());
+                throw MailConfigException.create(new StringBuilder(64).append("Property \"").append("com.openexchange.mail.mailServer").append("\" not set in mail properties").toString());
             }
-            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(
-                " in context ").append(contextId).toString());
+            throw MailConfigException.create(new StringBuilder(64).append("Cannot determine mail server URL for user ").append(userId).append(" in context ").append(contextId).toString());
         }
         {
             /*
              * Remove ending '/' character
              */
-            final int lastPos = serverURL.length() - 1;
+            int lastPos = serverURL.length() - 1;
             if (serverURL.charAt(lastPos) == '/') {
                 serverURL = serverURL.substring(0, lastPos);
             }
@@ -666,7 +663,7 @@ public abstract class MailConfig {
      * @param login The login
      * @return The sane login
      */
-    private static final String saneLogin(final String login) {
+    protected static final String saneLogin(final String login) {
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
             return login;
