@@ -49,29 +49,36 @@
 
 package com.openexchange.groupware.update.tasks;
 
-import static com.openexchange.tools.sql.DBUtils.autocommit;
-import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
+import com.openexchange.database.Databases;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.contexts.impl.ContextImpl;
+import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlResult;
+import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.Reference;
 import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
+import gnu.trove.procedure.TIntIntProcedure;
 
 /**
  * {@link FolderCorrectOwnerTask} - Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder.
@@ -94,7 +101,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
 
     @Override
     public TaskAttributes getAttributes() {
-        return new Attributes(UpdateConcurrency.BACKGROUND);
+        return new Attributes(UpdateConcurrency.BLOCKING);
     }
 
     @Override
@@ -102,61 +109,89 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
         Logger log = org.slf4j.LoggerFactory.getLogger(FolderCorrectOwnerTask.class);
         log.info("Performing update task {}", FolderCorrectOwnerTask.class.getSimpleName());
 
-        Connection connnection = Database.getNoTimeout(params.getContextId(), true);
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        Connection con = Database.getNoTimeout(params.getContextId(), true);
+        boolean rollback = false;
+        final Map<Integer, List<Map<Integer, List<VersionControlResult>>>> resultMaps = new LinkedHashMap<Integer, List<Map<Integer, List<VersionControlResult>>>>();
         try {
-            connnection.setAutoCommit(false);
+            Databases.startTransaction(con);
+            rollback = true;
 
-            stmt = connnection.prepareStatement("SELECT cid, id FROM user ORDER BY cid, id");
-            rs = stmt.executeQuery();
+            List<int[]> users = getUsers(con);
+            params.getProgressState().setTotal(users.size());
 
-            class UserInfo {
-                final int cid;
-                final int id;
+            int num = 1;
+            for (int[] user : users) {
+                final int contextId = user[0];
+                final int userId = user[1];
 
-                UserInfo(int id, int cid) {
-                    super();
-                    this.id = id;
-                    this.cid = cid;
+                // Get all trashed InfoStore/Drive folders having a different owner than trash-owning user
+                TIntIntMap trashFolders = getTrashFoldersToCheck(userId, contextId, con);
+                if (null != trashFolders && !trashFolders.isEmpty()) {
+                    final Connection conn = con;
+                    final Reference<OXException> ref = new Reference<OXException>();
+                    trashFolders.forEachEntry(new TIntIntProcedure() {
+
+                        @Override
+                        public boolean execute(int folderId, int oldOwner) {
+                            try {
+                                adjustTrashOwnershipFor(folderId, oldOwner, resultMaps, userId, contextId, conn);
+                                return true;
+                            } catch (OXException e) {
+                                ref.setValue(e);
+                            } catch (SQLException e) {
+                                ref.setValue(UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage()));
+                            } catch (RuntimeException e) {
+                                ref.setValue(UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage()));
+                            }
+                            return false;
+                        }
+                    });
+                }
+
+                if ((num % 10) == 0) {
+                    // Update zero-based state information
+                    params.getProgressState().setState(num - 1);
+                }
+                num++;
+            }
+
+            con.commit();
+            rollback = false;
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (rollback) {
+                // Roll-back connection
+                Databases.rollback(con);
+
+                // Try to restore files
+                Databases.autocommit(con);
+                for (Map.Entry<Integer, List<Map<Integer, List<VersionControlResult>>>> entry : resultMaps.entrySet()) {
+                    int contextId = entry.getKey().intValue();
+                    ContextImpl ctx = new ContextImpl(contextId);
+
+                    for (Map<Integer, List<VersionControlResult>> resultMap : entry.getValue()) {
+
+                        for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                            Integer documentId = documentEntry.getKey();
+                            List<VersionControlResult> versionInfo = documentEntry.getValue();
+
+                            try {
+                                VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), ctx, con);
+                            } catch (Exception e) {
+                                log.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, contextId, e);
+                            }
+                        }
+
+                    }
                 }
             }
 
-            List<UserInfo> users = new LinkedList<UserInfo>();
-            while (rs.next()) {
-                users.add(new UserInfo(rs.getInt(1), rs.getInt(2)));
-            }
-
-            DBUtils.closeSQLStuff(rs, stmt);
-            rs = null;
-            stmt = null;
-
-            for (UserInfo userInfo : users) {
-                int contextId = userInfo.cid;
-                int userId = userInfo.id;
-
-
-            }
-
-
-
-
-            stmt = connnection.prepareStatement("UPDATE oxfolder_tree SET changing_date=? WHERE changing_date=?;");
-            stmt.setLong(1, System.currentTimeMillis());
-            stmt.setLong(2, Long.MAX_VALUE);
-            int corrected = stmt.executeUpdate();
-            log.info("Corrected {} rows in 'oxfolder_tree'.", corrected);
-            connnection.commit();
-        } catch (SQLException e) {
-            rollback(connnection);
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (RuntimeException e) {
-            rollback(connnection);
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(rs, stmt);
-            autocommit(connnection);
-            Database.backNoTimeout(params.getContextId(), true, connnection);
+            // Ensure auto-commit mode is restored & push back to pool
+            Databases.autocommit(con);
+            Database.backNoTimeout(params.getContextId(), true, con);
         }
         log.info("{} successfully performed.", FolderCorrectOwnerTask.class.getSimpleName());
     }
@@ -178,7 +213,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
         }
     }
 
-    private TIntIntMap getTrashFolders(int userId, int contextId, Connection con) throws SQLException {
+    private TIntIntMap getTrashFoldersToCheck(int userId, int contextId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -188,6 +223,7 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             stmt.setInt(3, userId);
             rs = stmt.executeQuery();
             if (!rs.next()) {
+                // User has no InfoStore/Drive Trash folder
                 return null;
             }
 
@@ -196,15 +232,15 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             rs = null;
             stmt = null;
 
-            TIntIntMap fuids = new TIntIntHashMap();
-            collectTrashFolders(trashId, fuids, userId, contextId, con);
-            return fuids;
+            TIntIntMap folderId2Owner = new TIntIntHashMap();
+            collectTrashFolders(trashId, folderId2Owner, userId, contextId, con);
+            return folderId2Owner;
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
-    private void collectTrashFolders(int parentTrashId, TIntIntMap fuids, int userId, int contextId, Connection con) throws SQLException {
+    private void collectTrashFolders(int parentTrashId, TIntIntMap folderId2Owner, int userId, int contextId, Connection con) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -219,13 +255,14 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             TIntList children = new TIntArrayList(8);
             do {
                 int subfolderId = rs.getInt(1);
-                if (!fuids.containsKey(subfolderId)) {
+                if (!folderId2Owner.containsKey(subfolderId)) {
                     // Not present before, so examine child's sub-folders, too
                     children.add(subfolderId);
 
                     int createdFrom = rs.getInt(2);
                     if (createdFrom != userId) {
-                        fuids.put(subfolderId, createdFrom);
+                        // Owner needs to be changed
+                        folderId2Owner.put(subfolderId, createdFrom);
                     }
                 }
             } while (rs.next());
@@ -234,24 +271,35 @@ public final class FolderCorrectOwnerTask extends UpdateTaskAdapter {
             stmt = null;
 
             for (int childId : children.toArray()) {
-                collectTrashFolders(childId, fuids, userId, contextId, con);
+                collectTrashFolders(childId, folderId2Owner, userId, contextId, con);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
         }
     }
 
-    private void adjustTrashOwnershipFor(int folderId, int oldOwner, int userId, int contextId, Connection con) throws SQLException {
+    void adjustTrashOwnershipFor(int folderId, int oldOwner, Map<Integer, List<Map<Integer, List<VersionControlResult>>>> resultMaps, int userId, int contextId, Connection con) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("UPDATE oxfolder_tree SET created_from = ? WHERE cid=? AND fuid=?");
+            // Change folder's owner to trash-owning user
+            stmt = con.prepareStatement("UPDATE oxfolder_tree SET created_from=? WHERE cid=? AND fuid=?");
             stmt.setInt(1, userId);
             stmt.setInt(2, contextId);
             stmt.setInt(3, folderId);
             stmt.executeUpdate();
 
-           // VersionControlUtil.changeFileStoreLocationsIfNecessary(oldOwner, userId, folderId, Con, con);
-
+            // Check if files are required to be moved to a user-individual file storage
+            Map<Integer, List<VersionControlResult>> resultMap = VersionControlUtil.changeFileStoreLocationsIfNecessary(oldOwner, userId, folderId, new ContextImpl(contextId), con);
+            if (null != resultMap && !resultMap.isEmpty()) {
+                // Files were moved... Remember for possible restore operation
+                Integer key = Integer.valueOf(contextId);
+                List<Map<Integer, List<VersionControlResult>>> list = resultMaps.get(key);
+                if (null == list) {
+                    list = new LinkedList<Map<Integer, List<VersionControlResult>>>();
+                    resultMaps.put(key, list);
+                }
+                list.add(resultMap);
+            }
         } finally {
             DBUtils.closeSQLStuff(stmt);
         }

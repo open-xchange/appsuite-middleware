@@ -304,10 +304,15 @@ public final class VersionControlUtil {
             try {
                 copiedLocation = destFs.saveNewFile(srcFs.getFile(version.getFilestoreLocation()));
             } catch (OXException e) {
-                try {
-                    restoreVersionControl(resultMap, context, con);
-                } catch (Exception x) {
-                    LOG.warn("Failed to restore file storage locations", x);
+                for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                    Integer documentId = documentEntry.getKey();
+                    List<VersionControlResult> versionInfo = documentEntry.getValue();
+
+                    try {
+                        VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), context, con);
+                    } catch (Exception x) {
+                        LOG.error("Failed to restore file storage locations for document {} in context {}", documentId, context.getContextId(), x);
+                    }
                 }
                 throw e;
             }
@@ -341,10 +346,15 @@ public final class VersionControlUtil {
         } finally {
             Databases.closeSQLStuff(stmt);
             if (error) {
-                try {
-                    restoreVersionControl(resultMap, context, con);
-                } catch (Exception e) {
-                    LOG.warn("Failed to restore file storage locations", e);
+                for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                    Integer documentId = documentEntry.getKey();
+                    List<VersionControlResult> versionInfo = documentEntry.getValue();
+
+                    try {
+                        VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), context, con);
+                    } catch (Exception e) {
+                        LOG.error("Failed to restore file storage locations for document {} in context {}", documentId, context.getContextId(), e);
+                    }
                 }
             }
         }

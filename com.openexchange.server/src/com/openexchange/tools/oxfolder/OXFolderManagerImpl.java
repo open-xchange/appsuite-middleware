@@ -722,7 +722,16 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 boolean create = (wc == null);
                 try {
                     for (Map<Integer,List<VersionControlResult>> resultMap : results) {
-                        VersionControlUtil.restoreVersionControl(resultMap, ctx, wc);
+                        for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                            Integer documentId = documentEntry.getKey();
+                            List<VersionControlResult> versionInfo = documentEntry.getValue();
+
+                            try {
+                                VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), ctx, wc);
+                            } catch (Exception e) {
+                                LOG.error("Failed to restore InfoStore/Drive files for document {} in context {}", documentId, ctx.getContextId(), e);
+                            }
+                        }
                     }
                 } finally {
                     if (create && wc != null) {
@@ -1725,8 +1734,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 try {
                     next.onFolderDelete(folderID, ctx);
                 } catch (final OXException e) {
-                    LOG.error("Folder delete listener \"{}\" failed for folder {} int context {}", next.getClass().getName(), folderID, ctx.getContextId(),
-                        e);
+                    LOG.error("Folder delete listener \"{}\" failed for folder {} int context {}", next.getClass().getName(), folderID, ctx.getContextId(), e);
                     throw e;
                 }
             }

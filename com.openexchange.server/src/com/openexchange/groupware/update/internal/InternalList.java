@@ -792,6 +792,9 @@ public final class InternalList {
         // Creates indexes on tables "prg_contacts" and "del_contacts" to improve auto-complete
         list.add(new com.openexchange.groupware.update.tasks.CalendarAddIndex2DatesMembersV2());
 
+        // Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
+        list.add(new com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
