@@ -2553,4 +2553,61 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         }
         return retval;
     }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException {
+        int contextId = context.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            
+            // Fetch the schema name
+            stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE cid = ?");
+            stmt.setInt(1, contextId);
+            
+            result = stmt.executeQuery();
+            
+            String schemaName;
+            if (result.next()) {
+                schemaName = result.getString(1);
+            } else {
+                throw new InvalidDataException("The specified context '" + contextId + "' is does not exist in any known database schema.");
+            }
+            stmt.close();
+            result.close();
+            
+            // Count the contexts that the schema contains
+            stmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schemaName);
+            
+            result = stmt.executeQuery();
+            
+            if (result.next()) {
+                int count = result.getInt(1);
+                return count == 1;
+            } else {
+                throw new InvalidDataException("The specified schema '" + schemaName + "' does not exist.");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing context connection to pool.", e);
+                }
+            }
+        }
+    }
 }

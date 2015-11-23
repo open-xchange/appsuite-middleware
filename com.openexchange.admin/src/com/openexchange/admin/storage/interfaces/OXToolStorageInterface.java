@@ -49,6 +49,8 @@
 package com.openexchange.admin.storage.interfaces;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -478,5 +480,15 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException;
+
+    /**
+     * Determines whether the specified context is the last one on the database schema
+     * 
+     * @param context The context
+     * @return true if the specified context is the last one on the database schema; false otherwise
+     * @throws StorageException if a problem occurs on the storage layer.
+     * @throws InvalidDataException if the specified context does not exist in any known database schema
+     */
+    public abstract boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException;
 
 }
