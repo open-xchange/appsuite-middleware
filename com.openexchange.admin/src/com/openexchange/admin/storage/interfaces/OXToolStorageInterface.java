@@ -512,4 +512,14 @@ public abstract class OXToolStorageInterface {
      */
     public abstract Map<Integer, List<Integer>> fetchSlaveUsersOfMasterFilestore(Context context, int userId) throws StorageException;
 
+    /**
+     * Determines whether the specified context is the last one on the database schema
+     * 
+     * @param context The context
+     * @return true if the specified context is the last one on the database schema; false otherwise
+     * @throws StorageException if a problem occurs on the storage layer.
+     * @throws InvalidDataException if the specified context does not exist in any known database schema
+     */
+    public abstract boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException;
+
 }

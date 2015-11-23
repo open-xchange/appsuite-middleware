@@ -679,7 +679,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             LOG.error("", e);
             throw e;
         }
-
+        
+        final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
+        if (storage.isLastContextInSchema(ctx)) {
+            throw new OXContextRestoreException(Code.LAST_CONTEXT_IN_SCHEMA, ctx.getIdAsString());
+        }
+        
         LOG.info("Context: {}", ctx);
         LOG.info("Filenames: {}", java.util.Arrays.toString(fileNames));
 
@@ -709,7 +714,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
             final OXContextInterface contextInterface = Activator.getContextInterface();
 
-            final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
             // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
             if (storage.existsContext(ctx)) {
                 try {
