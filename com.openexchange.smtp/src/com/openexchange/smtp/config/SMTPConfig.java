@@ -173,7 +173,7 @@ public final class SMTPConfig extends TransportConfig {
             TransportAuth transportAuth = account.getTransportAuth();
             switch (transportAuth) {
             case CUSTOM:
-                login = account.getTransportLogin();
+                login = saneLogin(account.getTransportLogin());
                 password = MailPasswordUtil.decrypt(account.getTransportPassword(), session, account.getId(), login, account.getTransportServer());
                 break;
             case NONE:
@@ -183,8 +183,7 @@ public final class SMTPConfig extends TransportConfig {
             case MAIL:
                 /* fall-through */
             default:
-                login = account.getLogin();
-                password = MailPasswordUtil.decrypt(account.getPassword(), session, account.getId(), login, account.getMailServer());
+                /* Do nothing as login/password already set by calling MailConfig.fillLoginAndPassword() in TransportConfig.getTransportConfig() */
                 break;
             }
 
