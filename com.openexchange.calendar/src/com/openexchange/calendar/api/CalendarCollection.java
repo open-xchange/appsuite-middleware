@@ -3752,7 +3752,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public void checkAndRemovePastReminders(final CalendarDataObject cdao, final CalendarDataObject edao) {
         if (CalendarConfig.getCheckAndRemovePastReminders() && cdao.containsAlarm() && cdao.getAlarm() >= 0) {
             long reminder = 0;
-            if (cdao.containsStartDate()) {
+            if (cdao.containsStartDateAndIsNotNull()) {
                 reminder = cdao.getStartDate().getTime();
             } else {
                 reminder = edao.getStartDate().getTime();
