@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 1
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -58,6 +58,8 @@ ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapau
 %doc com.openexchange.authentication.imap/ChangeLog
 
 %changelog
+* Mon Nov 23 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.6.3 release
 * Mon Oct 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
 First candidate for 7.6.3 release
 * Tue Oct 20 2015 Marcus Klein <marcus.klein@open-xchange.com>
