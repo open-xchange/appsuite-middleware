@@ -94,6 +94,7 @@ import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.PListDict;
+import com.openexchange.onboarding.plist.PListWriter;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -369,12 +370,13 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment; filename=eas.mobileconfig");
             fileHolder.setName("eas.mobileconfig");
             fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=eas.mobileconfig"); // Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
             transport.sendMailMessage(message, ComposeType.NEW);
@@ -390,6 +392,7 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
     Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
         try {
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
 
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment");
@@ -397,7 +400,7 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
             fileHolder.setContentType("application/xml"); // Or application/x-plist ?
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             return new Result(fileHolder, "file");
         } catch (XMLStreamException e) {
             throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());

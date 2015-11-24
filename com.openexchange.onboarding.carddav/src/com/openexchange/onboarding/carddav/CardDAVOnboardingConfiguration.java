@@ -92,6 +92,7 @@ import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.PListDict;
+import com.openexchange.onboarding.plist.PListWriter;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -191,7 +192,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             throw ServiceExceptionCode.absentService(CapabilityService.class);
         }
 
-        if (false == capabilityService.getCapabilities(session).contains(Permission.CALDAV.getCapabilityName())) {
+        if (false == capabilityService.getCapabilities(session).contains(Permission.CARDDAV.getCapabilityName())) {
             return false;
         }
 
@@ -312,12 +313,13 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment; filename=carddav.mobileconfig");
             fileHolder.setName("carddav.mobileconfig");
             fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=carddav.mobileconfig"); // Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
             transport.sendMailMessage(message, ComposeType.NEW);
@@ -340,13 +342,16 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadType("com.apple.carddav.account");
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentUUID", PROFILE_CARDDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentIdentifier", "com.open-xchange.carddav", session));
+        payloadContent.setPayloadDisplayName(CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME);
+        payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CardDAVUsername", session.getLogin());
         payloadContent.addStringValue("CardDAVPassword", session.getPassword());
-        payloadContent.addStringValue("CardDAVHostname", getCardDAVUrl(request, session));
+        payloadContent.addStringValue("CardDAVHostName", getCardDAVUrl(request, session));
+        payloadContent.addBooleanValue("CardDAVUseSSL", false);
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.carddav.plist.accountDescription", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session));
 
         PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadIdentifier", "com.open-xchange", session));
+        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadIdentifier", "com.open-xchange.carddav", session));
         pListDict.setPayloadType("Configuration");
         pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadUUID", PROFILE_CARDDAV_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
@@ -358,6 +363,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
         try {
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
 
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment");
@@ -365,7 +371,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
             fileHolder.setContentType("application/x-apple-aspen-config"); // Or application/x-plist ?
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             return new Result(fileHolder, "file");
         } catch (XMLStreamException e) {
             throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());

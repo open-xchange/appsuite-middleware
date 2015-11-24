@@ -92,6 +92,7 @@ import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.PListDict;
+import com.openexchange.onboarding.plist.PListWriter;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -310,12 +311,13 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment; filename=caldav.mobileconfig");
             fileHolder.setName("caldav.mobileconfig");
             fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig");// Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
             transport.sendMailMessage(message, ComposeType.NEW);
@@ -338,13 +340,16 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadType("com.apple.caldav.account");
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
+        payloadContent.setPayloadDisplayName(CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME);
+        payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
         payloadContent.addStringValue("CalDAVPassword", session.getPassword());
-        payloadContent.addStringValue("CalDAVHostname", getCalDAVUrl(request, session));
-        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.plist.accountDescription", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session));
+        payloadContent.addStringValue("CalDAVHostName", getCalDAVUrl(request, session));
+        payloadContent.addBooleanValue("CalDAVUseSSL", false);
+        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.plist.accountDescription", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session));
 
         PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadIdentifier", "com.open-xchange", session));
+        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadIdentifier", "com.open-xchange.caldav", session));
         pListDict.setPayloadType("Configuration");
         pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadUUID", PROFILE_CALDAV_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
@@ -356,6 +361,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
     Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
         try {
             PListDict pListDict = generatePList(request, session);
+            PListWriter pListWriter = new PListWriter();
 
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment");
@@ -363,7 +369,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             fileHolder.setContentType("application/x-apple-aspen-config");// Or application/x-plist ?
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListDict.write(writer);
+            pListWriter.write(pListDict, writer);
             return new Result(fileHolder, "file");
         } catch (XMLStreamException e) {
             throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
