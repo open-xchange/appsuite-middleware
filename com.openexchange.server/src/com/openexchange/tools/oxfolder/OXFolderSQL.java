@@ -1842,9 +1842,12 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(false);
             }
             try {
+                int srcParentId = getParentId(src.getObjectID(), ctx, writeCon);
+                int destParentId = getParentId(dest.getObjectID(), ctx, writeCon);
+
                 // Acquire lock
-                lock(src.getObjectID(), ctx.getContextId(), writeCon);
-                lock(dest.getObjectID(), ctx.getContextId(), writeCon);
+                lock(srcParentId > 0 ? srcParentId : src.getObjectID(), ctx.getContextId(), writeCon);
+                lock(destParentId > 0 ? destParentId : dest.getObjectID(), ctx.getContextId(), writeCon);
 
                 // Do the move
                 pst = writeCon.prepareStatement(SQL_MOVE_UPDATE);
