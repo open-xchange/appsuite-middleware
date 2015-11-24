@@ -398,7 +398,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
      */
     private int optIntParameter(AJAXRequestData request, String name) throws OXException {
         if (request.isSet(name)) {
-            Integer integer = request.getParameter("width", int.class);
+            Integer integer = request.getParameter(name, int.class);
             return null != integer ? integer.intValue() : 0;
         }
         return 0;
