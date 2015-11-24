@@ -1595,7 +1595,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             setSeenFlag(fullName, mail, msg);
                         }
                     } catch (final MessagingException e) {
-                        imapFolderStorage.removeFromCache(fullName);
                         LOG.warn("/SEEN flag could not be set on message #{} in folder {}", mail.getMailId(), mail.getFolder(), e);
                     }
                 } else {
@@ -1648,9 +1647,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             mail.setFlag(MailMessage.FLAG_SEEN, true);
             final int cur = mail.getUnreadMessages();
             mail.setUnreadMessages(cur <= 0 ? 0 : cur - 1);
-            imapFolderStorage.decrementUnreadMessageCount(fullName);
         } catch (final Exception e) {
-            imapFolderStorage.removeFromCache(fullName);
             LOG.warn("/SEEN flag could not be set on message #{} in folder {}", mail.getMailId(), mail.getFolder(), e);
         }
     }
@@ -2415,7 +2412,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final OperationKey opKey = new OperationKey(Type.MSG_DELETE, accountId, new Object[] { fullName });
             final boolean marked = setMarker(opKey);
             try {
-                imapFolderStorage.removeFromCache(fullName);
                 if (hardDelete || getUserSettingMail().isHardDeleteMsgs()) {
                     blockwiseDeletion(msgUIDs, false, null);
                     notifyIMAPFolderModification(fullName);
@@ -2587,7 +2583,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 // Nothing to move
                 return new long[0];
             }
-            imapFolderStorage.clearCache();
             /*
              * Open and check user rights on source folder
              */
@@ -2870,7 +2865,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final OperationKey opKey = new OperationKey(Type.MSG_APPEND, accountId, new Object[] { destFullName });
             final boolean marked = setMarker(opKey);
             try {
-                imapFolderStorage.removeFromCache(destFullName);
                 /*
                  * Check if destination folder supports user flags
                  */
@@ -3050,7 +3044,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final OperationKey opKey = new OperationKey(Type.MSG_APPEND, accountId, new Object[] { destFullName });
             final boolean marked = setMarker(opKey);
             try {
-                imapFolderStorage.removeFromCache(destFullName);
                 /*
                  * Drop special "x-original-headers" header
                  */
@@ -3266,7 +3259,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Remove non user-alterable system flags
                  */
-                imapFolderStorage.removeFromCache(fullName);
                 int flags = flagsArg;
                 flags &= ~MailMessage.FLAG_RECENT;
                 flags &= ~MailMessage.FLAG_USER;
@@ -3397,7 +3389,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Remove non user-alterable system flags
                  */
-                imapFolderStorage.removeFromCache(fullName);
                 int flags = flagsArg;
                 flags &= ~MailMessage.FLAG_RECENT;
                 flags &= ~MailMessage.FLAG_USER;
@@ -3548,7 +3539,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Remove all old color label flag(s) and set new color label flag
                  */
-                imapFolderStorage.removeFromCache(fullName);
                 IMAPCommandsCollection.setUserFlags(imapFolder, mailIds, flags, set);
 
                 /*
@@ -3615,7 +3605,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Remove all old color label flag(s) and set new color label flag
                  */
-                imapFolderStorage.removeFromCache(fullName);
                 IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, msgUIDs, MailMessage.getColorLabelStringValue(colorLabel));
 
                 /*
@@ -3682,7 +3671,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Remove all old color label flag(s) and set new color label flag
                  */
-                imapFolderStorage.removeFromCache(fullName);
 
                 IMAPCommandsCollection.clearAndSetColorLabelSafely(imapFolder, null, MailMessage.getColorLabelStringValue(colorLabel));
                 /*
@@ -3733,7 +3721,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * Append message to draft folder
                  */
-                imapFolderStorage.removeFromCache(draftFullName);
                 uid = appendMessagesLong(draftFullName, new MailMessage[] { MimeMessageConverter.convertMessage(mimeMessage, false) })[0];
             } finally {
                 composedMail.cleanUp();

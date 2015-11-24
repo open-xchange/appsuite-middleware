@@ -51,13 +51,13 @@ package com.openexchange.session.reservation.impl;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.exception.OXException;
@@ -80,7 +80,7 @@ public class SessionReservationServiceImpl implements SessionReservationService 
     private volatile boolean useHzMap = false;
 
     private final Blocker blocker = new ConcurrentBlocker();
-    private final ConcurrentMap<String, Reservation> reservations;
+    private final Cache<String, Reservation> reservations;
     private final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler;
 
     /**
@@ -88,8 +88,14 @@ public class SessionReservationServiceImpl implements SessionReservationService 
      */
     public SessionReservationServiceImpl(HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler) {
         super();
-        IdleExpirationPolicy evictionPolicy = new IdleExpirationPolicy(TimeUnit.MINUTES.toMillis(5));
-        reservations = new ConcurrentLinkedHashMap<String, Reservation>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
+        CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+            .concurrencyLevel(1)
+            .maximumSize(Integer.MAX_VALUE)
+            .initialCapacity(1024)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+        ;
+        Cache<String, Reservation> cache = cacheBuilder.build();
+        reservations = cache;
         this.notActiveExceptionHandler = notActiveExceptionHandler;
     }
 
@@ -158,7 +164,7 @@ public class SessionReservationServiceImpl implements SessionReservationService 
     private Reservation pollReservation(String token) {
         blocker.acquire();
         try {
-            return useHzMap ? pollFromHzMap(hzMapName, token) : reservations.remove(token);
+            return useHzMap ? pollFromHzMap(hzMapName, token) : reservations.asMap().remove(token);
         } finally {
             blocker.release();
         }
@@ -247,10 +253,10 @@ public class SessionReservationServiceImpl implements SessionReservationService 
                 LOG.trace("Hazelcast map is not available.");
             } else {
                 // This MUST be synchronous!
-                for (Map.Entry<String, Reservation> entry : reservations.entrySet()) {
+                for (Map.Entry<String, Reservation> entry : reservations.asMap().entrySet()) {
                     hzMap.put(entry.getKey(), new PortableReservation(entry.getValue()));
                 }
-                reservations.clear();
+                reservations.invalidateAll();
             }
             useHzMap = true;
             LOG.info("Reservations backing map changed to hazelcast");

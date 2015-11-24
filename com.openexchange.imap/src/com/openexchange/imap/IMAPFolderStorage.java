@@ -91,7 +91,6 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.imap.OperationKey.Type;
 import com.openexchange.imap.acl.ACLExtension;
-import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.ListLsubEntry;
 import com.openexchange.imap.cache.ListLsubRuntimeException;
@@ -112,6 +111,7 @@ import com.openexchange.imap.entity2acl.Entity2ACLExceptionCode;
 import com.openexchange.imap.entity2acl.UserGroupID;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
+import com.openexchange.imap.util.FolderUtility;
 import com.openexchange.imap.util.IMAPSessionStorageAccess;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Strings;
@@ -295,71 +295,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
      */
     public int getAccountId() {
         return accountId;
-    }
-
-    /**
-     * Clears the folder cache.
-     */
-    public void clearCache() {
-        FolderCache.removeCachedFolders(session, accountId);
-        // ListLsubCache.clearCache(accountId, session);
-    }
-
-    /**
-     * Removes the IMAP folder denoted by specified full name.
-     *
-     * @param modifiedFullname The full name of the folder which has been modified
-     */
-    public void removeFromCache(final String modifiedFullname) {
-        FolderCache.removeCachedFolder(modifiedFullname, session, accountId);
-        // ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
-    }
-
-    /**
-     * Decrements unread message counter from cached IMAP folder.
-     *
-     * @param fullName The IMAP folder full name
-     */
-    public void decrementUnreadMessageCount(final String fullName) {
-        FolderCache.decrementUnreadMessageCount(fullName, session, accountId);
-    }
-
-    /**
-     * Updates the cached IMAP folder if message has changed.
-     *
-     * @param imapFolder The IMAP folder
-     * @param total The message count
-     * @return <code>true</code> if updated; otherwise <code>false</code>
-     */
-    public boolean updateCacheIfDiffer(final IMAPFolder imapFolder, final int total) {
-        final String fullName = imapFolder.getFullName();
-        final MailFolder mailFolder = FolderCache.optCachedFolder(fullName, this);
-        if (null != mailFolder) {
-            try {
-                final int cachedTotal = mailFolder.getMessageCount();
-                if (cachedTotal >= 0 && cachedTotal != total) {
-                    FolderCache.updateCachedFolder(fullName, this, imapFolder);
-                    return true;
-                }
-            } catch (final OXException e) {
-                LOG.warn("Updating IMAP folder cache failed.", e);
-                FolderCache.removeCachedFolder(fullName, session, accountId);
-                ListLsubCache.removeCachedEntry(fullName, accountId, session);
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Removes the IMAP folders denoted by specified set of full names.
-     *
-     * @param modifiedFullnames The full names of the folders which have been modified
-     */
-    public void removeFromCache(final Set<String> modifiedFullnames) {
-        for (final String modifiedFullname : modifiedFullnames) {
-            FolderCache.removeCachedFolder(modifiedFullname, session, accountId);
-            // ListLsubCache.removeCachedEntry(modifiedFullname, accountId, session);
-        }
     }
 
     private IMAPDefaultFolderChecker getChecker() {
@@ -742,7 +677,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
             if (exists) {
                 // IMAP does signal folder existence, but not reflected in caches
-                FolderCache.removeCachedFolders(session, accountId);
                 ListLsubCache.clearCache(accountId, session);
                 return true;
             }
@@ -757,7 +691,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     @Override
     public MailFolder getFolder(final String fullName) throws OXException {
         try {
-            return FolderCache.getCachedFolder(fullName, this);
+            return FolderUtility.loadFolder(fullName, this);
         } catch (OXException e) {
             if (e.equalsCode(MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber(), IMAPException.IMAPCode.prefix())) {
                 ListLsubCache.clearCache(accountId, session);
@@ -865,7 +799,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 for (final ListLsubEntry subfolder : subfolders) {
                     final String subfolderFullName = subfolder.getFullName();
                     try {
-                        list.add(FolderCache.getCachedFolder(subfolderFullName, this));
+                        list.add(FolderUtility.loadFolder(subfolderFullName, this));
                     } catch (final OXException e) {
                         if (MimeMailExceptionCode.FOLDER_NOT_FOUND.getNumber() != e.getCode()) {
                             throw e;
@@ -873,7 +807,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         /*
                          * Obviously folder does (no more) exist
                          */
-                        FolderCache.removeCachedFolder(subfolderFullName, session, accountId);
                         ListLsubCache.removeCachedEntry(subfolderFullName, accountId, session);
                         RightsCache.removeCachedRights(subfolderFullName, session, accountId);
                         UserFlagsCache.removeUserFlags(subfolderFullName, session, accountId);
@@ -989,14 +922,14 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
          */
         final List<MailFolder> list = new ArrayList<MailFolder>(subfolders.size() + (additionalFullNames.isEmpty() ? 0 : additionalFullNames.size()));
         for (final ListLsubEntry current : subfolders) {
-            final MailFolder mailFolder = FolderCache.getCachedFolder(current.getFullName(), this);
+            final MailFolder mailFolder = FolderUtility.loadFolder(current.getFullName(), this);
             if (mailFolder.exists()) {
                 list.add(mailFolder);
             }
         }
         if (!additionalFullNames.isEmpty()) {
             for (final String fn : additionalFullNames) {
-                list.add(FolderCache.getCachedFolder(fn, this));
+                list.add(FolderUtility.loadFolder(fn, this));
             }
         }
         return list.toArray(new MailFolder[list.size()]);
@@ -1106,7 +1039,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
 
     @Override
     public MailFolder getRootFolder() throws OXException {
-        return FolderCache.getCachedFolder(MailFolder.DEFAULT_FOLDER_ID, this);
+        return FolderUtility.loadFolder(MailFolder.DEFAULT_FOLDER_ID, this);
     }
 
     @Override
@@ -1182,7 +1115,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
              * Insert
              */
             String parentFullname = toCreate.getParentFullname();
-            FolderCache.removeCachedFolder(parentFullname, session, accountId);
             final boolean isParentDefault;
             IMAPFolder parent;
             if (DEFAULT_FOLDER_ID.equals(parentFullname)) {
@@ -1465,7 +1397,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolders(session, accountId);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -1635,7 +1566,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolders(session, accountId);
             ListLsubCache.clearCache(accountId, session);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
@@ -1883,7 +1813,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolder(fullName, session, accountId);
             /*
              * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
              */
@@ -1981,7 +1910,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                             /*
                              * Since the ACLs have changed remove cached rights
                              */
-                            FolderCache.removeCachedFolder(fullName, session, accountId);
                             RightsCache.removeCachedRights(updateMe, session, accountId);
                             /*
                              * Does affect ListLsubCache of other users, too
@@ -2009,7 +1937,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     }
                     boolean subscribe = toUpdate.isSubscribed();
                     setSubscribed(subscribe, updateMe);
-                    FolderCache.removeCachedFolders(session, accountId);
                     changed = true;
                 }
                 return updateMe.getFullName();
@@ -2073,7 +2000,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolders(session, accountId);
             clearListLsubCache = true;
             synchronized (deleteMe) {
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
@@ -2164,7 +2090,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolder(fullName, session, accountId);
             // ListLsubCache.removeCachedEntry(fullName, accountId, session);
             synchronized (f) {
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
@@ -2247,7 +2172,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
                 }
             }
-            FolderCache.removeCachedFolder(fullName, session, accountId);
             // ListLsubCache.removeCachedEntry(fullName, accountId, session);
             synchronized (f) {
                 imapAccess.getMessageStorage().notifyIMAPFolderModification(fullName);
@@ -2447,7 +2371,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             final String defaultFolder = "";
             String fn;
             while (!(fn = f.getFullName()).equals(defaultFolder)) {
-                list.add(FolderCache.getCachedFolder(fn, this));
+                list.add(FolderUtility.loadFolder(fn, this));
                 f = (IMAPFolder) f.getParent();
             }
             return list.toArray(new MailFolder[list.size()]);
@@ -2772,7 +2696,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Remove cache entries
          */
-        FolderCache.removeCachedFolder(fullName, session, accountId);
         // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(deleteMe, session, accountId);
         UserFlagsCache.removeUserFlags(deleteMe, session, accountId);
@@ -2940,7 +2863,6 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         /*
          * Remove cache entries
          */
-        FolderCache.removeCachedFolder(moveFullname, session, accountId);
         // ListLsubCache.clearCache(accountId, session);
         RightsCache.removeCachedRights(moveFullname, session, accountId);
         UserFlagsCache.removeUserFlags(moveFullname, session, accountId);

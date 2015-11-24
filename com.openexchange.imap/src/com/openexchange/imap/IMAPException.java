@@ -63,7 +63,6 @@ import com.openexchange.exception.LogLevel;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
-import com.openexchange.imap.cache.FolderCache;
 import com.openexchange.imap.cache.ListLsubCache;
 import com.openexchange.imap.cache.RightsCache;
 import com.openexchange.imap.cache.UserFlagsCache;
@@ -1370,11 +1369,9 @@ public final class IMAPException extends OXException {
                     fullName = null == folder ? null : folder.getFullName();
                 }
                 if (null == fullName) {
-                    FolderCache.removeCachedFolders(session, accountId);
                     ListLsubCache.clearCache(accountId, session);
                     return MailExceptionCode.FOLDER_NOT_FOUND_SIMPLE.create(e, new Object[0]);
                 }
-                FolderCache.removeCachedFolder(fullName, session, accountId);
                 ListLsubCache.removeCachedEntry(fullName, accountId, session);
                 RightsCache.removeCachedRights(fullName, session, accountId);
                 UserFlagsCache.removeUserFlags(fullName, session, accountId);

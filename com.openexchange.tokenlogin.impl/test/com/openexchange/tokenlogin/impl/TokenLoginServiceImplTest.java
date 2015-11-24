@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
@@ -70,7 +71,6 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -387,7 +387,7 @@ public class TokenLoginServiceImplTest {
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
         Mockito.verify(this.session, Mockito.times(1)).getSessionID();
-        ConcurrentLinkedHashMap<String, String> token2sessionMap = (ConcurrentLinkedHashMap<String, String>) MockUtils.getValueFromField(
+        ConcurrentHashMap<String, String> token2sessionMap = (ConcurrentHashMap<String, String>) MockUtils.getValueFromField(
             this.tokenLoginServiceImpl,
             "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
@@ -402,7 +402,7 @@ public class TokenLoginServiceImplTest {
 
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
-        ConcurrentLinkedHashMap<String, String> token2sessionMap = (ConcurrentLinkedHashMap<String, String>) MockUtils.getValueFromField(
+        ConcurrentHashMap<String, String> token2sessionMap = (ConcurrentHashMap<String, String>) MockUtils.getValueFromField(
             this.tokenLoginServiceImpl,
             "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
@@ -415,12 +415,7 @@ public class TokenLoginServiceImplTest {
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
     private ConcurrentMap<String, String> createToken2SessionId() {
-        ConcurrentMap<String, String> token2sessionId = new ConcurrentLinkedHashMap<String, String>(
-            1024,
-            0.75f,
-            16,
-            Integer.MAX_VALUE,
-            new IdleExpirationPolicy(this.maxIdleTime));
+        ConcurrentMap<String, String> token2sessionId = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
         token2sessionId.put(this.token, "8a07c5a2e4974a75ae70bd9a36198f03");
 
         return token2sessionId;
@@ -432,12 +427,7 @@ public class TokenLoginServiceImplTest {
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
     private ConcurrentMap<String, String> createSessionId2Token() {
-        ConcurrentMap<String, String> sessionId2Token = new ConcurrentLinkedHashMap<String, String>(
-            1024,
-            0.75f,
-            16,
-            Integer.MAX_VALUE,
-            new IdleExpirationPolicy(this.maxIdleTime));
+        ConcurrentMap<String, String> sessionId2Token = new ConcurrentHashMap<String, String>(1024, 0.75f, 1);
         sessionId2Token.put("8a07c5a2e4974a75ae70bd9a36198f03", this.token);
 
         return sessionId2Token;
