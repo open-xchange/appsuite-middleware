@@ -131,14 +131,14 @@ public class CaldavPerformer extends AbstractPerformer {
         actions.put(WebdavMethod.PROPPATCH, prepare(new WebdavProppatchAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, factory, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
         actions.put(WebdavMethod.MKCOL, prepare(new WebdavMkcolAction(), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
         actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.POST, prepare(new WebdavPostAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MKCALENDAR, prepare(new WebdavMkCalendarAction(), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, factory, new WebdavIfAction(0, false, false)));
