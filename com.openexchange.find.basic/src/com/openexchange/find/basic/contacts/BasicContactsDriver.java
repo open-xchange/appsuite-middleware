@@ -52,13 +52,12 @@ package com.openexchange.find.basic.contacts;
 import static com.openexchange.find.facet.Facets.newDefaultBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.SortOptions;
@@ -84,6 +83,7 @@ import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.SpecialAlphanumSortContactComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -109,6 +109,14 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.COMMERCIAL_REGISTER }
         //TOD=: more fields
     );
+
+    /**
+     * Contact fields that are required to perform a {@link Contact#SPECIAL_SORTING} of search results.
+     */
+    static final ContactField[] SORT_FIELDS = new ContactField[] {
+        ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME,
+        ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY, ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2
+    };
 
     /**
      * Initializes a new {@link BasicContactsDriver}.
@@ -177,14 +185,17 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         if (0 == columnIDs.length) {
             columnIDs = ColumnParser.parseColumns("list");
         }
-
+        contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
         /*
          * exclude context admin if requested
          */
         if (searchRequest.getOptions().includeContextAdmin()) {
-            contactFields = ColumnParser.getFieldsToQuery(columnIDs);
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs, SORT_FIELDS);
         } else {
-            contactFields = ColumnParser.getFieldsToQuery(columnIDs, ContactField.INTERNAL_USERID);
+            ContactField[] mandatoryFields = new ContactField[SORT_FIELDS.length + 1];
+            mandatoryFields[0] = ContactField.INTERNAL_USERID;
+            System.arraycopy(SORT_FIELDS, 0, mandatoryFields, 1, SORT_FIELDS.length);
+            contactFields = ColumnParser.getFieldsToQuery(columnIDs, mandatoryFields);
             CompositeSearchTerm excludeAdminTerm = new CompositeSearchTerm(CompositeOperation.OR);
             SingleSearchTerm isNullTerm = new SingleSearchTerm(SingleOperation.ISNULL);
             isNullTerm.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
@@ -200,17 +211,28 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
          */
         List<Document> contactDocuments = new ArrayList<Document>();
         SortOptions sortOptions = new SortOptions(searchRequest.getStart(), searchRequest.getSize());
+        List<Contact> contacts = new ArrayList<Contact>();
         SearchIterator<Contact> searchIterator = null;
         try {
             searchIterator = Services.getContactService().searchContacts(session, searchTerm, contactFields, sortOptions);
             while (searchIterator.hasNext()) {
-                Contact contact = searchIterator.next();
-                contactDocuments.add(new ContactsDocument(contact));
+                contacts.add(searchIterator.next());
             }
         } finally {
             SearchIterators.close(searchIterator);
         }
-
+        /*
+         * apply special sorting & convert resulting contacts
+         */
+        if (null != contacts) {
+            if (1 < contacts.size()) {
+                SpecialAlphanumSortContactComparator comparator = new SpecialAlphanumSortContactComparator(session.getUser().getLocale());
+                Collections.sort(contacts, comparator);
+            }
+            for (Contact contact : contacts) {
+                contactDocuments.add(new ContactsDocument(contact));
+            }
+        }
         return new SearchResult(-1, searchRequest.getStart(), contactDocuments, searchRequest.getActiveFacets());
     }
 
