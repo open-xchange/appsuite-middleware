@@ -76,6 +76,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.Types;
@@ -1317,6 +1318,51 @@ public final class OXFolderSQL {
     }
 
     /**
+     * Gets the parent identifier for specified folder.
+     *
+     * @param folder The folder identifier
+     * @param ctx The associated context
+     * @return The parent identifier or <code>-1</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    public static int getParentId(int folder, Context ctx) throws OXException, SQLException {
+        Connection connection = DBPool.pickup(ctx);
+        try {
+            return getParentId(folder, ctx, connection);
+        } finally {
+            DBPool.closeReaderSilent(ctx, connection);
+        }
+    }
+
+    /**
+     * Gets the parent identifier for specified folder.
+     *
+     * @param folder The folder identifier
+     * @param ctx The associated context
+     * @param connection The connection to use
+     * @return The parent identifier or <code>-1</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    public static int getParentId(int folder, Context ctx, Connection connection) throws OXException, SQLException {
+        if (null == connection) {
+            return getParentId(folder, ctx);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT parent FROM oxfolder_tree WHERE cid=? AND fuid=?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folder);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Gets a folder's path down to the root folder, ready to be used in events.
      *
      * @param folder The folder to get the path for
@@ -1961,8 +2007,10 @@ public final class OXFolderSQL {
         final boolean backup = (createBackup && deleteWorking);
         PreparedStatement stmt = null;
         try {
+            int parent = getParentId(folderId, ctx, writeCon);
+
             // Acquire lock
-            lock(folderId, ctx.getContextId(), backup, writeCon);
+            lock(parent > 0 ? parent : folderId, ctx.getContextId(), backup, writeCon);
 
             // Do delete
             if (backup) {
