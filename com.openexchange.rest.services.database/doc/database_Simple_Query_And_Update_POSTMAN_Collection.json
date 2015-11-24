@@ -1,0 +1,110 @@
+{
+  "id": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+  "name": "REST Database (Simple Q&U)",
+  "timestamp": 1426165720184,
+  "order": [
+    "ec430145-aaa6-b7ad-6948-1f78728728aa",
+    "148eb434-abff-d325-0737-5db9dd7aa034",
+    "4b46a827-ff77-7d64-7f40-4fff3c94959a",
+    "74d6e11c-822c-34d6-5bc4-14c1ca2d330b",
+    "2859ba49-0c77-1862-498a-5c01e2a9b3ed",
+    "f6afd954-9df5-1910-5055-c96be4136993",
+    "97a3ed83-0a01-d3c6-25d4-735b7d829998"
+  ],
+  "requests": [
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "148eb434-abff-d325-0737-5db9dd7aa034",
+      "name": "Writing to 'configdb'",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/configdb/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"UPDATE context SET quota_max=? WHERE cid=?;\",\n    \"params\" : [5242880001, 11]\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "2859ba49-0c77-1862-498a-5c01e2a9b3ed",
+      "name": "Reading from an OX db (Multi queries)",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nContent-Type: application/json\n",
+      "data": "{\n    \"allUsers\": {\n\t\t\"query\": \"SELECT id, mail, preferredLanguage FROM user WHERE cid = ? LIMIT ?\",\n\t\t\"params\": [424242669, 5]\n\t},\n\t\"aliases\": {\n\t\t\"query\": \"SELECT value FROM user_attribute WHERE cid = ? AND id = ? AND name = ?\",\n\t\t\"params\": [424242669, 2, \"alias\"]\n\t}\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426167914938
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "4b46a827-ff77-7d64-7f40-4fff3c94959a",
+      "name": "Reading from an OX db",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"SELECT id, mail, preferredLanguage FROM user WHERE cid = ? AND id = ?\",\n    \"params\" : [424242669, 4126]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "74d6e11c-822c-34d6-5bc4-14c1ca2d330b",
+      "name": "Writing to an OX db",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"UPDATE user SET preferredLanguage=? WHERE id = ? AND cid = ?;\",\n    \"params\" : [\"de_DE\", 4126, 424242669]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "97a3ed83-0a01-d3c6-25d4-735b7d829998",
+      "name": "Reading from 'configdb' (db_pool)",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/configdb/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\t\n  \"db_cluster\" : {  \n    \"query\" : \"SELECT cluster_id, read_db_pool_id, write_db_pool_id FROM db_cluster\",\n    \"params\" : []\n  },\n  \"db_pool\" : {\n    \"query\" : \"SELECT db_pool_id,url,name FROM db_pool\",\n    \"params\" : []\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168978627
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "ec430145-aaa6-b7ad-6948-1f78728728aa",
+      "name": "Reading from the 'configdb'",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/configdb/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"q\" : {\n    \"query\" : \"SELECT * FROM context WHERE cid = ? LIMIT ?\",\n    \"params\" : [11, 3]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "295687c1-264d-a86f-c43b-a1b0cf9c0983",
+      "id": "f6afd954-9df5-1910-5055-c96be4136993",
+      "name": "Error Handling",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nContent-Type: application/json\n",
+      "data": "{\n    \"error\": {\n\t\t\"query\": \"SELECT id, mail, non_existing FROM non_existing_table WHERE cid = ?\",\n\t\t\"params\": [424242669]\n\t}\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426167984305
+    }
+  ]
+}

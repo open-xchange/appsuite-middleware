@@ -1,0 +1,83 @@
+{
+  "id": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+  "name": "REST Database (Transactions)",
+  "timestamp": 1426165667025,
+  "order": [
+    "9c5c6ef6-1cb8-c597-38c8-4c4ca0475d7f",
+    "12aa9ac5-63c8-ba84-582b-d7ca0d0d64f4",
+    "1c6fad78-6162-d3d5-5e50-a0a7cbb4eb8a",
+    "c3a3aadb-81ec-8a69-52dc-e89cb1d35aa8",
+    "3df9d04f-2cfe-0273-8bcb-93e69749200e"
+  ],
+  "requests": [
+    {
+      "collectionId": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+      "id": "12aa9ac5-63c8-ba84-582b-d7ca0d0d64f4",
+      "name": "Transaction in OX DB #1",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/writable?keepOpen=true",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"UPDATE user SET preferredLanguage=? WHERE id = ? AND cid = ?;\",\n    \"params\" : [\"el_GR\", 4126, 424242669]\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168074665
+    },
+    {
+      "collectionId": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+      "id": "1c6fad78-6162-d3d5-5e50-a0a7cbb4eb8a",
+      "name": "Transaction in OX DB #2",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}?keepOpen=true",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"q\" : {\n    \"query\" : \"SELECT * FROM user WHERE id = ? AND cid = ?;\",\n    \"params\" : [4126, 424242669],\n    \"resultSet\" : true\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168503381
+    },
+    {
+      "collectionId": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+      "id": "3df9d04f-2cfe-0273-8bcb-93e69749200e",
+      "name": "Rollback Transaction in OX DB",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}/rollback",
+      "method": "GET",
+      "headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nContent-Type: text/plain\n",
+      "data": "{\n  \"q\" : {\n    \"query\" : \"SELECT * FROM user WHERE id = ? AND cid = ?;\",\n    \"params\" : [4126, 424242669]\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168513821
+    },
+    {
+      "collectionId": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+      "id": "9c5c6ef6-1cb8-c597-38c8-4c4ca0475d7f",
+      "name": "Transaction in OX DB #0",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"q\" : {\n    \"query\" : \"SELECT * FROM user WHERE id = ? AND cid = ?;\",\n    \"params\" : [4126, 424242669]\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "169e0847-febb-98a0-9ad4-a9158f9e1868",
+      "id": "c3a3aadb-81ec-8a69-52dc-e89cb1d35aa8",
+      "name": "Commit Transaction in OX DB",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/transaction/{{tx}}/commit",
+      "method": "GET",
+      "headers": "Authorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nContent-Type: text/plain\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"UPDATE user SET preferredLanguage=? WHERE id = ? AND cid = ?;\",\n    \"params\" : [\"en_GB\", 4126, 424242669]\n  }\n}\n",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168063634
+    }
+  ]
+}

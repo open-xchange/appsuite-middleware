@@ -1,0 +1,102 @@
+{
+  "id": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+  "name": "REST Database (NON-OX Schemas)",
+  "timestamp": 1426166077308,
+  "order": [
+    "0e335036-3f1c-dc19-7a1a-cfb9f915fe2b",
+    "3d195774-5ca7-91d1-e74b-0c5757047f1d",
+    "809530f2-575c-beff-e39a-1cb79f40f566",
+    "7092716d-a9ce-69b8-ebc7-d697bfbfd91b",
+    "eaae7531-019e-0622-ef0e-8db316ae79c0",
+    "8cd5d9ec-5226-ec48-4d89-07df71274aec"
+  ],
+  "requests": [
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "0e335036-3f1c-dc19-7a1a-cfb9f915fe2b",
+      "name": "Create Custom DB",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/oxdb/424242669/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"createDB\": {\n    \"query\": \"CREATE DATABASE myCustomDB\",\n    \"params\": [] \n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    },
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "3d195774-5ca7-91d1-e74b-0c5757047f1d",
+      "name": "Initialize Schema",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/init/w/16/myCustomDB",
+      "method": "GET",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"update\" : {\n    \"query\" : \"SELECT id, mail, preferredLanguage FROM user WHERE cid = ? AND id = ?\",\n    \"params\" : [424242669, 4126]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2
+    },
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "7092716d-a9ce-69b8-ebc7-d697bfbfd91b",
+      "name": "Create Greetings Table",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/migration/for/pool/r/1243/w/16/myCustomDB/to/1/forModule/com.openexchange.myModule",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"createGreetingTable\": {\n    \"query\": \"CREATE TABLE greetings (cid INT(10), uid INT(10), greeting VARCHAR(128))\"\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426166298053
+    },
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "809530f2-575c-beff-e39a-1cb79f40f566",
+      "name": "Insert into Greetings Table",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/pool/r/1243/w/16/myCustomDB/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"insertGreeting\": {\n    \"query\": \"INSERT INTO greetings (cid, uid, greeting) VALUES (?,?,?)\",\n    \"params\": [1, 3, \"Aloha\"] \n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426166333669
+    },
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "8cd5d9ec-5226-ec48-4d89-07df71274aec",
+      "name": "Clean up",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/pool/r/1243/w/16/myCustomDB/writable",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\n",
+      "data": "{\n  \"drop_db\" : {\n    \"query\" : \"DROP DATABASE myCustomDB\",\n    \"params\" : []\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "version": 2,
+      "time": 1426168696149
+    },
+    {
+      "collectionId": "481a3ad9-b314-7ac8-a334-7a1f203849a9",
+      "id": "eaae7531-019e-0622-ef0e-8db316ae79c0",
+      "name": "Select from Greetings Table",
+      "description": "",
+      "url": "http://{{ox}}:8009/rest/database/v1/pool/r/1243/w/16/myCustomDB/readOnly",
+      "method": "PUT",
+      "headers": "Content-Type: application/json\nAuthorization: Basic b3Blbi14Y2hhbmdlOnNlY3JldA==\nAccept: application/json\nX-OX-DB-MODULE: com.openexchange.myModule\nX-OX-DB-VERSION: 1\n",
+      "data": "{\n  \"selectGreeting\": {\n    \"query\": \"SELECT greeting FROM greetings WHERE cid = ? AND uid = ?\",\n    \"params\": [1,3]\n  }\n}",
+      "dataMode": "raw",
+      "timestamp": 0,
+      "responses": [
+        
+      ],
+      "version": 2
+    }
+  ]
+}
