@@ -68,13 +68,26 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     /**
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     * <p>
+     * This is the legacy constructor for maintaining the former constructor declaration.
      *
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
-     * @param version The version number
+     * @param version The version number; no more used
      * @param databaseService The database service
      */
-    public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final DatabaseService databaseService) {
+    public CreateTableUpdateTask(CreateTableService create, String[] dependencies, int version, DatabaseService databaseService) {
+        this(create, dependencies, databaseService);
+    }
+
+    /**
+     * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     *
+     * @param create The create-table service
+     * @param dependencies The dependencies to preceding update tasks
+     * @param databaseService The database service
+     */
+    public CreateTableUpdateTask(CreateTableService create, String[] dependencies, DatabaseService databaseService) {
         super();
         this.create = create;
         this.dependencies = dependencies;
