@@ -56,6 +56,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.Quota;
 import com.openexchange.quota.json.QuotaAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -72,7 +73,8 @@ public final class FilestoreAction extends AbstractQuotaAction {
 
     /**
      * Initializes a new {@link FilestoreAction}.
-     * @param services
+     *
+     * @param services The OSGi service look-up
      */
     public FilestoreAction(final ServiceLookup services) {
         super(services);
@@ -80,19 +82,8 @@ public final class FilestoreAction extends AbstractQuotaAction {
 
     @Override
     protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
-        if (req.getFsException() != null) {
-            throw req.getFsException();
-        }
-
-
-        final long use = req.getQfs().getUsage();
-        final long quota = req.getQfs().getQuota();
-        final JSONObject data = new JSONObject();
-        data.put("quota", quota);
-        data.put("use", use);
-        /*
-         * Return JSON object
-         */
+        Quota storageQuota = req.getStorageQuota();
+        JSONObject data = new JSONObject(4).put("quota", storageQuota.getLimit()).put("use", storageQuota.getUsage());
         return new AJAXRequestResult(data, "json");
     }
 
