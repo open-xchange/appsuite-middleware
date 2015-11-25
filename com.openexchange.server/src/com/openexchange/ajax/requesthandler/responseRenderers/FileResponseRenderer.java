@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -65,9 +66,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -840,18 +843,18 @@ public class FileResponseRenderer implements ResponseRenderer {
             transformations.rotate();
         }
         if (request.isSet("cropWidth") || request.isSet("cropHeight")) {
-            final int cropX = request.isSet("cropX") ? request.getParameter("cropX", int.class).intValue() : 0;
-            final int cropY = request.isSet("cropY") ? request.getParameter("cropY", int.class).intValue() : 0;
-            final int cropWidth = request.getParameter("cropWidth", int.class).intValue();
-            final int cropHeight = request.getParameter("cropHeight", int.class).intValue();
+            int cropX = optIntParameter(request, "cropX");
+            int cropY = optIntParameter(request, "cropY");
+            int cropWidth = optIntParameter(request, "cropWidth");
+            int cropHeight = optIntParameter(request, "cropHeight");
             transformations.crop(cropX, cropY, cropWidth, cropHeight);
         }
         if (request.isSet("width") || request.isSet("height")) {
-            final int maxWidth = request.isSet("width") ? request.getParameter("width", int.class).intValue() : 0;
+            int maxWidth = optIntParameter(request, "width");
             if (maxWidth > Constants.getMaxWidth()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
             }
-            final int maxHeight = request.isSet("height") ? request.getParameter("height", int.class).intValue() : 0;
+            int maxHeight = optIntParameter(request, "height");
             if (maxHeight > Constants.getMaxHeight()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
             }
@@ -984,6 +987,21 @@ public class FileResponseRenderer implements ResponseRenderer {
             return pos > 0 ? "attachment" + contentDisposition.substring(pos) : "attachment";
         }
         return contentDisposition;
+    }
+
+    /**
+     * Optionally parses a specific numerical parameter from the supplied request data.
+     *
+     * @param request The request to get the parameter from
+     * @param name The parameter name
+     * @return The parameter, or <code>0</code> if not set
+     */
+    private int optIntParameter(AJAXRequestData request, String name) throws OXException {
+        if (request.isSet(name)) {
+            Integer integer = request.getParameter(name, int.class);
+            return null != integer ? integer.intValue() : 0;
+        }
+        return 0;
     }
 
     private boolean isImage(final IFileHolder file) {
