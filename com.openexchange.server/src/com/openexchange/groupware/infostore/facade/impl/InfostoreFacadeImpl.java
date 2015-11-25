@@ -534,7 +534,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         try {
             limit = getFileStorage(session.getUserId(), session.getContextId()).getQuota();
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for context {}", session.getContextId(), e);
+            LOG.warn("Error getting file storage quota for user {} in context {}", session.getUserId(), session.getContextId(), e);
         }
         if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
             usage = getFileStorage(session.getUserId(), session.getContextId()).getUsage();
