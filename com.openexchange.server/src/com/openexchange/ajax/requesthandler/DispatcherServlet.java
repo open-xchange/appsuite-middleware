@@ -523,8 +523,14 @@ public class DispatcherServlet extends SessionServlet {
             return;
         }
 
-        // Handle other OXExceptions
+        //Bug 42565
+        if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
+            sendErrorAndPage(HttpServletResponse.SC_NOT_FOUND, e.getMessage(), resp);
+            logException(e, LogLevel.DEBUG, HttpServletResponse.SC_NOT_FOUND);
+            return;
+        }
 
+        // Handle other OXExceptions
         if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
             Throwable cause = e.getCause();
             LOG.error("Unexpected error", null == cause ? e : cause);
