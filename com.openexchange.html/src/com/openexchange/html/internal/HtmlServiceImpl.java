@@ -56,6 +56,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -122,6 +123,9 @@ import com.openexchange.java.StringBuilderStringer;
 import com.openexchange.java.Stringer;
 import com.openexchange.java.Strings;
 import com.openexchange.proxy.ProxyRegistry;
+import de.l3s.boilerpipe.BoilerpipeExtractor;
+import de.l3s.boilerpipe.BoilerpipeProcessingException;
+import de.l3s.boilerpipe.extractors.CommonExtractors;
 
 /**
  * {@link HtmlServiceImpl}
@@ -648,6 +652,34 @@ public final class HtmlServiceImpl implements HtmlService {
         String ret = PATTERN_ACCENT1.matcher(sb.toString()).replaceAll("&#96;");
         ret = PATTERN_ACCENT2.matcher(ret).replaceAll("&#180;");
         return ret;
+    }
+
+    @Override
+    public String extractText(String htmlContent) throws OXException {
+        if (Strings.isEmpty(htmlContent)) {
+            return htmlContent;
+        }
+
+        try {
+            BoilerpipeExtractor extractor = CommonExtractors.KEEP_EVERYTHING_EXTRACTOR;
+            return extractor.getText(htmlContent);
+        } catch (BoilerpipeProcessingException e) {
+            throw new OXException(e);
+        }
+    }
+
+    @Override
+    public String extractText(Reader htmlInput) throws OXException {
+        if (null == htmlInput) {
+            return null;
+        }
+
+        try {
+            BoilerpipeExtractor extractor = CommonExtractors.KEEP_EVERYTHING_EXTRACTOR;
+            return extractor.getText(htmlInput);
+        } catch (BoilerpipeProcessingException e) {
+            throw new OXException(e);
+        }
     }
 
     private static final Pattern PATTERN_HEADING_WS = Pattern.compile("(\r?\n|^) +");
