@@ -392,9 +392,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
     /**
      * Optionally parses a specific numerical parameter from the supplied request data.
      *
-     * @param request The request to get the paramter from
-     * @param name The parameter, or <code>0</code> if not set
-     * @return
+     * @param request The request to get the parameter from
+     * @param name The parameter name
+     * @return The parameter, or <code>0</code> if not set
      */
     private int optIntParameter(AJAXRequestData request, String name) throws OXException {
         if (request.isSet(name)) {
