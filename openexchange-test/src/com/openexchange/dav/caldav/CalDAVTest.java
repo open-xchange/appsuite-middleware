@@ -351,6 +351,17 @@ public abstract class CalDAVTest extends WebDAVTest {
         return null;
     }
 
+    protected List<Appointment> getChangeExcpetions(Appointment appointment) throws OXException {
+        List<Appointment> exceptions = testManager.getChangeExceptions(
+            appointment.getParentFolderID(), appointment.getObjectID(), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
+        if (null != exceptions && 0 < exceptions.size()) {
+            for (int i = 0; i < exceptions.size(); i++) {
+                exceptions.set(i, testManager.get(exceptions.get(i)));
+            }
+        }
+        return exceptions;
+    }
+
     protected Task getTask(String folderID, String uid) throws OXException {
         Task[] tasks = taskTestManager.getAllTasksOnServer(parse(folderID), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
         for (Task task : tasks) {
