@@ -885,6 +885,10 @@ public class FileResponseRenderer implements ResponseRenderer {
             final byte[] transformed;
             try {
                 TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
+                if (null == transformedImage) {
+                    // ImageIO.read() returned null...
+                    return file.repetitive() ? file : null;
+                }
                 int expenses = transformedImage.getTransformationExpenses();
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;
