@@ -56,6 +56,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -91,12 +92,16 @@ public class TaskManager {
 
         private final Callable<V> delegate;
         private final AtomicInteger runningjobs;
+        private final int id;
+        private final String typeofjob;
 
         /**
          * Initializes a new {@link IncrementingCallable}.
          */
-        IncrementingCallable(Callable<V> delegate, AtomicInteger runningjobs) {
+        IncrementingCallable(Callable<V> delegate, String typeofjob, int id, AtomicInteger runningjobs) {
             super();
+            this.id = id;
+            this.typeofjob = typeofjob;
             this.runningjobs = runningjobs;
             this.delegate = delegate;
         }
@@ -104,29 +109,42 @@ public class TaskManager {
         @Override
         public V call() throws Exception {
             runningjobs.incrementAndGet();
-            return delegate.call();
+            try {
+                V result = delegate.call();
+                LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, id);
+                return result;
+            } catch (Exception e) {
+                LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, e);
+                throw e;
+            } catch (Throwable t) {
+                LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, t);
+                throw new Exception(t);
+            } finally {
+                runningjobs.decrementAndGet();
+            }
         }
     }
 
-    private class Extended<V> extends ExtendedFutureTask<V> {
+    private static class Extended<V> extends ExtendedFutureTask<V> {
 
         private final AtomicReference<Long> completionStamp;
+        private final TaskManager taskManager;
 
         /**
          * Initializes a new {@link Extended}.
          */
-        Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid) {
-            super(new IncrementingCallable<V>(callable, runningjobs), typeofjob, furtherinformation, id, cid);
+        Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid, TaskManager taskManager) {
+            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.runningjobs), typeofjob, furtherinformation, id, cid);
+            this.taskManager = taskManager;
             completionStamp = new AtomicReference<Long>(null);
         }
 
         @Override
         protected void done() {
-            TaskManager.this.runningjobs.decrementAndGet();
             Integer id = Integer.valueOf(this.id);
             LOGGER.debug("Removing job number {}", id);
             completionStamp.set(Long.valueOf(System.currentTimeMillis()));
-            finishedJobs.offer(id);
+            taskManager.finishedJobs.offer(id);
         }
 
         /**
@@ -141,13 +159,17 @@ public class TaskManager {
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
+    /** The number of currently running jobs */
+    final AtomicInteger runningjobs;
+
+    /** The queue for identifiers of finished jobs; gets periodically cleaned once per hour */
+    final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
+
     private final AdminCache cache;
     private final PropertyHandler prop;
     private final ConcurrentMap<Integer, Extended<?>> jobs;
     private final ExecutorService executor;
     private final AtomicInteger lastID;
-    final AtomicInteger runningjobs;
-    final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
     private final ScheduledTimerTask timerTask;
 
     /**
@@ -162,7 +184,7 @@ public class TaskManager {
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         LOGGER.info("AdminJobExecutor: running {} jobs parallel", Integer.valueOf(threadCount));
-        this.executor = Executors.newFixedThreadPool(threadCount);
+        this.executor = Executors.newFixedThreadPool(threadCount, new TaskManagerThreadFactory());
 
         TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
         Runnable cleaner = new Runnable() {
@@ -184,15 +206,18 @@ public class TaskManager {
      * @param furtherinformation Arbitrary information
      * @param cid The associated context identifier
      * @return The job identifier
+     * @throws RejectedExecutionException If the task cannot be accepted for execution
      */
     public <V> int addJob(Callable<V> jobcall, String typeofjob, String furtherinformation, int cid) {
         // Get next job identifier
         int jobId = lastID.incrementAndGet();
 
-        // Instantiate & schedule job
-        Extended<V> job = new Extended<V>(jobcall, typeofjob, furtherinformation, jobId, cid);
+        // Instantiate job
+        Extended<V> job = new Extended<V>(jobcall, typeofjob, furtherinformation, jobId, cid, this);
         this.jobs.put(Integer.valueOf(jobId), job);
-        LOGGER.debug("Adding job number {}", Integer.valueOf(jobId));
+
+        // Schedule job
+        LOGGER.info("Adding job number {}", Integer.valueOf(jobId));
         this.executor.execute(job);
 
         // Return job identifier
@@ -210,6 +235,8 @@ public class TaskManager {
 
     /**
      * Shuts-down this task manager.
+     * <p>
+     * Initiates an orderly shutdown in which previously submitted jobs are executed, but no new job will be accepted.
      */
     public void shutdown() {
         ScheduledTimerTask timerTask = this.timerTask;

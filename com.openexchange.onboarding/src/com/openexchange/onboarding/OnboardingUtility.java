@@ -114,6 +114,27 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the value for specified <code>boolean</code> property.
+     *
+     * @param propertyName The name of the <code>boolean</code> property
+     * @param defaultValue The default <code>boolean</code> value
+     * @param session The session from requesting user
+     * @return The <code>boolean</code> value or <code>defaultValue</code> (if absent)
+     * @throws OXException If <code>boolean</code> value cannot be returned
+     */
+    public static boolean getBoolValue(String propertyName, boolean defaultValue, Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        return property.get().booleanValue();
+    }
+
+    /**
      * Gets the translation for specified i18n string
      *
      * @param i18nString The i18n string to translate
@@ -201,7 +222,7 @@ public class OnboardingUtility {
     /**
      * Loads an icon image for referenced property.
      *
-     * @param propertyName The name of the property for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
@@ -227,7 +248,7 @@ public class OnboardingUtility {
      * Loads an icon image for referenced property.
      *
      * @param propertyName The name of the property for the icon image; e.g. <code>"com.openexchange.onboarding.apple.icon"</code>
-     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple"</code>
+     * @param defaultImageName The default name for the icon image; e.g. <code>"platform_icon_apple.png"</code>
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
@@ -248,7 +269,7 @@ public class OnboardingUtility {
     /**
      * Loads the named icon image from template path.
      *
-     * @param imageName The image name; e.g. <code>"platform_icon_apple"</code>
+     * @param imageName The image name; e.g. <code>"platform_icon_apple.png"</code>
      * @return The loaded icon image or <code>null</code>
      */
     public static Icon loadIconImage(String imageName) {
@@ -263,6 +284,9 @@ public class OnboardingUtility {
 
             MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
             return new DefaultIcon(imageBytes, null == mimeTypeMap ? null : mimeTypeMap.getContentType(imageName));
+        } catch (java.io.FileNotFoundException e) {
+            LOG.warn("Icon image {} does not exist in path {}.", imageName, templatesPath);
+            return null;
         } catch (IOException e) {
             LOG.warn("Could not load icon image {} from path {}.", imageName, templatesPath, e);
             return null;
@@ -353,9 +377,28 @@ public class OnboardingUtility {
     // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
 
     /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an OSX Desktop
+     *
+     * @param clientInfo The client info to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an OSX Desktop; otherwise <code>false</code>
+     */
+    public static boolean isOSX(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem operatingSystem = agent.getOperatingSystem();
+        return OperatingSystemFamily.OS_X.equals(operatingSystem.getFamily());
+    }
+
+    /**
      * Checks specified client info if its <code>User-Agent</code> implies to be an iPad device
      *
-     * @param clientInfo The client infor to examine
+     * @param clientInfo The client info to examine
      * @return <code>true</code> if <code>User-Agent</code> implies to be an iPad device; otherwise <code>false</code>
      */
     public static boolean isIPad(ClientInfo clientInfo) {
@@ -379,7 +422,7 @@ public class OnboardingUtility {
     /**
      * Checks specified client info if its <code>User-Agent</code> implies to be an iPhone device
      *
-     * @param clientInfo The client infor to examine
+     * @param clientInfo The client info to examine
      * @return <code>true</code> if <code>User-Agent</code> implies to be an iPhone device; otherwise <code>false</code>
      */
     public static boolean isIPhone(ClientInfo clientInfo) {
@@ -398,6 +441,54 @@ public class OnboardingUtility {
 
         ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
         return Category.SMARTPHONE.equals(deviceCategory.getCategory());
+    }
+
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an Android phone
+     *
+     * @param clientInfo The client info to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android phone; otherwise <code>false</code>
+     */
+    public static boolean isAndroidPhone(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem os = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory device = agent.getDeviceCategory();
+        return Category.SMARTPHONE.equals(device.getCategory());
+    }
+
+    /**
+     * Checks specified client info if its <code>User-Agent</code> implies to be an Android tablet
+     *
+     * @param clientInfo The client info to examine
+     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android tablet; otherwise <code>false</code>
+     */
+    public static boolean isAndroidTablet(ClientInfo clientInfo) {
+        String userAgent = clientInfo.getUserAgent();
+        if (null == userAgent) {
+            return false;
+        }
+
+        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
+        ReadableUserAgent agent = userAgentParser.parse(userAgent);
+
+        OperatingSystem os = agent.getOperatingSystem();
+        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
+            return false;
+        }
+
+        ReadableDeviceCategory device = agent.getDeviceCategory();
+        return Category.TABLET.equals(device.getCategory());
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.notification.mail;
 
+import java.util.Collection;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
@@ -82,5 +84,29 @@ public interface NotificationMailFactory {
      * @throws OXException
      */
     ComposedMailMessage createMail(MailData mailData) throws OXException;
+
+    /**
+     * Composes a mail message with attachments from the given mail data. The resulting MIME structure is:
+     * <pre>
+     * MIME message (1.0)
+     * - multipart/alternative
+     * - text/plain
+     * - [html-part]
+     * </pre>
+     *
+     * The structure of the HTML part depends on the existence of a footer image (configurable
+     * via <code>as-config.yml</code>. If no footer image exists, the part is a simple <code>
+     * text/html</code> body part. Otherwise it is a <code>multipart/related</code> part, with
+     * the primary part being the <code>text/html</code> part and a second part of type <code>
+     * image/[sub-type]</code>, containing the footer image.
+     *
+     * Composed mails will contain the header <code>Auto-Submitted: auto-generated</code>.
+     *
+     * @param mailData The mail data
+     * @param attachments The attachments
+     * @return The composed message
+     * @throws OXException
+     */
+    ComposedMailMessage createMail(MailData mailData, Collection<IFileHolder> attachments) throws OXException;
 
 }

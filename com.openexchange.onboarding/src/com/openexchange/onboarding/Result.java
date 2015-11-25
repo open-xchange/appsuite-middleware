@@ -50,7 +50,6 @@
 package com.openexchange.onboarding;
 
 import java.util.Map;
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 
 /**
  * {@link Result} - A result when an on-boarding configuration has been successfully executed.
@@ -61,7 +60,6 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 public class Result {
 
     private final String resultText;
-    private final DynamicFormDescription formDescription;
     private final Map<String, Object> formConfiguration;
 
     private final Object resultObject;
@@ -73,7 +71,10 @@ public class Result {
      * @param resultText The result text that is supposed to be displayed to the user
      */
     public Result(String resultText) {
-        this(resultText, null, null);
+        this.resultText = resultText;
+        this.formConfiguration = null;
+        this.resultObject = null;
+        this.format = null;
     }
 
     /**
@@ -83,11 +84,10 @@ public class Result {
      * @param formConfiguration The form configuration
      * @param formDescription The form description
      */
-    public Result(String resultText, Map<String, Object> formConfiguration, DynamicFormDescription formDescription) {
+    public Result(String resultText, Map<String, Object> formConfiguration) {
         super();
         this.resultText = resultText;
         this.formConfiguration = formConfiguration;
-        this.formDescription = formDescription;
         resultObject = null;
         format = null;
     }
@@ -105,7 +105,6 @@ public class Result {
 
         resultText = null;
         formConfiguration = null;
-        formDescription = null;
     }
 
     /**
@@ -133,15 +132,6 @@ public class Result {
      */
     public String getResultText() {
         return resultText;
-    }
-
-    /**
-     * Gets the form description.
-     *
-     * @return The form description or <code>null</code>
-     */
-    public DynamicFormDescription getFormDescription() {
-        return formDescription;
     }
 
     /**

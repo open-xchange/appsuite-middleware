@@ -395,4 +395,9 @@ public class VirtualFolderInfostoreFacade implements InfostoreFacade {
         throw virtualFolder();
     }
 
+    @Override
+    public void touch(int id, Context context) throws OXException {
+        throw virtualFolder();
+    }
+
 }

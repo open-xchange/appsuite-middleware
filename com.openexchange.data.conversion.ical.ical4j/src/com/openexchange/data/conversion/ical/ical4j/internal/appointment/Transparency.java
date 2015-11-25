@@ -111,10 +111,26 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
     public void parse( int index, VEvent event, Appointment appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
         int shownAs = 0;
         /*
-         * prefer X-MICROSOFT-CDO-BUSYSTATUS when available
+         * parse default TRANSP
+         */
+        Transp transp = event.getTransparency();
+        if (null != transp && Strings.isNotEmpty(transp.getValue())) {
+            switch (transp.getValue().toUpperCase()) {
+                case "OPAQUE":
+                    shownAs = Appointment.RESERVED;
+                    break;
+                case "TRANSPARENT":
+                    shownAs = Appointment.FREE;
+                    break;
+                default:
+                    break;
+            }
+        }
+        /*
+         * refine RESERVED based on X-MICROSOFT-CDO-BUSYSTATUS when available
          */
         Property busyStatus = event.getProperty("X-MICROSOFT-CDO-BUSYSTATUS");
-        if (null != busyStatus && Strings.isNotEmpty(busyStatus.getValue())) {
+        if (Appointment.FREE != shownAs && null != busyStatus && Strings.isNotEmpty(busyStatus.getValue())) {
             switch (busyStatus.getValue().toUpperCase()) {
                 case "BUSY":
                     shownAs = Appointment.RESERVED;
@@ -130,24 +146,6 @@ public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Ap
                     break;
                 default:
                     break;
-            }
-        }
-        if (0 == shownAs) {
-            /*
-             * use default TRANSP as fallback
-             */
-            Transp transp = event.getTransparency();
-            if (null != transp && Strings.isNotEmpty(transp.getValue())) {
-                switch (transp.getValue().toUpperCase()) {
-                    case "OPAQUE":
-                        shownAs = Appointment.RESERVED;
-                        break;
-                    case "TRANSPARENT":
-                        shownAs = Appointment.FREE;
-                        break;
-                    default:
-                        break;
-                }
             }
         }
         if (0 < shownAs) {

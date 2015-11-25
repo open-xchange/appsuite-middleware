@@ -271,7 +271,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             return Collections.emptyList();
         }
         if (1 < contacts.size()) {
-            Collections.sort(contacts, new UseCountComparator(false, session.getUser().getLocale()));
+            Collections.sort(contacts, new UseCountComparator(session.getUser().getLocale()));
             if (0 < sortOptions.getLimit() && contacts.size() > sortOptions.getLimit()) {
                 contacts.subList(0, sortOptions.getLimit()).clear();
             }

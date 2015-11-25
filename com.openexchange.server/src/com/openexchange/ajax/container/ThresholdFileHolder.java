@@ -58,7 +58,10 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.LinkedList;
 import java.util.List;
 import javax.mail.internet.SharedInputStream;
@@ -377,6 +380,24 @@ public final class ThresholdFileHolder implements IFileHolder {
             Streams.close(out);
         }
         return this;
+    }
+
+    /**
+     * Gets the MD5 sum for this file holder's content
+     *
+     * @return The MD5 sum
+     * @throws OXException If MD5 sum cannot be returned
+     */
+    public String getMD5() throws OXException {
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] digest = md5.digest(Streams.stream2bytes(getStream()));
+            return new BigInteger(1, digest).toString(16);
+        } catch (NoSuchAlgorithmException e) {
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        }
     }
 
     /**
@@ -834,6 +855,32 @@ public final class ThresholdFileHolder implements IFileHolder {
         } finally {
             Streams.close(inChannel, outChannel);
         }
+    }
+
+    private static final char[] hexadecimal = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Encodes the 128 bit (16 bytes) MD5 into a 32 character String.
+     *
+     * @param binaryData The digest
+     * @return The encoded MD5, or <code>null</code> if encoding failed
+     */
+    public static String md5Encode(byte[] binaryData) {
+        if (null == binaryData || binaryData.length != 16) {
+            return null;
+        }
+
+        char[] buffer = new char[32];
+
+        for (int i = 0; i < 16; i++) {
+            int low = binaryData[i] & 0x0f;
+            int high = (binaryData[i] & 0xf0) >> 4;
+            buffer[i << 1] = hexadecimal[high];
+            buffer[(i << 1) + 1] = hexadecimal[low];
+        }
+
+        return new String(buffer);
+
     }
 
 }

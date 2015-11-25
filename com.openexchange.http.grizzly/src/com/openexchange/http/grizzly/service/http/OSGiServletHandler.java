@@ -499,7 +499,7 @@ public class OSGiServletHandler extends ServletHandler implements OSGiHandler {
          * @param response The associated Response
          */
         private void handleThrowable(Throwable throwable, ServletRequest request, ServletResponse response) {
-            ExceptionUtils.handleThrowable(throwable);
+            com.openexchange.exception.ExceptionUtils.handleThrowable(throwable);
 
             StringBuilder logBuilder = new StringBuilder(128).append("Error processing request:").append(System.getProperty("line.separator"));
             logBuilder.append(LogProperties.getAndPrettyPrint(LogProperties.Name.SESSION_SESSION));

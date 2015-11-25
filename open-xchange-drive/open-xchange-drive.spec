@@ -50,8 +50,16 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 # prevent bash from expanding, see bug 13316
 GLOBIGNORE='*'
 
+PFILE=/opt/open-xchange/etc/drive.properties
+
 # SoftwareChange_Request-1992
-ox_set_property com.openexchange.capability.drive false /opt/open-xchange/etc/drive.properties
+ox_set_property com.openexchange.capability.drive false $PFILE
+
+# SoftwareChange_Request-2850
+ox_add_property com.openexchange.drive.maxDirectories 65535 $PFILE
+ox_add_property com.openexchange.drive.maxFilesPerDirectory 65535 $PFILE
+ox_add_property com.openexchange.drive.enabledServices com.openexchange.infostore $PFILE
+ox_add_property com.openexchange.drive.excludedFolders '' $PFILE
 
 ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 640
 

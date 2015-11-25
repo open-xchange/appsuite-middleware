@@ -145,7 +145,7 @@ public abstract class WebDAVTest {
     protected static Iterable<Object[]> availableAuthMethods() {
         List<Object[]> authMethods = new ArrayList<>(2);
         authMethods.add(new Object[] { AUTH_METHOD_BASIC });
-        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+//        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
         return authMethods;
     }
 
@@ -552,7 +552,7 @@ public abstract class WebDAVTest {
     }
 
     protected static String formatAsUTC(final Date date) {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
     }

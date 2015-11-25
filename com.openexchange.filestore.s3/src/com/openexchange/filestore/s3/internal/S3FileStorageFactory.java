@@ -148,10 +148,11 @@ public class S3FileStorageFactory implements FileStorageProvider {
             /*
              * create client
              */
-            AmazonS3Client client = initClient(filestoreID);
+            AmazonS3ClientInfo clientInfo = initClient(filestoreID);
+            AmazonS3Client client = clientInfo.client;
             String bucketName = initBucket(client, filestoreID);
             LOG.debug("Using \"{}\" as bucket name.", bucketName);
-            S3FileStorage newStorage = new S3FileStorage(client, bucketName, extractFilestorePrefix(uri));
+            S3FileStorage newStorage = new S3FileStorage(client, clientInfo.encrypted, bucketName, extractFilestorePrefix(uri));
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
@@ -190,7 +191,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
      * @return The client
      * @throws OXException
      */
-    private AmazonS3Client initClient(String filestoreID) throws OXException {
+    private AmazonS3ClientInfo initClient(String filestoreID) throws OXException {
         /*
          * prepare credentials
          */
@@ -203,17 +204,19 @@ public class S3FileStorageFactory implements FileStorageProvider {
         ClientConfiguration clientConfiguration = getClientConfiguration(filestoreID);
         AmazonS3Client client = null;
         String encryption = configService.getProperty("com.openexchange.filestore.s3." + filestoreID + ".encryption", "none");
+        boolean encrypted;
         if (Strings.isEmpty(encryption) || "none".equals(encryption)) {
             /*
              * use default AmazonS3Client
              */
             client = new AmazonS3Client(credentials, clientConfiguration);
+            encrypted = false;
         } else {
             /*
              * use AmazonS3EncryptionClient
              */
-            client = new AmazonS3EncryptionClient(
-                credentials, getEncryptionMaterials(filestoreID, encryption), clientConfiguration, new CryptoConfiguration());
+            client = new AmazonS3EncryptionClient(credentials, getEncryptionMaterials(filestoreID, encryption), clientConfiguration, new CryptoConfiguration());
+            encrypted = true;
         }
         /*
          * configure client
@@ -234,7 +237,7 @@ public class S3FileStorageFactory implements FileStorageProvider {
         }
 
 
-        return client;
+        return new AmazonS3ClientInfo(client, encrypted);
     }
 
     private ClientConfiguration getClientConfiguration(String filestoreID) {
@@ -398,6 +401,21 @@ public class S3FileStorageFactory implements FileStorageProvider {
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
         }
         return authority;
+    }
+
+    private static class AmazonS3ClientInfo {
+
+        /** The Amazon S3 client reference */
+        final AmazonS3Client client;
+
+        /** Whether associated Amazon S3 client reference has encryption enabled */
+        final boolean encrypted;
+
+        AmazonS3ClientInfo(AmazonS3Client client, boolean encrypted) {
+            super();
+            this.client = client;
+            this.encrypted = encrypted;
+        }
     }
 
 }

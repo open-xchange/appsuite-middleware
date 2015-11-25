@@ -15,7 +15,7 @@
     </target>
 
     <target name="createLinks">
-        <property name="oauthLinks" value="enableoauthclient,getoauthclient,listoauthclient,removeoauthclient,revokeoauthclient,updateoauthclient" />
+        <property name="oauthLinks" value="enableoauthclient,disableoauthclient,getoauthclient,listoauthclient,removeoauthclient,revokeoauthclient,updateoauthclient" />
         <foreach list="${oauthLinks}" target="createContextLink" param="linkName" />
     </target>
 

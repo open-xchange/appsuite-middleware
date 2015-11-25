@@ -58,24 +58,25 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements Entity {
+public enum Platform implements IdEntity {
 
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "platform_icon_apple"),
+    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "platform_icon_apple.png"),
     /**
      * The Android/Google platform for Android devices
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "platform_icon_android"),
+    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "platform_icon_android.png"),
     /**
      * The Windows platform for Windows Desktop applications.
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "platform_icon_windows"),
+    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "platform_icon_windows.png"),
     ;
 
     private final String id;
 
+    private final String enabledProperty;
     private final String displayNameProperty;
     private final String iconProperty;
     private final String descriptionProperty;
@@ -88,6 +89,7 @@ public enum Platform implements Entity {
         this.id = id;
 
         String prefix = "com.openexchange.onboarding." + id;
+        enabledProperty = prefix + ".enabled";
         displayNameProperty = prefix + ".displayName";
         iconProperty = prefix + ".icon";
         descriptionProperty = prefix + ".description";
@@ -95,6 +97,11 @@ public enum Platform implements Entity {
         this.defaultDisplayName = defaultDisplayName;
         this.defaultIcon = defaultIcon;
         this.defaultDescription = defaultDescription;
+    }
+
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        return OnboardingUtility.getBoolValue(enabledProperty, true, session);
     }
 
     @Override
@@ -117,4 +124,22 @@ public enum Platform implements Entity {
         return OnboardingUtility.getTranslationFromProperty(descriptionProperty, defaultDescription, true, session);
     }
 
+    /**
+     * Gets the platform for specified identifier
+     *
+     * @param id The identifier to look-up
+     * @return The associated platform or <code>null</code>
+     */
+    public static Platform platformFor(String id) {
+        if (null == id) {
+            return null;
+        }
+
+        for (Platform platform : values()) {
+            if (id.equals(platform.getId())) {
+                return platform;
+            }
+        }
+        return null;
+    }
 }

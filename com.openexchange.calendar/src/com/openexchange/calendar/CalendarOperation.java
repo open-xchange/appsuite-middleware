@@ -846,6 +846,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (!cdao.containsModifiedBy()) {
                 cdao.setModifiedBy(uid);
             }
+
+            if (cdao.containsStartDate() && cdao.getStartDate() == null) {
+                throw OXCalendarExceptionCodes.FIELD_NULL_VALUE.create("Start Date");
+            }
+
+            if (cdao.containsEndDate() && cdao.getEndDate() == null) {
+                throw OXCalendarExceptionCodes.FIELD_NULL_VALUE.create("End Date");
+            }
+
             /*
              * if (!cdao.containsStartDate() || cdao.getStartDate() == null) { cdao.setStartDate((Date) edao.getStartDate().clone()); } if
              * (!cdao.containsEndDate() || cdao.getEndDate() == null) { cdao.setEndDate((Date) edao.getEndDate().clone()); }
@@ -1454,7 +1463,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setUsers(userparticipants.getUsers());
         }
     }
-    
+
+    /**
+     * Checks if a user participant should be added to the new list of users.
+     * Depends on the existtence of the user in the old Calendar Object and if the user is participant of the group.
+     * 
+     * @param gp
+     * @param up
+     * @param edao
+     * @return
+     */
     private static boolean shouldAdd(GroupParticipant gp, UserParticipant up, CalendarDataObject edao) {
         if (edao == null) {
             return true;
@@ -1467,6 +1485,14 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             }
             if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
                 containsUser = true;
+            }
+        }
+        if (!containsUser) { //double check
+            for (UserParticipant u : edao.getUsers()) {
+                if (u.getIdentifier() == up.getIdentifier()) {
+                    containsUser = true;
+                    break;
+                }
             }
         }
         if (containsUser) {
@@ -2074,10 +2100,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static final void checkInsertMandatoryFields(final CalendarDataObject cdao) throws OXException {
-        if (!cdao.containsStartDate()) {
+        if (!cdao.containsStartDate() || cdao.getStartDate() == null) {
             throw OXCalendarExceptionCodes.MANDATORY_FIELD_START_DATE.create();
         }
-        if (!cdao.containsEndDate()) {
+        if (!cdao.containsEndDate() || cdao.getEndDate() == null) {
             throw OXCalendarExceptionCodes.MANDATORY_FIELD_END_DATE.create();
         }
         if (!cdao.containsTitle()) {

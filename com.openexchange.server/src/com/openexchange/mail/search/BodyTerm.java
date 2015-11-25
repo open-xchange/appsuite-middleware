@@ -242,8 +242,8 @@ public final class BodyTerm extends SearchTerm<String> {
         }
         try {
             if (contentType.startsWith("text/htm")) {
-                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(MessageUtility.readMailPart(mailPart, charset), false);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                return htmlService.extractText(MessageUtility.readMailPart(mailPart, charset));
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
@@ -275,8 +275,8 @@ public final class BodyTerm extends SearchTerm<String> {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
             if (ct.startsWith("text/htm")) {
-                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(MessageUtility.readMimePart(part, charset), false);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                return  htmlService.extractText(MessageUtility.readMimePart(part, charset));
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {

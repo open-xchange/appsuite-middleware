@@ -66,7 +66,7 @@ public class I18nServices {
     private static final Locale DEFAULT_LOCALE = Locale.US;
     private static final I18nServices SINGLETON = new I18nServices();
 
-    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>();
+    private final Map<Locale, I18nService> services = new ConcurrentHashMap<Locale, I18nService>(32, 0.9F, 1);
 
     private I18nServices() {
         super();

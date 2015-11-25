@@ -50,7 +50,6 @@
 package com.openexchange.tools.images.scheduler;
 
 import java.lang.Thread.UncaughtExceptionHandler;
-import java.util.Map;
 
 /**
  * {@link SchedulerUncaughtExceptionhandler} - The uUncaught exception handler for image transformation scheduler.
@@ -83,50 +82,7 @@ final class SchedulerUncaughtExceptionhandler implements UncaughtExceptionHandle
     @Override
     public void uncaughtException(final Thread t, final Throwable e) {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchedulerUncaughtExceptionhandler.class);
-        LOG.error("Thread terminated with exception: {}", t.getName(), e);
-        /*
-         * Gather thread information
-         */
-        final Map<Thread, StackTraceElement[]> stackMap = Thread.getAllStackTraces();
-        final StringBuilder sb = new StringBuilder(256);
-        final String lineSeparator = System.getProperty("line.separator");
-        for (final Thread thread : stackMap.keySet()) {
-            sb.append(thread.getName()).append(" ID:").append(thread.getId());
-            sb.append(" State:").append(thread.getState()).append(" Prio:").append(thread.getPriority());
-            sb.append(lineSeparator);
-            appendStackTrace(stackMap.get(thread), sb, lineSeparator);
-            sb.append(lineSeparator);
-        }
-        LOG.error(sb.toString());
-    }
-
-    private static void appendStackTrace(final StackTraceElement[] trace, final StringBuilder sb, final String lineSeparator) {
-        if (null == trace) {
-            sb.append("<missing stack trace>\n");
-            return;
-        }
-        for (final StackTraceElement ste : trace) {
-            final String className = ste.getClassName();
-            if (null != className) {
-                sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                if (ste.isNativeMethod()) {
-                    sb.append("(Native Method)");
-                } else {
-                    final String fileName = ste.getFileName();
-                    if (null == fileName) {
-                        sb.append("(Unknown Source)");
-                    } else {
-                        final int lineNumber = ste.getLineNumber();
-                        sb.append('(').append(fileName);
-                        if (lineNumber >= 0) {
-                            sb.append(':').append(lineNumber);
-                        }
-                        sb.append(')');
-                    }
-                }
-                sb.append(lineSeparator);
-            }
-        }
+        LOG.error("Thread '{}' terminated abruptly with an uncaught RuntimeException or Error.", t.getName(), e);
     }
 
 }

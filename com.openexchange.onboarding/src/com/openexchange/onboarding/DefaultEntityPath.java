@@ -61,18 +61,71 @@ import org.apache.commons.lang.Validate;
  */
 public class DefaultEntityPath implements EntityPath {
 
+    private final OnboardingConfiguration service;
     private final Platform platform;
-    private final Collection<Entity> col;
+    private final Collection<IdEntity> col;
+    private final Module module;
+    private final Device device;
+    private final String compositeId;
 
     /**
      * Initializes a new {@link DefaultEntityPath}.
      */
-    public DefaultEntityPath(Platform platform, Collection<Entity> col) {
+    public DefaultEntityPath(OnboardingConfiguration service, Device device, Module module) {
+        this(service, device.getPlatform(), device, module, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultEntityPath}.
+     */
+    public DefaultEntityPath(OnboardingConfiguration service, Platform platform, Device device, Module module) {
+        this(service, platform, device, module, null);
+    }
+
+    /**
+     * Initializes a new {@link DefaultEntityPath}.
+     */
+    public DefaultEntityPath(OnboardingConfiguration service, Platform platform, Device device, Module module, Collection<IdEntity> col) {
         super();
+        Validate.notNull(service, "Service must not be null.");
         Validate.notNull(platform, "Platform must not be null.");
-        Validate.notNull(col, "Collection must not be null.");
+        Validate.notNull(module, "Module must not be null.");
+        Validate.notNull(device, "Device must not be null.");
+        this.service = service;
         this.platform = platform;
+        this.module = module;
+        this.device = device;
         this.col = col;
+        compositeId = new StringBuilder(16).append(device.getId()).append('/').append(module.getId()).append('/').append(service.getId()).toString();
+    }
+
+    @Override
+    public boolean matches(Device device, Module module, String serviceId) {
+        if (this.device != device) {
+            return false;
+        }
+        if (this.module != module) {
+            return false;
+        }
+        return service.getId().equals(serviceId);
+    }
+
+    @Override
+    public boolean matches(Device device, String serviceId) {
+        if (this.device != device) {
+            return false;
+        }
+        return service.getId().equals(serviceId);
+    }
+
+    @Override
+    public String getCompositeId() {
+        return compositeId;
+    }
+
+    @Override
+    public OnboardingConfiguration getService() {
+        return service;
     }
 
     @Override
@@ -81,8 +134,23 @@ public class DefaultEntityPath implements EntityPath {
     }
 
     @Override
-    public Iterator<Entity> iterator() {
-        return new UnmodifiableIterator<Entity>(col.iterator());
+    public Module getModule() {
+        return module;
+    }
+
+    @Override
+    public Device getDevice() {
+        return device;
+    }
+
+    @Override
+    public Iterator<IdEntity> iterator() {
+        return null == col ? null : new UnmodifiableIterator<IdEntity>(col.iterator());
+    }
+
+    @Override
+    public String toString() {
+        return compositeId;
     }
 
     // --------------------------------------------------------------------------------------------------------

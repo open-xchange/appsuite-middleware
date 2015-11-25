@@ -367,10 +367,15 @@ public class FreeBusyResults implements SearchIterator<CalendarDataObject> {
     }
 
     private final boolean checkPermissions() {
-        return pflag == 1 && owner == uid || pflag == 0 && isVisible();
+        boolean visible = checkVisibilityAnddetermineFolder();
+        return pflag == 1 && owner == uid || pflag == 0 && visible;
     }
 
-    private final boolean isVisible() {
+    /**
+     * Checks, if the object is visible to the user and sets the appropriate folder identifier.
+     * @return
+     */
+    private final boolean checkVisibilityAnddetermineFolder() {
         if (cfo == null) {
             return false;
         }

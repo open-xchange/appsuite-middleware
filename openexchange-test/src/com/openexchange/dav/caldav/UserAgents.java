@@ -51,20 +51,24 @@ package com.openexchange.dav.caldav;
 
 /**
  * {@link UserAgents} - Contains user-agent definitions.
- * 
+ *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public final class UserAgents {
 
 	public static final String MACOS_10_7_3 = "CalendarStore/5.0.2 (1166); iCal/5.0.2 (1571); Mac OS X/10.7.3 (11D50d)";
-	
-	public static final String LIGHTNING_1_7 = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20120907 Thunderbird/15.0.1 Lightning/1.7";
-		
+
+    public static final String LIGHTNING_1_7 = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:15.0) Gecko/20120907 Thunderbird/15.0.1 Lightning/1.7";
+
+    public static final String LIGHTNING_4_0_3_1 = "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:38.0) Gecko/20100101 Thunderbird/38.3.0 Lightning/4.0.3.1";
+
+    public static final String IOS_9_1 = "iOS/9.1 (13B143) dataaccessd/1.0";
+
 	public static final String[] MACOS_ALL = {
 		MACOS_10_7_3
-	};	
-	
+	};
+
 	private UserAgents() {
 		// prevent instantiation
-	}	
+	}
 }

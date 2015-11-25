@@ -110,12 +110,17 @@ public class I18nImpl implements I18nService {
     }
 
     @Override
-    public String getL10NLocalized(String messageContext, String key) {
+    public String getL10NContextLocalized(String messageContext, String key) {
         return messageContext == null ? getLocalized(key) : key;
     }
 
     @Override
     public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
         return messageContext == null && plural == 0 && keyPlural == null ? getLocalized(key) : key;
+    }
+
+    @Override
+    public String getL10NLocalized(String key) {
+        return getLocalized(key);
     }
 }

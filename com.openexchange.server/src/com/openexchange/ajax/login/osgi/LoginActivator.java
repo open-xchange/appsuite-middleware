@@ -55,12 +55,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.service.http.HttpService;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.ajax.ClientUtil;
 import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.login.LoginRequestHandler;
 import com.openexchange.ajax.login.RedeemReservationLogin;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.login.LoginRampUpService;
 import com.openexchange.login.internal.LoginPerformer;
@@ -154,9 +152,8 @@ public class LoginActivator extends HousekeepingActivator {
                 redeemReservationLogin.removeEnhancer(service);
             }
         });
-        ClientUtil.init(getService(ConfigurationService.class));
         openTrackers();
-        registerService(Reloadable.class, new ClientUtil());
+
         final ConfigurationService configurationService = getService(ConfigurationService.class);
         final String loginFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.login");
         final String logoutFormat = configurationService.getProperty("com.openexchange.ajax.login.formatstring.logout");

@@ -1164,7 +1164,7 @@ ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchang
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
 # SoftwareChange_Request-2429
-ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard.properties
+ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard-api.properties
 
 # SoftwareChange_Request-2442
 VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
@@ -1267,6 +1267,15 @@ ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchan
 ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
+
+# SoftwareChange_Request-2884
+ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc guard.properties guard-api.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"

@@ -56,10 +56,8 @@ import static com.openexchange.filestore.FileStorages.getQuotaFileStorageService
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.sql.SQLException;
 import java.util.Set;
 import org.apache.commons.io.FileUtils;
-import org.slf4j.Logger;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -107,9 +105,12 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
      * @throws ProgrammErrorException If a program error occurs
      */
     @Override
-    protected void doCopy(URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
-        int contextId = ctx.getId().intValue();
-        int userId = user.getId().intValue();
+    protected void doCopy(final URI srcBaseUri, URI dstBaseUri) throws StorageException, IOException, InterruptedException, ProgrammErrorException {
+        final int contextId = ctx.getId().intValue();
+        final int userId = user.getId().intValue();
+
+        Runnable finalTask = null;
+        Reverter reverter = null;
         try {
             // Check
             if (user.getFilestoreOwner().intValue() > 0 && user.getFilestoreOwner().intValue() != userId) {
@@ -117,42 +118,100 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             }
 
             // Grab associated quota-aware file storages
-            QuotaFileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
+            final QuotaFileStorage srcStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(srcBaseUri, userId, contextId);
             FileStorage dstStorage = getQuotaFileStorageService().getUnlimitedQuotaFileStorage(dstBaseUri, -1, contextId);
 
             // Copy each file from source to destination
-            Set<String> srcFiles = srcStorage.getFileList();
+            final Set<String> srcFiles = srcStorage.getFileList();
             if (false == srcFiles.isEmpty()) {
                 URI srcFullUri = ensureEndingSlash(getFullyQualifyingUriForUser(userId, contextId, srcBaseUri));
                 URI dstFullUri = ensureEndingSlash(getFullyQualifyingUriForContext(contextId, dstBaseUri));
-                CopyResult copyResult = copyFiles(srcFiles, srcStorage, dstStorage, srcFullUri, dstFullUri);
+                final CopyResult copyResult = copyFiles(srcFiles, srcStorage, dstStorage, srcFullUri, dstFullUri);
+                reverter = copyResult.reverter;
 
-                if (Operation.COPIED.equals(copyResult.operation)) {
-                    // Propagate new file locations throughout registered FilestoreLocationUpdater instances
-                    propagateNewLocations(copyResult.prevFileName2newFileName);
+                final Reverter rev = reverter;
+                finalTask = new Runnable() {
 
-                    srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
-                } else {
-                    // Simply adjust filestore_usage entries
-                    long totalSize = copyResult.totalSize;
-                    decUsage(totalSize, userId, contextId);
-                    incUsage(totalSize, 0, contextId);
-                }
-            }
+                    @Override
+                    public void run() {
+                        if (Operation.COPIED.equals(copyResult.operation)) {
+                            // Propagate new file locations throughout registered FilestoreLocationUpdater instances
+                            try {
+                                propagateNewLocations(copyResult.prevFileName2newFileName);
+                            } catch (Exception e) {
+                                LOGGER.error("{} failed to propagate new file storage locations. Going to revert copied files (if applicable) and cancel.", Thread.currentThread().getName(), e);
+                                if (null != rev) {
+                                    try {
+                                        rev.revertCopy();
+                                    } catch (Exception x) {
+                                        LOGGER.error("{} failed to revert copied files", Thread.currentThread().getName(), x);
+                                    }
+                                }
 
-            if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
-                File fsDirectory = new File(srcStorage.getUri());
-                if (fsDirectory.exists()) {
-                    FileUtils.deleteDirectory(fsDirectory);
-                }
+                                // Abort...
+                                return;
+                            }
+
+                            try {
+                                srcStorage.deleteFiles(srcFiles.toArray(new String[srcFiles.size()]));
+                            } catch (OXException e) {
+                                LOGGER.error("{} failed to delete copied files", Thread.currentThread().getName(), e);
+                            }
+                        } else {
+                            // Simply adjust filestore_usage entries
+                            try {
+                                long totalSize = copyResult.totalSize;
+                                changeUsage(decUsage(totalSize, userId, contextId), incUsage(totalSize, 0, contextId), contextId);
+                            } catch (Exception e) {
+                                LOGGER.error("{} failed to update filestore_usage entries. Going to revert copied files (if applicable) and cancel.", Thread.currentThread().getName(), e);
+                                if (null != rev) {
+                                    try {
+                                        rev.revertCopy();
+                                    } catch (Exception x) {
+                                        LOGGER.error("{} failed to revert copied files", Thread.currentThread().getName(), x);
+                                    }
+                                }
+
+                                // Abort...
+                                return;
+                            }
+                        }
+
+                        if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                            File fsDirectory = new File(srcStorage.getUri());
+                            if (fsDirectory.exists()) {
+                                try {
+                                    FileUtils.deleteDirectory(fsDirectory);
+                                } catch (IOException e) {
+                                    LOGGER.error("{} failed to delete source location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                                }
+                            }
+                        }
+                    }
+                };
+            } else {
+                finalTask = new Runnable() {
+                    @Override
+                    public void run() {
+                        if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
+                            File fsDirectory = new File(srcStorage.getUri());
+                            if (fsDirectory.exists()) {
+                                try {
+                                    FileUtils.deleteDirectory(fsDirectory);
+                                } catch (IOException e) {
+                                    LOGGER.error("{} failed to delete source location {}", Thread.currentThread().getName(), fsDirectory.getAbsolutePath(), e);
+                                }
+                            }
+                        }
+                    }
+                };
             }
         } catch (OXException e) {
-            throw new StorageException(e);
-        } catch (SQLException e) {
             throw new StorageException(e);
         }
 
         // Apply changes to context & clear caches
+        boolean error = true;
         try {
             user.setFilestoreId(Integer.valueOf(0));
             user.setFilestore_name(null);
@@ -162,20 +221,28 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(user, ctx);
             oxcox.cleanseFilestoreUsageFor(user, ctx);
+            error = false;
 
-            CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
-            Cache cache = cacheService.getCache("Filestore");
-            cache.clear();
-            Cache qfsCache = cacheService.getCache("QuotaFileStorages");
-            qfsCache.invalidateGroup(Integer.toString(contextId));
-            Cache userCache = cacheService.getCache("User");
-            userCache.remove(cacheService.newCacheKey(contextId, userId));
-        } catch (OXException e) {
-            throw new StorageException(e);
+            try {
+                CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                Cache cache = cacheService.getCache("Filestore");
+                cache.clear();
+                Cache qfsCache = cacheService.getCache("QuotaFileStorages");
+                qfsCache.invalidateGroup(Integer.toString(contextId));
+                Cache userCache = cacheService.getCache("User");
+                userCache.remove(cacheService.newCacheKey(contextId, userId));
+            } catch (Exception e) {
+                LOGGER.error("Failed to invalidate caches. Restart recommended.", e);
+            }
+        } finally {
+            if (error && null != reverter) {
+                reverter.revertCopy();
+            }
         }
 
-        Logger logger = org.slf4j.LoggerFactory.getLogger(MasterUser2UserFilestoreDataMover.class);
-        logger.info("Successfully moved files from individual file storage to context file storage for user {}", user.getId());
+        runSafely(finalTask);
+
+        LOGGER.info("Successfully moved files from individual file storage to context file storage for user {}", user.getId());
     }
 
 }

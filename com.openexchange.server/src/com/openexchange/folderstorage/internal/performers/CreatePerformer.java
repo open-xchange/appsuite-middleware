@@ -152,6 +152,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        boolean rollbackTransaction = true;
         /*
          * Throws an exception if someone tries to add an element. If this happens, you found a bug.
          * As long as a TransactionManager is present, every storage has to add itself to the
@@ -232,6 +233,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             transactionManager.commit();
+            rollbackTransaction = false;
 
             /*
              * Sanity check
@@ -253,11 +255,13 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
             return newId;
         } catch (final OXException e) {
-            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollbackTransaction) {
+                transactionManager.rollback();
+            }
         }
     }
 

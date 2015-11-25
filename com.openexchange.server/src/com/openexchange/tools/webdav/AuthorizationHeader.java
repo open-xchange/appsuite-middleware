@@ -86,10 +86,12 @@ public class AuthorizationHeader {
             throw new IllegalArgumentException("Invalid authorization header: null");
         }
 
-        String scheme = com.openexchange.tools.servlet.http.Authorization.extractAuthScheme(headerValue).trim();
+        String scheme = com.openexchange.tools.servlet.http.Authorization.extractAuthScheme(headerValue);
         if (Strings.isEmpty(scheme)) {
             throw new IllegalArgumentException("Invalid authorization header: " + headerValue);
         }
+
+        scheme = scheme.trim();
 
         try {
             String authString = headerValue.substring(headerValue.indexOf(scheme) + scheme.length() + 1);

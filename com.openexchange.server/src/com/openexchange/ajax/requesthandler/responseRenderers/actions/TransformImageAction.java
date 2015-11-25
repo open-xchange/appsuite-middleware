@@ -295,6 +295,11 @@ public class TransformImageAction implements IFileResponseRendererAction {
             final byte[] transformed;
             try {
                 TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
+                if (null == transformedImage) {
+                    // ImageIO.read() returned null...
+                    return file.repetitive() ? file : null;
+                }
+
                 int expenses = transformedImage.getTransformationExpenses();
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;
@@ -387,13 +392,13 @@ public class TransformImageAction implements IFileResponseRendererAction {
     /**
      * Optionally parses a specific numerical parameter from the supplied request data.
      *
-     * @param request The request to get the paramter from
-     * @param name The parameter, or <code>0</code> if not set
-     * @return
+     * @param request The request to get the parameter from
+     * @param name The parameter name
+     * @return The parameter, or <code>0</code> if not set
      */
     private int optIntParameter(AJAXRequestData request, String name) throws OXException {
         if (request.isSet(name)) {
-            Integer integer = request.getParameter("width", int.class);
+            Integer integer = request.getParameter(name, int.class);
             return null != integer ? integer.intValue() : 0;
         }
         return 0;

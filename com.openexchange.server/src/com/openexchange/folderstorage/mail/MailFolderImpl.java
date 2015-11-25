@@ -262,7 +262,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
             }
 
             // Determine the mail folder type (None, Trash, Sent, ...) and set localized name
-            this.mailFolderType = determineMailFolderType(folderName, mailFolder, accountId, user, fullnameProvider, translatePrimaryAccountDefaultFolders);
+            this.mailFolderType = determineMailFolderType(folderName, mailFolder, mailAccess, mailAccount, user, fullnameProvider, translatePrimaryAccountDefaultFolders);
         }
 
         {
@@ -332,9 +332,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         cacheable = cache;
     }
 
-    private MailFolderType determineMailFolderType(String folderName, MailFolder mailFolder, int accountId, User user, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) {
+    private MailFolderType determineMailFolderType(String folderName, MailFolder mailFolder, MailAccess<?, ?> mailAccess, MailAccount mailAccount, User user, DefaultFolderFullnameProvider fullnameProvider, boolean translatePrimaryAccountDefaultFolders) throws OXException {
         MailFolderType mailFolderType = MailFolderType.NONE;
-        boolean isPrimaryAccount = MailAccount.DEFAULT_ID == accountId;
+        boolean isPrimaryAccount = MailAccount.DEFAULT_ID == mailAccount.getId();
         if (mailFolder.containsDefaultFolderType()) {
             switch (mailFolder.getDefaultFolderType()) {
             case INBOX:
@@ -375,6 +375,9 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                 }
                 break;
             default:
+                if (isPrimaryAccount && translatePrimaryAccountDefaultFolders && MailFolderStorage.isArchiveFolder(fullName, mailAccess, mailAccount)) {
+                    localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
+                }
                 // Nope
             }
         } else if (null != fullName) {
@@ -405,11 +408,13 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
                         }
                         mailFolderType = MailFolderType.TRASH;
                     } else {
-                        if (isPrimaryAccount) {
+                        if (isPrimaryAccount && translatePrimaryAccountDefaultFolders) {
                             if (fullName.equals(fullnameProvider.getConfirmedSpamFolder())) {
                                 localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_SPAM);
                             } else if (fullName.equals(fullnameProvider.getConfirmedHamFolder())) {
                                 localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.CONFIRMED_HAM);
+                            } else if (MailFolderStorage.isArchiveFolder(fullName, mailAccess, mailAccount)) {
+                                localizedName = StringHelper.valueOf(user.getLocale()).getString(MailStrings.ARCHIVE);
                             }
                         }
                     }

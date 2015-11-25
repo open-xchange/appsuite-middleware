@@ -61,18 +61,11 @@ import com.openexchange.groupware.notify.hostname.HostData;
 public interface OnboardingRequest {
 
     /**
-     * Gets the identifier of the selected on-boarding configuration; e.g. <code>"com.openexchange.onboarding.caldav"</code>
+     * Gets the on-boarding selection to execute
      *
-     * @return The on-boarding configuration identifier
+     * @return The on-boarding selection
      */
-    String getConfigurationId();
-
-    /**
-     * Gets the identifier of the selection for the on-boarding configuration; e.g. <code>"apple.ios.ipad.caldav.profile.download"</code>
-     *
-     * @return The identifier of the selection
-     */
-    String getSelectionId();
+    OnboardingSelection getSelection();
 
     /**
      * Gets the client information

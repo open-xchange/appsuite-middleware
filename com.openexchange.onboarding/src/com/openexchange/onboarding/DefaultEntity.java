@@ -58,13 +58,13 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DefaultEntity implements Entity {
+public class DefaultEntity implements IdEntity {
 
     /**
      * Creates a new {@code DefaultEntity} instance
      *
      * @param id The identifier
-     * @param prefix The prefix to use to look-up properties; e.g. <code>"com.openexchange.onboarding.caldav."</code>
+     * @param prefix The prefix to use to look-up properties; e.g. <code>"apple.iphone.calendar.caldav."</code>
      * @param withDescription <code>true</code> to also look-up the description property; otherwise <code>false</code>
      * @return A new {@code DefaultEntity} instance
      */
@@ -75,6 +75,7 @@ public class DefaultEntity implements Entity {
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final String id;
+    private final String enabledProperty;
     private final String displayNameProperty;
     private final String imageNameProperty;
     private final String descriptionProperty;
@@ -86,6 +87,9 @@ public class DefaultEntity implements Entity {
 
         this.id = id;
 
+        this.enabledProperty = propertyNameBuilder.append("enabled").toString();
+
+        propertyNameBuilder.setLength(len);
         this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
 
         propertyNameBuilder.setLength(len);
@@ -99,16 +103,23 @@ public class DefaultEntity implements Entity {
      * Initializes a new {@link DefaultEntity}.
      *
      * @param id The identifier
+     * @param enabledProperty The property name for enabled flag
      * @param displayNameProperty The property name for the display name
      * @param imageNameProperty The property name for the icon image
      * @param descriptionProperty The property name for the description or <code>null</code>
      */
-    public DefaultEntity(String id, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
+    public DefaultEntity(String id, String enabledProperty, String displayNameProperty, String imageNameProperty, String descriptionProperty) {
         super();
         this.id = id;
+        this.enabledProperty = enabledProperty;
         this.displayNameProperty = displayNameProperty;
         this.imageNameProperty = imageNameProperty;
         this.descriptionProperty = descriptionProperty;
+    }
+
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        return OnboardingUtility.getBoolValue(enabledProperty, true, session);
     }
 
     @Override

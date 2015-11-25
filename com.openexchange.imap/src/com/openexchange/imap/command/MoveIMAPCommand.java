@@ -51,7 +51,6 @@ package com.openexchange.imap.command;
 
 import static com.openexchange.imap.IMAPCommandsCollection.prepareStringArgument;
 import java.util.Arrays;
-import java.util.Locale;
 import javax.mail.MessagingException;
 import com.openexchange.java.Strings;
 import com.sun.mail.iap.Response;
@@ -215,24 +214,22 @@ public final class MoveIMAPCommand extends AbstractIMAPCommand<long[]> {
 
     @Override
     protected boolean handleResponse(final Response response) throws MessagingException {
-        if (!response.isOK()) {
+        if (fast || !response.isOK()) {
             return false;
         }
-        if (fast) {
-            return true;
-        }
-        final String resp = response.toString().toLowerCase(Locale.ENGLISH);
         /*-
          * Parse response:
          *
          * OK [COPYUID 1184051486 10031:10523,10525:11020,11022:11027,11030:11047,11050:11051,11053:11558 1024:2544] Completed
          *
-         * * 45 EXISTS..* 2 RECENT..A4 OK [COPYUID 1185853191 7,32 44:45] Completed
+         * * 45 EXISTS
+         * * 2 RECENT
+         * A4 OK [COPYUID 1185853191 7,32 44:45] Completed
          */
+        String resp = Strings.asciiLowerCase(response.toString());
         int pos = resp.indexOf(COPYUID);
         if (pos < 0) {
-            LOG.warn("Missing COPYUID response code: {}", resp);
-            return true;
+            return false;
         }
         /*
          * Found COPYUID...

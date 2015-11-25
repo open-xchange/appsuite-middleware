@@ -55,7 +55,6 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import com.openexchange.ajax.Client;
 import com.openexchange.ajax.writer.LoginWriter;
 import com.openexchange.config.ConfigTools;
 import com.openexchange.config.ConfigurationService;
@@ -231,15 +230,7 @@ public final class ServerConfig implements Reloadable {
         clientWhitelist.clear();
         clientWhitelist.add(getPropertyInternal(Property.IP_CHECK_WHITELIST));
         // UI web path
-        String clientID = getPropertyInternal(Property.HTTP_AUTH_CLIENT);
-        Client client = Client.getClientByID(clientID);
-        if (client != null)
-        {
-            uiWebPath = client.getUIWebPath();
-        }
-        else {
-            uiWebPath = "/appsuite";
-        }
+        uiWebPath = getPropertyInternal(Property.UI_WEB_PATH);
         cookieTTL = (int) ConfigTools.parseTimespan(getPropertyInternal(Property.COOKIE_TTL));
         cookieHttpOnly = Boolean.parseBoolean(getPropertyInternal(Property.COOKIE_HTTP_ONLY));
         // The max. body size
@@ -578,18 +569,10 @@ public final class ServerConfig implements Reloadable {
          */
         IP_CHECK_WHITELIST("com.openexchange.IPCheckWhitelist", ""),
         /**
-         * Every client tells the backend through the client parameter on the login request his identy. This is not possible when using the HTTP
-         * Authorization Header based login. So the client identifier for that request is defined here. It must be the same identifier that the
-         * web frontend uses, if you set com.openexchange.cookie.hash to calculate and want the previously configured autologin to work.
-         * <p>
-         * Identifier for web UI is: <code>com.openexchange.ox.gui.dhtml</code>
-         */
-        HTTP_AUTH_CLIENT("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml"),
-        /**
          * Configures the path on the web server where the UI is located. This path is used to generate links directly into the UI. The
          * default conforms to the path where the UI is installed by the standard packages on the web server.
          */
-        UI_WEB_PATH("com.openexchange.UIWebPath", "client-defined"),
+        UI_WEB_PATH("com.openexchange.UIWebPath", "/appsuite/"),
         /**
          * The cookie time-to-live
          */

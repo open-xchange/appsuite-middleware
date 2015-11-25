@@ -61,11 +61,13 @@ import com.openexchange.session.Session;
 public interface Entity {
 
     /**
-     * Gets the identifier.
+     * Checks if this entity is enabled.
      *
-     * @return The identifier
+     * @param session The session to use
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If enabled flag cannot be returned
      */
-    String getId();
+    boolean isEnabled(Session session) throws OXException;
 
     /**
      * Gets the display name appropriate for the specified session

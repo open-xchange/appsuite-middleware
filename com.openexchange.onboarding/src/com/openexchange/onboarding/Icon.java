@@ -60,7 +60,7 @@ import java.io.Serializable;
 public interface Icon extends Serializable {
 
     /**
-     * Gets the size of this icon in bytes.
+     * Gets the size of this icon (the number of bytes).
      *
      * @return The size
      */

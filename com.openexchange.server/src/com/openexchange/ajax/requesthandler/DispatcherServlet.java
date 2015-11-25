@@ -524,7 +524,6 @@ public class DispatcherServlet extends SessionServlet {
         }
 
         // Handle other OXExceptions
-
         if (AjaxExceptionCodes.UNEXPECTED_ERROR.equals(e)) {
             Throwable cause = e.getCause();
             LOG.error("Unexpected error", null == cause ? e : cause);

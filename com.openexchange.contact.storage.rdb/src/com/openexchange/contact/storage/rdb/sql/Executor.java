@@ -1059,6 +1059,58 @@ public class Executor {
         }
     }
 
+    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws OXException, SQLException {
+        if (null != objectIDs && objectIDs.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("DELETE FROM object_use_count WHERE cid=?");
+            if (Integer.MIN_VALUE != folderID) {
+                sb.append(" AND folder=?");
+            }
+            sb.append(" AND object");
+            if (objectIDs.length == 1) {
+                sb.append("=").append(objectIDs[0]);
+            } else {
+                sb.append(" IN (").append(Tools.toCSV(objectIDs)).append(")");
+            }
+            sb.append(";");
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(sb.toString());
+                stmt.setInt(1, contextID);
+                if (Integer.MIN_VALUE != folderID) {
+                    stmt.setInt(2, folderID);
+                }
+                logExecuteUpdate(stmt);
+                //} catch (SQLException e) {
+                //    LOG.warn("Could not delete contacts from object_use_count table: {}", e.getMessage());
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws OXException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DELETE FROM object_use_count WHERE cid=?");
+        if (Integer.MIN_VALUE != objectID) {
+            sb.append(" AND object=?");
+        }
+        sb.append(";");
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(sb.toString());
+            stmt.setInt(1, contextID);
+            if (Integer.MIN_VALUE != objectID) {
+                stmt.setInt(2, objectID);
+            }
+            logExecuteUpdate(stmt);
+            //} catch (SQLException e) {
+            //    LOG.warn("Could not delete contact from object_use_count table: {}", e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long maxLastModified)
         throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
@@ -1093,7 +1145,9 @@ public class Executor {
             /*
              * execute and read out results
              */
-            return logExecuteUpdate(stmt);
+            int result = logExecuteUpdate(stmt);
+            deleteFromObjectUseCountTable(connection, contextID, folderID, objectIDs);
+            return result;
         } finally {
             closeSQLStuff(stmt);
         }
@@ -1121,7 +1175,9 @@ public class Executor {
             if (Long.MIN_VALUE != maxLastModified) {
                 stmt.setLong(3, maxLastModified);
             }
-            return logExecuteUpdate(stmt);
+            int result = logExecuteUpdate(stmt);
+            deleteSingleFromObjectUseCountTable(connection, contextID, objectID);
+            return result;
         } finally {
             closeSQLStuff(stmt);
         }

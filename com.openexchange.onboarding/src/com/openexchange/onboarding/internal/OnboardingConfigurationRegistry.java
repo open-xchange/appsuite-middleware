@@ -49,10 +49,8 @@
 
 package com.openexchange.onboarding.internal;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.osgi.framework.BundleContext;
@@ -60,10 +58,10 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfigurationTree;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.session.Session;
 
 /**
@@ -106,20 +104,14 @@ public class OnboardingConfigurationRegistry extends ServiceTracker<OnboardingCo
 
     @Override
     public Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException {
-        List<OnboardingConfiguration> retval = new ArrayList<OnboardingConfiguration>(32);
-        for (OnboardingConfiguration configuration : configurations.values()) {
-            if (configuration.isEnabled(session)) {
-                retval.add(configuration);
-            }
-        }
-        return retval;
+        return Collections.unmodifiableCollection(configurations.values());
     }
 
-
     @Override
-    public OnboardingConfigurationTree getConfigurationTreeFor(Session session) throws OXException {
-        Collection<OnboardingConfiguration> availableConfigurations = getAvailableConfigurationsFor(session);
-        return new OnboardingConfigurationTreeImpl(availableConfigurations, session);
+    public OnboardingView getViewFor(Session session) throws OXException {
+        OnboardingViewImpl view = new OnboardingViewImpl();
+        view.add(configurations.values(), session);
+        return view;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------

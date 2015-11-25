@@ -87,7 +87,6 @@ import com.openexchange.server.ServiceHolderListener;
 public class I18nActivator extends HousekeepingActivator {
 
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(I18nActivator.class);
-    protected static final org.slf4j.Logger myLog = org.slf4j.LoggerFactory.getLogger("MyLog");
 
     /**
      * {@link I18nServiceHolderListener} - Properly registers all I18n services defined through property <code>"i18n.language.path"</code>
@@ -163,8 +162,6 @@ public class I18nActivator extends HousekeepingActivator {
         final Map<Locale, List<I18nService>> locales = new HashMap<Locale, List<I18nService>>();
 
         for (final Translations tr : translations) {
-            myLog.debug(Arrays.toString(tr.getKnownStrings().toArray()));
-
             List<I18nService> list = locales.get(tr.getLocale());
             if (list == null) {
                 list = new ArrayList<I18nService>();
@@ -173,8 +170,6 @@ public class I18nActivator extends HousekeepingActivator {
 
             list.add(new TranslationsI18N(tr));
         }
-        
-        myLog.debug("------------------------------------------------------");
 
         for (final ResourceBundle rc : resourceBundles) {
 

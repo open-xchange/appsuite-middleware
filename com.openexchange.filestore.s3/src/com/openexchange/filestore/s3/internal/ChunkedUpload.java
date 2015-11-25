@@ -67,19 +67,28 @@ import com.openexchange.java.Streams;
  */
 public class ChunkedUpload implements Closeable {
 
+    private static final int CIPHER_BLOCK_SIZE = 16;
+
     private final DigestInputStream digestStream;
+    private final boolean encrypted;
     private boolean hasNext;
 
     /**
      * Initializes a new {@link ChunkedUpload}.
      *
      * @param data The underlying input stream
-     * @throws OXException
+     * @param encrypted Whether encryption is enabled
+     * @throws OXException If initialization fails
      */
-    public ChunkedUpload(InputStream data) throws OXException {
+    public ChunkedUpload(InputStream data, boolean encrypted) throws OXException {
         super();
+        this.encrypted = encrypted;
         try {
             this.digestStream = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
+            if (encrypted) {
+                // Disable updating digest if encrypted
+                digestStream.on(false);
+            }
         } catch (NoSuchAlgorithmException e) {
             throw FileStorageCodes.IOERROR.create(e);
         }
@@ -96,21 +105,41 @@ public class ChunkedUpload implements Closeable {
         try {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             byte[] buffer = new byte[0xFFFF]; // 64k
-            int read;
-            while (0 < (read = digestStream.read(buffer, 0, buffer.length))) {
+            for (int read; (read = digestStream.read(buffer, 0, buffer.length)) > 0;) {
                 fileHolder.write(buffer, 0, read);
                 if (fileHolder.getCount() >= UploadChunk.MIN_CHUNK_SIZE) {
-                    /*
-                     * chunk size reached
-                     */
-                    byte[] digest = digestStream.getMessageDigest().digest();
-                    return new UploadChunk(fileHolder, digest);
+                    // chunk size reached
+                    if (!encrypted) {
+                        byte[] digest = digestStream.getMessageDigest().digest();
+                        return new UploadChunk(fileHolder, digest);
+                    }
+
+                    // chunk sizes for encrypted multipart uploads must be multiples of the cipher block size (16) with the exception of the last part.
+                    int res = (int) (fileHolder.getCount() % CIPHER_BLOCK_SIZE);
+                    if (0 == res) {
+                        return new UploadChunk(fileHolder, null);
+                    }
+
+                    // Try to read missing bytes to have multiples of the cipher block size (16)
+                    res = CIPHER_BLOCK_SIZE - res;
+                    byte[] buf = new byte[res];
+                    int rd = digestStream.read(buf, 0, res);
+                    if (rd >= res) {
+                        fileHolder.write(buf, 0, rd);
+                        return new UploadChunk(fileHolder, null);
+                    }
+
+                    // No more data available - fall-through
+                    hasNext = false;
+                    return new UploadChunk(fileHolder, null);
                 }
             }
-            /*
-             * end of input reached
-             */
+
+            // end of input reached
             hasNext = false;
+            if (encrypted) {
+                return new UploadChunk(fileHolder, null);
+            }
             byte[] digest = digestStream.getMessageDigest().digest();
             return new UploadChunk(fileHolder, digest);
         } catch (IOException e) {

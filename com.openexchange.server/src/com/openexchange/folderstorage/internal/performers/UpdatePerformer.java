@@ -154,6 +154,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        boolean rollbackTransaction = true;
         /*
          * Throws an exception if someone tries to add an element. If this happens, you found a bug.
          * As long as a TransactionManager is present, every storage has to add itself to the
@@ -373,7 +374,6 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         } catch (OXException e) {
                             if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
                                 addWarning(e);
-                                transactionManager.rollback();
                                 return;
                             }
                             throw e;
@@ -437,6 +437,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Commit
              */
             transactionManager.commit();
+            rollbackTransaction = false;
 
             final Set<OXException> warnings = storageParameters.getWarnings();
             if (null != warnings) {
@@ -446,11 +447,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
         } catch (final OXException e) {
-            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollbackTransaction) {
+                transactionManager.rollback();
+            }
         }
     } // End of doUpdate()
 

@@ -129,6 +129,26 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
         }
     }
 
+    @Override
+    protected void touchFolders(List<TargetProxy> proxies) throws OXException {
+        FolderService folderService = getFolderService();
+        for (TargetProxy proxy : proxies) {
+            UserizedFolder folder = ((FolderTargetProxy) proxy).getFolder();
+            AbstractFolder toTouch = new AbstractFolder() {
+
+                private static final long serialVersionUID = -842650996626709735L;
+
+                @Override
+                public boolean isGlobalID() {
+                    return false;
+                }
+            };
+            toTouch.setTreeID(folder.getTreeID());
+            toTouch.setID(folder.getID());
+            folderService.updateFolder(toTouch, folder.getLastModifiedUTC(), parameters.getSession(), parameters.getFolderServiceDecorator());
+        }
+    }
+
     private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
         for (int module : objectsByModule.keySet()) {

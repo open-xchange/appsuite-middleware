@@ -51,10 +51,13 @@ package com.openexchange.onboarding.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
 import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
@@ -77,7 +80,8 @@ public class OnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class };
+        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
+            TranslatorFactory.class, ServerConfigService.class };
     }
 
     @Override
@@ -87,6 +91,7 @@ public class OnboardingActivator extends HousekeepingActivator {
         OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
         registry.open();
         this.registry = registry;
+        addService(OnboardingConfigurationService.class, registry);
 
         registerService(OnboardingConfigurationService.class, registry);
     }
@@ -98,10 +103,21 @@ public class OnboardingActivator extends HousekeepingActivator {
         OnboardingConfigurationRegistry registry = this.registry;
         if (null != registry) {
             this.registry = null;
+            removeService(OnboardingConfigurationService.class);
             registry.close();
         }
 
         Services.setServiceLookup(null);
+    }
+
+    @Override
+    public <S> boolean addService(Class<S> clazz, S service) {
+        return super.addService(clazz, service);
+    }
+
+    @Override
+    public <S> boolean removeService(Class<? extends S> clazz) {
+        return super.removeService(clazz);
     }
 
 }

@@ -62,6 +62,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2436
     sed -i 's/2014 Open-Xchange/2015 Open-Xchange/' /opt/open-xchange/etc/as-config-defaults.yml
+
+    # SoftwareChange_Request-2880
+    ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 fi
 
 ox_move_config_file /opt/open-xchange/templates /opt/open-xchange/templates print_dayview_table.tmpl cp_dayview_table_appsuite.tmpl

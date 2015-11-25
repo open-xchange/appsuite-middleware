@@ -995,7 +995,7 @@ ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchang
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
 # SoftwareChange_Request-2429
-ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard.properties
+ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard-api.properties
 
 # SoftwareChange_Request-2442
 if dpkg --compare-versions "7.6.2-0" gt-nl "$2"; then
@@ -1106,6 +1106,16 @@ ox_add_property com.openexchange.mail.autoconfig.allowGuess true /opt/open-xchan
 ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
+
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
+
+# SoftwareChange_Request-2884
+dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/guard.properties /opt/open-xchange/etc/guard-api.properties 7.8.1~ \
+    open-xchange-core -- "$@"
 
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )

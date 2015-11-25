@@ -318,6 +318,8 @@ public class Bug31453Test extends CalDAVTest {
          * edit reminder on client
          */
         iCalResource.getVEvent().getVAlarm().setProperty("TRIGGER", "-PT20M");
+        iCalResource.getVEvent().getVAlarm().removeProperties("ACKNOWLEDGED");
+        iCalResource.getVEvent().getVAlarm().removeProperties("X-MOZ-LASTACK");
         assertEquals("response code wrong", StatusCodes.SC_CREATED, super.putICalUpdate(iCalResource));
         /*
          * verify appointment on server

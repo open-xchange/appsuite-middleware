@@ -58,7 +58,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
-import com.openexchange.ajax.Client;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.drive.DriveClientType;
@@ -118,7 +117,7 @@ public class DriveConfig implements Initialization {
     private String uiWebPath;
     private String dispatcherPrefix;
     private int maxDirectories;
-    private int maxFilesPerDiretory;
+    private int maxFilesPerDirectory;
     private Set<String> enabledServices;
     private Set<String> excludedFolders;
 
@@ -392,12 +391,12 @@ public class DriveConfig implements Initialization {
     }
 
     /**
-     * Gets the maxFilesPerDiretory
+     * Gets the maxFilesPerDirectory
      *
-     * @return The maxFilesPerDiretory
+     * @return The maxFilesPerDirectory
      */
-    public int getMaxFilesPerDiretory() {
-        return maxFilesPerDiretory;
+    public int getMaxFilesPerDirectory() {
+        return maxFilesPerDirectory;
     }
 
     /**
@@ -450,7 +449,7 @@ public class DriveConfig implements Initialization {
         }
         try {
             excludedDirectoriesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedDirectoriesPattern",
-                "^.*/\\.msngr_hstr_data$"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                "^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         } catch (PatternSyntaxException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedDirectoriesPattern");
         }
@@ -494,7 +493,7 @@ public class DriveConfig implements Initialization {
          * restrictions
          */
         maxDirectories = configService.getIntProperty("com.openexchange.drive.maxDirectories", 65535);
-        maxFilesPerDiretory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDiretory", 65535);
+        maxFilesPerDirectory = configService.getIntProperty("com.openexchange.drive.maxFilesPerDirectory", 65535);
         String[] enabledServicesValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.enabledServices", "com.openexchange.infostore"));
         enabledServices = new HashSet<String>(Arrays.asList(enabledServicesValue));
         String[] exclduedFoldersValue = Strings.splitByCommaNotInQuotes(configService.getProperty("com.openexchange.drive.excludedFolders"));
@@ -530,15 +529,7 @@ public class DriveConfig implements Initialization {
             "m=infostore&f=[folder]");
         directLinkDirectory = configService.getProperty("com.openexchange.drive.directLinkDirectory",
             "[protocol]://[hostname]/[uiwebpath]#[directoryfragments]");
-        String clientID = configService.getProperty("com.openexchange.ajax.login.http-auth.client", "com.openexchange.ox.gui.dhtml");
-        Client client = Client.getClientByID(clientID);
-        if (client != null) {
-            uiWebPath = client.getUIWebPath();
-        }
-        else {
-            uiWebPath = "/ox6/index.html";
-        }
-
+        uiWebPath = configService.getProperty("com.openexchange.UIWebPath", "/appsuite/");
         dispatcherPrefix = configService.getProperty("com.openexchange.dispatcher.prefix", "ajax");
         /*
          * version restrictions

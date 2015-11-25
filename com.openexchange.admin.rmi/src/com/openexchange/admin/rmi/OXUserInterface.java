@@ -855,4 +855,20 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException
      */
     public Map<String, Map<String, Set<String>>> getUserCapabilitiesSource(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
+
+    /**
+     * Retrieves all users with an alias within the given domain
+     * 
+     * @param context Context object the user is associated to
+     * @param aliasDomain The domain of the alias
+     * @param auth Credentials for authenticating against server
+     * @return The users
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     */
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException;
+
 }

@@ -126,27 +126,40 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
         }
 
         List<TargetProxy> foldersToUpdate = new LinkedList<TargetProxy>();
+        List<TargetProxy> foldersToTouch = new LinkedList<TargetProxy>();
         for (ShareTarget target : folderTargets) {
             TargetProxy proxy = get(target);
             if (proxy.wasModified()) {
                 foldersToUpdate.add(proxy);
+            } else if (proxy.wasTouched()) {
+                foldersToTouch.add(proxy);
             }
         }
         updateFolders(foldersToUpdate);
+        if (0 < foldersToTouch.size()) {
+            touchFolders(foldersToTouch);
+        }
 
         for (int module : objectsByModule.keySet()) {
             List<ShareTarget> targets = objectsByModule.get(module);
             List<TargetProxy> modified = new ArrayList<TargetProxy>(targets.size());
+            List<TargetProxy> touched = new ArrayList<TargetProxy>(targets.size());
             for (ShareTarget target : targets) {
                 TargetProxy proxy = get(target);
                 if (proxy.wasModified()) {
                     modified.add(proxy);
+                } else if (proxy.wasTouched()) {
+                    touched.add(proxy);
                 }
             }
 
             if (!modified.isEmpty()) {
                 ModuleHandler handler = handlers.get(module);
                 handler.updateObjects(modified, getHandlerParameters());
+            }
+            if (!touched.isEmpty()) {
+                ModuleHandler handler = handlers.get(module);
+                handler.touchObjects(touched, getHandlerParameters());
             }
         }
     }
@@ -159,6 +172,8 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
     protected abstract Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException;
 
     protected abstract void updateFolders(List<TargetProxy> proxies) throws OXException;
+
+    protected abstract void touchFolders(List<TargetProxy> proxies) throws OXException;
 
     protected abstract HandlerParameters getHandlerParameters();
 

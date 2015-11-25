@@ -60,70 +60,67 @@ public enum Client {
     /**
      * The client for OX6 UI: <code>"com.openexchange.ox.gui.dhtml"</code>
      */
-    OX6_UI("com.openexchange.ox.gui.dhtml", "/ox6/index.html"),
+    OX6_UI("com.openexchange.ox.gui.dhtml"),
     /**
      * The client for App Suite UI: <code>"open-xchange-appsuite"</code>
      */
-    APPSUITE_UI("open-xchange-appsuite", "/appsuite/"),
+    APPSUITE_UI("open-xchange-appsuite"),
     /**
      * The client for Mobile Mail App: <code>"open-xchange-mailapp"</code>
      */
-    MOBILE_APP("open-xchange-mailapp", null),
+    MOBILE_APP("open-xchange-mailapp"),
     /**
      * The client for USM/EAS: <code>"USM-EAS"</code>
      */
-    USM_EAS("USM-EAS", null),
+    USM_EAS("USM-EAS"),
     /**
      * The client for USM/JSON (OLOX): <code>"USM-JSON"</code>
      */
-    USM_JSON("USM-JSON", null),
+    USM_JSON("USM-JSON"),
     /**
      * The client for Outlook OXtender2 AddIn: <code>"OpenXchange.HTTPClient.OXAddIn"</code>
      */
-    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn", null),
+    OUTLOOK_OXTENDER2_ADDIN("OpenXchange.HTTPClient.OXAddIn"),
     /**
      * The client for OX Notifier: <code>"OpenXchange.HTTPClient.OXNotifier"</code>
      */
-    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier", null),
+    OXNOTIFIER("OpenXchange.HTTPClient.OXNotifier"),
     /**
      * The client for Outlook Update 1: <code>"com.open-xchange.updater.olox1"</code>
      */
-    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1", null),
+    OUTLOOK_UPDATER1("com.open-xchange.updater.olox1"),
     /**
      * The client for Outlook Update 2: <code>"com.open-xchange.updater.olox2"</code>
      */
-    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2", null),
+    OUTLOOK_UPDATER2("com.open-xchange.updater.olox2"),
     /**
      * The client for CardDAV: <code>"CARDDAV"</code>
      */
-    CARDDAV("CARDDAV", null),
+    CARDDAV("CARDDAV"),
     /**
      * The client for CalDAV: <code>"CALDAV"</code>
      */
-    CALDAV("CALDAV", null),
+    CALDAV("CALDAV"),
     /**
      * The client for WebDAV iCal: <code>"WEBDAV_ICAL"</code>
      */
-    WEBDAV_ICAL("WEBDAV_ICAL", null),
+    WEBDAV_ICAL("WEBDAV_ICAL"),
     /**
      * The client for WebDav InfoStore: <code>"WEBDAV_INFOSTORE"</code>
      */
-    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE", null),
+    WEBDAV_INFOSTORE("WEBDAV_INFOSTORE"),
     /**
      * The client for WebDav vCard: <code>"WEBDAV_VCARD"</code>
      */
-    WEBDAV_VCARD("WEBDAV_VCARD", null);
+    WEBDAV_VCARD("WEBDAV_VCARD");
 
     private final String clientId;
-    private final String uiWebPath;
-    private final String DEFAULT_UIWebPath = "client-defined";
 
     /**
      * Initializes a new {@link Client}.
      */
-    private Client(String clientId, String uiWebPath) {
+    private Client(String clientId) {
         this.clientId = clientId;
-        this.uiWebPath = uiWebPath;
     }
 
     /**
@@ -135,20 +132,6 @@ public enum Client {
         return clientId;
     }
 
-    /**
-     * Gets the UIWebPath for this client.
-     * 
-     * @return the UIWebPath
-     */
-    public String getUIWebPath() {
-        String prop = ClientUtil.getUIWebPathProperty();
-        if (prop.contentEquals(DEFAULT_UIWebPath)) {
-            return uiWebPath;
-        }
-        else {
-            return prop;
-        }
-    }
 
     @Override
     public String toString() {

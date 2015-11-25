@@ -56,15 +56,13 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
-import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.DefaultClientInfo;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
+import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.Result;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -88,25 +86,13 @@ public class ExecuteAction extends AbstractOnboardingAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
-
         // Check for configuration identifier
-        String configurationId = requestData.getParameter("configurationId");
-        if (Strings.isEmpty(configurationId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("configurationId");
+        String compositeId = requestData.getParameter("id");
+        if (Strings.isEmpty(compositeId)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
-        // Check for selection identifier
-        String selectionId = requestData.getParameter("selectionId");
-        if (Strings.isEmpty(selectionId)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("selectionId");
-        }
-
-        // Check for matching on-boarding configuration
-        OnboardingConfiguration config = onboardingService.getConfiguration(configurationId);
-        if (null == config) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(configurationId);
-        }
+        DefaultOnboardingSelection selection = DefaultOnboardingSelection.parseFrom(compositeId);
 
         // Parse optional form content
         Map<String, Object> formContent = null;
@@ -120,18 +106,28 @@ public class ExecuteAction extends AbstractOnboardingAction {
 
         // Create on-boarding request & execute it
         DefaultClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
-        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(configurationId, selectionId, clientInfo, requestData.getHostData(), formContent);
-        Result onboardingResult = config.execute(onboardingRequest, session);
+        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(selection, clientInfo, requestData.getHostData(), formContent);
+        OnboardingConfiguration configuration = selection.getEntityPath().getService();
+        Result onboardingResult = configuration.execute(onboardingRequest, session);
 
         // Return execution result
         Object resultObject = onboardingResult.getResultObject();
         if (null != resultObject) {
             String format = onboardingResult.getFormat();
-            return null == format ? new AJAXRequestResult(resultObject) : new AJAXRequestResult(resultObject, format);
+            if (null == format) {
+                return new AJAXRequestResult(resultObject);
+            }
+            requestData.setFormat(format);
+            return new AJAXRequestResult(resultObject, format);
         }
 
-        if (null != onboardingResult.getFormConfiguration() && null != onboardingResult.getFormDescription()) {
-            return new AJAXRequestResult(FormContentWriter.write(onboardingResult.getFormDescription(), onboardingResult.getFormConfiguration(), null), "json");
+        Map<String, Object> formConfiguration = onboardingResult.getFormConfiguration();
+        if (null != formConfiguration) {
+            JSONObject json = new JSONObject(formConfiguration.size());
+            for (String key : formConfiguration.keySet()) {
+                json.put(key, formConfiguration.get(key));
+            }
+            return new AJAXRequestResult(json, "json");
         }
 
         JSONObject jResult = new JSONObject(2);

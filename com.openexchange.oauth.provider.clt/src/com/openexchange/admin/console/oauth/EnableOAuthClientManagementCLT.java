@@ -71,20 +71,15 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
 /**
  * {@link EnableOAuthClientManagementCLT}
  *
- * A CLT to enable or disable an oauth client
+ * A CLT to enable an oauth client
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class EnableOAuthClientManagementCLT extends BasicCommandlineOptions {
+public class EnableOAuthClientManagementCLT extends AbstractOAuthCLT {
 
     private static final String CLIENT_ID_LONG = "id";
-    private static final String ENABLE_LONG = "enable";
-    private static final char ENABLE_SHORT = 'e';
-
-
     private CLIOption clientID = null;
-    private CLIOption enable = null;
 
 
     public static void main(String[] args) {
@@ -107,28 +102,16 @@ public class EnableOAuthClientManagementCLT extends BasicCommandlineOptions {
             }
 
 
-                String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
-                boolean flag = Boolean.parseBoolean((String) parser.getOptionValue(this.enable));
-                boolean retval = false;
-                if (flag) {
-                    retval = remote.enableClient(id, auth);
-                    if (retval) {
-                        System.out.println("Enabling the oauth client was successful!");
-                        sysexit(0);
-                    } else {
-                        System.out.println("Enabling the oauth client has failed!");
-                        sysexit(0);
-                    }
-                } else {
-                    retval = remote.disableClient(id, auth);
-                    if (retval) {
-                        System.out.println("Disabling the oauth client was successful!");
-                        sysexit(0);
-                    } else {
-                        System.out.println("Disabling the oauth client has failed!");
-                        sysexit(0);
-                    }
-                }
+            String id = checkEmpty(clientID, (String) parser.getOptionValue(this.clientID));
+            boolean retval = false;
+            retval = remote.enableClient(id, auth);
+            if (retval) {
+                System.out.println("Enabling the oauth client was successful!");
+                sysexit(0);
+            } else {
+                System.out.println("Enabling the oauth client has failed!");
+                sysexit(0);
+            }
 
         } catch (CLIParseException e) {
             printError("Parsing command-line failed : " + e.getMessage(), parser);
@@ -157,7 +140,6 @@ public class EnableOAuthClientManagementCLT extends BasicCommandlineOptions {
             sysexit(1);
         } catch (RemoteClientManagementException e) {
             printError(e.getMessage(), parser);
-            parser.printUsage();
             sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
         } catch (InvalidCredentialsException e) {
             printServerException(e, parser);
@@ -202,8 +184,6 @@ public class EnableOAuthClientManagementCLT extends BasicCommandlineOptions {
         setDefaultCommandLineOptionsWithoutContextID(parser);
 
         this.clientID = setLongOpt(parser, CLIENT_ID_LONG, "id", "The id of the oauth client", true, true, false);
-        this.enable = setShortLongOpt(parser, ENABLE_SHORT, ENABLE_LONG, "boolean", "Flag that indicates whether the client should be enabled or disabled", true);
-
     }
 
 

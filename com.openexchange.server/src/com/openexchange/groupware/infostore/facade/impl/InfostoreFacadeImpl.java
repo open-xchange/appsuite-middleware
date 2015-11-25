@@ -501,6 +501,18 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     }
 
     @Override
+    public void touch(int id, Context context) throws OXException {
+        DocumentMetadata oldDocument = load(id, CURRENT_VERSION, context);
+        DocumentMetadata document = new DocumentMetadataImpl(oldDocument);
+        document.setLastModified(new Date());
+        document.setModifiedBy(context.getMailadmin());
+        HashSet<Metadata> modifiedColums = new HashSet<Metadata>(Arrays.asList(Metadata.LAST_MODIFIED_LITERAL, Metadata.MODIFIED_BY_LITERAL));
+        long sequenceNumber = oldDocument.getSequenceNumber();
+        int folderOwner = security.getFolderOwner(oldDocument, context);
+        saveModifiedDocument(new SaveParameters(context, null, document, oldDocument, sequenceNumber, modifiedColums, folderOwner));
+    }
+
+    @Override
     public com.openexchange.file.storage.Quota getFileQuota(ServerSession session) throws OXException {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
@@ -519,14 +531,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public com.openexchange.file.storage.Quota getStorageQuota(ServerSession session) throws OXException {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+
         try {
-            limit = getFileStorage(session.getUserId(), session.getContextId()).getQuota();
+            QuotaFileStorage fileStorage = getFileStorage(session.getUserId(), session.getContextId());
+            limit = fileStorage.getQuota();
+            if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+                usage = fileStorage.getUsage();
+            }
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for context {}", session.getContextId(), e);
+            LOG.warn("Error getting file storage quota for user {} in context {}", session.getUserId(), session.getContextId(), e);
         }
-        if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
-            usage = getFileStorage(session.getUserId(), session.getContextId()).getUsage();
-        }
+
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
     }
 

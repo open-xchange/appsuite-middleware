@@ -117,6 +117,47 @@ public class TransactionManager {
 
     public static final String PARAMETER_KEY = TransactionManager.class.getName();
 
+    /**
+     * Initializes a new {@link TransactionManager} or returns the currently active one if already instantiated.
+     * On initialization a writable {@link Connection} is acquired and put into the {@link StorageParameters} for
+     * {@link DatabaseFolderType} and {@link DatabaseParameterConstants#PARAM_CONNECTION} as key.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return The {@link TransactionManager}.
+     */
+    public static TransactionManager initTransaction(StorageParameters storageParameters) throws OXException {
+        TransactionManager transactionManager = getTransactionManager(storageParameters);
+        if (transactionManager == null) {
+            transactionManager = new TransactionManager(storageParameters);
+            storageParameters.putParameter(FolderType.GLOBAL, PARAMETER_KEY, transactionManager);
+        }
+
+        ++transactionManager.initCount;
+        return transactionManager;
+    }
+
+    /**
+     * Checks whether the current transaction is managed by a {@link TransactionManager} or not.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return <code>true</code> if the transaction is managed. Otherwise <code>false</code>.
+     */
+    public static boolean isManagedTransaction(StorageParameters storageParameters) {
+        return getTransactionManager(storageParameters) != null;
+    }
+
+    /**
+     * Gets the currently active {@link TransactionManager}.
+     *
+     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
+     * @return The {@link TransactionManager} or <code>null</code> if this transaction is not managed.
+     */
+    public static TransactionManager getTransactionManager(StorageParameters storageParameters) {
+        return storageParameters.getParameter(FolderType.GLOBAL, PARAMETER_KEY);
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------
+
     private final Collection<FolderStorage> openedStorages = new LinkedHashSet<FolderStorage>(6);
 
     private final StorageParameters storageParameters;
@@ -171,45 +212,6 @@ public class TransactionManager {
         }
 
         return false;
-    }
-
-    /**
-     * Initializes a new {@link TransactionManager} or returns the currently active one if already instantiated.
-     * On initialization a writable {@link Connection} is acquired and put into the {@link StorageParameters} for
-     * {@link DatabaseFolderType} and {@link DatabaseParameterConstants#PARAM_CONNECTION} as key.
-     *
-     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
-     * @return The {@link TransactionManager}.
-     */
-    public static TransactionManager initTransaction(StorageParameters storageParameters) throws OXException {
-        TransactionManager transactionManager = getTransactionManager(storageParameters);
-        if (transactionManager == null) {
-            transactionManager = new TransactionManager(storageParameters);
-            storageParameters.putParameter(FolderType.GLOBAL, PARAMETER_KEY, transactionManager);
-        }
-
-        ++transactionManager.initCount;
-        return transactionManager;
-    }
-
-    /**
-     * Checks whether the current transaction is managed by a {@link TransactionManager} or not.
-     *
-     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
-     * @return <code>true</code> if the transaction is managed. Otherwise <code>false</code>.
-     */
-    public static boolean isManagedTransaction(StorageParameters storageParameters) {
-        return getTransactionManager(storageParameters) != null;
-    }
-
-    /**
-     * Gets the currently active {@link TransactionManager}.
-     *
-     * @param storageParameters The {@link StorageParameters}, never <code>null</code>.
-     * @return The {@link TransactionManager} or <code>null</code> if this transaction is not managed.
-     */
-    public static TransactionManager getTransactionManager(StorageParameters storageParameters) {
-        return storageParameters.getParameter(FolderType.GLOBAL, PARAMETER_KEY);
     }
 
     /**

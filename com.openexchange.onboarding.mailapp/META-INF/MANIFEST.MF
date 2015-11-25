@@ -1,0 +1,18 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange onboarding mailapp bundle
+Bundle-SymbolicName: com.openexchange.onboarding.mailapp
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.capabilities,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware.userconfiguration,
+ com.openexchange.i18n,
+ com.openexchange.onboarding,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.session,
+ org.osgi.framework
+Bundle-Activator: com.openexchange.onboarding.mailapp.osgi.MailAppOnboardingActivator

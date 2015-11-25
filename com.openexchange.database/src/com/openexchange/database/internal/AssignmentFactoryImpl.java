@@ -54,7 +54,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.database.Assignment;
@@ -68,7 +67,7 @@ import com.openexchange.exception.OXException;
  * {@link AssignmentFactoryImpl}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @since 7.8.1
  */
 public class AssignmentFactoryImpl implements AssignmentFactory {
 

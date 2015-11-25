@@ -323,26 +323,63 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @return The old file name to new file name mapping; [src-file] --&gt; [dst-file]
      * @throws StorageException If copy operation fails
      */
-    protected CopyResult copyFiles(Set<String> files, FileStorage srcStorage, FileStorage dstStorage, URI srcFullUri, URI dstFullUri) throws StorageException {
+    protected CopyResult copyFiles(final Set<String> files, final FileStorage srcStorage, final FileStorage dstStorage, URI srcFullUri, URI dstFullUri) throws StorageException {
         if (files.isEmpty()) {
-            return new CopyResult(Collections.<String, String> emptyMap());
+            return new CopyResult(Collections.<String, String> emptyMap(), null);
         }
 
+        final String threadName = Thread.currentThread().getName();
+        final Integer size = Integer.valueOf(files.size());
 
         if ("file".equalsIgnoreCase(srcFullUri.getScheme()) && "file".equalsIgnoreCase(dstFullUri.getScheme())) {
             // File-wise move possible
             try {
-                File srcParent = new File(srcFullUri);
-                File dstParent = new File(dstFullUri);
+                final File srcParent = new File(srcFullUri);
+                final File dstParent = new File(dstFullUri);
                 long totalSize = 0L;
+
+                int i = 1;
                 for (String file : files) {
-                    File srcFile = new File(srcParent, file);
-                    long length = srcFile.length();
-                    FileUtils.moveFile(srcFile, new File(dstParent, file));
+                    File toCopy = new File(srcParent, file);
+                    long length = toCopy.length();
+                    FileUtils.moveFile(toCopy, new File(dstParent, file));
+
+                    if ((i % 10) == 0) {
+                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                    }
+                    i++;
+
                     totalSize += length;
                 }
 
-                return new CopyResult(totalSize);
+                LOGGER.info("{} copied {} files.", threadName, size);
+
+                Reverter reverter = new Reverter() {
+
+                    @Override
+                    public void revertCopy() throws StorageException {
+                        int numReverted = 0;
+                        int i = 1;
+                        for (String file : files) {
+                            File toRevert = new File(dstParent, file);
+                            try {
+                                FileUtils.moveFile(toRevert, new File(srcParent, file));
+
+                                if ((i % 10) == 0) {
+                                    LOGGER.info("{} reverted {} files of {} in total", threadName, Integer.valueOf(i), size);
+                                }
+                                i++;
+                                numReverted++;
+                            } catch (IOException e) {
+                                LOGGER.error("{} failed to revert file {}", threadName, toRevert.getPath(), e);
+                            }
+                        }
+
+                        LOGGER.info("{} reverted {} files.", threadName, Integer.valueOf(numReverted));
+                    }
+                };
+
+                return new CopyResult(totalSize, reverter);
             } catch (IOException e) {
                 throw new StorageException(e);
             }
@@ -350,16 +387,45 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
         // One-by-one...
         try {
-            Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
+            final Map<String, String> prevFileName2newFileName = new HashMap<String, String>(files.size());
+
+            int i = 1;
             for (String file : files) {
                 InputStream is = srcStorage.getFile(file);
                 String newFile = dstStorage.saveNewFile(is);
                 if (null != newFile) {
                     prevFileName2newFileName.put(file, newFile);
-                    LOGGER.info("Copied file {} to {}", file, newFile);
+
+                    if ((i % 10) == 0) {
+                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                    }
+                    i++;
                 }
             }
-            return new CopyResult(prevFileName2newFileName);
+
+            LOGGER.info("{} copied {} files.", threadName, size);
+
+            Reverter reverter = new Reverter() {
+
+                @Override
+                public void revertCopy() throws StorageException {
+                    String[] copiedFiles = prevFileName2newFileName.values().toArray(new String[size.intValue()]);
+                    try {
+                        dstStorage.deleteFiles(copiedFiles);
+                    } catch (OXException x) {
+                        // Failed bulk deletion - try one-by-one
+                        for (String copiedFile : prevFileName2newFileName.values()) {
+                            try {
+                                dstStorage.deleteFile(copiedFile);
+                            } catch (OXException e) {
+                                LOGGER.error("{} failed to revert file {}", threadName, copiedFile, e.getCause() == null ? e : e.getCause());
+                            }
+                        }
+                    }
+                }
+            };
+
+            return new CopyResult(prevFileName2newFileName, reverter);
         } catch (OXException e) {
             throw new StorageException(e);
         }
@@ -378,11 +444,22 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         }
         int contextId = ctx.getId().intValue();
         Connection con = Database.getNoTimeout(contextId, true);
+        boolean rollback = false;
         try {
+            Databases.startTransaction(con);
+            rollback = true;
+
             for (FileLocationHandler updater : FilestoreLocationUpdaterRegistry.getInstance().getServices()) {
                 updater.updateFileLocations(prevFileName2newFileName, contextId, con);
             }
+
+            con.commit();
+            rollback = false;
         } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
             Database.backNoTimeout(contextId, true, con);
         }
     }
@@ -488,22 +565,129 @@ public abstract class FilestoreDataMover implements Callable<Void> {
         /** A mapping for previous to new file name; <code>null</code> in case {@link #operation} is {@link Operation#MOVED} */
         final Map<String, String> prevFileName2newFileName;
 
-        CopyResult(long totalSize) {
+        /** Reverts the previously copied files */
+        final Reverter reverter;
+
+        CopyResult(long totalSize, Reverter reverter) {
             super();
             operation = Operation.MOVED;
             this.totalSize = totalSize;
             prevFileName2newFileName = null;
+            this.reverter = reverter;
         }
 
-        CopyResult(Map<String, String> prevFileName2newFileName) {
+        CopyResult(Map<String, String> prevFileName2newFileName, Reverter reverter) {
             super();
             operation = Operation.COPIED;
             this.prevFileName2newFileName = prevFileName2newFileName;
             totalSize = 0L;
+            this.reverter = reverter;
+        }
+    }
+
+    /**
+     * Used to revert previously copied files.
+     */
+    static interface Reverter {
+
+        /**
+         * Reverts the previously copied files.
+         */
+        void revertCopy() throws StorageException;
+    }
+
+    /**
+     * Runs the specified task safely.
+     *
+     * @param task The task
+     */
+    protected static void runSafely(Runnable task) {
+        if (null != task) {
+            try {
+                task.run();
+            } catch (Exception e) {
+                LOGGER.error("Unexpected exception while running task", e);
+            }
         }
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
+
+    protected static final class IncrementUsage {
+
+        protected final long incrementUsage;
+        protected final int ownerId;
+        protected final int contextId;
+
+        protected IncrementUsage(long usage, int ownerId, int contextId) {
+            super();
+            this.incrementUsage = usage;
+            this.ownerId = ownerId;
+            this.contextId = contextId;
+        }
+    }
+
+    protected static IncrementUsage incUsage(long usage, int ownerId, int contextId) {
+        return new IncrementUsage(usage, ownerId, contextId);
+    }
+
+    protected static final class DecrementUsage {
+
+        protected final long decrementUsage;
+        protected final int ownerId;
+        protected final int contextId;
+
+        protected DecrementUsage(long usage, int ownerId, int contextId) {
+            super();
+            this.decrementUsage = usage;
+            this.ownerId = ownerId;
+            this.contextId = contextId;
+        }
+    }
+
+    protected static DecrementUsage decUsage(long usage, int ownerId, int contextId) {
+        return new DecrementUsage(usage, ownerId, contextId);
+    }
+
+    /**
+     * Increases/decreases the quota usages.
+     *
+     * @param incUsage The argument for increasing quota usage
+     * @param decUsage The argument for decreasing quota usage
+     * @throws StorageException If a database error occurs
+     */
+    protected static void changeUsage(DecrementUsage decUsage, IncrementUsage incUsage, int contextId) throws StorageException {
+        Connection con = null;
+        boolean rollback = false;
+        try {
+            con = ClientAdminThread.cache.getConnectionForContext(contextId);
+            Databases.startTransaction(con);
+            rollback = true;
+
+            doDecUsage(decUsage.decrementUsage, decUsage.ownerId, contextId, con);
+            doIncUsage(incUsage.incrementUsage, incUsage.ownerId, contextId, con);
+
+            con.commit();
+            rollback = false;
+        } catch (PoolException e) {
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            throw new StorageException(e);
+        } finally {
+            if (rollback) {
+                Databases.rollback(con);
+            }
+            Databases.autocommit(con);
+
+            if (null != con) {
+                try {
+                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
+                } catch (PoolException e) {
+                    throw new StorageException(e);
+                }
+            }
+        }
+    }
 
     /**
      * Increases the quota usage.
@@ -511,18 +695,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @param usage The value by which the quota is supposed to be increased
      * @throws StorageException If a database error occurs
      */
-    protected static void incUsage(long usage, int ownerId, int contextId) throws StorageException {
-        Connection con = null;
+    private static void doIncUsage(long usage, int ownerId, int contextId, Connection con) throws StorageException {
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
-
-            con.setAutoCommit(false);
-            rollback = true;
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
             sstmt.setInt(1, contextId);
             sstmt.setInt(2, ownerId);
             rs = sstmt.executeQuery();
@@ -548,26 +726,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                 }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
-            con.commit();
-            rollback = false;
         } catch (Exception s) {
             throw new StorageException(s);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
             Databases.closeSQLStuff(rs);
             Databases.closeSQLStuff(sstmt);
             Databases.closeSQLStuff(ustmt);
-
-            if (null != con) {
-                try {
-                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
-                } catch (PoolException e) {
-                    throw new StorageException(e);
-                }
-            }
         }
     }
 
@@ -577,19 +741,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
      * @param usage by that the Quota has to be decreased
      * @throws StorageException If a database error occurs
      */
-    protected static void decUsage(long usage, int ownerId, int contextId) throws StorageException {
-        Connection con = null;
+    private static void doDecUsage(long usage, int ownerId, int contextId, Connection con) throws StorageException {
         PreparedStatement sstmt = null;
         PreparedStatement ustmt = null;
         ResultSet rs = null;
-        boolean rollback = false;
         try {
-            con = ClientAdminThread.cache.getConnectionForContext(contextId);
-
-            con.setAutoCommit(false);
-            rollback = true;
-
-            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=? FOR UPDATE");
+            sstmt = con.prepareStatement("SELECT used FROM filestore_usage WHERE cid=? AND user=?");
             sstmt.setInt(1, contextId);
             sstmt.setInt(2, ownerId);
             rs = sstmt.executeQuery();
@@ -623,27 +780,12 @@ public abstract class FilestoreDataMover implements Callable<Void> {
                 }
                 throw QuotaFileStorageExceptionCodes.UPDATE_FAILED.create(I(contextId));
             }
-
-            con.commit();
-            rollback = false;
         } catch (Exception s) {
             throw new StorageException(s);
         } finally {
-            if (rollback) {
-                Databases.rollback(con);
-            }
-            Databases.autocommit(con);
             Databases.closeSQLStuff(rs);
             Databases.closeSQLStuff(sstmt);
             Databases.closeSQLStuff(ustmt);
-
-            if (null != con) {
-                try {
-                    ClientAdminThread.cache.pushConnectionForContext(contextId, con);
-                } catch (PoolException e) {
-                    throw new StorageException(e);
-                }
-            }
         }
     }
 

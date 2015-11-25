@@ -69,7 +69,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An I/O error occurred: %1$s
      */
-    IO_ERROR("An I/O error occurred: %1$s", null, CATEGORY_ERROR, 2),
+    IO_ERROR("I/O error '%1$s' occurred while loading RSS feed from URL: %2$s", RssExceptionMessages.GENERIC_ERROR_WITH_ARG2_MSG, CATEGORY_ERROR, 2),
     /**
      * Invalid RSS URL -- No or not well-formed XML content provided by URL: %1$s
      */
@@ -77,7 +77,7 @@ public enum RssExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * HTTP error %1$s while loading RSS feed from URL: %2$s.
      */
-    RSS_HTTP_ERROR("HTTP error %1$s while loading RSS feed from URL: %2$s.", RssExceptionMessages.RSS_HTTP_ERROR_MSG, CATEGORY_SERVICE_DOWN, 4),
+    RSS_HTTP_ERROR("HTTP error %1$s while loading RSS feed from URL: %2$s", RssExceptionMessages.RSS_HTTP_ERROR_MSG, CATEGORY_SERVICE_DOWN, 4),
     /**
      * Timeout while reading the RSS feed from URL: %1$s
      */

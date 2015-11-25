@@ -65,6 +65,10 @@ import org.junit.runners.Suite.SuiteClasses;
     MkCalendarTest.class,
     CookieTest.class,
     ConfirmationTest.class,
+    AlarmTestEMClient.class,
+    AlarmTestMacCalendar.class,
+    AlarmTestLightning.class,
+    AlarmTestIOSCalendar.class
 })
 public final class CalDAVTestSuite {
 

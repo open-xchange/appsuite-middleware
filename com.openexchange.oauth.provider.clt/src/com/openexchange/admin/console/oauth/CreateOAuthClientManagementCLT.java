@@ -89,7 +89,7 @@ import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementExceptio
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
+public class CreateOAuthClientManagementCLT extends AbstractOAuthCLT {
 
     private static final String GROUP_CTX_ID_LONG = "context-group-id";
     private static final char GROUP_CTX_ID_SHORT = 'c';
@@ -211,7 +211,6 @@ public class CreateOAuthClientManagementCLT extends BasicCommandlineOptions {
             sysexit(1);
         } catch (RemoteClientManagementException e) {
             printError(e.getMessage(), parser);
-            parser.printUsage();
             sysexit(BasicCommandlineOptions.SYSEXIT_COMMUNICATION_ERROR);
         } catch (InvalidCredentialsException e) {
             printServerException(e, parser);

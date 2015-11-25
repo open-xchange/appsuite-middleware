@@ -49,8 +49,6 @@
 
 package com.openexchange.onboarding;
 
-import com.openexchange.datatypes.genericonf.DynamicFormDescription;
-
 /**
  * {@link OnboardingSelection}
  *
@@ -60,17 +58,24 @@ import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 public interface OnboardingSelection extends Entity {
 
     /**
-     * Gets the identifier of the associated on-boarding configuration
+     * Gets the identifier; e.g. <code>"apple.ipad/calendar/caldav/download"</code>
      *
-     * @return The on-boarding configuration identifier
+     * @return The identifier
      */
-    String getConfigurationId();
+    String getCompositeId();
 
     /**
-     * Gets the optional form description.
+     * Gets the associated entity path
      *
-     * @return The form description or <code>null</code>
+     * @return The entity path
      */
-    DynamicFormDescription getFormDescription();
+    EntityPath getEntityPath();
+
+    /**
+     * Gets the on-boarding type for this selection; e.g. download, via E-Mail, via SMS, etc.
+     *
+     * @return The selection type.
+     */
+    OnboardingType getType();
 
 }

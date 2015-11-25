@@ -110,6 +110,11 @@ public class PListDict implements PListElement {
         return this;
     }
 
+    public PListDict setPayloadDescription(String payloadDescription) {
+        elements.add(new PListStringValue("PayloadDescription", payloadDescription));
+        return this;
+    }
+
     public PListDict setPayloadUUID(String payloadUUID) {
         elements.add(new PListStringValue("PayloadUUID", payloadUUID));
         return this;
@@ -135,6 +140,16 @@ public class PListDict implements PListElement {
 
     public PListDict addStringValue(String key, String value) {
         elements.add(new PListStringValue(key, value));
+        return this;
+    }
+
+    public PListDict addIntegerValue(String key, int value) {
+        elements.add(new PListIntegerValue(key, value));
+        return this;
+    }
+
+    public PListDict addBooleanValue(String key, boolean value) {
+        elements.add(new PListBooleanValue(key, value));
         return this;
     }
 

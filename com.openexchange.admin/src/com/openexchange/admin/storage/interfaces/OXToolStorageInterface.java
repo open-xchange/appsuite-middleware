@@ -46,9 +46,12 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.admin.storage.interfaces;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -89,6 +92,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Creates a new instance implementing the group storage interface.
+     * 
      * @return an instance implementing the group storage interface.
      */
     public static OXToolStorageInterface getInstance() {
@@ -98,36 +102,39 @@ public abstract class OXToolStorageInterface {
     /**
      * Checks if given domain is used by any user,group or resource as mail address in given context.
      *
-     * @param ctx  The context
+     * @param ctx The context
      * @param domain The domain
      * @return <code>true</code> if given domain is used by any user,group or resource as mail address; otherwise <code>false</code>
      * @throws StorageException If check fails
      */
-    public abstract boolean domainInUse(final Context ctx,final String domain) throws StorageException;
+    public abstract boolean domainInUse(final Context ctx, final String domain) throws StorageException;
 
     /**
      * Checks if given domain is used as mail address of any group in given context.
+     * 
      * @param domain
      * @return Groups which use this domain.null if no group uses this domain.
      * @throws StorageException
      */
-    public abstract Group[] domainInUseByGroup(final Context ctx,final String domain) throws StorageException;
+    public abstract Group[] domainInUseByGroup(final Context ctx, final String domain) throws StorageException;
 
     /**
      * Checks if given domain is used as mail address of any resource in given context.
+     * 
      * @param domain
      * @return Resources which use this domain. null if no resource uses this domain.
      * @throws StorageException
      */
-    public abstract Resource[] domainInUseByResource(final Context ctx,final String domain) throws StorageException;
+    public abstract Resource[] domainInUseByResource(final Context ctx, final String domain) throws StorageException;
 
     /**
      * Checks if given domain is used as alias or primary mail address of any user in given context.
+     * 
      * @param domain
      * @return Users which use this domain. null if no user uses this domain.
      * @throws StorageException
      */
-    public abstract User[] domainInUseByUser(final Context ctx,final String domain) throws StorageException;
+    public abstract User[] domainInUseByUser(final Context ctx, final String domain) throws StorageException;
 
     /**
      * Although this method get's a context Object it will only look after the cid
@@ -153,6 +160,7 @@ public abstract class OXToolStorageInterface {
     /**
      * This method can be used to check if some group exists in a context. The connection is given to be able to check for groups that are
      * not committed yet.
+     * 
      * @param ctx Context.
      * @param con readable database connection.
      * @param id unique identifier of the group.
@@ -177,7 +185,7 @@ public abstract class OXToolStorageInterface {
 
     public abstract boolean existsResourceAddress(final Context ctx, final String address) throws StorageException;
 
-    public abstract boolean existsResourceAddress(Context ctx, String address,Integer resource_id) throws StorageException;
+    public abstract boolean existsResourceAddress(Context ctx, String address, Integer resource_id) throws StorageException;
 
     public abstract boolean existsServer(final int server_id) throws StorageException;
 
@@ -214,7 +222,6 @@ public abstract class OXToolStorageInterface {
      */
     public abstract boolean existsUser(Context ctx, User user) throws StorageException;
 
-
     /**
      * Checks via group id and group name if it already exists in this context. Should be used in change method!
      *
@@ -224,7 +231,6 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException If existence check fails
      */
     public abstract boolean existsGroupName(Context ctx, Group grp) throws StorageException;
-
 
     /**
      * Checks if given name is already associated with a group in given context.Should be used in create method!
@@ -310,6 +316,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Checks via resource id and resource name if it already exists. Should be used in change method!
+     * 
      * @param ctx The context
      * @param res
      * @return
@@ -318,7 +325,8 @@ public abstract class OXToolStorageInterface {
     public abstract boolean existsResourceName(Context ctx, Resource res) throws StorageException;
 
     /**
-     *  Checks if given name is already used for resource in given context!Should be used in create method!
+     * Checks if given name is already used for resource in given context!Should be used in create method!
+     * 
      * @param ctx The context
      * @param resourceName
      * @return
@@ -378,6 +386,7 @@ public abstract class OXToolStorageInterface {
 
     /**
      * Load database information with the given identifier.
+     * 
      * @param id the identifier of the database. It must be the identifier of the master.
      * @return the database information with the given identifier.
      * @throws StorageException if the database with the given identifier does not exist or a problem occurs when loading it.
@@ -401,17 +410,17 @@ public abstract class OXToolStorageInterface {
 
     public abstract int getGroupIDByGroupname(Context ctx, String groupName) throws StorageException, NoSuchGroupException;
 
-    public abstract String getGroupnameByGroupID(final Context ctx,final int group_id) throws StorageException;
+    public abstract String getGroupnameByGroupID(final Context ctx, final int group_id) throws StorageException;
 
     public abstract int getResourceIDByResourcename(Context ctx, String resourceName) throws StorageException, NoSuchResourceException;
 
-    public abstract String getResourcenameByResourceID(final Context ctx,final int resource_id) throws StorageException;
+    public abstract String getResourcenameByResourceID(final Context ctx, final int resource_id) throws StorageException;
 
     public abstract int getServerIDByServername(String serverName) throws StorageException, NoSuchObjectException;
 
     public abstract int getUserIDByUsername(Context ctx, String userName) throws StorageException, NoSuchUserException;
 
-    public abstract String getUsernameByUserID(final Context ctx,final int user_id) throws StorageException;
+    public abstract String getUsernameByUserID(final Context ctx, final int user_id) throws StorageException;
 
     public abstract boolean getIsGuestByUserID(final Context ctx, final int user_id) throws StorageException;
 
@@ -482,5 +491,35 @@ public abstract class OXToolStorageInterface {
      * @throws StorageException
      */
     public abstract void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException;
+
+    /**
+     * Verifies whether the specified user is the owner of a master filestore and other users are using this filestore
+     * 
+     * @param context The context
+     * @param userId The user identifier
+     * @return true if the user is a master filestore owner AND other users are using this filestore; false otherwise
+     * @throws StorageException
+     */
+    public abstract boolean isMasterFilestoreOwner(Context context, int userId) throws StorageException;
+
+    /**
+     * Fetches the slave users of the master filestore
+     * 
+     * @param context
+     * @param userId
+     * @return
+     * @throws StorageException
+     */
+    public abstract Map<Integer, List<Integer>> fetchSlaveUsersOfMasterFilestore(Context context, int userId) throws StorageException;
+
+    /**
+     * Determines whether the specified context is the last one on the database schema
+     * 
+     * @param context The context
+     * @return true if the specified context is the last one on the database schema; false otherwise
+     * @throws StorageException if a problem occurs on the storage layer.
+     * @throws InvalidDataException if the specified context does not exist in any known database schema
+     */
+    public abstract boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException;
 
 }

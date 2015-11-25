@@ -507,7 +507,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         argList.add(createNumberArg(size));
                         return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
                     } catch(NumberFormatException e) {
-                        throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, size);
+                        throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, id);
                     }
                 } else if (TestCommand.Commands.HEADER.getCommandname().equals(id)) {
                     return createAddressEnvelopeOrHeaderTest(jobj, TestCommand.Commands.HEADER);
@@ -523,11 +523,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             // allowed according to our specification
                             argList.add(createTagArg("content"));
                             final String extensionvalue = getString(jobj, BodyTestFields.EXTENSIONSVALUE, id);
-                            if (null != extensionkey) {
-                                argList.add(extensionvalue);
-                            } else {
-                                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionkey content needs a mime value but none given");
-                            }
+                            argList.add(extensionvalue);
                         } else {
                             throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Body rule: The extensionskey " + extensionkey + " is not a valid extensionkey");
                         }

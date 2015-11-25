@@ -54,11 +54,9 @@ import java.net.UnknownHostException;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-import com.openexchange.ajax.Client;
 import com.openexchange.calendar.itip.ITipRole;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.configuration.ServerConfig.Property;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.container.participants.ConfirmStatus;
@@ -245,17 +243,7 @@ public class LabelHelper {
     	}
     	final ConfigurationService config = services.getService(ConfigurationService.class);
 		final String template = patternSlashFixer.matcher(config.getProperty("object_link", "https://[hostname]/[uiwebpath]#m=[module]&i=[object]&f=[folder]")).replaceAll("/");
-
-        String clientID = config.getProperty(Property.HTTP_AUTH_CLIENT.getPropertyName(), Property.HTTP_AUTH_CLIENT.getDefaultValue());
-        Client client = Client.getClientByID(clientID);
-        String webpath;
-        if (client != null) {
-            webpath = client.getUIWebPath();
-        }
-        else {
-            webpath = "/ox6/index.html";
-        }
-
+		String webpath = config.getProperty("com.openexchange.UIWebPath", "/appsuite/");
 		if (webpath.startsWith("/")) {
 		    webpath = webpath.substring(1, webpath.length());
 		}
@@ -391,9 +379,9 @@ public class LabelHelper {
 			String msg = null;
 	        String statusString = null;
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_ON_YOUR_BEHALF_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg = Messages.DECLINE_ON_YOUR_BEHALF_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg = Messages.TENTATIVE_ON_YOUR_BEHALF_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
+	        case DECLINE: msg = Messages.DECLINE_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_ON_YOUR_BEHALF_INTRO; statusString = ""; break;
 	        case NONE: msg = Messages.NONE_ON_YOUR_BEHALF_INTRO; statusString = Messages.NONE; break;
 	        }
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);
@@ -424,17 +412,17 @@ public class LabelHelper {
     protected class OnBehalfOfAnother implements DelegationState {
 
 		@Override
-        public String statusChange(final NotificationParticipant participant,
-				final ConfirmStatus status) {
+        public String statusChange(final NotificationParticipant participant, final ConfirmStatus status) {
 			String msg = null;
-	        String statusString = null;
+	        String statusString = "";
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_ON_BEHALF_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg =Messages.DECLINE_ON_BEHALF_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg =Messages.TENTATIVE_ON_BEHALF_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_ON_BEHALF_INTRO; break;
+	        case DECLINE: msg = Messages.DECLINE_ON_BEHALF_INTRO; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_ON_BEHALF_INTRO; break;
 	        case NONE: msg = Messages.NONE_ON_BEHALF_INTRO; statusString = Messages.NONE; break;
 	        }
-	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);		}
+	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).add(mail.getOnBehalfOf().getDisplayName(), ArgumentType.PARTICIPANT).getMessage(wrapper, locale);
+	    }
 
 		@Override
         public String getDeleteIntroduction() {
@@ -461,14 +449,13 @@ public class LabelHelper {
     protected class OnNoOnesBehalf implements DelegationState {
 
 		@Override
-        public String statusChange(final NotificationParticipant participant,
-				final ConfirmStatus status) {
+        public String statusChange(final NotificationParticipant participant, final ConfirmStatus status) {
 			String msg = null;
-	        String statusString = null;
+	        String statusString = "";
 	        switch (status) {
-	        case ACCEPT: msg = Messages.ACCEPT_INTRO; statusString = Messages.ACCEPTED; break;
-	        case DECLINE: msg = Messages.DECLINE_INTRO; statusString = Messages.DECLINED; break;
-	        case TENTATIVE: msg = Messages.TENTATIVE_INTRO; statusString = Messages.TENTATIVELY_ACCEPTED; break;
+	        case ACCEPT: msg = Messages.ACCEPT_INTRO; break;
+	        case DECLINE: msg = Messages.DECLINE_INTRO; break;
+	        case TENTATIVE: msg = Messages.TENTATIVE_INTRO; break;
 	        case NONE: msg = Messages.NONE_INTRO; statusString = Messages.NONE; break;
 	        }
 	        return new Sentence(msg).add(participant.getDisplayName(), ArgumentType.PARTICIPANT).add(statusString, ArgumentType.STATUS, status).getMessage(wrapper, locale);

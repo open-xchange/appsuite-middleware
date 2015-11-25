@@ -3511,4 +3511,50 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         final Method retval = User.class.getMethod(boolmethodname);
         return retval;
     }
+
+    @Override
+    public User[] listUsersByAliasDomain(Context context, String aliasDomain) throws StorageException {
+        int context_id = context.getId().intValue();
+
+        Connection read_ox_con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            read_ox_con = cache.getConnectionForContext(context_id);
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid ");
+            sb.append("WHERE us.cid = ? and la.alias LIKE ?");
+
+            String query = sb.toString();
+            stmt = read_ox_con.prepareStatement(query);
+            stmt.setInt(1, context.getId());
+            stmt.setString(2, "%" + aliasDomain);
+
+            rs = stmt.executeQuery();
+            List<User> retval = new LinkedList<User>();
+            while (rs.next()) {
+                retval.add(new User(rs.getInt(1)));
+            }
+            return retval.toArray(new User[retval.size()]);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e.toString());
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (RuntimeException e) {
+            log.error("", e);
+            throw e;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+            if (read_ox_con != null) {
+                try {
+                    cache.pushConnectionForContextAfterReading(context_id, read_ox_con);
+                } catch (PoolException exp) {
+                    log.error("Pool Error pushing ox read connection to pool!", exp);
+                }
+            }
+        }
+    }
 }
