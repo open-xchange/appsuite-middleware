@@ -66,6 +66,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
@@ -99,6 +100,7 @@ import com.openexchange.onboarding.plist.xml.StaxUtils;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.user.UserService;
 
 /**
  * {@link EASOnboardingConfiguration}
@@ -429,7 +431,10 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
         payloadContent.addStringValue("UserName", session.getLogin());
         payloadContent.addStringValue("Password", session.getPassword());
+        payloadContent.addStringValue("EmailAddress", getPrimaryEMailAddress(session));
         payloadContent.addStringValue("Host", getEASUrl(request, session));
+        payloadContent.addBooleanValue("SSL", false);
+        payloadContent.setPayloadVersion(1);
 
         PListDict pListDict = new PListDict();
         pListDict.setPayloadIdentifier("com.open-xchange");
@@ -459,6 +464,12 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
 
     private TransportProvider getTransportProvider() {
         return TransportProviderRegistry.getTransportProvider("smtp");
+    }
+
+    private String getPrimaryEMailAddress(Session session) throws OXException {
+        UserService userService = services.getService(UserService.class);
+        User user = userService.getUser(session.getUserId(), session.getContextId());
+        return user.getMail();
     }
 
 }

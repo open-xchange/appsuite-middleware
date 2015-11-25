@@ -56,6 +56,7 @@ import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.eas.EASOnboardingConfiguration;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -75,7 +76,7 @@ public class OnboardingEASActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, CapabilityService.class, NotificationMailFactory.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, CapabilityService.class, NotificationMailFactory.class, UserService.class };
     }
 
     @Override
