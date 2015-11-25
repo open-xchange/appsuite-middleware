@@ -436,6 +436,7 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadType("com.apple.mail.managed");
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadContentUUID", PROFILE_IMAP_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadContentIdentifier", "com.open-xchange.imap", session));
+        payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
         payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.imap.plist.accountDescription", IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, true, session));
