@@ -341,6 +341,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
         payloadContent.setPayloadDisplayName(CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME);
+        payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
         payloadContent.addStringValue("CalDAVPassword", session.getPassword());

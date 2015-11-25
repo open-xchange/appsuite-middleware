@@ -343,6 +343,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentUUID", PROFILE_CARDDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentIdentifier", "com.open-xchange.carddav", session));
         payloadContent.setPayloadDisplayName(CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME);
+        payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CardDAVUsername", session.getLogin());
         payloadContent.addStringValue("CardDAVPassword", session.getPassword());
