@@ -539,14 +539,7 @@ public class DispatcherServlet extends SessionServlet {
         if (APIResponseRenderer.expectsJsCallback(req)) {
             writeErrorAsJsCallback(e, req, resp);
         } else {
-            //Bug 42565
-            if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
-                sendErrorAndPage(HttpServletResponse.SC_NOT_FOUND, e.getMessage(), resp);
-                logException(e, LogLevel.DEBUG, HttpServletResponse.SC_NOT_FOUND);
-                return;
-            } else {
-                super.handleOXException(e, req, resp, false, false);
-            }
+            super.handleOXException(e, req, resp, false, false);
         }
     }
 
