@@ -144,7 +144,9 @@ public enum Attribute {
         Attribute.SPAM_FULLNAME_LITERAL,
         Attribute.SPAM_LITERAL,
         Attribute.TRASH_FULLNAME_LITERAL,
-        Attribute.TRASH_LITERAL);
+        Attribute.TRASH_LITERAL,
+        Attribute.ARCHIVE_FULLNAME_LITERAL,
+        Attribute.ARCHIVE_LITERAL);
 
     /**
      * Contains attributes which denote the full names of an account's default folders.
@@ -155,7 +157,8 @@ public enum Attribute {
         Attribute.DRAFTS_FULLNAME_LITERAL,
         Attribute.SENT_FULLNAME_LITERAL,
         Attribute.SPAM_FULLNAME_LITERAL,
-        Attribute.TRASH_FULLNAME_LITERAL);
+        Attribute.TRASH_FULLNAME_LITERAL,
+        Attribute.ARCHIVE_FULLNAME_LITERAL);
 
     private final int id;
     private final String attrName;
