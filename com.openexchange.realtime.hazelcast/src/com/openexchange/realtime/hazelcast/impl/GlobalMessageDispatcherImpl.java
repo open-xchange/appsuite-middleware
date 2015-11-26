@@ -98,7 +98,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     private final HazelcastResourceDirectory directory;
 
-    private ResponseChannel channel = null;
+    private final ResponseChannel channel;
 
     public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
