@@ -354,7 +354,17 @@ public final class Scheduler {
                             // Perform (image transformation) task
                             task.run();
 
-                            if (currentThread.isInterrupted()) {
+                            if (Thread.interrupted()) {
+                                // Cleared interrupted status after run() method
+
+                                // Check status
+                                if (stopped.get()) {
+                                    // Stopped...
+                                    LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+                                    return;
+                                }
+
+                                // Otherwise orderly terminate this Selector & re-schedule another Selector
                                 proceed = false;
                                 LOGGER.info("Image transformation selector '{}' terminated. Going to schedule a new selector for further processing.", currentThread.getName());
 
