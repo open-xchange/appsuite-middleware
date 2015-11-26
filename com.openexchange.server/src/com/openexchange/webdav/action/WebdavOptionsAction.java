@@ -60,7 +60,9 @@ public class WebdavOptionsAction extends AbstractAction {
 		res.setHeader("Content-Length","0");
 		res.setHeader("Allow", join(req.getResource().getOptions()));
         res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, "
-            + "calendar-schedule, calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search");
+            + "calendar-schedule, calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, "
+            + "calendarserver-private-comments"
+        );
 		res.setHeader("Accept-Ranges", "bytes");
 		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
 	}

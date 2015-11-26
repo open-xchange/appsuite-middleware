@@ -190,8 +190,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
-             * handle reminders
+             * handle private comments & reminders
              */
+            handlePrivateComments(appointmentToSave);
             ReminderObject nextReminder = handleReminders(originalAppointment, appointmentToSave);
             /*
              * update appointment
@@ -243,6 +244,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     continue;
                 }
                 CalendarDataObject originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
+                handlePrivateComments(exceptionToSave);
                 ReminderObject nextExceptionReminder = handleReminders(originalException, exceptionToSave);
                 if (null != originalException) {
                     /*
@@ -341,6 +343,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     factory.getSession().getUserId(), parent.getFolder(), appointmentToSave);
                 Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
             }
+            handlePrivateComments(appointmentToSave);
             ReminderObject nextReminder = handleReminders(null, appointmentToSave);
             getAppointmentInterface().insertAppointmentObject(this.appointmentToSave);
             Date clientLastModified = appointmentToSave.getLastModified();
@@ -387,6 +390,37 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
             factory.getSession().getUserId(), target.getFolder(), appointmentToSave);
         getAppointmentInterface().updateAppointmentObject(appointmentToSave, parentFolderID, object.getLastModified());
+    }
+
+    /**
+     * Applies private attendee comment properties to the supplied appointment, based on the current session's user being the organizer
+     * or attendee of the meeting.
+     *
+     * @param appointment The appointment to apply private attendee comment properties for
+     */
+    private void applyPrivateComments(CalendarDataObject appointment) throws OXException {
+        if (appointment.getOrganizerId() == factory.getSession().getUserId()) {
+            /*
+             * provide all attendee comments for organizer
+             */
+            appointment.setProperty("com.openexchange.data.conversion.ical.participants.attendeeComments", Boolean.TRUE);
+        } else {
+            /*
+             * provide the current users confirmation message
+             */
+            Participant[] participants = appointment.getParticipants();
+            if (null != participants && 0 < participants.length) {
+                /*
+                 * set current users confirmation message
+                 */
+                for (Participant participant : participants) {
+                    if (Participant.USER == participant.getType() && participant.getIdentifier() == factory.getSession().getUserId()) {
+                        appointment.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", ((UserParticipant) participant).getConfirmMessage());
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     private void applyReminderProperties(CalendarDataObject appointment) throws OXException {
@@ -464,6 +498,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             CalendarDataObject appointment = parent.load(object, true);
             applyReminderProperties(appointment);
+            applyPrivateComments(appointment);
             CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
              * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
@@ -481,6 +516,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (null != changeExceptions && 0 < changeExceptions.length) {
                 for (CalendarDataObject changeException : changeExceptions) {
                     applyReminderProperties(changeException);
+                    applyPrivateComments(appointment);
                     icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
                 }
             }
@@ -741,7 +777,32 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     /**
-     * Handles reminders that have previously been "acknowledged" or "snoozed" on the client-side, based on the properties
+     * Handles incoming private attendee comments for the current user, based on the property
+     * <code>com.openexchange.data.conversion.ical.participants.privateComment</code>.
+     *
+     * @param updatedAppointment The updated appointment
+     */
+    private void handlePrivateComments(CalendarDataObject updatedAppointment) {
+        String privateComment = updatedAppointment.getProperty("com.openexchange.data.conversion.ical.participants.privateComment");
+        if (null != privateComment) {
+            updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.participants.privateComment");
+            Participant[] participants = updatedAppointment.getParticipants();
+            if (null != participants && 0 < participants.length) {
+                /*
+                 * set current users confirmation message
+                 */
+                for (Participant participant : participants) {
+                    if (Participant.USER == participant.getType() && participant.getIdentifier() == factory.getSession().getUserId()) {
+                        ((UserParticipant) participant).setConfirmMessage(privateComment);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles incoming reminders that have previously been "acknowledged" or "snoozed" on the client-side, based on the properties
      * <code>com.openexchange.data.conversion.ical.alarm.acknowledged</code> and
      * <code>com.openexchange.data.conversion.ical.alarm.snooze</code> (as inserted by the iCal parser).
      * <p/>

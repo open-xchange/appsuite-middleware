@@ -76,8 +76,10 @@ import net.fortuna.ical4j.model.parameter.CuType;
 import net.fortuna.ical4j.model.parameter.PartStat;
 import net.fortuna.ical4j.model.parameter.Role;
 import net.fortuna.ical4j.model.parameter.Rsvp;
+import net.fortuna.ical4j.model.parameter.XParameter;
 import net.fortuna.ical4j.model.property.Attendee;
 import net.fortuna.ical4j.model.property.Resources;
+import net.fortuna.ical4j.model.property.XProperty;
 import net.fortuna.ical4j.util.Uris;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
@@ -158,6 +160,13 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 default:
             }
         }
+        /*
+         * add private comment if set
+         */
+        String privateComment = cObj.getProperty("com.openexchange.data.conversion.ical.participants.privateComment");
+        if (null != privateComment) {
+            component.getProperties().add(new XProperty("X-CALENDARSERVER-PRIVATE-COMMENT", privateComment));
+        }
         if(resources.isEmpty()) { return; }
         setResources(index, component, resources, ctx);
     }
@@ -170,7 +179,15 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(CuType.RESOURCE);
             parameters.add(PartStat.ACCEPTED);
             parameters.add(Role.REQ_PARTICIPANT);
-            parameters.add(new Cn(resourceParticipant.getDisplayName()));
+            String displayName = resourceParticipant.getDisplayName();
+            if (Strings.isEmpty(displayName)) {
+                try {
+                    displayName = resourceResolver.load(resourceParticipant.getIdentifier(), ctx).getDisplayName();
+                } catch (OXException e) {
+                    LOG.warn("Error resolving resource participant", e);
+                }
+            }
+            parameters.add(new Cn(displayName));
             component.getProperties().add(attendee);
         } catch (URISyntaxException e) {
             LOG.error("", e); // Shouldn't happen
@@ -251,19 +268,28 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             final String displayName = this.resolveUserDisplayName(index, userParticipant, ctx);
             parameters.add(new Cn(null != displayName && 0 < displayName.length() ? displayName : address));
             switch (getConfirm(userParticipant, obj)) {
-            case CalendarObject.ACCEPT:
-                parameters.add(PartStat.ACCEPTED);
-                break;
-            case CalendarObject.DECLINE:
-                parameters.add(PartStat.DECLINED);
-                break;
-            case CalendarObject.TENTATIVE:
-                parameters.add(PartStat.TENTATIVE);
-                break;
-            case CalendarObject.NONE:
-            default:
+                case CalendarObject.ACCEPT:
+                    parameters.add(PartStat.ACCEPTED);
+                    break;
+                case CalendarObject.DECLINE:
+                    parameters.add(PartStat.DECLINED);
+                    break;
+                case CalendarObject.TENTATIVE:
+                    parameters.add(PartStat.TENTATIVE);
+                    break;
+                default:
+                    break;
             }
             component.getProperties().add(attendee);
+            /*
+             * add each attendee's comment for organizer if available
+             */
+            if (Strings.isNotEmpty(userParticipant.getConfirmMessage()) &&
+                Boolean.TRUE.equals(obj.getProperty("com.openexchange.data.conversion.ical.participants.attendeeComments"))) {
+                XProperty attendeeCommentProperty = new XProperty("X-CALENDARSERVER-ATTENDEE-COMMENT", userParticipant.getConfirmMessage());
+                attendeeCommentProperty.getParameters().add(new XParameter("X-CALENDARSERVER-ATTENDEE-REF", attendee.getValue()));
+                component.getProperties().add(attendeeCommentProperty);
+            }
         } catch (final URISyntaxException e) {
             LOG.error("", e); // Shouldn't happen
         } catch (AddressException e) {
@@ -462,8 +488,14 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for (final String resourceName : resourceNames) {
             warnings.add(new ConversionWarning(index, Code.CANT_RESOLVE_RESOURCE, resourceName));
         }
+        /*
+         * make private comment available as property if set
+         */
+        Property privateCommentProperty = component.getProperty("X-CALENDARSERVER-PRIVATE-COMMENT");
+        if (null != privateCommentProperty) {
+            cObj.setProperty("com.openexchange.data.conversion.ical.participants.privateComment", privateCommentProperty.getValue());
+        }
     }
-
 
     private static Set<String> getPossibleAddresses(User user) {
         Set<String> possibleAddresses = new HashSet<String>();
