@@ -340,7 +340,6 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadType("com.apple.caldav.account");
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
-        payloadContent.setPayloadDisplayName(CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME);
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
@@ -355,6 +354,7 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
         pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadUUID", PROFILE_CALDAV_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
         pListDict.setPayloadContent(payloadContent);
+        pListDict.setPayloadDisplayName(CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME);
 
         return pListDict;
     }

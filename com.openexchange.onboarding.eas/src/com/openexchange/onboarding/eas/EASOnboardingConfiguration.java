@@ -442,6 +442,7 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
         pListDict.setPayloadUUID(UUID.randomUUID().toString());
         pListDict.setPayloadVersion(1);
         pListDict.setPayloadContent(payloadContent);
+        pListDict.setPayloadDisplayName(EASOnboardingStrings.EAS_DISPLAY_NAME);
 
         return pListDict;
     }

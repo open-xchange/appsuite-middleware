@@ -342,7 +342,6 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         payloadContent.setPayloadType("com.apple.carddav.account");
         payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentUUID", PROFILE_CARDDAV_DEFAULT_CONTENT_UUID, session));
         payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentIdentifier", "com.open-xchange.carddav", session));
-        payloadContent.setPayloadDisplayName(CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME);
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "OX");
         payloadContent.addStringValue("CardDAVUsername", session.getLogin());
@@ -357,6 +356,7 @@ public class CardDAVOnboardingConfiguration implements OnboardingConfiguration {
         pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadUUID", PROFILE_CARDDAV_DEFAULT_UUID, session));
         pListDict.setPayloadVersion(1);
         pListDict.setPayloadContent(payloadContent);
+        pListDict.setPayloadDisplayName(CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME);
 
         return pListDict;
     }
