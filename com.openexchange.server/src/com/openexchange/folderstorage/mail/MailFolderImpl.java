@@ -160,7 +160,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private final MailFolderType mailFolderType;
     private final boolean cacheable;
     private final String fullName;
-    private final int accountId;
+    private final int mailAccountId;
     private final int userId;
     private final int contextId;
     private String localizedName;
@@ -210,8 +210,8 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
      */
     public MailFolderImpl(MailFolder mailFolder, int accountId, MailConfig mailConfig, User user, int contextId, DefaultFolderFullnameProvider fullnameProvider, MailAccess<?, ?> mailAccess, MailAccount mailAccount, boolean translatePrimaryAccountDefaultFolders) throws OXException {
         super();
-        this.accountId = accountId;
-        super.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
+        this.mailAccountId = accountId;
+        this.accountId = MailFolderUtility.prepareFullname(accountId, MailFolder.DEFAULT_FOLDER_ID);
         userId = user.getId();
         this.contextId = contextId;
         fullName = mailFolder.getFullname();
@@ -480,7 +480,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+            mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
             mailAccess.connect(false);
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
@@ -507,7 +507,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
 
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-            mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+            mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
             mailAccess.connect(false);
             final IMailFolderStorage folderStorage = mailAccess.getFolderStorage();
             if (folderStorage instanceof IMailFolderStorageEnhanced) {
@@ -536,7 +536,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
         if (null == optParams) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
-                mailAccess = MailAccess.getInstance(userId, contextId, accountId);
+                mailAccess = MailAccess.getInstance(userId, contextId, mailAccountId);
                 mailAccess.connect(false);
                 return totalAndUnread(mailAccess);
             } catch (final OXException e) {
@@ -588,7 +588,7 @@ public final class MailFolderImpl extends AbstractFolder implements FolderExtens
     private MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess(final ConcurrentMap<String, Object> optParams) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>) optParams.get("__macc__");
         if (null == mailAccess) {
-            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> nu = MailAccess.getInstance(userId, contextId, accountId);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> nu = MailAccess.getInstance(userId, contextId, mailAccountId);
             mailAccess = (MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>) optParams.putIfAbsent("__macc__", nu);
             if (null == mailAccess) {
                 // Put into map
