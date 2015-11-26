@@ -321,6 +321,7 @@ public final class Scheduler {
                 return;
             }
 
+            boolean decrementCount = true;
             try {
                 // Perform image processing until aborted
                 boolean proceed = true;
@@ -356,6 +357,10 @@ public final class Scheduler {
                             if (currentThread.isInterrupted()) {
                                 proceed = false;
                                 LOGGER.info("Image transformation selector '{}' terminated. Going to schedule a new selector for further processing.", currentThread.getName());
+
+                                // Ensure counter is decremented prior to one-shot task becoming active
+                                numberOfRunningScheduler.decrementAndGet();
+                                decrementCount = false;
 
                                 TimerService optService = Services.optService(TimerService.class);
                                 if (null != optService) {
@@ -393,7 +398,9 @@ public final class Scheduler {
                 LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
             } finally {
                 // Decrement count
-                numberOfRunningScheduler.decrementAndGet();
+                if (decrementCount) {
+                    numberOfRunningScheduler.decrementAndGet();
+                }
             }
 
             LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
