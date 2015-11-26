@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,40 +49,38 @@
 
 package com.openexchange.tools.images.scheduler;
 
-import java.lang.Thread.UncaughtExceptionHandler;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
 
 /**
- * {@link SchedulerUncaughtExceptionhandler} - The uUncaught exception handler for image transformation scheduler.
+ * {@link SchedulerThreadPoolExecutor}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since 7.6.0
+ * @since v7.8.1
  */
-final class SchedulerUncaughtExceptionhandler implements UncaughtExceptionHandler {
+public class SchedulerThreadPoolExecutor extends ThreadPoolExecutor {
 
-    private static final SchedulerUncaughtExceptionhandler INSTANCE = new SchedulerUncaughtExceptionhandler();
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SchedulerThreadPoolExecutor.class);
 
     /**
-     * Gets the instance
+     * Initializes a new {@link SchedulerThreadPoolExecutor}.
      *
-     * @return The instance
+     * @param nThreads The number of threads in the pool
+     * @param scheduler The parental {@link Scheduler} instance owning this thread pool
      */
-    static SchedulerUncaughtExceptionhandler getInstance() {
-        return INSTANCE;
-    }
-
-    // ---------------------------------------------------------------------------------------------- //
-
-    /**
-     * Initializes a new {@link SchedulerUncaughtExceptionhandler}.
-     */
-    private SchedulerUncaughtExceptionhandler() {
-        super();
+    public SchedulerThreadPoolExecutor(int nThreads) {
+        // See java.util.concurrent.Executors.newFixedThreadPool(int, ThreadFactory)
+        super(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(), new SchedulerThreadFactory());
     }
 
     @Override
-    public void uncaughtException(final Thread t, final Throwable e) {
-        final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SchedulerUncaughtExceptionhandler.class);
-        LOG.error("Thread '{}' terminated abruptly with an uncaught RuntimeException or Error.", t.getName(), e);
+    protected void afterExecute(Runnable r, Throwable t) {
+        super.afterExecute(r, t);
+        if (t != null) {
+            LOG.info("Image transformation thread '{}' terminated abruptly.", Thread.currentThread().getName(), t);
+        }
     }
 
 }

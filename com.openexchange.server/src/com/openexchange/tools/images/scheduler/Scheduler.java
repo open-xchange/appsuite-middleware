@@ -53,8 +53,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.tools.images.osgi.Services;
@@ -110,6 +109,7 @@ public final class Scheduler {
     // ------------------------------------------------------------------------------------------------ //
 
     private final ExecutorService pool;
+    final AtomicBoolean stopped;
     final Map<Object, TaskExecuter> runningThreads;
 
     /**
@@ -117,19 +117,25 @@ public final class Scheduler {
      */
     private Scheduler() {
         super();
-        final ConfigurationService configService = Services.getService(ConfigurationService.class);
-        final int defaultNumThreads = 10;
-        final int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.tools.images.scheduler.numThreads", defaultNumThreads);
-        final ThreadPoolExecutor newPool = (ThreadPoolExecutor) Executors.newFixedThreadPool(numThreads, new SchedulerThreadFactory());
+        // Determine number of threads to utilize
+        ConfigurationService configService = Services.getService(ConfigurationService.class);
+        int defaultNumThreads = 10;
+        int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.tools.images.scheduler.numThreads", defaultNumThreads);
+
+        // Initialize fixed thread pool
+        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads);
         newPool.prestartAllCoreThreads();
         pool = newPool;
         runningThreads = new HashMap<Object, TaskExecuter>(256);
+        stopped = new AtomicBoolean(false);
     }
 
     /**
      * Shuts-down this scheduler.
      */
     private void stop() {
+        stopped.set(true);
+
         try {
             pool.shutdownNow();
         } catch (final Exception x) {
@@ -146,6 +152,10 @@ public final class Scheduler {
      *         accepted for execution.
      */
     public boolean execute(final Object optKey, final Runnable task) {
+        if (stopped.get()) {
+            return false;
+        }
+
         final Object key = null == optKey ? Thread.currentThread() : optKey;
         TaskExecuter executer = null;
         synchronized (runningThreads) {
@@ -211,6 +221,16 @@ public final class Scheduler {
 
                 // Perform image transformation
                 task.run();
+                
+                if (Thread.interrupted()) {
+                    // Cleared interrupted status after run() method
+                    LOGGER.debug("Image transformation interrupted.");
+                }
+                
+                if (stopped.get()) {
+                    LOGGER.debug("Image transformation terminated.");
+                    return;
+                }
 
                 // Check for more...
                 synchronized (runningThreads) {
