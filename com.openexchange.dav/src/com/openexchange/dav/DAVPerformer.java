@@ -49,6 +49,7 @@
 
 package com.openexchange.dav;
 
+import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -137,6 +138,22 @@ public abstract class DAVPerformer implements SessionHolder {
      * @return The prepared WebDAV action
      */
     protected WebdavAction prepare(AbstractAction action, boolean logBody, boolean logResponse, BulkLoader bulkLoader, AbstractAction... additionals) {
+        return prepare(action, logBody, logResponse, true, bulkLoader, additionals);
+    }
+
+    /**
+     * Prepares a new {@link WebdavRequestCycleAction} for a concrete WebDAV action, injecting appropriate actions for logging, default
+     * response headers and if-header matching implicitly. Further actions are added as needed, as well as finally the action itself.
+     *
+     * @param action The action to prepare
+     * @param logBody <code>true</code> to log the request body, <code>false</code>, otherwise
+     * @param logResponse <code>true</code> to log the response, <code>false</code>, otherwise
+     * @param ifMatch <code>true</code> to do <code>"If-Match"</code> / <code>If-None-Match</code> header validation, <code>false</code>, otherwise
+     * @param bulkLoader The bulk loader to apply for each action, or <code>null</code> if not needed
+     * @param additionals Additional actions to include
+     * @return The prepared WebDAV action
+     */
+    protected WebdavAction prepare(AbstractAction action, boolean logBody, boolean logResponse, boolean ifMatch, BulkLoader bulkLoader, AbstractAction... additionals) {
         /*
          * initialize surrounding request lifecycle
          */
@@ -153,16 +170,19 @@ public abstract class DAVPerformer implements SessionHolder {
         WebdavDefaultHeaderAction defaultHeader = new WebdavDefaultHeaderAction();
         defaultHeader.setBulkLoader(bulkLoader);
         logAction.setNext(defaultHeader);
+        AbstractAction previousAction = defaultHeader;
         /*
          * add if-match action
          */
-        WebdavIfMatchAction ifMatch = new WebdavIfMatchAction();
-        ifMatch.setBulkLoader(bulkLoader);
-        defaultHeader.setNext(ifMatch);
+        if (ifMatch) {
+            WebdavIfMatchAction ifMatchAction = new WebdavIfMatchAction();
+            ifMatchAction.setBulkLoader(bulkLoader);
+            previousAction.setNext(ifMatchAction);
+            previousAction = ifMatchAction;
+        }
         /*
          * add additional actions
          */
-        AbstractAction previousAction = ifMatch;
         for (AbstractAction nextAction : additionals) {
             nextAction.setBulkLoader(bulkLoader);
             previousAction.setNext(nextAction);
@@ -192,9 +212,12 @@ public abstract class DAVPerformer implements SessionHolder {
             if (null != response && false == response.isCommitted()) {
                 if (PreconditionException.class.isInstance(e)) {
                     ((PreconditionException) e).sendError(response);
-
                 } else {
-                    response.setStatus(e.getStatus());
+                    try {
+                        response.sendError(e.getStatus(), e.getDisplayMessage(session.getUser().getLocale()));
+                    } catch (IOException x) {
+                        org.slf4j.LoggerFactory.getLogger(DAVPerformer.class).warn("Error sending error response", x);
+                    }
                 }
             }
         } finally {
