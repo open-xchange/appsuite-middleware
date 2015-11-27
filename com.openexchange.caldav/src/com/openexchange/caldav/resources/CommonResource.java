@@ -95,7 +95,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
      *
      * @param parent the parent folder collection.
      * @param object an existing groupware object represented by this resource,
-     * or <code>null</code> if a placeholder resource should be created
+     *            or <code>null</code> if a placeholder resource should be created
      * @param url the resource url
      * @throws OXException
      */
@@ -131,6 +131,8 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     protected WebdavProtocolException protocolException(OXException e, int statusCode) {
         if (Category.CATEGORY_USER_INPUT.equals(e.getCategory()) || Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
             LOG.debug("{}", this.getUrl(), e);
+        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            LOG.info("{}", this.getUrl(), e);
         } else {
             LOG.error("{}", this.getUrl(), e);
         }
@@ -241,7 +243,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
         if (null != e.getProblematics()) {
             for (ProblematicAttribute problematic : e.getProblematics()) {
                 if (Truncated.class.isInstance(problematic)) {
-                    hasTrimmed |= this.trimTruncatedAttribute((Truncated)problematic);
+                    hasTrimmed |= this.trimTruncatedAttribute((Truncated) problematic);
                 }
             }
         }
@@ -345,8 +347,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     @Override
-    public void setSource(String source) throws WebdavProtocolException {
-    }
+    public void setSource(String source) throws WebdavProtocolException {}
 
     @Override
     public Date getCreationDate() throws WebdavProtocolException {
@@ -393,12 +394,10 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-    }
+    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {}
 
     @Override
-    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
-    }
+    protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {}
 
     @Override
     protected boolean isset(Property p) {
@@ -406,8 +405,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     @Override
-    public void setCreationDate(Date date) throws WebdavProtocolException {
-    }
+    public void setCreationDate(Date date) throws WebdavProtocolException {}
 
     @Override
     public WebdavLock getLock(String token) throws WebdavProtocolException {
@@ -420,8 +418,7 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     @Override
-    public void unlock(String token) throws WebdavProtocolException {
-    }
+    public void unlock(String token) throws WebdavProtocolException {}
 
     @Override
     public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
@@ -439,19 +436,15 @@ public abstract class CommonResource<T extends CommonObject> extends AbstractRes
     }
 
     @Override
-    public void lock(WebdavLock lock) throws WebdavProtocolException {
-    }
+    public void lock(WebdavLock lock) throws WebdavProtocolException {}
 
     @Override
-    public void setContentType(String type) throws WebdavProtocolException {
-    }
+    public void setContentType(String type) throws WebdavProtocolException {}
 
     @Override
-    public void setLanguage(String language) throws WebdavProtocolException {
-    }
+    public void setLanguage(String language) throws WebdavProtocolException {}
 
     @Override
-    public void setLength(Long length) throws WebdavProtocolException {
-    }
+    public void setLength(Long length) throws WebdavProtocolException {}
 
 }
