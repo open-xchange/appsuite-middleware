@@ -184,11 +184,12 @@ public final class Scheduler {
         roundRobinQueue = new LinkedBlockingDeque<TaskManager>();
 
         // Start selector threads
+        stopped = new AtomicBoolean(false);
+        numberOfRunningScheduler = new AtomicInteger();
         for (int i = numThreads; i-- > 0;) {
             newPool.execute(new Selector());
+            numberOfRunningScheduler.incrementAndGet();
         }
-        numberOfRunningScheduler = new AtomicInteger(numThreads);
-        stopped = new AtomicBoolean(false);
     }
 
     /**
