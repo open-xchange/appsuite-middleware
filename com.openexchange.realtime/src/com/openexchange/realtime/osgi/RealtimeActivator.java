@@ -210,7 +210,7 @@ public class RealtimeActivator extends HousekeepingActivator {
             ID.ID_MANAGER_REF.set(null);
             RealtimeJanitors.getInstance().cleanup();
             realtimeConfig.stop();
-            super.cleanUp();
+            super.stopBundle();
         }
     }
 
@@ -228,10 +228,7 @@ public class RealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        LOG.warn(
-            "{} is handling unavailibility of needed service {}. Going to stop bundle.",
-            this.getClass().getSimpleName(),
-            clazz.getSimpleName());
+        LOG.warn("{} is handling unavailibility of needed service {}. Going to stop bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
         try {
             this.stopBundle();
         } catch (Exception e) {

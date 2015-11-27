@@ -55,6 +55,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -94,6 +95,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
 
+    private final AtomicBoolean stopped;
+
     volatile ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker;
     volatile ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker;
     volatile ServiceTracker<ManagementService, ManagementService> managementTracker;
@@ -105,6 +108,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
      */
     public HazelcastActivator() {
         super();
+        stopped = new AtomicBoolean(false);
     }
 
     @Override
@@ -112,6 +116,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         /*
          * track HazelcastConfigurationService
          */
+        stopped.set(false);
         ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService> customizer =
             new ServiceTrackerCustomizer<HazelcastConfigurationService, HazelcastConfigurationService>() {
 
@@ -120,7 +125,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 HazelcastConfigurationService configService = context.getService(reference);
                 try {
                     if (configService.isEnabled()) {
-                        HazelcastInstance hazelcast = startHazelcast(configService);
+                        HazelcastInstance hazelcast = startHazelcastInstance(configService);
                         // hazelcast = new InactiveAwareHazelcastInstance(hazelcast, HazelcastActivator.this);
                         if (null != hazelcast) {
                             serviceRegistration = context.registerService(HazelcastInstance.class, hazelcast, null);
@@ -146,26 +151,8 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
 
             @Override
             public void removedService(ServiceReference<HazelcastConfigurationService> reference, HazelcastConfigurationService service) {
-                ServiceRegistration<HazelcastInstance> registration = serviceRegistration;
-                if (null != registration) {
-                    registration.unregister();
-                    serviceRegistration = null;
-                }
-
-                ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> t = inactiveTracker;
-                if (null != t) {
-                    t.close();
-                    inactiveTracker = null;
-                }
-
-                try {
-                    stopHazelcast();
-                } catch (Exception e) {
-                    String msg = "Error stopping \"com.openexchange.hazelcast\"";
-                    LOG.error(msg, e);
-                    throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR, e));
-                }
                 context.ungetService(reference);
+                stop();
             }
         };
         ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> configTracker = new ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService>(context, HazelcastConfigurationService.class, customizer);
@@ -194,7 +181,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
                 String lf = Strings.getLineSeparator();
                 LOG.warn("{}Hazelcast:{}    Detected a {}. Hazelcast is going to be shut-down!{}", lf, lf, HazelcastInstanceNotActiveException.class.getSimpleName(), lf);
 
-                unregisterHazelcastInstance();
+                stop();
                 return notActiveException;
             }
         };
@@ -211,28 +198,24 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
 
     @Override
     public void unregisterHazelcastInstance() {
-        ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            this.serviceRegistration = null;
-        }
-        closeTrackers();
-        try {
-            stopHazelcast();
-        } catch (Exception e) {
-            LOG.error("Error stopping \"com.openexchange.hazelcast\"", e);
-        }
+        stop();
     }
 
     @Override
-    public void stop(BundleContext arg0) throws Exception {
-        ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
-        if (null != serviceRegistration) {
-            serviceRegistration.unregister();
-            this.serviceRegistration = null;
+    public void stop(BundleContext bundleContext) throws Exception {
+        stop();
+    }
+
+    void stop() {
+        if (stopped.compareAndSet(false, true)) {
+            ServiceRegistration<HazelcastInstance> serviceRegistration = this.serviceRegistration;
+            if (null != serviceRegistration) {
+                serviceRegistration.unregister();
+                this.serviceRegistration = null;
+            }
+            closeTrackers();
+            stopHazelcastInstance();
         }
-        closeTrackers();
-        stopHazelcast();
     }
 
     /**
@@ -241,22 +224,22 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
     void closeTrackers() {
         ServiceTracker<HazelcastConfigurationService, HazelcastConfigurationService> tracker = this.configTracker;
         if (null != tracker) {
-            tracker.close();
             this.configTracker = null;
+            tracker.close();
         }
         ServiceTracker<HazelcastInstanceNotActiveException, HazelcastInstanceNotActiveException> inactiveTracker = this.inactiveTracker;
         if (null != inactiveTracker) {
-            inactiveTracker.close();
             this.inactiveTracker = null;
+            inactiveTracker.close();
         }
         ServiceTracker<ManagementService, ManagementService> managementTracker = this.managementTracker;
         if (null != managementTracker) {
-            managementTracker.close();
             this.managementTracker = null;
+            managementTracker.close();
         }
     }
 
-    void stopHazelcast() throws Exception {
+    void stopHazelcastInstance() {
         HazelcastInstance hazelcast = this.hazelcastInstance;
         if (null != hazelcast) {
             this.hazelcastInstance = null;
@@ -283,7 +266,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         }
     }
 
-    HazelcastInstance startHazelcast(HazelcastConfigurationService configService) throws Exception {
+    HazelcastInstance startHazelcastInstance(HazelcastConfigurationService configService) throws Exception {
         String lf = Strings.getLineSeparator();
         LOG.info("{}Hazelcast:{}    Starting...{}", lf, lf, lf);
         if (false == configService.isEnabled()) {
@@ -311,8 +294,7 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
             public void onOutOfMemory(OutOfMemoryError oom, HazelcastInstance[] hazelcastInstances) {
                 if (shutdownOnOutOfMemory) {
                     try {
-                        closeTrackers();
-                        stopHazelcast();
+                        stop();
                     } catch (Exception e) {
                         LOG.error("Failed to shut-down Hazelcast", e);
                     }
