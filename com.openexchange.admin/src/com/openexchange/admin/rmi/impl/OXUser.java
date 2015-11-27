@@ -109,6 +109,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -2710,9 +2711,18 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         try {
             basicauth.doAuthentication(auth, context);
             contextcheck(context);
-            User users[] = oxu.listUsersByAliasDomain(context, aliasDomain);
+            UserAliasStorage uas = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
 
-            return users;
+            List<Integer> ids = uas.getUserIdsByAliasDomain(context.getId(), aliasDomain);
+
+            ArrayList<User> users = new ArrayList<User>(ids.size());
+            for (int id : ids) {
+                users.add(new User(id));
+            }
+            return users.toArray(new User[ids.size()]);
+        } catch (OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
