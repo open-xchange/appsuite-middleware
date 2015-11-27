@@ -318,12 +318,12 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
             boolean rollbackNeeded = false;
             try {
                 /*
-                 * Start InfoStore transaction
+                 * save attachment in storage, ignoring potential warnings due to limited storage capabilities
                  */
                 fileAccess.startTransaction();
                 rollbackNeeded = true;
                 try {
-                    fileAccess.saveDocument(file, in, FileStorageFileAccess.DISTANT_FUTURE);
+                    fileAccess.saveDocument(file, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, null, false, true);
                     fileAccess.commit();
                     rollbackNeeded = false;
                     retry = false;
