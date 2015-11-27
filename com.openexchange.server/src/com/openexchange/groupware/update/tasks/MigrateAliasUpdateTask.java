@@ -72,24 +72,13 @@ import com.openexchange.tools.update.Tools;
  */
 public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
 
-    private static final String NEW_TABLE_NAME = "user_alias";
-
-    private static final String CREATE_ALIAS_TABLE = "CREATE TABLE `" + NEW_TABLE_NAME + "` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
-        + "`cid` INT4 UNSIGNED NOT NULL, "
-        + "`user` INT4 UNSIGNED NOT NULL, "
-        + "`alias` VARCHAR(255) NOT NULL, "
-        + "PRIMARY KEY (`cid`, `user`, `alias`) "
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
-
     @Override
     public void perform(PerformParameters params) throws OXException {
         int ctxId = params.getContextId();
         Connection conn = Database.getNoTimeout(ctxId, true);
         try {
             conn.setAutoCommit(false);
-            if (false == Tools.tableExists(conn, NEW_TABLE_NAME)) {
+            if (false == Tools.tableExists(conn, "user_alias")) {
                 createTable(conn);
             }
 
@@ -114,7 +103,12 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
         Statement stmt = null;
         try {
             stmt = conn.createStatement();
-            stmt.execute(CREATE_ALIAS_TABLE);
+            stmt.execute("CREATE TABLE `user_alias` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
+            + "`cid` INT4 UNSIGNED NOT NULL, "
+            + "`user` INT4 UNSIGNED NOT NULL, "
+            + "`alias` VARCHAR(255) NOT NULL, "
+            + "PRIMARY KEY (`cid`, `user`, `alias`) "
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         } finally {
             closeSQLStuff(stmt);
         }
@@ -123,7 +117,7 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement(INSERT_ALIAS_IN_NEW_TABLE);
+            stmt = conn.prepareStatement("REPLACE INTO " + "user_alias" + " (cid, user, alias) VALUES(?, ?, ?)");
             int index;
             for (Alias alias : aliases) {
                 index = 0;
