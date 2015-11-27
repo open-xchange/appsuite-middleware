@@ -75,12 +75,33 @@ public class TaskManager {
 
     private static final TaskManager INSTANCE = new TaskManager();
 
+    private static volatile Boolean scheduled = false;
+
+    private Runnable cleaner = new Runnable() {
+
+        @Override
+        public void run() {
+            cleanUp();
+        }
+    };
+
     /**
      * Gets the instance.
      *
      * @return The instance
      */
     public static TaskManager getInstance() {
+        synchronized (scheduled) {
+            if (scheduled == false) {
+                TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
+                if (timerService != null) {
+                    INSTANCE.timerTask = timerService.scheduleWithFixedDelay(INSTANCE.cleaner, 20L, 20L, TimeUnit.MINUTES);
+                    scheduled = true;
+                } else {
+                    LOGGER.warn("Cleanup task couldn't be started, because TimerService is unavailable.");
+                }
+            }
+        }
         return INSTANCE;
     }
 
@@ -170,7 +191,7 @@ public class TaskManager {
     private final ConcurrentMap<Integer, Extended<?>> jobs;
     private final ExecutorService executor;
     private final AtomicInteger lastID;
-    private final ScheduledTimerTask timerTask;
+    private ScheduledTimerTask timerTask;
 
     /**
      * Prevent instantiation. Use {@link #getInstance()} instead.
@@ -185,16 +206,6 @@ public class TaskManager {
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         LOGGER.info("AdminJobExecutor: running {} jobs parallel", Integer.valueOf(threadCount));
         this.executor = Executors.newFixedThreadPool(threadCount, new TaskManagerThreadFactory());
-
-        TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
-        Runnable cleaner = new Runnable() {
-
-            @Override
-            public void run() {
-                cleanUp();
-            }
-        };
-        timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
     }
 
     /**
