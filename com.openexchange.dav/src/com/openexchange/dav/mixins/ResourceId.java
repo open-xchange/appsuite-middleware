@@ -51,7 +51,6 @@ package com.openexchange.dav.mixins;
 
 import java.util.UUID;
 import com.openexchange.dav.CUType;
-import com.openexchange.groupware.container.Participant;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
@@ -71,7 +70,7 @@ public class ResourceId extends SingleXMLPropertyMixin {
      * @return The resource ID
      */
     public static String forUser(int contextID, int userID) {
-        return "urn:uuid:" + encode(contextID, Participant.USER, userID);
+        return new ResourceId(contextID, userID, CUType.INDIVIDUAL).getValue();
     }
 
     /**
@@ -82,7 +81,7 @@ public class ResourceId extends SingleXMLPropertyMixin {
      * @return The resource ID
      */
     public static String forGroup(int contextID, int groupID) {
-        return "urn:uuid:" + encode(contextID, Participant.GROUP, groupID);
+        return new ResourceId(contextID, groupID, CUType.GROUP).getValue();
     }
 
     /**
@@ -93,12 +92,36 @@ public class ResourceId extends SingleXMLPropertyMixin {
      * @return The resource ID
      */
     public static String forResource(int contextID, int resourceID) {
-        return "urn:uuid:" + encode(contextID, Participant.RESOURCE, resourceID);
+        return new ResourceId(contextID, resourceID, CUType.RESOURCE).getValue();
+    }
+
+    /**
+     * Extracts the calendar user type along with the principal identifier from the supplied principal URL.
+     *
+     * @param resourceId The principal URL to parse
+     * @return The resource ID, or <code>null</code> if the URL couldn't be parsed
+     */
+    public static ResourceId parse(String resourceId) {
+        if (null != resourceId) {
+            String uuidString = resourceId;
+            if (uuidString.startsWith("urn:uuid:")) {
+                uuidString = uuidString.substring(9);
+            } else if (uuidString.startsWith("uuid:")) {
+                uuidString = uuidString.substring(5);
+            }
+            try {
+                UUID uuid = UUID.fromString(uuidString);
+                return new ResourceId(decodeContextID(uuid), decodeEntity(uuid), decodeType(uuid));
+            } catch (IllegalArgumentException e) {
+                org.slf4j.LoggerFactory.getLogger(ResourceId.class).debug("Error parsing resource ID", e);
+            }
+        }
+        return null;
     }
 
     private final int principalID;
     private final int contextID;
-    private final CUType type;
+    private final int type;
 
     /**
      * Initializes a new {@link ResourceId}.
@@ -108,24 +131,53 @@ public class ResourceId extends SingleXMLPropertyMixin {
      * @param type The calendar user type of the principal
      */
     public ResourceId(int contextID, int principalID, CUType type) {
+        this(contextID, principalID, type.getType());
+    }
+
+    /**
+     * Initializes a new {@link ResourceId}.
+     *
+     * @param contextID The context identifier
+     * @param principalID The identifier of the principal
+     * @param type The participant type of the principal
+     */
+    public ResourceId(int contextID, int principalID, int type) {
         super(Protocol.DAV_NS.getURI(), "resource-id");
         this.contextID = contextID;
         this.principalID = principalID;
         this.type = type;
     }
 
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier
+     */
+    public int getContextID() {
+        return contextID;
+    }
+
+    /**
+     * Gets the prinicipal identifier
+     *
+     * @return The prinicipal identifier
+     */
+    public int getPrincipalID() {
+        return principalID;
+    }
+
+    /**
+     * Gets the participant type
+     *
+     * @return The participant type
+     */
+    public int getparticipantType() {
+        return type;
+    }
+
     @Override
     protected String getValue() {
-        switch (type) {
-            case INDIVIDUAL:
-                return forUser(contextID, principalID);
-            case GROUP:
-                return forGroup(contextID, principalID);
-            case RESOURCE:
-                return forResource(contextID, principalID);
-            default:
-                throw new IllegalArgumentException(type.toString());
-        }
+        return "urn:uuid:" + encode(contextID, type, principalID);
     }
 
     private static UUID encode(int contextID, int type, int entity) {
@@ -134,6 +186,21 @@ public class ResourceId extends SingleXMLPropertyMixin {
         long msb = cid << 16;
         msb += type;
         return new UUID(msb, lsb);
+    }
+
+    private static int decodeContextID(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        return (int) msb >> 16;
+    }
+
+    private static int decodeType(UUID encoded) {
+        long msb = encoded.getMostSignificantBits();
+        long cid = msb >> 16;
+        return (int) (msb - (cid << 16));
+    }
+
+    private static int decodeEntity(UUID encoded) {
+        return (int) encoded.getLeastSignificantBits();
     }
 
 }

@@ -52,7 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
-import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.PropertyList;
 import net.fortuna.ical4j.model.component.VFreeBusy;
@@ -104,12 +103,7 @@ public class FreeBusyAttendees extends AbstractVerifyingAttributeConverter<VFree
         PropertyList properties = vFreeBusy.getProperties(Property.ATTENDEE);
         if (null != properties && 0 < properties.size()) {
             for (int i = 0; i < properties.size(); i++) {
-                Attendee attendee = (Attendee)properties.get(i);
-                if (null != attendee && null != attendee.getCalAddress() &&
-                    "mailto".equalsIgnoreCase(attendee.getCalAddress().getScheme())) {
-                    String mail = attendee.getCalAddress().getSchemeSpecificPart();
-                    attendees.add(IDNA.toIDN(mail));
-                }
+                attendees.add(((Attendee) properties.get(i)).getValue());
             }
         }
         freeBusyInformation.setAttendees(attendees.toArray(new String[attendees.size()]));

@@ -49,6 +49,8 @@
 
 package com.openexchange.dav;
 
+import com.openexchange.groupware.container.Participant;
+
 /**
  * {@link CUType}
  *
@@ -60,27 +62,47 @@ public enum CUType {
     /**
      * An individual
      */
-    INDIVIDUAL,
+    INDIVIDUAL(Participant.USER),
 
     /**
      * A group of individuals
      */
-    GROUP,
+    GROUP(Participant.GROUP),
 
     /**
      * A physical resource
      */
-    RESOURCE,
+    RESOURCE(Participant.RESOURCE),
 
     /**
      * A room resource
      */
-    ROOM,
+    ROOM(Participant.NO_ID),
 
     /**
      * Otherwise not known
      */
-    UNKNOWN
+    UNKNOWN(Participant.NO_ID)
     ;
+
+    private final int type;
+
+    /**
+     * Initializes a new {@link CUType}.
+     *
+     * @param type The corresponding participant type
+     */
+    private CUType(int type) {
+        this.type = type;
+    }
+
+    /**
+     * Gets the corresponding participant type for this calendar user type.
+     *
+     * @return The participant type, or <code>-1</code> if no matching participant type exists
+     */
+    public int getType() {
+        return type;
+    }
 
 }

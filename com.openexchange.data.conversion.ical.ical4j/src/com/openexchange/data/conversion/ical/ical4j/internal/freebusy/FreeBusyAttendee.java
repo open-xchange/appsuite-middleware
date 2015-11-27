@@ -52,8 +52,6 @@ package com.openexchange.data.conversion.ical.ical4j.internal.freebusy;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.TimeZone;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.idn.IDNA;
 import net.fortuna.ical4j.model.component.VFreeBusy;
 import net.fortuna.ical4j.model.property.Attendee;
 import com.openexchange.data.conversion.ical.ConversionError;
@@ -86,19 +84,12 @@ public class FreeBusyAttendee extends AbstractVerifyingAttributeConverter<VFreeB
     }
 
     @Override
-    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings,
-        Context ctx, Object... args) throws ConversionError {
-        Attendee attendee = new Attendee();
-        String address = freeBusyInformation.getAttendee();
+    public void emit(Mode mode, int index, FreeBusyInformation freeBusyInformation, VFreeBusy vFreeBusy, List<ConversionWarning> warnings, Context ctx, Object... args) throws ConversionError {
         try {
-            address = IDNA.toACE(address);
-            attendee.setValue("mailto:" + address);
+            vFreeBusy.getProperties().add(new Attendee(freeBusyInformation.getAttendee()));
         } catch (URISyntaxException e) {
             throw new ConversionError(index, Code.UNEXPECTED_ERROR, e, e.getMessage());
-        } catch (AddressException e) {
-            throw new ConversionError(index, Code.UNEXPECTED_ERROR, e, e.getMessage());
         }
-        vFreeBusy.getProperties().add(attendee);
     }
 
     @Override

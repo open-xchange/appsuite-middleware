@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.mixins;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import com.openexchange.dav.CUType;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -91,7 +93,38 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
         return "/principals/resources/" + resourceID;
     }
 
+    /**
+     * Extracts the calendar user type along with the principal identifier from the supplied string representation of a principal URL.
+     *
+     * @param principalURL The principal URL to parse
+     * @return The parsed principal URL, or <code>null</code> if the URL couldn't be parsed
+     */
+    public static PrincipalURL parse(String principalURL) {
+        if (null != principalURL && principalURL.startsWith("/principals/")) {
+            Matcher matcher = URL_PATTERN.matcher(principalURL);
+            if (matcher.find() && 2 == matcher.groupCount()) {
+                try {
+                    switch (matcher.group(1)) {
+                        case "resources":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.RESOURCE);
+                        case "groups":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.GROUP);
+                        case "users":
+                            return new PrincipalURL(Integer.parseInt(matcher.group(2)), CUType.INDIVIDUAL);
+                        default:
+                            throw new IllegalArgumentException(matcher.group(1));
+                    }
+                } catch (IllegalArgumentException e) {
+                    org.slf4j.LoggerFactory.getLogger(PrincipalURL.class).debug("Error parsing principal URL", e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private static final Pattern URL_PATTERN = Pattern.compile("/principals/(resources|users|groups)/(\\d+)/?");
     private static final String PROPERTY_NAME = "principal-URL";
+
     private final int principalID;
     private final CUType type;
 
@@ -105,6 +138,24 @@ public class PrincipalURL extends SingleXMLPropertyMixin {
         super(Protocol.DAV_NS.getURI(), PROPERTY_NAME);
         this.principalID = principalID;
         this.type = type;
+    }
+
+    /**
+     * Gets identifier of the principal
+     *
+     * @return The identifier of the principal
+     */
+    public int getPrincipalID() {
+        return principalID;
+    }
+
+    /**
+     * Gets the calendar user type of the principal
+     *
+     * @return The calendar user type of the principal
+     */
+    public CUType getType() {
+        return type;
     }
 
     @Override
