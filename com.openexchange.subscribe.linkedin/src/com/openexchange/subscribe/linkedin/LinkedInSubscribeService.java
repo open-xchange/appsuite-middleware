@@ -76,8 +76,6 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
 
     private final Activator activator;
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LinkedInSubscribeService.class);
-
     private final SubscriptionSource source;
 
     public LinkedInSubscribeService(final Activator activator){
@@ -110,8 +108,12 @@ public class LinkedInSubscribeService  extends AbstractSubscribeService {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(LinkedInService.class.getName());
             }
             final int contextId = subscription.getContext().getContextId();
-            final int accountId = ((Integer)subscription.getConfiguration().get("account")).intValue();
-            return linkedInService.getContacts(subscription.getSession(), subscription.getUserId(), contextId, accountId);
+            Map<String, Object> configuration = subscription.getConfiguration();
+            if ((configuration != null) && (configuration.get("account") != null)) {                
+                final int accountId = ((Integer)configuration.get("account")).intValue();
+                return linkedInService.getContacts(subscription.getSession(), subscription.getUserId(), contextId, accountId);
+            }
+            return Collections.emptyList();
         } catch (final RuntimeException e) {
             throw SubscriptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
