@@ -501,6 +501,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
+
+                // ensure shared folder owner is set prior loading users
+                if (FolderObject.SHARED == cdao.getFolderType()) {
+                    OXFolderAccess ofa = new OXFolderAccess(readcon, cdao.getContext());
+                    if (cdao.containsParentFolderID()) {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
+                    } else {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
+                    }
+                }
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
 
                 //Context of check is critical. TODO: Make independent!
@@ -1467,7 +1477,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     /**
      * Checks if a user participant should be added to the new list of users.
      * Depends on the existtence of the user in the old Calendar Object and if the user is participant of the group.
-     * 
+     *
      * @param gp
      * @param up
      * @param edao
