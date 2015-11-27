@@ -50,6 +50,7 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -58,6 +59,7 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -87,7 +89,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
 
     private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name FROM user_attribute WHERE name='alias'";
 
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
+    private static final String INSERT_ALIAS_IN_NEW_TABLE = "REPLACE INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
