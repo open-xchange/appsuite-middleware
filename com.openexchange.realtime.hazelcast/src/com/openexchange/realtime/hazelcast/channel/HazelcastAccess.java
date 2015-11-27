@@ -49,10 +49,14 @@
 
 package com.openexchange.realtime.hazelcast.channel;
 
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import com.hazelcast.config.Config;
+import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
@@ -104,6 +108,67 @@ public class HazelcastAccess {
      */
     public static Member getLocalMember() throws OXException {
         return getHazelcastInstance().getCluster().getLocalMember();
+    }
+
+    /**
+     * Discovers map names in the supplied Hazelcast configuration based on the map prefix.
+     *
+     * @param config The config object
+     * @param mapPrefix The prefix to look for
+     * @return The prefix of the map name or <code>null</code>
+     */
+    public static String discoverMapName(Config config, String mapPrefix) {
+        if (null == config || Strings.isEmpty(mapPrefix)) {
+            return null;
+        }
+        boolean considerVersion = mapPrefix.charAt(mapPrefix.length() - 1) == '-';
+        String candidate = null;
+
+        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
+        if (null != mapConfigs && 0 < mapConfigs.size()) {
+            for (String mapName : mapConfigs.keySet()) {
+                if (mapName.startsWith(mapPrefix)) {
+                    if (null == candidate || (considerVersion && hasHigherVersion(candidate, mapName))) {
+                        candidate = mapName;
+                    }
+                }
+            }
+        }
+        return candidate;
+    }
+
+    private static boolean hasHigherVersion(String candidate, String current) {
+        int pos1 = candidate.lastIndexOf('-');
+        if (pos1 < 0) {
+            return false;
+        }
+
+        int pos2 = current.lastIndexOf('-');
+        if (pos2 < 0) {
+            return false;
+        }
+
+        int vers1;
+        try {
+            vers1 = Integer.parseInt(candidate.substring(pos1 + 1));
+        } catch (Exception e) {
+            vers1 = -1;
+        }
+        if (vers1 < 0) {
+            return false;
+        }
+
+        int vers2;
+        try {
+            vers2 = Integer.parseInt(current.substring(pos2 + 1));
+        } catch (Exception e) {
+            vers2 = -1;
+        }
+        if (vers2 < 0) {
+            return false;
+        }
+
+        return vers2 > vers1;
     }
 
     private HazelcastAccess() {
