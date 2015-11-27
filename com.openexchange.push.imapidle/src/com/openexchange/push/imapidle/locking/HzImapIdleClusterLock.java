@@ -97,7 +97,8 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             return hzInstance.getMap(mapName);
         } catch (HazelcastInstanceNotActiveException e) {
             handleNotActiveException(e);
-            throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            // Obviously Hazelcast is absent
+            return null;
         } catch (HazelcastException e) {
             throw PushExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -130,6 +131,10 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
 
         String key = generateKey(sessionInfo);
         IMap<String, String> map = map(hzInstance);
+        if (null == map) {
+            // Hazelcast is absent
+            return true;
+        }
 
         long now = System.nanoTime();
         String previous = map.putIfAbsent(key, generateValue(now, sessionInfo));
@@ -159,7 +164,13 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        map(hzInstance).put(generateKey(sessionInfo), generateValue(System.nanoTime(), sessionInfo));
+        IMap<String, String> map = map(hzInstance);
+        if (null == map) {
+            // Hazelcast is absent
+            return;
+        }
+
+        map.put(generateKey(sessionInfo), generateValue(System.nanoTime(), sessionInfo));
     }
 
     @Override
@@ -172,7 +183,13 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
             throw ServiceExceptionCode.absentService(HazelcastInstance.class);
         }
 
-        map(hzInstance).remove(generateKey(sessionInfo));
+        IMap<String, String> map = map(hzInstance);
+        if (null == map) {
+            // Hazelcast is absent
+            return;
+        }
+
+        map.remove(generateKey(sessionInfo));
     }
 
 }
