@@ -54,7 +54,9 @@ import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.checksum.FileChecksum;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
@@ -99,16 +101,33 @@ public class DownloadHelper {
             @Override
             public IFileHolder call() throws OXException {
                 /*
-                 * get the file's input stream
+                 * get & verify the file version to download
                  */
                 File file = session.getStorage().getFileByName(path, fileVersion.getName(), true);
-                if (null == file || false == ChecksumProvider.matches(session, file, fileVersion.getChecksum())) {
+                if (null == file) {
                     throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
                 }
-                InputStream inputStream = getInputStream(file, offset, length);
+                FileChecksum checksum = ChecksumProvider.getChecksum(session, file);
+                if (false == checksum.getChecksum().equals(fileVersion.getChecksum())) {
+                    throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                }
                 /*
-                 * wrap stream into file holder and return
+                 * re-validate checksum of .drive-meta files prior download
                  */
+                if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(file)) {
+                    String fileMD5Sum = ((DriveMetadata) file).getFileMD5Sum();
+                    if (false == fileVersion.getChecksum().equals(fileMD5Sum)) {
+                        // stored checksum no longer valid
+                        session.trace("Checksum " + fileVersion.getChecksum() + " different from actual checksum " + fileMD5Sum +
+                            " of .drive-meta file, invalidating stored checksums.");
+                        session.getChecksumStore().removeFileChecksums(DriveUtils.getFileID(file));
+                        throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
+                    }
+                }
+                /*
+                 * get the file's input stream, wrap stream into file holder and return
+                 */
+                InputStream inputStream = getInputStream(file, offset, length);
                 if (null == inputStream) {
                     throw DriveExceptionCodes.FILE_NOT_FOUND.create(fileVersion.getName(), path);
                 }
