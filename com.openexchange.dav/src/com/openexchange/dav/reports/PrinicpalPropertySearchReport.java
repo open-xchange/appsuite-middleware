@@ -55,14 +55,18 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.SortOptions;
+import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.principals.groups.GroupPrincipalCollection;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.resources.ResourcePrincipalCollection;
@@ -146,7 +150,7 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
                     continue;
                 }
-                String match = matchElement.getText() + "*"; // always assume starts-with nature
+                String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
                 for (Element element : prop.getChildren()) {
                     /*
@@ -155,27 +159,40 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
                     if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
                         term.addOperand(new ContactFieldOperand(ContactField.DISPLAY_NAME));
-                        term.addOperand(new ConstantOperand<String>(match));
+                        term.addOperand(new ConstantOperand<String>(pattern));
                         orTerm.addSearchTerm(term);
                     } else if ("first-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
                         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
                         term.addOperand(new ContactFieldOperand(ContactField.GIVEN_NAME));
-                        term.addOperand(new ConstantOperand<String>(match));
+                        term.addOperand(new ConstantOperand<String>(pattern));
                         orTerm.addSearchTerm(term);
                     } else if ("last-name".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
                         SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
                         term.addOperand(new ContactFieldOperand(ContactField.SUR_NAME));
-                        term.addOperand(new ConstantOperand<String>(match));
+                        term.addOperand(new ConstantOperand<String>(pattern));
                         orTerm.addSearchTerm(term);
                     } else if ("email-address-set".equals(element.getName()) && DAVProtocol.CALENDARSERVER_NS.equals(element.getNamespace())) {
                         CompositeSearchTerm emailTerm = new CompositeSearchTerm(CompositeOperation.OR);
                         for (ContactField emailField : new ContactField[] { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 }) {
                             SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
                             term.addOperand(new ContactFieldOperand(emailField));
-                            term.addOperand(new ConstantOperand<String>(match));
+                            term.addOperand(new ConstantOperand<String>(pattern));
                             emailTerm.addSearchTerm(term);
                         }
                         orTerm.addSearchTerm(emailTerm);
+                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                        int userID = extractPrincipalID(pattern, CUType.INDIVIDUAL);
+                        if (-1 != userID) {
+                            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                            term.addOperand(new ContactFieldOperand(ContactField.INTERNAL_USERID));
+                            term.addOperand(new ConstantOperand<Integer>(Integer.valueOf(userID)));
+                            orTerm.addSearchTerm(term);
+                        } else if (pattern.startsWith("mailto:")) {
+                            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                            term.addOperand(new ContactFieldOperand(ContactField.EMAIL1));
+                            term.addOperand(new ConstantOperand<String>(pattern.substring(7)));
+                            orTerm.addSearchTerm(term);
+                        }
                     }
                 }
             }
@@ -212,7 +229,7 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
                     continue;
                 }
-                String match = matchElement.getText() + "*"; // always assume starts-with nature
+                String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
                 for (Element element : prop.getChildren()) {
                     /*
@@ -220,12 +237,24 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
                      */
                     if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                         try {
-                            Group[] foundGroups = GroupStorage.getInstance().searchGroups(match, false, factory.getContext());
+                            Group[] foundGroups = GroupStorage.getInstance().searchGroups(pattern, false, factory.getContext());
                             if (null != foundGroups) {
                                 groups.addAll(Arrays.asList(foundGroups));
                             }
                         } catch (OXException e) {
                             LOG.warn("error searching groups", e);
+                        }
+                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                        int groupID = extractPrincipalID(pattern, CUType.GROUP);
+                        if (-1 != groupID) {
+                            try {
+                                Group group = GroupStorage.getInstance().getGroup(groupID, factory.getContext());
+                                if (null != group) {
+                                    groups.add(group);
+                                }
+                            } catch (OXException e) {
+                                LOG.warn("error searching groups", e);
+                            }
                         }
                     }
                 }
@@ -241,30 +270,41 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
                     continue;
                 }
-                String match = matchElement.getText() + "*"; // always assume starts-with nature
+                String pattern = getPattern(matchElement);
                 Element prop = propertySearch.getChild("prop", DAV_NS);
-
                 for (Element element : prop.getChildren()) {
                     /*
                      * search by displayname or mail address
                      */
                     if ("displayname".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                         try {
-                            Resource[] foundResources = factory.requireService(ResourceService.class).searchResources(match, factory.getContext());
+                            Resource[] foundResources = factory.requireService(ResourceService.class).searchResources(pattern, factory.getContext());
                             if (null != foundResources && 0 < foundResources.length) {
                                 resources.addAll(Arrays.asList(foundResources));
                             }
                         } catch (OXException e) {
-                            LOG.warn("error searching groups", e);
+                            LOG.warn("error searching resources", e);
                         }
                     } else if ("email-address-set".equals(element.getName()) && DAV_NS.equals(element.getNamespace())) {
                         try {
-                            Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(match, factory.getContext());
+                            Resource[] foundResources = factory.requireService(ResourceService.class).searchResourcesByMail(pattern, factory.getContext());
                             if (null != foundResources && 0 < foundResources.length) {
                                 resources.addAll(Arrays.asList(foundResources));
                             }
                         } catch (OXException e) {
-                            LOG.warn("error searching groups", e);
+                            LOG.warn("error searching resources", e);
+                        }
+                    } else if ("calendar-user-address-set".equals(element.getName()) && DAVProtocol.CAL_NS.equals(element.getNamespace())) {
+                        int resourceID = extractPrincipalID(pattern, CUType.RESOURCE);
+                        if (-1 != resourceID) {
+                            try {
+                                Resource resource = factory.requireService(ResourceService.class).getResource(resourceID, factory.getContext());
+                                if (null != resource) {
+                                    resources.add(resource);
+                                }
+                            } catch (OXException e) {
+                                LOG.warn("error searching resources", e);
+                            }
                         }
                     }
                 }
@@ -289,6 +329,58 @@ public class PrinicpalPropertySearchReport extends DAVPropfindAction {
             multistatusElement.addContent(marshaller.marshal(new ResourcePrincipalResource(factory, resource)));
         }
         sendMultistatusResponse(response, multistatusElement);
+    }
+
+    /**
+     * Gets the search pattern indicated by the supplied <code>match</code> element.
+     *
+     * @param matchElement The match element to extract the pattern from
+     * @return The search pattern
+     */
+    private static String getPattern(Element matchElement) {
+        String match = matchElement.getText();
+        Attribute matchTypeAttribute = matchElement.getAttribute("match-type");
+        if (null == matchTypeAttribute || Strings.isEmpty(matchTypeAttribute.getValue())) {
+            return match + '*'; // default to "starts-with"
+        }
+        switch (matchTypeAttribute.getValue()) {
+            case "equals":
+                return match;
+            case "contains":
+                return '*' + match + '*';
+            case "ends-with":
+                return '*' + match;
+            default:
+                return match + '*';
+        }
+    }
+
+    /**
+     * Tries to extract the targeted principal identifier directly from the supplied pattern as used in a
+     * <code>calendar-user-address-set</code> property search.
+     *
+     * @param pattern The pattern to match
+     * @param cuType The calendar user type to match
+     * @return The principal identifier, or <code>-1</code> if none could be extracted
+     */
+    private static int extractPrincipalID(String pattern, CUType cuType) {
+        String trimmedPattern = Strings.trimStart(Strings.trimEnd(pattern, '*'), '*');
+        /*
+         * try principal URL
+         */
+        PrincipalURL principalURL = PrincipalURL.parse(trimmedPattern);
+        if (null != principalURL && cuType.equals(principalURL.getType())) {
+            return principalURL.getPrincipalID();
+        } else {
+            /*
+             * try resource ID
+             */
+            ResourceId resourceId = ResourceId.parse(trimmedPattern);
+            if (null != resourceId && cuType.getType() == resourceId.getparticipantType()) {
+                return resourceId.getPrincipalID();
+            }
+        }
+        return -1;
     }
 
 }
