@@ -56,10 +56,13 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
+import com.hazelcast.core.MapEvent;
 import com.hazelcast.core.Member;
 import com.hazelcast.core.MultiMap;
 import com.hazelcast.query.Predicate;
@@ -73,15 +76,20 @@ import com.openexchange.realtime.directory.DefaultResource;
 import com.openexchange.realtime.directory.DefaultResourceDirectory;
 import com.openexchange.realtime.directory.Resource;
 import com.openexchange.realtime.directory.RoutingInfo;
+import com.openexchange.realtime.group.DistributedGroupManager;
 import com.openexchange.realtime.hazelcast.channel.HazelcastAccess;
+import com.openexchange.realtime.hazelcast.group.DistributedGroupManagerImpl;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryMBean;
 import com.openexchange.realtime.hazelcast.management.HazelcastResourceDirectoryManagement;
+import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableMemberPredicate;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.packet.Presence;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.timer.TimerService;
 
 /**
  * {@link HazelcastResourceDirectory} - Keeps mappings of general {@link ID}s to full {@link ID}s and full {@link ID}s to {@link Resource}s.
@@ -104,15 +112,20 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     private final HazelcastResourceDirectoryManagement managementObject;
 
+    /** The reference to associated {@code DistributedGroupManager} instance */
+    final AtomicReference<DistributedGroupManager> distributedGroupManagerRef;
+
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
      *
-     * @param id_map the name of the apping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premium/random
-     * @param resource_map the name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap
+     * @param id_map The name of the mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premium/random
+     * @param resource_map The name of the mapping of full IDs to the Resource e.g. ox://marc.arens@premium/random <-> ResourceMap
      * @throws OXException
      */
     public HazelcastResourceDirectory(String id_map, String resource_map) throws OXException {
         super();
+        final AtomicReference<DistributedGroupManager> distributedGroupManagerRef = new AtomicReference<DistributedGroupManager>();
+        this.distributedGroupManagerRef = distributedGroupManagerRef;
         this.id_map = id_map;
         this.resource_map = resource_map;
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
@@ -123,19 +136,50 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 PortableID id = event.getKey();
                 Object source = event.getSource();
                 Member member = event.getMember();
+
+                DistributedGroupManager distributedGroupManager = distributedGroupManagerRef.get();
+                if (null != distributedGroupManager) {
+                    try {
+                        if (null != distributedGroupManager.getMembers(id)) {
+                            // Detected preliminary eviction attempt
+                            Throwable trace = new Throwable("tracked thread");
+                            LOG.warn("Source {} on Member: {} fired preliminary eviction event for '{}'. ID is still in use by associated {}", source, member, id, DistributedGroupManager.class.getSimpleName(), trace);
+                        }
+                    } catch (Exception e) {
+                        // Ignore...
+                    }
+                }
+
                 try {
                     if (getIDMapping().remove(id.toGeneralForm(), id)) {
-                        LOG.debug(
-                            "Source {} on Member: {} fired event. Removing mapping for '{}' due to eviction of associated resource.",
-                            source,
-                            member,
-                            id);
+                        LOG.debug("Source {} on Member: {} fired eviction event. Removing mapping for '{}' due to eviction of associated resource.", source, member, id);
                     }
                 } catch (OXException e) {
                     LOG.warn("Could not handle eviction for id '{}'", id, e);
                 }
             }
+
+            @Override
+            public void entryRemoved(EntryEvent<PortableID, PortableResource> event) {
+                PortableID id = event.getKey();
+                Object source = event.getSource();
+                Member member = event.getMember();
+                Throwable trace = new Throwable("tracked thread");
+                LOG.debug("Source {} on Member: {} fired removal event for '{}'.", source, member, id, trace);
+            }
         }, false);
+    }
+
+    /**
+     * Applies the specified {@link DistributedGroupManager} instance to this directory
+     *
+     * @param distributedGroupManager The {@code DistributedGroupManager} instance to apply
+     * @return The cleaner registration identifier
+     * @throws OXException If {@link DistributedGroupManager} instance cannot be applied
+     */
+    public String applyDistributedGroupManager(DistributedGroupManagerImpl distributedGroupManager) throws OXException {
+        this.distributedGroupManagerRef.set(distributedGroupManager);
+        return addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
     }
 
     @Override
@@ -417,7 +461,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      */
     public MultiMap<PortableID, PortableID> getIDMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getMultiMap(id_map);
+        try {
+            return hazelcast.getMultiMap(id_map);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+        }
     }
 
     /**
@@ -429,7 +477,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      */
     public IMap<PortableID, PortableResource> getResourceMapping() throws OXException {
         HazelcastInstance hazelcast = HazelcastAccess.getHazelcastInstance();
-        return hazelcast.getMap(resource_map);
+        try {
+            return hazelcast.getMap(resource_map);
+        } catch (HazelcastInstanceNotActiveException e) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(e, HazelcastInstance.class.getName());
+        }
     }
 
     @Override
@@ -497,6 +549,111 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     @Override
     public Dictionary<String, Object> getServiceProperties() {
         return AbstractRealtimeJanitor.NO_PROPERTIES;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private class ValidatingResourceMappingEntryListener implements ResourceMappingEntryListener {
+
+        private final ResourceMappingEntryListener delegate;
+        private final boolean reAdd;
+        private final boolean delegateIfInvalid;
+
+        ValidatingResourceMappingEntryListener(ResourceMappingEntryListener delegate, boolean reAdd, boolean delegateIfInvalid) {
+            super();
+            this.delegate = delegate;
+            this.reAdd = reAdd;
+            this.delegateIfInvalid = delegateIfInvalid;
+        }
+
+        @Override
+        public void entryMerged(EntryEvent<PortableID, PortableResource> event) {
+            delegate.entryMerged(event);
+        }
+
+        @Override
+        public void mapCleared(MapEvent event) {
+            delegate.mapCleared(event);
+        }
+
+        @Override
+        public void mapEvicted(MapEvent event) {
+            delegate.mapEvicted(event);
+        }
+
+        @Override
+        public void entryAdded(EntryEvent<PortableID, PortableResource> event) {
+            delegate.entryAdded(event);
+        }
+
+        @Override
+        public void entryUpdated(EntryEvent<PortableID, PortableResource> event) {
+            delegate.entryUpdated(event);
+        }
+
+        @Override
+        public void entryRemoved(EntryEvent<PortableID, PortableResource> event) {
+            delegate.entryRemoved(event);
+        }
+
+        @Override
+        public void entryEvicted(EntryEvent<PortableID, PortableResource> event) {
+            // Check for preliminary eviction attempt
+            DistributedGroupManager distributedGroupManager = distributedGroupManagerRef.get();
+            if (null != distributedGroupManager) {
+                try {
+                    PortableID id = event.getKey();
+                    if (null != distributedGroupManager.getMembers(id)) {
+                        // Detected preliminary eviction attempt
+                        Object source = event.getSource();
+                        Member member = event.getMember();
+                        LOG.warn("Source {} on Member: {} fired preliminary eviction event for '{}'. ID is still in use by associated {}", source, member, id, DistributedGroupManager.class.getSimpleName());
+                    }
+
+                    if (reAdd) {
+                        TimerService timerService = Services.optService(TimerService.class);
+                        if (null != timerService) {
+                            timerService.schedule(new EntryAdder(event), 250);
+                        }
+                    }
+
+                    if (false == delegateIfInvalid) {
+                        return;
+                    }
+                } catch (Exception e) {
+                    // Ignore...
+                }
+            }
+
+            // Delegate event
+            delegate.entryEvicted(event);
+        }
+
+        @Override
+        public Optional<Predicate<PortableID, PortableResource>> getPredicate() {
+            return delegate.getPredicate();
+        }
+    }
+
+    private class EntryAdder implements Runnable {
+
+        private final EntryEvent<PortableID, PortableResource> event;
+
+        EntryAdder(EntryEvent<PortableID, PortableResource> event) {
+            super();
+            this.event = event;
+        }
+
+        @Override
+        public void run() {
+            try {
+                IMap<PortableID, PortableResource> resourceMapping = getResourceMapping();
+                resourceMapping.put(event.getKey(), event.getValue());
+            } catch (Exception e) {
+                LOG.warn("Failed to add element", e);
+            }
+        }
+
     }
 
 }

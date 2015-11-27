@@ -50,7 +50,13 @@
 package com.openexchange.realtime.hazelcast.directory;
 
 import com.google.common.base.Optional;
-import com.hazelcast.core.EntryListener;
+import com.hazelcast.map.listener.EntryAddedListener;
+import com.hazelcast.map.listener.EntryEvictedListener;
+import com.hazelcast.map.listener.EntryMergedListener;
+import com.hazelcast.map.listener.EntryRemovedListener;
+import com.hazelcast.map.listener.EntryUpdatedListener;
+import com.hazelcast.map.listener.MapClearedListener;
+import com.hazelcast.map.listener.MapEvictedListener;
 import com.hazelcast.query.Predicate;
 import com.openexchange.realtime.hazelcast.serialization.directory.PortableResource;
 import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
@@ -62,7 +68,7 @@ import com.openexchange.realtime.hazelcast.serialization.packet.PortableID;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since 7.6.0
  */
-public interface ResourceMappingEntryListener extends EntryListener<PortableID, PortableResource> {
+public interface ResourceMappingEntryListener extends EntryEvictedListener<PortableID, PortableResource>, MapClearedListener, MapEvictedListener, EntryAddedListener<PortableID, PortableResource>, EntryRemovedListener<PortableID, PortableResource>, EntryMergedListener<PortableID, PortableResource>, EntryUpdatedListener<PortableID, PortableResource> {
 
     /**
      * Get the optional Predicate
