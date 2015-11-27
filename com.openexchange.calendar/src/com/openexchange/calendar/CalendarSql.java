@@ -669,7 +669,8 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return null;
             }
 
-            if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
+            String timezone = edao.getTimezone() == null ? user.getTimeZone() : edao.getTimezone();
+            if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, timezone)) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
             }
