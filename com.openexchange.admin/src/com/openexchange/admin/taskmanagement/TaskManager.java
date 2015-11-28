@@ -95,7 +95,7 @@ public class TaskManager {
     private static class IncrementingCallable<V> implements Callable<V> {
 
         private final Callable<V> delegate;
-        private final AtomicInteger runningjobs;
+        private final AtomicInteger numberOfRunningJobs;
         private final int id;
         private final String typeofjob;
 
@@ -106,13 +106,13 @@ public class TaskManager {
             super();
             this.id = id;
             this.typeofjob = typeofjob;
-            this.runningjobs = runningjobs;
+            this.numberOfRunningJobs = runningjobs;
             this.delegate = delegate;
         }
 
         @Override
         public V call() throws Exception {
-            runningjobs.incrementAndGet();
+            numberOfRunningJobs.incrementAndGet();
             try {
                 V result = delegate.call();
                 LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, id);
@@ -124,7 +124,7 @@ public class TaskManager {
                 LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, t);
                 throw new Exception(t);
             } finally {
-                runningjobs.decrementAndGet();
+                numberOfRunningJobs.decrementAndGet();
             }
         }
     }
@@ -138,7 +138,7 @@ public class TaskManager {
          * Initializes a new {@link Extended}.
          */
         Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid, TaskManager taskManager) {
-            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.runningjobs), typeofjob, furtherinformation, id, cid);
+            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.numberOfRunningJobs), typeofjob, furtherinformation, id, cid);
             this.taskManager = taskManager;
             completionStamp = new AtomicReference<Long>(null);
         }
@@ -164,7 +164,7 @@ public class TaskManager {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     /** The number of currently running jobs */
-    final AtomicInteger runningjobs;
+    final AtomicInteger numberOfRunningJobs;
 
     /** The queue for identifiers of finished jobs; gets periodically cleaned once per hour */
     final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
@@ -184,7 +184,7 @@ public class TaskManager {
     private TaskManager() {
         super();
         lastID = new AtomicInteger(0);
-        runningjobs = new AtomicInteger(0);
+        numberOfRunningJobs = new AtomicInteger(0);
         jobs = new ConcurrentHashMap<Integer, Extended<?>>(16, 0.9F, 1);
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
@@ -251,7 +251,7 @@ public class TaskManager {
      * @return <code>true</code> if there are currently running jobs; otherwise <code>false</code>
      */
     public boolean jobsRunning() {
-        return (runningjobs.get() > 0);
+        return (numberOfRunningJobs.get() > 0);
     }
 
     /**
