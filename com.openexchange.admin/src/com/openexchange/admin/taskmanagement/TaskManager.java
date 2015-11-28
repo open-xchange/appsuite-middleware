@@ -62,29 +62,33 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
+/**
+ * {@link TaskManager} - The task manager for job scheduling.
+ */
 public class TaskManager {
 
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
 
+    /** The number of milliseconds a finished job may remain idle in task manager prior to being removed */
+    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
+
+    /** The task manager instance */
     private static final TaskManager INSTANCE = new TaskManager();
 
     /**
-     * Gets the instance.
+     * Gets the task manager instance.
      *
-     * @return The instance
+     * @return The task manager instance
      */
     public static TaskManager getInstance() {
         return INSTANCE;
     }
-
-    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -170,7 +174,9 @@ public class TaskManager {
     private final ConcurrentMap<Integer, Extended<?>> jobs;
     private final ExecutorService executor;
     private final AtomicInteger lastID;
-    private final ScheduledTimerTask timerTask;
+
+    /** The timer task for job clean-up */
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Prevent instantiation. Use {@link #getInstance()} instead.
@@ -185,16 +191,6 @@ public class TaskManager {
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         LOGGER.info("AdminJobExecutor: running {} jobs parallel", Integer.valueOf(threadCount));
         this.executor = Executors.newFixedThreadPool(threadCount, new TaskManagerThreadFactory());
-
-        TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
-        Runnable cleaner = new Runnable() {
-
-            @Override
-            public void run() {
-                cleanUp();
-            }
-        };
-        timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
     }
 
     /**
@@ -225,6 +221,31 @@ public class TaskManager {
     }
 
     /**
+     * Starts the periodic cleaner using specified timer service
+     *
+     * @param timerService The timer service to use
+     */
+    public void startCleaner(TimerService timerService) {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null == timerTask) {
+            synchronized (this) {
+                timerTask = this.timerTask;
+                if (null == timerTask) {
+                    Runnable cleaner = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            cleanUp();
+                        }
+                    };
+                    timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
+                    this.timerTask = timerTask;
+                }
+            }
+        }
+    }
+
+    /**
      * Checks if there are currently running jobs.
      *
      * @return <code>true</code> if there are currently running jobs; otherwise <code>false</code>
@@ -241,6 +262,7 @@ public class TaskManager {
     public void shutdown() {
         ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
+            this.timerTask = null;
             timerTask.cancel(true);
         }
         this.executor.shutdown();

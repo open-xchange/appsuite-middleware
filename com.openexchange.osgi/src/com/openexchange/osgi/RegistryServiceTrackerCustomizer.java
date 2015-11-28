@@ -60,10 +60,13 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
  */
 public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustomizer<T, T> {
 
+    /** The bundle context */
     protected final BundleContext context;
 
+    /** The service registry to add the tracked service to */
     protected final AbstractServiceRegistry registry;
 
+    /** The class of the service to track */
     protected final Class<T> serviceClass;
 
     /**
@@ -115,7 +118,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
      *
      * @param service The newly tracked service
      */
-    protected void serviceAcquired(final Object service) {
+    protected void serviceAcquired(final T service) {
         // Nothing to do in basic implementation
     }
 
@@ -126,7 +129,7 @@ public class RegistryServiceTrackerCustomizer<T> implements ServiceTrackerCustom
      *
      * @param service The removed tracked service
      */
-    protected void serviceReleased(final Object service) {
+    protected void serviceReleased(final T service) {
         // Nothing to do in basic implementation
     }
 
