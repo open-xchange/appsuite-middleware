@@ -80,6 +80,7 @@ import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.Module;
+import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
@@ -87,7 +88,6 @@ import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingSelectionKey;
 import com.openexchange.onboarding.OnboardingStrings;
-import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
@@ -130,9 +130,9 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingAction.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingAction.DOWNLOAD), downloadExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingAction.DOWNLOAD), downloadExecutor);
         }
 
         {
@@ -144,9 +144,9 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingAction.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingAction.EMAIL), emailExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingAction.EMAIL), emailExecutor);
         }
 
         {
@@ -158,9 +158,9 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CALENDAR), OnboardingAction.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CALENDAR), OnboardingAction.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CALENDAR), OnboardingAction.DISPLAY), displayExecutor);
         }
     }
 
@@ -213,29 +213,29 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
         } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CALENDAR, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
 
             // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.SMS));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.SMS));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
 
@@ -243,13 +243,13 @@ public class CalDAVOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DOWNLOAD));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
 
             // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.EMAIL));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
         }

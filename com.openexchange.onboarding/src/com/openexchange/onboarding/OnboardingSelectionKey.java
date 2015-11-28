@@ -62,11 +62,11 @@ public class OnboardingSelectionKey {
      * Creates a new key instance using given arguments
      *
      * @param entityPath The entity path
-     * @param type The type
+     * @param action The action
      * @return The key instance
      */
-    public static OnboardingSelectionKey keyFor(EntityPath entityPath, OnboardingType type) {
-        return new OnboardingSelectionKey(entityPath, type);
+    public static OnboardingSelectionKey keyFor(EntityPath entityPath, OnboardingAction action) {
+        return new OnboardingSelectionKey(entityPath, action);
     }
 
     // ---------------------------------------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ public class OnboardingSelectionKey {
     private final Device device;
     private final Module module;
     private final String serviceId;
-    private final OnboardingType type;
+    private final OnboardingAction action;
     private final int hash;
 
     /**
@@ -86,12 +86,12 @@ public class OnboardingSelectionKey {
         this.device = entityPath.getDevice();
         this.module = entityPath.getModule();
         this.serviceId = entityPath.getService().getId();
-        this.type = selection.getType();
+        this.action = selection.getAction();
 
         int prime = 31;
         int result = prime * 1 + ((device == null) ? 0 : device.hashCode());
         result = prime * result + ((module == null) ? 0 : module.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
         hash = result;
     }
@@ -99,17 +99,17 @@ public class OnboardingSelectionKey {
     /**
      * Initializes a new {@link OnboardingSelectionKey}.
      */
-    public OnboardingSelectionKey(EntityPath entityPath, OnboardingType type) {
+    public OnboardingSelectionKey(EntityPath entityPath, OnboardingAction action) {
         super();
         this.device = entityPath.getDevice();
         this.module = entityPath.getModule();
         this.serviceId = entityPath.getService().getId();
-        this.type = type;
+        this.action = action;
 
         int prime = 31;
         int result = prime * 1 + ((device == null) ? 0 : device.hashCode());
         result = prime * result + ((module == null) ? 0 : module.hashCode());
-        result = prime * result + ((type == null) ? 0 : type.hashCode());
+        result = prime * result + ((action == null) ? 0 : action.hashCode());
         result = prime * result + ((serviceId == null) ? 0 : serviceId.hashCode());
         hash = result;
     }
@@ -134,7 +134,7 @@ public class OnboardingSelectionKey {
         if (module != other.module) {
             return false;
         }
-        if (type != other.type) {
+        if (action != other.action) {
             return false;
         }
         if (serviceId == null) {

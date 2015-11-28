@@ -50,6 +50,7 @@
 package com.openexchange.onboarding.json.converter;
 
 import org.apache.commons.codec.binary.Base64;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -118,7 +119,7 @@ public class ConfigurationViewConverter implements ResultConverter {
 
         // Platforms
         {
-            JSONObject jPlatforms = new JSONObject(4);
+            JSONArray jPlatforms = new JSONArray(4);
             for (Platform platform : view.getPlatforms()) {
                 JSONObject jPlatform = new JSONObject(4);
                 jPlatform.put("id", platform.getId());
@@ -126,14 +127,14 @@ public class ConfigurationViewConverter implements ResultConverter {
                 put2Json("displayName", platform.getDisplayName(session), jPlatform);
                 put2Json("description", platform.getDescription(session), jPlatform);
                 put2Json("icon", platform.getIcon(session), jPlatform);
-                jPlatforms.put(platform.getId(), jPlatform);
+                jPlatforms.put(jPlatform);
             }
             jView.put("platforms", jPlatforms);
         }
 
         // Devices
         {
-            JSONObject jDevices = new JSONObject(8);
+            JSONArray jDevices = new JSONArray(8);
             for (Device device : view.getDevices()) {
                 JSONObject jDevice = new JSONObject(4);
                 jDevice.put("id", device.getId());
@@ -141,14 +142,14 @@ public class ConfigurationViewConverter implements ResultConverter {
                 put2Json("displayName", device.getDisplayName(session), jDevice);
                 put2Json("description", device.getDescription(session), jDevice);
                 put2Json("icon", device.getIcon(session), jDevice);
-                jDevices.put(device.getId(), jDevice);
+                jDevices.put(jDevice);
             }
             jView.put("devices", jDevices);
         }
 
         // Modules
         {
-            JSONObject jModules = new JSONObject(8);
+            JSONArray jModules = new JSONArray(8);
             for (Module module : view.getModules()) {
                 JSONObject jModule = new JSONObject(4);
                 jModule.put("id", module.getId());
@@ -156,7 +157,7 @@ public class ConfigurationViewConverter implements ResultConverter {
                 put2Json("displayName", module.getDisplayName(session), jModule);
                 put2Json("description", module.getDescription(session), jModule);
                 put2Json("icon", module.getIcon(session), jModule);
-                jModules.put(module.getId(), jModule);
+                jModules.put(jModule);
             }
             jView.put("modules", jModules);
         }
@@ -165,7 +166,7 @@ public class ConfigurationViewConverter implements ResultConverter {
         {
             JSONObject jServices = new JSONObject(32);
             for (OnboardingSelection selection : view.getSelections()) {
-                JSONObject jSelections;
+                JSONArray jSelections;
                 {
                     String serviceId = selection.getEntityPath().getService().getId();
                     JSONObject jService = jServices.optJSONObject(serviceId);
@@ -180,9 +181,9 @@ public class ConfigurationViewConverter implements ResultConverter {
                         jServices.put(serviceId, jService);
                     }
 
-                    jSelections = jService.optJSONObject("selections");
+                    jSelections = jService.optJSONArray("selections");
                     if (null == jSelections) {
-                        jSelections = new JSONObject(8);
+                        jSelections = new JSONArray(8);
                         jService.put("selections", jSelections);
                     }
                 }
@@ -193,8 +194,8 @@ public class ConfigurationViewConverter implements ResultConverter {
                 put2Json("displayName", selection.getDisplayName(session), jSelection);
                 put2Json("description", selection.getDescription(session), jSelection);
                 put2Json("icon", selection.getIcon(session), jSelection);
-                put2Json("type", selection.getType().getId(), jSelection);
-                jSelections.put(selection.getCompositeId(), jSelection);
+                put2Json("action", selection.getAction().getId(), jSelection);
+                jSelections.put(jSelection);
             }
             jView.put("services", jServices);
         }

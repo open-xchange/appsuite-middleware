@@ -76,6 +76,6 @@ public interface OnboardingSelection extends Entity {
      *
      * @return The selection type.
      */
-    OnboardingType getType();
+    OnboardingAction getAction();
 
 }
