@@ -49,6 +49,8 @@
 
 package com.openexchange.onboarding.json.converter;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -164,12 +166,13 @@ public class ConfigurationViewConverter implements ResultConverter {
 
         // Services
         {
-            JSONObject jServices = new JSONObject(32);
+            Map<String, JSONObject> used = new HashMap<String, JSONObject>(32);
+            JSONArray jServices = new JSONArray(32);
             for (OnboardingSelection selection : view.getSelections()) {
                 JSONArray jSelections;
                 {
                     String serviceId = selection.getEntityPath().getService().getId();
-                    JSONObject jService = jServices.optJSONObject(serviceId);
+                    JSONObject jService = used.get(serviceId);
                     if (null == jService) {
                         jService = new JSONObject(4);
                         OnboardingConfiguration service = selection.getEntityPath().getService();
@@ -178,7 +181,8 @@ public class ConfigurationViewConverter implements ResultConverter {
                         put2Json("displayName", service.getDisplayName(session), jService);
                         put2Json("description", service.getDescription(session), jService);
                         put2Json("icon", service.getIcon(session), jService);
-                        jServices.put(serviceId, jService);
+                        used.put(serviceId, jService);
+                        jServices.put(jService);
                     }
 
                     jSelections = jService.optJSONArray("selections");
