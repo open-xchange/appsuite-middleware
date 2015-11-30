@@ -58,7 +58,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.ajax.fields.AppointmentFields;
-import com.openexchange.ajax.fields.CalendarFields;
 import com.openexchange.calendar.AppointmentDiff;
 import com.openexchange.calendar.AppointmentDiff.FieldUpdate;
 import com.openexchange.calendar.CalendarField;
@@ -80,6 +79,9 @@ import com.openexchange.groupware.notify.State.Type;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class NotificationMail {
+
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
+
     private ITipMessage itipMessage;
 
     private String templateName;
@@ -90,7 +92,6 @@ public class NotificationMail {
     private Appointment original;
     private Appointment appointment;
     private AppointmentDiff diff;
-
 
     private NotificationParticipant sender;
     private NotificationParticipant recipient;
@@ -110,8 +111,6 @@ public class NotificationMail {
     private boolean attachmentUpdate;
 
     private boolean sortedParticipants;
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(NotificationMail.class);
 
     public ITipMessage getMessage() {
         return itipMessage;
@@ -327,16 +326,18 @@ public class NotificationMail {
 
         // Interested in state changes, but not in other changes
         if (getRecipient().getConfiguration().interestedInStateChanges() && !getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (1), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChanges() + "\nDiffering Fields: " + diffs());
-            return isAboutStateChanges();
+            boolean aboutStateChanges = isAboutStateChanges();
+            LOG.debug("NotificationMail.shouldBeSend (1), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChanges, diffs());
+            return aboutStateChanges;
         }
 
         // Interested in other changes, but not in state changes
+        boolean aboutStateChangesOnly = isAboutStateChangesOnly();
         if (!getRecipient().getConfiguration().interestedInStateChanges() && getRecipient().getConfiguration().interestedInChanges()) {
-            LOG.debug("NotificationMail.shouldBeSend (2), User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs() + getUserDiff());
-            return !isAboutStateChangesOnly();
+            LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
+            return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend, User: " + id() + ", " + stateChanges() + ", " + changes() + ", " + isAboutStateChangesOnly() + "\nDiffering Fields: " + diffs());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs());
         return true;
     }
     private String id() {
