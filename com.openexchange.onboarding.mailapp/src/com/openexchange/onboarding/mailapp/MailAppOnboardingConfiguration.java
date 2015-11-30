@@ -62,6 +62,7 @@ import com.openexchange.onboarding.DefaultEntityPath;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Module;
+import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingConfiguration;
@@ -70,7 +71,6 @@ import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.OnboardingSelectionKey;
-import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.Result;
@@ -111,10 +111,10 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingType.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
         }
 
         {
@@ -126,10 +126,10 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
                 }
             };
 
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingType.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingAction.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingAction.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingAction.DISPLAY), redirectExecutor);
+            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingAction.DISPLAY), redirectExecutor);
         }
     }
 
@@ -183,20 +183,20 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The link selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.LINK));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
         } else if (entityPath.matches(Device.APPLE_IPHONE, Module.EMAIL, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The link selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.LINK));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
 
@@ -204,20 +204,20 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The link selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.LINK));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
         } else if (entityPath.matches(Device.ANDROID_TABLET, Module.EMAIL, identifier)) {
             List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
 
             // The link selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.LINK));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.LINK));
 
             // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingType.DISPLAY));
+            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
 
             return selections;
         }

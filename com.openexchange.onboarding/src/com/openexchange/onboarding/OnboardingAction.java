@@ -47,19 +47,71 @@
  *
  */
 
-package com.openexchange.hazelcast.osgi;
+package com.openexchange.onboarding;
 
 
 /**
- * {@link Unregisterer}
+ * {@link OnboardingAction} - The on-boarding action.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface Unregisterer {
+public enum OnboardingAction {
 
     /**
-     * Manually unregisters the session storage
+     * The download on-boarding action; required data/resources are provided through a file download
      */
-    void unregisterHazelcastInstance();
+    DOWNLOAD("download"),
+    /**
+     * The E-Mail on-boarding action; required data/resources are provided through an E-Mail
+     */
+    EMAIL("email"),
+    /**
+     * The SMS on-boarding action; required data/resources are provided through an SMS
+     */
+    SMS("sms"),
+    /**
+     * The display on-boarding action; required data/resources are displayed to the user
+     */
+    DISPLAY("display"),
+    /**
+     * The link on-boarding action; required data/resources are provided through an URI
+     */
+    LINK("link"),
+    ;
+
+    private final String id;
+
+    private OnboardingAction(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the on-boarding action for specified identifier
+     *
+     * @param id The identifier to look-up
+     * @return The associated on-boarding action or <code>null</code>
+     */
+    public static OnboardingAction actionFor(String id) {
+        if (null == id) {
+            return null;
+        }
+
+        for (OnboardingAction type : values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
+        }
+        return null;
+    }
 
 }

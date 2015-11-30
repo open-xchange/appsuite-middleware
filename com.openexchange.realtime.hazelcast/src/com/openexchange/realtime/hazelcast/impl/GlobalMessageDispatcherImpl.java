@@ -98,7 +98,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     private final HazelcastResourceDirectory directory;
 
-    private ResponseChannel channel = null;
+    private final ResponseChannel channel;
 
     public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
@@ -121,7 +121,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         if(idMap == null || idMap.isEmpty()) {
             throw DispatchExceptionCode.RESOURCE_OFFLINE.create(stanza.getTo());
         }
-        Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
+        Map<ID, OXException> exceptions = send(stanza, idMap);
         if(!exceptions.isEmpty()) {
             throw exceptions.values().iterator().next();
         }

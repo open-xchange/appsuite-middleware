@@ -55,9 +55,14 @@ import java.util.Map;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.images.osgi.Services;
 
 /**
@@ -157,6 +162,8 @@ public final class Scheduler {
     private final int numThreads;
     final BlockingDeque<TaskManager> roundRobinQueue;
     final Map<Object, TaskManager> taskManagers;
+    final AtomicInteger numberOfRunningScheduler;
+    final AtomicBoolean stopped;
 
     /**
      * Initializes a new {@link Scheduler}.
@@ -170,15 +177,18 @@ public final class Scheduler {
         this.numThreads = numThreads;
 
         // Initialize fixed thread pool
-        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads, this);
+        SchedulerThreadPoolExecutor newPool = new SchedulerThreadPoolExecutor(numThreads);
         newPool.prestartAllCoreThreads();
         pool = newPool;
         taskManagers = new HashMap<Object, TaskManager>(256);
         roundRobinQueue = new LinkedBlockingDeque<TaskManager>();
 
         // Start selector threads
+        stopped = new AtomicBoolean(false);
+        numberOfRunningScheduler = new AtomicInteger();
         for (int i = numThreads; i-- > 0;) {
             newPool.execute(new Selector());
+            numberOfRunningScheduler.incrementAndGet();
         }
     }
 
@@ -195,6 +205,8 @@ public final class Scheduler {
      * Shuts-down this scheduler.
      */
     private void stop() {
+        stopped.set(true);
+
         for (int i = numThreads; i-- > 0;) {
             roundRobinQueue.offerFirst(POISON);
         }
@@ -207,14 +219,44 @@ public final class Scheduler {
     }
 
     /**
-     * This does not block an unrelated thread used to send a synchronous event.
+     * Checks if a new <code>Selector</code> is supposed to be created
+     *
+     * @return <code>true</code> if a new <code>Selector</code> is supposed to be created; otherwise <code>false</code>
+     * @throws RejectedExecutionException If the possibly needed <code>Selector</code> cannot be accepted for execution
+     */
+    protected void scheduleNewSelectorIfNeeded() {
+        // Check number of currently running Selector instances
+        int num;
+        do {
+            num = numberOfRunningScheduler.get();
+            if (num >= numThreads) {
+                return;
+            }
+        } while (!numberOfRunningScheduler.compareAndSet(num, num + 1));
+
+        // Start a new Selector
+        pool.execute(new Selector());
+    }
+
+    /**
+     * Schedules the specified task for being executed associated with given key (if any).
      *
      * @param optKey The optional key; if <code>null</code> calling {@link Thread} instance is referenced as key
      * @param task The task to execute
-     * @return <code>true</code> if successfully scheduled for being executed; otherwise <code>false</code> to signal that task cannot be
-     *         accepted for execution.
+     * @return <code>true</code> if successfully scheduled for execution; otherwise <code>false</code> to signal that task cannot be accepted
      */
     public boolean execute(Object optKey, Runnable task) {
+        if (stopped.get()) {
+            return false;
+        }
+
+        // Check number of currently running Selector instances
+        try {
+            scheduleNewSelectorIfNeeded();
+        } catch (RejectedExecutionException x) {
+            return false;
+        }
+
         // Determine the key to use
         Object key = null == optKey ? Thread.currentThread() : optKey;
 
@@ -243,6 +285,23 @@ public final class Scheduler {
 
     // ----------------------------------------------------------------------------------------------- //
 
+    private final class SelectorAdder implements Runnable {
+
+        SelectorAdder() {
+            super();
+        }
+
+        @Override
+        public void run() {
+            try {
+                // Check number of currently running Selector instances
+                scheduleNewSelectorIfNeeded();
+            } catch (Exception e) {
+                LOGGER.warn("Failed to accept new Selector for execution", e);
+            }
+        }
+    }
+
     /**
      * The Selector waiting for incoming image processing tasks.
      */
@@ -257,39 +316,85 @@ public final class Scheduler {
             // Remember associated worker thread
             Thread currentThread = Thread.currentThread();
 
+            if (stopped.get()) {
+                // Stopped...
+                LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+                return;
+            }
+
+            boolean decrementCount = true;
             try {
                 // Perform image processing until aborted
-                boolean aborted = false;
-                while (!aborted) {
+                boolean proceed = true;
+                while (proceed) {
                     try {
+                        // Await next slot
                         TaskManager manager = roundRobinQueue.takeFirst();
+
+                        // Check slot for POISON
                         if (POISON == manager) {
-                            aborted = true;
-                        } else {
-                            // Check next available task
-                            Runnable task;
-                            synchronized (taskManagers) {
-                                task = manager.remove();
-                                if (null == task) {
-                                    taskManagers.remove(manager.getExecuterKey());
+                            // Poisoned...
+                            LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+                            return;
+                        }
+
+                        // Acquire next task from slot
+                        Runnable task;
+                        synchronized (taskManagers) {
+                            task = manager.remove();
+                            if (null == task) {
+                                taskManagers.remove(manager.getExecuterKey());
+                            }
+                        }
+
+                        // Check task
+                        if (null != task) {
+                            // Re-add slot to round-robin queue for next processing
+                            roundRobinQueue.offerLast(manager);
+
+                            // Perform (image transformation) task
+                            task.run();
+
+                            if (Thread.interrupted()) {
+                                // Cleared interrupted status after run() method
+
+                                // Check status
+                                if (stopped.get()) {
+                                    // Stopped...
+                                    LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+                                    return;
                                 }
+
+                                // Otherwise orderly terminate this Selector & re-schedule another Selector
+                                proceed = false;
+                                LOGGER.info("Image transformation selector '{}' terminated. Going to schedule a new selector for further processing.", currentThread.getName());
+
+                                // Ensure counter is decremented prior to one-shot task becoming active
+                                numberOfRunningScheduler.decrementAndGet();
+                                decrementCount = false;
+
+                                TimerService optService = Services.optService(TimerService.class);
+                                if (null != optService) {
+                                    optService.schedule(new SelectorAdder(), 250, TimeUnit.MILLISECONDS);
+                                }
+
+                                // Leave...
+                                return;
                             }
+                        }
 
-                            if (null != task) {
-                                // Re-add to round-robin queue for next processing
-                                roundRobinQueue.offerLast(manager);
-
-                                // Perform image transformation task
-                                task.run();
-                            }
-
-                            // Check thread status
-                            aborted = currentThread.isInterrupted();
+                        // Check status
+                        if (stopped.get()) {
+                            // Stopped...
+                            LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
+                            return;
                         }
                     } catch (InterruptedException e) {
                         // Handle in outer try-catch clause
                         throw e;
                     } catch (RuntimeException e) {
+                        LOGGER.info("Image transformation failed.", e);
+                    } catch (StackOverflowError e) {
                         LOGGER.info("Image transformation failed.", e);
                     } catch (Throwable t) {
                         // The Exception or Error that caused execution to terminate abruptly.
@@ -299,11 +404,15 @@ public final class Scheduler {
                     }
                 }
             } catch (InterruptedException e) {
+                // Keep interrupted status
                 currentThread.interrupt();
                 LOGGER.info("Image transformation selector '{}' interrupted", currentThread.getName(), e);
+            } finally {
+                // Decrement count
+                if (decrementCount) {
+                    numberOfRunningScheduler.decrementAndGet();
+                }
             }
-
-            // Other unexpected/abrupt termination reasons are handled in SchedulerThreadPoolExecutor.afterExecute() implementation
 
             LOGGER.info("Image transformation selector '{}' terminated", currentThread.getName());
         }

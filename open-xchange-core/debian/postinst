@@ -1117,6 +1117,16 @@ fi
 dpkg-maintscript-helper mv_conffile /opt/open-xchange/etc/guard.properties /opt/open-xchange/etc/guard-api.properties 7.8.1~ \
     open-xchange-core -- "$@"
 
+# SoftwareChange_Request-2914
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
+!com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
+EOF
+fi
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"

@@ -53,7 +53,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
@@ -228,6 +230,42 @@ public class RdbAliasStorage implements UserAliasStorage {
             if(!useExistingConnection) {
                 Database.back(contextId, false, con);
             }
+        }
+    }
+
+    @Override
+    public List<Integer> getUserIdsByAliasDomain(int contextId, String aliasDomain) throws OXException {
+
+        Connection read_ox_con = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            if (read_ox_con == null) {
+                read_ox_con = Database.get(contextId, true);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid ");
+            sb.append("WHERE us.cid = ? and la.alias LIKE ?");
+
+            String query = sb.toString();
+            stmt = read_ox_con.prepareStatement(query);
+            stmt.setInt(1, contextId);
+            stmt.setString(2, "%" + aliasDomain);
+
+            rs = stmt.executeQuery();
+            ArrayList<Integer> retval = new ArrayList<Integer>();
+            while (rs.next()) {
+                retval.add(rs.getInt(1));
+            }
+            return retval;
+        } catch (SQLException e) {
+            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw e;
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+            Database.back(contextId, false, read_ox_con);
         }
     }
 }

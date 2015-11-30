@@ -134,7 +134,14 @@ public class AdminActivator extends HousekeepingActivator {
         track(PipesAndFiltersService.class, new RegistryServiceTrackerCustomizer<PipesAndFiltersService>(context, AdminServiceRegistry.getInstance(), PipesAndFiltersService.class));
         track(ContextService.class, new RegistryServiceTrackerCustomizer<ContextService>(context, AdminServiceRegistry.getInstance(), ContextService.class));
         track(ThreadPoolService.class, new RegistryServiceTrackerCustomizer<ThreadPoolService>(context, AdminServiceRegistry.getInstance(), ThreadPoolService.class));
-        track(TimerService.class, new RegistryServiceTrackerCustomizer<TimerService>(context, AdminServiceRegistry.getInstance(), TimerService.class));
+
+        track(TimerService.class, new RegistryServiceTrackerCustomizer<TimerService>(context, AdminServiceRegistry.getInstance(), TimerService.class) {
+            @Override
+            protected void serviceAcquired(TimerService timerService) {
+                TaskManager.getInstance().startCleaner(timerService);
+            }
+        });
+
         track(MailAccountStorageService.class, new RegistryServiceTrackerCustomizer<MailAccountStorageService>(context, AdminServiceRegistry.getInstance(), MailAccountStorageService.class));
         track(PublicationTargetDiscoveryService.class, new RegistryServiceTrackerCustomizer<PublicationTargetDiscoveryService>(context, AdminServiceRegistry.getInstance(), PublicationTargetDiscoveryService.class));
         track(ConfigViewFactory.class, new RegistryServiceTrackerCustomizer<ConfigViewFactory>(context, AdminServiceRegistry.getInstance(), ConfigViewFactory.class));
@@ -274,8 +281,6 @@ public class AdminActivator extends HousekeepingActivator {
      */
     @Override
     public void stopBundle() throws Exception {
-        cleanUp();
-
         {
             TaskManager taskManager = TaskManager.getInstance();
             if (null != taskManager) {
@@ -291,6 +296,8 @@ public class AdminActivator extends HousekeepingActivator {
             daemon.unregisterRMI(context);
             this.daemon = null;
         }
+
+        cleanUp();
     }
 
     private PropertyHandlerExtended initCache(ConfigurationService service, org.slf4j.Logger logger) throws OXGenericException {

@@ -117,23 +117,23 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
 
         off = pos + 1;
 
-        OnboardingType type = OnboardingType.typeFor(compositeId.substring(off));
-        if (null == type) {
+        OnboardingAction action = OnboardingAction.actionFor(compositeId.substring(off));
+        if (null == action) {
             throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
         }
 
-        return newInstance(new DefaultEntityPath(configuration, device.getPlatform(), device, module), type);
+        return newInstance(new DefaultEntityPath(configuration, device.getPlatform(), device, module), action);
     }
 
     /**
      * Creates a new {@code DefaultOnboardingSelection} instance
      *
      * @param entityPath The entity path associated with the selection
-     * @param type The on-boarding type
+     * @param action The on-boarding action
      * @return A new {@code DefaultOnboardingSelection} instance
      */
-    public static DefaultOnboardingSelection newInstance(EntityPath entityPath, OnboardingType type) {
-        return new DefaultOnboardingSelection(entityPath, type);
+    public static DefaultOnboardingSelection newInstance(EntityPath entityPath, OnboardingAction action) {
+        return new DefaultOnboardingSelection(entityPath, action);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -143,16 +143,16 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     private final String displayNameProperty;
     private final String imageNameProperty;
     private final String descriptionProperty;
-    private final OnboardingType type;
+    private final OnboardingAction action;
     private final EntityPath entityPath;
 
-    private DefaultOnboardingSelection(EntityPath entityPath, OnboardingType type) {
+    private DefaultOnboardingSelection(EntityPath entityPath, OnboardingAction action) {
         super();
-        StringBuilder propertyNameBuilder = new StringBuilder("com.openexchange.onboarding.").append(entityPath.getService().getId()).append('.').append(type.getId()).append('.');
+        StringBuilder propertyNameBuilder = new StringBuilder("com.openexchange.onboarding.").append(entityPath.getService().getId()).append('.').append(action.getId()).append('.');
         int len = propertyNameBuilder.length();
 
-        this.id = new StringBuilder(entityPath.getCompositeId()).append('/').append(type.getId()).toString();
-        this.type = type;
+        this.id = new StringBuilder(entityPath.getCompositeId()).append('/').append(action.getId()).toString();
+        this.action = action;
         this.entityPath = entityPath;
 
         this.enabledProperty = propertyNameBuilder.append("enabled").toString();
@@ -173,8 +173,8 @@ public class DefaultOnboardingSelection implements OnboardingSelection {
     }
 
     @Override
-    public OnboardingType getType() {
-        return type;
+    public OnboardingAction getAction() {
+        return action;
     }
 
     @Override

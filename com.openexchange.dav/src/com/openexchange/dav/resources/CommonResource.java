@@ -115,6 +115,8 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
     protected WebdavProtocolException protocolException(OXException e, int statusCode) {
         if (Category.CATEGORY_USER_INPUT.equals(e.getCategory()) || Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
             LOG.debug("{}", this.getUrl(), e);
+        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            LOG.info("{}", this.getUrl(), e);
         } else {
             LOG.error("{}", this.getUrl(), e);
         }

@@ -50,6 +50,7 @@
 package com.openexchange.realtime.hazelcast.cleanup;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -57,6 +58,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.Member;
 import com.openexchange.exception.OXException;
 import com.openexchange.management.ManagementAware;
@@ -74,6 +76,7 @@ import com.openexchange.realtime.hazelcast.osgi.Services;
 import com.openexchange.realtime.hazelcast.serialization.cleanup.PortableCleanupDispatcher;
 import com.openexchange.realtime.packet.ID;
 import com.openexchange.realtime.util.IDMap;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * {@link GlobalRealtimeCleanupImpl}
@@ -114,30 +117,39 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
             LOG.debug("Unable to start local cleanup due to shut-down.", shutDown);
         }
 
-        //Remove from directory after the RealtimeJanitors ran so we don't end up with an unreachable directory entry
+        // Remove from directory after the RealtimeJanitors ran so we don't end up with an unreachable directory entry
         try {
             Collection<ID> removeFromResourceDirectory = removeFromResourceDirectory(id);
-            if(removeFromResourceDirectory.isEmpty()) {
+            if (removeFromResourceDirectory.isEmpty()) {
                 LOG.debug("Unable to remove {} from ResourceDirectory.", id);
             }
         } catch (OXException oxe) {
-            LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
+            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(oxe)) {
+                // Hazelcast no more available (either absent or already in "not active" state)
+                LOG.debug("Unable to remove {} from ResourceDirectory as Hazelcast is already shut-down.", id, oxe);
+            } else {
+                LOG.error("Unable to remove {} from ResourceDirectory.", id, oxe);
+            }
         }
 
-        //Remote cleanup via distributed MultiTask to remaining members of the cluster
-        HazelcastInstance hazelcastInstance;
+        // Remote cleanup via distributed MultiTask to remaining members of the cluster
         try {
-            hazelcastInstance = HazelcastAccess.getHazelcastInstance();
-            Member localMember = HazelcastAccess.getLocalMember();
-            Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
-            if(!clusterMembers.remove(localMember)) {
-                LOG.warn("Couldn't remove local member from cluster members.");
+            HazelcastInstance hazelcastInstance = HazelcastAccess.optHazelcastInstance();
+            if (null != hazelcastInstance) {
+                Member localMember = HazelcastAccess.getLocalMember();
+                Set<Member> clusterMembers = new HashSet<Member>(hazelcastInstance.getCluster().getMembers());
+                if(!clusterMembers.remove(localMember)) {
+                    LOG.warn("Couldn't remove local member from cluster members.");
+                }
+                if(!clusterMembers.isEmpty()) {
+                    hazelcastInstance.getExecutorService("default").submitToMembers(new PortableCleanupDispatcher(id), clusterMembers);
+                } else {
+                    LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
+                }
             }
-            if(!clusterMembers.isEmpty()) {
-                hazelcastInstance.getExecutorService("default").submitToMembers(new PortableCleanupDispatcher(id), clusterMembers);
-            } else {
-                LOG.debug("No other cluster members besides the local member. No further clean up necessary.");
-            }
+        } catch (HazelcastInstanceNotActiveException e) {
+            // Hazelcast no more available (either absent or already in "not active" state)
+            LOG.debug("Failed to issue remote cleanup for {} as Hazelcast is already shut-down.", id, e);
         } catch (Exception e) {
             LOG.error("Failed to issue remote cleanup for {}.", id, e);
         }
@@ -160,18 +172,40 @@ public class GlobalRealtimeCleanupImpl implements GlobalRealtimeCleanup, Managem
                 doCleanupForId(idToClean);
             }
         } catch (OXException oxe) {
-            LOG.error("Failed to clean for ID {}", id, oxe);
+            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(oxe)) {
+                LOG.debug("Failed to clean for ID {} as Hazelcast is already shut-down", id, oxe);
+            } else {
+                LOG.error("Failed to clean for ID {}", id, oxe);
+            }
         }
     }
 
     @Override
     public Collection<ID> removeFromResourceDirectory(ID id) throws OXException {
-        return hazelcastResourceDirectory.remove(id).keySet();
+        try {
+            return hazelcastResourceDirectory.remove(id).keySet();
+        } catch (OXException oxe) {
+            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(oxe)) {
+                LOG.debug("Failed to remove from resource directory for ID {} as Hazelcast is already shut-down", id, oxe);
+            } else {
+                LOG.error("Failed to remove from resource directory for ID {}", id, oxe);
+            }
+        }
+        return Collections.emptyList();
     }
 
     @Override
     public Collection<ID> removeFromResourceDirectory(Collection<ID> ids) throws OXException {
-        return hazelcastResourceDirectory.remove(ids).keySet();
+        try {
+            return hazelcastResourceDirectory.remove(ids).keySet();
+        } catch (OXException oxe) {
+            if (ServiceExceptionCode.SERVICE_UNAVAILABLE.equals(oxe)) {
+                LOG.debug("Failed to remove from resource directory for IDs {} as Hazelcast is already shut-down", ids, oxe);
+            } else {
+                LOG.error("Failed to remove from resource directory for IDs {}", ids, oxe);
+            }
+        }
+        return Collections.emptyList();
     }
 
     private void doCleanupForId(ID id) {

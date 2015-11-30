@@ -87,7 +87,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
 
     private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name FROM user_attribute WHERE name='alias'";
 
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
+    private static final String INSERT_ALIAS_IN_NEW_TABLE = "REPLACE INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
 
     @Override
     public void perform(PerformParameters params) throws OXException {

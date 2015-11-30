@@ -59,25 +59,13 @@ package com.openexchange.onboarding;
 public enum OnboardingType {
 
     /**
-     * The download on-boarding type; required data/resources are provided through a file download
+     * The PLIST on-boarding type; required data/resources are provided through a PLIST profile
      */
-    DOWNLOAD("download"),
+    PLIST("plist"),
     /**
-     * The E-Mail on-boarding type; required data/resources are provided through an E-Mail
+     * The manual on-boarding type; required data/resources are supposed to be manually set/applied
      */
-    EMAIL("email"),
-    /**
-     * The SMS on-boarding type; required data/resources are provided through an SMS
-     */
-    SMS("sms"),
-    /**
-     * The display on-boarding type; required data/resources are displayed to the user
-     */
-    DISPLAY("display"),
-    /**
-     * The link on-boarding type; required data/resources are provided through an URI
-     */
-    LINK("link"),
+    MANUAL("manual"),
     ;
 
     private final String id;

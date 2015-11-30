@@ -50,6 +50,7 @@
 package com.openexchange.groupware.alias;
 
 import java.sql.Connection;
+import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
@@ -82,6 +83,16 @@ public interface UserAliasStorage {
      * @throws OXException If an SQL error happened
      */
     int getUserId(int contextId, String alias) throws OXException;
+
+    /**
+     * Gets the identifiers of the users that have an alias within the given domain.
+     *
+     * @param contextId The context identifier
+     * @param domain The domain to search for
+     * @return The user identifiers
+     * @throws OXException If an SQL error happened
+     */
+    List<Integer> getUserIdsByAliasDomain(int contextId, String domain) throws OXException;
 
     /**
      * Creates an alias.

@@ -62,36 +62,40 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.rmi.exceptions.TaskManagerException;
-import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.PropertyHandler;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
+/**
+ * {@link TaskManager} - The task manager for job scheduling.
+ */
 public class TaskManager {
 
     /** The logger */
     static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(TaskManager.class);
 
+    /** The number of milliseconds a finished job may remain idle in task manager prior to being removed */
+    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
+
+    /** The task manager instance */
     private static final TaskManager INSTANCE = new TaskManager();
 
     /**
-     * Gets the instance.
+     * Gets the task manager instance.
      *
-     * @return The instance
+     * @return The task manager instance
      */
     public static TaskManager getInstance() {
         return INSTANCE;
     }
-
-    private static final long MAX_TASK_IDLE_MILLIS = TimeUnit.HOURS.toMillis(1L);
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     private static class IncrementingCallable<V> implements Callable<V> {
 
         private final Callable<V> delegate;
-        private final AtomicInteger runningjobs;
+        private final AtomicInteger numberOfRunningJobs;
         private final int id;
         private final String typeofjob;
 
@@ -102,13 +106,13 @@ public class TaskManager {
             super();
             this.id = id;
             this.typeofjob = typeofjob;
-            this.runningjobs = runningjobs;
+            this.numberOfRunningJobs = runningjobs;
             this.delegate = delegate;
         }
 
         @Override
         public V call() throws Exception {
-            runningjobs.incrementAndGet();
+            numberOfRunningJobs.incrementAndGet();
             try {
                 V result = delegate.call();
                 LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, id);
@@ -120,7 +124,7 @@ public class TaskManager {
                 LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, t);
                 throw new Exception(t);
             } finally {
-                runningjobs.decrementAndGet();
+                numberOfRunningJobs.decrementAndGet();
             }
         }
     }
@@ -134,7 +138,7 @@ public class TaskManager {
          * Initializes a new {@link Extended}.
          */
         Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid, TaskManager taskManager) {
-            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.runningjobs), typeofjob, furtherinformation, id, cid);
+            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.numberOfRunningJobs), typeofjob, furtherinformation, id, cid);
             this.taskManager = taskManager;
             completionStamp = new AtomicReference<Long>(null);
         }
@@ -160,7 +164,7 @@ public class TaskManager {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     /** The number of currently running jobs */
-    final AtomicInteger runningjobs;
+    final AtomicInteger numberOfRunningJobs;
 
     /** The queue for identifiers of finished jobs; gets periodically cleaned once per hour */
     final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
@@ -170,7 +174,9 @@ public class TaskManager {
     private final ConcurrentMap<Integer, Extended<?>> jobs;
     private final ExecutorService executor;
     private final AtomicInteger lastID;
-    private final ScheduledTimerTask timerTask;
+
+    /** The timer task for job clean-up */
+    private volatile ScheduledTimerTask timerTask;
 
     /**
      * Prevent instantiation. Use {@link #getInstance()} instead.
@@ -178,23 +184,13 @@ public class TaskManager {
     private TaskManager() {
         super();
         lastID = new AtomicInteger(0);
-        runningjobs = new AtomicInteger(0);
+        numberOfRunningJobs = new AtomicInteger(0);
         jobs = new ConcurrentHashMap<Integer, Extended<?>>(16, 0.9F, 1);
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
         final int threadCount = Integer.parseInt(this.prop.getProp("CONCURRENT_JOBS", "2"));
         LOGGER.info("AdminJobExecutor: running {} jobs parallel", Integer.valueOf(threadCount));
         this.executor = Executors.newFixedThreadPool(threadCount, new TaskManagerThreadFactory());
-
-        TimerService timerService = AdminServiceRegistry.getInstance().getService(TimerService.class);
-        Runnable cleaner = new Runnable() {
-
-            @Override
-            public void run() {
-                cleanUp();
-            }
-        };
-        timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
     }
 
     /**
@@ -225,12 +221,37 @@ public class TaskManager {
     }
 
     /**
+     * Starts the periodic cleaner using specified timer service
+     *
+     * @param timerService The timer service to use
+     */
+    public void startCleaner(TimerService timerService) {
+        ScheduledTimerTask timerTask = this.timerTask;
+        if (null == timerTask) {
+            synchronized (this) {
+                timerTask = this.timerTask;
+                if (null == timerTask) {
+                    Runnable cleaner = new Runnable() {
+
+                        @Override
+                        public void run() {
+                            cleanUp();
+                        }
+                    };
+                    timerTask = timerService.scheduleWithFixedDelay(cleaner, 20L, 20L, TimeUnit.MINUTES);
+                    this.timerTask = timerTask;
+                }
+            }
+        }
+    }
+
+    /**
      * Checks if there are currently running jobs.
      *
      * @return <code>true</code> if there are currently running jobs; otherwise <code>false</code>
      */
     public boolean jobsRunning() {
-        return (runningjobs.get() > 0);
+        return (numberOfRunningJobs.get() > 0);
     }
 
     /**
@@ -241,6 +262,7 @@ public class TaskManager {
     public void shutdown() {
         ScheduledTimerTask timerTask = this.timerTask;
         if (null != timerTask) {
+            this.timerTask = null;
             timerTask.cancel(true);
         }
         this.executor.shutdown();

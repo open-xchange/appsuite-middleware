@@ -112,15 +112,16 @@ public class AllAction extends AbstractFileStorageAccountAction {
                     FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
                     result.put(writer.write(account, rootFolder));
                 } catch (OXException e) {
-                    if (!e.equalsCode(6, "OAUTH")) {
+                    if (e.equalsCode(6, "OAUTH")) {
+                        // "OAUTH-0006" --> OAuth account not found
+                        try {
+                            fsService.getAccountManager().deleteAccount(account, session);
+                        } catch (Exception x) {
+                            // Ignore
+                        }
+                    } else {
                         // Set as error
                         requestResult.setException(e);
-                    }
-                    // "OAUTH-0006" --> OAuth account not found
-                    try {
-                        fsService.getAccountManager().deleteAccount(account, session);
-                    } catch (Exception x) {
-                        // Ignore
                     }
                 }
             }

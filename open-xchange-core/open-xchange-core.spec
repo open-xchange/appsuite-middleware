@@ -1277,6 +1277,16 @@ fi
 # SoftwareChange_Request-2884
 ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc guard.properties guard-api.properties
 
+# SoftwareChange_Request-2914
+PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
+if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
+    cat >> $PFILE <<EOF
+
+# Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
+!com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
+EOF
+fi
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
