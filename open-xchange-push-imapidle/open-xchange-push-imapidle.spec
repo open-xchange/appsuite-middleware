@@ -8,7 +8,7 @@ BuildRequires: open-xchange-core
 BuildRequires: open-xchange-imap
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 41
+%define        ox_release 42
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -76,6 +76,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/hazelcast/imapidle.properties
 
 %changelog
+* Mon Nov 30 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-12-07 (2916)
 * Tue Nov 17 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-11-23 (2883)
 * Wed Nov 11 2015 Carsten Hoeger <choeger@open-xchange.com>
