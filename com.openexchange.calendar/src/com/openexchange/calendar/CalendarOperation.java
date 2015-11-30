@@ -503,9 +503,9 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 cdao.setPrincipalId(setInt(i++, load_resultset));
 
                 // ensure shared folder owner is set prior loading users
-                if (FolderObject.SHARED == cdao.getFolderType()) {
+                if (FolderObject.SHARED == cdao.getFolderType() && 0 >= cdao.getSharedFolderOwner()) {
                     OXFolderAccess ofa = new OXFolderAccess(readcon, cdao.getContext());
-                    if (cdao.containsParentFolderID()) {
+                    if (cdao.containsParentFolderID() && 0 < cdao.getParentFolderID()) {
                         cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
                     } else {
                         cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
