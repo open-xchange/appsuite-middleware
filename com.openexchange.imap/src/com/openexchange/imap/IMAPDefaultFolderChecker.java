@@ -749,6 +749,15 @@ public class IMAPDefaultFolderChecker {
     }
 
     /**
+     * Signals whether an attempt should be performed to set an appropriate SPECIAL-USE flag for an existing folder or not.
+     *
+     * @return <code>true</code> to set appropriate SPECIAL-USE flag; otherwise <code>false</code>
+     */
+    protected boolean setSpecialUseForExisting() {
+        return false;
+    }
+
+    /**
      * Performs the actual folder check
      *
      * @param index The index
@@ -774,35 +783,28 @@ public class IMAPDefaultFolderChecker {
             ListLsubEntry entry = modified.getValue() ? ListLsubCache.getActualLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription) : ListLsubCache.getCachedLISTEntry(desiredFullName, accountId, imapStore, session, ignoreSubscription);
             if (null != entry && entry.exists()) {
                 // The easy one -- already existing; just check subscription status
+                boolean checkSpecialUseForExisting = false;
                 if (1 == subscribe) {
                     if (!entry.isSubscribed()) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, desiredFullName, true);
                         modified.setValue(true);
                     }
-                    if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
-                        // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                        String flag = SPECIAL_USES[index];
-                        try {
-                            IMAPCommandsCollection.setSpecialUses((IMAPFolder) imapStore.getFolder(desiredFullName), Collections.singletonList(flag));
-                            modified.setValue(true);
-                        } catch (Exception e) {
-                            LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                        }
-                    }
+                    checkSpecialUseForExisting = true;
                 } else if (0 == subscribe) {
                     if (entry.isSubscribed()) {
                         IMAPCommandsCollection.forceSetSubscribed(imapStore, desiredFullName, false);
                         modified.setValue(true);
                     }
-                    if (hasMetadata && index <= StorageUtility.INDEX_TRASH) {
-                        // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
-                        String flag = SPECIAL_USES[index];
-                        try {
-                            IMAPCommandsCollection.setSpecialUses((IMAPFolder) imapStore.getFolder(desiredFullName), Collections.singletonList(flag));
-                            modified.setValue(true);
-                        } catch (Exception e) {
-                            LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
-                        }
+                    checkSpecialUseForExisting = true;
+                }
+                if (checkSpecialUseForExisting && hasMetadata && index <= StorageUtility.INDEX_TRASH && setSpecialUseForExisting()) {
+                    // E.g. SETMETADATA "SavedDrafts" (/private/specialuse "\\Drafts")
+                    String flag = SPECIAL_USES[index];
+                    try {
+                        IMAPCommandsCollection.setSpecialUses((IMAPFolder) imapStore.getFolder(desiredFullName), Collections.singletonList(flag));
+                        modified.setValue(true);
+                    } catch (Exception e) {
+                        LOG.debug("Failed to set {} flag for existing standard {} folder (full-name=\"{}\", namespace=\"{}\") for login {} (account={}) on IMAP server {} (user={}, context={})", flag, getFallbackName(index), desiredFullName, namespace, imapConfig.getLogin(), Integer.valueOf(accountId), imapConfig.getServer(), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()), e);
                     }
                 }
                 return desiredFullName;
