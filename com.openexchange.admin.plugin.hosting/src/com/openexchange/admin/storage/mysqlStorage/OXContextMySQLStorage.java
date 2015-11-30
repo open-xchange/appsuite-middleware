@@ -143,6 +143,7 @@ import com.openexchange.threadpool.CompletionFuture;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.tools.file.external.QuotaFileStorages;
 import com.openexchange.tools.oxfolder.OXFolderAdminHelper;
 import com.openexchange.tools.pipesnfilters.DataSource;
 import com.openexchange.tools.pipesnfilters.Filter;
@@ -996,7 +997,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 oxdb_read = cache.getConnectionForContext(context_id);
                 long quota_used = 0;
                 try {
-                    stmt2 = oxdb_read.prepareStatement("SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0");
+                    boolean hasUserColumn = QuotaFileStorages.hasUserColumn(con, context_id);
+
+                    stmt2 = oxdb_read.prepareStatement(hasUserColumn ? "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ? AND filestore_usage.user = 0" : "SELECT filestore_usage.used FROM filestore_usage WHERE filestore_usage.cid = ?");
                     stmt2.setInt(1, context_id);
                     rs2 = stmt2.executeQuery();
 
@@ -1026,6 +1029,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
         } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (final OXException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
