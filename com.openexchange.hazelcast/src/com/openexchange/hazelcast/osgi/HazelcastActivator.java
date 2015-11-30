@@ -90,7 +90,7 @@ import com.openexchange.management.ManagementService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class HazelcastActivator implements BundleActivator, Unregisterer {
+public class HazelcastActivator implements BundleActivator {
 
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastActivator.class);
@@ -194,11 +194,6 @@ public class HazelcastActivator implements BundleActivator, Unregisterer {
         ServiceTracker<ManagementService, ManagementService> managementTracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ManagementRegisterer(context));
         this.managementTracker = managementTracker;
         managementTracker.open();
-    }
-
-    @Override
-    public void unregisterHazelcastInstance() {
-        stop();
     }
 
     @Override
