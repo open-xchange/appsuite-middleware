@@ -340,59 +340,95 @@ public class NotificationMail {
         LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs());
         return true;
     }
-    private String id() {
-        try {
-            return getRecipient().getUser().getId() + "";
-        } catch (Exception e) {
-            return "NPE";
-        }
-    }
 
-    private String getUserDiff() {
-        StringBuilder sb = new StringBuilder(" Changed Users: ");
-        try {
-            if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
-                FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
-                Difference extraInfo = (Difference) userChange.getExtraInfo();
-                if (!extraInfo.getAdded().isEmpty()) {
-                    for (Object added : extraInfo.getAdded()) {
-                        sb.append(((UserParticipant) added).getIdentifier()).append(", ");
-                    }
-                }
-                if (!extraInfo.getRemoved().isEmpty()) {
-                    for (Object removed : extraInfo.getRemoved()) {
-                        sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
-                    }
+    private Object id() {
+        // Return as Object to avoid possibly superfluous String creation
+        return new Object() {
+
+            @Override
+            public String toString() {
+                try {
+                    return getRecipient().getUser().getId() + "";
+                } catch (Exception e) {
+                    return "NPE";
                 }
             }
-        } catch (Exception e) {
-            return "Error";
-        }
-        return sb.toString();
+        };
     }
 
-    private String diffs() {
-        try {
-            return getDiff().getDifferingFieldNames().toString();
-        } catch (Exception e) {
-            return "NPE";
-        }
+    private Object getUserDiff() {
+        // Return as Object to avoid possibly superfluous String creation
+        return new Object() {
+
+            @Override
+            public String toString() {
+                StringBuilder sb = new StringBuilder(" Changed Users: ");
+                try {
+                    if (getDiff().anyFieldChangedOf(AppointmentFields.USERS)) {
+                        FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
+                        Difference extraInfo = (Difference) userChange.getExtraInfo();
+                        if (!extraInfo.getAdded().isEmpty()) {
+                            for (Object added : extraInfo.getAdded()) {
+                                sb.append(((UserParticipant) added).getIdentifier()).append(", ");
+                            }
+                        }
+                        if (!extraInfo.getRemoved().isEmpty()) {
+                            for (Object removed : extraInfo.getRemoved()) {
+                                sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    return "Error";
+                }
+                return sb.toString();
+            }
+        };
     }
 
-    private String changes() {
-        try {
-            return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
-        } catch (Exception e) {
-            return "NPE";
-        }
+    private Object diffs() {
+        // Return as Object to avoid possibly superfluous String creation
+        return new Object() {
+
+            @Override
+            public String toString() {
+                try {
+                    return getDiff().getDifferingFieldNames().toString();
+                } catch (Exception e) {
+                    return "NPE";
+                }
+            }
+        };
     }
 
-    private String stateChanges() {
-        try {
-            return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
-        } catch (Exception e) {
-            return "NPE";
-        }
+    private Object changes() {
+        // Return as Object to avoid possibly superfluous String creation
+        return new Object() {
+
+            @Override
+            public String toString() {
+                try {
+                    return Boolean.toString(getRecipient().getConfiguration().interestedInChanges());
+                } catch (Exception e) {
+                    return "NPE";
+                }
+            }
+        };
+    }
+
+    private Object stateChanges() {
+        // Return as Object to avoid possibly superfluous String creation
+        return new Object() {
+
+            @Override
+            public String toString() {
+                try {
+                    return Boolean.toString(getRecipient().getConfiguration().interestedInStateChanges());
+                } catch (Exception e) {
+                    return "NPE";
+                }
+            }
+        };
     }
 
     private boolean onlyPseudoChangesOnParticipants() {
