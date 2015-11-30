@@ -56,8 +56,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -99,7 +99,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
                 createTable(conn);
             }
 
-            List<Alias> aliase = getAllAliasesInUserAttributes(conn);
+            Set<Alias> aliase = getAllAliasesInUserAttributes(conn);
             if (aliase != null && false == aliase.isEmpty()) {
                 insertAliases(conn, aliase);
             }
@@ -126,7 +126,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private List<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
+    private Set<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
 
@@ -134,10 +134,10 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
             stmt = conn.prepareStatement(SELECT_OLD_ALIAS_ENTRIES);
             rs = stmt.executeQuery();
             if (!rs.next()) {
-                return Collections.emptyList();
+                return Collections.emptySet();
             }
 
-            List<Alias> aliases = new LinkedList<Alias>();
+            Set<Alias> aliases = new LinkedHashSet<Alias>();
             int index;
             do {
                 index = 0;
@@ -153,7 +153,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private int insertAliases(Connection conn, List<Alias> aliases) throws SQLException {
+    private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = conn.prepareStatement(INSERT_ALIAS_IN_NEW_TABLE);
@@ -192,11 +192,18 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         private final int cid;
         private final int userId;
         private final String alias;
+        private final int hash;
 
-        public Alias(int cid, int userId, String alias) {
+        Alias(int cid, int userId, String alias) {
             this.cid = cid;
             this.userId = userId;
             this.alias = alias;
+
+            int prime = 31;
+            int result = prime * 1 + cid;
+            result = prime * result + userId;
+            result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+            this.hash = result;
         }
 
         public int getCid() {
@@ -210,5 +217,36 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         public String getAlias() {
             return alias;
         }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Alias)) {
+                return false;
+            }
+            Alias other = (Alias) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (alias == null) {
+                if (other.alias != null) {
+                    return false;
+                }
+            } else if (!alias.equals(other.alias)) {
+                return false;
+            }
+            return true;
+        }
     }
+
 }
