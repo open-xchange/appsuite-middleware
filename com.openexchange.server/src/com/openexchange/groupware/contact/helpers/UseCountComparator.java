@@ -52,6 +52,7 @@ package com.openexchange.groupware.contact.helpers;
 import java.util.Comparator;
 import java.util.Locale;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
@@ -75,6 +76,14 @@ public class UseCountComparator implements Comparator<Contact> {
         int comp = o2.getUseCount() - o1.getUseCount();
         if (0 != comp) {
             return comp;
+        }
+        if (o1.getParentFolderID() != o2.getParentFolderID()) {
+            if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+                return -1;
+            }
+            if (o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+                return 1;
+            }
         }
         if (null != contactComparator) {
             return contactComparator.compare(o1, o2);
