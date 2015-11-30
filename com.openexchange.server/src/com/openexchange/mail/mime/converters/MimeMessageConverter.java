@@ -1904,48 +1904,24 @@ public final class MimeMessageConverter {
                 }
             }
            {
-                final ContentType ct = mail.getContentType();
+                ContentType ct = mail.getContentType();
                 if (ct.startsWith(MULTI_PRIMTYPE)) {
                     if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
                         // For convenience consider multipart/mixed to hold file attachments
                         mail.setHasAttachment(true);
                     } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/mixed to hold file attachments
-                        mail.setHasAttachment(mail.getEnclosedCount() > 2);
-                    } else {
-                        // Examine Multipart object
-                        Object content = null;
-                        try {
-                            content = msg.getContent();
-                        } catch (final Exception ignore) {
-                            // Ignore
-                        }
-                        if (null == content) {
-                            // No multipart object
-                            mail.setHasAttachment(false);
+                        // For convenience consider multipart/alternative to hold file attachments if it has more than 2 sub-parts
+                        if (mail.getEnclosedCount() > 2) {
+                            mail.setHasAttachment(true);
                         } else {
-                            try {
-                                mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
-                            } catch (final OXException e) {
-                                if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
-                                    throw e;
-                                }
-                                // A messaging error occurred
-                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            } catch (final ClassCastException e) {
-                                // Cast to javax.mail.Multipart failed
-                                LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", content.getClass().getName());
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            } catch (final MessagingException e) {
-                                // A messaging error occurred
-                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            }
+                            examineAttachmentPresence(mail, ct);
                         }
+                    } else {
+                        // Examine...
+                        examineAttachmentPresence(mail, ct);
                     }
                 } else {
-                    // No multipart/*
+                    // No multipart/* at all
                     mail.setHasAttachment(false);
                 }
             }
@@ -2071,6 +2047,27 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void examineAttachmentPresence(MimeMailMessage mail, ContentType ct) throws IOException, OXException {
+        try {
+            mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
+        } catch (OXException e) {
+            if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                throw e;
+            }
+            // A messaging error occurred
+            LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+        } catch (ClassCastException e) {
+            // Cast to javax.mail.Multipart failed
+            LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but is not.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+        } catch (MessagingException e) {
+            // A messaging error occurred
+            LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
         }
     }
 

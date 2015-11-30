@@ -399,7 +399,7 @@ public class ContentType extends ParameterizedHeader {
 
     private String getLowerCaseBaseType() {
         if (null == lcBaseType) {
-            lcBaseType = toLowerCase(getBaseType());
+            lcBaseType = Strings.asciiLowerCase(getBaseType());
         }
         return lcBaseType;
     }
@@ -476,7 +476,7 @@ public class ContentType extends ParameterizedHeader {
                         }
                     }
                     baseType = new StringBuilder(16).append(primaryType).append(DELIMITER).append(subType).toString();
-                    lcBaseType = toLowerCase(baseType);
+                    lcBaseType = Strings.asciiLowerCase(baseType);
                     if (paramList) {
                         if (semicolonPos < 0) {
                             if (commaPos < 0) {
@@ -653,7 +653,7 @@ public class ContentType extends ParameterizedHeader {
         if (null == baseType) {
             throw new IllegalArgumentException("baseType is null");
         }
-        return getLowerCaseBaseType().equals(toLowerCase(baseType));
+        return getLowerCaseBaseType().equals(Strings.asciiLowerCase(baseType));
     }
 
     /**
@@ -834,7 +834,7 @@ public class ContentType extends ParameterizedHeader {
         if (null == prefix) {
             throw new IllegalArgumentException("Prefix is null");
         }
-        return getLowerCaseBaseType().startsWith(toLowerCase(prefix), 0);
+        return getLowerCaseBaseType().startsWith(Strings.asciiLowerCase(prefix), 0);
     }
 
     /**
@@ -849,7 +849,7 @@ public class ContentType extends ParameterizedHeader {
         }
         final String lowerCase = getLowerCaseBaseType();
         for (final String prefix : prefixes) {
-            if (null != prefix && lowerCase.startsWith(toLowerCase(prefix), 0)) {
+            if (null != prefix && lowerCase.startsWith(Strings.asciiLowerCase(prefix), 0)) {
                 return true;
             }
         }
@@ -913,15 +913,6 @@ public class ContentType extends ParameterizedHeader {
             return new StringBuilder(32).append(m.group(1)).append('/').append(subType).toString();
         }
         throw MailExceptionCode.INVALID_CONTENT_TYPE.create(mimeType);
-    }
-
-    private static String toLowerCase(final String s) {
-        final int length = s.length();
-        final StringBuilder sb = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            sb.append(Character.toLowerCase(s.charAt(i)));
-        }
-        return sb.toString();
     }
 
     /**
