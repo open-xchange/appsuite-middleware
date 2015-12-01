@@ -62,7 +62,9 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailAccountSMTPProperties.class);
 
-    private final MailAccount mailAccount;
+    private static final int PRIMARY = MailAccount.DEFAULT_ID;
+
+    private final int mailAccountId;
 
     /**
      * Initializes a new {@link MailAccountSMTPProperties}.
@@ -72,133 +74,203 @@ public final class MailAccountSMTPProperties extends MailAccountTransportPropert
      */
     public MailAccountSMTPProperties(final MailAccount mailAccount) {
         super(mailAccount);
-        this.mailAccount = mailAccount;
+        this.mailAccountId = mailAccount.getId();
     }
 
     @Override
     public String getSmtpAuthEnc() {
-        final String smtpAuthEncStr = properties.get("com.openexchange.smtp.smtpAuthEnc");
-        if (null == smtpAuthEncStr) {
-            return SMTPProperties.getInstance().getSmtpAuthEnc();
+        String smtpAuthEncStr = properties.get("com.openexchange.smtp.smtpAuthEnc");
+        if (null != smtpAuthEncStr) {
+
+            if (Charset.isSupported(smtpAuthEncStr)) {
+                return smtpAuthEncStr;
+            }
+            final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
+            LOG.error("SMTP Auth Encoding: Unsupported charset \"{}\". Setting to fallback {}", smtpAuthEncStr, fallback);
+            return fallback;
         }
 
-        if (Charset.isSupported(smtpAuthEncStr)) {
-            return smtpAuthEncStr;
+        if (mailAccountId == PRIMARY) {
+            smtpAuthEncStr = lookUpProperty("com.openexchange.smtp.primary.smtpAuthEnc");
+            if (null != smtpAuthEncStr) {
+
+                if (Charset.isSupported(smtpAuthEncStr)) {
+                    return smtpAuthEncStr;
+                }
+                final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
+                LOG.error("SMTP Auth Encoding: Unsupported charset \"{}\". Setting to fallback {}", smtpAuthEncStr, fallback);
+                return fallback;
+            }
         }
-        final String fallback = SMTPProperties.getInstance().getSmtpAuthEnc();
-        LOG.error("SMTP Auth Encoding: Unsupported charset \"{}\". Setting to fallback {}", smtpAuthEncStr, fallback);
-        return fallback;
+
+        return SMTPProperties.getInstance().getSmtpAuthEnc();
     }
 
     @Override
     public int getSmtpConnectionTimeout() {
-        final String smtpConTimeoutStr = properties.get("com.openexchange.smtp.smtpConnectionTimeout");
-        if (null == smtpConTimeoutStr) {
-            return SMTPProperties.getInstance().getSmtpConnectionTimeout();
+        String smtpConTimeoutStr = properties.get("com.openexchange.smtp.smtpConnectionTimeout");
+        if (null != smtpConTimeoutStr) {
+
+            try {
+                return Integer.parseInt(smtpConTimeoutStr);
+            } catch (final NumberFormatException e) {
+                LOG.error("SMTP Connection Timeout: Invalid value.", e);
+                return SMTPProperties.getInstance().getSmtpConnectionTimeout();
+            }
         }
 
-        try {
-            return Integer.parseInt(smtpConTimeoutStr);
-        } catch (final NumberFormatException e) {
-            LOG.error("SMTP Connection Timeout: Invalid value.", e);
-            return SMTPProperties.getInstance().getSmtpConnectionTimeout();
+        if (mailAccountId == PRIMARY) {
+            smtpConTimeoutStr = lookUpProperty("com.openexchange.smtp.primary.smtpConnectionTimeout");
+            if (null != smtpConTimeoutStr) {
+
+                try {
+                    return Integer.parseInt(smtpConTimeoutStr);
+                } catch (final NumberFormatException e) {
+                    LOG.error("SMTP Connection Timeout: Invalid value.", e);
+                    return SMTPProperties.getInstance().getSmtpConnectionTimeout();
+                }
+            }
         }
+
+        return SMTPProperties.getInstance().getSmtpConnectionTimeout();
     }
 
     @Override
     public String getSmtpLocalhost() {
-        final String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
-        if (null == smtpLocalhostStr) {
-            return SMTPProperties.getInstance().getSmtpLocalhost();
+        String smtpLocalhostStr = properties.get("com.openexchange.smtp.smtpLocalhost");
+        if (null != smtpLocalhostStr) {
+            return (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
         }
 
-        return (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
+        if (mailAccountId == PRIMARY) {
+            smtpLocalhostStr = lookUpProperty("com.openexchange.smtp.primary.smtpLocalhost");
+            if (null != smtpLocalhostStr) {
+                return (smtpLocalhostStr.length() == 0) || "null".equalsIgnoreCase(smtpLocalhostStr) ? null : smtpLocalhostStr;
+            }
+        }
+
+        return SMTPProperties.getInstance().getSmtpLocalhost();
     }
 
     @Override
     public int getSmtpTimeout() {
-        final String smtpTimeoutStr = properties.get("com.openexchange.smtp.smtpTimeout");
-        if (null == smtpTimeoutStr) {
-            return SMTPProperties.getInstance().getSmtpTimeout();
+        String smtpTimeoutStr = properties.get("com.openexchange.smtp.smtpTimeout");
+        if (null != smtpTimeoutStr) {
+            try {
+                return Integer.parseInt(smtpTimeoutStr.trim());
+            } catch (final NumberFormatException e) {
+                LOG.error("SMTP Timeout: Invalid value.", e);
+                return SMTPProperties.getInstance().getSmtpTimeout();
+            }
         }
 
-        try {
-            return Integer.parseInt(smtpTimeoutStr);
-        } catch (final NumberFormatException e) {
-            LOG.error("SMTP Timeout: Invalid value.", e);
-            return SMTPProperties.getInstance().getSmtpTimeout();
+        if (mailAccountId == PRIMARY) {
+            smtpTimeoutStr = lookUpProperty("com.openexchange.smtp.primary.smtpTimeout");
+            if (null != smtpTimeoutStr) {
+                try {
+                    return Integer.parseInt(smtpTimeoutStr.trim());
+                } catch (final NumberFormatException e) {
+                    LOG.error("SMTP Timeout: Invalid value.", e);
+                    return SMTPProperties.getInstance().getSmtpTimeout();
+                }
+            }
         }
+
+        return SMTPProperties.getInstance().getSmtpTimeout();
     }
 
     @Override
     public boolean isSmtpAuth() {
-        final String smtpAuthStr = properties.get("com.openexchange.smtp.smtpAuthentication");
-        if (null == smtpAuthStr) {
-            return SMTPProperties.getInstance().isSmtpAuth();
+        String smtpAuthStr = properties.get("com.openexchange.smtp.smtpAuthentication");
+        if (null != smtpAuthStr) {
+            return Boolean.parseBoolean(smtpAuthStr.trim());
         }
 
-        return Boolean.parseBoolean(smtpAuthStr);
+        if (mailAccountId == PRIMARY) {
+            smtpAuthStr = lookUpProperty("com.openexchange.smtp.primary.smtpAuthentication");
+            if (null != smtpAuthStr) {
+                return Boolean.parseBoolean(smtpAuthStr.trim());
+            }
+        }
+
+        return SMTPProperties.getInstance().isSmtpAuth();
     }
 
     @Override
     public boolean isSendPartial() {
-        final String smtpPartialStr = properties.get("com.openexchange.smtp.sendPartial");
-        if (null == smtpPartialStr) {
-            return SMTPProperties.getInstance().isSendPartial();
+        String smtpPartialStr = properties.get("com.openexchange.smtp.sendPartial");
+        if (null != smtpPartialStr) {
+            return Boolean.parseBoolean(smtpPartialStr.trim());
         }
 
-        return Boolean.parseBoolean(smtpPartialStr);
+        if (mailAccountId == PRIMARY) {
+            smtpPartialStr = lookUpProperty("com.openexchange.smtp.primary.sendPartial");
+            if (null != smtpPartialStr) {
+                return Boolean.parseBoolean(smtpPartialStr.trim());
+            }
+        }
+
+        return SMTPProperties.getInstance().isSendPartial();
     }
 
     @Override
     public boolean isSmtpEnvelopeFrom() {
-        final boolean retval;
-        if (mailAccount.getId() == 0) {
-            final String smtpEnvFromStr = properties.get("com.openexchange.smtp.setSMTPEnvelopeFrom");
-            if (null == smtpEnvFromStr) {
-                return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
-            }
-            retval = Boolean.parseBoolean(smtpEnvFromStr);
-        } else {
-            retval = false;
+        if (mailAccountId != PRIMARY) {
+            return false;
         }
-        return retval;
-    }
 
+        String smtpEnvFromStr = properties.get("com.openexchange.smtp.setSMTPEnvelopeFrom");
+        if (null == smtpEnvFromStr) {
+            return SMTPProperties.getInstance().isSmtpEnvelopeFrom();
+        }
+        return Boolean.parseBoolean(smtpEnvFromStr);
+    }
 
     @Override
     public boolean isLogTransport() {
-        final boolean retval;
-        if (mailAccount.getId() == 0) {
-            final String tmp = properties.get("com.openexchange.smtp.logTransport");
-            if (null == tmp) {
-                return SMTPProperties.getInstance().isLogTransport();
-            }
-            retval = Boolean.parseBoolean(tmp);
-        } else {
-            retval = false;
+        if (mailAccountId != PRIMARY) {
+            return false;
         }
-        return retval;
+
+        String tmp = properties.get("com.openexchange.smtp.logTransport");
+        if (null == tmp) {
+            return SMTPProperties.getInstance().isLogTransport();
+        }
+        return Boolean.parseBoolean(tmp);
     }
 
     @Override
     public String getSSLProtocols() {
-        final String tmp = properties.get("com.openexchange.smtp.ssl.protocols");
-        if (null == tmp) {
-            return SMTPProperties.getInstance().getSSLProtocols();
+        String tmp = properties.get("com.openexchange.smtp.ssl.protocols");
+        if (null != tmp) {
+            return tmp.trim();
         }
 
-        return tmp.trim();
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.smtp.primary.ssl.protocols");
+            if (null != tmp) {
+                return tmp.trim();
+            }
+        }
+
+        return SMTPProperties.getInstance().getSSLProtocols();
     }
 
     @Override
     public String getSSLCipherSuites() {
-        final String tmp = properties.get("com.openexchange.smtp.ssl.ciphersuites");
-        if (null == tmp) {
-            return SMTPProperties.getInstance().getSSLCipherSuites();
+        String tmp = properties.get("com.openexchange.smtp.ssl.ciphersuites");
+        if (null != tmp) {
+            return tmp.trim();
         }
 
-        return tmp.trim();
+        if (mailAccountId == PRIMARY) {
+            tmp = lookUpProperty("com.openexchange.smtp.primary.ssl.ciphersuites");
+            if (null != tmp) {
+                return tmp.trim();
+            }
+        }
+
+        return SMTPProperties.getInstance().getSSLCipherSuites();
     }
 
 }
