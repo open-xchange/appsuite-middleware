@@ -155,7 +155,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                     break;
                 case Participant.RESOURCE:
                     resources.add((ResourceParticipant) p);
-                    addResourceAttendee((ResourceParticipant) p, component, ctx);
+                    addResourceAttendee((ResourceParticipant) p, cObj, component, ctx);
                     break;
                 default:
             }
@@ -171,7 +171,7 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         setResources(index, component, resources, ctx);
     }
 
-    protected void addResourceAttendee(ResourceParticipant resourceParticipant, T component, Context ctx) {
+    protected void addResourceAttendee(ResourceParticipant resourceParticipant, U calendarObject, T component, Context ctx) {
         Attendee attendee = new Attendee();
         try {
             attendee.setValue("urn:uuid:" + encode(ctx.getContextId(), Participant.RESOURCE, resourceParticipant.getIdentifier()));
@@ -180,12 +180,20 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
             parameters.add(PartStat.ACCEPTED);
             parameters.add(Role.REQ_PARTICIPANT);
             String displayName = resourceParticipant.getDisplayName();
-            if (Strings.isEmpty(displayName)) {
-                try {
-                    displayName = resourceResolver.load(resourceParticipant.getIdentifier(), ctx).getDisplayName();
-                } catch (OXException e) {
-                    LOG.warn("Error resolving resource participant", e);
+            try {
+                Resource resource = resourceResolver.load(resourceParticipant.getIdentifier(), ctx);
+                displayName = resource.getDisplayName();
+                /*
+                 * add resource description as attendee's comment for organizer if available
+                 */
+                if (Strings.isNotEmpty(resource.getDescription()) &&
+                    Boolean.TRUE.equals(calendarObject.getProperty("com.openexchange.data.conversion.ical.participants.attendeeComments"))) {
+                    XProperty attendeeCommentProperty = new XProperty("X-CALENDARSERVER-ATTENDEE-COMMENT", resource.getDescription());
+                    attendeeCommentProperty.getParameters().add(new XParameter("X-CALENDARSERVER-ATTENDEE-REF", attendee.getValue()));
+                    component.getProperties().add(attendeeCommentProperty);
                 }
+            } catch (OXException e) {
+                LOG.warn("Error resolving resource participant", e);
             }
             parameters.add(new Cn(displayName));
             component.getProperties().add(attendee);

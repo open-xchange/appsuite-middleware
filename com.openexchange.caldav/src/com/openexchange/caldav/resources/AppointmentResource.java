@@ -528,7 +528,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             if (null != changeExceptions && 0 < changeExceptions.length) {
                 for (CalendarDataObject changeException : changeExceptions) {
                     applyReminderProperties(changeException);
-                    applyPrivateComments(appointment);
+                    applyPrivateComments(changeException);
                     icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
                 }
             }
