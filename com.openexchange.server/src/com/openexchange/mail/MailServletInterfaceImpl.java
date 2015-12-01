@@ -191,6 +191,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -2956,6 +2957,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
             if (null != retentionService) {
                 triggerDataRetention(transport, startTransport, sentMail, validRecipients, retentionService);
+            }
+
+            ObjectUseCountService objectUseCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != objectUseCountService) {
+                Set<InternetAddress> addresses = new HashSet<InternetAddress>();
+                addresses.addAll(Arrays.asList(composedMail.getAllRecipients()));
+                objectUseCountService.incrementObjectUseCount(session, addresses);
             }
             /*
              * Check for a reply/forward

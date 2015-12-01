@@ -64,6 +64,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
@@ -126,9 +127,7 @@ public class AutocompleteAction extends ContactAction {
          */
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        }
+        Collections.sort(contacts, new UseCountComparator(request.getSession().getUser().getLocale()));
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

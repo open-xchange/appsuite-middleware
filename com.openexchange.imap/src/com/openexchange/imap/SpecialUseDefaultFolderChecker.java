@@ -90,6 +90,11 @@ public class SpecialUseDefaultFolderChecker extends IMAPDefaultFolderChecker {
     }
 
     @Override
+    protected boolean setSpecialUseForExisting() {
+        return hasCreateSpecialUse;
+    }
+
+    @Override
     protected void createIfNonExisting(IMAPFolder f, int type, char sep, String namespace, int index) throws MessagingException {
         if (!f.exists()) {
             try {

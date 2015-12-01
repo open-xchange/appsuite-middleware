@@ -1541,7 +1541,7 @@ public final class IMAPCommandsCollection {
                 // Craft IMAP command
                 String command;
                 {
-                    StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox);
+                    StringBuilder cmdBuilder = new StringBuilder(32).append("SETMETADATA ").append(mbox).append(' ');
                     cmdBuilder.append("(");
                     for (String specialUse : specialUses) {
                         cmdBuilder.append("/private/specialuse ");

@@ -333,7 +333,7 @@ public final class Tools {
         if (forAutocomplete || (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions) && null != sortOptions.getOrder())) {
             stringBuilder.append("ORDER BY ");
             if (forAutocomplete) {
-                stringBuilder.append("value DESC, ");
+                stringBuilder.append("value DESC, fid ASC, ");
             }
             final SortOrder[] order = sortOptions.getOrder();
             if (null != order && 0 < order.length) {
