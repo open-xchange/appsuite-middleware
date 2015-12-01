@@ -49,7 +49,12 @@
 
 package com.openexchange.onboarding;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -95,6 +100,7 @@ public enum Device implements IdEntity {
     private final String displayNameProperty;
     private final String iconProperty;
     private final String descriptionProperty;
+    private final String scenariosProperty;
 
     private final String defaultDisplayName;
     private final String defaultIcon;
@@ -111,6 +117,7 @@ public enum Device implements IdEntity {
         displayNameProperty = prefix + ".displayName";
         iconProperty = prefix + ".icon";
         descriptionProperty = prefix + ".description";
+        scenariosProperty = prefix + ".scenarios";
 
         this.defaultDisplayName = defaultDisplayName;
         this.defaultIcon = defaultIcon;
@@ -129,6 +136,33 @@ public enum Device implements IdEntity {
      */
     public Platform getPlatform() {
         return platform;
+    }
+
+    /**
+     * Checks if there are any user-associated scenarios for this device.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if there is at least one scenario; otherwise <code>false</code> if there is none
+     * @throws OXException If scenarios cannot be checked
+     */
+    public boolean hasScenarios(Session session) throws OXException {
+        String proprSceanrios = OnboardingUtility.getValueFromProperty(scenariosProperty, null, session);
+        return (Strings.isEmpty(proprSceanrios));
+    }
+
+    /**
+     * Gets the identifiers for the user-associated scenarios for this device.
+     *
+     * @param session The session providing user data
+     * @return The identifiers for the user-associated scenarios
+     * @throws OXException If scenarios cannot be returned
+     */
+    public List<String> getScenarios(Session session) throws OXException {
+        String scenarioIds = OnboardingUtility.getValueFromProperty(scenariosProperty, null, session);
+        if (Strings.isEmpty(scenarioIds)) {
+            return Collections.emptyList();
+        }
+        return new ArrayList<String>(Arrays.asList(Strings.splitByComma(scenarioIds)));
     }
 
     @Override

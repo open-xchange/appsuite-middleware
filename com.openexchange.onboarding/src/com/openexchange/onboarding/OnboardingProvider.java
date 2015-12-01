@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,38 @@
  *
  */
 
-package com.openexchange.onboarding.imap.osgi;
+package com.openexchange.onboarding;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.context.ContextService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.onboarding.imap.IMAPOnboardingProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link IMAPOnboardingConfigurationActivator}
+ * {@link OnboardingProvider} - Represents an on-boarding provider suitable for configuring/integrating a client for communicating
+ * with the Open-Xchange Middleware.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator {
+public interface OnboardingProvider extends IdEntity, OnboardingExecutor {
 
     /**
-     * Initializes a new {@link IMAPOnboardingConfigurationActivator}.
+     * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
+     *
+     * @param session The session providing user data
+     * @return The paths to the dedicated on-boarding configuration selections.
+     * @throws OXException If paths cannot be returned
      */
-    public IMAPOnboardingConfigurationActivator() {
-        super();
-    }
+    List<EntityPath> getEntityPaths(Session session) throws OXException;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, CapabilityService.class, MailService.class, NotificationMailFactory.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new IMAPOnboardingProvider(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-    }
+    /**
+     * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
+     *
+     * @param entityPath The entity path
+     * @param session The session providing user data
+     * @return The available selections
+     * @throws OXException If denoted entity has no selections or selections cannot be returned
+     */
+    List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException;
 
 }

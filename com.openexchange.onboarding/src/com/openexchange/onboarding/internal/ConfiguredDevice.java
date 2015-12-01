@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,59 @@
  *
  */
 
-package com.openexchange.onboarding.imap.osgi;
+package com.openexchange.onboarding.internal;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.context.ContextService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.onboarding.imap.IMAPOnboardingProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.List;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Platform;
 
 /**
- * {@link IMAPOnboardingConfigurationActivator}
+ * {@link ConfiguredDevice}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator {
+public class ConfiguredDevice {
+
+    private final Platform platform;
+    private final Device device;
+    private final List<String> scenarios;
 
     /**
-     * Initializes a new {@link IMAPOnboardingConfigurationActivator}.
+     * Initializes a new {@link ConfiguredDevice}.
      */
-    public IMAPOnboardingConfigurationActivator() {
+    public ConfiguredDevice(Platform platform, Device device, List<String> scenarios) {
         super();
+        this.platform = platform;
+        this.device = device;
+        this.scenarios = scenarios;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, CapabilityService.class, MailService.class, NotificationMailFactory.class };
+    /**
+     * Gets the platform
+     *
+     * @return The platform
+     */
+    public Platform getPlatform() {
+        return platform;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new IMAPOnboardingProvider(this));
+    /**
+     * Gets the device
+     *
+     * @return The device
+     */
+    public Device getDevice() {
+        return device;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
+    /**
+     * Gets the scenarios associated with this device
+     *
+     * @return The scenarios
+     */
+    public List<String> getScenarios() {
+        return scenarios;
     }
 
 }

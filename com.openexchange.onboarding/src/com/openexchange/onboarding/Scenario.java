@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,39 @@
  *
  */
 
-package com.openexchange.onboarding.imap.osgi;
+package com.openexchange.onboarding;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.context.ContextService;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.onboarding.imap.IMAPOnboardingProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import java.util.List;
+import com.openexchange.session.Session;
 
 /**
- * {@link IMAPOnboardingConfigurationActivator}
+ * {@link Scenario} - An on-boarding scenario.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator {
+public interface Scenario extends IdEntity {
 
     /**
-     * Initializes a new {@link IMAPOnboardingConfigurationActivator}.
+     * Gets the associated type for this scenario.
+     *
+     * @return The type
      */
-    public IMAPOnboardingConfigurationActivator() {
-        super();
-    }
+    OnboardingType getType();
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, CapabilityService.class, MailService.class, NotificationMailFactory.class };
-    }
+    /**
+     * Gets the associated on-boarding providers.
+     *
+     * @param session The session to use
+     * @return The provider list
+     */
+    List<OnboardingProvider> getProviders(Session session);
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new IMAPOnboardingProvider(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
-    }
+    /**
+     * Gets the alternative scenarios.
+     *
+     * @return The alternative scenarios
+     */
+    List<Scenario> getAlternatives(Session session);
 
 }

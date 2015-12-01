@@ -61,7 +61,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.onboarding.DefaultClientInfo;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
 import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.Result;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -107,7 +107,7 @@ public class ExecuteAction extends AbstractOnboardingAction {
         // Create on-boarding request & execute it
         DefaultClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
         DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(selection, clientInfo, requestData.getHostData(), formContent);
-        OnboardingConfiguration configuration = selection.getEntityPath().getService();
+        OnboardingProvider configuration = selection.getEntityPath().getService();
         Result onboardingResult = configuration.execute(onboardingRequest, session);
 
         // Return execution result

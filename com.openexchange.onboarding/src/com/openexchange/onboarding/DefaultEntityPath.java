@@ -61,7 +61,7 @@ import org.apache.commons.lang.Validate;
  */
 public class DefaultEntityPath implements EntityPath {
 
-    private final OnboardingConfiguration service;
+    private final OnboardingProvider service;
     private final Platform platform;
     private final Collection<IdEntity> col;
     private final Module module;
@@ -71,21 +71,21 @@ public class DefaultEntityPath implements EntityPath {
     /**
      * Initializes a new {@link DefaultEntityPath}.
      */
-    public DefaultEntityPath(OnboardingConfiguration service, Device device, Module module) {
+    public DefaultEntityPath(OnboardingProvider service, Device device, Module module) {
         this(service, device.getPlatform(), device, module, null);
     }
 
     /**
      * Initializes a new {@link DefaultEntityPath}.
      */
-    public DefaultEntityPath(OnboardingConfiguration service, Platform platform, Device device, Module module) {
+    public DefaultEntityPath(OnboardingProvider service, Platform platform, Device device, Module module) {
         this(service, platform, device, module, null);
     }
 
     /**
      * Initializes a new {@link DefaultEntityPath}.
      */
-    public DefaultEntityPath(OnboardingConfiguration service, Platform platform, Device device, Module module, Collection<IdEntity> col) {
+    public DefaultEntityPath(OnboardingProvider service, Platform platform, Device device, Module module, Collection<IdEntity> col) {
         super();
         Validate.notNull(service, "Service must not be null.");
         Validate.notNull(platform, "Platform must not be null.");
@@ -124,7 +124,7 @@ public class DefaultEntityPath implements EntityPath {
     }
 
     @Override
-    public OnboardingConfiguration getService() {
+    public OnboardingProvider getService() {
         return service;
     }
 

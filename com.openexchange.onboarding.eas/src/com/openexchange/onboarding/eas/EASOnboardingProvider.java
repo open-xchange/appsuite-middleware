@@ -84,7 +84,7 @@ import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -103,13 +103,13 @@ import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
 
 /**
- * {@link EASOnboardingConfiguration}
+ * {@link EASOnboardingProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class EASOnboardingConfiguration implements OnboardingConfiguration {
+public class EASOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String propertyPrefix;
@@ -118,9 +118,9 @@ public class EASOnboardingConfiguration implements OnboardingConfiguration {
     private final EnumSet<Module> supportedModules;
 
     /**
-     * Initializes a new {@link EASOnboardingConfiguration}.
+     * Initializes a new {@link EASOnboardingProvider}.
      */
-    public EASOnboardingConfiguration(ServiceLookup services) {
+    public EASOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
         propertyPrefix = "com.openexchange.onboarding.eas";

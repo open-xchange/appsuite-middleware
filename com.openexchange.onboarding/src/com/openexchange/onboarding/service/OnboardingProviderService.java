@@ -51,43 +51,43 @@ package com.openexchange.onboarding.service;
 
 import java.util.Collection;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingConfigurationService} - The service for {@link OnboardingConfiguration configurations}.
+ * {@link OnboardingProviderService} - The service for {@link OnboardingProvider providers}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
 @SingletonService
-public interface OnboardingConfigurationService {
+public interface OnboardingProviderService {
 
     /**
-     * Gets all currently registered {@link OnboardingConfiguration configurations}.
+     * Gets all currently registered {@link OnboardingProvider providers}.
      *
-     * @return All configurations
-     * @throws OXException If configurations cannot be returned
+     * @return All providers
+     * @throws OXException If providers cannot be returned
      */
-    Collection<OnboardingConfiguration> getAllConfigurations() throws OXException;
+    Collection<OnboardingProvider> getAllProviders() throws OXException;
 
     /**
-     * Gets the specified {@link OnboardingConfiguration configurations}.
+     * Gets the specified {@link OnboardingProvider provider}.
      *
-     * @return The specified configuration
-     * @throws OXException If configuration cannot be returned
+     * @return The specified provider
+     * @throws OXException If provider cannot be returned
      */
-    OnboardingConfiguration getConfiguration(String id) throws OXException;
+    OnboardingProvider getProvider(String id) throws OXException;
 
     /**
-     * Gets the currently available {@link OnboardingConfiguration configurations} for the session-associated user.
+     * Gets the currently available {@link OnboardingProvider providers} for the session-associated user.
      *
      * @param session The session
-     * @return The currently available configurations
-     * @throws OXException If configurations cannot be returned
+     * @return The currently available providers
+     * @throws OXException If providers cannot be returned
      */
-    Collection<OnboardingConfiguration> getAvailableConfigurationsFor(Session session) throws OXException;
+    Collection<OnboardingProvider> getAvailableProvidersFor(Session session) throws OXException;
 
     /**
      * Gets the on-boarding view for specified session

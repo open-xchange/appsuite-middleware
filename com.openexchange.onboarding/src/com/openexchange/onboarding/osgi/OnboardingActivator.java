@@ -50,12 +50,14 @@
 package com.openexchange.onboarding.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.onboarding.internal.OnboardingConfigurationRegistry;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.onboarding.internal.OnboardingProviderRegistry;
+import com.openexchange.onboarding.internal.OnboardingInit;
+import com.openexchange.onboarding.service.OnboardingProviderService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.uadetector.UserAgentParser;
@@ -69,7 +71,7 @@ import com.openexchange.user.UserService;
  */
 public class OnboardingActivator extends HousekeepingActivator {
 
-    private volatile OnboardingConfigurationRegistry registry;
+    private volatile OnboardingProviderRegistry registry;
 
     /**
      * Initializes a new {@link OnboardingActivator}.
@@ -88,22 +90,23 @@ public class OnboardingActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
 
-        OnboardingConfigurationRegistry registry = new OnboardingConfigurationRegistry(context);
+        OnboardingProviderRegistry registry = new OnboardingProviderRegistry(context, OnboardingInit.initScenarios(getService(ConfigurationService.class)));
         registry.open();
         this.registry = registry;
-        addService(OnboardingConfigurationService.class, registry);
+        addService(OnboardingProviderService.class, registry);
 
-        registerService(OnboardingConfigurationService.class, registry);
+        registerService(OnboardingProviderService.class, registry);
+        registerService(Reloadable.class, registry);
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
 
-        OnboardingConfigurationRegistry registry = this.registry;
+        OnboardingProviderRegistry registry = this.registry;
         if (null != registry) {
             this.registry = null;
-            removeService(OnboardingConfigurationService.class);
+            removeService(OnboardingProviderService.class);
             registry.close();
         }
 

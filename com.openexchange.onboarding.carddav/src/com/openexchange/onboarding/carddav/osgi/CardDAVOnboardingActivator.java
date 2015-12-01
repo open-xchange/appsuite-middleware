@@ -54,8 +54,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.carddav.CardDAVOnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.carddav.CardDAVOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -84,8 +84,8 @@ public class CardDAVOnboardingActivator extends HousekeepingActivator {
         trackService(MailService.class);
         openTrackers();
 
-        CardDAVOnboardingConfiguration onboardingConfiguration = new CardDAVOnboardingConfiguration(this);
-        registerService(OnboardingConfiguration.class, onboardingConfiguration);
+        CardDAVOnboardingProvider onboardingConfiguration = new CardDAVOnboardingProvider(this);
+        registerService(OnboardingProvider.class, onboardingConfiguration);
     }
 
 }

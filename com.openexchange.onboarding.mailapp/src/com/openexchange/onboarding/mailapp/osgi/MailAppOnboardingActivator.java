@@ -50,8 +50,8 @@
 package com.openexchange.onboarding.mailapp.osgi;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.mailapp.MailAppOnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.mailapp.MailAppOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -77,8 +77,8 @@ public class MailAppOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        MailAppOnboardingConfiguration config = new MailAppOnboardingConfiguration(this);
-        registerService(OnboardingConfiguration.class, config);
+        MailAppOnboardingProvider config = new MailAppOnboardingProvider(this);
+        registerService(OnboardingProvider.class, config);
     }
 
     @Override

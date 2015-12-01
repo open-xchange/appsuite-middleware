@@ -49,19 +49,15 @@
 
 package com.openexchange.onboarding.internal;
 
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.LinkedList;
 import java.util.List;
-import com.openexchange.exception.OXException;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.EntityPath;
-import com.openexchange.onboarding.Module;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingView;
-import com.openexchange.session.Session;
 
 /**
  * {@link OnboardingViewImpl}
@@ -72,9 +68,7 @@ import com.openexchange.session.Session;
 public class OnboardingViewImpl implements OnboardingView {
 
     private final EnumSet<Platform> platforms;
-    private final EnumSet<Device> devices;
-    private final EnumSet<Module> modules;
-    private final List<OnboardingSelection> selections;
+    private final EnumMap<Device, List<String>> devices;
 
     /**
      * Initializes a new {@link OnboardingViewImpl}.
@@ -82,59 +76,45 @@ public class OnboardingViewImpl implements OnboardingView {
     public OnboardingViewImpl() {
         super();
         platforms = EnumSet.noneOf(Platform.class);
-        devices = EnumSet.noneOf(Device.class);
-        modules = EnumSet.noneOf(Module.class);
-        selections = new LinkedList<OnboardingSelection>();
+        devices = new EnumMap<Device, List<String>>(Device.class);
     }
 
     /**
-     * Adds the specified on-boarding configurations to this view
+     * Adds the specified on-boarding devices to this view
      *
-     * @param configurations The configurations to add
-     * @param session The session providing user data
-     * @throws OXException If adding to this view fails
+     * @param availableDevices The available devices to add
      */
-    public void add(Collection<OnboardingConfiguration> configurations, Session session) throws OXException {
-        for (OnboardingConfiguration configuration : configurations) {
-            add(configuration, session);
+    public void add(Map<Device, List<String>> availableDevices) {
+        for (Map.Entry<Device, List<String>> availableDevice : availableDevices.entrySet()) {
+            add(availableDevice.getKey(), availableDevice.getValue());
         }
     }
 
     /**
-     * Adds the specified on-boarding configuration to this view
+     * Adds the specified on-boarding device to this view
      *
-     * @param configuration The configuration to add
-     * @param session The session providing user data
-     * @throws OXException If adding to this view fails
+     * @param device The device to add
+     * @param compositeIds The composite identifiers for available scenarios
      */
-    public void add(OnboardingConfiguration configuration, Session session) throws OXException {
-        List<EntityPath> entityPaths = configuration.getEntityPaths(session);
-        for (EntityPath entityPath : entityPaths) {
-            platforms.add(entityPath.getPlatform());
-            devices.add(entityPath.getDevice());
-            modules.add(entityPath.getModule());
-            selections.addAll(configuration.getSelections(entityPath, session));
+    public void add(Device device, List<String> compositeIds) {
+        platforms.add(device.getPlatform());
+
+        List<String> existingCompositeIds = this.devices.get(device);
+        if (null == existingCompositeIds) {
+            existingCompositeIds = new ArrayList<String>(compositeIds.size());
+            this.devices.put(device, existingCompositeIds);
         }
+        existingCompositeIds.addAll(compositeIds);
     }
 
     @Override
-    public EnumSet<Platform> getPlatforms() {
+    public Set<Platform> getPlatforms() {
         return platforms;
     }
 
     @Override
-    public EnumSet<Device> getDevices() {
+    public Map<Device, List<String>> getDevices() {
         return devices;
-    }
-
-    @Override
-    public EnumSet<Module> getModules() {
-        return modules;
-    }
-
-    @Override
-    public List<OnboardingSelection> getSelections() {
-        return selections;
     }
 
 }

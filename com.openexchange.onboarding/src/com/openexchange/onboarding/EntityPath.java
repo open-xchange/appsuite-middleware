@@ -71,7 +71,7 @@ public interface EntityPath {
      *
      * @return The on-boarding configuration service
      */
-    OnboardingConfiguration getService();
+    OnboardingProvider getService();
 
     /**
      * Gets the associated platform.

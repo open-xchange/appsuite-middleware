@@ -65,7 +65,7 @@ import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -80,12 +80,12 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link MailAppOnboardingConfiguration}
+ * {@link MailAppOnboardingProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
+public class MailAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String propertyPrefix;
@@ -93,9 +93,9 @@ public class MailAppOnboardingConfiguration implements OnboardingConfiguration {
     private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
 
     /**
-     * Initializes a new {@link MailAppOnboardingConfiguration}.
+     * Initializes a new {@link MailAppOnboardingProvider}.
      */
-    public MailAppOnboardingConfiguration(ServiceLookup services) {
+    public MailAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
         propertyPrefix = "com.openexchange.onboarding.mailapp";

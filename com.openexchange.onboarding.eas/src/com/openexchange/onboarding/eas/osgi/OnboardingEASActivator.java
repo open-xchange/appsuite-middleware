@@ -53,8 +53,8 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.eas.EASOnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.eas.EASOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -81,8 +81,8 @@ public class OnboardingEASActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        EASOnboardingConfiguration config = new EASOnboardingConfiguration(this);
-        registerService(OnboardingConfiguration.class, config);
+        EASOnboardingProvider config = new EASOnboardingProvider(this);
+        registerService(OnboardingProvider.class, config);
     }
 
     @Override
