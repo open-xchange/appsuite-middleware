@@ -82,7 +82,7 @@ public class DAVProperty extends WebdavProperty {
 
     /**
      * Gets the XML element.
-     *
+     * 
      * @return The element
      */
     public Element getElement() {

@@ -96,7 +96,7 @@ public class UserPrincipalResource extends DAVResource {
             new CalendarUserType(CUType.INDIVIDUAL), new RecordType(RecordType.RECORD_TYPE_USER),
             new ResourceId(factory.getContext().getContextId(), user.getId(), CUType.INDIVIDUAL),
             new GroupMembership(user.getGroups())
-            );
+        );
     }
 
     /**

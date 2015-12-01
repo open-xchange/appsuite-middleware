@@ -50,13 +50,13 @@
 package com.openexchange.caldav.resources;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
@@ -83,7 +83,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CalDAVRootCollection extends DAVCollection {
+public class CalDAVRootCollection extends DAVRootCollection {
 
     /**
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
@@ -101,7 +101,7 @@ public class CalDAVRootCollection extends DAVCollection {
      * @param factory the factory
      */
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
-        super(factory, GroupwareCaldavFactory.ROOT_URL);
+        super(factory, "Calendars");
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
@@ -118,16 +118,6 @@ public class CalDAVRootCollection extends DAVCollection {
             this.subfolders = getVisibleFolders();
         }
         return subfolders;
-    }
-
-    @Override
-    public Date getCreationDate() throws WebdavProtocolException {
-        return new Date(0);
-    }
-
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
-        return new Date(0);
     }
 
     @Override
@@ -185,11 +175,6 @@ public class CalDAVRootCollection extends DAVCollection {
 
         LOG.debug("{}: got {} child resources.", getUrl(), children.size());
         return children;
-    }
-
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return "Calendars";
     }
 
     /**

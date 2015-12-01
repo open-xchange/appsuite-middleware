@@ -57,6 +57,9 @@ import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.java.Strings;
@@ -86,6 +89,14 @@ public class GroupPrincipalCollection extends DAVCollection {
         super(factory, URL);
         this.factory = factory;
         includeProperties(new CurrentUserPrincipal(factory));
+    }
+
+    @Override
+    public Permission[] getPermissions() {
+        return new Permission[] {
+            new DefaultPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
+                Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
+        };
     }
 
     @Override

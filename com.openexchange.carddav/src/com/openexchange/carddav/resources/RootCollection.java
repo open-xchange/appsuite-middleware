@@ -50,20 +50,19 @@
 package com.openexchange.carddav.resources;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.mixins.DummySyncToken;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.groupware.container.CommonObject;
-import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -72,13 +71,12 @@ import com.openexchange.webdav.protocol.WebdavResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RootCollection extends DAVCollection {
+public class RootCollection extends DAVRootCollection {
 
     private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
     private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
     private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RootCollection.class);
-    private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
 
@@ -93,7 +91,7 @@ public class RootCollection extends DAVCollection {
      * @param factory the factory
      */
     public RootCollection(GroupwareCarddavFactory factory) {
-    	super(factory, new WebdavPath());
+    	super(factory, "Addressbooks");
     	this.factory = factory;
         includeProperties(new DummySyncToken());
     }
@@ -127,11 +125,6 @@ public class RootCollection extends DAVCollection {
 		}
 		LOG.debug("{}: got {} child resources.", getUrl(), children.size());
 		return children;
-	}
-
-	@Override
-	public String getDisplayName() throws WebdavProtocolException {
-		return DISPLAY_NAME;
 	}
 
     /**
@@ -226,16 +219,6 @@ public class RootCollection extends DAVCollection {
 		    return getUserAgentForAggregatedCollection().matcher(userAgent).find();
 		}
 		return false;
-	}
-
-	@Override
-	public Date getCreationDate() throws WebdavProtocolException {
-		return new Date(0);
-	}
-
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-		return new Date(0);
 	}
 
     private CardDAVCollection createFolderCollection(UserizedFolder folder) throws WebdavProtocolException {

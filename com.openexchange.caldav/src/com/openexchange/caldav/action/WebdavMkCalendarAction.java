@@ -57,6 +57,7 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.dav.DAVProperty;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Streams;
 import com.openexchange.webdav.action.AbstractAction;
@@ -112,7 +113,8 @@ public class WebdavMkCalendarAction extends AbstractAction {
                             if (req.getFactory().getProtocol().isProtected(propertyElement.getNamespaceURI(), propertyElement.getName())) {
                                 throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
                             } else {
-                                resource.putProperty(getProperty(propertyElement));
+                                resource.putProperty(new DAVProperty(propertyElement));
+//                                resource.putProperty(getProperty(propertyElement));
                             }
                         }
                     }

@@ -50,19 +50,14 @@
 package com.openexchange.dav.principals;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.dav.Privilege;
-import com.openexchange.dav.mixins.CurrentUserPrincipal;
-import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
-import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.principals.groups.GroupPrincipalCollection;
 import com.openexchange.dav.principals.resources.ResourcePrincipalCollection;
 import com.openexchange.dav.principals.users.UserPrincipalCollection;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.java.Strings;
-import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -72,7 +67,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class RootPrincipalCollection extends DAVCollection {
+public class RootPrincipalCollection extends DAVRootCollection {
 
     private final PrincipalFactory factory;
 
@@ -82,44 +77,17 @@ public class RootPrincipalCollection extends DAVCollection {
      * @param factory The factory
      */
     public RootPrincipalCollection(PrincipalFactory factory) {
-        super(factory, new WebdavPath());
+        super(factory, "Principals");
         this.factory = factory;
-        includeProperties(new CurrentUserPrincipal(factory), new PrincipalCollectionSet(),
-            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET));
-    }
-
-    @Override
-    public String getResourceType() throws WebdavProtocolException {
-        return "httpd/unix-directory";
-    }
-
-    @Override
-    protected void internalDelete() throws WebdavProtocolException {
-        throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_FORBIDDEN);
     }
 
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
-        List<WebdavResource> children = new ArrayList<WebdavResource>(2);
+        List<WebdavResource> children = new ArrayList<WebdavResource>(3);
         children.add(new UserPrincipalCollection(factory));
         children.add(new GroupPrincipalCollection(factory));
         children.add(new ResourcePrincipalCollection(factory));
         return children;
-    }
-
-    @Override
-    public Date getCreationDate() throws WebdavProtocolException {
-        return new Date(0L);
-    }
-
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
-        return new Date(0L);
-    }
-
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return "Principals";
     }
 
     @Override

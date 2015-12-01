@@ -79,6 +79,9 @@ import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.freebusy.FreeBusyData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
@@ -112,6 +115,14 @@ public class ScheduleOutboxCollection extends DAVCollection {
     public ScheduleOutboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleOutboxURL.SCHEDULE_OUTBOX));
         this.factory = factory;
+    }
+
+    @Override
+    public Permission[] getPermissions() {
+        return new Permission[] {
+            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
+                Permission.CREATE_OBJECTS_IN_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
+        };
     }
 
     @Override

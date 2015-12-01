@@ -114,6 +114,11 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         }
     }
 
+    @Override
+    public Permission[] getPermissions() {
+        return folder.getPermissions();
+    }
+
     /**
      * Gets all objects that have been created or modified since the supplied time.
      *

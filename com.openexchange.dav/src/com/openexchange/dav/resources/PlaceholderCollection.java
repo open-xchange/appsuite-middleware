@@ -120,15 +120,26 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
 
     @Override
     protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
+        Element element = DAVProperty.class.isInstance(property) ? ((DAVProperty) property).getElement() : null;
         if (DAVProtocol.CAL_NS.getURI().equals(property.getNamespace()) && "supported-calendar-component-set".equals(property.getName())) {
-            String value = property.getValue();
-            if (property.isXML()) {
-                // try to extract comp attribute from xml fragment
-                Pattern compNameRegex = Pattern.compile("name=\\\"(.+?)\\\"",
-                    Pattern.DOTALL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.MULTILINE);
-                Matcher regexMatcher = compNameRegex.matcher(value);
-                if (regexMatcher.find()) {
-                    value = regexMatcher.group(1);
+            String value = null;
+            if (null != element) {
+                for (Element compElement : element.getChildren("comp", DAVProtocol.CAL_NS)) {
+                    String name = null != compElement.getAttribute("name") ? compElement.getAttribute("name").getValue() : null;
+                    if (SupportedCalendarComponentSet.VTODO.equalsIgnoreCase(name) || SupportedCalendarComponentSet.VEVENT.equalsIgnoreCase(name)) {
+                        value = name;
+                    }
+                }
+            } else {
+                value = property.getValue();
+                if (property.isXML()) {
+                    // try to extract comp attribute from xml fragment
+                    Pattern compNameRegex = Pattern.compile("name=\\\"(.+?)\\\"",
+                        Pattern.DOTALL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.MULTILINE);
+                    Matcher regexMatcher = compNameRegex.matcher(value);
+                    if (regexMatcher.find()) {
+                        value = regexMatcher.group(1);
+                    }
                 }
             }
             if (SupportedCalendarComponentSet.VTODO.equalsIgnoreCase(value)) {
@@ -138,8 +149,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
             } else {
                 throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
             }
-        } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && DAVProperty.class.isInstance(property)) {
-            Element element = ((DAVProperty) property).getElement();
+        } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && null != element) {
             if (null != element.getChild("addressbook", DAVProtocol.CARD_NS)) {
                 contentType = ContactContentType.getInstance();
             } else if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
@@ -151,7 +161,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
             String value = CalendarColor.parse(property);
             meta.put("color", value);
         } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "displayname".equals(property.getName())) {
-            displayName = property.getValue();
+            displayName = null != element ? element.getValue() : property.getValue();
         } else if (factory.getProtocol().isProtected(property.getNamespace(), property.getName())) {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_CONFLICT);
         }

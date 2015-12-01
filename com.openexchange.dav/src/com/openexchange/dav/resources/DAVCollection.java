@@ -55,6 +55,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -120,9 +121,15 @@ public abstract class DAVCollection extends AbstractCollection {
      *
      * @param name the name of the resource
      * @return the child resource
-     * @throws WebdavProtocolException
      */
     public abstract AbstractResource getChild(String name) throws WebdavProtocolException;
+
+    /**
+     * Gets the underlying permissions applicable for this WebDAV collection.
+     *
+     * @return The permissions
+     */
+    public abstract Permission[] getPermissions();
 
     /**
      * Constructs a {@link WebdavPath} for a child resource of this

@@ -57,6 +57,10 @@ import com.openexchange.dav.mixins.CurrentUserPrincipal;
 import com.openexchange.dav.principals.PrincipalFactory;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
+import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
@@ -86,6 +90,14 @@ public class UserPrincipalCollection extends DAVCollection {
         super(factory, URL);
         this.factory = factory;
         includeProperties(new CurrentUserPrincipal(factory));
+    }
+
+    @Override
+    public Permission[] getPermissions() {
+        return new Permission[] {
+            new DefaultPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, Permissions.createPermissionBits(
+                Permission.READ_FOLDER, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, Permission.NO_PERMISSIONS, false))
+        };
     }
 
     @Override
@@ -127,10 +139,26 @@ public class UserPrincipalCollection extends DAVCollection {
         if (Strings.isEmpty(name)) {
             throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
+        /*
+         * lookup by principal id
+         */
+        int id;
         try {
-            int id = Integer.parseInt(name);
+            id = Integer.parseInt(name);
+        } catch (NumberFormatException ignored) {
+            // no numerical resource name, lookup by login name for backwards compatibility, too
+            try {
+                id = factory.requireService(UserService.class).getUserId(name, factory.getContext());
+            } catch (OXException e) {
+                throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_NOT_FOUND);
+            }
+        }
+        /*
+         * get user
+         */
+        try {
             return createUserResource(factory.requireService(UserService.class).getUser(id, factory.getContext()));
-        } catch (OXException | NumberFormatException e) {
+        } catch (OXException e) {
             throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
     }

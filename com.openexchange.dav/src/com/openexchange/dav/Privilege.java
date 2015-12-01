@@ -319,9 +319,11 @@ public enum Privilege {
             throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "not-supported-privilege", new WebdavPath(), HttpServletResponse.SC_FORBIDDEN);
         }
         if (setPrivileges.contains(READ)) {
+            permission.setFolderPermission(Permission.READ_FOLDER);
             permission.setReadPermission(Permission.READ_ALL_OBJECTS);
         }
         if (setPrivileges.contains(WRITE_CONTENT)) {
+            permission.setFolderPermission(Permission.READ_FOLDER);
             permission.setWritePermission(Permission.WRITE_ALL_OBJECTS);
         }
         if (setPrivileges.contains(WRITE_ACL) || setPrivileges.contains(WRITE) || setPrivileges.contains(WRITE_PROPERTIES)) {

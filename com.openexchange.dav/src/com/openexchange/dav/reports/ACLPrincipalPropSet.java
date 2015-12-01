@@ -55,10 +55,9 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.DAVPropfindAction;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
-import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
-import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.contexts.Context;
@@ -101,25 +100,26 @@ public class ACLPrincipalPropSet extends DAVPropfindAction {
          * marshal resources based on folder permissions
          */
         ResourceMarshaller marshaller = getMarshaller(request, optRequestBody(request), new WebdavPath().toString());
-        CommonFolderCollection<?> collection = (CommonFolderCollection<?>) request.getCollection();
-        UserizedFolder folder = collection.getFolder();
-        Context context = folder.getContext();
-        for (Permission permission : folder.getPermissions()) {
-            try {
-                WebdavResource resource;
-                if (permission.isGroup()) {
-                    Group group = collection.getFactory().requireService(GroupService.class).getGroup(context, permission.getEntity());
-                    resource = new GroupPrincipalResource(collection.getFactory(), group);
-                } else {
-                    User user = collection.getFactory().requireService(UserService.class).getUser(permission.getEntity(), context);
-                    resource = new UserPrincipalResource(collection.getFactory(), user);
+        if (DAVCollection.class.isInstance(request.getCollection())) {
+            DAVCollection collection = (DAVCollection) request.getCollection();
+            Context context = collection.getFactory().getContext();
+            for (Permission permission : collection.getPermissions()) {
+                try {
+                    WebdavResource resource;
+                    if (permission.isGroup()) {
+                        Group group = collection.getFactory().requireService(GroupService.class).getGroup(context, permission.getEntity());
+                        resource = new GroupPrincipalResource(collection.getFactory(), group);
+                    } else {
+                        User user = collection.getFactory().requireService(UserService.class).getUser(permission.getEntity(), context);
+                        resource = new UserPrincipalResource(collection.getFactory(), user);
+                    }
+                    multistatusElement.addContent(marshaller.marshal(resource));
+                } catch (OXException e) {
+                    org.slf4j.LoggerFactory.getLogger(ACLPrincipalPropSet.class).warn("Error marshalling ACL resource for permission entity {}", permission.getEntity(), e);
                 }
-                multistatusElement.addContent(marshaller.marshal(resource));
-            } catch (OXException e) {
-                org.slf4j.LoggerFactory.getLogger(ACLPrincipalPropSet.class).warn("Error marshalling ACL resource for permission entity {}", permission.getEntity(), e);
             }
+            sendMultistatusResponse(res, multistatusElement);
         }
-        sendMultistatusResponse(res, multistatusElement);
     }
 
 }
