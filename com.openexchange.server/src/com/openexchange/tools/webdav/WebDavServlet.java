@@ -117,6 +117,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 allow.append("REPORT,");
             } else if ("doMkCalendar".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
                 allow.append("MKCALENDAR,");
+            } else if ("doAcl".equals(methods[i].getName()) && !clazz.equals(methods[i].getDeclaringClass())) {
+                allow.append("ACL,");
             }
         }
         allow.append("TRACE,OPTIONS");
@@ -162,6 +164,10 @@ public abstract class WebDavServlet extends HttpServlet {
 
     protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"MKCALENDAR\" is not supported by this servlet");
+    }
+
+    protected void doAcl(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "Method \"ACL\" is not supported by this servlet");
     }
 
     protected boolean isDisabledByProperty() {
@@ -218,6 +224,8 @@ public abstract class WebDavServlet extends HttpServlet {
                 doReport(req, resp);
             } else if ("MKCALENDAR".equals(method)) {
                 doMkCalendar(req, resp);
+            } else if ("ACL".equals(method)) {
+                doAcl(req, resp);
             } else {
                 super.service(req, resp);
             }

@@ -47,34 +47,46 @@
  *
  */
 
-package com.openexchange.webdav.action;
+package com.openexchange.dav.mixins;
 
-import com.openexchange.webdav.protocol.WebdavMethod;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
-public class WebdavOptionsAction extends AbstractAction {
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		res.setHeader("Content-Length","0");
-		res.setHeader("Allow", join(req.getResource().getOptions()));
-        res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, "
-            + "calendar-schedule, calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, "
-            + "calendarserver-private-comments, extended-mkcol"
-        );
-		res.setHeader("Accept-Ranges", "bytes");
-		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
-	}
+/**
+ * {@link SupportedCalendarComponentSet}
+ *
+ * Specifies the calendar component types (e.g., VEVENT, VTODO, etc.) that
+ * calendar object resources can contain in the calendar collection.
+ *
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ */
+public class SupportedCalendarComponentSet extends SingleXMLPropertyMixin {
 
-	private String join(final WebdavMethod[] options) {
-		final StringBuffer buffer = new StringBuffer();
-		for(final WebdavMethod m : options) {
-			buffer.append(m.toString());
-			buffer.append(", ");
-		}
-		buffer.setLength(buffer.length()-2);
-		return buffer.toString();
-	}
+    public static final String VEVENT = "VEVENT";
+    public static final String VTODO = "VTODO";
+
+    private final String[] components;
+
+    public SupportedCalendarComponentSet() {
+        this(VEVENT);
+    }
+
+    public SupportedCalendarComponentSet(String...components) {
+        super(DAVProtocol.CAL_NS.getURI(), "supported-calendar-component-set");
+        this.components = components;
+    }
+
+    @Override
+    protected String getValue() {
+        StringBuilder stringBuilder = new StringBuilder();
+        if (null != this.components) {
+            for (String component : components) {
+                stringBuilder.append("<CAL:comp name=\"").append(component).append("\"/>");
+            }
+        }
+        return stringBuilder.toString();
+    }
 
 }

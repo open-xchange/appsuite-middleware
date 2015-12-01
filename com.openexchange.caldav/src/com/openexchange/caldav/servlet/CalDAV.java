@@ -168,6 +168,11 @@ public class CalDAV extends OXServlet {
         doIt(req, resp, WebdavMethod.MKCALENDAR);
     }
 
+    @Override
+    protected void doAcl(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, WebdavMethod.ACL);
+    }
+
     private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final WebdavMethod action) throws ServletException, IOException {
         ServerSession session = null;
         try {

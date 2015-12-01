@@ -57,6 +57,7 @@ import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -70,12 +71,12 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link CalDAVRootCollection}
@@ -130,7 +131,7 @@ public class CalDAVRootCollection extends DAVCollection {
     }
 
     @Override
-    public AbstractCollection getChild(String name) throws WebdavProtocolException {
+    public DAVCollection getChild(String name) throws WebdavProtocolException {
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
@@ -143,7 +144,7 @@ public class CalDAVRootCollection extends DAVCollection {
                 }
             }
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
-            return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
+            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), factory.getState().getTreeID());
         } catch (OXException e) {
             throw protocolException(e);
         }

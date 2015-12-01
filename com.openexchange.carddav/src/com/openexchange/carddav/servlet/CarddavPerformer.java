@@ -56,6 +56,8 @@ import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.action.CardDAVMaxUploadSizeAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
+import com.openexchange.dav.actions.DAVAclAction;
+import com.openexchange.dav.actions.ExtendedMkColAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.OXWebdavPutAction;
 import com.openexchange.webdav.action.WebdavAction;
@@ -67,7 +69,6 @@ import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
 import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavLockAction;
-import com.openexchange.webdav.action.WebdavMkcolAction;
 import com.openexchange.webdav.action.WebdavMoveAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
@@ -75,7 +76,6 @@ import com.openexchange.webdav.action.WebdavProppatchAction;
 import com.openexchange.webdav.action.WebdavReportAction;
 import com.openexchange.webdav.action.WebdavTraceAction;
 import com.openexchange.webdav.action.WebdavUnlockAction;
-import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
@@ -85,7 +85,7 @@ import com.openexchange.webdav.protocol.WebdavMethod;
  */
 public class CarddavPerformer extends DAVPerformer {
 
-    private static final Protocol PROTOCOL = new CarddavProtocol();
+    private static final CarddavProtocol PROTOCOL = new CarddavProtocol();
 
     private final GroupwareCarddavFactory factory;
     private final Map<WebdavMethod, WebdavAction> actions;
@@ -109,13 +109,14 @@ public class CarddavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
-        actions.put(WebdavMethod.MKCOL, prepare(new WebdavMkcolAction(), true, true, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMkColAction(PROTOCOL), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
         actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.ACL, prepare(new DAVAclAction(), true, true, new WebdavIfAction(0, true, false)));
         OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         CardDAVMaxUploadSizeAction maxUploadSizeAction = new CardDAVMaxUploadSizeAction(factory, this);
         actions.put(WebdavMethod.PUT, prepare(oxWebdavPut, true, true, new WebdavIfMatchAction(), maxUploadSizeAction));

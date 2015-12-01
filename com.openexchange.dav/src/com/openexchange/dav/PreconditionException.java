@@ -76,6 +76,14 @@ public class PreconditionException extends WebdavProtocolException {
         this.preconditionElement = new Element(name, namespace);
     }
 
+    public PreconditionException(String namespace, String name, int status) {
+        this(namespace, name, new WebdavPath(), status);
+    }
+
+    public Element getPreconditionElement() {
+        return preconditionElement;
+    }
+
     public void sendError(HttpServletResponse response) {
         Element errorElement = new Element("error", DAVProtocol.DAV_NS);
         errorElement.addContent(preconditionElement);

@@ -78,8 +78,8 @@ public class WebdavProperty {
 	 */
 	public WebdavProperty(final String namespace, final String name) {
 	    super();
-		setNamespace(namespace);
-		setName(name);
+	    this.namespace = namespace;
+	    this.name = name;
 	}
 
 	public String getLanguage() {

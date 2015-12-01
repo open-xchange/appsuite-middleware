@@ -52,14 +52,17 @@ package com.openexchange.carddav.resources;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.mixins.DummySyncToken;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
@@ -140,7 +143,7 @@ public class RootCollection extends DAVCollection {
      * @throws WebdavProtocolException
      */
 	@Override
-    public CardDAVCollection getChild(String name) throws WebdavProtocolException {
+    public DAVCollection getChild(String name) throws WebdavProtocolException {
 		if (isUseAggregatedCollection() && (AGGREGATED_FOLDER_ID.equals(name) || AGGREGATED_DISPLAY_NAME.equals(name))) {
 			/*
 			 * this is the aggregated collection
@@ -152,33 +155,22 @@ public class RootCollection extends DAVCollection {
 		    }
 		}
 		if (isUseFolderCollections()) {
-			/*
-			 * search available folders
-			 */
-			try {
-				List<UserizedFolder> folders = factory.getState().getFolders();
-				// try folder ID first
-				for (UserizedFolder folder : folders) {
-					if (name.equals(folder.getID())) {
-						return createFolderCollection(folder);
-					}
-				}
-				// try folder name
-				for (UserizedFolder folder : folders) {
-					if (folder.getName().equals(name)) {
-						return createFolderCollection(folder);
-					}
-				}
-				// try localized folder name
-				Locale locale = factory.getUser().getLocale();
-				for (UserizedFolder folder : folders) {
-					if (folder.getLocalizedName(locale).equals(name)) {
-						return createFolderCollection(folder);
-					}
-				}
-			} catch (OXException e) {
-				throw protocolException(e);
-			}
+	        try {
+	            for (UserizedFolder folder : factory.getState().getFolders()) {
+	                if (name.equals(folder.getID())) {
+	                    LOG.debug("{}: found child collection by name '{}'", getUrl(), name);
+	                    return createFolderCollection(folder);
+	                }
+	                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
+	                    LOG.debug("{}: found child collection by resource name '{}'", getUrl(), name);
+	                    return createFolderCollection(folder);
+	                }
+	            }
+	            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
+	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactContentType.getInstance(), FolderStorage.REAL_TREE_ID);
+	        } catch (OXException e) {
+	            throw protocolException(e);
+	        }
 		}
 		throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}

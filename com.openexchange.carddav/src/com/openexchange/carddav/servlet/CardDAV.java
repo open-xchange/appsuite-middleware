@@ -186,6 +186,11 @@ public class CardDAV extends OXServlet {
         doIt(req, resp, WebdavMethod.REPORT);
     }
 
+    @Override
+    protected void doAcl(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+        doIt(req, resp, WebdavMethod.ACL);
+    }
+
     private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method) throws ServletException, IOException {
         /*
          * get server session from request & check permissions

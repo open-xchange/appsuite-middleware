@@ -420,21 +420,21 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     @Override
     public String getResourceType() throws WebdavProtocolException {
-        StringBuilder StringBuilder = new StringBuilder(super.getResourceType());
-        StringBuilder.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
+        StringBuilder stringBuilder = new StringBuilder(super.getResourceType());
+        stringBuilder.append('<').append(CaldavProtocol.CAL_NS.getPrefix()).append(":calendar/>");
         if (null != this.folder) {
             if (SharedType.getInstance().equals(folder.getType())) {
                 // used to indicate that the calendar is owned by another user and is being shared to the current user.
-                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared/>");
+                stringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared/>");
             } else if (PrivateType.getInstance().equals(folder.getType())) {
                 // used to indicate that the calendar is owned by the current user and is being shared by them.
-                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
+                stringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(":shared-owner/>");
             } else if (PublicType.getInstance().equals(folder.getType())) {
                 // evaluate own permission if folder shares can be edited or not
-                StringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
+                stringBuilder.append('<').append(CaldavProtocol.CALENDARSERVER_NS.getPrefix()).append(folder.getOwnPermission().isAdmin() ? ":shared-owner/>" : ":shared/>");
             }
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
     @Override
@@ -474,13 +474,6 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             return null;
         }
         return new Date(tstamp);
-    }
-
-    protected Permission getDefaultAdminPermissions(int entity) {
-        CalDAVPermission permission = new CalDAVPermission();
-        permission.setMaxPermissions();
-        permission.setEntity(entity);
-        return permission;
     }
 
 }

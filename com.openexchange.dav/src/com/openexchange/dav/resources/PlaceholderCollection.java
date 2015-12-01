@@ -47,32 +47,36 @@
  *
  */
 
-package com.openexchange.caldav.resources;
+package com.openexchange.dav.resources;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.mixins.CalendarColor;
-import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
+import org.jdom2.Element;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProperty;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.mixins.CalendarColor;
+import com.openexchange.dav.mixins.SupportedCalendarComponentSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
 import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.ContentType;
+import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.groupware.container.CalendarObject;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProperty;
@@ -80,36 +84,45 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link UndecidedFolderCollection}
- *
- * WebDAV task- and calendar-collections that are about to be created
+ * {@link PlaceholderCollection}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarObject> {
+public class PlaceholderCollection<T extends CommonObject> extends CommonFolderCollection<T> {
 
     private String displayName;
     private ContentType contentType;
     private Map<String, Object> meta;
+    private String treeID;
 
     /**
-     * Initializes a new {@link UndecidedFolderCollection}.
+     * Initializes a new {@link PlaceholderCollection}.
      *
-     * @param factory The underlying CalDAV factory
+     * @param factory The underlying factory
      * @param url The target WebDAV path
+     * @param contentType The default content type to use
+     * @param treeID The tree identifier to use
      */
-    public UndecidedFolderCollection(GroupwareCaldavFactory factory, WebdavPath url) throws OXException {
+    public PlaceholderCollection(DAVFactory factory, WebdavPath url, ContentType contentType, String treeID) throws OXException {
         super(factory, url, null);
-        this.contentType = CalendarContentType.getInstance();
+        this.contentType = null;
         this.displayName = "New Folder";
+        this.contentType = contentType;
+        this.treeID = treeID;
         this.meta = new HashMap<String, Object>();
     }
 
     @Override
-    protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-        if (CaldavProtocol.CAL_NS.getURI().equals(prop.getNamespace()) && "supported-calendar-component-set".equals(prop.getName())) {
-            String value = prop.getValue();
-            if (prop.isXML()) {
+    public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
+        internalPutProperty(prop);
+    }
+
+    @Override
+    protected void internalPutProperty(WebdavProperty property) throws WebdavProtocolException {
+        if (DAVProtocol.CAL_NS.getURI().equals(property.getNamespace()) && "supported-calendar-component-set".equals(property.getName())) {
+            String value = property.getValue();
+            if (property.isXML()) {
                 // try to extract comp attribute from xml fragment
                 Pattern compNameRegex = Pattern.compile("name=\\\"(.+?)\\\"",
                     Pattern.DOTALL | Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE | Pattern.MULTILINE);
@@ -119,24 +132,36 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
                 }
             }
             if (SupportedCalendarComponentSet.VTODO.equalsIgnoreCase(value)) {
-                this.contentType = TaskContentType.getInstance();
+                contentType = TaskContentType.getInstance();
             } else if (SupportedCalendarComponentSet.VEVENT.equalsIgnoreCase(value)) {
-                this.contentType = CalendarContentType.getInstance();
+                contentType = CalendarContentType.getInstance();
             } else {
                 throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
             }
-        }
-        if (CalendarColor.NAMESPACE.getURI().equals(prop.getNamespace()) && CalendarColor.NAME.equals(prop.getName())) {
-            String value = CalendarColor.parse(prop);
+        } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "resourcetype".equals(property.getName()) && DAVProperty.class.isInstance(property)) {
+            Element element = ((DAVProperty) property).getElement();
+            if (null != element.getChild("addressbook", DAVProtocol.CARD_NS)) {
+                contentType = ContactContentType.getInstance();
+            } else if (null != element.getChild("calendar", DAVProtocol.CAL_NS)) {
+                contentType = CalendarContentType.getInstance();
+            } else {
+                throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-resourcetype", getUrl(), HttpServletResponse.SC_CONFLICT);
+            }
+        } else if (CalendarColor.NAMESPACE.getURI().equals(property.getNamespace()) && CalendarColor.NAME.equals(property.getName())) {
+            String value = CalendarColor.parse(property);
             meta.put("color", value);
+        } else if (DAVProtocol.DAV_NS.getURI().equals(property.getNamespace()) && "displayname".equals(property.getName())) {
+            displayName = property.getValue();
+        } else if (factory.getProtocol().isProtected(property.getNamespace(), property.getName())) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "cannot-modify-protected-property", getUrl(), HttpServletResponse.SC_CONFLICT);
         }
     }
 
     @Override
     public void create() throws WebdavProtocolException {
         try {
-            FolderService folderService = factory.getFolderService();
-            UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), factory.getState().getTreeID(), contentType, factory.getSession(), null);
+            FolderService folderService = factory.requireService(FolderService.class);
+            UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), treeID, contentType, factory.getSession(), null);
             AbstractFolder folder = prepareUpdatableFolder();
             folder.setParentID(parentFolder.getID());
             folder.setName(displayName);
@@ -146,7 +171,7 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
             folder.setPermissions(new Permission[] { getDefaultAdminPermissions(factory.getUser().getId()) });
             meta.put("resourceName", getUrl().name());
             folder.setMeta(meta);
-            factory.getFolderService().createFolder(folder, factory.getSession(), null);
+            factory.requireService(FolderService.class).createFolder(folder, factory.getSession(), null);
         } catch (OXException e) {
             if ("FLD-0092".equals(e.getErrorCode())) {
                 /*
@@ -180,33 +205,40 @@ public class UndecidedFolderCollection extends CalDAVFolderCollection<CalendarOb
     }
 
     @Override
-    protected boolean isSupported(CalendarObject object) throws OXException {
-        return false;
-    }
-
-    @Override
-    protected List<CalendarObject> getObjectsInRange(Date from, Date until) throws OXException {
+    protected Collection<T> getModifiedObjects(Date since) throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected Collection<CalendarObject> getModifiedObjects(Date since) throws OXException {
+    protected Collection<T> getDeletedObjects(Date since) throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected Collection<CalendarObject> getDeletedObjects(Date since) throws OXException {
+    protected Collection<T> getObjects() throws OXException {
         return Collections.emptyList();
     }
 
     @Override
-    protected Collection<CalendarObject> getObjects() throws OXException {
-        return Collections.emptyList();
-    }
-
-    @Override
-    protected AbstractResource createResource(CalendarObject object, WebdavPath url) throws OXException {
+    protected AbstractResource createResource(T object, WebdavPath url) throws OXException {
         throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+    }
+
+    @Override
+    protected T getObject(String resourceName) throws OXException {
+        return null;
+    }
+
+    @Override
+    protected String getFileExtension() {
+        return "";
+    }
+
+    protected Permission getDefaultAdminPermissions(int entity) {
+        DefaultPermission permission = new DefaultPermission();
+        permission.setMaxPermissions();
+        permission.setEntity(entity);
+        return permission;
     }
 
 }
