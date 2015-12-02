@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,77 +47,46 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.json.actions;
 
-import java.util.Iterator;
+import java.util.Map.Entry;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.DeviceAwareScenario;
+import com.openexchange.onboarding.OnboardingUtility;
+import com.openexchange.onboarding.service.OnboardingService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link EntityPath} - Represents a path in the configuration to a certain on-boarding configuration option.
+ * {@link ScenarioAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface EntityPath {
+public class ScenarioAction extends AbstractOnboardingAction {
 
     /**
-     * Gets the composite identifier; e.g. <code>"apple.ipad/calendar/caldav"</code>
+     * Initializes a new {@link ScenarioAction}.
      *
-     * @return The composite identifier
+     * @param services
      */
-    String getCompositeId();
+    public ScenarioAction(ServiceLookup services) {
+        super(services);
+    }
 
-    /**
-     * Gets the associated on-boarding configuration service.
-     *
-     * @return The on-boarding configuration service
-     */
-    OnboardingProvider getService();
+    @Override
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        OnboardingService onboardingService = getOnboardingService();
 
-    /**
-     * Gets the associated platform.
-     *
-     * @return The supported platform
-     */
-    Platform getPlatform();
+        String compositeId = requestData.checkParameter("device");
+        Entry<Device, String> parsed = OnboardingUtility.parseCompositeId(compositeId);
 
-    /**
-     * Gets the associated module.
-     *
-     * @return The supported module
-     */
-    Module getModule();
-
-    /**
-     * Gets the associated device.
-     *
-     * @return The supported device
-     */
-    Device getDevice();
-
-    /**
-     * Checks if this entity path matches the specified arguments.
-     *
-     * @param device The device
-     * @param module The module
-     * @param serviceId The identifier of the on-boarding configuration service
-     * @return <code>true</code> if this entity path matches; otherwise <code>false</code>
-     */
-    boolean matches(Device device, Module module, String serviceId);
-
-    /**
-     * Checks if this entity path matches the specified arguments.
-     *
-     * @param device The device
-     * @param serviceId The identifier of the on-boarding configuration service
-     * @return <code>true</code> if this entity path matches; otherwise <code>false</code>
-     */
-    boolean matches(Device device, String serviceId);
-
-    /**
-     * Gets additional entity paths.
-     *
-     * @return An {@link Iterator} instance or <code>null</code>
-     */
-    Iterator<IdEntity> iterator();
+        DeviceAwareScenario scenario = onboardingService.getScenario(parsed.getValue(), parsed.getKey(), session);
+        return new AJAXRequestResult(scenario, "onboardingScenario");
+    }
 
 }

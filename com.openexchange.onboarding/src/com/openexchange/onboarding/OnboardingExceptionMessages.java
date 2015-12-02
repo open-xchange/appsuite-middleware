@@ -72,4 +72,7 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     // The chosen configuration is not supported.
     public static final String CONFIGURATION_NOT_SUPPORTED_MSG = "The chosen configuration is not supported.";
 
+    // The execution has been denied. Please choose another option.
+    public static final String EXECUTION_DENIED_MSG = "The execution has been denied. Please choose another option.";
+
 }

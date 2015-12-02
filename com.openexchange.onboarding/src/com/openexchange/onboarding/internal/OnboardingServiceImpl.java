@@ -66,32 +66,38 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultReply;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.DefaultScenario;
 import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.service.OnboardingProviderService;
+import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingProviderRegistry}
+ * {@link OnboardingServiceImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingProviderRegistry extends ServiceTracker<OnboardingProvider, OnboardingProvider> implements OnboardingProviderService, Reloadable {
+public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, OnboardingProvider> implements OnboardingService, Reloadable {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingProviderRegistry.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingServiceImpl.class);
 
     private final ConcurrentMap<String, OnboardingProvider> providers;
     private final AtomicReference<Map<String, ConfiguredScenario>> configuredScenariosReference;
 
     /**
-     * Initializes a new {@link OnboardingProviderRegistry}.
+     * Initializes a new {@link OnboardingServiceImpl}.
      *
      * @param context The bundle context
      * @param configuredScenarios The configured scenarios
      */
-    public OnboardingProviderRegistry(BundleContext context, Map<String, ConfiguredScenario> configuredScenarios) {
+    public OnboardingServiceImpl(BundleContext context, Map<String, ConfiguredScenario> configuredScenarios) {
         super(context, OnboardingProvider.class, null);
         providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
         configuredScenariosReference = new AtomicReference<>(configuredScenarios);
@@ -136,6 +142,109 @@ public class OnboardingProviderRegistry extends ServiceTracker<OnboardingProvide
     }
 
     @Override
+    public Result execute(OnboardingRequest request, Session session) throws OXException {
+        if (null == request) {
+            return null;
+        }
+
+        // Invocation chain - looping through providers
+        Scenario scenario = request.getScenario();
+        Result result = null;
+        for (OnboardingProvider provider : scenario.getProviders(session)) {
+            Result currentResult = provider.execute(request, result, session);
+            ResultReply reply = currentResult.getReply();
+            if (ResultReply.ACCEPT.equals(reply)) {
+                // Return
+                return currentResult;
+            }
+            if (ResultReply.DENY.equals(reply)) {
+                // No further processing allowed
+                throw OnboardingExceptionCodes.EXECUTION_DENIED.create(provider.getId(), scenario.getId());
+            }
+            // Otherwise NEUTRAL reply; next in chain
+            result = currentResult;
+        }
+
+        return result;
+    }
+
+    @Override
+    public Scenario getScenario(String scenarioId) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
+        return getScenario(scenarioId, configuredScenarios);
+    }
+
+    @Override
+    public DeviceAwareScenario getScenario(String scenarioId, Device device, Session session) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
+        Scenario scenario = getScenario(scenarioId, configuredScenarios);
+        return new DeviceAwareScenarionImpl(scenario, device, Device.getActionsFor(device, scenario.getType(), session));
+    }
+
+    @Override
+    public List<DeviceAwareScenario> getScenariosFor(Device device, Session session) throws OXException {
+        List<String> availableScenarios = device.getScenarios(session);
+        if (null == availableScenarios || availableScenarios.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
+
+        List<DeviceAwareScenario> scenarios = new ArrayList<DeviceAwareScenario>(availableScenarios.size());
+        for (String scenarioId : availableScenarios) {
+            ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
+            if (null == configuredScenario) {
+                throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+            }
+
+            if (configuredScenario.isEnabled()) {
+                Scenario scenario = getScenario(configuredScenario, configuredScenarios);
+                scenarios.add(new DeviceAwareScenarionImpl(scenario, device, Device.getActionsFor(device, scenario.getType(), session)));
+            }
+        }
+        return scenarios;
+    }
+
+    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
+        if (null == configuredScenario) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
+        if (!configuredScenario.isEnabled()) {
+            throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
+        }
+
+        return getScenario(configuredScenario, configuredScenarios);
+    }
+
+    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
+        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
+
+        for (String providerId : configuredScenario.getProviderIds()) {
+            scenario.addProvider(getProvider(providerId));
+        }
+
+        for (String alternativeId : configuredScenario.getAlternativeIds()) {
+            scenario.addAlternative(getScenario(alternativeId, configuredScenarios));
+        }
+
+        return scenario;
+    }
+
+    @Override
     public OnboardingView getViewFor(Session session) throws OXException {
         Map<Device, List<String>> availableDevices;
 
@@ -158,7 +267,9 @@ public class OnboardingProviderRegistry extends ServiceTracker<OnboardingProvide
                             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
                         }
 
-                        compositeIds.add(new StringBuilder(32).append(device.getId()).append('/').append(scenarioId).toString());
+                        if (configuredScenario.isEnabled()) {
+                            compositeIds.add(new StringBuilder(32).append(device.getId()).append('/').append(scenarioId).toString());
+                        }
                     }
                 }
             }

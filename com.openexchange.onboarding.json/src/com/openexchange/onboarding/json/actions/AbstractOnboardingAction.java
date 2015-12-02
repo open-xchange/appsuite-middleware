@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.onboarding.service.OnboardingProviderService;
+import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -89,8 +89,8 @@ public abstract class AbstractOnboardingAction implements AJAXActionService {
      * @return The on-boarding service
      * @throws OXException if the service is unavailable
      */
-    protected OnboardingProviderService getOnboardingService() throws OXException {
-        return requireService(OnboardingProviderService.class, services);
+    protected OnboardingService getOnboardingService() throws OXException {
+        return requireService(OnboardingService.class, services);
     }
 
     /**

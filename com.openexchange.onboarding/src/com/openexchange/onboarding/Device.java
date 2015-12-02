@@ -52,8 +52,10 @@ package com.openexchange.onboarding;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -202,6 +204,128 @@ public enum Device implements IdEntity {
             }
         }
         return null;
+    }
+
+    /**
+     * Gets the available action for given device and type for session-associated user.
+     *
+     * @param device The device
+     * @param type The type
+     * @param session The session
+     * @return The available actions
+     * @throws OXException If actions cannot be returned
+     */
+    public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, Session session) throws OXException {
+        List<OnboardingAction> actions = new ArrayList<>(getStaticActionsFor(device, type));
+        for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
+            OnboardingAction action = iter.next();
+            switch (action) {
+                case EMAIL:
+                    if (OnboardingUtility.hasPermission(Permission.WEBMAIL, session)) {
+                        iter.remove();
+                    }
+                    break;
+                case SMS:
+                    // TODO: Check for SMS provider, by now there is none...
+                    if (true) {
+                        iter.remove();
+                    }
+                    break;
+                default:
+                    // Nothing to do...
+                    break;
+            }
+        }
+        return actions;
+    }
+
+    private static List<OnboardingAction> getStaticActionsFor(Device device, OnboardingType type) {
+        if (null == device || null == type) {
+            return Collections.emptyList();
+        }
+
+        switch (device) {
+            case ANDROID_PHONE:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Collections.emptyList();
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            case ANDROID_TABLET:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Collections.emptyList();
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            case APPLE_IPAD:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL);
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            case APPLE_IPHONE:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL, OnboardingAction.SMS);
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            case APPLE_MAC:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL);
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            case WINDOWS_DESKTOP_8_10:
+                {
+                    switch (type) {
+                        case LINK:
+                            return Arrays.asList(OnboardingAction.LINK);
+                        case MANUAL:
+                            return Arrays.asList(OnboardingAction.DISPLAY);
+                        case PLIST:
+                            return Collections.emptyList();
+                        default:
+                            throw new IllegalArgumentException("Unknown type: " + type.getId());
+                    }
+                }
+            default:
+                throw new IllegalArgumentException("Unknown device: " + device.id);
+        }
     }
 
 }

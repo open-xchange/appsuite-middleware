@@ -47,114 +47,58 @@
  *
  */
 
-package com.openexchange.onboarding.internal;
+package com.openexchange.onboarding;
 
-import java.util.List;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingType;
+import java.util.Map;
 
 /**
- * {@link ConfiguredScenario} - Represents a configured scenario parsed from appropriate .yml file.
+ * {@link DeviceAwareAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfiguredScenario {
+public class DeviceAwareAction {
 
-    private final String id;
-    private final boolean enabled;
-    private final OnboardingType type;
-    private final List<String> providerIds;
-    private final List<String> alternativeIds;
-    private final Icon icon;
-    private final String displayName;
-    private final String description;
+    private final OnboardingAction action;
+    private final Map<String, Object> data;
 
     /**
-     * Initializes a new {@link ConfiguredScenario}.
+     * Initializes a new {@link DeviceAwareAction}.
+     *
+     * @param action The action
      */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
+    public DeviceAwareAction(OnboardingAction action) {
+        this(action, null);
+    }
+
+    /**
+     * Initializes a new {@link DeviceAwareAction}.
+     *
+     * @param action The action
+     * @param data The output data
+     */
+    public DeviceAwareAction(OnboardingAction action, Map<String, Object> data) {
         super();
-        this.id = id;
-        this.enabled = enabled;
-        this.type = type;
-        this.providerIds = providerIds;
-        this.alternativeIds = alternativeIds;
-        this.icon = icon;
-        this.displayName = displayName;
-        this.description = description;
+        this.action = action;
+        this.data = data;
     }
 
     /**
-     * Gets the identifier
+     * Gets the action
      *
-     * @return The identifier
+     * @return The action
      */
-    public String getId() {
-        return id;
+    public OnboardingAction getAction() {
+        return action;
     }
 
     /**
-     * Gets the enabled
+     * Gets the data
      *
-     * @return The enabled
+     * @return The data or <code>null</code>
      */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Gets the type
-     *
-     * @return The type
-     */
-    public OnboardingType getType() {
-        return type;
-    }
-
-    /**
-     * Gets the identifiers of associated providers
-     *
-     * @return The identifiers of associated providers
-     */
-    public List<String> getProviderIds() {
-        return providerIds;
-    }
-
-    /**
-     * Gets the identifiers for alternative scenarios.
-     *
-     * @return The identifiers for alternative scenarios
-     */
-    public List<String> getAlternativeIds() {
-        return alternativeIds;
-    }
-
-    /**
-     * Gets the icon
-     *
-     * @return The icon
-     */
-    public Icon getIcon() {
-        return icon;
-    }
-
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets the description
-     *
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
+    public Map<String, Object> getData() {
+        return data;
     }
 
 }

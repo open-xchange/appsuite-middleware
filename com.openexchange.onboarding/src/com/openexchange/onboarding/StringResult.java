@@ -49,28 +49,37 @@
 
 package com.openexchange.onboarding;
 
-
 /**
- * {@link DefaultClientInfo} - The default <code>ClientInfo</code> implementation.
+ * {@link StringResult} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DefaultClientInfo implements ClientInfo {
+public class StringResult implements Result {
 
-    private final String userAgent;
+    private final String result;
 
     /**
-     * Initializes a new {@link DefaultClientInfo}.
+     * Initializes a new {@link StringResult}.
+     *
+     * @param resultText The result string; e.g. a link
      */
-    public DefaultClientInfo(String userAgent) {
+    public StringResult(String result) {
         super();
-        this.userAgent = userAgent;
+        this.result = result;
+    }
+
+    /**
+     * Gets the result string
+     *
+     * @return The result string
+     */
+    public String getResult() {
+        return result;
     }
 
     @Override
-    public String getUserAgent() {
-        return userAgent;
+    public ResultReply getReply() {
+        return ResultReply.ACCEPT;
     }
-
 }

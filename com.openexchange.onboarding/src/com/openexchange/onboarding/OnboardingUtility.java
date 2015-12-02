@@ -52,21 +52,22 @@ package com.openexchange.onboarding;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import net.sf.uadetector.OperatingSystem;
-import net.sf.uadetector.OperatingSystemFamily;
-import net.sf.uadetector.ReadableDeviceCategory;
-import net.sf.uadetector.ReadableUserAgent;
-import net.sf.uadetector.ReadableDeviceCategory.Category;
+import java.util.Set;
+import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXUtility;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -74,7 +75,6 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
 /**
@@ -95,7 +95,112 @@ public class OnboardingUtility {
     }
 
     /**
-     * Gets the locale for session-associated user
+     * Parses the specified composite identifier; e.g. <code>"apple.iphone/davsync"</code>.
+     *
+     * @param compositeId The composite identifier; e.g. <code>"apple.iphone/davsync"</code>
+     * @return The parsed device/scenario pair
+     * @throws OXException If parse attempt fails
+     */
+    public static Map.Entry<Device, String> parseCompositeId(String compositeId) throws OXException {
+        if (null == compositeId) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create("null");
+        }
+
+        char delim = '/';
+
+        int off = 0;
+        int pos = compositeId.indexOf(delim, off);
+        if (pos < 0) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        final Device device = Device.deviceFor(compositeId.substring(off, pos));
+        if (null == device) {
+            throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
+        }
+
+        off = pos + 1;
+        final String scenarioId = compositeId.substring(off);
+
+        return new Map.Entry<Device, String>() {
+
+            @Override
+            public Device getKey() {
+                return device;
+            }
+
+            @Override
+            public String getValue() {
+                return scenarioId;
+            }
+
+            @Override
+            public String setValue(String value) {
+                throw new UnsupportedOperationException("setValue() is not supported");
+            }
+        };
+    }
+
+    /**
+     * Checks if specified permission is set for session-associated user.
+     *
+     * @param permission The permission to check
+     * @param session The session
+     * @return <code>true</code> if permission is set; otherwise <code>false</code>
+     * @throws OXException If check fails
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static boolean hasPermission(Permission permission, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        return null == permission ? false : hasCapability(permission.getCapabilityName(), session);
+    }
+
+    /**
+     * Checks if specified capability is set for session-associated user.
+     *
+     * @param capability The capability to check
+     * @param session The session
+     * @return <code>true</code> if capability is set; otherwise <code>false</code>
+     * @throws OXException If check fails
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static boolean hasCapability(String capability, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        CapabilityService service = Services.getService(CapabilityService.class);
+        return null == capability ? false : service.getCapabilities(session).contains(capability);
+    }
+
+    /**
+     * Checks if specified scenario is enabled for session-associated user.
+     *
+     * @param scenarioId The scenario identifier to check
+     * @param session The session
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static boolean isScenarioEnabled(String scenarioId, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        if (Strings.isEmpty(scenarioId)) {
+            return false;
+        }
+
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.enabledScenarios", String.class);
+        if (null == property || !property.isDefined()) {
+            // Nothing enabled...
+            return false;
+        }
+
+        String[] ids = Strings.splitByComma(Strings.asciiLowerCase(property.get()));
+        Set<String> set = new HashSet<String>(ids.length, 0.9F);
+        set.addAll(Arrays.asList(ids));
+        return set.contains(Strings.asciiLowerCase(scenarioId));
+    }
+
+    /**
+     * Gets the locale for session-associated user.
      *
      * @param session The session
      * @return The locale
@@ -121,8 +226,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The <code>boolean</code> value or <code>defaultValue</code> (if absent)
      * @throws OXException If <code>boolean</code> value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static boolean getBoolValue(String propertyName, boolean defaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -143,7 +250,7 @@ public class OnboardingUtility {
      * @throws OXException If translated string cannot be returned
      */
     public static String getTranslationFor(String i18nString, Session session) throws OXException {
-        return StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+        return null == i18nString ? null : StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
     }
 
     /**
@@ -153,8 +260,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The translated string or <code>null</code>
      * @throws OXException If translated string cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static String getTranslationFromProperty(String propertyName, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -179,8 +288,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The translated string or <code>defaultValue</code>
      * @throws OXException If translated string cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static String getTranslationFromProperty(String propertyName, String defaultValue, boolean translateDefaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -205,8 +316,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The translated string or <code>defaultValue</code>
      * @throws OXException If translated string cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static String getValueFromProperty(String propertyName, String defaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -226,8 +339,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static Icon loadIconImageFromProperty(String propertyName, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -252,8 +367,10 @@ public class OnboardingUtility {
      * @param session The session from requesting user
      * @return The loaded icon or <code>null</code>
      * @throws OXException If loading icon fails
+     * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static Icon loadIconImageFromProperty(String propertyName, String defaultImageName, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
@@ -271,8 +388,11 @@ public class OnboardingUtility {
      *
      * @param imageName The image name; e.g. <code>"platform_icon_apple.png"</code>
      * @return The loaded icon image or <code>null</code>
+     * @throws IllegalArgumentException If imageName is <code>null</code>
      */
     public static Icon loadIconImage(String imageName) {
+        Validate.notNull(imageName, "imageName must not be null");
+
         String templatesPath = getTemplatesPath();
         if (Strings.isEmpty(templatesPath)) {
             return null;
@@ -372,123 +492,6 @@ public class OnboardingUtility {
         }
         // Return URL
         return url;
-    }
-
-    // --------------------------------------------- User-Agent parsing --------------------------------------------------------------
-
-    /**
-     * Checks specified client info if its <code>User-Agent</code> implies to be an OSX Desktop
-     *
-     * @param clientInfo The client info to examine
-     * @return <code>true</code> if <code>User-Agent</code> implies to be an OSX Desktop; otherwise <code>false</code>
-     */
-    public static boolean isOSX(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem operatingSystem = agent.getOperatingSystem();
-        return OperatingSystemFamily.OS_X.equals(operatingSystem.getFamily());
-    }
-
-    /**
-     * Checks specified client info if its <code>User-Agent</code> implies to be an iPad device
-     *
-     * @param clientInfo The client info to examine
-     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPad device; otherwise <code>false</code>
-     */
-    public static boolean isIPad(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem operatingSystem = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
-        return Category.TABLET.equals(deviceCategory.getCategory());
-    }
-
-    /**
-     * Checks specified client info if its <code>User-Agent</code> implies to be an iPhone device
-     *
-     * @param clientInfo The client info to examine
-     * @return <code>true</code> if <code>User-Agent</code> implies to be an iPhone device; otherwise <code>false</code>
-     */
-    public static boolean isIPhone(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem operatingSystem = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.IOS.equals(operatingSystem.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory deviceCategory = agent.getDeviceCategory();
-        return Category.SMARTPHONE.equals(deviceCategory.getCategory());
-    }
-
-    /**
-     * Checks specified client info if its <code>User-Agent</code> implies to be an Android phone
-     *
-     * @param clientInfo The client info to examine
-     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android phone; otherwise <code>false</code>
-     */
-    public static boolean isAndroidPhone(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem os = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory device = agent.getDeviceCategory();
-        return Category.SMARTPHONE.equals(device.getCategory());
-    }
-
-    /**
-     * Checks specified client info if its <code>User-Agent</code> implies to be an Android tablet
-     *
-     * @param clientInfo The client info to examine
-     * @return <code>true</code> if <code>User-Agent</code> implies to be an Android tablet; otherwise <code>false</code>
-     */
-    public static boolean isAndroidTablet(ClientInfo clientInfo) {
-        String userAgent = clientInfo.getUserAgent();
-        if (null == userAgent) {
-            return false;
-        }
-
-        UserAgentParser userAgentParser = Services.getService(UserAgentParser.class);
-        ReadableUserAgent agent = userAgentParser.parse(userAgent);
-
-        OperatingSystem os = agent.getOperatingSystem();
-        if (!OperatingSystemFamily.ANDROID.equals(os.getFamily())) {
-            return false;
-        }
-
-        ReadableDeviceCategory device = agent.getDeviceCategory();
-        return Category.TABLET.equals(device.getCategory());
     }
 
 }

@@ -61,18 +61,25 @@ import com.openexchange.groupware.notify.hostname.HostData;
 public interface OnboardingRequest {
 
     /**
-     * Gets the on-boarding selection to execute
+     * Gets the on-boarding scenario to execute
      *
-     * @return The on-boarding selection
+     * @return The on-boarding scenario
      */
-    OnboardingSelection getSelection();
+    Scenario getScenario();
 
     /**
-     * Gets the client information
+     * Gets the action to perform
      *
-     * @return The client information
+     * @return The action
      */
-    ClientInfo getClientInfo();
+    OnboardingAction getAction();
+
+    /**
+     * Gets the device to which the scenario applies
+     *
+     * @return The device
+     */
+    Device getDevice();
 
     /**
      * Gets the associated host data
@@ -86,5 +93,5 @@ public interface OnboardingRequest {
      *
      * @return The form content or <code>null</code>
      */
-    Map<String, Object> getFormContent();
+    Map<String, Object> getInput();
 }

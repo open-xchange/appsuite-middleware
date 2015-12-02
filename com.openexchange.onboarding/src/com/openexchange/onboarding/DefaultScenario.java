@@ -50,6 +50,7 @@
 package com.openexchange.onboarding;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -63,49 +64,48 @@ import com.openexchange.session.Session;
 public class DefaultScenario implements Scenario {
 
     /**
-     * Creates a new {@code DefaultEntity} instance
+     * Creates a new {@code DefaultScenario} instance
      *
-     * @param id The identifier
-     * @param prefix The prefix to use to look-up properties; e.g. <code>"apple.iphone.calendar.caldav."</code>
-     * @param withDescription <code>true</code> to also look-up the description property; otherwise <code>false</code>
-     * @param type The type; e.g. <code>"plist"</code>
-     * @return A new {@code DefaultEntity} instance
+     * @param id The scenario identifier
+     * @param type The associated type
+     * @param icon The icon
+     * @param i18nDisplayName The translatable display name
+     * @param i18nDescription The translatable description
+     * @return The new  {@code DefaultScenario} instance
      */
-    public static DefaultScenario newInstance(String id, String prefix, boolean withDescription, OnboardingType type) {
-        return new DefaultScenario(id, prefix, withDescription, type);
+    public static DefaultScenario newInstance(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription) {
+        return new DefaultScenario(id, type, icon, i18nDisplayName, i18nDescription);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final String id;
-    private final String enabledProperty;
-    private final String displayNameProperty;
-    private final String imageNameProperty;
-    private final String descriptionProperty;
     private final OnboardingType type;
     private final List<OnboardingProvider> providers;
     private final List<Scenario> alternatives;
+    private final Icon icon;
+    private final String i18nDisplayName;
+    private final String i18nDescription;
 
-    private DefaultScenario(String id, String prefix, boolean withDescription, OnboardingType type) {
+    /**
+     * Initializes a new {@link DefaultScenario}.
+     *
+     * @param id The scenario identifier
+     * @param type The associated type
+     * @param icon The icon
+     * @param i18nDisplayName The translatable display name
+     * @param i18nDescription The translatable description
+     */
+    protected DefaultScenario(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription) {
         super();
-        int len = prefix.length();
-        StringBuilder propertyNameBuilder = new StringBuilder(48).append(prefix);
-
         this.id = id;
         this.type = type;
         this.providers = new ArrayList<OnboardingProvider>(4);
         this.alternatives = new ArrayList<Scenario>(2);
 
-        this.enabledProperty = propertyNameBuilder.append("enabled").toString();
-
-        propertyNameBuilder.setLength(len);
-        this.displayNameProperty = propertyNameBuilder.append("displayName").toString();
-
-        propertyNameBuilder.setLength(len);
-        this.imageNameProperty = propertyNameBuilder.append("icon").toString();
-
-        propertyNameBuilder.setLength(len);
-        this.descriptionProperty = withDescription ? propertyNameBuilder.append("description").toString() : null;
+        this.icon = icon;
+        this.i18nDisplayName = i18nDisplayName;
+        this.i18nDescription = i18nDescription;
     }
 
     /**
@@ -132,12 +132,12 @@ public class DefaultScenario implements Scenario {
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
-        return OnboardingUtility.getBoolValue(enabledProperty, true, session);
+        return OnboardingUtility.isScenarioEnabled(id, session);
     }
 
     @Override
     public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(displayNameProperty, session);
+        return OnboardingUtility.getTranslationFor(i18nDisplayName, session);
     }
 
     @Override
@@ -147,12 +147,12 @@ public class DefaultScenario implements Scenario {
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(imageNameProperty, session);
+        return icon;
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return null == descriptionProperty ? null : OnboardingUtility.getTranslationFromProperty(descriptionProperty, session);
+        return OnboardingUtility.getTranslationFor(i18nDescription, session);
     }
 
     @Override
@@ -162,14 +162,12 @@ public class DefaultScenario implements Scenario {
 
     @Override
     public List<OnboardingProvider> getProviders(Session session) {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableList(providers);
     }
 
     @Override
     public List<Scenario> getAlternatives(Session session) {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableList(alternatives);
     }
 
 }

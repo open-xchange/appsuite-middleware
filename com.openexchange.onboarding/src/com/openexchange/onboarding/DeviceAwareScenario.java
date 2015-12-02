@@ -47,114 +47,30 @@
  *
  */
 
-package com.openexchange.onboarding.internal;
+package com.openexchange.onboarding;
 
 import java.util.List;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingType;
 
 /**
- * {@link ConfiguredScenario} - Represents a configured scenario parsed from appropriate .yml file.
+ * {@link DeviceAwareScenario} - An on-boarding scenario parameterized with a certain device.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfiguredScenario {
-
-    private final String id;
-    private final boolean enabled;
-    private final OnboardingType type;
-    private final List<String> providerIds;
-    private final List<String> alternativeIds;
-    private final Icon icon;
-    private final String displayName;
-    private final String description;
+public interface DeviceAwareScenario extends Scenario {
 
     /**
-     * Initializes a new {@link ConfiguredScenario}.
-     */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
-        super();
-        this.id = id;
-        this.enabled = enabled;
-        this.type = type;
-        this.providerIds = providerIds;
-        this.alternativeIds = alternativeIds;
-        this.icon = icon;
-        this.displayName = displayName;
-        this.description = description;
-    }
-
-    /**
-     * Gets the identifier
+     * Gets the associated device for this scenario.
      *
-     * @return The identifier
+     * @return The device
      */
-    public String getId() {
-        return id;
-    }
+    Device getDevice();
 
     /**
-     * Gets the enabled
+     * Gets the associated on-boarding actions for this device-aware scenario.
      *
-     * @return The enabled
+     * @return The actions
      */
-    public boolean isEnabled() {
-        return enabled;
-    }
-
-    /**
-     * Gets the type
-     *
-     * @return The type
-     */
-    public OnboardingType getType() {
-        return type;
-    }
-
-    /**
-     * Gets the identifiers of associated providers
-     *
-     * @return The identifiers of associated providers
-     */
-    public List<String> getProviderIds() {
-        return providerIds;
-    }
-
-    /**
-     * Gets the identifiers for alternative scenarios.
-     *
-     * @return The identifiers for alternative scenarios
-     */
-    public List<String> getAlternativeIds() {
-        return alternativeIds;
-    }
-
-    /**
-     * Gets the icon
-     *
-     * @return The icon
-     */
-    public Icon getIcon() {
-        return icon;
-    }
-
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets the description
-     *
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
-    }
+    List<OnboardingAction> getActions();
 
 }

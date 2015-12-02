@@ -60,46 +60,53 @@ import com.openexchange.groupware.notify.hostname.HostData;
  */
 public class DefaultOnboardingRequest implements OnboardingRequest {
 
-    private final OnboardingSelection selection;
-    private final ClientInfo clientInfo;
+    private final Scenario scenario;
+    private final OnboardingAction action;
+    private final Device device;
     private final HostData hostData;
-    private final Map<String, Object> formContent;
+    private final Map<String, Object> input;
 
     /**
      * Initializes a new {@link DefaultOnboardingRequest}.
      *
-     * @param configurationId The configuration identifier
-     * @param selectionId The selection identifier
-     * @param clientInfo The client information
+     * @param scenario The scenario to execute
+     * @param action The action to perform
+     * @param device The associated device
      * @param hostData The host data
-     * @param formContent The optional form content or <code>null</code>
+     * @param input The optional input or <code>null</code>
      */
-    public DefaultOnboardingRequest(OnboardingSelection selection, ClientInfo clientInfo, HostData hostData, Map<String, Object> formContent) {
+    public DefaultOnboardingRequest(Scenario scenario, OnboardingAction action, Device device, HostData hostData, Map<String, Object> input) {
         super();
-        this.selection = selection;
-        this.clientInfo = clientInfo;
+        this.scenario = scenario;
+        this.action = action;
+        this.device = device;
         this.hostData = hostData;
-        this.formContent = formContent;
+        this.input = input;
     }
 
     @Override
-    public Map<String, Object> getFormContent() {
-        return formContent;
+    public Scenario getScenario() {
+        return scenario;
     }
 
     @Override
-    public OnboardingSelection getSelection() {
-        return selection;
+    public OnboardingAction getAction() {
+        return action;
     }
 
     @Override
-    public ClientInfo getClientInfo() {
-        return clientInfo;
+    public Device getDevice() {
+        return device;
     }
 
     @Override
     public HostData getHostData() {
         return hostData;
+    }
+
+    @Override
+    public Map<String, Object> getInput() {
+        return input;
     }
 
 }

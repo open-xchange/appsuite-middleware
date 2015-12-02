@@ -49,25 +49,37 @@
 
 package com.openexchange.onboarding;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
-
 /**
- * {@link OnboardingExecutor} - Executes a certain on-boarding request.
+ * {@link AckResult} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingExecutor {
+public class AckResult implements Result {
+
+    private final String resultText;
 
     /**
-     * Executes specified on-boarding request.
+     * Initializes a new {@link AckResult}.
      *
-     * @param request The on-boarding request
-     * @param session The session providing user data
-     * @return The result
-     * @throws OXException If execution fails
+     * @param resultText The result text that is supposed to be displayed to the user
      */
-    Result execute(OnboardingRequest request, Session session) throws OXException;
+    public AckResult(String resultText) {
+        super();
+        this.resultText = resultText;
+    }
 
+    /**
+     * Gets the result text
+     *
+     * @return The result text
+     */
+    public String getResultText() {
+        return resultText;
+    }
+
+    @Override
+    public ResultReply getReply() {
+        return ResultReply.ACCEPT;
+    }
 }

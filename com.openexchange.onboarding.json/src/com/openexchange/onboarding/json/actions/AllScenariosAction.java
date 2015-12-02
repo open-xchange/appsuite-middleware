@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,44 +47,49 @@
  *
  */
 
-package com.openexchange.onboarding.json.osgi;
+package com.openexchange.onboarding.json.actions;
 
-import org.slf4j.Logger;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.onboarding.json.OnboardingActionFactory;
-import com.openexchange.onboarding.json.converter.OnboardingViewConverter;
-import com.openexchange.onboarding.json.converter.ScenarioConverter;
+import java.util.List;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.DeviceAwareScenario;
+import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.service.OnboardingService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link OnboardingJsonActivator}
+ * {@link AllScenariosAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class OnboardingJsonActivator extends AJAXModuleActivator {
+public class AllScenariosAction extends AbstractOnboardingAction {
 
     /**
-     * Initializes a new {@link OnboardingJsonActivator}.
+     * Initializes a new {@link AllScenariosAction}.
+     *
+     * @param services
      */
-    public OnboardingJsonActivator() {
-        super();
+    public AllScenariosAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingService.class };
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        OnboardingService onboardingService = getOnboardingService();
 
-    @Override
-    protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingJsonActivator.class);
-        logger.info("Starting bundle: \"com.openexchange.onboarding.json\"");
+        String deviceId = requestData.checkParameter("device");
+        Device device = Device.deviceFor(deviceId);
+        if (null == device) {
+            throw OnboardingExceptionCodes.INVALID_DEVICE_ID.create(deviceId);
+        }
 
-        registerService(ResultConverter.class, new OnboardingViewConverter());
-        registerService(ResultConverter.class, new ScenarioConverter(this));
-        registerModule(new OnboardingActionFactory(this), "onboarding");
+        List<DeviceAwareScenario> scenarios = onboardingService.getScenariosFor(device, session);
+        return new AJAXRequestResult(scenarios, "onboardingScenario");
     }
 
 }

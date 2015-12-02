@@ -47,35 +47,90 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.internal;
+
+import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.DeviceAwareScenario;
+import com.openexchange.onboarding.Icon;
+import com.openexchange.onboarding.OnboardingAction;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.OnboardingType;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingSelection}
+ * {@link DeviceAwareScenarionImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingSelection extends Entity {
+public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
+
+    private final String id;
+    private final Scenario scenario;
+    private final Device device;
+    private final List<OnboardingAction> actions;
 
     /**
-     * Gets the identifier; e.g. <code>"apple.ipad/calendar/caldav/download"</code>
-     *
-     * @return The identifier
+     * Initializes a new {@link DeviceAwareScenarionImpl}.
      */
-    String getCompositeId();
+    public DeviceAwareScenarionImpl(Scenario scenario, Device device, List<OnboardingAction> actions) {
+        super();
+        this.id = new StringBuilder(32).append(device.getId()).append('/').append(scenario.getId()).toString();
+        this.scenario = scenario;
+        this.device = device;
+        this.actions = actions;
+    }
+    @Override
+    public Device getDevice() {
+        return device;
+    }
 
-    /**
-     * Gets the associated entity path
-     *
-     * @return The entity path
-     */
-    EntityPath getEntityPath();
+    @Override
+    public List<OnboardingAction> getActions() {
+        return actions;
+    }
 
-    /**
-     * Gets the on-boarding type for this selection; e.g. download, via E-Mail, via SMS, etc.
-     *
-     * @return The selection type.
-     */
-    OnboardingAction getAction();
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public OnboardingType getType() {
+        return scenario.getType();
+    }
+
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        return scenario.isEnabled(session);
+    }
+
+    @Override
+    public List<OnboardingProvider> getProviders(Session session) {
+        return scenario.getProviders(session);
+    }
+
+    @Override
+    public String getDisplayName(Session session) throws OXException {
+        return scenario.getDisplayName(session);
+    }
+
+    @Override
+    public List<Scenario> getAlternatives(Session session) {
+        return scenario.getAlternatives(session);
+    }
+
+    @Override
+    public Icon getIcon(Session session) throws OXException {
+        return scenario.getIcon(session);
+    }
+
+    @Override
+    public String getDescription(Session session) throws OXException {
+        return scenario.getDescription(session);
+    }
 
 }

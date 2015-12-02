@@ -47,114 +47,78 @@
  *
  */
 
-package com.openexchange.onboarding.internal;
-
-import java.util.List;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingType;
+package com.openexchange.onboarding;
 
 /**
- * {@link ConfiguredScenario} - Represents a configured scenario parsed from appropriate .yml file.
+ * {@link ObjectResult} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfiguredScenario {
-
-    private final String id;
-    private final boolean enabled;
-    private final OnboardingType type;
-    private final List<String> providerIds;
-    private final List<String> alternativeIds;
-    private final Icon icon;
-    private final String displayName;
-    private final String description;
+public class ObjectResult implements Result {
 
     /**
-     * Initializes a new {@link ConfiguredScenario}.
+     * Creates a new {@link ObjectResult} returning a contributable object.
+     *
+     * @param resultObject The result object; e.g. <code>PListDict</code>
+     * @param format The result object's format; e.g. <code>"plist"</code>
+     * @return The result
      */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
+    public static ObjectResult contributingResult(Object resultObject, String format) {
+        return new ObjectResult(resultObject, format, ResultReply.NEUTRAL);
+    }
+
+    /**
+     * Creates a new {@link ObjectResult} returning a non-contributable (therefore final) object.
+     *
+     * @param resultObject The result object; e.g. <code>IFileHolder</code>
+     * @param format The result object's format; e.g. <code>"file"</code>
+     * @return The result
+     */
+    public static ObjectResult terminatingResult(Object resultObject, String format) {
+        return new ObjectResult(resultObject, format, ResultReply.ACCEPT);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    private final Object resultObject;
+    private final String format;
+    private final ResultReply reply;
+
+    /**
+     * Initializes a new {@link ObjectResult}.
+     *
+     * @param resultObject The result object; e.g. <code>IFileHolder</code>
+     * @param format The result object's format; e.g. <code>"file"</code>
+     */
+    private ObjectResult(Object resultObject, String format, ResultReply reply) {
         super();
-        this.id = id;
-        this.enabled = enabled;
-        this.type = type;
-        this.providerIds = providerIds;
-        this.alternativeIds = alternativeIds;
-        this.icon = icon;
-        this.displayName = displayName;
-        this.description = description;
+        this.resultObject = resultObject;
+        this.format = format;
+        this.reply = reply;
     }
 
     /**
-     * Gets the identifier
+     * Gets the result object
      *
-     * @return The identifier
+     * @return The result object or <code>null</code>
      */
-    public String getId() {
-        return id;
+    public Object getResultObject() {
+        return resultObject;
     }
 
     /**
-     * Gets the enabled
+     * Gets the format
      *
-     * @return The enabled
+     * @return The format or <code>null</code>
      */
-    public boolean isEnabled() {
-        return enabled;
+    public String getFormat() {
+        return format;
     }
 
-    /**
-     * Gets the type
-     *
-     * @return The type
-     */
-    public OnboardingType getType() {
-        return type;
-    }
-
-    /**
-     * Gets the identifiers of associated providers
-     *
-     * @return The identifiers of associated providers
-     */
-    public List<String> getProviderIds() {
-        return providerIds;
-    }
-
-    /**
-     * Gets the identifiers for alternative scenarios.
-     *
-     * @return The identifiers for alternative scenarios
-     */
-    public List<String> getAlternativeIds() {
-        return alternativeIds;
-    }
-
-    /**
-     * Gets the icon
-     *
-     * @return The icon
-     */
-    public Icon getIcon() {
-        return icon;
-    }
-
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets the description
-     *
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
+    @Override
+    public ResultReply getReply() {
+        return reply;
     }
 
 }

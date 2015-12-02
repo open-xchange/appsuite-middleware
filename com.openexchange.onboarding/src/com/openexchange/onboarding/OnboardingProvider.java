@@ -49,7 +49,7 @@
 
 package com.openexchange.onboarding;
 
-import java.util.List;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -60,25 +60,31 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingProvider extends IdEntity, OnboardingExecutor {
+public interface OnboardingProvider {
 
     /**
-     * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
+     * Gets the identifier.
      *
-     * @param session The session providing user data
-     * @return The paths to the dedicated on-boarding configuration selections.
-     * @throws OXException If paths cannot be returned
+     * @return The identifier
      */
-    List<EntityPath> getEntityPaths(Session session) throws OXException;
+    String getId();
 
     /**
-     * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
+     * Gets the supported devices
      *
-     * @param entityPath The entity path
-     * @param session The session providing user data
-     * @return The available selections
-     * @throws OXException If denoted entity has no selections or selections cannot be returned
+     * @return The supported devices
      */
-    List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException;
+    Set<Device> getSupportedDevices();
+
+    /**
+     * Executes specified on-boarding scenario according to given action.
+     *
+     * @param request The on-boarding request
+     * @param previousResult The optional previous result or <code>null</code>
+     * @param session The session
+     * @return The execution result
+     * @throws OXException If execution fails
+     */
+    Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException;
 
 }

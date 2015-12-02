@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,31 @@
  *
  */
 
-package com.openexchange.onboarding.service;
+package com.openexchange.onboarding;
 
-import java.util.Collection;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.osgi.annotation.SingletonService;
-import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingProviderService} - The service for {@link OnboardingProvider providers}.
+ * This enum represents the possible replies that a {@link OnboardingProvider provider} can return alongside with a {@link Result} instance.
+ * <p>
+ * Based on the order that the ResultReply values are declared,
+ * <code>ResolveReply.ACCEPT.compareTo(ResolveReply.DENY)</code> will return a positive value.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @version v7.8.1
  */
-@SingletonService
-public interface OnboardingProviderService {
+public enum ResultReply {
 
     /**
-     * Gets all currently registered {@link OnboardingProvider providers}.
-     *
-     * @return All providers
-     * @throws OXException If providers cannot be returned
+     * The {@link OnboardingProvider} denies further processing of the result.
      */
-    Collection<OnboardingProvider> getAllProviders() throws OXException;
-
+    DENY,
     /**
-     * Gets the specified {@link OnboardingProvider provider}.
-     *
-     * @return The specified provider
-     * @throws OXException If provider cannot be returned
+     * The {@link OnboardingProvider} completed its contribution to a result; next one in chain can proceed (if any).
      */
-    OnboardingProvider getProvider(String id) throws OXException;
-
+    NEUTRAL,
     /**
-     * Gets the currently available {@link OnboardingProvider providers} for the session-associated user.
-     *
-     * @param session The session
-     * @return The currently available providers
-     * @throws OXException If providers cannot be returned
+     * The {@link OnboardingProvider} successfully handled the result and considers it to be complete.
      */
-    Collection<OnboardingProvider> getAvailableProvidersFor(Session session) throws OXException;
-
-    /**
-     * Gets the on-boarding view for specified session
-     *
-     * @param session The session
-     * @return The on-boarding view
-     * @throws OXException If view cannot be returned
-     */
-    OnboardingView getViewFor(Session session) throws OXException;
+    ACCEPT;
 
 }

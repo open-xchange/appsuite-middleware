@@ -66,6 +66,10 @@ public enum OnboardingType {
      * The manual on-boarding type; required data/resources are supposed to be manually set/applied
      */
     MANUAL("manual"),
+    /**
+     * The link on-boarding type; required data/resources are supposed to be applied by clicking a link (to an app store)
+     */
+    LINK("link"),
     ;
 
     private final String id;

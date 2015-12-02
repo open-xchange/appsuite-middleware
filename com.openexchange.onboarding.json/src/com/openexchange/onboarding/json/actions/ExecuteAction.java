@@ -53,16 +53,19 @@ import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.onboarding.DefaultClientInfo;
+import com.openexchange.onboarding.AckResult;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
-import com.openexchange.onboarding.DefaultOnboardingSelection;
-import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.ObjectResult;
+import com.openexchange.onboarding.OnboardingAction;
+import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -86,53 +89,75 @@ public class ExecuteAction extends AbstractOnboardingAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        // Check for configuration identifier
+        OnboardingService onboardingService = getOnboardingService();
+
+        // Check for composite identifier
         String compositeId = requestData.getParameter("id");
         if (Strings.isEmpty(compositeId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
-        DefaultOnboardingSelection selection = DefaultOnboardingSelection.parseFrom(compositeId);
+        // Parse composite identifier
+        Map.Entry<Device, String> parsed = OnboardingUtility.parseCompositeId(compositeId);
+
+        // Check for action
+        String sAction = requestData.getParameter("action_id");
+        if (Strings.isEmpty(sAction)) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("action_id");
+        }
+
+        OnboardingAction action = OnboardingAction.actionFor(sAction);
+        if (null == action) {
+            throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
+        }
 
         // Parse optional form content
-        Map<String, Object> formContent = null;
+        Map<String, Object> input = null;
         {
             Object data = requestData.getData();
             if (data instanceof JSONObject) {
                 JSONObject jFormContent = (JSONObject) data;
-                formContent = (Map<String, Object>) JSONCoercion.coerceToNative(jFormContent);
+                input = (Map<String, Object>) JSONCoercion.coerceToNative(jFormContent);
             }
         }
+
+        Scenario scenario = onboardingService.getScenario(parsed.getValue());
 
         // Create on-boarding request & execute it
-        DefaultClientInfo clientInfo = new DefaultClientInfo(AJAXRequestDataTools.getUserAgent(requestData));
-        DefaultOnboardingRequest onboardingRequest = new DefaultOnboardingRequest(selection, clientInfo, requestData.getHostData(), formContent);
-        OnboardingProvider configuration = selection.getEntityPath().getService();
-        Result onboardingResult = configuration.execute(onboardingRequest, session);
+        DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, parsed.getKey(), requestData.getHostData(), input);
+        Result result = onboardingService.execute(request, session);
 
-        // Return execution result
-        Object resultObject = onboardingResult.getResultObject();
-        if (null != resultObject) {
-            String format = onboardingResult.getFormat();
-            if (null == format) {
-                return new AJAXRequestResult(resultObject);
-            }
-            requestData.setFormat(format);
-            return new AJAXRequestResult(resultObject, format);
+        // Check for an AckResult
+        if (result instanceof AckResult) {
+            AckResult ackResult = (AckResult) result;
+            JSONObject jResult = new JSONObject(2);
+            jResult.put("result", ackResult.getResultText());
+            return new AJAXRequestResult(jResult, "json");
         }
 
-        Map<String, Object> formConfiguration = onboardingResult.getFormConfiguration();
-        if (null != formConfiguration) {
-            JSONObject json = new JSONObject(formConfiguration.size());
-            for (String key : formConfiguration.keySet()) {
-                json.put(key, formConfiguration.get(key));
-            }
-            return new AJAXRequestResult(json, "json");
+        // Otherwise expect an ObjectResult
+        ObjectResult objectResult = (ObjectResult) result;
+        switch (action) {
+            case DOWNLOAD:
+                doDownload(objectResult, scenario, session);
+                break;
+            case EMAIL:
+                break;
+            case SMS:
+                break;
+            default:
+                throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
         }
 
-        JSONObject jResult = new JSONObject(2);
-        jResult.put("result", onboardingResult.getResultText());
-        return new AJAXRequestResult(jResult, "json");
+
+
+
+        String format = objectResult.getFormat();
+        if (null == format) {
+            return new AJAXRequestResult(objectResult.getResultObject());
+        }
+        requestData.setFormat(format);
+        return new AJAXRequestResult(objectResult.getResultObject(), format);
     }
 
 }

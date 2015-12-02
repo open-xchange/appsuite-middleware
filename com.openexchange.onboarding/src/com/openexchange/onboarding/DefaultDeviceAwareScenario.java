@@ -47,114 +47,65 @@
  *
  */
 
-package com.openexchange.onboarding.internal;
+package com.openexchange.onboarding;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingType;
 
 /**
- * {@link ConfiguredScenario} - Represents a configured scenario parsed from appropriate .yml file.
+ * {@link DefaultDeviceAwareScenario} - The default entity implementation.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfiguredScenario {
-
-    private final String id;
-    private final boolean enabled;
-    private final OnboardingType type;
-    private final List<String> providerIds;
-    private final List<String> alternativeIds;
-    private final Icon icon;
-    private final String displayName;
-    private final String description;
+public class DefaultDeviceAwareScenario extends DefaultScenario implements DeviceAwareScenario {
 
     /**
-     * Initializes a new {@link ConfiguredScenario}.
+     * Creates a new {@code DefaultScenario} instance
+     *
+     * @param id The scenario identifier
+     * @param type The associated type
+     * @param icon The icon
+     * @param i18nDisplayName The translatable display name
+     * @param i18nDescription The translatable description
+     * @param device The associated device
+     * @return The new {@code DefaultScenario} instance
      */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
-        super();
-        this.id = id;
-        this.enabled = enabled;
-        this.type = type;
-        this.providerIds = providerIds;
-        this.alternativeIds = alternativeIds;
-        this.icon = icon;
-        this.displayName = displayName;
-        this.description = description;
+    public static DefaultDeviceAwareScenario newInstance(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
+        return new DefaultDeviceAwareScenario(id, type, icon, i18nDisplayName, i18nDescription, device);
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
+
+    private final Device device;
+    private final List<OnboardingAction> actions;
+
+    private DefaultDeviceAwareScenario(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
+        super(new StringBuilder(32).append(device.getId()).append('/').append(id).toString(), type, icon, i18nDisplayName, i18nDescription);
+        this.device = device;
+        actions = new ArrayList<>(4);
     }
 
     /**
-     * Gets the identifier
+     * Adds specified action
      *
-     * @return The identifier
+     * @param action The action
      */
-    public String getId() {
-        return id;
+    public void addAction(OnboardingAction action) {
+        if (null != action) {
+            this.actions.add(action);
+        }
     }
 
-    /**
-     * Gets the enabled
-     *
-     * @return The enabled
-     */
-    public boolean isEnabled() {
-        return enabled;
+    @Override
+    public Device getDevice() {
+        return device;
     }
 
-    /**
-     * Gets the type
-     *
-     * @return The type
-     */
-    public OnboardingType getType() {
-        return type;
-    }
-
-    /**
-     * Gets the identifiers of associated providers
-     *
-     * @return The identifiers of associated providers
-     */
-    public List<String> getProviderIds() {
-        return providerIds;
-    }
-
-    /**
-     * Gets the identifiers for alternative scenarios.
-     *
-     * @return The identifiers for alternative scenarios
-     */
-    public List<String> getAlternativeIds() {
-        return alternativeIds;
-    }
-
-    /**
-     * Gets the icon
-     *
-     * @return The icon
-     */
-    public Icon getIcon() {
-        return icon;
-    }
-
-    /**
-     * Gets the display name
-     *
-     * @return The display name
-     */
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    /**
-     * Gets the description
-     *
-     * @return The description
-     */
-    public String getDescription() {
-        return description;
+    @Override
+    public List<OnboardingAction> getActions() {
+        return Collections.unmodifiableList(actions);
     }
 
 }

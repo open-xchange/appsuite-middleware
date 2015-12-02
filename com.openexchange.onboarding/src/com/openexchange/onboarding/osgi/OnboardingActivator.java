@@ -49,15 +49,16 @@
 
 package com.openexchange.onboarding.osgi;
 
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.onboarding.internal.OnboardingProviderRegistry;
+import com.openexchange.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.onboarding.internal.OnboardingInit;
-import com.openexchange.onboarding.service.OnboardingProviderService;
+import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.uadetector.UserAgentParser;
@@ -71,7 +72,7 @@ import com.openexchange.user.UserService;
  */
 public class OnboardingActivator extends HousekeepingActivator {
 
-    private volatile OnboardingProviderRegistry registry;
+    private volatile OnboardingServiceImpl registry;
 
     /**
      * Initializes a new {@link OnboardingActivator}.
@@ -83,19 +84,19 @@ public class OnboardingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
-            TranslatorFactory.class, ServerConfigService.class };
+            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
 
-        OnboardingProviderRegistry registry = new OnboardingProviderRegistry(context, OnboardingInit.initScenarios(getService(ConfigurationService.class)));
+        OnboardingServiceImpl registry = new OnboardingServiceImpl(context, OnboardingInit.initScenarios(getService(ConfigurationService.class)));
         registry.open();
         this.registry = registry;
-        addService(OnboardingProviderService.class, registry);
+        addService(OnboardingService.class, registry);
 
-        registerService(OnboardingProviderService.class, registry);
+        registerService(OnboardingService.class, registry);
         registerService(Reloadable.class, registry);
     }
 
@@ -103,10 +104,10 @@ public class OnboardingActivator extends HousekeepingActivator {
     protected void stopBundle() throws Exception {
         super.stopBundle();
 
-        OnboardingProviderRegistry registry = this.registry;
+        OnboardingServiceImpl registry = this.registry;
         if (null != registry) {
             this.registry = null;
-            removeService(OnboardingProviderService.class);
+            removeService(OnboardingService.class);
             registry.close();
         }
 

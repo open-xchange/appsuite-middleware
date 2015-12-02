@@ -119,7 +119,30 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * No such scenario for identifier: %1$s
      */
     NO_SUCH_SCENARIO("No such scenario for identifier: %1$s", null, Category.CATEGORY_CONFIGURATION, 14),
-
+    /**
+     * Scenario is disabled: %1$s
+     */
+    DISABLED_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 15),
+    /**
+     * Invalid device identifier: %1$s
+     */
+    INVALID_DEVICE_ID("Invalid device identifier: %1$s", null, Category.CATEGORY_USER_INPUT, 16),
+    /**
+     * Provider %1$s denied execution for scenario %2$s
+     */
+    EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 17),
+    /**
+     * Provider %1$s does not support device %2$s
+     */
+    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 18),
+    /**
+     * Provider %1$s does not support action %2$s for type %3$s
+     */
+    UNSUPPORTED_ACTION("Provider %1$s does not support action %2$s for type %3$s", null, Category.CATEGORY_ERROR, 19),
+    /**
+     * Provider %1$s does not support type %2$s
+     */
+    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 20),
     ;
 
     /** The error code prefix for on-boarding module */

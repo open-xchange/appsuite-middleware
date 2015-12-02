@@ -49,20 +49,39 @@
 
 package com.openexchange.onboarding;
 
+import java.util.Map;
 
 /**
- * {@link ClientInfo} - Information for a client that initiated an on-boarding action.
+ * {@link DisplayResult} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface ClientInfo {
+public class DisplayResult implements Result {
+
+    private final Map<String, Object> configuration;
 
     /**
-     * Gets the <code>User-Agent</code> string
+     * Initializes a new {@link DisplayResult}.
      *
-     * @return The <code>User-Agent</code> string
+     * @param configuration The configuration
      */
-    String getUserAgent();
+    public DisplayResult(Map<String, Object> configuration) {
+        super();
+        this.configuration = configuration;
+    }
 
+    /**
+     * Gets the form configuration.
+     *
+     * @return The form configuration or <code>null</code>
+     */
+    public Map<String, Object> getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public ResultReply getReply() {
+        return ResultReply.ACCEPT;
+    }
 }

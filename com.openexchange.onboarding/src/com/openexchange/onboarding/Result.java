@@ -49,97 +49,28 @@
 
 package com.openexchange.onboarding;
 
-import java.util.Map;
-
 /**
  * {@link Result} - A result when an on-boarding configuration has been successfully executed.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class Result {
+public interface Result {
 
-    private final String resultText;
-    private final Map<String, Object> formConfiguration;
+    /** The DENY result. */
+    public static Result DENY = new Result() {
 
-    private final Object resultObject;
-    private final String format;
-
-    /**
-     * Initializes a new {@link Result}.
-     *
-     * @param resultText The result text that is supposed to be displayed to the user
-     */
-    public Result(String resultText) {
-        this.resultText = resultText;
-        this.formConfiguration = null;
-        this.resultObject = null;
-        this.format = null;
-    }
+        @Override
+        public ResultReply getReply() {
+            return ResultReply.DENY;
+        }
+    };
 
     /**
-     * Initializes a new {@link Result}.
+     * Gets this result's reply
      *
-     * @param resultText The result text
-     * @param formConfiguration The form configuration
-     * @param formDescription The form description
+     * @return The reply
      */
-    public Result(String resultText, Map<String, Object> formConfiguration) {
-        super();
-        this.resultText = resultText;
-        this.formConfiguration = formConfiguration;
-        resultObject = null;
-        format = null;
-    }
+    ResultReply getReply();
 
-    /**
-     * Initializes a new {@link Result}.
-     *
-     * @param resultObject The result object; e.g. <code>IFileHolder</code>
-     * @param format The result object's format; e.g. <code>"file"</code>
-     */
-    public Result(Object resultObject, String format) {
-        super();
-        this.resultObject = resultObject;
-        this.format = format;
-
-        resultText = null;
-        formConfiguration = null;
-    }
-
-    /**
-     * Gets the result object
-     *
-     * @return The result object or <code>null</code>
-     */
-    public Object getResultObject() {
-        return resultObject;
-    }
-
-    /**
-     * Gets the format
-     *
-     * @return The format or <code>null</code>
-     */
-    public String getFormat() {
-        return format;
-    }
-
-    /**
-     * Gets the result text that is supposed to be displayed to the user.
-     *
-     * @return The result text
-     */
-    public String getResultText() {
-        return resultText;
-    }
-
-    /**
-     * Gets the form configuration.
-     *
-     * @return The form configuration or <code>null</code>
-     */
-    public Map<String, Object> getFormConfiguration() {
-        return formConfiguration;
-    }
 }

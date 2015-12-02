@@ -70,17 +70,17 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link ConfigurationViewConverter}
+ * {@link OnboardingViewConverter}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ConfigurationViewConverter implements ResultConverter {
+public class OnboardingViewConverter implements ResultConverter {
 
     /**
-     * Initializes a new {@link ConfigurationViewConverter}.
+     * Initializes a new {@link OnboardingViewConverter}.
      */
-    public ConfigurationViewConverter() {
+    public OnboardingViewConverter() {
         super();
     }
 
