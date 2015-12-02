@@ -49,11 +49,10 @@
 
 package com.openexchange.onboarding.service;
 
-import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.Module;
-import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 
 /**
@@ -69,27 +68,13 @@ public interface OnboardingView {
      *
      * @return The platforms
      */
-    EnumSet<Platform> getPlatforms();
+    Set<Platform> getPlatforms();
 
     /**
      * Gets the available devices for this view
      *
      * @return The devices
      */
-    EnumSet<Device> getDevices();
-
-    /**
-     * Gets the available modules for this view
-     *
-     * @return The modules
-     */
-    EnumSet<Module> getModules();
-
-    /**
-     * Gets the available selections for this view
-     *
-     * @return The selections
-     */
-    List<OnboardingSelection> getSelections();
+    Map<Device, List<String>> getDevices();
 
 }

@@ -895,24 +895,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              */
             if (false == acknowledgedDate.before(trigger) && (null == originalAppointment || originalAppointment.getAlarm() == updatedAppointment.getAlarm())) {
                 updatedAppointment.setAlarm(-1);
-                if (null != existingReminder) {
-                    new ReminderHandler(factory.getContext()).deleteReminder(existingReminder);
-                }
             }
-//
-//
-//            ReminderObject nextReminder = calculateNextReminder(updatedAppointment, updatedAppointment.getStartDate(), existingReminder);
-//            if (null != nextReminder && acknowledgedDate.before(nextReminder.getDate())) {
-//                /*
-//                 * acknowledged date is after trigger, so assume alarm is acknowledged if not updated concurrently
-//                 */
-//                if (null == originalAppointment || originalAppointment.getAlarm() == updatedAppointment.getAlarm()) {
-//                    updatedAppointment.setAlarm(-1);
-////                    if (null != existingReminder) {
-////                        new ReminderHandler(factory.getContext()).deleteReminder(existingReminder);
-////                    }
-//                }
-
         } else {
             /*
              * reminder of appointment series is acknowledged, calculate next trigger date

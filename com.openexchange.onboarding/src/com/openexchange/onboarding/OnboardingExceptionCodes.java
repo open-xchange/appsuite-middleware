@@ -76,9 +76,9 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      */
     SQL_ERROR("An SQL error occurred: %1$s", null, Category.CATEGORY_ERROR, 3),
     /**
-     * No such configuration for identifier: %1$s
+     * No such provider for identifier: %1$s
      */
-    NOT_FOUND("No such configuration for identifier: %1$s", null, Category.CATEGORY_ERROR, 4),
+    NOT_FOUND("No such provider for identifier: %1$s", null, Category.CATEGORY_ERROR, 4),
     /**
      * Entity identifier not specified.
      */
@@ -107,6 +107,18 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid composite identifier: %1$s
      */
     INVALID_COMPOSITE_ID("Invalid composite identifier: %1$s", null, Category.CATEGORY_ERROR, 11),
+    /**
+     * Invalid scenario configuration for %1$s
+     */
+    INVALID_SCENARIO_CONFIGURATION("Invalid scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 12),
+    /**
+     * Duplicate scenario configuration for %1$s
+     */
+    DUPLICATE_SCENARIO_CONFIGURATION("Duplicate scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 13),
+    /**
+     * No such scenario for identifier: %1$s
+     */
+    NO_SUCH_SCENARIO("No such scenario for identifier: %1$s", null, Category.CATEGORY_CONFIGURATION, 14),
 
     ;
 

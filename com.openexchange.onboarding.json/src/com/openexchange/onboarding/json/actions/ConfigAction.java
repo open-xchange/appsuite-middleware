@@ -53,7 +53,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.onboarding.service.OnboardingProviderService;
 import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -77,7 +77,7 @@ public class ConfigAction extends AbstractOnboardingAction {
 
     @Override
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingConfigurationService onboardingService = getOnboardingService();
+        OnboardingProviderService onboardingService = getOnboardingService();
         OnboardingView view = onboardingService.getViewFor(session);
         return new AJAXRequestResult(view, "onboardingView");
     }

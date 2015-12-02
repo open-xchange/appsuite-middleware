@@ -84,7 +84,7 @@ import com.openexchange.onboarding.EntityPath;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.Module;
 import com.openexchange.onboarding.OnboardingAction;
-import com.openexchange.onboarding.OnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -105,13 +105,13 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link IMAPOnboardingConfiguration}
+ * {@link IMAPOnboardingProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
+public class IMAPOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String propertyPrefix;
@@ -119,9 +119,9 @@ public class IMAPOnboardingConfiguration implements OnboardingConfiguration {
     private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
 
     /**
-     * Initializes a new {@link IMAPOnboardingConfiguration}.
+     * Initializes a new {@link IMAPOnboardingProvider}.
      */
-    public IMAPOnboardingConfiguration(ServiceLookup services) {
+    public IMAPOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
         propertyPrefix = "com.openexchange.onboarding.imap";

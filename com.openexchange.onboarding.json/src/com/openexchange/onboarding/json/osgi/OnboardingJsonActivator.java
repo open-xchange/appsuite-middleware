@@ -55,7 +55,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.onboarding.json.OnboardingActionFactory;
 import com.openexchange.onboarding.json.converter.ConfigurationViewConverter;
-import com.openexchange.onboarding.service.OnboardingConfigurationService;
+import com.openexchange.onboarding.service.OnboardingProviderService;
 
 /**
  * {@link OnboardingJsonActivator}
@@ -73,7 +73,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingConfigurationService.class };
+        return new Class<?>[] { CapabilityService.class, OnboardingProviderService.class };
     }
 
     @Override

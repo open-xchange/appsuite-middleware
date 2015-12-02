@@ -47,38 +47,114 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.internal;
 
 import java.util.List;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.onboarding.Icon;
+import com.openexchange.onboarding.OnboardingType;
 
 /**
- * {@link OnboardingConfiguration} - Represents an on-boarding configuration suitable for configuring/integrating a client for communicating
- * with the Open-Xchange Middleware.
+ * {@link ConfiguredScenario}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface OnboardingConfiguration extends IdEntity, OnboardingExecutor {
+public class ConfiguredScenario {
+
+    private final String id;
+    private final boolean enabled;
+    private final OnboardingType type;
+    private final List<String> providerIds;
+    private final List<String> alternativeIds;
+    private final Icon icon;
+    private final String displayName;
+    private final String description;
 
     /**
-     * Gets the paths to the dedicated on-boarding configuration selections (excluding the platform).
-     *
-     * @param session The session providing user data
-     * @return The paths to the dedicated on-boarding configuration selections.
-     * @throws OXException If paths cannot be returned
+     * Initializes a new {@link ConfiguredScenario}.
      */
-    List<EntityPath> getEntityPaths(Session session) throws OXException;
+    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
+        super();
+        this.id = id;
+        this.enabled = enabled;
+        this.type = type;
+        this.providerIds = providerIds;
+        this.alternativeIds = alternativeIds;
+        this.icon = icon;
+        this.displayName = displayName;
+        this.description = description;
+    }
 
     /**
-     * Gets the available concrete selections for a {@link EntityPath path}'s last entity.
+     * Gets the identifier
      *
-     * @param entityPath The entity path
-     * @param session The session providing user data
-     * @return The available selections
-     * @throws OXException If denoted entity has no selections or selections cannot be returned
+     * @return The identifier
      */
-    List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException;
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Gets the enabled
+     *
+     * @return The enabled
+     */
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    /**
+     * Gets the type
+     *
+     * @return The type
+     */
+    public OnboardingType getType() {
+        return type;
+    }
+
+    /**
+     * Gets the identifiers of associated providers
+     *
+     * @return The identifiers of associated providers
+     */
+    public List<String> getProviderIds() {
+        return providerIds;
+    }
+
+    /**
+     * Gets the identifiers for alternative scenarios.
+     *
+     * @return The identifiers for alternative scenarios
+     */
+    public List<String> getAlternativeIds() {
+        return alternativeIds;
+    }
+
+    /**
+     * Gets the icon
+     *
+     * @return The icon
+     */
+    public Icon getIcon() {
+        return icon;
+    }
+
+    /**
+     * Gets the display name
+     *
+     * @return The display name
+     */
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    /**
+     * Gets the description
+     *
+     * @return The description
+     */
+    public String getDescription() {
+        return description;
+    }
 
 }

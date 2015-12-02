@@ -49,8 +49,8 @@
 
 package com.openexchange.onboarding.json.converter;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Map.Entry;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -63,8 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.Module;
-import com.openexchange.onboarding.OnboardingConfiguration;
 import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingView;
@@ -137,71 +135,30 @@ public class ConfigurationViewConverter implements ResultConverter {
         // Devices
         {
             JSONArray jDevices = new JSONArray(8);
-            for (Device device : view.getDevices()) {
+            for (Entry<Device, List<String>> deviceEntry : view.getDevices().entrySet()) {
+                Device device = deviceEntry.getKey();
+                List<String> compositeIds = deviceEntry.getValue();
+
                 JSONObject jDevice = new JSONObject(4);
                 jDevice.put("id", device.getId());
                 jDevice.put("enabled", device.isEnabled(session));
                 put2Json("displayName", device.getDisplayName(session), jDevice);
                 put2Json("description", device.getDescription(session), jDevice);
                 put2Json("icon", device.getIcon(session), jDevice);
+
+                if (null == compositeIds || compositeIds.isEmpty()) {
+                    jDevice.put("scenarios", new JSONArray(0));
+                } else {
+                    JSONArray jCompositeIds = new JSONArray(compositeIds.size());
+                    for (String compositeId : compositeIds) {
+                        jCompositeIds.put(compositeId);
+                    }
+                    jDevice.put("scenarios", jCompositeIds);
+                }
+
                 jDevices.put(jDevice);
             }
             jView.put("devices", jDevices);
-        }
-
-        // Modules
-        {
-            JSONArray jModules = new JSONArray(8);
-            for (Module module : view.getModules()) {
-                JSONObject jModule = new JSONObject(4);
-                jModule.put("id", module.getId());
-                jModule.put("enabled", module.isEnabled(session));
-                put2Json("displayName", module.getDisplayName(session), jModule);
-                put2Json("description", module.getDescription(session), jModule);
-                put2Json("icon", module.getIcon(session), jModule);
-                jModules.put(jModule);
-            }
-            jView.put("modules", jModules);
-        }
-
-        // Services
-        {
-            Map<String, JSONObject> used = new HashMap<String, JSONObject>(32);
-            JSONArray jServices = new JSONArray(32);
-            for (OnboardingSelection selection : view.getSelections()) {
-                JSONArray jSelections;
-                {
-                    String serviceId = selection.getEntityPath().getService().getId();
-                    JSONObject jService = used.get(serviceId);
-                    if (null == jService) {
-                        jService = new JSONObject(4);
-                        OnboardingConfiguration service = selection.getEntityPath().getService();
-                        jService.put("id", serviceId);
-                        jService.put("enabled", service.isEnabled(session));
-                        put2Json("displayName", service.getDisplayName(session), jService);
-                        put2Json("description", service.getDescription(session), jService);
-                        put2Json("icon", service.getIcon(session), jService);
-                        used.put(serviceId, jService);
-                        jServices.put(jService);
-                    }
-
-                    jSelections = jService.optJSONArray("selections");
-                    if (null == jSelections) {
-                        jSelections = new JSONArray(8);
-                        jService.put("selections", jSelections);
-                    }
-                }
-
-                JSONObject jSelection = new JSONObject(6);
-                jSelection.put("id", selection.getCompositeId());
-                jSelection.put("enabled", selection.isEnabled(session));
-                put2Json("displayName", selection.getDisplayName(session), jSelection);
-                put2Json("description", selection.getDescription(session), jSelection);
-                put2Json("icon", selection.getIcon(session), jSelection);
-                put2Json("action", selection.getAction().getId(), jSelection);
-                jSelections.put(jSelection);
-            }
-            jView.put("services", jServices);
         }
 
         return jView;

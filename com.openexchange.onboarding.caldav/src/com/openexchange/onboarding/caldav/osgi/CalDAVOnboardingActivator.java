@@ -54,8 +54,8 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.OnboardingConfiguration;
-import com.openexchange.onboarding.caldav.CalDAVOnboardingConfiguration;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.caldav.CalDAVOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -84,8 +84,8 @@ public class CalDAVOnboardingActivator extends HousekeepingActivator {
         trackService(MailService.class);
         openTrackers();
 
-        CalDAVOnboardingConfiguration onboardingConfiguration = new CalDAVOnboardingConfiguration(this);
-        registerService(OnboardingConfiguration.class, onboardingConfiguration);
+        CalDAVOnboardingProvider onboardingConfiguration = new CalDAVOnboardingProvider(this);
+        registerService(OnboardingProvider.class, onboardingConfiguration);
     }
 
 }
