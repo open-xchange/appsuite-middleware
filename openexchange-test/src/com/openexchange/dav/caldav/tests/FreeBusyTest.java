@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
@@ -316,13 +318,13 @@ public class FreeBusyTest extends CalDAVTest {
 		 * discover principal URL
 		 */
 		DavPropertyNameSet props = new DavPropertyNameSet();
-        props.add(PropertyNames.PRINCIPAL_URL);
+        props.add(PropertyNames.CURRENT_USER_PRINCIPAL);
         PropFindMethod propFind = new PropFindMethod(getWebDAVClient().getBaseURI() + "/",
         		DavConstants.PROPFIND_BY_PROPERTY, props, DavConstants.DEPTH_0);
         MultiStatusResponse[] responses = getWebDAVClient().doPropFind(propFind);
         assertNotNull("got no response", responses);
         assertTrue("got no responses", 1 == responses.length);
-        String principalURL = extractHref(PropertyNames.PRINCIPAL_URL, responses[0]);
+        String principalURL = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, responses[0]);
         assertNotNull("got no principal URL", principalURL);
         /*
          * discover schedule-outbox-url
