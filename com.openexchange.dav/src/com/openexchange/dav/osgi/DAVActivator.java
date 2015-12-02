@@ -56,6 +56,8 @@ import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.principals.PrincipalPerformer;
 import com.openexchange.dav.principals.PrincipalServlet;
+import com.openexchange.dav.root.RootPerformer;
+import com.openexchange.dav.root.RootServlet;
 import com.openexchange.group.GroupService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
@@ -81,6 +83,12 @@ public class DAVActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         HttpService httpService = getService(HttpService.class);
+        /*
+         * root
+         */
+        RootPerformer rootPerformer = new RootPerformer(this);
+        RootServlet rootServlet = new RootServlet(rootPerformer);
+        httpService.registerServlet("/servlet/dav", rootServlet, null, null);
         /*
          * principals
          */

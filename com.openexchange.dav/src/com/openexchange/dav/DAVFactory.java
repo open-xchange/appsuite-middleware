@@ -148,7 +148,7 @@ public abstract class DAVFactory extends AbstractWebdavFactory implements Sessio
      */
     protected WebdavPath sanitize(WebdavPath url) {
         WebdavPath prefixPath = new WebdavPath(getURLPrefix());
-        return url.startsWith(prefixPath) ? url.subpath(1) : url;
+        return 0 < prefixPath.size() && url.startsWith(prefixPath) ? url.subpath(1) : url;
     }
 
     /**
