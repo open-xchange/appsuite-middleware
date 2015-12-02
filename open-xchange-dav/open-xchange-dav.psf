@@ -3,7 +3,6 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.caldav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.carddav"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.webdav.acl"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.webdav.directory"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.dav"/>
 </provider>
 </psf>
