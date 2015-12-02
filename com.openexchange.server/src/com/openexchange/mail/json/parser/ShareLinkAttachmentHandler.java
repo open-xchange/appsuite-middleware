@@ -347,16 +347,17 @@ public final class ShareLinkAttachmentHandler extends DefaultAttachmentHandler i
         public String getName() {
             return name;
         }
+
         @Override
         public String getLink(InternetAddress recipient) {
+            ShareTargetPath targetPath;
             if (isEncodeRecipients()) {
-
+                Map<String, String> additionals = new HashMap<String, String>(1);
+                additionals.put("recipient", recipient.getAddress());
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem(), additionals);
             } else {
-
+                targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem());
             }
-            Map<String, String> additionals = new HashMap<String, String>(1);
-            additionals.put("recipient", recipient.getAddress());
-            ShareTargetPath targetPath = new ShareTargetPath(sourceTarget.getModule(), sourceTarget.getFolder(), sourceTarget.getItem(), additionals);
             String url = guest.generateLink(hostData, targetPath);
             if (Strings.isNotEmpty(queryString)) {
                 url = url + '?' + queryString;
