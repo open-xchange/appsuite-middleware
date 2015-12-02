@@ -3029,11 +3029,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             try {
                 if (!holdsMessages()) {
-                    throw IMAPException.create(
-                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                        imapConfig,
-                        session,
-                        imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
                 }
                 if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                     throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, imapFolder.getFullName());
@@ -3120,7 +3116,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
                 try {
                     if (hasUIDPlus) {
-                        // Perform append expecting APPENUID response code
+                        // Perform append expecting APPENDUID response code
                         retval = checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()])));
                     } else {
                         // Perform simple append
@@ -3133,7 +3129,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     throw oxe;
                 }
-                if (null != retval) {
+                if (null != retval && retval.length > 0) {
                     /*
                      * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                      */
@@ -3160,7 +3156,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     /*
                      * Missing UID information in APPENDUID response
                      */
-                    LOG.warn("Missing UID information in APPENDUID response");
+                    LOG.warn("Missing UID information in APPENDUID response for folder {} from IMAP server {} using login {}", imapFolder.getFullName(), imapConfig.getServer(), imapConfig.getLogin());
                 }
                 retval = new long[msgs.length];
                 final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
