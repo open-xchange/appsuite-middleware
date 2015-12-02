@@ -6,6 +6,7 @@ Bundle-Version: 7.8.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.container,
  com.openexchange.config,
  com.openexchange.config.cascade,
  com.openexchange.context,
@@ -41,4 +42,8 @@ Bundle-Activator: com.openexchange.onboarding.osgi.OnboardingActivator
 Export-Package: com.openexchange.onboarding,
  com.openexchange.onboarding.notification,
  com.openexchange.onboarding.notification.mail,
- com.openexchange.onboarding.service
+ com.openexchange.onboarding.service,
+ com.openexchange.onboarding.signature
+Bundle-ClassPath: lib/bcpkix-jdk15on-152.jar,
+ lib/bcprov-jdk15on-152.jar,
+ .

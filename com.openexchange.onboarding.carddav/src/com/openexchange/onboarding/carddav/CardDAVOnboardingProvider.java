@@ -94,6 +94,7 @@ import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNot
 import com.openexchange.onboarding.plist.PListDict;
 import com.openexchange.onboarding.plist.PListWriter;
 import com.openexchange.onboarding.plist.xml.StaxUtils;
+import com.openexchange.onboarding.signature.PListSigner;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -320,6 +321,8 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
             fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=carddav.mobileconfig"); // Or application/x-plist ?
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
             pListWriter.write(pListDict, writer);
+            PListSigner signer = new PListSigner(fileHolder);
+            fileHolder = signer.signPList();
             NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
             transport.sendMailMessage(message, ComposeType.NEW);
@@ -373,6 +376,8 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
             fileHolder.setDelivery("download");
             XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
             pListWriter.write(pListDict, writer);
+            PListSigner signer = new PListSigner(fileHolder);
+            fileHolder = signer.signPList();
             return new Result(fileHolder, "file");
         } catch (XMLStreamException e) {
             throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
