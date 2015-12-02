@@ -3039,13 +3039,20 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     statementFiller.fillStatement(pst, a + 1, cdao);
                 }
-                if (!skipParticipants) {
-                    final boolean temp = updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
-                    realChange = realChange || temp;
-                }
                 final int ret = pst.executeUpdate();
                 if (ret == 0) {
                     throw OXException.conflict();
+                }
+                if (!skipParticipants) {
+                    final boolean temp = updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
+                    realChange = realChange || temp;
+                    /*
+                     * reload new last modification timestamp (as it might have changed implicitly through reminder updates)
+                     */
+                    long lastModified = getLastModified(edao.getObjectID(), so.getContextId(), writecon);
+                    if (0 < lastModified) {
+                        cdao.setLastModified(new Date(lastModified));
+                    }
                 }
                 if (edao.isException()) {
                     // Update last-modified of master
@@ -4567,6 +4574,23 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt.setLong(pos++, lastModified); // LAST_MODIFIED
             stmt.executeUpdate();
         } finally {
+            COLLECTION.closePreparedStatement(stmt);
+        }
+    }
+
+    private static final String SQL_GET_LAST_MODIFIED = "SELECT " + COLLECTION.getFieldName(Appointment.LAST_MODIFIED) + " FROM prg_dates AS pd WHERE cid = ? AND " + COLLECTION.getFieldName(Appointment.OBJECT_ID) + " = ?;";
+
+    private static long getLastModified(int oid, int cid, Connection connection) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = connection.prepareStatement(SQL_GET_LAST_MODIFIED);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, oid);
+            result = stmt.executeQuery();
+            return result.next() ? result.getLong(1) : -1L;
+        } finally {
+            COLLECTION.closeResultSet(result);
             COLLECTION.closePreparedStatement(stmt);
         }
     }
