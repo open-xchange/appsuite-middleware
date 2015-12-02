@@ -70,8 +70,7 @@ Import-Package: com.openexchange.datatypes.genericonf,
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-ClassPath: lib/htmlcleaner-2.2.jar,
- lib/rome-1.0.jar,
+Bundle-ClassPath: lib/rome-1.0.jar,
  lib/rome-fetcher-1.0.jar,
  lib/jdom-1.1.3.jar,
  .

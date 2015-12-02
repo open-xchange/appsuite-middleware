@@ -63,6 +63,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
 import com.openexchange.osgi.console.ServiceStateLookup;
@@ -434,7 +435,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
                     errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                    final String errorMsg = t.getMessage();
+                    final String errorMsg = t instanceof OXException ? ((OXException) t).getLogMessage() : t.getMessage();
                     if (null == errorMsg || "null".equals(errorMsg)) {
                         errorBuilder.append(t.getClass().getName());
                     } else {
