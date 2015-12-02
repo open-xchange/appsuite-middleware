@@ -360,7 +360,45 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         PropertyList properties = component.getProperties(Property.ATTENDEE);
         for (int i = 0, size = properties.size(); i < size; i++) {
             Attendee attendee = (Attendee) properties.get(i);
+            /*
+             * try to decode unique urn:uuid first
+             */
             URI uri = attendee.getCalAddress();
+            if (null != uri && "urn".equals(uri.getScheme())) {
+                String specificPart = uri.getSchemeSpecificPart();
+                if (Strings.isNotEmpty(specificPart) && specificPart.startsWith("uuid:")) {
+                    try {
+                        UUID uuid = UUID.fromString(specificPart.substring(5));
+                        if (ctx.getContextId() == decodeContextID(uuid)) {
+                            int entity = decodeEntity(uuid);
+                            switch (decodeType(uuid)) {
+                                case Participant.GROUP:
+                                    GroupService groupService = GROUP_SERVICE_REFERENCE.get();
+                                    if (null == groupService) {
+                                        throw new ConversionWarning(index, Code.CANT_RESOLVE_GROUP, ServiceExceptionCode.absentService(GroupService.class), attendee.toString());
+                                    }
+                                    groups.add(groupService.getGroup(ctx, decodeEntity(uuid)));
+                                    continue;
+                                case Participant.RESOURCE:
+                                    resources.add(resourceResolver.load(decodeEntity(uuid), ctx));
+                                    continue;
+                                case Participant.USER:
+                                    User user = userResolver.loadUser(entity, ctx);
+                                    String mail = IDNA.toIDN(user.getMail());
+                                    mails.put(mail, createIcalParticipant(attendee, mail, comment));
+                                    continue;
+                                default:
+                                    break;
+                            }
+                        }
+                    } catch (IllegalArgumentException | OXException e) {
+                        warnings.add(new ConversionWarning(index, Code.CANT_RESOLVE_USER, e, specificPart));
+                    }
+                }
+            }
+            /*
+             * decode based on CUTYPE
+             */
             if (CuType.RESOURCE.equals(attendee.getParameter(Parameter.CUTYPE))) {
                 try {
                     resources.add(parseResourceAttendee(index, ctx, attendee));
