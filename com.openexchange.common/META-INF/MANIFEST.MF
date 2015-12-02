@@ -147,8 +147,7 @@ Bundle-ClassPath: .,
  lib/concurrentlinkedhashmap-lru-1.3.2.jar,
  lib/brownies-collections-0.9.6.jar,
  lib/jdo2-api-2.3-eb.jar,
- lib/commons-validator-1.4.0.jar,
- lib/ical4j-1.0.6.jar
+ lib/commons-validator-1.4.0.jar
 Export-Package: com.googlecode.concurrentlinkedhashmap,
  com.mysql.jdbc;version="5.1.30",
  com.openexchange.httpclient.ssl,

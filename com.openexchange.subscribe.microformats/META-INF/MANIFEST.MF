@@ -67,8 +67,7 @@ Import-Package: com.openexchange.config,
 Bundle-ClassPath: .,
  lib/htmllexer.jar,
  lib/htmlparser.jar,
- lib/jodatime.jar,
- lib/org.microformats.hCard.jar
+ lib/jodatime.jar
 Eclipse-RegisterBuddy: com.openexchange.xerces
 Export-Package: com.openexchange.subscribe.microformats,
  com.openexchange.subscribe.microformats.datasources,
