@@ -19,7 +19,7 @@ davsync_mybrand:
     displayName_tr: "OX Sync"
     description_tr: "Synchronize all your appointments and contacts"
 
-davmanual
+davmanual:
     enabled: true
     type: manual
     providers: [carddav, caldav]
@@ -28,28 +28,28 @@ davmanual
     displayName_tr: "OX Sync"
     description_tr: "Synchronize all your appointments and contacts"
 
-scenario_eassync
+scenario_eassync:
     id: eassync
     enabled: true
     type: plist
     providers: [eas]
     alternatives: [easmanual]
 
-scenario_easmanual
+scenario_easmanual:
     id: easmanual
     enabled: true
     type: manual
     providers: [eas]
     alternatives: []
 
-scenario_imapsync
+scenario_imapsync:
     id: imapsync
     enabled: true
     type: plist
     providers: [imap]
     alternatives: [imapmanual]
 
-scenario_imapmanual
+scenario_imapmanual:
     id: imapmanual
     enabled: true
     type: manual
