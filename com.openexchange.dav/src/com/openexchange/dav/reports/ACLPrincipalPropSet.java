@@ -52,7 +52,7 @@ package com.openexchange.dav.reports;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.principals.groups.GroupPrincipalResource;
 import com.openexchange.dav.principals.users.UserPrincipalResource;
 import com.openexchange.dav.resources.DAVCollection;
@@ -76,7 +76,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ACLPrincipalPropSet extends DAVPropfindAction {
+public class ACLPrincipalPropSet extends PROPFINDAction {
 
     public static final String NAMESPACE = Protocol.DEFAULT_NAMESPACE;
     public static final String NAME = "acl-principal-prop-set";

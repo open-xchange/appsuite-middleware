@@ -50,18 +50,22 @@
 package com.openexchange.dav.actions;
 
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.webdav.action.WebdavPropfindAction;
+import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindAllPropsMarshaller;
 import com.openexchange.webdav.xml.resources.PropfindPropNamesMarshaller;
@@ -70,36 +74,106 @@ import com.openexchange.webdav.xml.resources.RecursiveMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
- * {@link DAVPropfindAction}
+ * {@link DAVAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public abstract class DAVPropfindAction extends WebdavPropfindAction {
+public abstract class DAVAction extends AbstractAction {
 
     protected static final XMLOutputter OUTPUTTER = new XMLOutputter();
 
+    protected final Protocol protocol;
+
     /**
-     * Initializes a new {@link DAVPropfindAction}.
+     * Initializes a new {@link DAVAction}.
      *
-     * @param protocol The underlying WebDAV protocol
+     * @param protocol The underlying protocol
      */
-    public DAVPropfindAction(DAVProtocol protocol) {
-        super(protocol);
+    public DAVAction(Protocol protocol) {
+        super();
+        this.protocol = protocol;
     }
 
     /**
-     * Prepares an XML element ready to be used as root element for a multistatus response, containing any additionally defined
-     * namespace declarations of the underlying protocol.
+     * Gets the request body document from the supplied WebDAV request, throwing an appropriate exception if there is none or parsing fails.
      *
-     * @return A new multistatus element
+     * @param request The WebDAV request
+     * @return The response body
      */
-    protected Element prepareMultistatusElement() {
-        Element multistatusElement = new Element("multistatus", DAV_NS);
-        for (Namespace namespace : protocol.getAdditionalNamespaces()) {
-            multistatusElement.addNamespaceDeclaration(namespace);
+    protected Document requireRequestBody(WebdavRequest request) throws WebdavProtocolException {
+        try {
+            Document document = request.getBodyAsDocument();
+            if (null == document) {
+                throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+            }
+            return document;
+        } catch (JDOMException | IOException e) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
         }
-        return multistatusElement;
+    }
+
+    /**
+     * Optionally extracts the request body document from a WebDAV request.
+     *
+     * @param request The WebDAV request
+     * @return The response body, or <code>null</code> if there is none or no document could be parsed
+     */
+    protected Document optRequestBody(WebdavRequest request) {
+        try {
+            return request.getBodyAsDocument();
+        } catch (JDOMException | IOException e) {
+            org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error getting WebDAV request body", e);
+            return null;
+        }
+    }
+
+    /**
+     * Gets the WebDAV resource targeted by the supplied WebDAV request, throwing appropriate exceptions in case no suitable resource is
+     * found.
+     *
+     * @param request The request to get the resource for
+     * @return The resource
+     */
+    protected DAVResource requireResource(WebdavRequest request) throws WebdavProtocolException {
+        WebdavResource resource = request.getResource();
+        if (null == resource) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_NOT_FOUND);
+        }
+        if (false == DAVResource.class.isInstance(resource)) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_CONFLICT);
+        }
+        return (DAVResource) resource;
+    }
+
+    /**
+     * Parses the request's content length header.
+     *
+     * @param request The request to parse the content length for
+     * @return The content length, or <code>-1</code> if not set or parsing fails
+     */
+    protected long getContentLength(WebdavRequest request) {
+        String value = request.getHeader("Content-Length");
+        if (Strings.isNotEmpty(value)) {
+            try {
+                return Long.parseLong(value);
+            } catch (NumberFormatException e) {
+                org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error parsing \"Content-Length\" header", e);
+            }
+        }
+        return -1;
+    }
+
+    /**
+     * Gets the request's content type, based on the supplied <code>Content-Type</code> header, falling back to a content type indicated
+     * by the resource name.
+     *
+     * @param request The request to get the content type for
+     * @return The content-type or <code>application/octet-stream</code> if no other could be detected
+     */
+    protected String getContentType(WebdavRequest request) {
+        String value = request.getHeader("Content-Type");
+        return Strings.isEmpty(value) ? MimeType2ExtMap.getContentType(request.getUrl().name(), "application/octet-stream") : value;
     }
 
     /**
@@ -133,13 +207,13 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
          * create appropriate response marshaller
          */
         PropertiesMarshaller marshaller;
-        if (null == requestBody || null != requestBody.getRootElement().getChild("allprop", DAV_NS)) {
+        if (null == requestBody || null != requestBody.getRootElement().getChild("allprop", DAVProtocol.DAV_NS)) {
             /*
              * marshal all properties
              */
             loadingHints.setProps(LoadingHints.Property.ALL);
             marshaller = new PropfindAllPropsMarshaller(urlPrefix, request.getCharset());
-        } else if (null != requestBody.getRootElement().getChild("propname", DAV_NS)) {
+        } else if (null != requestBody.getRootElement().getChild("propname", DAVProtocol.DAV_NS)) {
             /*
              * marshal all property names
              */
@@ -151,7 +225,7 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
              */
             loadingHints.setProps(LoadingHints.Property.SOME);
             PropfindResponseMarshaller responseMarshaller = new PropfindResponseMarshaller(urlPrefix, request.getCharset(), request.isBrief());
-            for (Element requestedProps : requestBody.getRootElement().getChildren("prop", DAV_NS)){
+            for (Element requestedProps : requestBody.getRootElement().getChildren("prop", DAVProtocol.DAV_NS)){
                 for (Element requestedProperty : requestedProps.getChildren()) {
                     loadingHints.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
                     responseMarshaller.addProperty(requestedProperty.getNamespaceURI(), requestedProperty.getName());
@@ -170,31 +244,6 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
     }
 
     /**
-     * Optionally extracts the request body document from a WebDAV request.
-     *
-     * @param request The WebDAV request
-     * @return The response body, or <code>null</code> if there is none or no document could be parsed
-     */
-    protected Document optRequestBody(WebdavRequest request) {
-        try {
-            return request.getBodyAsDocument();
-        } catch (JDOMException | IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVPropfindAction.class).warn("Error getting WebDAV request body", e);
-            return null;
-        }
-    }
-
-    /**
-     * Sends a multistatus response.
-     *
-     * @param response The WebDAV response to write to
-     * @param multistatusElement The root element for the multistatus response
-     */
-    protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
-        sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
-    }
-
-    /**
      * Sends a XML response document.
      *
      * @param response The WebDAV response to write to
@@ -207,7 +256,7 @@ public abstract class DAVPropfindAction extends WebdavPropfindAction {
             response.setContentType("text/xml; charset=UTF-8");
             OUTPUTTER.output(responseBody, response.getOutputStream());
         } catch (IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVPropfindAction.class).warn("Error sending WebDAV response", e);
+            org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error sending WebDAV response", e);
         }
     }
 

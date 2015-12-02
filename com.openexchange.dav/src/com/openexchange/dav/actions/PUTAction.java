@@ -47,56 +47,96 @@
  *
  */
 
-package com.openexchange.dav.principals.reports;
+package com.openexchange.dav.actions;
 
-import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
+import java.io.IOException;
+import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
-import org.jdom2.Element;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.PROPFINDAction;
-import com.openexchange.dav.principals.PrincipalFactory;
-import com.openexchange.dav.principals.users.UserPrincipalResource;
-import com.openexchange.groupware.ldap.User;
+import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.webdav.action.WebdavPutAction.SizeExceededInputStream;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
- * {@link PrincipalMatchReport}
+ * {@link PUTAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class PrincipalMatchReport extends PROPFINDAction {
-
-    public static final String NAMESPACE = DAV_NS.getURI();
-    public static final String NAME = "principal-match";
+public abstract class PUTAction extends DAVAction {
 
     /**
-     * Initializes a new {@link PrincipalMatchReport}.
+     * Initializes a new {@link PUTAction}.
      *
-     * @param protocol The protocol
+     * @param protocol The underlying protocol
      */
-    public PrincipalMatchReport(DAVProtocol protocol) {
+    public PUTAction(Protocol protocol) {
         super(protocol);
+    }
+
+    protected abstract long getMaxSize();
+
+    protected abstract boolean includeResponseETag();
+
+    protected WebdavProtocolException getSizeExceeded(WebdavRequest request) {
+        return WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE);
     }
 
     @Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        if (0 != request.getDepth(0) || false == request.getResource().isCollection()) {
-            throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        /*
+         * check indicated content length
+         */
+        long contentLength = getContentLength(request);
+        long maxSize = getMaxSize();
+        if (-1 != contentLength && 0 < maxSize && maxSize < contentLength) {
+            throw getSizeExceeded(request);
         }
         /*
-         * always marshal properties from current user: matches both if "self" is requested, and also any requested
-         * properties via the "principal-property" for the root principal collection of users.
+         * get & prepare targeted resource
          */
-        PrincipalFactory factory = (PrincipalFactory) request.getFactory();
-        User user = factory.getUser();
-        UserPrincipalResource resource = new UserPrincipalResource(factory, user);
-        Element multistatusElement = prepareMultistatusElement();
-        ResourceMarshaller marshaller = getMarshaller(request, optRequestBody(request));
-        multistatusElement.addContent(marshaller.marshal(resource));
-        sendMultistatusResponse(response, multistatusElement);
+        DAVResource resource = requireResource(request);
+        resource.setLength(Long.valueOf(contentLength));
+        resource.setContentType(getContentType(request));
+        /*
+         * put resource
+         */
+        InputStream inputStream = null;
+        try {
+            inputStream = request.getBody();
+            if (0 < maxSize) {
+                inputStream = new SizeExceededInputStream(inputStream, maxSize);
+            }
+            resource.putBodyAndGuessLength(inputStream);
+        } catch (IOException e) {
+            throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
+        } catch (WebdavProtocolException e) {
+            if (SizeExceededInputStream.class.isInstance(inputStream) && ((SizeExceededInputStream) inputStream).hasExceeded()) {
+                throw getSizeExceeded(request);
+            }
+            throw e;
+        } finally {
+            Streams.close(inputStream);
+        }
+        /*
+         * save / create resource & send response
+         */
+        if (resource.exists() && false == resource.isLockNull()) {
+            resource.save();
+        } else {
+            resource.create();
+        }
+        response.setStatus(HttpServletResponse.SC_CREATED);
+        if (includeResponseETag()) {
+            String eTag = resource.getETag();
+            if (Strings.isNotEmpty(eTag)) {
+                response.setHeader("ETag", eTag);
+            }
+        }
     }
 
 }

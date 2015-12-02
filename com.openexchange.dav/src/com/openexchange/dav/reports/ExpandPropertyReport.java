@@ -54,7 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
@@ -69,7 +69,7 @@ import com.openexchange.webdav.xml.resources.PropfindResponseMarshaller;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class ExpandPropertyReport extends DAVPropfindAction {
+public class ExpandPropertyReport extends PROPFINDAction {
 
     public static final String NAMESPACE = Protocol.DEFAULT_NAMESPACE;
     public static final String NAME = "expand-property";

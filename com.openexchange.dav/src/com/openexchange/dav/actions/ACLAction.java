@@ -49,13 +49,11 @@
 
 package com.openexchange.dav.actions;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -68,25 +66,26 @@ import com.openexchange.folderstorage.AbstractFolder;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link DAVAclAction}
+ * {@link ACLAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class DAVAclAction extends AbstractAction {
+public class ACLAction extends DAVAction {
 
     /**
-     * Initializes a new {@link DAVAclAction}.
+     * Initializes a new {@link ACLAction}.
+     *
+     * @param protocol The underlying protocol
      */
-    public DAVAclAction() {
-        super();
+    public ACLAction(DAVProtocol protocol) {
+        super(protocol);
     }
 
     @Override
@@ -106,12 +105,7 @@ public class DAVAclAction extends AbstractAction {
         /*
          * parse target permissions
          */
-        Document requestBody;
-        try {
-            requestBody = request.getBodyAsDocument();
-        } catch (JDOMException | IOException e) {
-            throw WebdavProtocolException.generalError(e, request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
-        }
+        Document requestBody = requireRequestBody(request);
         Element aclElement = requestBody.getRootElement();
         if (null == aclElement || false == "acl".equals(aclElement.getName()) || false == DAVProtocol.DAV_NS.equals(aclElement.getNamespace())) {
             throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);

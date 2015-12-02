@@ -57,8 +57,8 @@ import com.openexchange.caldav.action.WebdavMkCalendarAction;
 import com.openexchange.caldav.action.WebdavPostAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
-import com.openexchange.dav.actions.DAVAclAction;
-import com.openexchange.dav.actions.ExtendedMkColAction;
+import com.openexchange.dav.actions.ACLAction;
+import com.openexchange.dav.actions.ExtendedMKCOLAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
 import com.openexchange.webdav.action.OXWebdavPutAction;
@@ -116,7 +116,7 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, false, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MOVE, prepare(new WebdavMoveAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, true, true)));
-        actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMkColAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.MKCOL, prepare(new ExtendedMKCOLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
         actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
@@ -124,7 +124,7 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.POST, prepare(new WebdavPostAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MKCALENDAR, prepare(new WebdavMkCalendarAction(), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.ACL, prepare(new DAVAclAction(), true, true, factory, new WebdavIfAction(0, true, false)));
+        actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, factory, new WebdavIfAction(0, false, false)));
         OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
         OXWebdavMaxUploadSizeAction oxWebdavMaxUploadSize = new OXWebdavMaxUploadSizeAction(this);

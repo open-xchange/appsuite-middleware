@@ -47,76 +47,63 @@
  *
  */
 
-package com.openexchange.carddav.reports;
+package com.openexchange.carddav.action;
 
-import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import com.openexchange.carddav.CarddavProtocol;
+import static org.slf4j.LoggerFactory.getLogger;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.PROPFINDAction;
+import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.actions.PUTAction;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
- * A {@link CaldavMultigetReport} allows clients to retrieve properties of certain named resources. It is conceptually similar to a propfind.
+ * {@link CardDAVPUTAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class AddressbookMultigetReport extends PROPFINDAction {
+public class CardDAVPUTAction extends PUTAction {
 
-    public static final String NAMESPACE = CarddavProtocol.CARD_NS.getURI();
-    public static final String NAME = "addressbook-multiget";
+    private final GroupwareCarddavFactory factory;
 
     /**
-     * Initializes a new {@link AddressbookMultigetReport}.
+     * Initializes a new {@link CardDAVPUTAction}.
      *
-     * @param protocol The protocol
+     * @param factory The underlying factory
      */
-    public AddressbookMultigetReport(DAVProtocol protocol) {
-        super(protocol);
+    public CardDAVPUTAction(GroupwareCarddavFactory factory) {
+        super(factory.getProtocol());
+        this.factory = factory;
     }
 
     @Override
-    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        Document requestBody = optRequestBody(request);
-        List<Element> elements = new ArrayList<Element>();
-        ResourceMarshaller marshaller = getMarshaller(request, requestBody);
-        for (WebdavPath webdavPath : getPaths(request, requestBody)) {
-            elements.addAll(marshaller.marshal(request.getFactory().resolveResource(webdavPath)));
-        }
-        Element multistatusElement = prepareMultistatusElement();
-        multistatusElement.addContent(elements);
-        sendMultistatusResponse(response, multistatusElement);
+    protected WebdavProtocolException getSizeExceeded(WebdavRequest request) {
+        return new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", HttpServletResponse.SC_FORBIDDEN);
     }
 
-    private List<WebdavPath> getPaths(WebdavRequest request, Document requestBody) throws WebdavProtocolException {
-        if (requestBody == null) {
-            return Collections.emptyList();
+    @Override
+    protected long getMaxSize() {
+        long maxVCardSize = factory.getState().getMaxVCardSize();
+        Long maxUploadSize = null;
+        try {
+            maxUploadSize = factory.optConfigValue("MAX_UPLOAD_SIZE", Long.class, Long.valueOf(104857600));
+        } catch (OXException e) {
+            getLogger(CardDAVPUTAction.class).error("Error getting MAX_UPLOAD_SIZE value", e);
         }
-
-        List<Element> children = requestBody.getRootElement().getChildren("href", DAV_NS);
-        if (children == null || children.isEmpty()) {
-            return Collections.emptyList();
+        if (null == maxUploadSize || 0 >= maxUploadSize.longValue()) {
+            return maxVCardSize;
         }
-
-        List<WebdavPath> paths = new ArrayList<WebdavPath>(children.size());
-        int length = request.getURLPrefix().length();
-        for (Object object : children) {
-            Element href = (Element) object;
-            String url = href.getText();
-            url = url.substring(length);
-            paths.add(((GroupwareCarddavFactory) request.getFactory()).decode(new WebdavPath(url)));
+        if (0 >= maxVCardSize) {
+            return maxUploadSize.longValue();
         }
+        return Math.min(maxVCardSize, maxUploadSize.longValue());
+    }
 
-        return paths;
+    @Override
+    protected boolean includeResponseETag() {
+        return true;
     }
 
 }

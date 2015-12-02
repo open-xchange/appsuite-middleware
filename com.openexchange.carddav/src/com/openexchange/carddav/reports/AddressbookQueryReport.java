@@ -60,7 +60,7 @@ import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.Strings;
 import com.openexchange.search.CompositeSearchTerm;
@@ -81,7 +81,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class AddressbookQueryReport extends DAVPropfindAction {
+public class AddressbookQueryReport extends PROPFINDAction {
 
     public static final String NAMESPACE = CarddavProtocol.CARD_NS.getURI();
     public static final String NAME = "addressbook-query";

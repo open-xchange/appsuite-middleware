@@ -49,6 +49,7 @@
 
 package com.openexchange.caldav.reports;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,7 +58,7 @@ import org.jdom2.Element;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavPath;
@@ -69,7 +70,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CaldavMultigetReport extends DAVPropfindAction {
+public class CaldavMultigetReport extends PROPFINDAction {
 
     public static final String NAMESPACE = CaldavProtocol.CAL_NS.getURI();
     public static final String NAME = "calendar-multiget";

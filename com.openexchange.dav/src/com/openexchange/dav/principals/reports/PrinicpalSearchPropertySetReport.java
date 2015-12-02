@@ -49,12 +49,13 @@
 
 package com.openexchange.dav.principals.reports;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -64,7 +65,7 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PrinicpalSearchPropertySetReport extends DAVPropfindAction {
+public class PrinicpalSearchPropertySetReport extends PROPFINDAction {
 
     public static final String NAMESPACE = DAV_NS.getURI();
     public static final String NAME = "principal-search-property-set";

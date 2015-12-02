@@ -47,61 +47,58 @@
  *
  */
 
-package com.openexchange.carddav.action;
+package com.openexchange.dav.actions;
 
-import static org.slf4j.LoggerFactory.getLogger;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.servlet.CardDAV;
-import com.openexchange.java.Strings;
-import com.openexchange.tools.session.SessionHolder;
-import com.openexchange.webdav.action.OXWebdavMaxUploadSizeAction;
-import com.openexchange.webdav.action.WebdavRequest;
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import org.jdom2.output.XMLOutputter;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.Protocol;
 
 /**
- * {@link CardDAVMaxUploadSizeAction}
+ * {@link PROPFINDAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class CardDAVMaxUploadSizeAction extends OXWebdavMaxUploadSizeAction {
+public abstract class PROPFINDAction extends DAVAction {
 
-    private final GroupwareCarddavFactory factory;
+    protected static final XMLOutputter OUTPUTTER = new XMLOutputter();
 
     /**
-     * Initializes a new {@link CardDAVMaxUploadSizeAction}.
+     * Initializes a new {@link PROPFINDAction}.
      *
-     * @param factory The CardDAV factory
-     * @param sessionHolder The session holder
+     * @param protocol The underlying WebDAV protocol
      */
-    public CardDAVMaxUploadSizeAction(GroupwareCarddavFactory factory, SessionHolder sessionHolder) {
-        super(sessionHolder);
-        this.factory = factory;
+    public PROPFINDAction(DAVProtocol protocol) {
+        super(protocol);
     }
 
-    @Override
-    public boolean fits(WebdavRequest req) {
-        if (super.fits(req)) {
-            /*
-             * also check maximum allowed resource size
-             */
-            String contentLengthHeader = req.getHeader("content-length");
-            if (Strings.isEmpty(contentLengthHeader)) {
-                return true;
-            }
-            long contentLength = 0;
-            try {
-                contentLength = Long.parseLong(contentLengthHeader);
-            } catch (NumberFormatException e) {
-                getLogger(CardDAV.class).error("Error parsing content length header \"{}\": {}", contentLengthHeader, e.getMessage(), e);
-            }
-            if (0 >= contentLength) {
-                return true;
-            }
-            long maxVCardSize = factory.getState().getMaxVCardSize();
-            if (0 <= maxVCardSize && maxVCardSize >= contentLength) {
-                return true;
-            }
+    /**
+     * Prepares an XML element ready to be used as root element for a multistatus response, containing any additionally defined
+     * namespace declarations of the underlying protocol.
+     *
+     * @return A new multistatus element
+     */
+    protected Element prepareMultistatusElement() {
+        Element multistatusElement = new Element("multistatus", DAV_NS);
+        for (Namespace namespace : protocol.getAdditionalNamespaces()) {
+            multistatusElement.addNamespaceDeclaration(namespace);
         }
-        return false;
+        return multistatusElement;
+    }
+
+    /**
+     * Sends a multistatus response.
+     *
+     * @param response The WebDAV response to write to
+     * @param multistatusElement The root element for the multistatus response
+     */
+    protected void sendMultistatusResponse(WebdavResponse response, Element multistatusElement) {
+        sendXMLResponse(response, new Document(multistatusElement), Protocol.SC_MULTISTATUS);
     }
 
 }

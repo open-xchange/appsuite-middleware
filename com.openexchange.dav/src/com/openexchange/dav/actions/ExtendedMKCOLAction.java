@@ -73,19 +73,19 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.util.Utils;
 
 /**
- * {@link ExtendedMkColAction}
+ * {@link ExtendedMKCOLAction}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class ExtendedMkColAction extends WebdavMkcolAction {
+public class ExtendedMKCOLAction extends WebdavMkcolAction {
 
     private final DAVProtocol protocol;
 
     /**
-     * Initializes a new {@link ExtendedMkColAction}.
+     * Initializes a new {@link ExtendedMKCOLAction}.
      */
-    public ExtendedMkColAction(DAVProtocol protocol) {
+    public ExtendedMKCOLAction(DAVProtocol protocol) {
         super();
         this.protocol = protocol;
     }
@@ -150,7 +150,7 @@ public class ExtendedMkColAction extends WebdavMkcolAction {
             response.setContentType("text/xml; charset=UTF-8");
             new XMLOutputter().output(responseBody, response.getOutputStream());
         } catch (IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVPropfindAction.class).warn("Error sending WebDAV response", e);
+            org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error sending WebDAV response", e);
         }
     }
 

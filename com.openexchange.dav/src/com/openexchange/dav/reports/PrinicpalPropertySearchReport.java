@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.reports;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -64,7 +65,7 @@ import com.openexchange.contact.SortOptions;
 import com.openexchange.dav.CUType;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.mixins.PrincipalURL;
 import com.openexchange.dav.mixins.ResourceId;
 import com.openexchange.dav.principals.groups.GroupPrincipalCollection;
@@ -95,13 +96,12 @@ import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
-
 /**
  * {@link PrinicpalPropertySearchReport}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class PrinicpalPropertySearchReport extends DAVPropfindAction {
+public class PrinicpalPropertySearchReport extends PROPFINDAction {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(PrinicpalPropertySearchReport.class);
 

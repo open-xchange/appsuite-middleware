@@ -334,9 +334,10 @@ public class ContactResource extends CardDAVResource {
                 Date lastModified = contact.getLastModified();
                 int objectID = contact.getObjectID();
                 String vCardID = contact.getVCardId();
+                String uid = contact.getUid();
                 vCardImport = factory.getVCardService().importVCard(body, contact, parameters);
                 contact = vCardImport.getContact();
-                contact.removeUid();
+                contact.setUid(uid);
                 contact.setParentFolderID(parentFolderID);
                 contact.setContextId(contextID);
                 contact.setLastModified(lastModified);

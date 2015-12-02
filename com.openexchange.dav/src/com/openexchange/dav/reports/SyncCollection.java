@@ -49,12 +49,13 @@
 
 package com.openexchange.dav.reports;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import java.util.ArrayList;
 import java.util.List;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
@@ -64,13 +65,12 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
-
 /**
  * {@link SyncCollection}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class SyncCollection extends DAVPropfindAction {
+public class SyncCollection extends PROPFINDAction {
 
     public static final String NAMESPACE = Protocol.DEFAULT_NAMESPACE;
     public static final String NAME = "sync-collection";

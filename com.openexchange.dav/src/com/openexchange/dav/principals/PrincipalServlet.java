@@ -65,7 +65,7 @@ import com.openexchange.webdav.protocol.WebdavMethod;
 /**
  * {@link PrincipalServlet}
  *
- * @author <a href="mailto:firstname.lastname@open-xchange.com">Firstname Lastname</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
 public class PrincipalServlet extends OXServlet {
@@ -77,7 +77,7 @@ public class PrincipalServlet extends OXServlet {
     /**
      * Initializes a new {@link PrincipalServlet}.
      *
-     * @param performer
+     * @param performer The underlying performer
      */
     public PrincipalServlet(PrincipalPerformer performer) {
         super();

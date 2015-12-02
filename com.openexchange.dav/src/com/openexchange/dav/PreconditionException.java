@@ -72,7 +72,7 @@ public class PreconditionException extends WebdavProtocolException {
     private final Element preconditionElement;
 
     public PreconditionException(String namespace, String name, WebdavPath url, int status) {
-        super(url, status, OXException.general("Precondition not satisfied"));
+        super(url, status, OXException.general(namespace + ':' + name));
         this.preconditionElement = new Element(name, namespace);
     }
 

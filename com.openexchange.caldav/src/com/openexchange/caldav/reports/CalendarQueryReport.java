@@ -59,7 +59,7 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterParser;
 import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.actions.DAVPropfindAction;
+import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -72,7 +72,7 @@ import com.openexchange.webdav.xml.resources.ResourceMarshaller;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalendarQueryReport extends DAVPropfindAction {
+public class CalendarQueryReport extends PROPFINDAction {
 
     public static final String NAMESPACE = CaldavProtocol.CAL_NS.getURI();
     public static final String NAME = "calendar-query";
