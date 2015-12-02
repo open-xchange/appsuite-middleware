@@ -145,7 +145,7 @@ public abstract class WebDAVTest {
     protected static Iterable<Object[]> availableAuthMethods() {
         List<Object[]> authMethods = new ArrayList<>(2);
         authMethods.add(new Object[] { AUTH_METHOD_BASIC });
-//        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
+        authMethods.add(new Object[] { AUTH_METHOD_OAUTH });
         return authMethods;
     }
 
