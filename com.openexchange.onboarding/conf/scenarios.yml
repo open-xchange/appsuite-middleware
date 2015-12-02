@@ -28,28 +28,28 @@ davmanual:
     displayName_tr: "OX Sync"
     description_tr: "Synchronize all your appointments and contacts"
 
-scenario_eassync:
+eassync:
     id: eassync
     enabled: true
     type: plist
     providers: [eas]
     alternatives: [easmanual]
 
-scenario_easmanual:
+easmanual:
     id: easmanual
     enabled: true
     type: manual
     providers: [eas]
     alternatives: []
 
-scenario_imapsync:
+imapsync:
     id: imapsync
     enabled: true
     type: plist
     providers: [imap]
     alternatives: [imapmanual]
 
-scenario_imapmanual:
+imapmanual:
     id: imapmanual
     enabled: true
     type: manual
