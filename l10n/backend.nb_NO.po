@@ -27,8 +27,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"PO-Revision-Date: 2015-05-03 14:37+0000\n"
-"Last-Translator: hv@webhuset.no <hv@webhuset.no>\n"
+"PO-Revision-Date: 2015-12-02 10:39+0000\n"
+"Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: nb_NO\n"
 "MIME-Version: 1.0\n"
@@ -36,7 +36,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.1.1\n"
-"X-POOTLE-MTIME: 1430663849.000000\n"
+"X-POOTLE-MTIME: 1449052760.000000\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.authentication.kerberos/src/com/openexchange/kerberos/KerberosExceptionMessages.java:62
@@ -184,44 +184,44 @@ msgstr "Dag"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:84
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:891
 msgid "Monday"
-msgstr "Mandag"
+msgstr "mandag"
 
 #. Tuesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:86
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:894
 msgid "Tuesday"
-msgstr "Tirsdag"
+msgstr "tirsdag"
 
 #. Wednesday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:88
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:897
 msgid "Wednesday"
-msgstr "Onsdag"
+msgstr "onsdag"
 
 #. Thursday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:90
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:900
 msgid "Thursday"
-msgstr "Torsdag"
+msgstr "torsdag"
 
 #. Friday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:92
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:903
 msgid "Friday"
-msgstr "Fredag"
+msgstr "fredag"
 
 #. Saturday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:94
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:906
 msgid "Saturday"
-msgstr "Lørdag"
+msgstr "lørdag"
 
 #. Sunday
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/HRRStrings.java:96
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:909
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:912
 msgid "Sunday"
-msgstr "Søndag"
+msgstr "søndag"
 
 #. -
 #. * Months
@@ -715,14 +715,14 @@ msgstr "%1$s har %2$s avtalen."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
 msgid "accepted"
-msgstr "akseptert"
+msgstr "aksepterte"
 
 #. declined
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:237
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
 msgid "declined"
-msgstr "avslått"
+msgstr "avslo"
 
 #. -
 #. * Confirmation statuses
