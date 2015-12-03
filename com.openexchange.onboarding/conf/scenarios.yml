@@ -1,5 +1,5 @@
 # Configuration file for on-boarding scenarios
-# (^|\s)\w+_tr\s*\:\s*"(\\"|[^"])+"
+# (^|\s)\w+_t10e\s*\:\s*"(\\"|[^"])+"
 
 davsync:
     enabled: true
@@ -7,8 +7,8 @@ davsync:
     providers: [carddav, caldav]
     alternatives: [davmanual]
     icon: <base64>
-    displayName_tr: "OX Sync"
-    description_tr: "Synchronize all your appointments and contacts"
+    displayName_t10e: "OX Sync"
+    description_t10e: "Synchronize all your appointments and contacts"
 
 davsync_mybrand:
     enabled: true
@@ -16,8 +16,8 @@ davsync_mybrand:
     providers: [carddav, caldav]
     alternatives: [davmanual]
     icon: <base64>
-    displayName_tr: "OX Sync"
-    description_tr: "Synchronize all your appointments and contacts"
+    displayName_t10e: "OX Sync"
+    description_t10e: "Synchronize all your appointments and contacts"
 
 davmanual:
     enabled: true
@@ -25,8 +25,8 @@ davmanual:
     providers: [carddav, caldav]
     alternatives: []
     icon: <base64>
-    displayName_tr: "OX Sync"
-    description_tr: "Synchronize all your appointments and contacts"
+    displayName_t10e: "OX Sync"
+    description_t10e: "Synchronize all your appointments and contacts"
 
 eassync:
     id: eassync
