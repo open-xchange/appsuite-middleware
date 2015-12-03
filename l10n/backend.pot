@@ -3451,11 +3451,9 @@ msgstr ""
 msgid "CalDAV"
 msgstr ""
 
-#. A description for a CaldAV account on a mobile device
+#. A description for a CaldAV account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:74
-msgid ""
-"The CalDAV account for synchronizing calendar entries with Open-Xchange "
-"Server."
+msgid "The CalDAV account for synchronizing calendar entries."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:76
@@ -3471,11 +3469,9 @@ msgstr ""
 msgid "CardDAV"
 msgstr ""
 
-#. A description for a CardDAV account on a mobile device
+#. A description for a CardDAV account
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:74
-msgid ""
-"The CardDAV account for synchronizing contact entries with Open-Xchange "
-"Server."
+msgid "The CardDAV account for synchronizing contact entries."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:76
@@ -3494,8 +3490,8 @@ msgstr ""
 #. The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:67
 msgid ""
-"The Microsoft Exchange Active-Sync account for synchronizing with Open-"
-"Xchange Server."
+"The Microsoft Exchange Active-Sync account for synchronizing your calendar, "
+"contacts and messages."
 msgstr ""
 
 #. Your Microsoft Exchange Active-Sync profile
@@ -3515,7 +3511,7 @@ msgstr ""
 
 #. A description for an IMAP account on a mobile device
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingStrings.java:74
-msgid "The IMAP account for synchronizing E-Mails with Open-Xchange Server."
+msgid "The account for accessing and sending E-Mails."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.imap/src/com/openexchange/onboarding/imap/IMAPOnboardingStrings.java:76
@@ -3526,19 +3522,17 @@ msgstr ""
 msgid "Your IMAP settings"
 msgstr ""
 
-#. OX Mail
+#. Open-Xchange MailApp
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:64
 msgid "Open-Xchange MailApp"
 msgstr ""
 
-#. OX Mail App
+#. The Open-Xchange MailApp to synchronize E-Mails
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:67
-msgid ""
-"The Open-Xchange MailApp to synchronize E-Mails with the Open-Xchange "
-"Middleware"
+msgid "The Open-Xchange MailApp to synchronize E-Mails"
 msgstr ""
 
-#. Get OX Mail app
+#. Get the Open-Xchange MailApp
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mailapp/src/com/openexchange/onboarding/mailapp/MailAppOnboardingStrings.java:70
 msgid "Get the Open-Xchange MailApp"
 msgstr ""
@@ -3556,6 +3550,11 @@ msgstr ""
 #. The execution has been denied. Please choose another option.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:76
 msgid "The execution has been denied. Please choose another option."
+msgstr ""
+
+#. Execution failed. Please choose another option.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:79
+msgid "Execution failed. Please choose another option."
 msgstr ""
 
 #. The display name for Apple platform
