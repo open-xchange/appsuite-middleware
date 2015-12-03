@@ -54,8 +54,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingProvider} - Represents an on-boarding provider suitable for configuring/integrating a client for communicating
- * with the Open-Xchange Middleware.
+ * {@link OnboardingProvider} - Represents an on-boarding provider suitable for configuring/integrating a client for communicating with the
+ * Open-Xchange Middleware.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
@@ -70,7 +70,7 @@ public interface OnboardingProvider {
     String getId();
 
     /**
-     * Gets the supported devices
+     * Gets the supported devices.
      *
      * @return The supported devices
      */

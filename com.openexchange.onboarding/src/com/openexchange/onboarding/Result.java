@@ -49,6 +49,9 @@
 
 package com.openexchange.onboarding;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 /**
  * {@link Result} - A result when an on-boarding configuration has been successfully executed.
  *
@@ -57,14 +60,21 @@ package com.openexchange.onboarding;
  */
 public interface Result {
 
-    /** The DENY result. */
+    /** The special DENY result, which will lead to a {@link OnboardingExceptionCodes#EXECUTION_DENIED denied execution} error. */
     public static Result DENY = new Result() {
 
         @Override
         public ResultReply getReply() {
             return ResultReply.DENY;
         }
+
+        @Override
+        public ResultObject getResultObject(OnboardingRequest request, Session session) {
+            return null;
+        }
     };
+
+    // ------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets this result's reply
@@ -72,5 +82,14 @@ public interface Result {
      * @return The reply
      */
     ResultReply getReply();
+
+    /**
+     * Gets the result object with respect to specified action.
+     *
+     * @param request The on-boarding request
+     * @param session The session providing user data
+     * @throws OXException If result cannot be returned
+     */
+    ResultObject getResultObject(OnboardingRequest request, Session session) throws OXException;
 
 }

@@ -71,7 +71,7 @@ public class IMAPOnboardingStrings implements LocalizableStrings {
     public static final String IMAP_DISPLAY_NAME = "IMAP";
 
     // A description for an IMAP account on a mobile device
-    public static final String IMAP_ACCOUNT_DESCRIPTION = "The IMAP account for synchronizing E-Mails with Open-Xchange Server.";
+    public static final String IMAP_ACCOUNT_DESCRIPTION = "The account for accessing and sending E-Mails.";
 
     public static final String IMAP_TEXT_PROFILE = "Your IMAP profile";
 

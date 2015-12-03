@@ -63,7 +63,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingSelection;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -103,7 +102,7 @@ public class OnboardingViewConverter implements ResultConverter {
     public void convert(AJAXRequestData requestData, AJAXRequestResult result, ServerSession session, Converter converter) throws OXException {
         Object resultObject = result.getResultObject();
         if (!(resultObject instanceof OnboardingView)) {
-            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingSelection.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+            throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingView.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
         }
 
         try {

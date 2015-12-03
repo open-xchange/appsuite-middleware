@@ -50,6 +50,7 @@
 package com.openexchange.onboarding.mailapp.osgi;
 
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.mailapp.MailAppOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -72,18 +73,12 @@ public class MailAppOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        MailAppOnboardingProvider config = new MailAppOnboardingProvider(this);
-        registerService(OnboardingProvider.class, config);
-    }
-
-    @Override
-    public void stopBundle() throws Exception {
-        unregisterServices();
+        registerService(OnboardingProvider.class, new MailAppOnboardingProvider(this));
     }
 
 }

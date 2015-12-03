@@ -65,15 +65,16 @@ import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.Result;
-import com.openexchange.onboarding.ResultReply;
-import com.openexchange.onboarding.Scenario;
 import com.openexchange.onboarding.DefaultScenario;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultObject;
+import com.openexchange.onboarding.ResultReply;
+import com.openexchange.onboarding.Scenario;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.onboarding.service.OnboardingView;
 import com.openexchange.session.Session;
@@ -142,7 +143,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
     }
 
     @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
+    public ResultObject execute(OnboardingRequest request, Session session) throws OXException {
         if (null == request) {
             return null;
         }
@@ -153,11 +154,11 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         for (OnboardingProvider provider : scenario.getProviders(session)) {
             Result currentResult = provider.execute(request, result, session);
             ResultReply reply = currentResult.getReply();
-            if (ResultReply.ACCEPT.equals(reply)) {
+            if (ResultReply.ACCEPT == reply) {
                 // Return
-                return currentResult;
+                return currentResult.getResultObject(request, session);
             }
-            if (ResultReply.DENY.equals(reply)) {
+            if (ResultReply.DENY == reply) {
                 // No further processing allowed
                 throw OnboardingExceptionCodes.EXECUTION_DENIED.create(provider.getId(), scenario.getId());
             }
@@ -165,7 +166,11 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
             result = currentResult;
         }
 
-        return result;
+        // Return the result object
+        if (null == result) {
+            throw OnboardingExceptionCodes.EXECUTION_FAILED.create(scenario.getId());
+        }
+        return result.getResultObject(request, session);
     }
 
     @Override

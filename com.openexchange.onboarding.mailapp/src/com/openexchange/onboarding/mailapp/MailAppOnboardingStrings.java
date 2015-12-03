@@ -60,13 +60,13 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class MailAppOnboardingStrings implements LocalizableStrings {
 
-    // OX Mail
+    // Open-Xchange MailApp
     public static final String MAILAPP_DISPLAY_NAME = "Open-Xchange MailApp";
 
-    // OX Mail App
-    public static final String MAILAPP_DESCRIPTION = "The Open-Xchange MailApp to synchronize E-Mails with the Open-Xchange Middleware";
+    // The Open-Xchange MailApp to synchronize E-Mails
+    public static final String MAILAPP_DESCRIPTION = "The Open-Xchange MailApp to synchronize E-Mails";
 
-    // Get OX Mail app
+    // Get the Open-Xchange MailApp
     public static final String MAILAPP_STORE_LINK = "Get the Open-Xchange MailApp";
 
     private MailAppOnboardingStrings() {

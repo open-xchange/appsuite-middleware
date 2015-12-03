@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import com.openexchange.ajax.AJAXUtility;
@@ -92,6 +93,21 @@ public class OnboardingUtility {
      */
     private OnboardingUtility() {
         super();
+    }
+
+    /**
+     * Crafts a UUID for specified scenario for given user.
+     *
+     * @param identifier The identifier to craft from
+     * @param session The session providing user data
+     * @return The crafted UUID
+     */
+    public static UUID craftUUIDFrom(String identifier, Session session) {
+        return new UUID(longFor(identifier.hashCode(), "open-xchange".hashCode()), longFor(session.getUserId(), session.getContextId()));
+    }
+
+    private static long longFor(int x, int y) {
+        return ((((long) x) << 32) | (y & 0xffffffffL));
     }
 
     /**

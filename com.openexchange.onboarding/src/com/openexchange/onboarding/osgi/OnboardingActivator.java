@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.onboarding.internal.OnboardingInit;
 import com.openexchange.onboarding.service.OnboardingService;
@@ -84,7 +85,7 @@ public class OnboardingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
-            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class };
+            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class };
     }
 
     @Override

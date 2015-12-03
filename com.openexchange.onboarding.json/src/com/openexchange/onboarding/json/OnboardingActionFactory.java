@@ -57,7 +57,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.json.actions.ConfigAction;
 import com.openexchange.onboarding.json.actions.ExecuteAction;
-import com.openexchange.onboarding.json.actions.ScenarioAction;
+import com.openexchange.onboarding.json.actions.GetScenarioAction;
 import com.openexchange.onboarding.json.actions.AllScenariosAction;
 import com.openexchange.server.ServiceLookup;
 
@@ -80,7 +80,7 @@ public class OnboardingActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new HashMap<String, AJAXActionService>(4, 0.9F);
         actions.put("config", new ConfigAction(services));
-        actions.put("scenario", new ScenarioAction(services));
+        actions.put("get", new GetScenarioAction(services));
         actions.put("scenarios", new AllScenariosAction(services));
         actions.put("execute", new ExecuteAction(services));
     }

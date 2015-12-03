@@ -49,56 +49,29 @@
 
 package com.openexchange.onboarding.imap;
 
-import static com.openexchange.onboarding.OnboardingSelectionKey.keyFor;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.capabilities.CapabilityService;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.imap.config.IMAPConfig;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.dataobjects.compose.ComposeType;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
-import com.openexchange.notification.mail.MailData;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.CommonForms;
-import com.openexchange.onboarding.DefaultEntityPath;
-import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.EntityPath;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.Module;
-import com.openexchange.onboarding.OnboardingAction;
+import com.openexchange.onboarding.DisplayResult;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.OnboardingExecutor;
 import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.OnboardingSelection;
-import com.openexchange.onboarding.OnboardingSelectionKey;
-import com.openexchange.onboarding.OnboardingStrings;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
-import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
-import com.openexchange.onboarding.plist.PListDict;
-import com.openexchange.onboarding.plist.PListWriter;
-import com.openexchange.onboarding.plist.xml.StaxUtils;
-import com.openexchange.onboarding.signature.PListSigner;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.onboarding.ResultReply;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.plist.PlistResult;
+import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.SMTPConfig;
@@ -115,9 +88,8 @@ import com.openexchange.user.UserService;
 public class IMAPOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
-    private final String propertyPrefix;
     private final String identifier;
-    private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
+    private final EnumSet<Device> supportedDevices;
 
     /**
      * Initializes a new {@link IMAPOnboardingProvider}.
@@ -125,54 +97,8 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     public IMAPOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        propertyPrefix = "com.openexchange.onboarding.imap";
-        identifier = "imap";
-        executors = new HashMap<OnboardingSelectionKey, OnboardingExecutor>(16);
-
-        {
-            OnboardingExecutor downloadExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return generatePListResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingAction.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingAction.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.EMAIL), OnboardingAction.DOWNLOAD), downloadExecutor);
-        }
-
-        {
-            OnboardingExecutor emailExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return sendEmailResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingAction.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingAction.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.EMAIL), OnboardingAction.EMAIL), emailExecutor);
-        }
-
-        {
-            OnboardingExecutor displayExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return displayResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.WINDOWS_DESKTOP_8_10, Module.EMAIL), OnboardingAction.DISPLAY), displayExecutor);
-        }
+        identifier = "eas";
+        supportedDevices = EnumSet.allOf(Device.class);
     }
 
     @Override
@@ -181,130 +107,40 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
-    public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".displayName", session);
+    public Set<Device> getSupportedDevices() {
+        return Collections.unmodifiableSet(supportedDevices);
     }
 
     @Override
-    public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(propertyPrefix + ".iconName", session);
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".description", session);
-    }
-
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
+    public Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Device device = request.getDevice();
+        if (!supportedDevices.contains(device)) {
+            throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());
         }
 
-        if (false == capabilityService.getCapabilities(session).contains(Permission.WEBMAIL.getCapabilityName())) {
-            return false;
+        Scenario scenario = request.getScenario();
+        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        return OnboardingUtility.getBoolValue(propertyPrefix + ".enabled", true, session);
+        switch(scenario.getType()) {
+            case LINK:
+                throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
+            case MANUAL:
+                return doExecuteManual(request, previousResult, session);
+            case PLIST:
+                return doExecutePlist(request, previousResult, session);
+            default:
+                throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
+        }
     }
 
-    @Override
-    public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        List<EntityPath> paths = new ArrayList<EntityPath>(6);
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.EMAIL));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.EMAIL));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_MAC, Module.EMAIL));
-        paths.add(new DefaultEntityPath(this, Device.ANDROID_PHONE, Module.EMAIL));
-        paths.add(new DefaultEntityPath(this, Device.ANDROID_TABLET, Module.EMAIL));
-        paths.add(new DefaultEntityPath(this, Device.WINDOWS_DESKTOP_8_10, Module.EMAIL));
-        return paths;
+    private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        return plistResult(request, previousResult, session);
     }
 
-    @Override
-    public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
-        if (entityPath.matches(Device.APPLE_IPAD, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.SMS));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-
-        } else if (entityPath.matches(Device.APPLE_MAC, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        } else if (entityPath.matches(Device.ANDROID_PHONE, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        } else if (entityPath.matches(Device.ANDROID_TABLET, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        } else if (entityPath.matches(Device.WINDOWS_DESKTOP_8_10, Module.EMAIL, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        }
-
-        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityPath.getCompositeId());
-    }
-
-    @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        OnboardingSelection selection = request.getSelection();
-        if (!selection.isEnabled(session)) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
-        }
-
-        OnboardingExecutor onboardingExecutor = executors.get(new OnboardingSelectionKey(selection));
-        if (null == onboardingExecutor) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
-        }
-
-        return onboardingExecutor.execute(request, session);
+    private Result doExecuteManual(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        return displayResult(request, previousResult, session);
     }
 
     // --------------------------------------------------------------------------------------------------------------------------
@@ -320,9 +156,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     private final static String SMTP_PORT_FIELD = "smtpPort";
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
-    Result displayResult(OnboardingRequest request, Session session) throws OXException {
-        String resultText = OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_TEXT_SETTINGS, session);
-
+    private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         IMAPConfig imapConfig = new IMAPConfig(0);
         MailConfig.getConfig(imapConfig, session, 0);
         String imapServer = imapConfig.getServer();
@@ -339,68 +173,22 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         String smtpPassword = smtpConfig.getPassword();
         boolean smtpSecure = smtpConfig.isSecure();
 
-        Map<String, Object> formContent = new HashMap<String, Object>();
-        formContent.put(IMAP_LOGIN_FIELD, imapLogin);
-        formContent.put(IMAP_PASSWORD_FIELD, imapPassword);
-        formContent.put(IMAP_SERVER_FIELD, imapServer);
-        formContent.put(IMAP_PORT_FIELD, new Integer(imapPort));
-        formContent.put(IMAP_SECURE_FIELD, new Boolean(imapSecure));
-        formContent.put(SMTP_LOGIN_FIELD, smtpLogin);
-        formContent.put(SMTP_PASSWORD_FIELD, smtpPassword);
-        formContent.put(SMTP_SERVER_FIELD, smtpServer);
-        formContent.put(SMTP_PORT_FIELD, new Integer(smtpPort));
-        formContent.put(SMTP_SECURE_FIELD, new Boolean(smtpSecure));
+        Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
+        configuration.put(IMAP_LOGIN_FIELD, imapLogin);
+        configuration.put(IMAP_PASSWORD_FIELD, imapPassword);
+        configuration.put(IMAP_SERVER_FIELD, imapServer);
+        configuration.put(IMAP_PORT_FIELD, new Integer(imapPort));
+        configuration.put(IMAP_SECURE_FIELD, new Boolean(imapSecure));
+        configuration.put(SMTP_LOGIN_FIELD, smtpLogin);
+        configuration.put(SMTP_PASSWORD_FIELD, smtpPassword);
+        configuration.put(SMTP_SERVER_FIELD, smtpServer);
+        configuration.put(SMTP_PORT_FIELD, new Integer(smtpPort));
+        configuration.put(SMTP_SECURE_FIELD, new Boolean(smtpSecure));
 
-        return new Result(resultText, formContent);
-    }
-
-    // --------------------------------------------- E-Mail utils --------------------------------------------------------------
-
-    private TransportProvider getTransportProvider() {
-        return TransportProviderRegistry.getTransportProvider("smtp");
-    }
-
-    Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
-        Map<String, Object> formContent = request.getFormContent();
-        if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
-        try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
-
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment; filename=imap.mobileconfig");
-            fileHolder.setName("imap.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=imap.mobileconfig"); // Or application/x-plist ?
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
-            ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
-            transport.sendMailMessage(message, ComposeType.NEW);
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        } finally {
-            transport.close();
-        }
-
-        return new Result(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session));
+        return new DisplayResult(configuration);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
-
-    private static final String PROFILE_IMAP_DEFAULT_UUID = "b264c731-b93d-428e-8b7f-ae12db3726ef";
-    private static final String PROFILE_IMAP_DEFAULT_CONTENT_UUID = "56f5eca3-4249-4e2c-8eba-34f6c8ed204b";
 
     private UserSettingMail getUserSettingMail(Session session) throws OXException {
         if (session instanceof ServerSession) {
@@ -418,7 +206,9 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         return services.getService(UserService.class).getUser(session.getUserId(), session.getContextId());
     }
 
-    PListDict generatePList(OnboardingRequest request, Session session) throws OXException {
+    private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Scenario scenario = request.getScenario();
+
         IMAPConfig imapConfig = new IMAPConfig(0);
         MailConfig.getConfig(imapConfig, session, 0);
         String imapServer = imapConfig.getServer();
@@ -435,14 +225,28 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         String smtpPassword = smtpConfig.getPassword();
         boolean smtpSecure = smtpConfig.isSecure();
 
+        // Get the PListDict to contribute to
+        PListDict pListDict;
+        if (null == previousResult) {
+            pListDict = new PListDict();
+            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
+        } else {
+            pListDict = ((PlistResult) previousResult).getPListDict();
+        }
+
+        // Generate content
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.mail.managed");
-        payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadContentUUID", PROFILE_IMAP_DEFAULT_CONTENT_UUID, session));
-        payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadContentIdentifier", "com.open-xchange.imap", session));
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
+        payloadContent.setPayloadIdentifier("com.open-xchange.mail");
         payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
-        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.imap.plist.accountDescription", IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, true, session));
+        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
 
         // The full user name for the account. This is the user name in sent messages, etc.
         payloadContent.addStringValue("EmailAccountName", getUser(session).getDisplayName());
@@ -533,36 +337,11 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         // disableMailDrop - Boolean - Default false.
         // If true, this account is excluded from using Mail Drop. The default is false.
 
-        PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadIdentifier", "com.open-xchange", session));
-        pListDict.setPayloadType("Configuration");
-        pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.imap.plist.payloadUUID", PROFILE_IMAP_DEFAULT_UUID, session));
-        pListDict.setPayloadVersion(1);
-        pListDict.setPayloadDisplayName(OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_DISPLAY_NAME, session));
-        // pListDict.setPayloadDescription(OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
+        // Add payload content dictionary to top-level dictionary
         pListDict.setPayloadContent(payloadContent);
 
-        return pListDict;
-    }
-
-    Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
-        try {
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("imap.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config"); // Or application/x-plist ?
-            fileHolder.setDelivery("download");
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            return new Result(fileHolder, "file");
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        }
+        // Return result
+        return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
 }

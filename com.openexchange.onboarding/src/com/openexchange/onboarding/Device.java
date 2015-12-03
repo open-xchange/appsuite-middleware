@@ -221,7 +221,7 @@ public enum Device implements IdEntity {
             OnboardingAction action = iter.next();
             switch (action) {
                 case EMAIL:
-                    if (OnboardingUtility.hasPermission(Permission.WEBMAIL, session)) {
+                    if (!OnboardingUtility.hasPermission(Permission.WEBMAIL, session)) {
                         iter.remove();
                     }
                     break;

@@ -1,0 +1,215 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.onboarding.plist;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.dataobjects.compose.ComposeType;
+import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
+import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.notification.mail.MailData;
+import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.onboarding.CommonForms;
+import com.openexchange.onboarding.OnboardingAction;
+import com.openexchange.onboarding.OnboardingExceptionCodes;
+import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.OnboardingStrings;
+import com.openexchange.onboarding.OnboardingUtility;
+import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultObject;
+import com.openexchange.onboarding.ResultReply;
+import com.openexchange.onboarding.SimpleResultObject;
+import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
+import com.openexchange.onboarding.plist.osgi.Services;
+import com.openexchange.onboarding.signature.PListSigner;
+import com.openexchange.plist.PListDict;
+import com.openexchange.plist.PListWriter;
+import com.openexchange.session.Session;
+
+/**
+ * {@link PlistResult} - A plist result.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
+ */
+public class PlistResult implements Result {
+
+    private final PListDict pListDict;
+    private final ResultReply reply;
+
+    /**
+     * Initializes a new {@link PlistResult}.
+     *
+     * @param pListDict The plist object
+     * @param reply The reply
+     */
+    public PlistResult(PListDict pListDict, ResultReply reply) {
+        super();
+        this.pListDict = pListDict;
+        this.reply = reply;
+    }
+
+    /**
+     * Gets the plist object
+     *
+     * @return The plist object
+     */
+    public PListDict getPListDict() {
+        return pListDict;
+    }
+
+    @Override
+    public ResultObject getResultObject(OnboardingRequest request, Session session) throws OXException {
+        OnboardingAction action = request.getAction();
+        switch (action) {
+            case DOWNLOAD:
+                return generatePListResult(request, session);
+            case EMAIL:
+                return sendEmailResult(request, session);
+            case SMS:
+                // Currently not supported
+                throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(action.getId());
+            default:
+                throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(action.getId());
+        }
+    }
+
+    @Override
+    public ResultReply getReply() {
+        return reply;
+    }
+
+    // --------------------------------------------- E-Mail utils --------------------------------------------------------------
+
+    private TransportProvider getTransportProvider() {
+        return TransportProviderRegistry.getTransportProvider("smtp");
+    }
+
+    private ResultObject sendEmailResult(OnboardingRequest request, Session session) throws OXException {
+        Map<String, Object> formContent = request.getInput();
+        if (null == formContent) {
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+        }
+
+        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+        if (Strings.isEmpty(emailAddress)) {
+            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+        }
+
+        ThresholdFileHolder fileHolder = null;
+        boolean error = true;
+        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
+        try {
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
+
+            String name = request.getScenario().getId() + ".mobileconfig";
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.setDisposition("attachment; filename=" + name);
+            fileHolder.setName(name);
+            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=" + name);// Or application/x-plist ?
+            new PListWriter().write(pListDict, fileHolder.asOutputStream());
+
+            PListSigner signer = new PListSigner(fileHolder);
+            fileHolder = signer.signPList();
+
+            NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
+            ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
+            transport.sendMailMessage(message, ComposeType.NEW);
+
+            ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session), "string");
+            error = false;
+            return resultObject;
+        } catch (IOException e) {
+            throw OnboardingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            transport.close();
+            if (error) {
+                Streams.close(fileHolder);
+            }
+        }
+    }
+
+    // --------------------------------------------- PLIST utils --------------------------------------------------------------
+
+    private ResultObject generatePListResult(OnboardingRequest request, Session session) throws OXException {
+        ThresholdFileHolder fileHolder = null;
+        boolean error = true;
+        try {
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.setDisposition("attachment");
+            fileHolder.setName(request.getScenario().getId() + ".mobileconfig");
+            fileHolder.setContentType("application/x-apple-aspen-config");// Or application/x-plist ?
+            fileHolder.setDelivery("download");
+            new PListWriter().write(pListDict, fileHolder.asOutputStream());
+
+            PListSigner signer = new PListSigner(fileHolder);
+            fileHolder = signer.signPList();
+
+            ResultObject resultObject = new SimpleResultObject(fileHolder, "file");
+            error = false;
+            return resultObject;
+        } catch (IOException e) {
+            throw OnboardingExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(fileHolder);
+            }
+        }
+    }
+
+}

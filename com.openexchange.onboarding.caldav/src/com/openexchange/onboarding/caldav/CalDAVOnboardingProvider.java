@@ -49,50 +49,27 @@
 
 package com.openexchange.onboarding.caldav;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.dataobjects.compose.ComposeType;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.notification.mail.MailData;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.CommonForms;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.ObjectResult;
-import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.OnboardingStrings;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.Scenario;
-import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
-import com.openexchange.onboarding.plist.PListDict;
-import com.openexchange.onboarding.plist.PListWriter;
-import com.openexchange.onboarding.plist.xml.StaxUtils;
-import com.openexchange.onboarding.signature.PListSigner;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.onboarding.plist.PlistResult;
+import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -137,7 +114,7 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
 
         Scenario scenario = request.getScenario();
         if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
-            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(identifier, request.getAction().getId(), scenario.getType().getId());
+            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
         switch(scenario.getType()) {
@@ -152,9 +129,8 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         }
     }
 
-    private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) {
-
-
+    private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        return plistResult(request, previousResult, session);
     }
 
     private Result doExecuteManual(OnboardingRequest request, Result previousResult, Session session) throws OXException {
@@ -164,107 +140,54 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
     // --------------------------------------------- Display utils --------------------------------------------------------------
 
 
-    private final static String CALDAV_LOGIN_FIELD = "login";
-    private final static String CALDAV_PASSWORD_FIELD = "password";
-    private final static String CALDAV_HOST_FIELD = "hostName";
+    private final static String CALDAV_LOGIN_FIELD = "caldav_login";
+    private final static String CALDAV_PASSWORD_FIELD = "caldav_password";
+    private final static String CALDAV_HOST_FIELD = "caldav_hostName";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>() : ((DisplayResult) previousResult).getConfiguration();
+        Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
         configuration.put(CALDAV_PASSWORD_FIELD, session.getPassword());
         configuration.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
         return new DisplayResult(configuration);
     }
 
-    // --------------------------------------------- E-Mail utils --------------------------------------------------------------
-
-    private TransportProvider getTransportProvider() {
-        return TransportProviderRegistry.getTransportProvider("smtp");
-    }
-
-    Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
-        Map<String, Object> formContent = request.getFormContent();
-        if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
-        try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
-
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment; filename=caldav.mobileconfig");
-            fileHolder.setName("caldav.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=caldav.mobileconfig");// Or application/x-plist ?
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
-            ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
-            transport.sendMailMessage(message, ComposeType.NEW);
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        } finally {
-            transport.close();
-        }
-
-        return new Result(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session));
-    }
-
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
-    private static final String PROFILE_CALDAV_DEFAULT_UUID = "c454c731-b93d-428e-8b7f-d158db3726ef";
-    private static final String PROFILE_CALDAV_DEFAULT_CONTENT_UUID = "6af5eca3-4249-4e2c-8eba-4ae7c8ed204b";
+    private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Scenario scenario = request.getScenario();
 
-    PListDict generatePList(OnboardingRequest request, Session session) throws OXException {
+        // Get the PListDict to contribute to
+        PListDict pListDict;
+        if (null == previousResult) {
+            pListDict = new PListDict();
+            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
+        } else {
+            pListDict = ((PlistResult) previousResult).getPListDict();
+        }
+
+        // Generate payload content dictionary
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.caldav.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentUUID", PROFILE_CALDAV_DEFAULT_CONTENT_UUID, session));
-        payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadContentIdentifier", "com.open-xchange.caldav", session));
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
+        payloadContent.setPayloadIdentifier("com.open-xchange.caldav");
         payloadContent.setPayloadVersion(1);
-        payloadContent.addStringValue("PayloadOrganization", "OX");
+        payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
         payloadContent.addStringValue("CalDAVPassword", session.getPassword());
         payloadContent.addStringValue("CalDAVHostName", getCalDAVUrl(request, session));
         payloadContent.addBooleanValue("CalDAVUseSSL", false);
-        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.caldav.plist.accountDescription", CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, true, session));
+        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, session));
 
-        PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadIdentifier", "com.open-xchange.caldav", session));
-        pListDict.setPayloadType("Configuration");
-        pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.caldav.plist.payloadUUID", PROFILE_CALDAV_DEFAULT_UUID, session));
-        pListDict.setPayloadVersion(1);
+        // Add payload content dictionary to top-level dictionary
         pListDict.setPayloadContent(payloadContent);
-        pListDict.setPayloadDisplayName(CalDAVOnboardingStrings.CALDAV_DISPLAY_NAME);
 
-        return pListDict;
-    }
-
-    Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
-        try {
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("caldav.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config");// Or application/x-plist ?
-            fileHolder.setDelivery("download");
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            return new Result(fileHolder, "file");
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        }
+        // Return result
+        return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     private String getCalDAVUrl(OnboardingRequest request, Session session) throws OXException {

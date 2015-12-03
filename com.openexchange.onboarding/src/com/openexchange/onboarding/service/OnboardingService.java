@@ -56,7 +56,7 @@ import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultObject;
 import com.openexchange.onboarding.Scenario;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
@@ -139,9 +139,9 @@ public interface OnboardingService {
      *
      * @param request The on-boarding request
      * @param session The session
-     * @return The device-aware scenario
+     * @return The result object
      * @throws OXException If scenario cannot be returned
      */
-    Result execute(OnboardingRequest request, Session session) throws OXException;
+    ResultObject execute(OnboardingRequest request, Session session) throws OXException;
 
 }

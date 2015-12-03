@@ -132,17 +132,25 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      */
     EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 17),
     /**
+     * Execution for scenario %1$s failed
+     */
+    EXECUTION_FAILED("Execution for scenario %1$s failed", OnboardingExceptionMessages.EXECUTION_FAILED_MSG, Category.CATEGORY_ERROR, 18),
+    /**
      * Provider %1$s does not support device %2$s
      */
-    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 18),
+    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 19),
     /**
      * Provider %1$s does not support action %2$s for type %3$s
      */
-    UNSUPPORTED_ACTION("Provider %1$s does not support action %2$s for type %3$s", null, Category.CATEGORY_ERROR, 19),
+    UNSUPPORTED_ACTION("Action %1$s is not supported", null, Category.CATEGORY_ERROR, 20),
     /**
      * Provider %1$s does not support type %2$s
      */
-    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 20),
+    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 21),
+    /**
+     * Missing property: %1$s
+     */
+    MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 22),
     ;
 
     /** The error code prefix for on-boarding module */

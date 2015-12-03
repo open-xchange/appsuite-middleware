@@ -64,7 +64,7 @@ public class EASOnboardingStrings implements LocalizableStrings {
     public static final String EAS_DISPLAY_NAME = "Microsoft Exchange Active-Sync";
 
     // The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.
-    public static final String EAS_ACCOUNT_DESCRIPTION = "The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.";
+    public static final String EAS_ACCOUNT_DESCRIPTION = "The Microsoft Exchange Active-Sync account for synchronizing your calendar, contacts and messages.";
 
     // Your Microsoft Exchange Active-Sync profile
     public static final String EAS_TEXT_PROFILE = "Your Microsoft Exchange Active-Sync profile";

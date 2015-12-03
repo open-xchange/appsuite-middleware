@@ -49,53 +49,27 @@
 
 package com.openexchange.onboarding.carddav;
 
-import static com.openexchange.onboarding.OnboardingSelectionKey.keyFor;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
-import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.capabilities.CapabilityService;
+import java.util.Set;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.dataobjects.compose.ComposeType;
-import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
-import com.openexchange.mail.transport.MailTransport;
-import com.openexchange.mail.transport.TransportProvider;
-import com.openexchange.mail.transport.TransportProviderRegistry;
-import com.openexchange.notification.mail.MailData;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.CommonForms;
-import com.openexchange.onboarding.DefaultEntityPath;
-import com.openexchange.onboarding.DefaultOnboardingSelection;
 import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.Module;
-import com.openexchange.onboarding.OnboardingAction;
-import com.openexchange.onboarding.EntityPath;
-import com.openexchange.onboarding.Icon;
-import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.DisplayResult;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.OnboardingExecutor;
+import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.OnboardingSelection;
-import com.openexchange.onboarding.OnboardingSelectionKey;
-import com.openexchange.onboarding.OnboardingStrings;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
-import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
-import com.openexchange.onboarding.plist.PListDict;
-import com.openexchange.onboarding.plist.PListWriter;
-import com.openexchange.onboarding.plist.xml.StaxUtils;
-import com.openexchange.onboarding.signature.PListSigner;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.onboarding.ResultReply;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.plist.PlistResult;
+import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
@@ -109,9 +83,8 @@ import com.openexchange.session.Session;
 public class CardDAVOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
-    private final String propertyPrefix;
     private final String identifier;
-    private final Map<OnboardingSelectionKey, OnboardingExecutor> executors;
+    private final EnumSet<Device> supportedDevices;
 
     /**
      * Initializes a new {@link CardDAVOnboardingProvider}.
@@ -119,51 +92,8 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
     public CardDAVOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        propertyPrefix = "com.openexchange.onboarding.carddav";
         identifier = "carddav";
-        executors = new HashMap<OnboardingSelectionKey, OnboardingExecutor>(8);
-
-        {
-            OnboardingExecutor downloadExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return generatePListResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingAction.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingAction.DOWNLOAD), downloadExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingAction.DOWNLOAD), downloadExecutor);
-        }
-
-        {
-            OnboardingExecutor emailExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return sendEmailResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingAction.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingAction.EMAIL), emailExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingAction.EMAIL), emailExecutor);
-        }
-
-        {
-            OnboardingExecutor displayExecutor = new OnboardingExecutor() {
-
-                @Override
-                public Result execute(OnboardingRequest request, Session session) throws OXException {
-                    return displayResult(request, session);
-                }
-            };
-
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS), OnboardingAction.DISPLAY), displayExecutor);
-            executors.put(keyFor(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS), OnboardingAction.DISPLAY), displayExecutor);
-        }
+        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
     }
 
     @Override
@@ -172,216 +102,93 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
-    public String getDisplayName(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".displayName", CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME, true, session);
+    public Set<Device> getSupportedDevices() {
+        return Collections.unmodifiableSet(supportedDevices);
     }
 
     @Override
-    public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(propertyPrefix + ".iconName", session);
-    }
-
-    @Override
-    public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(propertyPrefix + ".description", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session);
-    }
-
-    @Override
-    public boolean isEnabled(Session session) throws OXException {
-        CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
-        if (null == capabilityService) {
-            throw ServiceExceptionCode.absentService(CapabilityService.class);
+    public Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Device device = request.getDevice();
+        if (!supportedDevices.contains(device)) {
+            throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());
         }
 
-        if (false == capabilityService.getCapabilities(session).contains(Permission.CARDDAV.getCapabilityName())) {
-            return false;
+        Scenario scenario = request.getScenario();
+        if (!Device.getActionsFor(device, scenario.getType(), session).contains(request.getAction())) {
+            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(request.getAction().getId());
         }
 
-        return OnboardingUtility.getBoolValue(propertyPrefix + ".enabled", true, session);
+        switch(scenario.getType()) {
+            case LINK:
+                throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
+            case MANUAL:
+                return doExecuteManual(request, previousResult, session);
+            case PLIST:
+                return doExecutePlist(request, previousResult, session);
+            default:
+                throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
+        }
     }
 
-    @Override
-    public List<EntityPath> getEntityPaths(Session session) throws OXException {
-        List<EntityPath> paths = new ArrayList<EntityPath>(4);
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPAD, Module.CONTACTS));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_IPHONE, Module.CONTACTS));
-        paths.add(new DefaultEntityPath(this, Device.APPLE_MAC, Module.CONTACTS));
-        return paths;
+    private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        return plistResult(request, previousResult, session);
     }
 
-    @Override
-    public List<OnboardingSelection> getSelections(EntityPath entityPath, Session session) throws OXException {
-        if (entityPath.matches(Device.APPLE_IPAD, Module.CONTACTS, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        } else if (entityPath.matches(Device.APPLE_IPHONE, Module.CONTACTS, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.SMS));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-
-        } else if (entityPath.matches(Device.APPLE_MAC, Module.CONTACTS, identifier)) {
-            List<OnboardingSelection> selections = new ArrayList<OnboardingSelection>(4);
-
-            // The download selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DOWNLOAD));
-
-            // The eMail selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.EMAIL));
-
-            // The display settings selection
-            selections.add(DefaultOnboardingSelection.newInstance(entityPath, OnboardingAction.DISPLAY));
-
-            return selections;
-        }
-
-        throw OnboardingExceptionCodes.ENTITY_NOT_SUPPORTED.create(entityPath.getCompositeId());
-    }
-
-    @Override
-    public Result execute(OnboardingRequest request, Session session) throws OXException {
-        OnboardingSelection selection = request.getSelection();
-        if (!selection.isEnabled(session)) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
-        }
-
-        OnboardingExecutor onboardingExecutor = executors.get(new OnboardingSelectionKey(selection));
-        if (null == onboardingExecutor) {
-            throw OnboardingExceptionCodes.CONFIGURATION_NOT_SUPPORTED.create(selection.getCompositeId());
-        }
-
-        return onboardingExecutor.execute(request, session);
+    private Result doExecuteManual(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        return displayResult(request, previousResult, session);
     }
 
     // --------------------------------------------- Display utils --------------------------------------------------------------
 
-    private final static String CARDDAV_LOGIN_FIELD = "login";
-    private final static String CARDDAV_PASSWORD_FIELD = "password";
-    private final static String CARDDAV_HOST_FIELD = "hostName";
 
-    Result displayResult(OnboardingRequest request, Session session) throws OXException {
-        String resultText = OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_TEXT_SETTINGS, session);
+    private final static String CARDDAV_LOGIN_FIELD = "carddav_login";
+    private final static String CARDDAV_PASSWORD_FIELD = "carddav_password";
+    private final static String CARDDAV_HOST_FIELD = "carddav_hostName";
 
-        Map<String, Object> formContent = new HashMap<String, Object>();
-        formContent.put(CARDDAV_LOGIN_FIELD, session.getLogin());
-        formContent.put(CARDDAV_PASSWORD_FIELD, session.getPassword());
-        formContent.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, session));
-
-        return new Result(resultText, formContent);
-    }
-
-
-    // --------------------------------------------- E-Mail utils --------------------------------------------------------------
-
-    private TransportProvider getTransportProvider() {
-        return TransportProviderRegistry.getTransportProvider("smtp");
-    }
-
-    Result sendEmailResult(OnboardingRequest request, Session session) throws OXException {
-        Map<String, Object> formContent = request.getFormContent();
-        if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
-        }
-
-        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
-        try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
-
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment; filename=carddav.mobileconfig");
-            fileHolder.setName("carddav.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=carddav.mobileconfig"); // Or application/x-plist ?
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            NotificationMailFactory notify = services.getService(NotificationMailFactory.class);
-            ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
-            transport.sendMailMessage(message, ComposeType.NEW);
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        } finally {
-            transport.close();
-        }
-
-        return new Result(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session));
+    private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
+        configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
+        configuration.put(CARDDAV_PASSWORD_FIELD, session.getPassword());
+        configuration.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, session));
+        return new DisplayResult(configuration);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
-    private static final String PROFILE_CARDDAV_DEFAULT_UUID = "f264c731-b93d-428e-8b7f-d158db3726ef";
-    private static final String PROFILE_CARDDAV_DEFAULT_CONTENT_UUID = "a6f5eca3-4249-4e2c-8eba-4ae7c8ed204b";
+    private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
+        Scenario scenario = request.getScenario();
 
-    PListDict generatePList(OnboardingRequest request, Session session) throws OXException {
+        // Get the PListDict to contribute to
+        PListDict pListDict;
+        if (null == previousResult) {
+            pListDict = new PListDict();
+            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
+        } else {
+            pListDict = ((PlistResult) previousResult).getPListDict();
+        }
+
+        // Generate payload content dictionary
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.carddav.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentUUID", PROFILE_CARDDAV_DEFAULT_CONTENT_UUID, session));
-        payloadContent.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadContentIdentifier", "com.open-xchange.carddav", session));
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
+        payloadContent.setPayloadIdentifier("com.open-xchange.carddav");
         payloadContent.setPayloadVersion(1);
-        payloadContent.addStringValue("PayloadOrganization", "OX");
+        payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CardDAVUsername", session.getLogin());
         payloadContent.addStringValue("CardDAVPassword", session.getPassword());
         payloadContent.addStringValue("CardDAVHostName", getCardDAVUrl(request, session));
         payloadContent.addBooleanValue("CardDAVUseSSL", false);
-        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFromProperty("com.openexchange.onboarding.carddav.plist.accountDescription", CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, true, session));
+        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, session));
 
-        PListDict pListDict = new PListDict();
-        pListDict.setPayloadIdentifier(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadIdentifier", "com.open-xchange.carddav", session));
-        pListDict.setPayloadType("Configuration");
-        pListDict.setPayloadUUID(OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.carddav.plist.payloadUUID", PROFILE_CARDDAV_DEFAULT_UUID, session));
-        pListDict.setPayloadVersion(1);
+        // Add payload content dictionary to top-level dictionary
         pListDict.setPayloadContent(payloadContent);
-        pListDict.setPayloadDisplayName(CardDAVOnboardingStrings.CARDDAV_DISPLAY_NAME);
 
-        return pListDict;
-    }
-
-    Result generatePListResult(OnboardingRequest request, Session session) throws OXException {
-        try {
-            PListDict pListDict = generatePList(request, session);
-            PListWriter pListWriter = new PListWriter();
-
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            fileHolder.setDisposition("attachment");
-            fileHolder.setName("carddav.mobileconfig");
-            fileHolder.setContentType("application/x-apple-aspen-config"); // Or application/x-plist ?
-            fileHolder.setDelivery("download");
-            XMLStreamWriter writer = StaxUtils.createXMLStreamWriter(fileHolder.asOutputStream());
-            pListWriter.write(pListDict, writer);
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
-            return new Result(fileHolder, "file");
-        } catch (XMLStreamException e) {
-            throw OnboardingExceptionCodes.XML_ERROR.create(e, e.getMessage());
-        }
+        // Return result
+        return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     private String getCardDAVUrl(OnboardingRequest request, Session session) throws OXException {

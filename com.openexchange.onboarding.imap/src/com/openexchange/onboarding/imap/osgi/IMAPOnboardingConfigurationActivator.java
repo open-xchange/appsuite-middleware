@@ -49,10 +49,9 @@
 
 package com.openexchange.onboarding.imap.osgi;
 
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.context.ContextService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.service.MailService;
-import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.imap.IMAPOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -75,7 +74,7 @@ public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator 
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ContextService.class, CapabilityService.class, MailService.class, NotificationMailFactory.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class };
     }
 
     @Override

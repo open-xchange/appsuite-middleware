@@ -63,13 +63,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
 import com.openexchange.onboarding.DeviceAwareScenario;
-import com.openexchange.onboarding.DisplayResult;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingAction;
-import com.openexchange.onboarding.OnboardingSelection;
-import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultObject;
 import com.openexchange.onboarding.Scenario;
-import com.openexchange.onboarding.StringResult;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -115,16 +112,25 @@ public class ScenarioConverter implements ResultConverter {
             Object resultObject = result.getResultObject();
             if (resultObject instanceof DeviceAwareScenario) {
                 DeviceAwareScenario scenario = (DeviceAwareScenario) resultObject;
-                result.setResultObject(toJson(scenario, requestData, session), "json");
+                OnboardingService onboardingService = services.getOptionalService(OnboardingService.class);
+                if (null == onboardingService) {
+                    throw ServiceExceptionCode.absentService(OnboardingService.class);
+                }
+                result.setResultObject(toJson(scenario, requestData, session, onboardingService), "json");
             } else {
-                if ((resultObject instanceof Collection)) {
-                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(OnboardingSelection.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                if (!(resultObject instanceof Collection)) {
+                    throw AjaxExceptionCodes.UNEXPECTED_RESULT.create(DeviceAwareScenario.class.getSimpleName(), null == resultObject ? "null" : resultObject.getClass().getSimpleName());
+                }
+
+                OnboardingService onboardingService = services.getOptionalService(OnboardingService.class);
+                if (null == onboardingService) {
+                    throw ServiceExceptionCode.absentService(OnboardingService.class);
                 }
 
                 Collection<DeviceAwareScenario> scenarios = (Collection<DeviceAwareScenario>) resultObject;
                 JSONArray jScenarios = new JSONArray(scenarios.size());
                 for (DeviceAwareScenario scenario : scenarios) {
-                    jScenarios.put(toJson(scenario, requestData, session));
+                    jScenarios.put(toJson(scenario, requestData, session, onboardingService));
                 }
                 result.setResultObject(jScenarios, "json");
             }
@@ -133,12 +139,11 @@ public class ScenarioConverter implements ResultConverter {
         }
     }
 
-    private JSONObject toJson(DeviceAwareScenario scenario, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingService onboardingService = services.getOptionalService(OnboardingService.class);
-        if (null == onboardingService) {
-            throw ServiceExceptionCode.absentService(OnboardingService.class);
-        }
+    private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, AJAXRequestData requestData, OnboardingAction action) {
+        return new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null);
+    }
 
+    private JSONObject toJson(DeviceAwareScenario scenario, AJAXRequestData requestData, ServerSession session, OnboardingService onboardingService) throws OXException, JSONException {
         JSONObject jScenario = new JSONObject(8);
         jScenario.put("id", scenario.getId());
         jScenario.put("enabled", scenario.isEnabled(session));
@@ -152,19 +157,19 @@ public class ScenarioConverter implements ResultConverter {
                 switch (action) {
                     case DISPLAY:
                         {
-                            Result result = onboardingService.execute(new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null), session);
+                            ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
                             JSONObject jAction = new JSONObject(2);
                             jAction.put("id", action.getId());
-                            jAction.put("data", new JSONObject(((DisplayResult) result).getConfiguration()));
+                            jAction.put("data", result.getObject());
                             jActions.put(jAction);
                         }
                         break;
                     case LINK:
                         {
-                            Result result = onboardingService.execute(new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null), session);
+                            ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
                             JSONObject jAction = new JSONObject(2);
                             jAction.put("id", action.getId());
-                            jAction.put("link", ((StringResult) result).getResult());
+                            jAction.put("link", result.getObject());
                             jActions.put(jAction);
                         }
                         break;
@@ -187,12 +192,8 @@ public class ScenarioConverter implements ResultConverter {
             List<Scenario> alternatives = scenario.getAlternatives(session);
             JSONArray jAlternatives = new JSONArray(alternatives.size());
             for (Scenario alternative : alternatives) {
-                JSONObject jAlternative = new JSONObject(6);
-                jScenario.put("id", alternative.getId());
-                jScenario.put("enabled", alternative.isEnabled(session));
-                put2Json("displayName", alternative.getDisplayName(session), jScenario);
-                put2Json("description", alternative.getDescription(session), jScenario);
-                put2Json("icon", alternative.getIcon(session), jScenario);
+                DeviceAwareScenario deviceAwareScenario = onboardingService.getScenario(alternative.getId(), scenario.getDevice(), session);
+                JSONObject jAlternative = toJson(deviceAwareScenario, requestData, session, onboardingService);
                 jAlternatives.put(jAlternative);
             }
             jScenario.put("alternatives", jAlternatives);

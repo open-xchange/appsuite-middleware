@@ -50,6 +50,9 @@
 package com.openexchange.onboarding;
 
 import java.util.Map;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
  * {@link DisplayResult} - A result when an on-boarding configuration has been successfully executed.
@@ -83,5 +86,15 @@ public class DisplayResult implements Result {
     @Override
     public ResultReply getReply() {
         return ResultReply.ACCEPT;
+    }
+
+    @Override
+    public ResultObject getResultObject(OnboardingRequest request, Session session) throws OXException {
+        OnboardingAction action = request.getAction();
+        if (OnboardingAction.DISPLAY != action) {
+            throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(null == action ? "null" : action.getId());
+        }
+
+        return new SimpleResultObject(new JSONObject(configuration), "json");
     }
 }

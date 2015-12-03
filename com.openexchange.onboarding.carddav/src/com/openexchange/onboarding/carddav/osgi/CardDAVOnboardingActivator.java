@@ -49,11 +49,8 @@
 
 package com.openexchange.onboarding.carddav.osgi;
 
-import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.carddav.CardDAVOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -76,16 +73,12 @@ public class CardDAVOnboardingActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, CapabilityService.class, NotificationMailFactory.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        trackService(MailService.class);
-        openTrackers();
-
-        CardDAVOnboardingProvider onboardingConfiguration = new CardDAVOnboardingProvider(this);
-        registerService(OnboardingProvider.class, onboardingConfiguration);
+        registerService(OnboardingProvider.class, new CardDAVOnboardingProvider(this));
     }
 
 }

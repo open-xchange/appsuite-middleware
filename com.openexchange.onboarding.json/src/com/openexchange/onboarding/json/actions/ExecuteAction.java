@@ -57,13 +57,11 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.onboarding.AckResult;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
 import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.ObjectResult;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingUtility;
-import com.openexchange.onboarding.Result;
+import com.openexchange.onboarding.ResultObject;
 import com.openexchange.onboarding.Scenario;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.server.ServiceLookup;
@@ -125,39 +123,15 @@ public class ExecuteAction extends AbstractOnboardingAction {
 
         // Create on-boarding request & execute it
         DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, parsed.getKey(), requestData.getHostData(), input);
-        Result result = onboardingService.execute(request, session);
+        ResultObject resultObject = onboardingService.execute(request, session);
 
-        // Check for an AckResult
-        if (result instanceof AckResult) {
-            AckResult ackResult = (AckResult) result;
-            JSONObject jResult = new JSONObject(2);
-            jResult.put("result", ackResult.getResultText());
-            return new AJAXRequestResult(jResult, "json");
-        }
-
-        // Otherwise expect an ObjectResult
-        ObjectResult objectResult = (ObjectResult) result;
-        switch (action) {
-            case DOWNLOAD:
-                doDownload(objectResult, scenario, session);
-                break;
-            case EMAIL:
-                break;
-            case SMS:
-                break;
-            default:
-                throw AjaxExceptionCodes.IMVALID_PARAMETER.create("action_id");
-        }
-
-
-
-
-        String format = objectResult.getFormat();
+        // Return result
+        String format = resultObject.getFormat();
         if (null == format) {
-            return new AJAXRequestResult(objectResult.getResultObject());
+            return new AJAXRequestResult(resultObject.getObject());
         }
         requestData.setFormat(format);
-        return new AJAXRequestResult(objectResult.getResultObject(), format);
+        return new AJAXRequestResult(resultObject.getObject(), format);
     }
 
 }

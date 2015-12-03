@@ -75,4 +75,7 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     // The execution has been denied. Please choose another option.
     public static final String EXECUTION_DENIED_MSG = "The execution has been denied. Please choose another option.";
 
+    // Execution failed. Please choose another option.
+    public static final String EXECUTION_FAILED_MSG = "Execution failed. Please choose another option.";
+
 }
