@@ -52,6 +52,7 @@ package com.openexchange.cli;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.AccessException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -221,6 +222,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
                 throw x;
             } catch (NotBoundException x) {
                 throw x;
+            } catch (ConnectException x) {
+                throw x;
             } catch (Exception e) {
                 Throwable t = e.getCause();
                 throw new ExecutionFault(null == t ? e : t);
@@ -239,6 +242,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             System.err.println("Remote stub not found: " + e.getMessage());
         } catch (final MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
+        } catch (final ConnectException e) {
+            System.err.println("Unable to connect to server");
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final RuntimeException e) {
