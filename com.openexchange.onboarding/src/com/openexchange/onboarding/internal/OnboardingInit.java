@@ -53,13 +53,12 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.codec.binary.Base64;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.DefaultIcon;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingType;
+import com.openexchange.onboarding.TemplateIcon;
 
 /**
  * {@link OnboardingInit} - Initialization class.
@@ -93,7 +92,7 @@ public class OnboardingInit {
         Object yaml = configService.getYaml(CONFIGFILE_SCENARIOS);
         if (null != yaml && Map.class.isInstance(yaml)) {
             Map<String, Object> map = (Map<String, Object>) yaml;
-            if (0 < map.size()) {
+            if (!map.isEmpty()) {
                 scenarios = parseScenarios(map);
             }
         }
@@ -140,12 +139,11 @@ public class OnboardingInit {
                 }
                 alternativeIds = (List<String>) alternativesValue;
             }
-            Icon icon = new DefaultIcon(Base64.decodeBase64((String) values.get("icon")), "image/jpg");
-            String displayName = (String) values.get("displayName");
-            String description = (String) values.get("description");
+            Icon icon = new TemplateIcon((String) values.get("icon"));
+            String displayName = (String) values.get("displayName_tr");
+            String description = (String) values.get("description_tr");
 
-            ConfiguredScenario scenario = new ConfiguredScenario(id, enabled.booleanValue(), type, providerIds, alternativeIds, displayName, icon, description);
-            scenarios.put(scenario.getId(), scenario);
+            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, providerIds, alternativeIds, displayName, icon, description));
         }
         return scenarios;
     }

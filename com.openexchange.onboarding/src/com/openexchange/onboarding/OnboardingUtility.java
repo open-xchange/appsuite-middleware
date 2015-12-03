@@ -430,6 +430,54 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the template file information for specified file name.
+     *
+     * @param name The file name; e.g. <code>"platform_icon_apple.png"</code>
+     * @return The template file
+     * @throws IllegalArgumentException If name is <code>null</code>
+     */
+    public static Map.Entry<File, String> getTemplateFileInfo(String name) {
+        final File templateFile = getTemplateFile(name);
+        MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
+        final String mimeType = null == mimeTypeMap ? "application/octet-stream" : mimeTypeMap.getContentType(name);
+        return new Map.Entry<File, String>() {
+
+            @Override
+            public File getKey() {
+                return templateFile;
+            }
+
+            @Override
+            public String getValue() {
+                return mimeType;
+            }
+
+            @Override
+            public String setValue(String value) {
+                throw new UnsupportedOperationException("setValue() is not supported");
+            }
+        };
+    }
+
+    /**
+     * Gets the template file for specified file name.
+     *
+     * @param name The file name; e.g. <code>"platform_icon_apple.png"</code>
+     * @return The template file
+     * @throws IllegalArgumentException If name is <code>null</code>
+     */
+    public static File getTemplateFile(String name) {
+        Validate.notNull(name, "name must not be null");
+
+        String templatesPath = getTemplatesPath();
+        if (Strings.isEmpty(templatesPath)) {
+            return null;
+        }
+
+        return new File(new File(templatesPath), name);
+    }
+
+    /**
      * Gets the template path
      *
      * @return The template path
