@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Update
+Bundle-Name: Drive Client Updater
 Bundle-SymbolicName: com.openexchange.drive.client.windows
 Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.drive.client.windows.osgi.Activator
-Bundle-Vendor: OPENEXCHANGE
+Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.drive.client.windows.service
@@ -39,4 +39,5 @@ Import-Package: com.openexchange.ajax.helper,
  org.apache.http.client.utils,
  org.osgi.framework;version="1.8.0",
  org.osgi.service.http;version="1.2.1",
+ org.osgi.util.tracker;version="1.5.1",
  org.slf4j;version="1.7.5"

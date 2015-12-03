@@ -767,15 +767,16 @@ public abstract class OXServlet extends WebDavServlet {
      */
     protected static boolean isTransient(Interface iface) {
         switch (iface) {
-        case CALDAV:
-        case CARDDAV:
-        case WEBDAV_INFOSTORE:
-        case WEBDAV_ICAL:
-        case WEBDAV_VCARD:
-        case OUTLOOK_UPDATER:
-            return true;
-        default:
-            return false;
+            case CALDAV:
+            case CARDDAV:
+            case WEBDAV_INFOSTORE:
+            case WEBDAV_ICAL:
+            case WEBDAV_VCARD:
+            case OUTLOOK_UPDATER:
+            case DRIVE_UPDATER:
+                return true;
+            default:
+                return false;
         }
     }
 

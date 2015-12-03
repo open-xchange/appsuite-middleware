@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,51 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.ajax.drive.updater;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.io.IOException;
+import org.json.JSONException;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
+
 
 /**
- * {@link BrandingConfigurationRemote} is a rmi interface to reload the current branding configuration's.
+ * {@link DownloadRequest}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public interface BrandingConfigurationRemote extends Remote {
+public abstract class AbstractUpdaterRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+
+    private final String servletPath;
+
+    public AbstractUpdaterRequest(final String servletPath) {
+        super();
+        this.servletPath = servletPath;
+    }
 
     /**
-     * RMI name to be used in the naming lookup.
+     * @see com.openexchange.ajax.framework.AJAXRequest#getServletPath()
      */
-    public static final String RMI_NAME = BrandingConfigurationRemote.class.getSimpleName();
+    @Override
+    public String getServletPath() {
+        return servletPath;
+    }
 
     /**
-     * This method reloads the branding configurations and the corresponding update files.
-     * It uses the last used path. In the major of cases this will be the path specified in <code>com.openexchange.drive.updater.path</code>.
-     * 
-     * @return A list of the loaded branding identifiers.
-     * @throws OXException
-     * @throws RemoteException
+     * @see com.openexchange.ajax.framework.AJAXRequest#getParameters()
      */
-    public List<String> reload() throws OXException, RemoteException;
+    @Override
+    public Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] {};
+    }
 
     /**
-     * This method reloads the branding configurations and the corresponding update files for given path.
-     * It must be pointed out that <code>com.openexchange.drive.updater.path</code> will be ignored and the given path is used instead.
-     * 
-     * @param path The path to be used.
-     * @return A list of the loaded branding identifiers.
-     * @throws RemoteException
-     * @throws OXException
+     * @see com.openexchange.ajax.framework.AJAXRequest#getHeaders()
      */
-    public List<String> reload(String path) throws RemoteException, OXException;
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
 
 }

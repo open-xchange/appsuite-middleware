@@ -54,7 +54,9 @@ import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -103,6 +105,12 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
         loaders = new HashMap<String, FileSystemResourceLoader>();
     }
 
+    /**
+     * Initialize this UpdatesFilesProvider with again with the old path
+     * 
+     * @return this
+     * @throws OXException
+     */
     public UpdateFilesProvider reinit() throws OXException {
         return init(this.path);
     }
@@ -115,48 +123,51 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
      * @throws OXException
      */
     public UpdateFilesProvider init(String path) throws OXException {
+        synchronized (loaders) {
 
-        this.path = path;
-        File parent = new File(path);
-        if (null == parent || !parent.exists()) {
-            throw new BrandingException(BrandingException.MISSING_FOLDER);
-        }
-
-        FileFilter dirFilter = new FileFilter() {
-
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory();
+            this.path = path;
+            loaders.clear();
+            File parent = new File(path);
+            if (null == parent || !parent.exists()) {
+                throw new BrandingException(BrandingException.MISSING_FOLDER);
             }
-        };
 
-        File[] dirs = parent.listFiles(dirFilter);
-        if (dirs != null && dirs.length != 0) {
-
-            FilenameFilter brandingFilter = new FilenameFilter() {
+            FileFilter dirFilter = new FileFilter() {
 
                 @Override
-                public boolean accept(File dir, String name) {
-                    return name.endsWith(".properties") || name.endsWith(".branding");
+                public boolean accept(File file) {
+                    return file.isDirectory();
                 }
             };
 
-            for (File f : dirs) {
-                File[] brandings = f.listFiles(brandingFilter);
-                if (brandings.length == 1) {
-                    try {
-                        if (BrandingConfig.checkFile(brandings[0])) {
-                            loaders.put(f.getName(), new FileSystemResourceLoader(f.getAbsolutePath()));
+            File[] dirs = parent.listFiles(dirFilter);
+            if (dirs != null && dirs.length != 0) {
+
+                FilenameFilter brandingFilter = new FilenameFilter() {
+
+                    @Override
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".properties") || name.endsWith(".branding");
+                    }
+                };
+
+                for (File f : dirs) {
+                    File[] brandings = f.listFiles(brandingFilter);
+                    if (brandings.length == 1) {
+                        try {
+                            if (BrandingConfig.checkFile(brandings[0])) {
+                                loaders.put(f.getName(), new FileSystemResourceLoader(f.getAbsolutePath()));
+                            }
+                        } catch (IOException e) {
+                            LOG.warn("Failed to load properties from %s and will be skipped!", brandings[0].getName());
+                            continue;
                         }
-                    } catch (IOException e) {
-                        LOG.warn("Failed to load properties from %s and will be skipped!", brandings[0].getName());
+
+                    } else {
+
+                        LOG.warn("Folder %s contains none or more than one property file and will be skipped!", f.getName());
                         continue;
                     }
-
-                } else {
-
-                    LOG.warn("Folder %s contains none or more than one property file and will be skipped!", f.getName());
-                    continue;
                 }
             }
         }
@@ -178,6 +189,11 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
     }
 
     @Override
+    public boolean isValid(String branding) {
+        return loaders.containsKey(branding);
+    }
+
+    @Override
     public long getSize(String branding, String name) throws OXException {
         try {
             return loaders.get(branding).getSize(name);
@@ -188,7 +204,9 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public String getFileName(String branding, Pattern regex) throws OXException {
-
+        if (!loaders.containsKey(branding)) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
         try {
             Set<String> files = loaders.get(branding).getAvailableFiles();
             if (files.isEmpty()) {
@@ -225,5 +243,16 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
         reinit();
     }
 
+    @Override
+    public void reload(String path) throws OXException {
+        reinit();
+    }
+
+    @Override
+    public List<String> getAvailableBrandings() {
+        ArrayList<String> list = new ArrayList<String>(loaders.size());
+        list.addAll(loaders.keySet());
+        return list;
+    }
 }
 

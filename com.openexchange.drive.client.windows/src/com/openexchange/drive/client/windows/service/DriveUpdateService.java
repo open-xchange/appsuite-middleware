@@ -55,7 +55,6 @@ import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.templating.OXTemplate;
-import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link DriveUpdateService}
@@ -74,15 +73,15 @@ public interface DriveUpdateService {
     public OXTemplate getOxtenderSpecificTemplate() throws OXException;
 
     /**
-     * Returns the values for the templates placeholders.
+     * Returns the values for the templates placeholder's.
      *
      * @param serverUrl The URL to the groupware server.
-     * @param session The clients session.
+     * @param username The name of the current user.
      * @param branding The branding identifier.
      * @return A Map containing the values for the {@link OXTemplate}.
      * @throws AbstractOXException
      */
-    public Map<String, Object> getTemplateValues(String serverUrl, ServerSession session, String branding) throws OXException;
+    public Map<String, Object> getTemplateValues(String serverUrl, String username, String branding) throws OXException;
 
     /**
      * Gets the necessary permission that is needed to receive updates for the drive.

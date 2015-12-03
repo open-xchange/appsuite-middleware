@@ -61,8 +61,6 @@ import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * {@link DriveUpdateServiceImpl}
@@ -70,9 +68,6 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  */
 public class DriveUpdateServiceImpl implements DriveUpdateService {
-
-    private static final String PROP_BINARY_REGEX_EXE = "com.openexchange.drive.windows.binaryRegex.exe";
-    private static final String PROP_BINARY_REGEX_MSI = "com.openexchange.drive.windows.binaryRegex.msi";
 
     private UpdateFilesProvider provider;
     private Pattern regex_exe;
@@ -83,16 +78,16 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     public void init(UpdateFilesProvider provider) throws OXException {
         this.provider = provider;
         ConfigurationService config = Services.getService(ConfigurationService.class);
-        String binaryRegex = config.getProperty(PROP_BINARY_REGEX_EXE);
+        String binaryRegex = config.getProperty(Constants.PROP_BINARY_REGEX_EXE);
         if (binaryRegex == null) {
-            throw UpdaterExceptionCodes.MISSING_CONFIG_PROPERTY.create(PROP_BINARY_REGEX_EXE);
+            throw UpdaterExceptionCodes.MISSING_CONFIG_PROPERTY.create(Constants.PROP_BINARY_REGEX_EXE);
         }
 
         regex_exe = Pattern.compile(binaryRegex);
 
-        binaryRegex = config.getProperty(PROP_BINARY_REGEX_MSI);
+        binaryRegex = config.getProperty(Constants.PROP_BINARY_REGEX_MSI);
         if (binaryRegex == null) {
-            throw UpdaterExceptionCodes.MISSING_CONFIG_PROPERTY.create(PROP_BINARY_REGEX_MSI);
+            throw UpdaterExceptionCodes.MISSING_CONFIG_PROPERTY.create(Constants.PROP_BINARY_REGEX_MSI);
         }
 
         regex_msi = Pattern.compile(binaryRegex);
@@ -118,10 +113,13 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     }
 
     @Override
-    public Map<String, Object> getTemplateValues(String serverUrl, ServerSession session, String branding) throws OXException {
+    public Map<String, Object> getTemplateValues(String serverUrl, String username, String branding) throws OXException {
+        if (!isValid(branding)) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+        }
         HashMap<String, Object> values = new HashMap<String, Object>();
         values.put("OX_SERVERURL", quote(serverUrl));
-        values.put("OX_USERNAME", quote(Utils.getUserName(session)));
+        values.put("OX_USERNAME", quote(username));
         String exeFileName = getExeFileName(branding);
         String msiFileName = getMsiFileName(branding);
         try {
@@ -132,9 +130,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
             values.put("ICON", loadIcon(branding));
 
             BrandingConfig conf = BrandingConfig.getBranding(branding);
-            if (conf == null) {
-                throw new OXException(new Exception("There is no configuration for the branding " + branding));
-            }
+
             Properties prop = conf.getProperties();
             values.put(Constants.BRANDING_NAME, prop.get(Constants.BRANDING_NAME));
             values.put(Constants.BRANDING_VERSION, prop.get(Constants.BRANDING_VERSION));
@@ -180,6 +176,12 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     public String getDefaultBranding() {
         ConfigurationService conf = Services.getService(ConfigurationService.class);
         return conf.getProperty(Constants.BRANDING_CONF, "generic");
+    }
+
+    private boolean isValid(String branding){
+        boolean provBool = provider.isValid(branding);
+        boolean confBool = BrandingConfig.isValid(branding);
+        return provBool && confBool;
     }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.drive.client.windows.service;
 
+import java.rmi.RemoteException;
+import java.util.List;
 import com.openexchange.drive.client.windows.files.UpdateFilesProviderImpl;
 import com.openexchange.exception.OXException;
 
@@ -61,14 +63,15 @@ import com.openexchange.exception.OXException;
 public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRemote {
 
     @Override
-    public void reload() throws OXException {
+    public List<String> reload() throws OXException, RemoteException {
         UpdateFilesProviderImpl.getInstance().reload();
+        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
     }
 
     @Override
-    public void reload(String path) {
-        // TODO reload with new path or remove
-
+    public List<String> reload(String path) throws RemoteException, OXException {
+        UpdateFilesProviderImpl.getInstance().reload(path);
+        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
     }
 
 }

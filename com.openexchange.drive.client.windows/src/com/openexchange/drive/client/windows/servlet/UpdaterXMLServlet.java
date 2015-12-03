@@ -97,7 +97,7 @@ public class UpdaterXMLServlet extends OXServlet {
 
     @Override
     protected Interface getInterface() {
-        return Interface.OUTLOOK_UPDATER;
+        return Interface.DRIVE_UPDATER;
     }
 
     @Override
@@ -120,7 +120,7 @@ public class UpdaterXMLServlet extends OXServlet {
                 String branding = configView.get(Constants.BRANDING_CONF, String.class);
                 Map<String, Object> map = null;
                 try {
-                    map = driveUpdate.getTemplateValues(serverUrl, session, branding);
+                    map = driveUpdate.getTemplateValues(serverUrl, Utils.getUserName(session), branding);
                 } catch (NullPointerException e) {
                     LOG.error("Branding properties imcomplete!");
                     throw new BrandingException(BrandingException.MISSING_PROPERTIES); //TODO store could don't know it

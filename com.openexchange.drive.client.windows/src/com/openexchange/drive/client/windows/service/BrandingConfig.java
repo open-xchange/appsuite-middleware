@@ -58,7 +58,7 @@ import java.util.Properties;
 
 
 /**
- * {@link BrandingConfig}
+ * {@link BrandingConfig} is a storage for branding configuration's.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
@@ -69,19 +69,7 @@ public class BrandingConfig {
     private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
     private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
 
-    public BrandingConfig(String name) throws IOException {
-        //load prop   
-        prop = new Properties();
-        try {
-            String dir = System.getProperty("openexchange.propdir");
-            prop.load(new FileInputStream(new File(dir, name)));
-        } catch (IOException e) {
-            throw e;
-        }
-    }
-
-    public BrandingConfig(File file) throws IOException {
-        //load prop   
+    private BrandingConfig(File file) throws IOException {
         prop = new Properties();
         try {
             prop.load(new FileInputStream(file));
@@ -99,6 +87,8 @@ public class BrandingConfig {
     }
 
     /**
+     * Checks if the given file is a valid branding configuration and add it to the list of known configurations.
+     * 
      * @param file
      * @throws IOException
      */
@@ -114,11 +104,24 @@ public class BrandingConfig {
     }
 
     /**
+     * Clear the list of all known configurations.
+     */
+    public static void clear() {
+        CONFIGS.clear();
+    }
+
+    /**
+     * Retrieves the configuration for the given branding.
+     * 
      * @param branding
      * @return
      */
     public static BrandingConfig getBranding(String branding) {
         return CONFIGS.get(branding);
+    }
+
+    public static boolean isValid(String branding) {
+        return CONFIGS.containsKey(branding);
     }
 
 }

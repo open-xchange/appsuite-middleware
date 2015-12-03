@@ -57,14 +57,41 @@ package com.openexchange.drive.client.windows.service;
  */
 public class Constants {
 
-    public static final String PROP_PATH = "com.openexchange.drive.updater.path";
+    /**
+     * The updater template configuration key
+     */
     public static final String TMPL_UPDATER_CONFIG = "com.openexchange.drive.updater.tmpl";
+    /**
+     * The updater template default value
+     */
     public static final String TMPL_UPDATER_DEFAULT = "oxdrive_update.tmpl";
+    /**
+     * The address of the download servlet
+     */
     public static final String DOWNLOAD_SERVLET = "drive/client/windows/download";
+    /**
+     * The address of the update servlet
+     */
     public static final String UPDATE_SERVLET = "drive/client/windows/v1/update.xml";
+
+    /**
+     * The configuration key of the regex expression for binary '.exe' files.
+     */
+    public static final String PROP_BINARY_REGEX_EXE = "com.openexchange.drive.windows.binaryRegex.exe";
+    /**
+     * The configuration key of the regex expression for binary '.msi' files.
+     */
+    public static final String PROP_BINARY_REGEX_MSI = "com.openexchange.drive.windows.binaryRegex.msi";
+
     public static final String AUTO_EXTRACTER = "7zS.sfx";
 
-    //All branding constants
+    /**
+     * The path to the branding configurations.
+     */
+    public static final String BRANDINGS_PATH = "com.openexchange.drive.updater.path";
+    /**
+     * The branding configuration key.
+     */
     public static final String BRANDING_CONF = "com.openexchange.drive.update.branding";
 
     public static final String BRANDING_ID = "id";

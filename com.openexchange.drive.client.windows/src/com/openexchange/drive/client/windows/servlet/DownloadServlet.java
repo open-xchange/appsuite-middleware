@@ -74,7 +74,7 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 
 /**
- * {@link DownloadServlet}
+ * {@link DownloadServlet} is a servlet to download the branded setup files for the windows drive client.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
@@ -191,14 +191,9 @@ public class DownloadServlet extends OXServlet {
         return new ServerSessionAdapter(getSession(req));
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.tools.webdav.OXServlet#getInterface()
-     */
     @Override
     protected Interface getInterface() {
-        return Interface.OUTLOOK_UPDATER;
+        return Interface.DRIVE_UPDATER;
     }
 
 }

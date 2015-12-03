@@ -68,6 +68,8 @@ public enum Interface {
 
     OUTLOOK_UPDATER,
 
+    DRIVE_UPDATER,
+
     MOBILECONFIG,
 
     MAC_UPDATER,

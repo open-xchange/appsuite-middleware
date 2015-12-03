@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,15 +47,60 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.ajax.drive.updater;
+
+import java.io.IOException;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.ParseException;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link OXUpdaterService}
+ * {@link UpdateXMLParser}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  */
-public class OXUpdaterService {
+public class UpdateXMLParser extends AbstractAJAXParser<UpdateXMLResponse> {
+
+    private String xml;
+
+    /**
+     * Initializes a new {@link UpdateXMLParser}.
+     * @param failOnError
+     */
+    protected UpdateXMLParser(boolean failOnError) {
+        super(failOnError);
+    }
+
+    @Override
+    public String checkResponse(HttpResponse resp, HttpRequest request) throws ParseException ,IOException {
+        assertEquals("Response code is not okay.", HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
+        HttpEntity entity = resp.getEntity();
+        xml = EntityUtils.toString(entity);
+
+        return null;
+    }
+
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#createResponse(com.openexchange.ajax.container.Response)
+     */
+    @Override
+    protected UpdateXMLResponse createResponse(Response response) throws JSONException {
+        return null;
+    }
+
+    /**
+     * @see com.openexchange.ajax.framework.AbstractAJAXParser#parse(java.lang.String)
+     */
+    @Override
+    public UpdateXMLResponse parse(String body) throws JSONException {
+        return new UpdateXMLResponse(xml);
+    }
 
 }

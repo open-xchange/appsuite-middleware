@@ -84,7 +84,14 @@ public enum UpdaterExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * An IO error occurred: %1$s
      */
-    IO_ERROR("An IO error occurred: %1$s", Category.CATEGORY_ERROR, 6, null), ;
+    IO_ERROR("An IO error occurred: %1$s", Category.CATEGORY_ERROR, 6, null),
+
+    /**
+     * Some or all necessary files of the brand \"%1$s\" are missing but required! Please provide all necessary files or change the configured brand.
+     */
+    BRANDING_ERROR("Some or all necessary files of the brand \"%1$s\" are missing but required! Please provide all necessary files or change the configured brand.", Category.CATEGORY_ERROR, 7, null);
+
+    ;
 
     /**
      * The error code prefix.

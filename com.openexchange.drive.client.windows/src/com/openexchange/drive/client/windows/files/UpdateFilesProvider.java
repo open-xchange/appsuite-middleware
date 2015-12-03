@@ -51,6 +51,7 @@ package com.openexchange.drive.client.windows.files;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
 
@@ -65,11 +66,18 @@ import com.openexchange.exception.OXException;
 public interface UpdateFilesProvider {
 
     /**
-     * Forget all knows setup files and and do a clean check afterwards
+     * Forget all knows configuration's and setup files and search them under the last used path.
      * 
      * @throws OXException
      */
     public void reload() throws OXException;
+
+    /**
+     * Forget all knows configuration's and setup files and search them under given path.
+     * 
+     * @throws OXException
+     */
+    void reload(String path) throws OXException;
 
     /**
      * Returns the given setup file as a stream
@@ -133,5 +141,20 @@ public interface UpdateFilesProvider {
      * @throws IOException
      */
     public String getIcon(String branding) throws IOException;
+
+    /**
+     * Retrieves the branding identifiers of all available branding's.
+     * 
+     * @return A list of identifiers.
+     */
+    public List<String> getAvailableBrandings();
+
+    /**
+     * Checks if the given branding identifier is valid.
+     * 
+     * @param branding
+     * @return true if the UpdateFilesProvider knows the branding.
+     */
+    public boolean isValid(String branding);
 
 }
