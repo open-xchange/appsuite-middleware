@@ -54,6 +54,7 @@ import com.openexchange.database.Assignment;
 
 /**
  * Assignment of context and server to read and write databases.
+ * 
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public class AssignmentImpl implements Serializable, Assignment {
@@ -73,6 +74,7 @@ public class AssignmentImpl implements Serializable, Assignment {
 
     /**
      * Default constructor.
+     * 
      * @param contextId
      * @param serverId
      * @param readPoolId
@@ -119,6 +121,7 @@ public class AssignmentImpl implements Serializable, Assignment {
 
     /**
      * Returns true if the transaction counter has been initialized
+     * 
      * @return
      */
     boolean isTransactionInitialized() {
@@ -178,5 +181,16 @@ public class AssignmentImpl implements Serializable, Assignment {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("write_pool_id: " + this.writePoolId + ", ");
+        builder.append("read_pool_id: " + this.readPoolId + ", ");
+        builder.append("schema name: " + this.schema + ", ");
+        builder.append("server_id: " + this.serverId + ", ");
+        builder.append("context_id: " + this.contextId);
+        return builder.toString();
     }
 }
