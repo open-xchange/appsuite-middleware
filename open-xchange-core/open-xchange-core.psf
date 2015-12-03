@@ -82,6 +82,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.rest.client"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.http.testservlet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.i18n.yaml"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.importexport"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.itip.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.java"/>
