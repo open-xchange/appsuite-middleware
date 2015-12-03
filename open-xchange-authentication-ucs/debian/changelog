@@ -1,9 +1,3 @@
-open-xchange-authentication-ucs (7.6.2-42) stable; urgency=medium
-
-  * Build for patch 2015-12-07 (2916)
-
- -- Carsten Hoeger <choeger@open-xchange.com>  Mon, 30 Nov 2015 08:55:11 +0100
-
 open-xchange-authentication-ucs (7.6.2-41) stable; urgency=medium
 
   * Build for patch 2015-11-23 (2883)
