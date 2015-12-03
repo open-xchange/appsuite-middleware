@@ -222,16 +222,17 @@ public class Streams {
         if (null == reader) {
             return null;
         }
-        int buflen = 2048;
-        char[] cbuf = new char[buflen];
-        StringBuilder builder = new StringBuilder(8192);
-        for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
-            builder.append(cbuf, 0, read);
+        try {
+            StringBuilder builder = new StringBuilder(8192);
+            int buflen = 2048;
+            char[] cbuf = new char[buflen];
+            for (int read; (read = reader.read(cbuf, 0, buflen)) > 0;) {
+                builder.append(cbuf, 0, read);
+            }
+            return 0 == builder.length() ? null : builder.toString();
+        } finally {
+            close(reader);
         }
-        if (0 == builder.length()) {
-            return null;
-        }
-        return builder.toString();
     }
 
     /**
