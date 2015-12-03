@@ -184,7 +184,7 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, session));
 
         // Add payload content dictionary to top-level dictionary
-        pListDict.setPayloadContent(payloadContent);
+        pListDict.addPayloadContent(payloadContent);
 
         // Return result
         return new PlistResult(pListDict, ResultReply.NEUTRAL);

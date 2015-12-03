@@ -185,7 +185,7 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, session));
 
         // Add payload content dictionary to top-level dictionary
-        pListDict.setPayloadContent(payloadContent);
+        pListDict.addPayloadContent(payloadContent);
 
         // Return result
         return new PlistResult(pListDict, ResultReply.NEUTRAL);

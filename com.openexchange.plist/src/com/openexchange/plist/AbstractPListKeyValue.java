@@ -61,6 +61,7 @@ import javax.xml.stream.XMLStreamWriter;
  */
 public abstract class AbstractPListKeyValue extends AbstractPListElement {
 
+    /** The key / name */
     protected final String key;
 
     /**
@@ -69,6 +70,15 @@ public abstract class AbstractPListKeyValue extends AbstractPListElement {
     protected AbstractPListKeyValue(String key) {
         super();
         this.key = key;
+    }
+
+    /**
+     * Gets the key.
+     *
+     * @return The key
+     */
+    public String getKey() {
+        return key;
     }
 
     @Override

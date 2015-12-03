@@ -338,7 +338,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         // If true, this account is excluded from using Mail Drop. The default is false.
 
         // Add payload content dictionary to top-level dictionary
-        pListDict.setPayloadContent(payloadContent);
+        pListDict.addPayloadContent(payloadContent);
 
         // Return result
         return new PlistResult(pListDict, ResultReply.NEUTRAL);

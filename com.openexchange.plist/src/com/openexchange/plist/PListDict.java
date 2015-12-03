@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLStreamException;
@@ -65,21 +66,21 @@ import com.openexchange.plist.xml.StaxUtils;
 
 
 /**
- * {@link PListDict}
+ * {@link PListDict} - Represents a PLIST dictionary.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
 public class PListDict extends AbstractPListElement {
 
-    private final List<AbstractPListElement> elements;
+    private final List<AbstractPListKeyValue> elements;
 
     /**
      * Initializes a new {@link PListDict}.
      */
     public PListDict() {
         super();
-        elements = new ArrayList<AbstractPListElement>(8);
+        elements = new ArrayList<AbstractPListKeyValue>(8);
     }
 
     /**
@@ -155,11 +156,22 @@ public class PListDict extends AbstractPListElement {
      * <p>
      * A globally unique identifier for the profile. The actual content is unimportant, but it must be globally unique.
      *
-     * @param payloadDescription The payload UUID
+     * @param payloadUUID The payload UUID
      * @return This instance
      */
     public PListDict setPayloadUUID(String payloadUUID) {
         elements.add(new PListStringValue("PayloadUUID", payloadUUID));
+        return this;
+    }
+
+    /**
+     * Sets the <code>PayloadOrganization</code> element.
+     *
+     * @param payloadOrganization The payload organization
+     * @return This instance
+     */
+    public PListDict setPayloadOrganization(String payloadOrganization) {
+        elements.add(new PListStringValue("PayloadOrganization", payloadOrganization));
         return this;
     }
 
@@ -179,46 +191,128 @@ public class PListDict extends AbstractPListElement {
     }
 
     /**
-     * Sets the <code>PayloadContent</code> element.
+     * Sets the <code>PayloadContent</code> element. Replaces any existing payload dictionaries.
      * <p>
-     * Array of payload dictionaries.
+     * A payload dictionary.
      *
      * @param payloadContent The payload content
      * @return This instance
      */
     public PListDict setPayloadContent(PListDict payloadContent) {
+        for (Iterator<AbstractPListKeyValue> it = elements.iterator(); it.hasNext();) {
+            AbstractPListKeyValue element = it.next();
+            if ("PayloadContent".equals(element.getKey())) {
+                it.remove();
+            }
+        }
+
         elements.add(new PListArrayValue("PayloadContent").add(payloadContent));
         return this;
     }
 
+    /**
+     * Adds the <code>PayloadContent</code> element. Extending any existing payload dictionaries.
+     * <p>
+     * A payload dictionary.
+     *
+     * @param payloadContent The payload content
+     * @return This instance
+     */
+    public PListDict addPayloadContent(PListDict payloadContent) {
+        PListArrayValue existingPayloadContent = null;
+
+        for (Iterator<AbstractPListKeyValue> it = elements.iterator(); null == existingPayloadContent && it.hasNext();) {
+            AbstractPListKeyValue element = it.next();
+            if ("PayloadContent".equals(element.getKey())) {
+                existingPayloadContent = (PListArrayValue) element;
+            }
+        }
+
+        if (null == existingPayloadContent) {
+            elements.add(new PListArrayValue("PayloadContent").add(payloadContent));
+        } else {
+            existingPayloadContent.add(payloadContent);
+        }
+
+        return this;
+    }
+
+    /**
+     * Adds the specified icon
+     *
+     * @param in The icon's input stream
+     * @return This instance
+     * @throws IOException If icon's input stream cannot be read
+     */
     public PListDict addIcon(InputStream in) throws IOException {
         return addDataValue("Icon", in);
     }
 
+    /**
+     * Adds the specified icon
+     *
+     * @param bytes The icon's bytes
+     * @return This instance
+     */
     public PListDict addIcon(byte[] bytes) {
         return addDataValue("Icon", bytes);
     }
 
+    /**
+     * Adds the specified string value.
+     *
+     * @param key The key/name
+     * @param value The value
+     * @return This instance
+     */
     public PListDict addStringValue(String key, String value) {
         elements.add(new PListStringValue(key, value));
         return this;
     }
 
+    /**
+     * Adds the specified integer value.
+     *
+     * @param key The key/name
+     * @param value The value
+     * @return This instance
+     */
     public PListDict addIntegerValue(String key, int value) {
         elements.add(new PListIntegerValue(key, value));
         return this;
     }
 
+    /**
+     * Adds the specified boolean value.
+     *
+     * @param key The key/name
+     * @param value The value
+     * @return This instance
+     */
     public PListDict addBooleanValue(String key, boolean value) {
         elements.add(new PListBooleanValue(key, value));
         return this;
     }
 
+    /**
+     * Adds the specified binary value.
+     *
+     * @param key The key/name
+     * @param value The stream
+     * @return This instance
+     */
     public PListDict addDataValue(String key, InputStream in) throws IOException {
         elements.add(new PListStringValue(key, Charsets.toAsciiString(Base64.encodeBase64(Streams.stream2bytes(in), false))));
         return this;
     }
 
+    /**
+     * Adds the specified binary value.
+     *
+     * @param key The key/name
+     * @param value The byte array
+     * @return This instance
+     */
     public PListDict addDataValue(String key, byte[] bytes) {
         elements.add(new PListStringValue(key, Charsets.toAsciiString(Base64.encodeBase64(bytes, false))));
         return this;

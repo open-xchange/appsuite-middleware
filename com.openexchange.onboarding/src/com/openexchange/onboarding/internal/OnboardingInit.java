@@ -139,7 +139,8 @@ public class OnboardingInit {
                 }
                 alternativeIds = (List<String>) alternativesValue;
             }
-            Icon icon = new TemplateIcon((String) values.get("icon"));
+            String iconName = (String) values.get("icon");
+            Icon icon = null == iconName ? null : new TemplateIcon(iconName);
             String displayName = (String) values.get("displayName_tr");
             String description = (String) values.get("description_tr");
 
