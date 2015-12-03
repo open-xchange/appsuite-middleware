@@ -49,14 +49,10 @@
 
 package com.openexchange.onboarding.signature;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.RandomAccessFile;
-import java.security.KeyFactory;
+import java.security.KeyStore;
 import java.security.PrivateKey;
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.Collections;
 import java.util.List;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
@@ -93,33 +89,32 @@ public final class PListSigner {
     }
 
     public ThresholdFileHolder signPList() throws OXException {
+        return signPList("");
+    }
+
+    public ThresholdFileHolder signPList(String brand) throws OXException {
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (null == configService) {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
+
         boolean enabled = configService.getBoolProperty("com.openexchange.onboarding.plist.signature.enabled", false);
-        String privKeyFileName = configService.getProperty("com.openexchange.onboarding.plist.signature.privatekey");
-        String certFileName = configService.getProperty("com.openexchange.onboarding.plist.signature.certificate");
-        if (!enabled || Strings.isEmpty(privKeyFileName) || Strings.isEmpty(certFileName)) {
+        String storeName = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.filename" + brand);
+        String password = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.password" + brand);
+        String alias = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.alias" + brand);
+        if (!enabled || Strings.isEmpty(storeName) || Strings.isEmpty(password) || Strings.isEmpty(alias)) {
             return fileHolder;
         }
-        byte[] signed = signPList(fileHolder.toByteArray(), privKeyFileName, certFileName);
+        byte[] signed = signPList(fileHolder.toByteArray(), storeName, password, alias);
         fileHolder.reset();
         fileHolder.write(signed);
         return fileHolder;
     }
 
-    private byte[] signPList(byte[] in, String privKeyFileName, String certFileName) throws OXException {
+    private byte[] signPList(byte[] in, String storeName, String password, String alias) throws OXException {
         try {
-            RandomAccessFile privKeyFile = new RandomAccessFile(new File(privKeyFileName), "r");
-            byte[] privKeyBytes = new byte[(int) privKeyFile.length()];
-            privKeyFile.readFully(privKeyBytes);
-            privKeyFile.close();
-            FileInputStream certIn = new FileInputStream(new File(certFileName));
-            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privKeyBytes);
-            KeyFactory factory = KeyFactory.getInstance("RSA");
-            PrivateKey privKey = factory.generatePrivate(keySpec);
-            X509Certificate cert = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(certIn);
+            PrivateKey privKey = getPrivateKey(storeName, password, alias);
+            X509Certificate cert = getCertificate(storeName, password, alias);
             List<X509Certificate> certList = Collections.singletonList(cert);
             Store certs = new JcaCertStore(certList);
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
@@ -128,11 +123,22 @@ public final class PListSigner {
             gen.addCertificates(certs);
             CMSTypedData data = new CMSProcessableByteArray(in);
             CMSSignedData signed = gen.generate(data, true);
-            System.out.println(signed.getSignedContent());
             return signed.getEncoded();
         } catch (Exception e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private X509Certificate getCertificate(String storeName, String password, String alias) throws Exception {
+        KeyStore store = KeyStore.getInstance("PKCS12");
+        store.load(new FileInputStream(storeName), password.toCharArray());
+        return (X509Certificate) store.getCertificate(alias);
+    }
+
+    private PrivateKey getPrivateKey(String storeName, String password, String alias) throws Exception {
+        KeyStore store = KeyStore.getInstance("PKCS12");
+        store.load(new FileInputStream(storeName), password.toCharArray());
+        return (PrivateKey) store.getKey(alias, password.toCharArray());
     }
 
 }
