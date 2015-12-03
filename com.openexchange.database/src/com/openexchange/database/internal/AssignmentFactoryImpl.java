@@ -54,6 +54,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import com.openexchange.database.Assignment;
@@ -91,14 +92,19 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
     @Override
     public void reload() {
         try {
-            readPools();
+            List<Assignment> readPools = readPools();
+            if (readPools.size() == 0) {
+                LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
+            }
+            assignments.clear();
+            assignments.addAll(readPools);
         } catch (OXException e) {
             LOG.error("Unable to init assignments!", e);
         }
     }
 
-    private void readPools() throws OXException {
-        assignments.clear();
+    private List<Assignment> readPools() throws OXException {
+        List<Assignment> lAssignments = new ArrayList<>();
         Connection readOnly = this.databaseService.getReadOnly();
 
         int readPoolId = 0;
@@ -119,7 +125,9 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                     readPoolId = writePoolId;
                 }
                 int context = get(readOnly, writePoolId);
-                assignments.add(new AssignmentImpl(context, Server.getServerId(), readPoolId, writePoolId, schema));
+                AssignmentImpl assignmentImpl = new AssignmentImpl(context, Server.getServerId(), readPoolId, writePoolId, schema);
+                lAssignments.add(assignmentImpl);
+                LOG.info("Found assignment and added to pool: {}", assignmentImpl.toString());
             }
             stmt.close();
         } catch (final SQLException e) {
@@ -128,6 +136,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             Databases.closeSQLStuff(result, stmt);
             databaseService.backReadOnly(readOnly);
         }
+        return lAssignments;
     }
 
     private int get(Connection con, int poolId) throws OXException {
@@ -141,8 +150,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             if (result.next()) {
                 return result.getInt(1);
             }
-            //TODO aaaargh, kein context?!
-            return 0;
+            return 0; // non context related dbs like: global, guard and shard
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -160,6 +168,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                 return assignment;
             }
         }
+        LOG.warn("Found no assignment for context id {}", contextId);
         return null;
     }
 
@@ -170,9 +179,11 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
     public Assignment get(String schemaName) {
         for (Assignment assignment : assignments) {
             if (assignment.getSchema().equalsIgnoreCase(schemaName)) {
+                LOG.debug("Found the following assignment for schema name {}: {}", schemaName, assignment.toString());
                 return assignment;
             }
         }
+        LOG.warn("Found no assignment for schema name {}", schemaName);
         return null;
     }
 
@@ -184,14 +195,17 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
         for (Assignment assignment : assignments) {
             if (write) {
                 if (assignment.getWritePoolId() == poolId) {
+                    LOG.debug("Found the following assignment for 'write' identified by poolId {}: {}", poolId, assignment.toString());
                     return assignment;
                 }
             } else {
                 if (assignment.getReadPoolId() == poolId) {
+                    LOG.debug("Found the following assignment for identified by poolId {}: {}", poolId, assignment.toString());
                     return assignment;
                 }
             }
         }
+        LOG.warn("Found no assignment for pool id {} in pool write {}.", poolId, Boolean.toString(write));
         return null;
     }
 }

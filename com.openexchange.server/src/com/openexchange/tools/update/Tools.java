@@ -70,10 +70,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.file.FileStorage;
 import com.openexchange.tools.file.QuotaFileStorage;
@@ -237,6 +239,7 @@ public final class Tools {
     /**
      * This method drops the primary key on the table. Beware, this method is vulnerable to SQL injection because table and index name can
      * not be set through a {@link PreparedStatement}.
+     * 
      * @param con writable database connection.
      * @param table table name that primary key should be dropped.
      * @throws SQLExceptionif some SQL problem occurs.
@@ -336,7 +339,7 @@ public final class Tools {
     public static final void createPrimaryKeyIfAbsent(final Connection con, final String table, final String[] columns) throws SQLException {
         if (!existsPrimaryKey(con, table, columns)) {
             if (hasPrimaryKey(con, table)) {
-               dropPrimaryKey(con, table);
+                dropPrimaryKey(con, table);
             }
             createPrimaryKey(con, table, columns);
         }
@@ -658,7 +661,7 @@ public final class Tools {
         try {
             stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
             rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 contextIds.add(I(rs.getInt(1)));
             }
             return contextIds;
@@ -667,12 +670,12 @@ public final class Tools {
         }
     }
 
-    public static void exec(final Connection con, final String sql, final Object...args) throws SQLException {
+    public static void exec(final Connection con, final String sql, final Object... args) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sql);
             int i = 1;
-            for(final Object arg : args) {
+            for (final Object arg : args) {
                 stmt.setObject(i++, arg);
             }
             stmt.execute();
@@ -884,6 +887,43 @@ public final class Tools {
         }
         if (!toDo.isEmpty()) {
             modifyColumns(con, tableName, ignore, toDo.toArray(new Column[toDo.size()]));
+        }
+    }
+
+    /**
+     * Changes the column to a new size
+     * 
+     * @param colName The column to enlarge
+     * @param newSize The new size to set the column to
+     * @param tableName The table name
+     * @param con The connection to use
+     * @throws OXException
+     */
+    public static void changeVarcharColumnSize(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
+        ResultSet rsColumns = null;
+        boolean doAlterTable = false;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                final String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    doAlterTable = true;
+                    break;
+                }
+            }
+            Databases.closeSQLStuff(rsColumns);
+            rsColumns = null;
+
+            if (doAlterTable) {
+                modifyColumns(con, tableName, new Column(colName, "VARCHAR(" + newSize + ")"));
+            }
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
         }
     }
 }
