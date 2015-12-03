@@ -50,8 +50,10 @@
 package com.openexchange.mail.config;
 
 import java.util.Map;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.mail.api.IMailProperties;
 import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link MailAccountProperties} - Mail properties read from mail account with fallback to properties read from properties file.
@@ -84,6 +86,28 @@ public class MailAccountProperties implements IMailProperties {
             tmp = null;
         }
         url = tmp;
+    }
+
+    /**
+     * Looks-up the denoted property.
+     *
+     * @param name The property name
+     * @return The looked-up value or <code>null</code>
+     */
+    protected String lookUpProperty(String name) {
+        return lookUpProperty(name, null);
+    }
+
+    /**
+     * Looks-up the denoted property.
+     *
+     * @param name The property name
+     * @param defaultValue The default value to return if absent
+     * @return The looked-up value or given <code>defaultValue</code>
+     */
+    protected String lookUpProperty(String name, String defaultValue) {
+        ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+        return null == service ? defaultValue : service.getProperty(name, defaultValue);
     }
 
     @Override
