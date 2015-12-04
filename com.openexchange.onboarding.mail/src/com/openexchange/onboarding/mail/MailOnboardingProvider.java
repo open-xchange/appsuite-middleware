@@ -99,7 +99,7 @@ public class MailOnboardingProvider implements OnboardingProvider {
     public MailOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "eas";
+        identifier = "imap";
         supportedDevices = EnumSet.allOf(Device.class);
     }
 
