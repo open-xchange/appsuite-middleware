@@ -214,12 +214,12 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The bit mask reflecting already tracked needed services.
      */
-    private int availability;
+    private long availability;
 
     /**
      * The bit mask if all needed services are available.
      */
-    private int allAvailable;
+    private long allAvailable;
 
     /**
      * The execution context of the bundle.
@@ -319,7 +319,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[len];
             availability = 0;
-            allAvailable = (1 << len) - 1;
+            allAvailable = (1L << len) - 1;
             /*
              * Initialize service trackers for needed services
              */
@@ -414,7 +414,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param clazz The service's class
      */
     protected final void signalAvailability(final int index, final Class<?> clazz) {
-        availability |= (1 << index);
+        availability |= (1L << index);
         if (started.get()) {
             /*
              * Signal availability of single service
@@ -494,7 +494,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param stop Whether to stop this activator
      */
     final void signalUnavailability(int index, Class<?> clazz, boolean stop) {
-        availability &= ~(1 << index);
+        availability &= ~(1L << index);
         if (started.get()) {
             if (stop) {
                 try {
