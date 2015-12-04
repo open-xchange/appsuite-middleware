@@ -81,15 +81,16 @@ public interface I18NYamlParserService {
      * @return The translatable string literals
      * @throws OXException If parse attempt fails
      */
-    List<String> parseTranslatableFromFile(String fileName) throws OXException;
+    List<String> parseTranslatablesFromFile(String fileName) throws OXException;
 
     /**
      * Parses translatable string literals from all YAML files contained in given directory.
      *
      * @param dirName The directory name
+     * @param recursive <code>true</code> for recursively processing sub-directories; otherwise <code>false</code>
      * @return The translatable string literals from all contained YAML files
      * @throws OXException If parse attempt fails
      */
-    List<String> parseTranslatableFromDirectory(String dirName) throws OXException;
+    List<String> parseTranslatablesFromDirectory(String dirName, boolean recursive) throws OXException;
 
 }

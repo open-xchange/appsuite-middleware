@@ -53,7 +53,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.rmi.RemoteException;
 import java.util.List;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
@@ -61,9 +60,9 @@ import org.apache.commons.cli.Options;
 import org.fedorahosted.tennera.jgettext.Catalog;
 import org.fedorahosted.tennera.jgettext.Message;
 import org.fedorahosted.tennera.jgettext.PoWriter;
-import com.openexchange.auth.rmi.RemoteAuthenticator;
-import com.openexchange.cli.AbstractRmiCLI;
-import com.openexchange.i18n.yaml.rmi.I18nYamlParserInterface;
+import com.openexchange.cli.AbstractCLI;
+import com.openexchange.i18n.yaml.internal.I18NYamlParserImpl;
+import com.openexchange.i18n.yaml.internal.I18nYamlParseException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 
@@ -73,7 +72,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.0
  */
-public class I18NYamlParserTool extends AbstractRmiCLI<Void> {
+public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
 
     public static void main(String[] args) {
         new I18NYamlParserTool().execute(args);
@@ -89,28 +88,33 @@ public class I18NYamlParserTool extends AbstractRmiCLI<Void> {
     }
 
     @Override
-    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
-        // Nothing
-    }
-
-    @Override
     protected void addOptions(Options options) {
-        options.addOption(new Option("y", "yamlfile", true, "The name of the YAML file to parse, which is supposed to reside in '/opt/openexchange/etc' directory."));
+        options.addOption(new Option("y", "yamlfile", true, "The name of the YAML file to parse; either a fully qualified path name or only the name to look it up in default directory \"/opt/open-xchange/etc\""));
         options.addOption(new Option("o", "output", true, "The path name for the .pot output file; e.g. \"/tmp/yamlstrings.pot\""));
         options.addOption(new Option("f", "force", false, "Whether to force .pot creation. That is to overwrite the denoted path name in case it does already exist."));
     }
 
     @Override
-    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+    protected Void invoke(Options options, CommandLine cmd, Void voit) throws Exception {
         String yamlFile = cmd.getOptionValue('y');
 
         List<String> literals;
-        {
-            I18nYamlParserInterface yamlParserInterface = getRmiStub(I18nYamlParserInterface.RMI_NAME);
-            literals = yamlParserInterface.parseTranslatableFromFile(yamlFile);
+        try {
+            I18NYamlParserImpl yamlParser = new I18NYamlParserImpl(null);
+            literals = yamlParser.parseFile(yamlFile);
+        } catch (I18nYamlParseException e) {
+            System.out.println(e.getMessage());
+            System.exit(-1);
+            return null;
         }
 
-        if (null == literals || literals.isEmpty()) {
+        if (null == literals) {
+            System.out.println("Unable to look-up such a file \"" + yamlFile + "\".");
+            System.exit(-1);
+            return null;
+        }
+
+        if (literals.isEmpty()) {
             System.out.println("Denoted YAML file \"" + yamlFile + "\" appears to have no translatable string literals.");
             System.exit(-1);
             return null;
@@ -203,11 +207,6 @@ public class I18NYamlParserTool extends AbstractRmiCLI<Void> {
                 return;
             }
         }
-    }
-
-    @Override
-    protected boolean requiresAdministrativePermission() {
-        return false;
     }
 
     @Override

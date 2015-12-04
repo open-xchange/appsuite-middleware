@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -191,7 +192,16 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
         Scenario scenario = getScenario(scenarioId, configuredScenarios);
-        return new DeviceAwareScenarionImpl(scenario, device, Device.getActionsFor(device, scenario.getType(), session));
+        if (!scenario.isEnabled(session)) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
+        boolean enabled = true;
+        for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
+            OnboardingProvider provider = it.next();
+            enabled &= provider.isAvailable(session);
+        }
+        return new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), session));
     }
 
     @Override
@@ -212,7 +222,14 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
 
             if (configuredScenario.isEnabled()) {
                 Scenario scenario = getScenario(configuredScenario, configuredScenarios);
-                scenarios.add(new DeviceAwareScenarionImpl(scenario, device, Device.getActionsFor(device, scenario.getType(), session)));
+                if (scenario.isEnabled(session)) {
+                    boolean enabled = true;
+                    for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
+                        OnboardingProvider provider = it.next();
+                        enabled &= provider.isAvailable(session);
+                    }
+                    scenarios.add(new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), session)));
+                }
             }
         }
         return scenarios;

@@ -62,6 +62,7 @@ import com.openexchange.onboarding.LinkResult;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.Scenario;
 import com.openexchange.server.ServiceLookup;
@@ -88,6 +89,11 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = "mailapp";
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) throws OXException {
+        return OnboardingUtility.hasCapability("mobile_mail_app", session);
     }
 
     @Override

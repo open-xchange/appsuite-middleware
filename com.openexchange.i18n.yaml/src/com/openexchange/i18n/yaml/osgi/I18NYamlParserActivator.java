@@ -55,8 +55,6 @@ import java.util.Hashtable;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.i18n.yaml.I18NYamlParserService;
 import com.openexchange.i18n.yaml.internal.I18NYamlParserImpl;
-import com.openexchange.i18n.yaml.rmi.I18nYamlParserInterface;
-import com.openexchange.i18n.yaml.rmi.impl.I18nYamlParserInterfaceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -86,13 +84,6 @@ public class I18NYamlParserActivator extends HousekeepingActivator {
 
         // Register as OSGi service
         registerService(I18NYamlParserService.class, yamlParser);
-
-        // Register appropriate RMI stub
-        {
-            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-            props.put("RMIName", I18nYamlParserInterface.RMI_NAME);
-            registerService(Remote.class, new I18nYamlParserInterfaceImpl(yamlParser), props);
-        }
     }
 
 }

@@ -76,7 +76,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
+public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, MBeanServerConnection> {
 
     /**
      * Initializes a new {@link AbstractMBeanCLI}.
@@ -91,6 +91,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * @param args The arguments
      * @return The return value
      */
+    @Override
     public R execute(final String[] args) {
         final Options options = newOptions();
         boolean error = true;
@@ -294,6 +295,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      *
      * @param options The options
      */
+    @Override
     protected abstract void addOptions(Options options);
 
     /**
@@ -305,6 +307,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * @return The return value
      * @throws Exception If invocation fails
      */
+    @Override
     protected abstract R invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
 
     /**

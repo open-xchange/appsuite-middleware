@@ -47,21 +47,28 @@
  *
  */
 
-package com.openexchange.i18n.yaml.rmi;
+package com.openexchange.cli;
 
 
 /**
- * {@link I18nYamlParserInterfaceException} - RMI wrapper exception.
+ * {@link AbstractAdministrativeCLI} - The basic class for administrative command-line tools that probably require appropriate permissions.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
  */
-public class I18nYamlParserInterfaceException extends Exception {
+public abstract class AbstractAdministrativeCLI<R, C> extends AbstractCLI<R, C> {
 
-    private static final long serialVersionUID = -3746629818198161251L;
-
-    public I18nYamlParserInterfaceException(String message) {
-        super(message);
+    /**
+     * Initializes a new {@link AbstractAdministrativeCLI}.
+     */
+    protected AbstractAdministrativeCLI() {
+        super();
     }
+
+    /**
+     * Signals if this command-line tool requires administrative permission.
+     *
+     * @return <code>true</code> for administrative permission; otherwise <code>false</code>
+     */
+    protected abstract boolean requiresAdministrativePermission();
 
 }

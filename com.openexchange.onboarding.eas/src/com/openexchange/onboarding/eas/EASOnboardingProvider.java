@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
@@ -95,6 +96,11 @@ public class EASOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = "eas";
         supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10));
+    }
+
+    @Override
+    public boolean isAvailable(Session session) throws OXException {
+        return OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), session);
     }
 
     @Override

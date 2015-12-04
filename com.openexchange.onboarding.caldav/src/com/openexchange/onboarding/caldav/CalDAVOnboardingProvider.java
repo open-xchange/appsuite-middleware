@@ -58,6 +58,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
@@ -93,6 +94,11 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = "caldav";
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) throws OXException {
+        return OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session);
     }
 
     @Override

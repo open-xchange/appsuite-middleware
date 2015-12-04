@@ -24,6 +24,5 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.i18n.yaml,
- com.openexchange.i18n.yaml.rmi
+Export-Package: com.openexchange.i18n.yaml
 Bundle-Activator: com.openexchange.i18n.yaml.osgi.I18NYamlParserActivator

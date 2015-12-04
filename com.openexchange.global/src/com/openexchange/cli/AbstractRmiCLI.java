@@ -73,7 +73,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.2
  */
-public abstract class AbstractRmiCLI<R> extends AbstractCLI {
+public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String> {
 
     protected static final AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
@@ -126,6 +126,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @param args The arguments
      * @return The return value
      */
+    @Override
     public R execute(final String[] args) {
         Options options = newOptions();
         boolean error = true;
@@ -309,10 +310,11 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      *
      * @param options The options
      */
+    @Override
     protected abstract void addOptions(Options options);
 
     /**
-     * Invokes the MBean's method.
+     * Invokes the RMI method.
      *
      * @param options The options
      * @param cmd The command line providing parameters/options
@@ -320,6 +322,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @return The return value
      * @throws Exception If invocation fails
      */
+    @Override
     protected abstract R invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception;
 
     /**

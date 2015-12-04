@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,47 @@
  *
  */
 
-package com.openexchange.i18n.yaml.rmi;
+package com.openexchange.i18n.yaml.internal;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
 
 /**
- * {@link I18nYamlParserInterface} - The RMI stub I18N YAM parser.
+ * {@link I18nYamlParseException} - Indicates an error during parsing string literals from a YAML file.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface I18nYamlParserInterface extends Remote {
+public class I18nYamlParseException extends Exception {
+
+    private static final long serialVersionUID = -738530317209728482L;
 
     /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = I18nYamlParserInterface.class.getSimpleName();
-
-    /**
-     * Parses translatable string literals from specified YAML file.
+     * Wraps specified exception with a {@code I18nYamlParseException}.
      *
-     * @param fileName The name of the YAML file
-     * @return The translatable string literals
-     * @throws I18nYamlParserInterfaceException If parse attempt fails
-     * @throws RemoteException If a communication-related error occurs
+     * @param message The optional message
+     * @param e The exception to wrap
+     * @return The {@code I18nYamlParseException} instance
      */
-    List<String> parseTranslatableFromFile(String fileName) throws I18nYamlParserInterfaceException, RemoteException;
+    public static I18nYamlParseException wrapException(String message, Exception e) {
+        if (null == e) {
+            return null;
+        }
+        if (e instanceof I18nYamlParseException) {
+            return (I18nYamlParseException) e;
+        }
+        I18nYamlParseException parseException = new I18nYamlParseException(null == message ? e.getMessage() : message);
+        parseException.setStackTrace(e.getStackTrace());
+        return parseException;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------
 
     /**
-     * Parses translatable string literals from all YAML files contained in given directory.
+     * Initializes a new {@link I18nYamlParseException}.
      *
-     * @param dirName The directory name
-     * @return The translatable string literals from all contained YAML files
-     * @throws I18nYamlParserInterfaceException If parse attempt fails
-     * @throws RemoteException If a communication-related error occurs
+     * @param message
      */
-    List<String> parseTranslatableFromDirectory(String dirName) throws I18nYamlParserInterfaceException, RemoteException;
+    public I18nYamlParseException(String message) {
+        super(message);
+    }
 
 }

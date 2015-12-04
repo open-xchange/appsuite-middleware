@@ -87,4 +87,13 @@ public interface OnboardingProvider {
      */
     Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException;
 
+    /**
+     * Checks if this provider is enabled for session-associated user.
+     *
+     * @param session The session
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If availability cannot be checked
+     */
+    boolean isAvailable(Session session) throws OXException;
+
 }

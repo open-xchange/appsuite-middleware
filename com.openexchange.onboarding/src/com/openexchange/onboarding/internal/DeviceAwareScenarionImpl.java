@@ -69,6 +69,7 @@ import com.openexchange.session.Session;
 public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
 
     private final String id;
+    private final boolean enabled;
     private final Scenario scenario;
     private final Device device;
     private final List<OnboardingAction> actions;
@@ -76,9 +77,10 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     /**
      * Initializes a new {@link DeviceAwareScenarionImpl}.
      */
-    public DeviceAwareScenarionImpl(Scenario scenario, Device device, List<OnboardingAction> actions) {
+    public DeviceAwareScenarionImpl(Scenario scenario, boolean enabled, Device device, List<OnboardingAction> actions) {
         super();
         this.id = new StringBuilder(32).append(device.getId()).append('/').append(scenario.getId()).toString();
+        this.enabled = enabled;
         this.scenario = scenario;
         this.device = device;
         this.actions = actions;
@@ -105,7 +107,8 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
 
     @Override
     public boolean isEnabled(Session session) throws OXException {
-        return scenario.isEnabled(session);
+        // Return pre-computed flag
+        return enabled;
     }
 
     @Override

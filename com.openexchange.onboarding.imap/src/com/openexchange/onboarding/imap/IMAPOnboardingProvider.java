@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.config.TransportConfig;
@@ -99,6 +100,11 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = "eas";
         supportedDevices = EnumSet.allOf(Device.class);
+    }
+
+    @Override
+    public boolean isAvailable(Session session) throws OXException {
+        return OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session);
     }
 
     @Override

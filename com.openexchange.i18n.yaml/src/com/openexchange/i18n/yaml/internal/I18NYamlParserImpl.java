@@ -57,6 +57,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -80,17 +81,21 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
 
     private final ServiceLookup services;
     private final Pattern pattern;
+    private final File genericDir;
 
     /**
      * Initializes a new {@link I18NYamlParserImpl}.
+     *
+     * @param services The OSGi service look-up or <code>null</code>
      */
     public I18NYamlParserImpl(ServiceLookup services) {
         super();
         this.services = services;
         pattern = Pattern.compile("(^|\\s)\\w+_t10e\\s*\\:\\s*\"((?:\\\\\"|[^\"])+)\"");
+        genericDir = new File("/opt/open-xchange/etc");
     }
 
-    private Set<String> parseFrom(File file) throws OXException {
+    private Set<String> parseFile0(File file) throws I18nYamlParseException {
         try {
             String content = Streams.reader2string(new FileReader(file));
             Matcher m = pattern.matcher(content);
@@ -104,52 +109,131 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
             } while (m.find());
             return literals;
         } catch (FileNotFoundException e) {
-            throw OXException.general(file.getName() + " is not readable");
+            throw new I18nYamlParseException("\"" + file.getName() + "\" does not exist");
         } catch (IOException e) {
-            throw OXException.general(file.getName() + " is not readable", e);
+            throw I18nYamlParseException.wrapException("\"" + file.getName() + "\" is not readable", e);
         }
     }
 
+    private void collectAllYamlFiles(File dir, List<File> fileList) {
+        File[] files = dir.listFiles();
+        if (null != files) {
+            for (File pathname : files) {
+                if (pathname.isDirectory()) {
+                    collectAllYamlFiles(pathname, fileList);
+                } else {
+                    String lc = Strings.asciiLowerCase(pathname.getName());
+                    if (null != lc && (lc.endsWith(".yml") || lc.endsWith(".yaml"))) {
+                        fileList.add(pathname);
+                    }
+                }
+            }
+        }
+    }
+
+    private File LookUpYamlFile(File dir, String name) {
+        File[] files = dir.listFiles();
+        if (null != files) {
+            for (File pathname : files) {
+                if (pathname.isDirectory()) {
+                    File candidate = LookUpYamlFile(pathname, name);
+                    if (null != candidate) {
+                        return candidate;
+                    }
+                } else {
+                    String curName = pathname.getName();
+                    if (name.equals(curName)) {
+                        return pathname;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Parses the translatable string literals from specified YAML file.
+     *
+     * @param fileName The file name; either a fully qualified path name or only the name to look it up in default directory <code>"/opt/open-xchange/etc"</code>
+     * @return The translatable string literals or <code>null</code> if no such file can be found
+     * @throws I18nYamlParseException If translatable string literals cannot be returned
+     */
+    public List<String> parseFile(String fileName) throws I18nYamlParseException {
+        File yamlFile = new File(fileName);
+
+        if (null == yamlFile.getParent()) {
+            yamlFile = new File(genericDir, fileName);
+            if (!yamlFile.isFile()) {
+                yamlFile = LookUpYamlFile(genericDir, fileName);
+                if (null == yamlFile || !yamlFile.isFile()) {
+                    throw new I18nYamlParseException("Unable to look-up such a file \"" + fileName + "\" in \"" + genericDir.getPath() + "\"");
+                }
+            }
+        } else if (!yamlFile.isFile()) {
+            throw new I18nYamlParseException("\"" + yamlFile.getPath() + "\" does not exist");
+        }
+
+        return new ArrayList<String>(parseFile0(yamlFile));
+    }
+
     @Override
-    public List<String> parseTranslatableFromFile(String fileName) throws OXException {
-        ConfigurationService service = services.getOptionalService(ConfigurationService.class);
+    public List<String> parseTranslatablesFromFile(String fileName) throws OXException {
+        ConfigurationService service = null == services ? null : services.getOptionalService(ConfigurationService.class);
         if (null == service) {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
 
-        File file = service.getFileByName(fileName);
-        if (null == file || !file.exists()) {
-            throw OXException.general(fileName + " is not readable");
-        }
+        try {
+            File file = service.getFileByName(fileName);
+            if (null == file) {
+                throw OXException.general("Unable to look-up such a file \"" + fileName + "\"");
+            }
+            if (!file.exists()) {
+                throw OXException.general("\"" + file.getPath() + "\" does not exist");
+            }
 
-        return new ArrayList<String>(parseFrom(file));
+            return new ArrayList<String>(parseFile0(file));
+        } catch (I18nYamlParseException e) {
+            throw OXException.general(e.getMessage(), e);
+        }
     }
 
     @Override
-    public List<String> parseTranslatableFromDirectory(String dirName) throws OXException {
+    public List<String> parseTranslatablesFromDirectory(String dirName, boolean recursive) throws OXException {
         File dir = new File(dirName);
         if (!dir.isDirectory()) {
-            throw OXException.general(dirName + " is not a directory");
+            throw OXException.general("\"" + dirName + "\" is not a directory");
         }
 
-        File[] yamlFiles = dir.listFiles(new FilenameFilter() {
+        File[] yamlFiles;
+        if (recursive) {
+            List<File> fileList = new LinkedList<File>();
+            collectAllYamlFiles(dir, fileList);
+            yamlFiles = fileList.toArray(new File[fileList.size()]);
+        } else {
+            yamlFiles = dir.listFiles(new FilenameFilter() {
 
-            @Override
-            public boolean accept(File dir, String name) {
-                String lc = Strings.asciiLowerCase(name);
-                return null != name && (lc.endsWith(".yml") || lc.endsWith(".yaml"));
-            }
-        });
+                @Override
+                public boolean accept(File dir, String name) {
+                    String lc = Strings.asciiLowerCase(name);
+                    return null != name && (lc.endsWith(".yml") || lc.endsWith(".yaml"));
+                }
+            });
+        }
 
         if (null == yamlFiles || 0 == yamlFiles.length) {
             return Collections.emptyList();
         }
 
-        Set<String> literals = new LinkedHashSet<String>(16, 0.9F);
-        for (File yamlFile : yamlFiles) {
-            literals.addAll(parseFrom(yamlFile));
+        try {
+            Set<String> literals = new LinkedHashSet<String>(16, 0.9F);
+            for (File yamlFile : yamlFiles) {
+                literals.addAll(parseFile0(yamlFile));
+            }
+            return new ArrayList<String>(literals);
+        } catch (I18nYamlParseException e) {
+            throw OXException.general(e.getMessage(), e);
         }
-        return new ArrayList<String>(literals);
     }
 
 }
