@@ -130,7 +130,9 @@ public class ExecuteAction extends AbstractOnboardingAction {
         if (null == format) {
             return new AJAXRequestResult(resultObject.getObject());
         }
-        requestData.setFormat(format);
+        if ("file".equals(format)) {
+            requestData.setFormat(format);
+        }
         return new AJAXRequestResult(resultObject.getObject(), format);
     }
 
