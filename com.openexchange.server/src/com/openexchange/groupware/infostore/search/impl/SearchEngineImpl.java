@@ -90,6 +90,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.sql.SearchStrings;
@@ -104,9 +105,7 @@ public class SearchEngineImpl extends DBService {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SearchEngineImpl.class);
     private final InfostoreSecurityImpl security = new InfostoreSecurityImpl();
 
-    private static final String[] SEARCH_FIELDS = new String[] {
-        "infostore_document.title", "infostore_document.url", "infostore_document.description", "infostore_document.categories",
-        "infostore_document.filename", "infostore_document.file_version_comment" };
+    private static final String[] SEARCH_FIELDS = new String[] { "infostore_document.title", "infostore_document.url", "infostore_document.description", "infostore_document.categories", "infostore_document.filename", "infostore_document.file_version_comment" };
 
     public SearchEngineImpl() {
         super(null);
@@ -143,15 +142,16 @@ public class SearchEngineImpl extends DBService {
         ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(all, own, session.getContextId(), session.getUserId(), getResultFieldsSelect(cols), sortedBy, dir, start, end);
         searchTerm.visit(visitor);
         String sqlQuery = visitor.getMySqlQuery();
-        boolean keepConnection = false;
+        boolean successful = false;
         PreparedStatement stmt = null;
         Connection con = null;
+        InfostoreSearchIterator iter = null;
         try {
             con = getReadConnection(session.getContext());
             stmt = con.prepareStatement(sqlQuery);
-            final InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+            iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
             // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
-            keepConnection = true;
+            successful = true;
             return iter;
         } catch (SQLException e) {
             if (e.getCause() instanceof java.net.SocketTimeoutException) {
@@ -164,8 +164,13 @@ public class SearchEngineImpl extends DBService {
             LOG.error("", e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
-            if (con != null && !keepConnection) {
-                releaseReadConnection(session.getContext(), con);
+            if (!successful) {
+                if (iter != null) {
+                    SearchIterators.close(iter);
+                } else if (con != null) {
+                    releaseReadConnection(session.getContext(), con);
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
         }
     }
@@ -196,8 +201,7 @@ public class SearchEngineImpl extends DBService {
             } else {
                 maxResults = NOT_SET;
             }
-            if (NOT_SET != maxResults && own.size() + all.size() > maxResults && (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(
-                sortedBy))) {
+            if (NOT_SET != maxResults && own.size() + all.size() > maxResults && (null == sortedBy || InfostoreQueryCatalog.Table.INFOSTORE.getFieldSet().contains(sortedBy))) {
                 /*
                  * no pattern, ordering possible, and more folders queried than results needed - use optimized query
                  */
@@ -207,9 +211,7 @@ public class SearchEngineImpl extends DBService {
 
         final StringBuilder SQL_QUERY = new StringBuilder(512);
         SQL_QUERY.append(getResultFieldsSelect(cols));
-        SQL_QUERY.append(
-            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
-            session.getContextId());
+        SQL_QUERY.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId());
 
         appendFolders(SQL_QUERY, session.getContextId(), session.getUserId(), all, own);
 
@@ -376,9 +378,7 @@ public class SearchEngineImpl extends DBService {
             if (readAllFolders.contains(sharedFilesFolderID)) {
                 readAllFolders = new ArrayList<Integer>(readAllFolders);
                 readAllFolders.remove(sharedFilesFolderID);
-                sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=")
-                    .append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID)
-                    .append(" AND permission_id=").append(userID).append("))");
+                sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=").append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID).append(" AND permission_id=").append(userID).append("))");
                 appendOr = true;
             }
             if (0 < readAllFolders.size()) {
@@ -483,9 +483,7 @@ public class SearchEngineImpl extends DBService {
          */
         sqlQuery = new StringBuilder();
         sqlQuery.append(getResultFieldsSelect(cols));
-        sqlQuery.append(
-            " FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(
-            session.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
+        sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
         appendOrderBy(sqlQuery, sortedBy, dir);
         boolean keepConnection = false;
         PreparedStatement stmt = null;
@@ -545,74 +543,74 @@ public class SearchEngineImpl extends DBService {
         final List<String> retval = new ArrayList<String>(columns.length);
         for (final Metadata current : columns) {
             Metadata2DBSwitch: switch (current.getId()) {
-            default:
-                break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED:
-                retval.add("infostore.last_modified");
-                break Metadata2DBSwitch;
-            case Metadata.LAST_MODIFIED_UTC:
-                retval.add("infostore.last_modified");
-                break Metadata2DBSwitch;
-            case Metadata.CREATION_DATE:
-                retval.add("infostore.creating_date");
-                break Metadata2DBSwitch;
-            case Metadata.MODIFIED_BY:
-                retval.add("infostore.changed_by");
-                break Metadata2DBSwitch;
-            case Metadata.FOLDER_ID:
-                retval.add("infostore.folder_id");
-                break Metadata2DBSwitch;
-            case Metadata.TITLE:
-                retval.add("infostore_document.title");
-                break Metadata2DBSwitch;
-            case Metadata.VERSION:
-                retval.add("infostore.version");
-                break Metadata2DBSwitch;
-            case Metadata.CONTENT:
-                retval.add("infostore_document.description");
-                break Metadata2DBSwitch;
-            case Metadata.FILENAME:
-                retval.add("infostore_document.filename");
-                break Metadata2DBSwitch;
-            case Metadata.SEQUENCE_NUMBER:
-                retval.add("infostore.id");
-                break Metadata2DBSwitch;
-            case Metadata.ID:
-                retval.add("infostore.id");
-                break Metadata2DBSwitch;
-            case Metadata.FILE_SIZE:
-                retval.add("infostore_document.file_size");
-                break Metadata2DBSwitch;
-            case Metadata.FILE_MIMETYPE:
-                retval.add("infostore_document.file_mimetype");
-                break Metadata2DBSwitch;
-            case Metadata.DESCRIPTION:
-                retval.add("infostore_document.description");
-                break Metadata2DBSwitch;
-            case Metadata.LOCKED_UNTIL:
-                retval.add("infostore.locked_until");
-                break Metadata2DBSwitch;
-            case Metadata.URL:
-                retval.add("infostore_document.url");
-                break Metadata2DBSwitch;
-            case Metadata.CREATED_BY:
-                retval.add("infostore.created_by");
-                break Metadata2DBSwitch;
-            case Metadata.CATEGORIES:
-                retval.add("infostore_document.categories");
-                break Metadata2DBSwitch;
-            case Metadata.FILE_MD5SUM:
-                retval.add("infostore_document.file_md5sum");
-                break Metadata2DBSwitch;
-            case Metadata.VERSION_COMMENT:
-                retval.add("infostore_document.file_version_comment");
-                break Metadata2DBSwitch;
-            case Metadata.COLOR_LABEL:
-                retval.add("infostore.color_label");
-                break Metadata2DBSwitch;
-            case Metadata.META:
-                retval.add("infostore_document.meta");
-                break Metadata2DBSwitch;
+                default:
+                    break Metadata2DBSwitch;
+                case Metadata.LAST_MODIFIED:
+                    retval.add("infostore.last_modified");
+                    break Metadata2DBSwitch;
+                case Metadata.LAST_MODIFIED_UTC:
+                    retval.add("infostore.last_modified");
+                    break Metadata2DBSwitch;
+                case Metadata.CREATION_DATE:
+                    retval.add("infostore.creating_date");
+                    break Metadata2DBSwitch;
+                case Metadata.MODIFIED_BY:
+                    retval.add("infostore.changed_by");
+                    break Metadata2DBSwitch;
+                case Metadata.FOLDER_ID:
+                    retval.add("infostore.folder_id");
+                    break Metadata2DBSwitch;
+                case Metadata.TITLE:
+                    retval.add("infostore_document.title");
+                    break Metadata2DBSwitch;
+                case Metadata.VERSION:
+                    retval.add("infostore.version");
+                    break Metadata2DBSwitch;
+                case Metadata.CONTENT:
+                    retval.add("infostore_document.description");
+                    break Metadata2DBSwitch;
+                case Metadata.FILENAME:
+                    retval.add("infostore_document.filename");
+                    break Metadata2DBSwitch;
+                case Metadata.SEQUENCE_NUMBER:
+                    retval.add("infostore.id");
+                    break Metadata2DBSwitch;
+                case Metadata.ID:
+                    retval.add("infostore.id");
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_SIZE:
+                    retval.add("infostore_document.file_size");
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_MIMETYPE:
+                    retval.add("infostore_document.file_mimetype");
+                    break Metadata2DBSwitch;
+                case Metadata.DESCRIPTION:
+                    retval.add("infostore_document.description");
+                    break Metadata2DBSwitch;
+                case Metadata.LOCKED_UNTIL:
+                    retval.add("infostore.locked_until");
+                    break Metadata2DBSwitch;
+                case Metadata.URL:
+                    retval.add("infostore_document.url");
+                    break Metadata2DBSwitch;
+                case Metadata.CREATED_BY:
+                    retval.add("infostore.created_by");
+                    break Metadata2DBSwitch;
+                case Metadata.CATEGORIES:
+                    retval.add("infostore_document.categories");
+                    break Metadata2DBSwitch;
+                case Metadata.FILE_MD5SUM:
+                    retval.add("infostore_document.file_md5sum");
+                    break Metadata2DBSwitch;
+                case Metadata.VERSION_COMMENT:
+                    retval.add("infostore_document.file_version_comment");
+                    break Metadata2DBSwitch;
+                case Metadata.COLOR_LABEL:
+                    retval.add("infostore.color_label");
+                    break Metadata2DBSwitch;
+                case Metadata.META:
+                    retval.add("infostore_document.meta");
+                    break Metadata2DBSwitch;
             }
         }
         return (retval.toArray(new String[0]));
@@ -642,7 +640,6 @@ public class SearchEngineImpl extends DBService {
         }
         return retval;
     }
-
 
     public static class InfostoreSearchIterator implements SearchIterator<DocumentMetadata> {
 
@@ -678,7 +675,7 @@ public class SearchEngineImpl extends DBService {
                 if (rs.next()) {
                     // Preload?
                     if (false && Arrays.asList(columns).contains(Metadata.CONTENT_LITERAL)) { // Metadata.CONTENT_LITERAL is mapped to
-                                                                                              // description in fillDocumentMetadata()
+                                                                                             // description in fillDocumentMetadata()
                         next = fillDocumentMetadata(new DocumentMetadataImpl(), columns, rs);
                     } else {
                         final List<DocumentMetadata> list = new LinkedList<DocumentMetadata>();
