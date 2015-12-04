@@ -53,8 +53,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.session.Session;
 
 /**
@@ -84,6 +86,16 @@ public final class MailServiceImpl implements MailService {
     @Override
     public MailTransport getMailTransport(final Session session, final int accountId) throws OXException {
         return MailTransport.getInstance(session, accountId);
+    }
+
+    @Override
+    public MailConfig getMailConfig(Session session, int accountId) throws OXException {
+        return MailAccess.getInstance(session, accountId).getMailConfig();
+    }
+
+    @Override
+    public TransportConfig getTransportConfig(Session session, int accountId) throws OXException {
+        return MailTransport.getInstance(session, accountId).getTransportConfig();
     }
 
 }

@@ -57,11 +57,13 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.imap.config.IMAPConfig;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mailaccount.MailAccount;
+import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
 import com.openexchange.onboarding.OnboardingProvider;
@@ -75,7 +77,6 @@ import com.openexchange.onboarding.plist.PlistResult;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.smtp.config.SMTPConfig;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
@@ -104,7 +105,11 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
 
     @Override
     public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session);
+        if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session)) {
+            return false;
+        }
+        MailAccount mailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(session.getUserId(), session.getContextId());
+        return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
     }
 
     @Override
@@ -163,7 +168,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        IMAPConfig imapConfig = new IMAPConfig(0);
+        MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
         MailConfig.getConfig(imapConfig, session, 0);
         String imapServer = imapConfig.getServer();
         int imapPort = imapConfig.getPort();
@@ -171,8 +176,8 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         String imapPassword = imapConfig.getPassword();
         boolean imapSecure = imapConfig.isSecure();
 
-        SMTPConfig smtpConfig = new SMTPConfig();
-        TransportConfig.getTransportConfig(smtpConfig, session, 0);
+        TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, imapPort);
+        TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
         String smtpServer = smtpConfig.getServer();
         int smtpPort = smtpConfig.getPort();
         String smtpLogin = smtpConfig.getLogin();
@@ -215,7 +220,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Scenario scenario = request.getScenario();
 
-        IMAPConfig imapConfig = new IMAPConfig(0);
+        MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
         MailConfig.getConfig(imapConfig, session, 0);
         String imapServer = imapConfig.getServer();
         int imapPort = imapConfig.getPort();
@@ -223,8 +228,8 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         String imapPassword = imapConfig.getPassword();
         boolean imapSecure = imapConfig.isSecure();
 
-        SMTPConfig smtpConfig = new SMTPConfig();
-        TransportConfig.getTransportConfig(smtpConfig, session, 0);
+        TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, imapPort);
+        TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
         String smtpServer = smtpConfig.getServer();
         int smtpPort = smtpConfig.getPort();
         String smtpLogin = smtpConfig.getLogin();
