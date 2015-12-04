@@ -139,10 +139,14 @@ public class OnboardingInit {
                 }
                 alternativeIds = (List<String>) alternativesValue;
             }
+
+            // Read icon name
             String iconName = (String) values.get("icon");
             Icon icon = null == iconName ? null : new TemplateIcon(iconName);
-            String displayName = (String) values.get("displayName_tr");
-            String description = (String) values.get("description_tr");
+
+            // Read i18n strings
+            String displayName = (String) values.get("displayName_t10e");
+            String description = (String) values.get("description_t10e");
 
             scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, providerIds, alternativeIds, displayName, icon, description));
         }
