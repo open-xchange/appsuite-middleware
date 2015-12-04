@@ -81,7 +81,7 @@ public class GetScenarioAction extends AbstractOnboardingAction {
     protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         OnboardingService onboardingService = getOnboardingService();
 
-        String sCompositeId = requestData.checkParameter("device");
+        String sCompositeId = requestData.checkParameter("id");
         CompositeId compositeId = OnboardingUtility.parseCompositeId(sCompositeId);
 
         DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
