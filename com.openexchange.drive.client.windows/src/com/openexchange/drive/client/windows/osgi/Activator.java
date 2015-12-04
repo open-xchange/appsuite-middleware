@@ -19,7 +19,7 @@ import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.drive.client.windows.service.DriveUpdateServiceImpl;
 import com.openexchange.drive.client.windows.service.Services;
 import com.openexchange.drive.client.windows.servlet.DownloadServlet;
-import com.openexchange.drive.client.windows.servlet.UpdaterXMLServlet;
+import com.openexchange.drive.client.windows.servlet.UpdatesXMLServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -62,7 +62,7 @@ public class Activator extends HousekeepingActivator {
         //register update servlet
         updateServletAlias = prefix + Constants.UPDATE_SERVLET;
         final TemplateService templateService = getService(TemplateService.class);
-        getService(HttpService.class).registerServlet(updateServletAlias, new UpdaterXMLServlet(templateService, updateService), null, null);
+        getService(HttpService.class).registerServlet(updateServletAlias, new UpdatesXMLServlet(templateService, updateService), null, null);
 
         //register rmi interface
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);

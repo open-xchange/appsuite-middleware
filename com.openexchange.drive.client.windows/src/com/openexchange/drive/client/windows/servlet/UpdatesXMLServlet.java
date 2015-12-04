@@ -76,11 +76,11 @@ import com.openexchange.tools.webdav.OXServlet;
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
-public class UpdaterXMLServlet extends OXServlet {
+public class UpdatesXMLServlet extends OXServlet {
 
     private static final long serialVersionUID = -7945036709270719526L;
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdaterXMLServlet.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdatesXMLServlet.class);
 
     private final TemplateService templateService;
 
@@ -89,7 +89,7 @@ public class UpdaterXMLServlet extends OXServlet {
     private final static String HEAD = "<Products>";
     private final static String TAIL = "</Products>";
 
-    public UpdaterXMLServlet(final TemplateService templateService, DriveUpdateService driveUpdate) {
+    public UpdatesXMLServlet(final TemplateService templateService, DriveUpdateService driveUpdate) {
         super();
         this.templateService = templateService;
         this.driveUpdate = driveUpdate;
