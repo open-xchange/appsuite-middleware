@@ -127,7 +127,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                 int context = get(readOnly, writePoolId);
                 AssignmentImpl assignmentImpl = new AssignmentImpl(context, Server.getServerId(), readPoolId, writePoolId, schema);
                 lAssignments.add(assignmentImpl);
-                LOG.info("Found assignment and added to pool: {}", assignmentImpl.toString());
+                LOG.debug("Found assignment and added to pool: {}", assignmentImpl.toString());
             }
             stmt.close();
         } catch (final SQLException e) {
