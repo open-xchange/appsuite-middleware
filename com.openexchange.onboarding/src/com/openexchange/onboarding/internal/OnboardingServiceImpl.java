@@ -131,11 +131,11 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
 
     @Override
     public OnboardingProvider getProvider(String id) throws OXException {
-        OnboardingProvider configuration = null == id ? null : providers.get(id);
-        if (null == configuration) {
+        OnboardingProvider provider = null == id ? null : providers.get(id);
+        if (null == provider) {
             throw OnboardingExceptionCodes.NOT_FOUND.create(null == id ? "null" : id);
         }
-        return configuration;
+        return provider;
     }
 
     @Override
@@ -181,7 +181,12 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-        return getScenario(scenarioId, configuredScenarios);
+
+        Scenario scenario = getScenario(scenarioId, configuredScenarios, true);
+        if (null == scenario) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+        return scenario;
     }
 
     @Override
@@ -191,8 +196,8 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-        Scenario scenario = getScenario(scenarioId, configuredScenarios);
-        if (!scenario.isEnabled(session)) {
+        Scenario scenario = getScenario(scenarioId, configuredScenarios, true);
+        if (null == scenario || !scenario.isEnabled(session)) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
 
@@ -221,8 +226,8 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
             }
 
             if (configuredScenario.isEnabled()) {
-                Scenario scenario = getScenario(configuredScenario, configuredScenarios);
-                if (scenario.isEnabled(session)) {
+                Scenario scenario = getScenario(configuredScenario, configuredScenarios, false);
+                if (null != scenario && scenario.isEnabled(session)) {
                     boolean enabled = true;
                     for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
                         OnboardingProvider provider = it.next();
@@ -235,7 +240,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         return scenarios;
     }
 
-    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
+    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
@@ -249,18 +254,28 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
             throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
         }
 
-        return getScenario(configuredScenario, configuredScenarios);
+        return getScenario(configuredScenario, configuredScenarios, errorOnProviderAbsence);
     }
 
-    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
+    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence) throws OXException {
         DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
 
         for (String providerId : configuredScenario.getProviderIds()) {
+            OnboardingProvider provider = providers.get(providerId);
+            if (null == provider) {
+                if (errorOnProviderAbsence) {
+                    throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
+                }
+                return null;
+            }
             scenario.addProvider(getProvider(providerId));
         }
 
         for (String alternativeId : configuredScenario.getAlternativeIds()) {
-            scenario.addAlternative(getScenario(alternativeId, configuredScenarios));
+            Scenario alternative = getScenario(alternativeId, configuredScenarios, false);
+            if (null != alternative) {
+                scenario.addAlternative(alternative);
+            }
         }
 
         return scenario;

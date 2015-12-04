@@ -124,33 +124,37 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      */
     DISABLED_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 15),
     /**
+     * Scenario is invalid: %1$s. No such provider %2$s
+     */
+    INVALID_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 16),
+    /**
      * Invalid device identifier: %1$s
      */
-    INVALID_DEVICE_ID("Invalid device identifier: %1$s", null, Category.CATEGORY_USER_INPUT, 16),
+    INVALID_DEVICE_ID("Invalid device identifier: %1$s", null, Category.CATEGORY_USER_INPUT, 17),
     /**
      * Provider %1$s denied execution for scenario %2$s
      */
-    EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 17),
+    EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 18),
     /**
      * Execution for scenario %1$s failed
      */
-    EXECUTION_FAILED("Execution for scenario %1$s failed", OnboardingExceptionMessages.EXECUTION_FAILED_MSG, Category.CATEGORY_ERROR, 18),
+    EXECUTION_FAILED("Execution for scenario %1$s failed", OnboardingExceptionMessages.EXECUTION_FAILED_MSG, Category.CATEGORY_ERROR, 19),
     /**
      * Provider %1$s does not support device %2$s
      */
-    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 19),
+    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 20),
     /**
      * Provider %1$s does not support action %2$s for type %3$s
      */
-    UNSUPPORTED_ACTION("Action %1$s is not supported", null, Category.CATEGORY_ERROR, 20),
+    UNSUPPORTED_ACTION("Action %1$s is not supported", null, Category.CATEGORY_ERROR, 21),
     /**
      * Provider %1$s does not support type %2$s
      */
-    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 21),
+    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 22),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 22),
+    MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 23),
     ;
 
     /** The error code prefix for on-boarding module */
