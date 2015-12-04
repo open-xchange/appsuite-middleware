@@ -24,7 +24,6 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open-Xchange Dovecot Push Bundle
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@
-Suggests:      open-xchange-dav >= @OXVERSION@
 
 %description
 Open-Xchange on-boarding package
