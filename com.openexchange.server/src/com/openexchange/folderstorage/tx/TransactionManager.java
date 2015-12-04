@@ -63,7 +63,6 @@ import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.StorageParameters;
 import com.openexchange.folderstorage.database.DatabaseFolderStorage.ConnectionMode;
-import com.openexchange.folderstorage.internal.ResilientConnection;
 import com.openexchange.folderstorage.database.DatabaseFolderType;
 import com.openexchange.folderstorage.database.DatabaseParameterConstants;
 import com.openexchange.folderstorage.osgi.FolderStorageServices;
