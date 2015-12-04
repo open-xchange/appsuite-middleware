@@ -93,6 +93,9 @@ public final class PListSigner {
 
     public ThresholdFileHolder signPList(Session session) throws OXException {
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+        }
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (null == configService) {
