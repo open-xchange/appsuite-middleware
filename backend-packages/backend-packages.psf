@@ -66,6 +66,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts-jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth-provider"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-onboarding"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
