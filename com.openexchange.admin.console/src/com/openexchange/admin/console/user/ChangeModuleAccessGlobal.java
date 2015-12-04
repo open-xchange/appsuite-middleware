@@ -116,9 +116,14 @@ public class ChangeModuleAccessGlobal extends UserAbstraction {
             parse(parser, args);
             prepare(parser);
             execute();
+            printSuccessMessage();
         } catch (Exception e) {
             printErrors(null, ctxid, e, parser);
         }
+    }
+
+    private void printSuccessMessage() {
+        System.out.println("Access successfully changed.");
     }
 
     /**
