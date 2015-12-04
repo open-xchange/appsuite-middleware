@@ -4049,7 +4049,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
-        checkConfirmPermission(folderId, uid, so, ctx);
+        checkConfirmPermission(folderId, uid, so, ctx, false);
         Connection writecon = null;
         PreparedStatement pu = null;
         PreparedStatement mo = null;
@@ -4145,7 +4145,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      */
     @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
-        checkConfirmPermission(folderId, -1, so, ctx);
+        checkConfirmPermission(folderId, -1, so, ctx, true);
 
         final String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; // this is a
         // party
@@ -4216,12 +4216,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         return changeTimestamp;
     }
 
-    private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException {
+    private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx, boolean extern) throws OXException {
         if (uid != so.getUserId()) {
             final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
             final OXFolderAccess ofa = new OXFolderAccess(ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
-            if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
+            if (!extern && ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create();
             }
             if (!oclp.canWriteAllObjects()) {
