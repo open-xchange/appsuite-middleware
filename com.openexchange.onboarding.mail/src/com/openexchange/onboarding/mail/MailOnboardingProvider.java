@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.onboarding.imap;
+package com.openexchange.onboarding.mail;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -81,22 +81,22 @@ import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
- * {@link IMAPOnboardingProvider}
+ * {@link MailOnboardingProvider}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingProvider implements OnboardingProvider {
+public class MailOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
 
     /**
-     * Initializes a new {@link IMAPOnboardingProvider}.
+     * Initializes a new {@link MailOnboardingProvider}.
      */
-    public IMAPOnboardingProvider(ServiceLookup services) {
+    public MailOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
         identifier = "eas";
@@ -146,6 +146,55 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         }
     }
 
+    private Configurations getEffectiveConfigurations(Session session) throws OXException {
+        // IMAP
+        Configuration imapConfiguration;
+        {
+            MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
+            MailConfig.getConfig(imapConfig, session, 0);
+            String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.mail.imap.host", null, session);
+            if (null == imapServer) {
+                imapServer = imapConfig.getServer();
+            }
+            Integer imapPort = OnboardingUtility.getIntFromProperty("com.openexchange.onboarding.mail.imap.port", null, session);
+            if (null == imapPort) {
+                imapPort = Integer.valueOf(imapConfig.getPort());
+            }
+            Boolean imapSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.onboarding.mail.imap.secure", null, session);
+            if (null == imapSecure) {
+                imapSecure = Boolean.valueOf(imapConfig.isSecure());
+            }
+            String imapLogin = imapConfig.getLogin();
+            String imapPassword = imapConfig.getPassword();
+            imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, imapPassword);
+        }
+
+        // SMTP
+        Configuration smtpConfiguration;
+        {
+            TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, MailAccount.DEFAULT_ID);
+            TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
+            String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.mail.smtp.host", null, session);
+            if (null == smtpServer) {
+                smtpServer = smtpConfig.getServer();
+            }
+            Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.onboarding.mail.smtp.port", null, session);
+            if (null == smtpPort) {
+                smtpPort = Integer.valueOf(smtpConfig.getPort());
+            }
+            Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.onboarding.mail.smtp.secure", null, session);
+            if (null == smtpSecure) {
+                smtpSecure = Boolean.valueOf(smtpConfig.isSecure());
+            }
+            String smtpLogin = smtpConfig.getLogin();
+            String smtpPassword = smtpConfig.getPassword();
+            smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, smtpPassword);
+        }
+
+        // Return configurations
+        return new Configurations(imapConfiguration, smtpConfiguration);
+    }
+
     private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         return plistResult(request, previousResult, session);
     }
@@ -168,33 +217,21 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
-        MailConfig.getConfig(imapConfig, session, 0);
-        String imapServer = imapConfig.getServer();
-        int imapPort = imapConfig.getPort();
-        String imapLogin = imapConfig.getLogin();
-        String imapPassword = imapConfig.getPassword();
-        boolean imapSecure = imapConfig.isSecure();
-
-        TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, imapPort);
-        TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
-        String smtpServer = smtpConfig.getServer();
-        int smtpPort = smtpConfig.getPort();
-        String smtpLogin = smtpConfig.getLogin();
-        String smtpPassword = smtpConfig.getPassword();
-        boolean smtpSecure = smtpConfig.isSecure();
+        Configurations configurations = getEffectiveConfigurations(session);
 
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
-        configuration.put(IMAP_LOGIN_FIELD, imapLogin);
-        configuration.put(IMAP_PASSWORD_FIELD, imapPassword);
-        configuration.put(IMAP_SERVER_FIELD, imapServer);
-        configuration.put(IMAP_PORT_FIELD, new Integer(imapPort));
-        configuration.put(IMAP_SECURE_FIELD, new Boolean(imapSecure));
-        configuration.put(SMTP_LOGIN_FIELD, smtpLogin);
-        configuration.put(SMTP_PASSWORD_FIELD, smtpPassword);
-        configuration.put(SMTP_SERVER_FIELD, smtpServer);
-        configuration.put(SMTP_PORT_FIELD, new Integer(smtpPort));
-        configuration.put(SMTP_SECURE_FIELD, new Boolean(smtpSecure));
+
+        configuration.put(IMAP_LOGIN_FIELD, configurations.imapConfig.login);
+        configuration.put(IMAP_PASSWORD_FIELD, configurations.imapConfig.password);
+        configuration.put(IMAP_SERVER_FIELD, configurations.imapConfig.host);
+        configuration.put(IMAP_PORT_FIELD, new Integer(configurations.imapConfig.port));
+        configuration.put(IMAP_SECURE_FIELD, new Boolean(configurations.imapConfig.secure));
+
+        configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
+        configuration.put(SMTP_PASSWORD_FIELD, configurations.smtpConfig.password);
+        configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
+        configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
+        configuration.put(SMTP_SECURE_FIELD, new Boolean(configurations.smtpConfig.secure));
 
         return new DisplayResult(configuration);
     }
@@ -220,21 +257,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Scenario scenario = request.getScenario();
 
-        MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
-        MailConfig.getConfig(imapConfig, session, 0);
-        String imapServer = imapConfig.getServer();
-        int imapPort = imapConfig.getPort();
-        String imapLogin = imapConfig.getLogin();
-        String imapPassword = imapConfig.getPassword();
-        boolean imapSecure = imapConfig.isSecure();
-
-        TransportConfig smtpConfig = services.getService(MailService.class).getTransportConfig(session, imapPort);
-        TransportConfig.getTransportConfig(smtpConfig, session, MailAccount.DEFAULT_ID);
-        String smtpServer = smtpConfig.getServer();
-        int smtpPort = smtpConfig.getPort();
-        String smtpLogin = smtpConfig.getLogin();
-        String smtpPassword = smtpConfig.getPassword();
-        boolean smtpSecure = smtpConfig.isSecure();
+        Configurations configurations = getEffectiveConfigurations(session);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
@@ -257,7 +280,7 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
-        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(IMAPOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
+        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(MailOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
 
         // The full user name for the account. This is the user name in sent messages, etc.
         payloadContent.addStringValue("EmailAccountName", getUser(session).getDisplayName());
@@ -273,43 +296,43 @@ public class IMAPOnboardingProvider implements OnboardingProvider {
         payloadContent.addStringValue("IncomingMailServerAuthentication", "EmailAuthPassword");
 
         // Designates the incoming mail server host name (or IP address).
-        payloadContent.addStringValue("IncomingMailServerHostName", imapServer);
+        payloadContent.addStringValue("IncomingMailServerHostName", configurations.imapConfig.host);
 
         // Designates the incoming mail server port number. If no port number is specified, the default port for a given protocol is used.
-        payloadContent.addIntegerValue("IncomingMailServerPortNumber", imapPort);
+        payloadContent.addIntegerValue("IncomingMailServerPortNumber", configurations.imapConfig.port);
 
         // Designates whether the incoming mail server uses SSL for authentication. Default false.
-        payloadContent.addBooleanValue("IncomingMailServerUseSSL", imapSecure);
+        payloadContent.addBooleanValue("IncomingMailServerUseSSL", configurations.imapConfig.secure);
 
         // Designates the user name for the email account, usually the same as the email address up to the @ character.
         // If not present in the payload, and the account is set up to require authentication for incoming email, the device will prompt for this string during profile installation.
-        payloadContent.addStringValue("IncomingMailServerUsername", imapLogin);
+        payloadContent.addStringValue("IncomingMailServerUsername", configurations.imapConfig.login);
 
         // Password for the Incoming Mail Server. Use only with encrypted profiles.
-        payloadContent.addStringValue("IncomingPassword", imapPassword);
+        payloadContent.addStringValue("IncomingPassword", configurations.imapConfig.password);
 
 
         // Password for the Outgoing Mail Server. Use only with encrypted profiles.
-        payloadContent.addStringValue("OutgoingPassword", smtpPassword);
+        payloadContent.addStringValue("OutgoingPassword", configurations.smtpConfig.password);
 
         // If set, the user will be prompted for the password only once and it will be used for both outgoing and incoming mail.
-        payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", imapPassword.equals(smtpPassword));
+        payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", configurations.imapConfig.password.equals(configurations.smtpConfig.password));
 
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
         payloadContent.addStringValue("OutgoingMailServerAuthentication", "EmailAuthPassword");
 
         // Designates the outgoing mail server host name (or IP address).
-        payloadContent.addStringValue("OutgoingMailServerHostName", smtpServer);
+        payloadContent.addStringValue("OutgoingMailServerHostName", configurations.smtpConfig.host);
 
         // Designates the outgoing mail server port number. If no port number is specified, ports 25, 587 and 465 are used, in this order.
-        payloadContent.addIntegerValue("OutgoingMailServerPortNumber", smtpPort);
+        payloadContent.addIntegerValue("OutgoingMailServerPortNumber", configurations.smtpConfig.port);
 
         // Designates whether the outgoing mail server uses SSL for authentication. Default false.
-        payloadContent.addBooleanValue("OutgoingMailServerUseSSL", smtpSecure);
+        payloadContent.addBooleanValue("OutgoingMailServerUseSSL", configurations.smtpConfig.secure);
 
         // Designates the user name for the email account, usually the same as the email address up to the @ character.
         // If not present in the payload, and the account is set up to require authentication for outgoing email, the device prompts for this string during profile installation.
-        payloadContent.addStringValue("OutgoingMailServerUsername", smtpLogin);
+        payloadContent.addStringValue("OutgoingMailServerUsername", configurations.smtpConfig.login);
 
         // Further options (currently not used)
 

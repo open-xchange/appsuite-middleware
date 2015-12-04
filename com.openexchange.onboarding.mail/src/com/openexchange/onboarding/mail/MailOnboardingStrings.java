@@ -47,23 +47,23 @@
  *
  */
 
-package com.openexchange.onboarding.imap;
+package com.openexchange.onboarding.mail;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link IMAPOnboardingStrings}
+ * {@link MailOnboardingStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingStrings implements LocalizableStrings {
+public class MailOnboardingStrings implements LocalizableStrings {
 
     /**
-     * Initializes a new {@link IMAPOnboardingStrings}.
+     * Initializes a new {@link MailOnboardingStrings}.
      */
-    private IMAPOnboardingStrings() {
+    private MailOnboardingStrings() {
         super();
     }
 

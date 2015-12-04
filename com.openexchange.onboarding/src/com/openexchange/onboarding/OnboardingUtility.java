@@ -308,14 +308,13 @@ public class OnboardingUtility {
     }
 
     /**
-     * Gets the translation for referenced i18n string; returns translation for default value if such a property does not exist.
+     * Gets the value for specified property; returns default value if such a property does not exist.
      *
      * @param propertyName The property name for the i18n string to translate
      * @param defaultValue The default value to return
-     * @param translateDefaultValue Whether specified default value is supposed to be translated
      * @param session The session from requesting user
-     * @return The translated string or <code>defaultValue</code>
-     * @throws OXException If translated string cannot be returned
+     * @return The value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
      * @throws IllegalArgumentException If session is <code>null</code>
      */
     public static String getValueFromProperty(String propertyName, String defaultValue, Session session) throws OXException {
@@ -330,6 +329,58 @@ public class OnboardingUtility {
 
         String value = property.get();
         return Strings.isEmpty(value) ? defaultValue : value;
+    }
+
+    /**
+     * Gets the integer value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param session The session from requesting user
+     * @return The integer value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static Integer getIntFromProperty(String propertyName, Integer defaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        try {
+            String value = property.get();
+            return Strings.isEmpty(value) ? defaultValue : Integer.valueOf(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Gets the boolean value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param session The session from requesting user
+     * @return The boolean value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     * @throws IllegalArgumentException If session is <code>null</code>
+     */
+    public static Boolean getBoolFromProperty(String propertyName, Boolean defaultValue, Session session) throws OXException {
+        Validate.notNull(session, "session must not be null");
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        String value = property.get();
+        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
     }
 
     /**

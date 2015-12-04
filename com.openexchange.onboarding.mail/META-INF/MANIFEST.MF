@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Imap
-Bundle-SymbolicName: com.openexchange.onboarding.imap
+Bundle-Name: The on-boarding bundle for mail
+Bundle-SymbolicName: com.openexchange.onboarding.mail
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -138,4 +138,4 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax,
  org.xml.sax.ext,
  org.xml.sax.helpers
-Bundle-Activator: com.openexchange.onboarding.imap.osgi.IMAPOnboardingConfigurationActivator
+Bundle-Activator: com.openexchange.onboarding.mail.osgi.MailOnboardingConfigurationActivator

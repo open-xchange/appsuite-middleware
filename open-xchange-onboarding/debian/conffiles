@@ -3,4 +3,5 @@ opt/open-xchange/etc/onboarding-caldav.properties
 opt/open-xchange/etc/onboarding-carddav.properties
 opt/open-xchange/etc/onboarding-eas.properties
 opt/open-xchange/etc/onboarding-mailapp.properties
+opt/open-xchange/etc/onboarding-mail.properties
 opt/open-xchange/etc/scenarios.yml

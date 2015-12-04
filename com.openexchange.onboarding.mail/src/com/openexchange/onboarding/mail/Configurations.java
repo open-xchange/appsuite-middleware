@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,32 @@
  *
  */
 
-package com.openexchange.onboarding.imap.osgi;
-
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccountStorageService;
-import com.openexchange.onboarding.OnboardingProvider;
-import com.openexchange.onboarding.imap.IMAPOnboardingProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+package com.openexchange.onboarding.mail;
 
 /**
- * {@link IMAPOnboardingConfigurationActivator}
+ * {@link Configurations}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class IMAPOnboardingConfigurationActivator extends HousekeepingActivator {
+public class Configurations {
+
+    /** The IMAP configuration */
+    public final Configuration imapConfig;
+
+    /** The SMTP configuration */
+    public final Configuration smtpConfig;
 
     /**
-     * Initializes a new {@link IMAPOnboardingConfigurationActivator}.
+     * Initializes a new {@link Configurations}.
+     *
+     * @param imapConfig The IMAP configuration
+     * @param smtpConfig The SMTP configuration
      */
-    public IMAPOnboardingConfigurationActivator() {
+    public Configurations(Configuration imapConfig, Configuration smtpConfig) {
         super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class, MailService.class, MailAccountStorageService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(OnboardingProvider.class, new IMAPOnboardingProvider(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
+        this.imapConfig = imapConfig;
+        this.smtpConfig = smtpConfig;
     }
 
 }
