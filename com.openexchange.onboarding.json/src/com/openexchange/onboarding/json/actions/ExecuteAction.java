@@ -57,8 +57,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.onboarding.CompositeId;
 import com.openexchange.onboarding.DefaultOnboardingRequest;
-import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.ResultObject;
@@ -90,13 +90,13 @@ public class ExecuteAction extends AbstractOnboardingAction {
         OnboardingService onboardingService = getOnboardingService();
 
         // Check for composite identifier
-        String compositeId = requestData.getParameter("id");
-        if (Strings.isEmpty(compositeId)) {
+        String sCompositeId = requestData.getParameter("id");
+        if (Strings.isEmpty(sCompositeId)) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("id");
         }
 
         // Parse composite identifier
-        Map.Entry<Device, String> parsed = OnboardingUtility.parseCompositeId(compositeId);
+        CompositeId compositeId = OnboardingUtility.parseCompositeId(sCompositeId);
 
         // Check for action
         String sAction = requestData.getParameter("action_id");
@@ -119,10 +119,10 @@ public class ExecuteAction extends AbstractOnboardingAction {
             }
         }
 
-        Scenario scenario = onboardingService.getScenario(parsed.getValue());
+        Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId());
 
         // Create on-boarding request & execute it
-        DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, parsed.getKey(), requestData.getHostData(), input);
+        DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, compositeId.getDevice(), requestData.getHostData(), input);
         ResultObject resultObject = onboardingService.execute(request, session);
 
         // Return result

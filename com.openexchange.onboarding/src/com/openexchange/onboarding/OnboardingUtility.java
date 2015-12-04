@@ -117,7 +117,7 @@ public class OnboardingUtility {
      * @return The parsed device/scenario pair
      * @throws OXException If parse attempt fails
      */
-    public static Map.Entry<Device, String> parseCompositeId(String compositeId) throws OXException {
+    public static CompositeId parseCompositeId(String compositeId) throws OXException {
         if (null == compositeId) {
             throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create("null");
         }
@@ -130,31 +130,15 @@ public class OnboardingUtility {
             throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
         }
 
-        final Device device = Device.deviceFor(compositeId.substring(off, pos));
+        Device device = Device.deviceFor(compositeId.substring(off, pos));
         if (null == device) {
             throw OnboardingExceptionCodes.INVALID_COMPOSITE_ID.create(compositeId);
         }
 
         off = pos + 1;
-        final String scenarioId = compositeId.substring(off);
+        String scenarioId = compositeId.substring(off);
 
-        return new Map.Entry<Device, String>() {
-
-            @Override
-            public Device getKey() {
-                return device;
-            }
-
-            @Override
-            public String getValue() {
-                return scenarioId;
-            }
-
-            @Override
-            public String setValue(String value) {
-                throw new UnsupportedOperationException("setValue() is not supported");
-            }
-        };
+        return new CompositeId(device, scenarioId);
     }
 
     /**

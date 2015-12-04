@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,47 @@
  *
  */
 
-package com.openexchange.onboarding.json.actions;
-
-import org.json.JSONException;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.exception.OXException;
-import com.openexchange.onboarding.CompositeId;
-import com.openexchange.onboarding.DeviceAwareScenario;
-import com.openexchange.onboarding.OnboardingUtility;
-import com.openexchange.onboarding.service.OnboardingService;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.session.ServerSession;
+package com.openexchange.onboarding;
 
 /**
- * {@link GetScenarioAction}
+ * {@link CompositeId} - Represents a composite identifier for a device and scenario identifier tuple; e.g. <code>"apple.iphone/davsync"</code>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GetScenarioAction extends AbstractOnboardingAction {
+public class CompositeId {
+
+    private final Device device;
+    private final String scenarioId;
 
     /**
-     * Initializes a new {@link GetScenarioAction}.
+     * Initializes a new {@link CompositeId}.
      *
-     * @param services
+     * @param device The device
+     * @param scenarioId The scenario identifier
      */
-    public GetScenarioAction(ServiceLookup services) {
-        super(services);
+    public CompositeId(Device device, String scenarioId) {
+        super();
+        this.device = device;
+        this.scenarioId = scenarioId;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        OnboardingService onboardingService = getOnboardingService();
+    /**
+     * Gets the device
+     *
+     * @return The device
+     */
+    public Device getDevice() {
+        return device;
+    }
 
-        String sCompositeId = requestData.checkParameter("device");
-        CompositeId compositeId = OnboardingUtility.parseCompositeId(sCompositeId);
-
-        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
-        return new AJAXRequestResult(scenario, "onboardingScenario");
+    /**
+     * Gets the scenario identifier
+     *
+     * @return The scenario identifier
+     */
+    public String getScenarioId() {
+        return scenarioId;
     }
 
 }
