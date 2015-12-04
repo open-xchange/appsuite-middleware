@@ -165,7 +165,7 @@ public class PlistResult implements Result {
             new PListWriter().write(pListDict, fileHolder.asOutputStream());
 
             PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
+            fileHolder = signer.signPList(session);
 
             NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
@@ -198,7 +198,7 @@ public class PlistResult implements Result {
             new PListWriter().write(pListDict, fileHolder.asOutputStream());
 
             PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList();
+            fileHolder = signer.signPList(session);
 
             ResultObject resultObject = new SimpleResultObject(fileHolder, "file");
             error = false;

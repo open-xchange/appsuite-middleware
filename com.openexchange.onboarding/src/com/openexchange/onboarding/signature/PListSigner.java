@@ -64,11 +64,14 @@ import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.util.Store;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 
 /**
  * {@link PListSigner}
@@ -88,20 +91,18 @@ public final class PListSigner {
         this.fileHolder = fileHolder;
     }
 
-    public ThresholdFileHolder signPList() throws OXException {
-        return signPList("");
-    }
-
-    public ThresholdFileHolder signPList(String brand) throws OXException {
+    public ThresholdFileHolder signPList(Session session) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (null == configService) {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
 
         boolean enabled = configService.getBoolProperty("com.openexchange.onboarding.plist.signature.enabled", false);
-        String storeName = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.filename" + brand);
-        String password = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.password" + brand);
-        String alias = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.alias" + brand);
+        String storeName = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.filename");
+        String password = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.password");
+        String alias = view.get("com.openexchange.onboarding.plist.signkey.alias", String.class);
         if (!enabled || Strings.isEmpty(storeName) || Strings.isEmpty(password) || Strings.isEmpty(alias)) {
             return fileHolder;
         }
