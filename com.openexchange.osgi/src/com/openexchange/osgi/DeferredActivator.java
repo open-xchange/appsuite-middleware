@@ -303,7 +303,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
-            startUp(false);
+            startUp();
         } else {
             final int len = classes.length;
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
@@ -336,7 +336,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 }
             }
             if (len == 0) {
-                startUp(false);
+                startUp();
             }
         }
     }
@@ -426,7 +426,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Start bundle
                  */
                 try {
-                    startUp(false);
+                    startUp();
                 } catch (final Exception e) {
                     Throwable t = e;
                     if (t.getCause() instanceof BundleException) {
@@ -522,27 +522,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
-    private void startUp(final boolean async) throws Exception {
+    private void startUp() throws Exception {
         stopPerformed = false;
-        if (async) {
-            final Runnable task = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        startBundle();
-                        started.set(true);
-                    } catch (final Throwable t) {
-                        ExceptionUtils.handleThrowable(t);
-                        LOG.error("", t);
-                    }
-                }
-            };
-            new Thread(task).run();
-        } else {
-            startBundle();
-            started.set(true);
-        }
+        startBundle();
+        started.set(true);
     }
 
     /**
