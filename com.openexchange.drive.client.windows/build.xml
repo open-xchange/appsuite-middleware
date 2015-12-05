@@ -1,24 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project name="OXUpdater drive client override" basedir=".">
+<project name="OX Drive drive client override" basedir=".">
 
     <description>
-        Prepares the OXDrive client binaries, templates and config files.
+        Prepares the OX Drive client binaries, templates and config files.
     </description>
 
-    <import file="build-project.xml" />
-	
-    <property name="templatesDir" value="templates" />
-    <property name="templateInstallDir" value="${prefix}/${templatesDir}" />
-    
+	<!-- Constants -->
+    <property name="templatesDir" value="templates"/>
+
+    <import file="build-project.xml"/>
 
     <target name="postInstall">
-        <antcall target="installTemplate" />
-    </target>
-
-    <target name="installTemplate">
-        <mkdir dir="${destDir}/${templateInstallDir}" />
-        <copy todir="${destDir}/${templateInstallDir}">
-            <fileset dir="${patchTemplateDir}" />
+        <mkdir dir="${destDir}/${prefix}/${templatesDir}"/>
+        <copy todir="${destDir}/${prefix}/${templatesDir}">
+            <fileset dir="${templatesDir}"/>
         </copy>
     </target>
 
