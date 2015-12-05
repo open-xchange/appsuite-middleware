@@ -50,7 +50,10 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/bundles/*
 %dir /opt/open-xchange/osgi/bundle.d/
 /opt/open-xchange/osgi/bundle.d/*
-%config(noreplace) /opt/open-xchange/etc/driveUpdater.properties
+%dir /opt/open-xchange/etc/
+%config(noreplace) /opt/open-xchange/etc/*
+%dir /opt/open-xchange/templates/
+/opt/open-xchange/templates/*
 
 %changelog
 * Tue Nov 10 2015 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
