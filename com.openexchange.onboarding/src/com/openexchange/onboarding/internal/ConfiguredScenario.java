@@ -157,4 +157,34 @@ public class ConfiguredScenario {
         return description;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("ConfiguredScenario [");
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        builder.append("enabled=").append(enabled).append(", ");
+        if (type != null) {
+            builder.append("type=").append(type).append(", ");
+        }
+        if (providerIds != null) {
+            builder.append("providerIds=").append(providerIds).append(", ");
+        }
+        if (alternativeIds != null) {
+            builder.append("alternativeIds=").append(alternativeIds).append(", ");
+        }
+        if (icon != null) {
+            builder.append("icon=").append(icon).append(", ");
+        }
+        if (displayName != null) {
+            builder.append("displayName=").append(displayName).append(", ");
+        }
+        if (description != null) {
+            builder.append("description=").append(description);
+        }
+        builder.append("]");
+        return builder.toString();
+    }
+
 }

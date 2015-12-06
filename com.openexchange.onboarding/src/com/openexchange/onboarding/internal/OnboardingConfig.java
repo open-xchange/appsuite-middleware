@@ -142,7 +142,7 @@ public class OnboardingConfig {
 
             // Read icon name
             String iconName = (String) values.get("icon");
-            Icon icon = null == iconName ? null : new TemplateIcon(iconName);
+            Icon icon = null == iconName || "null".equalsIgnoreCase(iconName) ? null : new TemplateIcon(iconName);
 
             // Read i18n strings
             String displayName = (String) values.get("displayName_t10e");

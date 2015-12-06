@@ -1,57 +1,125 @@
-# Configuration file for on-boarding scenarios
-# (^|\s)\w+_t10e\s*\:\s*"(\\"|[^"])+"
+# The YAML configuration file for on-boarding scenarios
+#
+# Notation/meaning is:
+# <unique-scenario-identifier>:
+#     enabled: <true|false>
+#       Boolean. If set to 'false' the scenario will not be available, useful for testing/enabling the scenario later on
+#
+#     type: <plist|manual|link>
+#       String. The type of the scenario. Currently known:
+#       "plist" for generating a plist configuration file for iOS and OSX devices,
+#       "manual" for a description for the user for manual set-up
+#       "link" for a link/URL to either Apple App Store or Google Play Store
+#
+#     providers: <provider-identifiers>
+#       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
+#
+#     alternatives: <alternative-scenarios>
+#       Array of strings. A list of alternative/fall-back scenarios; e.g. the scenario for manual setup
+#
+#     icon: <file-name>
+#       String. The name of the icon image file located in '/opt/open-xchange/templates' directory
+#
+#     displayName_t10e: <display-name>
+#       String. The translatable display name; will be available in scenarios.pot file
+#
+#     description_t10e: <description>
+#       String. The translatable description; will be available in scenarios.pot file
+#
+
+
+### CalDAV & CardDAV Sync
+################################################################################
 
 davsync:
     enabled: true
     type: plist
     providers: [carddav, caldav]
     alternatives: [davmanual]
-    icon: <base64>
-    displayName_t10e: "OX Sync"
-    description_t10e: "Synchronize all your appointments and contacts"
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: davsync.png
+    # The translatable display name
+    displayName_t10e: "CalDAV & CardDAV Sync"
+    # The translatable description
+    description_t10e: "Synchronize your appointments and contacts"
 
-davsync_mybrand:
-    enabled: true
-    type: plist
-    providers: [carddav, caldav]
-    alternatives: [davmanual]
-    icon: <base64>
-    displayName_t10e: "OX Sync"
-    description_t10e: "Synchronize all your appointments and contacts"
+#davsync_mybrand:
+#    enabled: true
+#    type: plist
+#    providers: [carddav, caldav]
+#    alternatives: [davmanual]
+#    # The name of the image file located in '/opt/open-xchange/templates' directory
+#    icon: <base64>
+#    # The translatable display name
+#    displayName_t10e: "OX Sync"
+#    # The translatable description
+#    description_t10e: "Synchronize all your appointments and contacts"
 
 davmanual:
     enabled: true
     type: manual
     providers: [carddav, caldav]
     alternatives: []
-    icon: <base64>
-    displayName_t10e: "OX Sync"
-    description_t10e: "Synchronize all your appointments and contacts"
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: davsync.png
+    # The translatable display name
+    displayName_t10e: "CalDAV & CardDAV Sync"
+    # The translatable description
+    description_t10e: "Synchronize your appointments and contacts"
+
+
+### Exchange ActiveSync
+################################################################################
 
 eassync:
-    id: eassync
     enabled: true
     type: plist
     providers: [eas]
     alternatives: [easmanual]
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: eassync.png
+    # The translatable display name
+    displayName_t10e: "Exchange ActiveSync"
+    # The translatable description
+    description_t10e: "Synchronize your emails, contacts, calendar, and tasks"
 
 easmanual:
-    id: easmanual
     enabled: true
     type: manual
     providers: [eas]
     alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: eassync.png
+    # The translatable display name
+    displayName_t10e: "Exchange ActiveSync"
+    # The translatable description
+    description_t10e: "Synchronize your emails, contacts, calendar, and tasks"
 
-imapsync:
-    id: imapsync
+
+### IMAP/SMTP
+################################################################################
+
+mailsync:
     enabled: true
     type: plist
-    providers: [imap]
-    alternatives: [imapmanual]
+    providers: [mail]
+    alternatives: [mailmanual]
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: mailsync.png
+    # The translatable display name
+    displayName_t10e: "IMAP/SMTP"
+    # The translatable description
+    description_t10e: "Access & send your emails"
 
-imapmanual:
-    id: imapmanual
+mailmanual:
     enabled: true
     type: manual
-    providers: [imap]
+    providers: [mail]
     alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: mailsync.png
+    # The translatable display name
+    displayName_t10e: "IMAP/SMTP"
+    # The translatable description
+    description_t10e: "Access & send your emails"
+
