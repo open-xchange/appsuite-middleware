@@ -49,6 +49,9 @@
 
 package com.openexchange.onboarding.osgi;
 
+import java.rmi.Remote;
+import java.util.Dictionary;
+import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -57,8 +60,10 @@ import com.openexchange.context.ContextService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.onboarding.internal.OnboardingConfig;
+import com.openexchange.onboarding.internal.OnboardingServiceImpl;
+import com.openexchange.onboarding.rmi.RemoteOnboardingService;
+import com.openexchange.onboarding.rmi.impl.RemoteOnboardingServiceImpl;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -106,6 +111,13 @@ public class OnboardingActivator extends HousekeepingActivator {
         // Register services
         registerService(OnboardingService.class, serviceImpl);
         registerService(Reloadable.class, new OnboardingReloadable(serviceImpl));
+
+        // Register appropriate RMI stub
+        {
+            Dictionary<String, Object> props = new Hashtable<String, Object>(2);
+            props.put("RMIName", RemoteOnboardingService.RMI_NAME);
+            registerService(Remote.class, new RemoteOnboardingServiceImpl(serviceImpl), props);
+        }
     }
 
     @Override

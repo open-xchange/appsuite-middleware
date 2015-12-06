@@ -4,6 +4,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.caldav"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.carddav"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.clt"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.eas"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.onboarding.json"/>
