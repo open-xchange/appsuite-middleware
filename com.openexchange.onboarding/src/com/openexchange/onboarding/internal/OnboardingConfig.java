@@ -55,6 +55,7 @@ import java.util.List;
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingType;
@@ -142,7 +143,7 @@ public class OnboardingConfig {
 
             // Read icon name
             String iconName = (String) values.get("icon");
-            Icon icon = null == iconName || "null".equalsIgnoreCase(iconName) ? null : new TemplateIcon(iconName);
+            Icon icon = Strings.isEmpty(iconName) || "null".equalsIgnoreCase(iconName) ? null : new TemplateIcon(iconName);
 
             // Read i18n strings
             String displayName = (String) values.get("displayName_t10e");
