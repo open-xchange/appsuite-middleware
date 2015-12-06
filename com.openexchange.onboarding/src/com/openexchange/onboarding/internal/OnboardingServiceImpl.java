@@ -59,12 +59,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.DefaultScenario;
 import com.openexchange.onboarding.Device;
@@ -86,7 +81,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, OnboardingProvider> implements OnboardingService, Reloadable {
+public class OnboardingServiceImpl implements OnboardingService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingServiceImpl.class);
 
@@ -95,31 +90,43 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
 
     /**
      * Initializes a new {@link OnboardingServiceImpl}.
+     */
+    public OnboardingServiceImpl() {
+        super();
+        providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
+        configuredScenariosReference = new AtomicReference<>(null);
+    }
+
+    /**
+     * Sets the specified configured scenarios.
      *
-     * @param context The bundle context
      * @param configuredScenarios The configured scenarios
      */
-    public OnboardingServiceImpl(BundleContext context, Map<String, ConfiguredScenario> configuredScenarios) {
-        super(context, OnboardingProvider.class, null);
-        providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
-        configuredScenariosReference = new AtomicReference<>(configuredScenarios);
+    public void setConfiguredScenarios(Map<String, ConfiguredScenario> configuredScenarios) {
+        configuredScenariosReference.set(configuredScenarios);
     }
 
-    // -----------------------------------------------------------------------------------------------------------------------------
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        try {
-            Map<String, ConfiguredScenario> scenarios = OnboardingInit.initScenarios(configService);
-            configuredScenariosReference.set(scenarios);
-        } catch (OXException e) {
-            LOG.error("Failed to reload on-boarding scenarios", e);
+    /**
+     * Adds the specified provider if no such provider is already contained.
+     *
+     * @param provider The provider to ass
+     * @return <code>true</code> if given provider has been successfully added; otherwise <code>false</code>
+     */
+    public boolean addProviderIfAbsent(OnboardingProvider provider) {
+        if (null == provider) {
+            return false;
         }
+        return null == providers.putIfAbsent(provider.getId(), provider);
     }
 
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    /**
+     * Removes the denoted provider
+     *
+     * @param providerId The identifier of the provider to remove
+     * @return <code>true</code> if provider was removed; otherwise <code>false</code>
+     */
+    public boolean removeProvider(String providerId) {
+        return null != providers.remove(providerId);
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------
@@ -182,7 +189,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
 
-        Scenario scenario = getScenario(scenarioId, configuredScenarios, true);
+        Scenario scenario = getScenario(scenarioId, configuredScenarios);
         if (null == scenario) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
@@ -196,7 +203,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-        Scenario scenario = getScenario(scenarioId, configuredScenarios, true);
+        Scenario scenario = getScenario(scenarioId, configuredScenarios);
         if (null == scenario || !scenario.isEnabled(session)) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
@@ -240,7 +247,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         return scenarios;
     }
 
-    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence) throws OXException {
+    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
@@ -254,7 +261,7 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
             throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
         }
 
-        return getScenario(configuredScenario, configuredScenarios, errorOnProviderAbsence);
+        return getScenario(configuredScenario, configuredScenarios, true);
     }
 
     private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence) throws OXException {
@@ -266,15 +273,23 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
                 if (errorOnProviderAbsence) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
                 }
+                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
                 return null;
             }
             scenario.addProvider(getProvider(providerId));
         }
 
         for (String alternativeId : configuredScenario.getAlternativeIds()) {
-            Scenario alternative = getScenario(alternativeId, configuredScenarios, false);
-            if (null != alternative) {
-                scenario.addAlternative(alternative);
+            ConfiguredScenario alternativeConfiguredScenario = configuredScenarios.get(alternativeId);
+            if (null == alternativeConfiguredScenario) {
+                LOG.warn("Alternative scenario '{}' does not exist in configured scenarios for '{}'", alternativeId, configuredScenario.getId());
+            } else if (!alternativeConfiguredScenario.isEnabled()) {
+                LOG.warn("Alternative scenario '{}' is not enabled in configured scenarios for '{}'", alternativeId, configuredScenario.getId());
+            } else {
+                Scenario alternative = getScenario(alternativeConfiguredScenario, configuredScenarios, false);
+                if (null != alternative) {
+                    scenario.addAlternative(alternative);
+                }
             }
         }
 
@@ -315,26 +330,6 @@ public class OnboardingServiceImpl extends ServiceTracker<OnboardingProvider, On
         OnboardingViewImpl view = new OnboardingViewImpl();
         view.add(availableDevices);
         return view;
-    }
-
-    // -----------------------------------------------------------------------------------------------------------------------------
-
-    @Override
-    public OnboardingProvider addingService(ServiceReference<OnboardingProvider> reference) {
-        OnboardingProvider provider = context.getService(reference);
-        if (null == providers.putIfAbsent(provider.getId(), provider)) {
-            return provider;
-        }
-
-        LOG.warn("An on-boarding provider already exists with identifier {}. Ignoring {}", provider.getId(), provider.getClass().getName());
-        context.ungetService(reference);
-        return null;
-    }
-
-    @Override
-    public void removedService(ServiceReference<OnboardingProvider> reference, OnboardingProvider configuration) {
-        providers.remove(configuration.getId());
-        context.ungetService(reference);
     }
 
 }

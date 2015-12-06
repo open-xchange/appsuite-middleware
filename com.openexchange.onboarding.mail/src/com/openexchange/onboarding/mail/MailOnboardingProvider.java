@@ -104,6 +104,11 @@ public class MailOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
     public boolean isAvailable(Session session) throws OXException {
         if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session)) {
             return false;

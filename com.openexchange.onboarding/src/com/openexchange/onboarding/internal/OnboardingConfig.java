@@ -61,19 +61,19 @@ import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.TemplateIcon;
 
 /**
- * {@link OnboardingInit} - Initialization class.
+ * {@link OnboardingConfig} - Initialization class.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingInit {
+public class OnboardingConfig {
 
     private static final String CONFIGFILE_SCENARIOS = "scenarios.yml";
 
     /**
-     * Initializes a new {@link OnboardingInit}.
+     * Initializes a new {@link OnboardingConfig}.
      */
-    public OnboardingInit() {
+    public OnboardingConfig() {
         super();
     }
 
@@ -84,8 +84,8 @@ public class OnboardingInit {
      * @return The configured scenarios
      * @throws OXException If initializing scenarios fails
      */
-    public static Map<String, ConfiguredScenario> initScenarios(ConfigurationService configService) throws OXException {
-        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingInit.class);
+    public static Map<String, ConfiguredScenario> parseScenarios(ConfigurationService configService) throws OXException {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingConfig.class);
 
         Map<String, ConfiguredScenario> scenarios = null;
 

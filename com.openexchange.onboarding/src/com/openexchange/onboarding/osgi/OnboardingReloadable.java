@@ -49,86 +49,48 @@
 
 package com.openexchange.onboarding.osgi;
 
-import com.openexchange.capabilities.CapabilityService;
+import java.util.Map;
+import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.internal.OnboardingServiceImpl;
+import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.internal.ConfiguredScenario;
 import com.openexchange.onboarding.internal.OnboardingConfig;
-import com.openexchange.onboarding.service.OnboardingService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.serverconfig.ServerConfigService;
-import com.openexchange.uadetector.UserAgentParser;
-import com.openexchange.user.UserService;
+import com.openexchange.onboarding.internal.OnboardingServiceImpl;
 
 /**
- * {@link OnboardingActivator}
+ * {@link OnboardingReloadable}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingActivator extends HousekeepingActivator {
+public class OnboardingReloadable implements Reloadable {
 
-    private volatile OnboardingServiceImpl registry;
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingReloadable.class);
+
+    private final OnboardingServiceImpl serviceImpl;
 
     /**
-     * Initializes a new {@link OnboardingActivator}.
+     * Initializes a new {@link OnboardingReloadable}.
      */
-    public OnboardingActivator() {
+    public OnboardingReloadable(OnboardingServiceImpl serviceImpl) {
         super();
+        this.serviceImpl = serviceImpl;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
-            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Create service instance
-        OnboardingServiceImpl serviceImpl = new OnboardingServiceImpl();
-        this.registry = serviceImpl;
-        serviceImpl.setConfiguredScenarios(OnboardingConfig.parseScenarios(getService(ConfigurationService.class)));
-        addService(OnboardingService.class, serviceImpl);
-
-        // Initialize & open provider tracker
-        OnboardingProviderTracker providerTracker = new OnboardingProviderTracker(context, serviceImpl);
-        rememberTracker(providerTracker);
-        openTrackers();
-
-        // Register services
-        registerService(OnboardingService.class, serviceImpl);
-        registerService(Reloadable.class, new OnboardingReloadable(serviceImpl));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-
-        OnboardingServiceImpl registry = this.registry;
-        if (null != registry) {
-            this.registry = null;
-            removeService(OnboardingService.class);
+    public void reloadConfiguration(ConfigurationService configService) {
+        try {
+            Map<String, ConfiguredScenario> scenarios = OnboardingConfig.parseScenarios(configService);
+            serviceImpl.setConfiguredScenarios(scenarios);
+        } catch (OXException e) {
+            LOG.error("Failed to reload on-boarding scenarios", e);
         }
-
-        Services.setServiceLookup(null);
     }
 
     @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
     }
 
 }

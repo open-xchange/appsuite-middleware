@@ -98,6 +98,11 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
+
+    @Override
     public boolean isAvailable(Session session) throws OXException {
         return OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session);
     }
