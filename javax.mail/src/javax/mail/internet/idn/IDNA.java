@@ -49,9 +49,11 @@
 
 package javax.mail.internet.idn;
 
-import gnu.inet.encoding.IDNAException;
 import javax.mail.internet.AddressException;
+
 import org.slf4j.LoggerFactory;
+
+import gnu.inet.encoding.IDNAException;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
@@ -82,28 +84,37 @@ public final class IDNA {
      * @return The ASCII-encoded (punycode) of given internet address or <code>null</code> if argument is <code>null</code>
      * @throws AddressException If ASCII representation of given internet address cannot be created
      */
-    public static String toACE(final String idnAddress) throws AddressException {
+    public static String toACE(String idnAddress) throws AddressException {
         if (null == idnAddress || isAscii(idnAddress)) {
             return idnAddress;
         }
         try {
-            final int pos = idnAddress.indexOf('@');
+            // Check for presence of '@' character
+            int pos = idnAddress.indexOf('@');
             if (pos < 0) {
                 return idnAddress;
             }
-            final int length = idnAddress.length();
+
+            // Check location of '@' character (should no be at the very end)
+            int length = idnAddress.length();
             if (pos == length - 1) {
                 return idnAddress;
             }
-            final StringBuilder sb = new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@');
+
+            // Generate the ACE representation for given address (known to contain non-ascii characters)
+            StringBuilder sb = new StringBuilder(length + 8).append(idnAddress.substring(0, pos)).append('@');
             if (idnAddress.endsWith(">")) {
                 sb.append(gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1, idnAddress.length() - 1), true)).append('>');
             } else {
                 sb.append(gnu.inet.encoding.IDNA.toASCII(idnAddress.substring(pos + 1), true));
             }
             return sb.toString();
-        } catch (final gnu.inet.encoding.IDNAException e) {
-            final AddressException ae = new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
+        } catch (gnu.inet.encoding.IDNAException e) {
+            AddressException ae = new AddressException(new StringBuilder(e.getMessage()).append(": ").append(idnAddress).toString());
+            ae.setNextException(e);
+            throw ae;
+        } catch (RuntimeException e) {
+            AddressException ae = new AddressException(new StringBuilder("Failed to convert IDN to ACE/puny-code address: '").append(idnAddress).append('\'').toString());
             ae.setNextException(e);
             throw ae;
         }
@@ -129,8 +140,14 @@ public final class IDNA {
         if (pos < 0 || aceAddress.indexOf(ACE_PREFIX) < 0) {
             return aceAddress;
         }
-        return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(
-            gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true)).toString();
+        try {
+            String unicode = gnu.inet.encoding.IDNA.toUnicode(aceAddress.substring(pos + 1), true);
+            return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(unicode).toString();
+        } catch (RuntimeException e) {
+            // Decoding punycode failed
+        	LoggerFactory.getLogger(IDNA.class).error("Failed to convert ACE/puny-code to IDN address: {}", aceAddress, e);
+            return aceAddress;
+        }
     }
 
     private static final String SCHEME_DELIM = "://";
