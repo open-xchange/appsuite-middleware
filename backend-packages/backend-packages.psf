@@ -36,7 +36,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-grizzly"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive-comet"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive-client-windows"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-mail"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-eas-provisioning-sms"/>
@@ -67,6 +66,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-munin-scripts-jolokia"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth-provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-onboarding"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-drive-client-windows"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-parallels"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-database"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-passwordchange-script"/>
