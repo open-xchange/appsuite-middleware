@@ -113,7 +113,7 @@ public class ICalUtil {
             TasksSQLImpl tasksSql = new TasksSQLImpl(session);
             for (Task task : tasks) {
                 task.setParentFolderID(folderID);
-                tasksSql.insertTaskObject(task);
+                tasksSql.insertTaskObject(task, true);
             }
         }
         return tasks;

@@ -306,8 +306,8 @@ public class RdbTaskStorage extends TaskStorage {
     }
 
     @Override
-    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, int[] columns) throws OXException {
-        if (type == StorageType.ACTIVE) {
+    public void insertTask(final Context ctx, final Connection con, final Task task, final StorageType type, int[] columns, boolean checkUID) throws OXException {
+        if (checkUID && type == StorageType.ACTIVE) {
             handleUID(ctx, con, task);
         }
         final StringBuilder insert = new StringBuilder();

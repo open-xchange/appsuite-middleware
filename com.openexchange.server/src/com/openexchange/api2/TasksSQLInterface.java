@@ -145,6 +145,16 @@ public interface TasksSQLInterface {
      * Insert the task The lastModified attribute is empty, it will be filled with the actual timestamp.
      *
      * @param taskobject
+     * @param checkUID
+     * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException,
+     *             OXObjectNotFoundException
+     */
+    void insertTaskObject(Task taskobject, boolean checkUID) throws OXException;
+
+    /**
+     * Insert the task The lastModified attribute is empty, it will be filled with the actual timestamp.
+     *
+     * @param taskobject
      * @throws OXException, OXPermissionException, OXFolderNotFoundException, OXConflictException, OXMandatoryFieldException,
      *             OXObjectNotFoundException
      */

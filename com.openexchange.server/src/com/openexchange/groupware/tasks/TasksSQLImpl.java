@@ -196,6 +196,11 @@ public class TasksSQLImpl implements TasksSQLInterface {
 
     @Override
     public void insertTaskObject(Task task) throws OXException {
+        insertTaskObject(task, false);
+    }
+
+    @Override
+    public void insertTaskObject(Task task, boolean checkUID) throws OXException {
         final Context ctx = Tools.getContext(session.getContextId());
         final int userId = session.getUserId();
         final User user = Tools.getUser(ctx, userId);
@@ -204,7 +209,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
         final FolderObject folder = Tools.getFolder(ctx, folderId);
         InsertData insert = new InsertData(ctx, user, permissionBits, folder, task);
         insert.prepare(session);
-        insert.doInsert();
+        insert.doInsert(checkUID);
         insert.createReminder();
         insert.sentEvent(session);
 

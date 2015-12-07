@@ -199,7 +199,7 @@ public class TaskCopyTask implements CopyUserTaskService {
         for (final int taskId : tasks.keySet()) {
             final Task task = tasks.get(taskId);
             try {
-                TaskStorage.getInstance().insertTask(dstCtx, dstCon, task, StorageType.ACTIVE);
+                TaskStorage.getInstance().insertTask(dstCtx, dstCon, task, StorageType.ACTIVE, false);
                 final Set<Folder> source = FolderStorage.getInstance().selectFolder(srcCtx, srcCon, taskId, StorageType.ACTIVE);
                 for (int i = 0; i < source.size(); i++) {
                     final Folder newFolder = new Folder(task.getParentFolderID(), dstUserId);
