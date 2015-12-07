@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.drive.client.windows.service.internal;
 
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.server.ServiceLookup;

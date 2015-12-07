@@ -47,81 +47,32 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.drive.client.windows.service.internal;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
-
+import java.rmi.RemoteException;
+import java.util.List;
+import com.openexchange.drive.client.windows.files.UpdateFilesProviderImpl;
+import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link BrandingConfig} is a storage for branding configuration's.
+ * {@link BrandingConfigurationRemoteImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class BrandingConfig {
+public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRemote {
 
-    private final Properties prop;
-    private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
-    private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
-
-    private BrandingConfig(File file) throws IOException {
-        prop = new Properties();
-        try {
-            prop.load(new FileInputStream(file));
-        } catch (IOException e) {
-            throw e;
-        }
+    @Override
+    public List<String> reload() throws OXException, RemoteException {
+        UpdateFilesProviderImpl.getInstance().reload();
+        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
     }
 
-    public Properties getProperties() {
-        return prop;
-    }
-
-    public boolean contains(String property) {
-        return prop.containsKey(property);
-    }
-
-    /**
-     * Checks if the given file is a valid branding configuration and add it to the list of known configurations.
-     * 
-     * @param file
-     * @throws IOException
-     */
-    public static boolean checkFile(File file) throws IOException {
-        BrandingConfig conf = new BrandingConfig(file);
-        for (String field : FIELDS) {
-            if (!conf.contains(field)) {
-                return false;
-            }
-        }
-        CONFIGS.put(file.getParentFile().getName(), conf);
-        return true;
-    }
-
-    /**
-     * Clear the list of all known configurations.
-     */
-    public static void clear() {
-        CONFIGS.clear();
-    }
-
-    /**
-     * Retrieves the configuration for the given branding.
-     * 
-     * @param branding
-     * @return
-     */
-    public static BrandingConfig getBranding(String branding) {
-        return CONFIGS.get(branding);
-    }
-
-    public static boolean isValid(String branding) {
-        return CONFIGS.containsKey(branding);
+    @Override
+    public List<String> reload(String path) throws RemoteException, OXException {
+        UpdateFilesProviderImpl.getInstance().reload(path);
+        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
     }
 
 }

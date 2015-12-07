@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.drive.client.windows.service.internal;
 
 import static com.openexchange.java.Strings.quote;
 import java.io.IOException;
@@ -57,8 +57,15 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
+import com.openexchange.drive.client.windows.service.Constants;
+import com.openexchange.drive.client.windows.service.DriveUpdateService;
+import com.openexchange.drive.client.windows.service.UpdaterExceptionCodes;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.session.Session;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 
@@ -110,6 +117,29 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         ConfigurationService conf = Services.getService(ConfigurationService.class);
         OXTemplate template = templateService.loadTemplate(conf.getProperty(Constants.TMPL_UPDATER_CONFIG, Constants.TMPL_UPDATER_DEFAULT));
         return template;
+    }
+
+    @Override
+    public String getInstallerDownloadUrl(HostData hostData, Session session) throws OXException {
+        // Get associated branding
+        String branding;
+        {
+            ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
+            ConfigView configView = configFactory.getView(session.getUserId(), session.getContextId());
+            branding = configView.get(Constants.BRANDING_CONF, String.class);
+            if (!isValid(branding)) {
+                throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
+            }
+        }
+
+        // Get the name of .exe file
+        String exeFileName = getExeFileName(branding);
+
+        // Compile server URL
+        String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
+
+        // ... and return URL
+        return Utils.getFileUrl(serverUrl, branding, exeFileName);
     }
 
     @Override

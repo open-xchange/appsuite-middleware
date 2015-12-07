@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,52 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.onboarding.drive.client.windows.osgi;
 
-import java.rmi.RemoteException;
-import java.util.List;
-import com.openexchange.drive.client.windows.files.UpdateFilesProviderImpl;
-import com.openexchange.exception.OXException;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.drive.client.windows.service.DriveUpdateService;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.drive.client.windows.DriveWindowsClientOnboardingProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link BrandingConfigurationRemoteImpl}
+ * {@link DriveWindowsClientOnboardingActivator}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRemote {
+public class DriveWindowsClientOnboardingActivator extends HousekeepingActivator {
 
-    @Override
-    public List<String> reload() throws OXException, RemoteException {
-        UpdateFilesProviderImpl.getInstance().reload();
-        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
+    /**
+     * Initializes a new {@link DriveWindowsClientOnboardingActivator}.
+     */
+    public DriveWindowsClientOnboardingActivator() {
+        super();
     }
 
     @Override
-    public List<String> reload(String path) throws RemoteException, OXException {
-        UpdateFilesProviderImpl.getInstance().reload(path);
-        return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, DriveUpdateService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DriveWindowsClientOnboardingActivator.class);
+        logger.info("Starting bundle \"{}\"...", context.getBundle().getSymbolicName());
+        registerService(OnboardingProvider.class, new DriveWindowsClientOnboardingProvider(this));
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(DriveWindowsClientOnboardingActivator.class);
+        logger.info("Stopping bundle \"{}\"...", context.getBundle().getSymbolicName());
+        super.stopBundle();
     }
 
 }

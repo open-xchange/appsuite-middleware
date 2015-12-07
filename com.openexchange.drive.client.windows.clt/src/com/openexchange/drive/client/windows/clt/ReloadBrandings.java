@@ -60,8 +60,8 @@ import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.drive.client.windows.service.BrandingConfigurationRemote;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
 import com.openexchange.exception.OXException;
 
 /**

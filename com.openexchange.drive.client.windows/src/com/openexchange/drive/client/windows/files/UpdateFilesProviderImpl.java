@@ -64,9 +64,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.drive.client.windows.service.BrandingConfig;
 import com.openexchange.drive.client.windows.service.UpdaterExceptionCodes;
-import com.openexchange.drive.client.windows.service.Utils;
+import com.openexchange.drive.client.windows.service.internal.BrandingConfig;
+import com.openexchange.drive.client.windows.service.internal.Utils;
 import com.openexchange.drive.client.windows.servlet.BrandingException;
 import com.openexchange.exception.OXException;
 

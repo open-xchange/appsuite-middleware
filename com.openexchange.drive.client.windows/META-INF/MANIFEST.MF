@@ -7,7 +7,8 @@ Bundle-Activator: com.openexchange.drive.client.windows.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.drive.client.windows.service
+Export-Package: com.openexchange.drive.client.windows.service,
+ com.openexchange.drive.client.windows.service.rmi
 Import-Package: com.openexchange.ajax.helper,
  com.openexchange.capabilities,
  com.openexchange.config,
@@ -23,6 +24,7 @@ Import-Package: com.openexchange.ajax.helper,
  com.openexchange.login,
  com.openexchange.login.internal,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.templating,

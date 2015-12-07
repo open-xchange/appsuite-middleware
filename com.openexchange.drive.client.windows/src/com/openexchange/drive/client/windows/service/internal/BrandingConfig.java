@@ -47,45 +47,82 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.drive.client.windows.service.internal;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
-import com.openexchange.exception.OXException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
+import com.openexchange.drive.client.windows.service.Constants;
+
 
 /**
- * {@link BrandingConfigurationRemote} is a rmi interface to reload the current branding configuration's.
+ * {@link BrandingConfig} is a storage for branding configuration's.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public interface BrandingConfigurationRemote extends Remote {
+public class BrandingConfig {
+
+    private final Properties prop;
+    private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
+    private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
+
+    private BrandingConfig(File file) throws IOException {
+        prop = new Properties();
+        try {
+            prop.load(new FileInputStream(file));
+        } catch (IOException e) {
+            throw e;
+        }
+    }
+
+    public Properties getProperties() {
+        return prop;
+    }
+
+    public boolean contains(String property) {
+        return prop.containsKey(property);
+    }
 
     /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = BrandingConfigurationRemote.class.getSimpleName();
-
-    /**
-     * This method reloads the branding configurations and the corresponding update files.
-     * It uses the last used path. In the major of cases this will be the path specified in <code>com.openexchange.drive.updater.path</code>.
+     * Checks if the given file is a valid branding configuration and add it to the list of known configurations.
      * 
-     * @return A list of the loaded branding identifiers.
-     * @throws OXException
-     * @throws RemoteException
+     * @param file
+     * @throws IOException
      */
-    public List<String> reload() throws OXException, RemoteException;
+    public static boolean checkFile(File file) throws IOException {
+        BrandingConfig conf = new BrandingConfig(file);
+        for (String field : FIELDS) {
+            if (!conf.contains(field)) {
+                return false;
+            }
+        }
+        CONFIGS.put(file.getParentFile().getName(), conf);
+        return true;
+    }
 
     /**
-     * This method reloads the branding configurations and the corresponding update files for given path.
-     * It must be pointed out that <code>com.openexchange.drive.updater.path</code> will be ignored and the given path is used instead.
-     * 
-     * @param path The path to be used.
-     * @return A list of the loaded branding identifiers.
-     * @throws RemoteException
-     * @throws OXException
+     * Clear the list of all known configurations.
      */
-    public List<String> reload(String path) throws RemoteException, OXException;
+    public static void clear() {
+        CONFIGS.clear();
+    }
+
+    /**
+     * Retrieves the configuration for the given branding.
+     * 
+     * @param branding
+     * @return
+     */
+    public static BrandingConfig getBranding(String branding) {
+        return CONFIGS.get(branding);
+    }
+
+    public static boolean isValid(String branding) {
+        return CONFIGS.containsKey(branding);
+    }
 
 }

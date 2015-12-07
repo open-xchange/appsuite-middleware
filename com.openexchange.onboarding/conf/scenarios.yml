@@ -28,6 +28,39 @@
 #
 
 
+### OX Drive App
+################################################################################
+
+drivewindowsclientinstall:
+    enabled: true
+    type: link
+    providers: [drivewindowsclient]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: drivewindowsclient.png
+    # The translatable display name
+    displayName_t10e: "OX Drive Windows Client"
+    # The translatable description
+    description_t10e: "To use Drive on your device, simply download OX Drive Windows Client"
+
+
+### OX Mail App
+################################################################################
+
+mailappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [mailapp]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: mailapp.png
+    # The translatable display name
+    displayName_t10e: "OX Mail App"
+    # The translatable description
+    description_t10e: "To use Mail on your device, simply download OX Mail App"
+
+
 ### CalDAV & CardDAV Sync
 ################################################################################
 
@@ -41,7 +74,7 @@ davsync:
     # The translatable display name
     displayName_t10e: "CalDAV & CardDAV Sync"
     # The translatable description
-    description_t10e: "Synchronize your appointments and contacts"
+    description_t10e: "To use Calendar & Contacts on your device, simply enable CalDAV & CardDAV Sync"
 
 #davsync_mybrand:
 #    enabled: true
@@ -63,16 +96,17 @@ davmanual:
     # The name of the image file located in '/opt/open-xchange/templates' directory
     icon: davsync.png
     # The translatable display name
-    displayName_t10e: "CalDAV & CardDAV Sync"
+    displayName_t10e: "CalDAV & CardDAV server details"
     # The translatable description
-    description_t10e: "Synchronize your appointments and contacts"
+    description_t10e: "To setup CalDAV & CardDAV account, please use the folling server details"
 
 
 ### Exchange ActiveSync
 ################################################################################
 
 eassync:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: plist
     providers: [eas]
     alternatives: [easmanual]
@@ -84,7 +118,8 @@ eassync:
     description_t10e: "Synchronize your emails, contacts, calendar, and tasks"
 
 easmanual:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: manual
     providers: [eas]
     alternatives: []

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.client.windows.service;
+package com.openexchange.drive.client.windows.service.internal;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -59,6 +59,7 @@ import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.drive.client.windows.service.Constants;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
