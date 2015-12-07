@@ -517,7 +517,7 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public Connection getReadOnly(Assignment assignment) throws OXException {
         AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
-        return get(assignmentImpl, false, true);
+        return get(assignmentImpl, false, false);
     }
 
     /**
@@ -526,6 +526,6 @@ public final class DatabaseServiceImpl implements DatabaseService {
     @Override
     public Connection getWritable(Assignment assignment) throws OXException {
         AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
-        return get(assignmentImpl, true, true);
+        return get(assignmentImpl, true, false);
     }
 }
