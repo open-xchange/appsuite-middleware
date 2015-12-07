@@ -145,11 +145,11 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     @Override
     public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
+        for (UserParticipant up : cObj.getUsers()) {
+            addUserAttendee(index, up, ctx, component, cObj);
+        }
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {
-                case Participant.USER:
-                    addUserAttendee(index, (UserParticipant)p, ctx, component, cObj);
-                    break;
                 case Participant.EXTERNAL_USER:
                     addExternalAttendee((ExternalUserParticipant)p, component);
                     break;
@@ -269,6 +269,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
                 address = resolveUserMail(index, userParticipant, ctx);
             }
             address = IDNA.toACE(address);
+            PropertyList properties = component.getProperties(Property.ATTENDEE);
+            for (Object p : properties) {
+                if (((Property)p).getValue().equals("mailto:" + address)) {
+                    return; // skip
+                }
+            }
             attendee.setValue("mailto:" + address);
             final ParameterList parameters = attendee.getParameters();
             parameters.add(Role.REQ_PARTICIPANT);
