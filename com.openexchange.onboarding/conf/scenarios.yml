@@ -61,6 +61,23 @@ mailappinstall:
     description_t10e: "To use Mail on your device, simply download OX Mail App"
 
 
+### OX Drive App
+################################################################################
+
+mailappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [driveapp]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory
+    icon: driveapp.png
+    # The translatable display name
+    displayName_t10e: "OX Drive App"
+    # The translatable description
+    description_t10e: "To use Drive on your device, simply download OX Drive App"
+
+
 ### CalDAV & CardDAV Sync
 ################################################################################
 

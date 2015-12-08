@@ -1,7 +1,7 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Open-Xchange on-boarding bundle for the OX Mail App
-Bundle-SymbolicName: com.openexchange.onboarding.mailapp
+Bundle-Name: Open-Xchange on-boarding bundle for the OX Drive App
+Bundle-SymbolicName: com.openexchange.onboarding.driveapp
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -17,4 +17,4 @@ Import-Package: com.openexchange.capabilities,
  com.openexchange.server,
  com.openexchange.session,
  org.osgi.framework
-Bundle-Activator: com.openexchange.onboarding.mailapp.osgi.MailAppOnboardingActivator
+Bundle-Activator: com.openexchange.onboarding.driveapp.osgi.DriveAppOnboardingActivator

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.onboarding.mailapp;
+package com.openexchange.onboarding.driveapp;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.LinkResult;
@@ -70,24 +71,24 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link MailAppOnboardingProvider}
+ * {@link DriveAppOnboardingProvider}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class MailAppOnboardingProvider implements OnboardingProvider {
+public class DriveAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
 
     /**
-     * Initializes a new {@link MailAppOnboardingProvider}.
+     * Initializes a new {@link DriveAppOnboardingProvider}.
      */
-    public MailAppOnboardingProvider(ServiceLookup services) {
+    public DriveAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "mailapp";
+        identifier = "driveapp";
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
     }
 
@@ -98,7 +99,7 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability("mobile_mail_app", session);
+        return OnboardingUtility.hasPermission(Permission.INFOSTORE, session);
     }
 
     @Override
@@ -152,10 +153,10 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
             Device device = request.getDevice();
             switch (device.getPlatform()) {
                 case APPLE:
-                    propertyName = "com.openexchange.onboarding.mailapp.store.apple.appstore";
+                    propertyName = "com.openexchange.onboarding.driveapp.store.apple.appstore";
                     break;
                 case ANDROID_GOOGLE:
-                    propertyName = "com.openexchange.onboarding.mailapp.store.google.playstore";
+                    propertyName = "com.openexchange.onboarding.driveapp.store.google.playstore";
                     break;
                 default:
                     throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());

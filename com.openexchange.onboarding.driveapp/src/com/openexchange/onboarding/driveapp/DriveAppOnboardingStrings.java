@@ -47,29 +47,29 @@
  *
  */
 
-package com.openexchange.onboarding.mailapp;
+package com.openexchange.onboarding.driveapp;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link MailAppOnboardingStrings}
+ * {@link DriveAppOnboardingStrings}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class MailAppOnboardingStrings implements LocalizableStrings {
+public class DriveAppOnboardingStrings implements LocalizableStrings {
 
-    // Open-Xchange MailApp
-    public static final String MAILAPP_DISPLAY_NAME = "Open-Xchange Mail App";
+    // Open-Xchange Drive App
+    public static final String DRIVEAPP_DISPLAY_NAME = "Open-Xchange Drive App";
 
-    // The Open-Xchange MailApp to synchronize E-Mails
-    public static final String MAILAPP_DESCRIPTION = "The Open-Xchange Mail App to synchronize E-Mails";
+    // The Open-Xchange Drive App to synchronize files
+    public static final String DRIVEAPP_DESCRIPTION = "The Open-Xchange Drive App to synchronize files";
 
-    // Get the Open-Xchange MailApp
-    public static final String MAILAPP_STORE_LINK = "Get the Open-Xchange Mail App";
+    // Get the Open-Xchange Drive App
+    public static final String DRIVEAPP_STORE_LINK = "Get the Open-Xchange Drive App";
 
-    private MailAppOnboardingStrings() {
+    private DriveAppOnboardingStrings() {
         super();
     }
 
