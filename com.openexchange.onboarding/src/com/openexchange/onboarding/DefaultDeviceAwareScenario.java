@@ -66,14 +66,15 @@ public class DefaultDeviceAwareScenario extends DefaultScenario implements Devic
      *
      * @param id The scenario identifier
      * @param type The associated type
+     * @param link The optional link
      * @param icon The icon
      * @param i18nDisplayName The translatable display name
      * @param i18nDescription The translatable description
      * @param device The associated device
      * @return The new {@code DefaultScenario} instance
      */
-    public static DefaultDeviceAwareScenario newInstance(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        return new DefaultDeviceAwareScenario(id, type, icon, i18nDisplayName, i18nDescription, device);
+    public static DefaultDeviceAwareScenario newInstance(String id, OnboardingType type, String link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
+        return new DefaultDeviceAwareScenario(id, type, link, icon, i18nDisplayName, i18nDescription, device);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -81,8 +82,8 @@ public class DefaultDeviceAwareScenario extends DefaultScenario implements Devic
     private final Device device;
     private final List<OnboardingAction> actions;
 
-    private DefaultDeviceAwareScenario(String id, OnboardingType type, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        super(new StringBuilder(32).append(device.getId()).append('/').append(id).toString(), type, icon, i18nDisplayName, i18nDescription);
+    private DefaultDeviceAwareScenario(String id, OnboardingType type, String link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
+        super(new StringBuilder(32).append(device.getId()).append('/').append(id).toString(), type, link, icon, i18nDisplayName, i18nDescription);
         this.device = device;
         actions = new ArrayList<>(4);
     }

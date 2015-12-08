@@ -49,6 +49,8 @@
 
 package com.openexchange.onboarding.internal;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -121,15 +123,49 @@ public class OnboardingConfig {
                 throw OnboardingExceptionCodes.DUPLICATE_SCENARIO_CONFIGURATION.create(id);
             }
 
-            // Check value
+            // Check values map
             if (false == Map.class.isInstance(entry.getValue())) {
                 throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
             }
 
-            // Parse value
+            // Parse values map
             Map<String, Object> values = (Map<String, Object>) entry.getValue();
+
+            // Enabled flag
             Boolean enabled = (Boolean) values.get("enabled");
-            OnboardingType type = OnboardingType.typeFor((String) values.get("type"));
+
+            // The scenario's type
+            OnboardingType type;
+            {
+                String sType = (String) values.get("type");
+                type = OnboardingType.typeFor(sType);
+                if (null == type) {
+                    throw OnboardingExceptionCodes.NO_SUCH_TYPE.create(sType, id);
+                }
+            }
+
+            // Check for special "link" scenario
+            Link link = null;
+            if (OnboardingType.LINK == type) {
+                // The link
+                String sLink = (String) values.get("link");
+                if (!Strings.isEmpty(sLink)) {
+                    try {
+                        URI uri = new URI(sLink);
+                        if ("property".equalsIgnoreCase(uri.getScheme())) {
+                            // E.g. "property://com.openexchange.onboarding.app.link"
+                            link = new Link(uri.getAuthority(), true);
+                        } else {
+                            // E.g. "https://itunes.apple.com/us/app/keynote/id361285480?mt=8"
+                            link = new Link(sLink, false);
+                        }
+                    } catch (URISyntaxException e) {
+                        throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(e, id);
+                    }
+                }
+            }
+
+            // Associated providers
             List<String> providerIds;
             {
                 Object providersValue = values.get("providers");
@@ -138,6 +174,8 @@ public class OnboardingConfig {
                 }
                 providerIds = (List<String>) providersValue;
             }
+
+            // Optional alternative scenarios
             List<String> alternativeIds;
             {
                 Object alternativesValue = values.get("alternatives");
@@ -171,7 +209,7 @@ public class OnboardingConfig {
             String displayName = (String) values.get("displayName_t10e");
             String description = (String) values.get("description_t10e");
 
-            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, providerIds, alternativeIds, displayName, icon, description));
+            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, link, providerIds, alternativeIds, displayName, icon, description));
         }
         return scenarios;
     }

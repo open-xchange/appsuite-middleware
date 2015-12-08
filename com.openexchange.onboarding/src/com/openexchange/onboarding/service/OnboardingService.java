@@ -108,10 +108,11 @@ public interface OnboardingService {
      * Gets the scenario by specified identifier
      *
      * @param scenarioId The scenario identifier
+     * @param session The session
      * @return The scenario
      * @throws OXException If scenario cannot be returned
      */
-    Scenario getScenario(String scenarioId) throws OXException;
+    Scenario getScenario(String scenarioId, Session session) throws OXException;
 
     /**
      * Gets the device-aware scenario by specified identifier

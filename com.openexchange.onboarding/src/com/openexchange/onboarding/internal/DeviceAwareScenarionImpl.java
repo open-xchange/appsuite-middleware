@@ -106,6 +106,11 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     }
 
     @Override
+    public String getLink() {
+        return scenario.getLink();
+    }
+
+    @Override
     public boolean isEnabled(Session session) throws OXException {
         // Return pre-computed flag
         return enabled;

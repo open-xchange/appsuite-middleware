@@ -68,6 +68,13 @@ public interface Scenario extends IdEntity {
     OnboardingType getType();
 
     /**
+     * Gets the link
+     *
+     * @return The link
+     */
+    String getLink();
+
+    /**
      * Gets the associated on-boarding providers.
      *
      * @param session The session to use

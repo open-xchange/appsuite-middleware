@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,30 +47,47 @@
  *
  */
 
-package com.openexchange.onboarding.driveapp;
-
-import com.openexchange.i18n.LocalizableStrings;
-
+package com.openexchange.onboarding.internal;
 
 /**
- * {@link DriveAppOnboardingStrings}
+ * {@link Link} - A link for a scenario having type set to "link".
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DriveAppOnboardingStrings implements LocalizableStrings {
+public class Link {
 
-    // Open-Xchange Drive App
-    public static final String DRIVEAPP_DISPLAY_NAME = "Open-Xchange Drive App";
+    private final String link;
+    private final boolean property;
 
-    // The Open-Xchange Drive App to synchronize files
-    public static final String DRIVEAPP_DESCRIPTION = "The Open-Xchange Drive App to synchronize files";
-
-    // Get the Open-Xchange Drive App
-    public static final String DRIVEAPP_STORE_LINK = "Get the Open-Xchange Drive App";
-
-    private DriveAppOnboardingStrings() {
+    /**
+     * Initializes a new {@link Link}.
+     *
+     * @param link The link
+     * @param property Whether the link denotes a property
+     */
+    public Link(String link, boolean property) {
         super();
+        this.link = link;
+        this.property = property;
+    }
+
+    /**
+     * Gets the link
+     *
+     * @return The link
+     */
+    public String getLink() {
+        return link;
+    }
+
+    /**
+     * Gets the property flag
+     *
+     * @return The property flag
+     */
+    public boolean isProperty() {
+        return property;
     }
 
 }

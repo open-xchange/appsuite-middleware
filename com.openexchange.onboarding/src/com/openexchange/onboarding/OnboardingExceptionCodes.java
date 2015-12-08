@@ -155,6 +155,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * Missing property: %1$s
      */
     MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 23),
+    /**
+     * No such type for identifier %1$s in scenario %2$s
+     */
+    NO_SUCH_TYPE("No such type for identifier %1$s in scenario %2$s", null, Category.CATEGORY_CONFIGURATION, 24),
     ;
 
     /** The error code prefix for on-boarding module */

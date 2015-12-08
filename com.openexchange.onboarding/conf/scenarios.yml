@@ -11,6 +11,10 @@
 #       "manual" for a description for the user for manual set-up
 #       "link" for a link/URL to either Apple App Store or Google Play Store
 #
+#     link: <link>
+#       String. The link routing to the app. Only valid in case "type" is set to "link"!
+#       For specifying a property that provides the actual link, please use special "property" scheme; e.g. "property://com.openexchange.onboarding.app.mylink"
+#
 #     providers: <provider-identifiers>
 #       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
 #
@@ -28,15 +32,35 @@
 #
 
 
+### Generic Apps
+################################################################################
+
+# Only an example
+myappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link: property://com.openexchange.onboarding.app.store.url
+    providers: [app]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+
 ### OX Drive App
 ################################################################################
 
 drivewindowsclientinstall:
     enabled: true
     type: link
+    link: property://
     providers: [drivewindowsclient]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: drivewindowsclient.png
     # The translatable display name
     displayName_t10e: "OX Drive Windows Client"
@@ -53,7 +77,7 @@ mailappinstall:
     type: link
     providers: [mailapp]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailapp.png
     # The translatable display name
     displayName_t10e: "OX Mail App"
@@ -70,7 +94,7 @@ driveappinstall:
     type: link
     providers: [driveapp]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: driveapp.png
     # The translatable display name
     displayName_t10e: "OX Drive App"
@@ -86,7 +110,7 @@ davsync:
     type: plist
     providers: [carddav, caldav]
     alternatives: [davmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
     displayName_t10e: "CalDAV & CardDAV Sync"
@@ -98,7 +122,7 @@ davsync:
 #    type: plist
 #    providers: [carddav, caldav]
 #    alternatives: [davmanual]
-#    # The name of the image file located in '/opt/open-xchange/templates' directory
+#    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
 #    icon: <base64>
 #    # The translatable display name
 #    displayName_t10e: "OX Sync"
@@ -110,7 +134,7 @@ davmanual:
     type: manual
     providers: [carddav, caldav]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
     displayName_t10e: "CalDAV & CardDAV server details"
@@ -127,7 +151,7 @@ eassync:
     type: plist
     providers: [eas]
     alternatives: [easmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: eassync.png
     # The translatable display name
     displayName_t10e: "Exchange ActiveSync"
@@ -140,7 +164,7 @@ easmanual:
     type: manual
     providers: [eas]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: eassync.png
     # The translatable display name
     displayName_t10e: "Exchange ActiveSync"
@@ -156,7 +180,7 @@ mailsync:
     type: plist
     providers: [mail]
     alternatives: [mailmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailsync.png
     # The translatable display name
     displayName_t10e: "IMAP/SMTP"
@@ -168,7 +192,7 @@ mailmanual:
     type: manual
     providers: [mail]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailsync.png
     # The translatable display name
     displayName_t10e: "IMAP/SMTP"

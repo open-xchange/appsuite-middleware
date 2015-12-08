@@ -47,14 +47,11 @@
  *
  */
 
-package com.openexchange.onboarding.driveapp;
+package com.openexchange.onboarding.app;
 
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
-import com.openexchange.config.cascade.ComposedConfigProperty;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
@@ -62,7 +59,6 @@ import com.openexchange.onboarding.LinkResult;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
-import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.Scenario;
 import com.openexchange.server.ServiceLookup;
@@ -70,21 +66,21 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link DriveAppOnboardingProvider}
+ * {@link GenericAppOnboardingProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DriveAppOnboardingProvider implements OnboardingProvider {
+public class GenericAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
 
     /**
-     * Initializes a new {@link DriveAppOnboardingProvider}.
+     * Initializes a new {@link GenericAppOnboardingProvider}.
      */
-    public DriveAppOnboardingProvider(ServiceLookup services) {
+    public GenericAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
         identifier = "app";
@@ -98,7 +94,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability("drive", session);
+        return true;
     }
 
     @Override
@@ -125,7 +121,14 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
 
         switch(scenario.getType()) {
             case LINK:
-                return doExecuteLink(request, session);
+                {
+                    // Return the link from associated scenario
+                    String link = request.getScenario().getLink();
+                    if (Strings.isEmpty(link)) {
+                        throw OnboardingExceptionCodes.MISSING_PROPERTY.create("link");
+                    }
+                    return new LinkResult(link);
+                }
             case MANUAL:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case PLIST:
@@ -133,46 +136,6 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
             default:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
         }
-    }
-
-    private Result doExecuteLink(OnboardingRequest request, Session session) throws OXException {
-        return linkResult(request, session);
-    }
-
-    private Result linkResult(OnboardingRequest request, Session session) throws OXException {
-        return new LinkResult(getAppStoreLink(request, session));
-    }
-
-    private String getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
-        String propertyName;
-        {
-            Device device = request.getDevice();
-            switch (device.getPlatform()) {
-                case APPLE:
-                    propertyName = "com.openexchange.onboarding.driveapp.store.apple.appstore";
-                    break;
-                case ANDROID_GOOGLE:
-                    propertyName = "com.openexchange.onboarding.driveapp.store.google.playstore";
-                    break;
-                default:
-                    throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());
-            }
-        }
-
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
-        }
-
-        String value = property.get();
-        if (Strings.isEmpty(value)) {
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
-        }
-
-        return value;
     }
 
 }

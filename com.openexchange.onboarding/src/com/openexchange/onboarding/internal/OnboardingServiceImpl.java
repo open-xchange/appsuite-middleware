@@ -67,6 +67,7 @@ import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.ResultObject;
 import com.openexchange.onboarding.ResultReply;
@@ -182,14 +183,14 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
-    public Scenario getScenario(String scenarioId) throws OXException {
+    public Scenario getScenario(String scenarioId, Session session) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
 
-        Scenario scenario = getScenario(scenarioId, configuredScenarios);
+        Scenario scenario = getScenario(scenarioId, configuredScenarios, session);
         if (null == scenario) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
@@ -203,7 +204,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-        Scenario scenario = getScenario(scenarioId, configuredScenarios);
+        Scenario scenario = getScenario(scenarioId, configuredScenarios, session);
         if (null == scenario || !scenario.isEnabled(session)) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
@@ -233,7 +234,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             }
 
             if (configuredScenario.isEnabled()) {
-                Scenario scenario = getScenario(configuredScenario, configuredScenarios, false);
+                Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
                 if (null != scenario && scenario.isEnabled(session)) {
                     boolean enabled = true;
                     for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
@@ -247,7 +248,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         return scenarios;
     }
 
-    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios) throws OXException {
+    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios, Session session) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
         }
@@ -261,11 +262,12 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
         }
 
-        return getScenario(configuredScenario, configuredScenarios, true);
+        return getScenario(configuredScenario, configuredScenarios, true, session);
     }
 
-    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence) throws OXException {
-        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
+    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence, Session session) throws OXException {
+        String link = resolveLink(configuredScenario.getLink(), session);
+        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
 
         for (String providerId : configuredScenario.getProviderIds()) {
             OnboardingProvider provider = providers.get(providerId);
@@ -286,7 +288,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             } else if (!alternativeConfiguredScenario.isEnabled()) {
                 LOG.warn("Alternative scenario '{}' is not enabled in configured scenarios for '{}'", alternativeId, configuredScenario.getId());
             } else {
-                Scenario alternative = getScenario(alternativeConfiguredScenario, configuredScenarios, false);
+                Scenario alternative = getScenario(alternativeConfiguredScenario, configuredScenarios, false, session);
                 if (null != alternative) {
                     scenario.addAlternative(alternative);
                 }
@@ -294,6 +296,10 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         return scenario;
+    }
+
+    private String resolveLink(Link link, Session session) throws OXException {
+        return null == link ? null : (link.isProperty() ? OnboardingUtility.getValueFromProperty(link.getLink(), null, session) : link.getLink());
     }
 
     @Override

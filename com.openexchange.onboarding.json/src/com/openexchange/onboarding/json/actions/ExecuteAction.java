@@ -119,7 +119,7 @@ public class ExecuteAction extends AbstractOnboardingAction {
             }
         }
 
-        Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId());
+        Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
 
         // Create on-boarding request & execute it
         DefaultOnboardingRequest request = new DefaultOnboardingRequest(scenario, action, compositeId.getDevice(), requestData.getHostData(), input);

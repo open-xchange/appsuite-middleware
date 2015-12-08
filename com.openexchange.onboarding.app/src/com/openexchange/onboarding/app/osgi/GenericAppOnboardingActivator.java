@@ -47,30 +47,38 @@
  *
  */
 
-package com.openexchange.onboarding.mailapp;
+package com.openexchange.onboarding.app.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.app.GenericAppOnboardingProvider;
+import com.openexchange.osgi.HousekeepingActivator;
 
 
 /**
- * {@link MailAppOnboardingStrings}
+ * {@link GenericAppOnboardingActivator}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class MailAppOnboardingStrings implements LocalizableStrings {
+public class GenericAppOnboardingActivator extends HousekeepingActivator {
 
-    // Open-Xchange MailApp
-    public static final String MAILAPP_DISPLAY_NAME = "Open-Xchange Mail App";
-
-    // The Open-Xchange MailApp to synchronize E-Mails
-    public static final String MAILAPP_DESCRIPTION = "The Open-Xchange Mail App to synchronize E-Mails";
-
-    // Get the Open-Xchange MailApp
-    public static final String MAILAPP_STORE_LINK = "Get the Open-Xchange Mail App";
-
-    private MailAppOnboardingStrings() {
+    /**
+     * Initializes a new {@link GenericAppOnboardingActivator}.
+     */
+    public GenericAppOnboardingActivator() {
         super();
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(OnboardingProvider.class, new GenericAppOnboardingProvider(this));
     }
 
 }
