@@ -24,7 +24,8 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.slf4j,
  sun.misc
-Export-Package: com.openexchange.threadpool,
+Export-Package: com.openexchange.processing,
+ com.openexchange.threadpool,
  com.openexchange.threadpool.behavior,
  com.openexchange.timer
 Bundle-Activator: com.openexchange.threadpool.osgi.ThreadPoolActivator

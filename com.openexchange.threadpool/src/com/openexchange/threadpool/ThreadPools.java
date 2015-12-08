@@ -62,6 +62,7 @@ import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.openexchange.exception.OXException;
+import com.openexchange.processing.ProcessorService;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
@@ -158,6 +159,15 @@ public final class ThreadPools {
      */
     public static TimerService getTimerService() {
         return ThreadPoolActivator.REF_TIMER.get();
+    }
+
+    /**
+     * Gets registered processor service.
+     *
+     * @return The processor service or <code>null</code>
+     */
+    public static ProcessorService getProcessorService() {
+        return ThreadPoolActivator.REF_PROCESSOR.get();
     }
 
     /**
