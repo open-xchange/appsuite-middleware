@@ -14,7 +14,7 @@ BuildRequires:  java-devel >= 1.7.0
 %endif
 BuildRequires:  open-xchange-admin
 Version:        @OXVERSION@
-%define         ox_release 10
+%define         ox_release 11
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -83,6 +83,8 @@ fi
 %doc com.openexchange.parallels/ChangeLog
 
 %changelog
+* Tue Dec 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-12-07 (2918)
 * Thu Nov 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-11-23 (2878)
 * Thu Nov 05 2015 Marcus Klein <marcus.klein@open-xchange.com>
