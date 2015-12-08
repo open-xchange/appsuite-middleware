@@ -53,9 +53,13 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
+import org.apache.commons.codec.binary.Base64;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Strings;
+import com.openexchange.onboarding.DefaultIcon;
 import com.openexchange.onboarding.Icon;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingType;
@@ -105,6 +109,8 @@ public class OnboardingConfig {
         return scenarios;
     }
 
+    private static final Pattern PATTERN_FILENAME = Pattern.compile("^[\\w,\\s-]+\\.[A-Za-z]{2,4}$");
+
     private static Map<String, ConfiguredScenario> parseScenarios(Map<String, Object> yaml) throws OXException {
         Map<String, ConfiguredScenario> scenarios = new LinkedHashMap<String, ConfiguredScenario>(yaml.size());
         for (Map.Entry<String, Object> entry : yaml.entrySet()) {
@@ -142,8 +148,24 @@ public class OnboardingConfig {
             }
 
             // Read icon name
-            String iconName = (String) values.get("icon");
-            Icon icon = Strings.isEmpty(iconName) || "null".equalsIgnoreCase(iconName) ? null : new TemplateIcon(iconName);
+            Icon icon;
+            {
+                String iconValue = (String) values.get("icon");
+                if (Strings.isEmpty(iconValue) || "null".equalsIgnoreCase(iconValue)) {
+                    icon = null;
+                } else {
+                    iconValue = iconValue.trim();
+                    if (PATTERN_FILENAME.matcher(iconValue).matches()) {
+                        // Assume a file name
+                        icon = new TemplateIcon(iconValue);
+                    } else {
+                        // Assume base64-encoded image
+                        byte[] bytes = Base64.decodeBase64(iconValue);
+                        String mimeType = ImageTypeDetector.getMimeType(bytes, null);
+                        icon = new DefaultIcon(bytes, null == mimeType ? "image/jpg" : mimeType);
+                    }
+                }
+            }
 
             // Read i18n strings
             String displayName = (String) values.get("displayName_t10e");

@@ -18,7 +18,7 @@
 #       Array of strings. A list of alternative/fall-back scenarios; e.g. the scenario for manual setup
 #
 #     icon: <file-name>
-#       String. The name of the icon image file located in '/opt/open-xchange/templates' directory
+#       String. The name of the icon image file located in '/opt/open-xchange/templates' directory or the base64-encoded binary content
 #
 #     displayName_t10e: <display-name>
 #       String. The translatable display name; will be available in scenarios.pot file
