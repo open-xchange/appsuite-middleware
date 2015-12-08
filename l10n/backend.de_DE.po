@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2015-10-27 09:26+0100\n"
+"PO-Revision-Date: 2015-12-08 14:47+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -87,7 +87,9 @@ msgstr "Alle Ihre Termine lesen."
 msgid "Create, modify and delete appointments."
 msgstr "Termine anlegen, ändern und löschen."
 
+#. The display name for calendar module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar.printing/src/com/openexchange/calendar/printing/CalendarPrintingStrings.java:61
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:107
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:94
 msgid "Calendar"
 msgstr "Kalender"
@@ -561,11 +563,7 @@ msgstr "%1$s hat die Einladung im Auftrag von %3$s %2$s:"
 msgid "%1$s has %2$s the invitation on your behalf:"
 msgstr "%1$s hat die Einladung in Ihrem Namen %2$s:"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:145
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
-msgid "tentatively accepted"
-msgstr "vorläufig bestätigt"
-
+#. public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 #. Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:148
 msgid "%1$s sets the status to %2$s for this appointment:"
@@ -735,23 +733,10 @@ msgstr "%1$s wurde aus dem Termin entfernt."
 msgid "%1$s has %2$s the appointment."
 msgstr "%1$s hat den Termin %2$s."
 
-#. -
-#. * Confirmation actions
+#. public static final String ACCEPTED = "accepted";
 #.
-#. accepted
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:235
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
-msgid "accepted"
-msgstr "bestätigt"
-
-#. declined
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:237
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
-msgid "declined"
-msgstr "abgelehnt"
-
+#. public static final String DECLINED = "declined";
+#.
 #. -
 #. * Confirmation statuses
 #.
@@ -761,10 +746,8 @@ msgstr "abgelehnt"
 msgid "waiting"
 msgstr "Wartestatus"
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:241
-msgid "tentatively accept"
-msgstr "vorläufig bestätigen"
-
+#.
+#. public static final String TENTATIVELY_ACCEPT = "tentatively accept";
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:243
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:245
 msgid "Invite the group %1$s to the appointment."
@@ -1716,6 +1699,24 @@ msgid "The supplied metadata could not be parsed: \"%1$s\""
 msgstr ""
 "Die bereitgestellten Metadaten konnten nicht analysiert werden: \"%1$s\""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:93
+msgid ""
+"The maximum number of synchronizable directories (%1$d) is exceeded. Please "
+"remove some directories and try again, or select another root folder."
+msgstr ""
+"Die maximale Anzahl synchronisierbarer Verzeichnisse (%1$d) wurde "
+"überschritten. Bitte entfernen Sie einige Verzeichnisse und versuchen Sie es "
+"erneut, oder wählen Sie einen anderen Stammordner."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
+msgid ""
+"The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please "
+"remove some files and try again."
+msgstr ""
+"Die maximale Anzahl von Dateien (%1$d) im Verzeichnis  \"%2$s\" wurde "
+"überschritten . Bitte entfernen Sie einige Dateien und versuchen Sie es "
+"erneut."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.boxcom/src/com/openexchange/file/storage/boxcom/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.dropbox/src/com/openexchange/file/storage/dropbox/FormStrings.java:61
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage.googledrive/src/com/openexchange/file/storage/googledrive/FormStrings.java:61
@@ -1952,6 +1953,14 @@ msgstr ""
 "Die Datei \"%1$s\" wurde aufgrund möglicher Datenverluste nicht gespeichert. "
 "Bitte lesen Sie die Warnhinweise für weitere Informationen."
 
+#. Bad or expired access token. Need to re-authenticate user.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:160
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
+msgid "Bad or expired access token. Need to re-authenticate user."
+msgstr ""
+"Zugriffs-Token ist fehlerhaft oder abgelaufen. Der Benutzer muss neu "
+"authentifiziert werden."
+
 #. Access denied.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:65
 msgid "Access denied."
@@ -2131,6 +2140,17 @@ msgid "The e-mail address you provided does not match any account on record."
 msgstr ""
 "Die von Ihnen angegebene E-Mail-Adresse stimmt mit keinem registrierten "
 "Account überein."
+
+#. The S3 storage responds with \"Bad Request\". Please check whether com.openexchange.filestore.s3.[filestoreID].signerOverride is properly configured for this filestore.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:154
+msgid ""
+"The S3 storage responds with \"Bad Request\". Please check whether com."
+"openexchange.filestore.s3.[filestoreID].signerOverride is properly "
+"configured for this filestore."
+msgstr ""
+"Der S3-Speicher antwortet mit \"Bad Request\". Bitte überprüfen Sie, ob com."
+"openexchange.filestore.s3.[filestoreID].signerOverride für diesen "
+"Dateispeicher richtig konfiguriert ist."
 
 #. No such document: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.sproxyd/src/com/openexchange/filestore/sproxyd/SproxydExceptionMessages.java:63
@@ -2401,7 +2421,9 @@ msgid "Folders"
 msgstr "Ordner"
 
 #. Search in Persons.
+#. The display name for contacts module
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/drive/DriveStrings.java:72
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:100
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:96
 msgid "Contacts"
 msgstr "Kontakte"
@@ -3729,6 +3751,267 @@ msgstr ""
 "Konfiguration -> Meine Social-Einstellungen -> Accounts. Versuchen Sie es "
 "dann erneut."
 
+#. The default display name for a CaldAV account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:71
+msgid "CalDAV"
+msgstr "CalDAV"
+
+#. A description for a CaldAV account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:74
+msgid "The CalDAV account for synchronizing calendar entries."
+msgstr "Der CalDAV-Account zum Synchronisieren von Kalendereinträgen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:76
+msgid "Your CalDAV profile"
+msgstr "Ihr CalDAV-Profil"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.caldav/src/com/openexchange/onboarding/caldav/CalDAVOnboardingStrings.java:78
+msgid "Your CalDAV settings"
+msgstr "Ihre CalDAV-Einstellungen"
+
+#. The default display name for a CardDAV account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:71
+msgid "CardDAV"
+msgstr "CardDAV"
+
+#. A description for a CardDAV account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:74
+msgid "The CardDAV account for synchronizing contact entries."
+msgstr "Der CalDAV-Account zum Synchronisieren von Kontakteinträgen."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:76
+msgid "Your CardDAV profile"
+msgstr "Ihr CardDAV-Profil"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.carddav/src/com/openexchange/onboarding/carddav/CardDAVOnboardingStrings.java:78
+msgid "Your CardDAV settings"
+msgstr "Ihre CardDAV-Einstellungen"
+
+#. Microsoft Exchange Active-Sync
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:64
+msgid "Microsoft Exchange Active-Sync"
+msgstr "Microsoft Exchange Active-Sync"
+
+#. The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:67
+msgid ""
+"The Microsoft Exchange Active-Sync account for synchronizing your calendar, "
+"contacts and messages."
+msgstr ""
+"Der Microsoft Exchange Active-Sync-Account zum Synchronisieren Ihrer "
+"Kalender, Kontakte und Nachrichten."
+
+#. Your Microsoft Exchange Active-Sync profile
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:70
+msgid "Your Microsoft Exchange Active-Sync profile"
+msgstr "Ihr Microsoft Exchange Active Sync-Profil"
+
+#. Your Microsoft Exchange Active-Sync settings
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.eas/src/com/openexchange/onboarding/eas/EASOnboardingStrings.java:73
+msgid "Your Microsoft Exchange Active-Sync settings"
+msgstr "Ihre Microsoft Exchange Active Sync-Einstellungen"
+
+#. The default display name for an IMAP account
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mail/src/com/openexchange/onboarding/mail/MailOnboardingStrings.java:71
+msgid "IMAP"
+msgstr "IMAP"
+
+#. A description for an IMAP account on a mobile device
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mail/src/com/openexchange/onboarding/mail/MailOnboardingStrings.java:74
+msgid "The account for accessing and sending E-Mails."
+msgstr "Der Account für den Zugriff auf und das Versenden von E-Mails."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mail/src/com/openexchange/onboarding/mail/MailOnboardingStrings.java:76
+msgid "Your IMAP profile"
+msgstr "Ihr IMAP-Profil"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding.mail/src/com/openexchange/onboarding/mail/MailOnboardingStrings.java:78
+msgid "Your IMAP settings"
+msgstr "Ihre IMAP-Einstellungen"
+
+#. Your selection is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:70
+msgid "Your selection is not supported."
+msgstr "Ihre Auswahl wird nicht unterstützt."
+
+#. The chosen configuration is not supported.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:73
+msgid "The chosen configuration is not supported."
+msgstr "Die gewählte Konfiguration wird nicht unterstützt."
+
+#. The execution has been denied. Please choose another option.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:76
+msgid "The execution has been denied. Please choose another option."
+msgstr "Die Ausführung wurde verweigert. Bitte wählen Sie eine andere Option."
+
+#. Execution failed. Please choose another option.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingExceptionMessages.java:79
+#, fuzzy
+msgid "Execution failed. Please choose another option."
+msgstr "Fehler beim Ausführen. Bitte wählen Sie eine andere Option."
+
+#. The display name for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:71
+msgid "Apple"
+msgstr "Apple"
+
+#. The description for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:74
+msgid "The Apple platform"
+msgstr "Die Apple-Plattform"
+
+#. The display name for Windows platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:78
+msgid "Windows"
+msgstr "Windows"
+
+#. The description for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:81
+msgid "The Windows platform"
+msgstr "Die Windows-Plattform"
+
+#. The display name for Android/Google platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:85
+msgid "Android"
+msgstr "Android"
+
+#. The description for Apple platform
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:88
+msgid "The Android/Google platform"
+msgstr "Die Android/Google-Plattform"
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. The display name for E-Mail module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:93
+msgid "E-Mail"
+msgstr "E-Mail"
+
+#. The description for E-Mail module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:96
+#, fuzzy
+msgid "The E-Mail module for accessing/synchronizing E-Mails."
+msgstr "Das E-Mail-Modul für den Zugriff auf/das Synchronisieren von E-Mails."
+
+#. The description for contacts module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:103
+#, fuzzy
+msgid "The contacts module for accessing/synchronizing contacts."
+msgstr ""
+"Das Kontaktemodul für den Zugriff auf Kontakte und das Synchronisieren von "
+"Kontakten."
+
+#. The description for calendar module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:110
+#, fuzzy
+msgid "The calendar module for accessing/synchronizing events."
+msgstr ""
+"Das Kalendermodul für den Zugriff auf Ereignisse und das Synchronisieren von "
+"Ereignissen."
+
+#. The display name for Drive module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
+msgid "Drive"
+msgstr "Drive"
+
+#. The description for Drive module
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:117
+#, fuzzy
+msgid "The Drive module for accessing/synchronizing files."
+msgstr "Das Drive-Modul für den Zugriff auf/das Synchronisieren von Dateien."
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. The display name for an Apple Mac
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:122
+msgid "Apple Mac"
+msgstr "Apple Mac"
+
+#. The description for an Apple Mac
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:125
+msgid "The device for an Apple Mac"
+msgstr "Das Gerät für einen Apple Mac"
+
+#. The display name for an Apple iPad
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:129
+msgid "Apple iPad"
+msgstr "Apple iPad"
+
+#. The description for an Apple iPad
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:132
+msgid "The device for an Apple iPad"
+msgstr "Das Gerät für ein Apple iPad"
+
+#. The display name for an Apple iPhone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:136
+msgid "Apple iPhone"
+msgstr "Apple iPhone"
+
+#. The description for an Apple iPhone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:139
+msgid "The device for an Apple iPhone"
+msgstr "Das Gerät für ein Apple iPhone"
+
+#. The display name for an Android/Google tablet
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:143
+msgid "Android tablet"
+msgstr "Android-Tablet"
+
+#. The description for an Android/Google tablet
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:146
+msgid "The device for an Android/Google tablet"
+msgstr "Das Gerät für ein Android/Google-Tablet"
+
+#. The display name for an Android/Google phone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:150
+#, fuzzy
+msgid "Android phone"
+msgstr "Android-Phone"
+
+#. The description for an Android/Google phone
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:153
+#, fuzzy
+msgid "The device for an Android/Google phone"
+msgstr "Das Gerät für ein Android/Google-Phone"
+
+#. The display name for a Windows Desktop
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:157
+msgid "Windows Desktop"
+msgstr "Windows-Desktop"
+
+#. The description for a Windows Desktop
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:160
+msgid "The device for a Windows Desktop"
+msgstr "Das Gerät für einen Windows-Desktop"
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. E-Mail successfully sent
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:165
+msgid "E-Mail successfully sent"
+msgstr "E-Mail erfolgreich versendet"
+
+#. ----------------------------------------------------------------------------------------------------------------------
+#. Used when rendering a form in which the user is supposed to enter an E-Mail address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:170
+msgid "E-Mail address"
+msgstr "E-Mail-Adresse"
+
+#. Used when rendering a form in which the user is supposed to enter a phone number address
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/OnboardingStrings.java:173
+msgid "Phone number"
+msgstr "Telefonnummer"
+
+#. Your requested on-boarding profile.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:68
+#, fuzzy
+msgid "Your requested on-boarding profile."
+msgstr "Ihr angefordertes Onboarding-Profil"
+
+#. Your on-boarding information.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.onboarding/src/com/openexchange/onboarding/notification/OnboardingNotificationStrings.java:71
+#, fuzzy
+msgid "Your onboarding information."
+msgstr "Ihre Onboarding-Informationen."
+
 #. *
 #. * New password too short.
 #.
@@ -4516,6 +4799,16 @@ msgstr "HTTP-Fehler %1$s beim Laden des RSS-Feed von der URL: %2$s."
 msgid "Timeout while reading the RSS feed from URL: %1$s"
 msgstr "Zeitüberschreitung beim Lesen des RSS-Feed von der URL: %1$s."
 
+#. Failed to read RSS feed from URL: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:72
+msgid "Failed to read RSS feed from URL: %1$s"
+msgstr "Lesen des RSS-Feed von URL fehlgeschlagen:%1$s"
+
+#. Failed to read RSS feed from URL: %2$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.rss/src/com/openexchange/rss/RssExceptionMessages.java:75
+msgid "Failed to read RSS feed from URL: %2$s"
+msgstr "Lesen des RSS-Feed von URL fehlgeschlagen:%2$s"
+
 #. No appropriate anonymizer available.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/ajax/anonymizer/AnonymizeExceptionMessages.java:63
 msgid "No appropriate anonymizer available."
@@ -4696,7 +4989,7 @@ msgstr ""
 
 #. The folder name "%1$s" is reserved. Please choose another name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/folderstorage/FolderExceptionMessages.java:92
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:120
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:121
 msgid "The folder name \"%1$s\" is reserved. Please choose another name."
 msgstr ""
 "Der Ordnername \"%1$s\" ist reserviert. Bitte wählen Sie einen anderen Namen."
@@ -5120,6 +5413,22 @@ msgstr ""
 "Der Termin  (%1$s) kann nicht angelegt werden. Ein Termin mit der "
 "eindeutigen ID (%2$s) ist bereits vorhanden."
 
+#. *
+#. * Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:223
+msgid ""
+"Cannot insert task (%1$s). A task with the unique identifier (%2$s) already "
+"exists."
+msgstr ""
+"Die Aufgabe (%1$s) kann nicht angelegt werden. Eine Aufgabe mit der "
+"eindeutigen ID (%2$s) ist bereits vorhanden."
+
+#. Sequence number is outdated.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:226
+msgid "Sequence number is outdated."
+msgstr "Sequenznummer ist veraltet."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:61
 msgid "Invalid E-Mail address."
 msgstr "Ungültige E-Mail-Adresse."
@@ -5432,10 +5741,6 @@ msgstr "E-Mail-Anhänge"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:102
 msgid "My files"
 msgstr "Meine Dateien"
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:104
-msgid "Drive"
-msgstr "Drive"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/FolderStrings.java:108
 msgid "Public files"
@@ -6588,6 +6893,25 @@ msgid "Not set"
 msgstr "Nicht festgelegt"
 
 #. -
+#. * Confirmation actions
+#.
+#. accepted
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:672
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:699
+msgid "accepted"
+msgstr "bestätigt"
+
+#. declined
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:674
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:702
+msgid "declined"
+msgstr "abgelehnt"
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/i18n/Notifications.java:676
+msgid "tentatively accepted"
+msgstr "vorläufig bestätigt"
+
+#. -
 #. * TASK PRIORITIES
 #.
 #. low
@@ -6953,7 +7277,7 @@ msgstr ""
 
 #. Unsupported character "%1$s" in field "%2$s". Please remove that character.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:125
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:123
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:124
 msgid ""
 "Unsupported character \"%1$s\" in field \"%2$s\". Please remove that "
 "character."
@@ -6963,7 +7287,7 @@ msgstr ""
 
 #. Unsupported character. Please correct your input.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:128
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:126
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:127
 msgid "Unsupported character. Please correct your input."
 msgstr "Nicht unterstütztes Zeichen. Bitte korrigieren Sie Ihre Eingabe."
 
@@ -6984,6 +7308,12 @@ msgid ""
 msgstr ""
 "Gleichzeitiger Schreibversuch. Bitte warten Sie, bis der vorherige "
 "Speichervorgang abgeschlossen wurde."
+
+#. Your search took too long in order to be accomplished.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
+#, fuzzy
+msgid "Your search took too long in order to be accomplished."
+msgstr "Ihre Suche dauerte zu lange, um durchgeführt werden zu können."
 
 #. A document's description
 #. Task attribute name
@@ -7712,6 +8042,8 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/upload/impl/UploadExceptionMessage.java:116
 msgid "Read timed out. Waited too long for incoming data from client."
 msgstr ""
+"Zeitlimit überschritten. Das Warten auf eingehende Daten vom Client dauerte "
+"zu lange."
 
 #. *
 #. * Configuration for user %1$s could not be found in context %2$d
@@ -8100,7 +8432,7 @@ msgstr "Ein Standardordner darf nicht gelöscht werden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:199
 msgid "Archive folder does not allow subfolders."
-msgstr ""
+msgstr "Der Archiv-Ordner lässt keine Unterordner zu."
 
 #. *
 #. * There was an issue while authenticating. This may be due to a recent password change. To continue please log out and log back in with
@@ -8719,13 +9051,21 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:105
 msgid ""
+"It is not possible to apply the changes as a result of restricted "
+"permissions of the user \"%1s\"."
+msgstr ""
+"Die Änderungen können aufgrund eingeschränkter Berechtigungen des Benutzers "
+"\"%1s\" nicht angewendet werden."
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
+msgid ""
 "The folder cannot be deleted since it contains a hidden subfolder you don't "
 "have the appropriate permissions for."
 msgstr ""
 "Der Ordner kann nicht gelöscht werden, da er einen versteckten Unterordner "
 "enthält, für den Sie nicht die entsprechenden Berechtigungen besitzen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:106
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
 msgid ""
 "The folder already contains a folder with such a name. Please choose a "
 "different name and try again."
@@ -8733,11 +9073,11 @@ msgstr ""
 "Der Ordner enthält bereits einen Ordner mit solch einem Namen. Bitte wählen "
 "Sie einen anderen Namen und versuchen Sie es erneut."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:107
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:108
 msgid "The folder name contains invalid characters."
 msgstr "Der Ordnername enthält unzulässige Zeichen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:108
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
 msgid ""
 "You already share a personal folder named \"%1$s\" with the same user. You "
 "can not share two folders with exactly the same name with a user. Please "
@@ -8748,60 +9088,60 @@ msgstr ""
 "einen Benutzer freigeben. Bitte benennen Sie den Ordner vor der Freigabe für "
 "diesen Benutzer um."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:109
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
 msgid "Duplicate permission defined. Only one permission per user is allowed."
 msgstr ""
 "Berechtigung doppelt angegeben. Es ist nur eine Berechtigung pro Benutzer "
 "zulässig."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:110
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
 msgid "Duplicate permission defined. Only one permission per group is allowed."
 msgstr ""
 "Berechtigung doppelt angegeben. Es ist nur eine Berechtigung pro Gruppe "
 "zulässig."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:111
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
 msgid "Only the folder visibility permission is allowed to be changed."
 msgstr "Es darf nur die Berechtigung zum Sehen des Ordners geändert werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:112
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
 msgid "Only individual user permissions, but no group permissions are allowed."
 msgstr ""
 "Es sind nur individuelle Benutzerberechtigungen zulässig, jedoch keine "
 "Gruppenberechtigungen."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:113
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
 msgid "No individual user permissions are allowed."
 msgstr "Es sind keine individuellen Benutzerberechtigungen zulässig."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:114
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
 msgid "You do not have appropriate permissions to rename the folder."
 msgstr ""
 "Sie haben nicht die entsprechenden Berechtigungen zum Umbenennen des Ordners."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:115
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
 msgid "The folder cannot be deleted as it contains locked documents."
 msgstr ""
 "Der Ordner kann nicht gelöscht werden, da er gesperrte Dokumente enthält."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:116
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
 msgid "Operation may only be performed for context administrator."
 msgstr "Der Vorgang kann nur für den Kontext-Admin ausgeführt werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:117
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
 msgid "The folder cannot be deleted."
 msgstr "Der Ordner kann nicht gelöscht werden."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:118
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
 msgid "The administrative permissions were restored."
 msgstr "Die administrativen Berechtigungen wurden wiederhergestellt."
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:119
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:120
 msgid "You must enter a folder name."
 msgstr "Sie müssen einen Ordnernamen eingeben."
 
 #. You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:129
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:130
 msgid "You are not allowed to share the folder to \"%2$s\""
 msgstr "Sie haben keine Berechtigung zum Freigeben des Ordners für \"%2$s\"."
 
@@ -9731,6 +10071,11 @@ msgstr ""
 msgid "The subscription you requested is unkonwn!"
 msgstr "Das von Ihnen angeforderte Abonnement ist nicht bekannt."
 
+#. The operation is forbidden
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.json/src/com/openexchange/subscribe/json/SubscriptionJSONExceptionMessage.java:72
+msgid "The operation is forbidden."
+msgstr "Die Aktion ist nicht zulässig."
+
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/FormStrings.java:63
 msgid "OXMF Contacts"
 msgstr "OXMF-Kontakte"
@@ -9766,11 +10111,6 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:72
 msgid "You provided an invalid URL."
 msgstr "Sie haben eine ungültige URL eingegeben."
-
-#. The operation is forbidden
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.microformats/src/com/openexchange/subscribe/microformats/OXMFErrorStrings.java:75
-msgid "The operation is forbidden."
-msgstr "Die Aktion ist nicht zulässig."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.xing/src/com/openexchange/subscribe/xing/FormStrings.java:62
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.subscribe.yahoo/src/com/openexchange/subscribe/yahoo/FormStrings.java:62
@@ -10035,13 +10375,6 @@ msgstr "Löschvorgang verweigert für die XING-Ressource: %1$s"
 msgid "Missing configuration for account \"%1$s\"."
 msgstr "Fehlende Konfiguration für den Account \"%1$s\"."
 
-#. Bad or expired access token. Need to re-authenticate user.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:80
-msgid "Bad or expired access token. Need to re-authenticate user."
-msgstr ""
-"Zugriffs-Token ist fehlerhaft oder abgelaufen. Der Benutzer muss neu "
-"authentifiziert werden."
-
 #. E-Mail address is invalid
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:83
 msgid "E-Mail address is invalid"
@@ -10107,6 +10440,22 @@ msgstr "Der XING-Server ist nicht verfügbar."
 msgid "A XING account has already been requested for E-Mail address %1$s."
 msgstr ""
 "Es wurde bereits ein XING-Account für die E-Mail-Adresse %1$s angefordert."
+
+#. The XING app that you are using does not hold the required permissions in order to perform the requested action
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:119
+msgid ""
+"The XING app that you are using does not hold the required permissions in "
+"order to perform the requested action"
+msgstr ""
+"Die von Ihnen verwendete XING-App verfügt nicht über ausreichende "
+"Berechtigungen zum Ausführen der gewünschten Aktion."
+
+#. No XING OAuth access available for user %1$s in context %2$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.xing.access/src/com/openexchange/xing/access/XingExceptionMessages.java:122
+msgid "No XING OAuth access available. Please create a XING OAuth account."
+msgstr ""
+"Kein XING OAuth-Zugang verfügbar. Bitte erstellen Sie einen XING OAuth-"
+"Account."
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:2
 msgid "Africa/Abidjan"
@@ -12219,6 +12568,59 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:529
 msgid "Zulu"
 msgstr "Zulu"
+
+#~ msgid ""
+#~ "The CalDAV account for synchronizing calendar entries with Open-Xchange "
+#~ "Server."
+#~ msgstr ""
+#~ "Der CalDAV-Account zum Synchronisieren von Kalendereinträgen mit dem Open-"
+#~ "Xchange Server."
+
+#~ msgid ""
+#~ "The CardDAV account for synchronizing contact entries with Open-Xchange "
+#~ "Server."
+#~ msgstr ""
+#~ "Der CalDAV-Account zum Synchronisieren von Kontakteinträgen mit dem Open-"
+#~ "Xchange Server."
+
+#~ msgid ""
+#~ "The Microsoft Exchange Active-Sync account for synchronizing with Open-"
+#~ "Xchange Server."
+#~ msgstr ""
+#~ "Der Microsoft Exchange Active-Sync-Account zum Synchronisieren mit dem "
+#~ "Open-Xchange Server."
+
+#~ msgid "The IMAP account for synchronizing E-Mails with Open-Xchange Server."
+#~ msgstr ""
+#~ "Der IMAP-Account zum Synchronisieren von E-Mails mit dem Open-Xchange "
+#~ "Server."
+
+#~ msgid "Open-Xchange MailApp"
+#~ msgstr "Open-Xchange MailApp"
+
+#~ msgid ""
+#~ "The Open-Xchange MailApp to synchronize E-Mails with the Open-Xchange "
+#~ "Middleware"
+#~ msgstr ""
+#~ "Die Open-Xchange MailApp zum Synchronisieren von E-Mails mit der Open-"
+#~ "Xchange-Middleware"
+
+#, fuzzy
+#~ msgid "Get the Open-Xchange MailApp"
+#~ msgstr "Holen Sie sich die Open-Xchange MailApp"
+
+#~ msgid "OX Mail"
+#~ msgstr "OX Mail"
+
+#~ msgid "OX Mail App"
+#~ msgstr "OX Mail App"
+
+#, fuzzy
+#~ msgid "Get OX Mail app"
+#~ msgstr "Holen Sie sich OX Mail App"
+
+#~ msgid "tentatively accept"
+#~ msgstr "vorläufig bestätigen"
 
 #~ msgid "You do not have appropriate permissions to view the folder \"%1$s\"."
 #~ msgstr ""
