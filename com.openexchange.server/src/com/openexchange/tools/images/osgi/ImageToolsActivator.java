@@ -52,6 +52,7 @@ package com.openexchange.tools.images.osgi;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.processing.ProcessorService;
 import com.openexchange.timer.TimerService;
 import com.openexchange.tools.images.ImageTransformationReloadable;
 import com.openexchange.tools.images.ImageTransformationService;
@@ -69,7 +70,7 @@ public class ImageToolsActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TimerService.class };
+        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
     }
 
     @Override
@@ -77,7 +78,7 @@ public class ImageToolsActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         // Initialize through acquiring instance
-        Scheduler.getInstance();
+        Scheduler.init();
 
         // Register services
         registerService(ImageTransformationService.class, new JavaImageTransformationService());

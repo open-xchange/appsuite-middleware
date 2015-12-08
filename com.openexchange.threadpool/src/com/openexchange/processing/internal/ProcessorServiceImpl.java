@@ -66,7 +66,7 @@ import com.openexchange.processing.ProcessorService;
 public class ProcessorServiceImpl implements ProcessorService {
 
     private final AtomicInteger count;
-    private final Queue<InternalProcessor> processors;
+    private final Queue<Processor> processors;
 
     /**
      * Initializes a new {@link ProcessorServiceImpl}.
@@ -74,14 +74,14 @@ public class ProcessorServiceImpl implements ProcessorService {
     public ProcessorServiceImpl() {
         super();
         count = new AtomicInteger();
-        processors = new ConcurrentLinkedQueue<InternalProcessor>();
+        processors = new ConcurrentLinkedQueue<Processor>();
     }
 
     @Override
     public Processor newProcessor(String name, int numThreads) throws OXException {
         try {
             int id = count.incrementAndGet();
-            InternalProcessor processor = new RoundRobinProcessor(null == name ? "Processor" + id : name, numThreads);
+            Processor processor = new RoundRobinProcessor(null == name ? "Processor" + id : name, numThreads);
             processors.offer(processor);
             return processor;
         } catch (RuntimeException e) {
@@ -93,7 +93,7 @@ public class ProcessorServiceImpl implements ProcessorService {
     public Processor newBoundedProcessor(String name, int numThreads, int maxTasks) throws OXException {
         try {
             int id = count.incrementAndGet();
-            InternalProcessor processor = new BoundedRoundRobinProcessor(null == name ? "Processor" + id : name, numThreads, maxTasks);
+            Processor processor = new BoundedRoundRobinProcessor(null == name ? "Processor" + id : name, numThreads, maxTasks);
             processors.offer(processor);
             return processor;
         } catch (RuntimeException e) {
@@ -105,7 +105,7 @@ public class ProcessorServiceImpl implements ProcessorService {
      * Shuts-down all processors
      */
     public void shutDownAll() {
-        for (InternalProcessor processor; (processor = processors.poll()) != null;) {
+        for (Processor processor; (processor = processors.poll()) != null;) {
             processor.stop();
         }
     }

@@ -66,4 +66,9 @@ public interface Processor {
      */
     boolean execute(Object optKey, Runnable task);
 
+    /**
+     * Shuts-down this processor.
+     */
+    void stop();
+
 }

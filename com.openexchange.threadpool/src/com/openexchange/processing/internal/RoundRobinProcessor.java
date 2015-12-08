@@ -60,6 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import com.openexchange.exception.ExceptionUtils;
+import com.openexchange.processing.Processor;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.timer.TimerService;
 
@@ -69,7 +70,7 @@ import com.openexchange.timer.TimerService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.8.1
  */
-public class RoundRobinProcessor implements InternalProcessor {
+public class RoundRobinProcessor implements Processor {
 
     /** The logger */
     static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(RoundRobinProcessor.class);
@@ -109,7 +110,10 @@ public class RoundRobinProcessor implements InternalProcessor {
 
     @Override
     public void stop() {
-        stopped.set(true);
+        if (!stopped.compareAndSet(false, true)) {
+            // Already stopped
+            return;
+        }
 
         for (int i = numThreads; i-- > 0;) {
             roundRobinQueue.offerFirst(TaskManager.POISON);
