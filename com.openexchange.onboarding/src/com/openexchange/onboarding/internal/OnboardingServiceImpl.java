@@ -321,12 +321,11 @@ public class OnboardingServiceImpl implements OnboardingService {
 
                     for (String scenarioId : availableScenarios) {
                         ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
-                        if (null == configuredScenario) {
-                            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
-                        }
-
-                        if (configuredScenario.isEnabled()) {
-                            compositeIds.add(new StringBuilder(32).append(device.getId()).append('/').append(scenarioId).toString());
+                        if (null != configuredScenario && configuredScenario.isEnabled()) {
+                            Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
+                            if (null != scenario) {
+                                compositeIds.add(new StringBuilder(32).append(device.getId()).append('/').append(scenarioId).toString());
+                            }
                         }
                     }
                 }
