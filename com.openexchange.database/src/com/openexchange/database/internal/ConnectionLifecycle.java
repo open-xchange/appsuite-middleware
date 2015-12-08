@@ -222,9 +222,11 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                     String openStatement = "";
                     if (con instanceof com.mysql.jdbc.ConnectionImpl) {
                         try {
-                            Field field = ((com.mysql.jdbc.ConnectionImpl) con).getClass().getField("openStatements");
-                            field.setAccessible(true);
-                            Map<Statement, Statement> open = (Map<Statement, Statement>) field.get(con);
+                            com.mysql.jdbc.ConnectionImpl impl = ((com.mysql.jdbc.ConnectionImpl) con);
+                            Field openStatementsField = impl.getClass().getSuperclass().getDeclaredField("openStatements");
+                            openStatementsField.setAccessible(true);
+                            
+                            Map<Statement, Statement> open = (Map<Statement, Statement>) openStatementsField.get(impl);
                             for (Entry<Statement, Statement> entry : open.entrySet()) {
                                 openStatement = entry.getKey().toString();
                             }
