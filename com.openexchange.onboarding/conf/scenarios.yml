@@ -64,7 +64,7 @@ mailappinstall:
 ### OX Drive App
 ################################################################################
 
-mailappinstall:
+driveappinstall:
     # Disbled by default
     enabled: false
     type: link
