@@ -56,7 +56,6 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.LinkResult;
@@ -99,7 +98,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasPermission(Permission.INFOSTORE, session);
+        return OnboardingUtility.hasCapability("drive", session);
     }
 
     @Override
