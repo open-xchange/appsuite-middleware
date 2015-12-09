@@ -221,7 +221,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
         // OK, so far we assume image transformation is needed
         // Ensure IFileHolder is repetitive
         if (!file.repetitive()) {
-            file = new ThresholdFileHolder(file);
+            ThresholdFileHolder tmp = new ThresholdFileHolder(file);
+            file.close();
+            file = tmp;
         }
 
         // Validate...
