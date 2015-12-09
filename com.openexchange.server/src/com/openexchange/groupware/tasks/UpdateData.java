@@ -804,7 +804,7 @@ class UpdateData {
                     final boolean title = null != actual.getTitle() && actual.getTitle().equals(updated.getTitle());
                     boolean startDate;
 
-                    if (actual.getStartDate() != null) {
+                    if (actual.getStartDate() != null && updated.getStartDate() != null) {
                         final long aStartDateLong = actual.getStartDate().getTime();
                         final long uStartDateLong = updated.getStartDate().getTime();
                         startDate = aStartDateLong / 1000 == uStartDateLong / 1000;
@@ -826,7 +826,9 @@ class UpdateData {
             }
 
             if (!duplicateExists && next) {
-                insertNextRecurrence(session, ctx, getUserId(), permissionBits, folder, getUpdated(), getUpdatedParticipants(), getUpdatedFolder());
+                Task recurrence = getUpdated();
+                recurrence.removeUid();
+                insertNextRecurrence(session, ctx, getUserId(), permissionBits, folder, recurrence, getUpdatedParticipants(), getUpdatedFolder());
             }
         }
     }
