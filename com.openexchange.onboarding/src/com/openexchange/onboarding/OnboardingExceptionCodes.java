@@ -80,85 +80,65 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      */
     NOT_FOUND("No such provider for identifier: %1$s", null, Category.CATEGORY_ERROR, 4),
     /**
-     * Entity identifier not specified.
+     * Missing the following input field: %1$s
      */
-    ENTITY_ID_MISSING("Entity selection not specified.", null, Category.CATEGORY_ERROR, 5),
-    /**
-     * Entity not supported: %1$s
-     */
-    ENTITY_NOT_SUPPORTED("Entity not supported: %1$s", OnboardingExceptionMessages.ENTITY_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 6),
-    /**
-     * Selection not specified.
-     */
-    CONFIGURATION_ID_MISSING("Selection not specified.", null, Category.CATEGORY_ERROR, 7),
-    /**
-     * Configuration not supported: %1$s
-     */
-    CONFIGURATION_NOT_SUPPORTED("Configuration not supported: %1$s", OnboardingExceptionMessages.CONFIGURATION_NOT_SUPPORTED_MSG, Category.CATEGORY_USER_INPUT, 8),
-    /**
-     * An XML write error occurred: %1$s
-     */
-    XML_ERROR("An XML write error occurred: %1$s", null, Category.CATEGORY_ERROR, 9),
-    /**
-     * Missing the following form field: %1$s
-     */
-    MISSING_FORM_FIELD("Missing the following form field: %1$s", null, Category.CATEGORY_ERROR, 10),
+    MISSING_INPUT_FIELD("Missing the following input field: %1$s", null, Category.CATEGORY_ERROR, 5),
     /**
      * Invalid composite identifier: %1$s
      */
-    INVALID_COMPOSITE_ID("Invalid composite identifier: %1$s", null, Category.CATEGORY_ERROR, 11),
+    INVALID_COMPOSITE_ID("Invalid composite identifier: %1$s", null, Category.CATEGORY_ERROR, 6),
     /**
      * Invalid scenario configuration for %1$s
      */
-    INVALID_SCENARIO_CONFIGURATION("Invalid scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 12),
+    INVALID_SCENARIO_CONFIGURATION("Invalid scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 7),
     /**
      * Duplicate scenario configuration for %1$s
      */
-    DUPLICATE_SCENARIO_CONFIGURATION("Duplicate scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 13),
+    DUPLICATE_SCENARIO_CONFIGURATION("Duplicate scenario configuration for %1$s", null, Category.CATEGORY_CONFIGURATION, 8),
     /**
      * No such scenario for identifier: %1$s
      */
-    NO_SUCH_SCENARIO("No such scenario for identifier: %1$s", null, Category.CATEGORY_CONFIGURATION, 14),
+    NO_SUCH_SCENARIO("No such scenario for identifier: %1$s", null, Category.CATEGORY_CONFIGURATION, 9),
     /**
      * Scenario is disabled: %1$s
      */
-    DISABLED_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 15),
+    DISABLED_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 10),
     /**
      * Scenario is invalid: %1$s. No such provider %2$s
      */
-    INVALID_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 16),
+    INVALID_SCENARIO("Scenario is disabled: %1$s", null, Category.CATEGORY_CONFIGURATION, 11),
     /**
      * Invalid device identifier: %1$s
      */
-    INVALID_DEVICE_ID("Invalid device identifier: %1$s", null, Category.CATEGORY_USER_INPUT, 17),
+    INVALID_DEVICE_ID("Invalid device identifier: %1$s", null, Category.CATEGORY_USER_INPUT, 12),
     /**
      * Provider %1$s denied execution for scenario %2$s
      */
-    EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 18),
+    EXECUTION_DENIED("Provider %1$s denied execution for scenario %2$s", OnboardingExceptionMessages.EXECUTION_DENIED_MSG, Category.CATEGORY_ERROR, 13),
     /**
      * Execution for scenario %1$s failed
      */
-    EXECUTION_FAILED("Execution for scenario %1$s failed", OnboardingExceptionMessages.EXECUTION_FAILED_MSG, Category.CATEGORY_ERROR, 19),
+    EXECUTION_FAILED("Execution for scenario %1$s failed", OnboardingExceptionMessages.EXECUTION_FAILED_MSG, Category.CATEGORY_ERROR, 14),
     /**
      * Provider %1$s does not support device %2$s
      */
-    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 20),
+    UNSUPPORTED_DEVICE("Provider %1$s does not support device %2$s", null, Category.CATEGORY_ERROR, 15),
     /**
      * Provider %1$s does not support action %2$s for type %3$s
      */
-    UNSUPPORTED_ACTION("Action %1$s is not supported", null, Category.CATEGORY_ERROR, 21),
+    UNSUPPORTED_ACTION("Action %1$s is not supported", null, Category.CATEGORY_ERROR, 16),
     /**
      * Provider %1$s does not support type %2$s
      */
-    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 22),
+    UNSUPPORTED_TYPE("Provider %1$s does not support type %2$s", null, Category.CATEGORY_ERROR, 17),
     /**
      * Missing property: %1$s
      */
-    MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 23),
+    MISSING_PROPERTY("Missing property: %1$s", null, Category.CATEGORY_CONFIGURATION, 18),
     /**
      * No such type for identifier %1$s in scenario %2$s
      */
-    NO_SUCH_TYPE("No such type for identifier %1$s in scenario %2$s", null, Category.CATEGORY_CONFIGURATION, 24),
+    NO_SUCH_TYPE("No such type for identifier %1$s in scenario %2$s", null, Category.CATEGORY_CONFIGURATION, 19),
     ;
 
     /** The error code prefix for on-boarding module */

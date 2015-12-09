@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,63 +49,44 @@
 
 package com.openexchange.onboarding;
 
+import java.io.File;
+
 /**
- * {@link CommonForms} - An enumeration for common form descriptions.
+ * {@link FileInfo} - A file and its MIME type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum CommonForms {
+public class FileInfo {
+
+    private final File file;
+    private final String mimeType;
 
     /**
-     * The common form description in case the user is not supposed to enter anything.
+     * Initializes a new {@link FileInfo}.
      */
-    NONE(new String[0]),
-    /**
-     * The common form description in case the user is supposed to enter an E-Mail address.
-     */
-    EMAIL_ADDRESS("email"),
-    /**
-     * The common form description in case the user is supposed to enter a phone number.
-     */
-    PHONE_NUMBER("number"),
-
-    ;
-
-    private final String[] elementNames;
-    private final String firstElementName;
-
-    private CommonForms(String... elementNames) {
-        if (null != elementNames && elementNames.length > 0) {
-            // First form element
-            {
-                String name = elementNames[0];
-                firstElementName = name;
-            }
-
-            this.elementNames = elementNames;
-        } else {
-            this.firstElementName = null;
-            this.elementNames = null;
-        }
+    public FileInfo(File file, String mimeType) {
+        super();
+        this.file = file;
+        this.mimeType = mimeType;
     }
 
     /**
-     * Gets the element names
+     * Gets the file.
      *
-     * @return The element names or <code>null</code>
+     * @return The file
      */
-    public String[] getElementNames() {
-        return elementNames;
+    public File getFile() {
+        return file;
     }
 
     /**
-     * Gets the name of the first element
+     * Gets the MIME type or <code>"application/octet-stream"</code> if unknown.
      *
-     * @return The name of the first element or <code>null</code>
+     * @return The MIME type or <code>"application/octet-stream"</code> if unknown
      */
-    public String getFirstElementName() {
-        return firstElementName;
+    public String getMimeType() {
+        return mimeType;
     }
 
 }

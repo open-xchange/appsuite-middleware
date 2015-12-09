@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum Platform implements IdEntity {
+public enum Platform implements Entity {
 
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.

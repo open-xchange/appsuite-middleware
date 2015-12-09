@@ -52,7 +52,6 @@ package com.openexchange.onboarding;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Map;
 import org.slf4j.Logger;
 import com.openexchange.java.Streams;
 
@@ -64,9 +63,9 @@ import com.openexchange.java.Streams;
  */
 public class TemplateIcon implements Icon {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateIcon.class);
-
     private static final long serialVersionUID = 7821572419974173720L;
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateIcon.class);
 
     private final String mimeType;
     private final File file;
@@ -83,9 +82,9 @@ public class TemplateIcon implements Icon {
      */
     public TemplateIcon(String name, String mimeType) {
         super();
-        Map.Entry<File, String> fileInfo = OnboardingUtility.getTemplateFileInfo(name);
-        this.file = fileInfo.getKey();
-        this.mimeType = null == mimeType ? fileInfo.getValue() : mimeType;
+        FileInfo fileInfo = OnboardingUtility.getTemplateFileInfo(name);
+        this.file = fileInfo.getFile();
+        this.mimeType = null == mimeType ? fileInfo.getMimeType() : mimeType;
     }
 
     @Override

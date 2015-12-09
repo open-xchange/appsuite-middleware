@@ -61,6 +61,13 @@ import com.openexchange.session.Session;
 public interface Entity {
 
     /**
+     * Gets the identifier.
+     *
+     * @return The identifier
+     */
+    String getId();
+
+    /**
      * Checks if this entity is enabled.
      *
      * @param session The session to use

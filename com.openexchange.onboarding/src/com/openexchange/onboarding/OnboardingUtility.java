@@ -471,27 +471,11 @@ public class OnboardingUtility {
      * @return The template file
      * @throws IllegalArgumentException If name is <code>null</code>
      */
-    public static Map.Entry<File, String> getTemplateFileInfo(String name) {
-        final File templateFile = getTemplateFile(name);
+    public static FileInfo getTemplateFileInfo(String name) {
+        File templateFile = getTemplateFile(name);
         MimeTypeMap mimeTypeMap = Services.getService(MimeTypeMap.class);
-        final String mimeType = null == mimeTypeMap ? "application/octet-stream" : mimeTypeMap.getContentType(name);
-        return new Map.Entry<File, String>() {
-
-            @Override
-            public File getKey() {
-                return templateFile;
-            }
-
-            @Override
-            public String getValue() {
-                return mimeType;
-            }
-
-            @Override
-            public String setValue(String value) {
-                throw new UnsupportedOperationException("setValue() is not supported");
-            }
-        };
+        String mimeType = null == mimeTypeMap ? "application/octet-stream" : mimeTypeMap.getContentType(name);
+        return new FileInfo(templateFile, mimeType);
     }
 
     /**

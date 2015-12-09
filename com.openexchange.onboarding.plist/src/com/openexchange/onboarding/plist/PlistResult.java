@@ -64,7 +64,7 @@ import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.CommonForms;
+import com.openexchange.onboarding.CommonInput;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -141,14 +141,14 @@ public class PlistResult implements Result {
     }
 
     private ResultObject sendEmailResult(OnboardingRequest request, Session session) throws OXException {
-        Map<String, Object> formContent = request.getInput();
-        if (null == formContent) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+        Map<String, Object> input = request.getInput();
+        if (null == input) {
+            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(CommonInput.EMAIL_ADDRESS.getFirstElementName());
         }
 
-        String emailAddress = (String) formContent.get(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+        String emailAddress = (String) input.get(CommonInput.EMAIL_ADDRESS.getFirstElementName());
         if (Strings.isEmpty(emailAddress)) {
-            throw OnboardingExceptionCodes.MISSING_FORM_FIELD.create(CommonForms.EMAIL_ADDRESS.getFirstElementName());
+            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(CommonInput.EMAIL_ADDRESS.getFirstElementName());
         }
 
         ThresholdFileHolder fileHolder = null;

@@ -50,18 +50,62 @@
 package com.openexchange.onboarding;
 
 /**
- * {@link IdEntity} - An on-boarding entity with an identifier.
+ * {@link CommonInput} - An enumeration for common key-value-pairs input.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface IdEntity extends Entity {
+public enum CommonInput {
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
+     * The common input in case the user is not supposed to enter anything.
      */
-    String getId();
+    NONE(new String[0]),
+    /**
+     * The common input in case the user is supposed to enter an E-Mail address.
+     */
+    EMAIL_ADDRESS("email"),
+    /**
+     * The common input in case the user is supposed to enter a phone number.
+     */
+    PHONE_NUMBER("number"),
+
+    ;
+
+    private final String[] elementNames;
+    private final String firstElementName;
+
+    private CommonInput(String... elementNames) {
+        if (null != elementNames && elementNames.length > 0) {
+            // First form element
+            {
+                String name = elementNames[0];
+                firstElementName = name;
+            }
+
+            this.elementNames = elementNames;
+        } else {
+            this.firstElementName = null;
+            this.elementNames = null;
+        }
+    }
+
+    /**
+     * Gets the element names
+     *
+     * @return The element names or <code>null</code>
+     */
+    public String[] getElementNames() {
+        return elementNames;
+    }
+
+    /**
+     * Gets the name of the first element
+     *
+     * @return The name of the first element or <code>null</code>
+     */
+    public String getFirstElementName() {
+        return firstElementName;
+    }
 
 }

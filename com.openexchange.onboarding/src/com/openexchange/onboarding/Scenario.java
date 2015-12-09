@@ -58,7 +58,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface Scenario extends IdEntity {
+public interface Scenario extends Entity {
 
     /**
      * Gets the associated type for this scenario.
