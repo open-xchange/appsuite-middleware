@@ -55,33 +55,37 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.console.BasicCommandlineOptions;
 import com.openexchange.admin.console.CLIIllegalOptionValueException;
 import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.console.CLIParseException;
 import com.openexchange.admin.console.CLIUnknownOptionException;
+import com.openexchange.drive.client.windows.service.BrandingConfigurationRemote;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link ReloadBrandings}
+ * {@link ListBrandings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class ReloadBrandings extends BasicCommandlineOptions {
+public class ListBrandings extends BasicCommandlineOptions {
 
-    private static final String PATH_LONG = "path";
-    private static final char PATH_SHORT = 'p';
+    private final static String VALIDATE_LONG = "validate";
+    private final static char VALIDATE_SHORT = 'v';
+    CLIOption validate_option;
 
-    private CLIOption path = null;
+    private final static String INVALID_ONLY_LONG = "invalid_only";
+    private final static char INVALID_ONLY_SHORT = 'o';
+    CLIOption invalid_only_option;
 
     /**
      * @param args
      */
     public static void main(String[] args) {
-        new ReloadBrandings().execute(args);
+        new ListBrandings().execute(args);
     }
 
     private void execute(String[] args) {
@@ -89,16 +93,17 @@ public class ReloadBrandings extends BasicCommandlineOptions {
         setOptions(parser);
         try {
             parser.ownparse(args);
+            boolean validate = parser.hasOption(validate_option);
+            boolean invalid_only = parser.hasOption(invalid_only_option);
+            validate = invalid_only ? true : validate;
             BrandingConfigurationRemote remote = (BrandingConfigurationRemote) Naming.lookup(RMI_HOSTNAME + BrandingConfigurationRemote.RMI_NAME);
-            String path = (String) parser.getOptionValue(this.path);
-            List<String> brands;
-            if (path == null || path.length() == 0) {
-                brands = remote.reload();
+            List<String> brands = remote.getBrandings(validate, invalid_only);
+
+            if (invalid_only) {
+                System.out.println("The following brands are invalid:");
             } else {
-                brands = remote.reload(path);
+                System.out.println("The following brands are available:");
             }
-            System.out.println("Brandings successful reloaded!");
-            System.out.println("The following brands are now available:");
             for (String brand : brands) {
                 System.out.println("\t -" + brand);
             }
@@ -130,7 +135,8 @@ public class ReloadBrandings extends BasicCommandlineOptions {
     }
 
     private void setOptions(AdminParser parser) {
-        this.path = setShortLongOpt(parser, PATH_SHORT, PATH_LONG, "a path", "Defines the path to look for brandings. If set the configured path will be ignored.", false);
+        this.validate_option = setShortLongOpt(parser, VALIDATE_SHORT, VALIDATE_LONG, "If defined, the brandings will be validated and only valid brandings will be returned. This validation verifies if all required files are present.", false, NeededQuadState.notneeded);
+        this.invalid_only_option = setShortLongOpt(parser, INVALID_ONLY_SHORT, INVALID_ONLY_LONG, "Retrieves only invalid brandings.", false, NeededQuadState.notneeded);
     }
 
 }

@@ -88,4 +88,15 @@ public interface BrandingConfigurationRemote extends Remote {
      */
     public List<String> reload(String path) throws RemoteException, OXException;
 
+    /**
+     * Retrieves all available branding's.
+     *
+     * @param validate if true retrieves only the brandings, which include all the necessary files.
+     * @param invalid_only retrieves only the invalid brandings. The parameter validate must be true for this to take effect.
+     * @return a list of branding names
+     * @throws RemoteException
+     * @throws OXException
+     */
+    public List<String> getBrandings(boolean validate, boolean invalid_only) throws RemoteException, OXException;
+
 }

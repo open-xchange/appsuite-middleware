@@ -50,7 +50,9 @@
 package com.openexchange.drive.client.windows.service.internal;
 
 import java.rmi.RemoteException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import com.openexchange.drive.client.windows.files.UpdateFilesProviderImpl;
 import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
 import com.openexchange.exception.OXException;
@@ -73,6 +75,33 @@ public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRem
     public List<String> reload(String path) throws RemoteException, OXException {
         UpdateFilesProviderImpl.getInstance().reload(path);
         return UpdateFilesProviderImpl.getInstance().getAvailableBrandings();
+    }
+
+    private static final Pattern EXE_PATTERN = Pattern.compile(".*\\.exe");
+    private static final Pattern MSI_PATTERN = Pattern.compile(".*\\.msi");
+    private static final Pattern BRANDING_PATTERN = Pattern.compile(".*\\.branding");
+
+    @Override
+    public List<String> getBrandings(boolean validate, boolean invalidate_only) throws RemoteException, OXException {
+        UpdateFilesProviderImpl provider = UpdateFilesProviderImpl.getInstance();
+        List<String> brandings = provider.getAvailableBrandings();
+        if (validate) {
+            List<String> tmp = new ArrayList<String>();
+            for (String brand : brandings) {
+                if (provider.getFileName(brand, EXE_PATTERN) != null &&
+                    provider.getFileName(brand, MSI_PATTERN) != null &&
+                    provider.getFileName(brand, BRANDING_PATTERN) != null) {
+                    
+                    tmp.add(brand);
+                }
+            }
+            if(invalidate_only){
+                brandings.removeAll(tmp);
+            } else {
+                brandings = tmp;
+            }
+        }
+        return brandings;
     }
 
 }

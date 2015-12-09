@@ -62,7 +62,18 @@ test -f $OXCONFIG && . $OXCONFIG
 
 ox_set_JAVA_BIN
 
-JAVAMAIN="com.openexchange.drive.client.windows.clt.ReloadBrandings"
+BNAME=$(basename $0)
+ACTION=
+case "${BNAME}" in
+    "listbrandings")
+    ACTION="ListBrandings"
+    ;;
+    "reloadbrandings")
+    ACTION="ReloadBrandings"
+    ;;
+esac
+
+JAVAMAIN="com.openexchange.drive.client.windows.clt.${ACTION}"
 
 test -z "$JAVA_OXCMD_OPTS" && JAVA_OXCMD_OPTS="-Xmx280M"
 

@@ -10,5 +10,5 @@ Package: open-xchange-admin-drive-client-windows
 Architecture: all
 Pre-Depends: open-xchange-drive-client-windows (>= @OXVERSION@)
 Depends: ${misc:Depends}, open-xchange-admin (>= @OXVERSION@)
-Description: The windows drive client branding configuration CLT
+Description: The windows drive client branding configuration CLTs
  This package adds the branding configuration command-line tools for the windows drive client updater.
