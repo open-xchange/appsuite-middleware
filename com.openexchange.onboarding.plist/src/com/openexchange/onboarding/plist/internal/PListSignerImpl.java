@@ -47,51 +47,57 @@
  *
  */
 
-package com.openexchange.onboarding.signature;
+package com.openexchange.onboarding.plist.internal;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.security.PrivateKey;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
+import org.bouncycastle.asn1.ASN1OutputStream;
+import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cms.CMSProcessableByteArray;
+import org.bouncycastle.cms.CMSProcessableFile;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.bouncycastle.cms.CMSTypedData;
 import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoGeneratorBuilder;
 import org.bouncycastle.util.Store;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.osgi.Services;
+import com.openexchange.onboarding.plist.PListSigner;
+import com.openexchange.onboarding.plist.osgi.Services;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 
 /**
- * {@link PListSigner}
+ * {@link PListSignerImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public final class PListSigner {
-
-    private final ThresholdFileHolder fileHolder;
+public final class PListSignerImpl implements PListSigner {
 
     /**
-     * Initializes a new {@link PListSigner}.
+     * Initializes a new {@link PListSignerImpl}.
      */
-    public PListSigner(ThresholdFileHolder fileHolder) {
+    public PListSignerImpl() {
         super();
-        this.fileHolder = fileHolder;
     }
 
-    public ThresholdFileHolder signPList(Session session) throws OXException {
+    @Override
+    public IFileHolder signPList(IFileHolder toSign, Session session) throws OXException {
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         if (null == viewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
@@ -107,30 +113,66 @@ public final class PListSigner {
         String password = configService.getProperty("com.openexchange.onboarding.plist.pkcs12store.password");
         String alias = view.get("com.openexchange.onboarding.plist.signkey.alias", String.class);
         if (!enabled || Strings.isEmpty(storeName) || Strings.isEmpty(password) || Strings.isEmpty(alias)) {
-            return fileHolder;
+            return toSign;
         }
-        byte[] signed = signPList(fileHolder.toByteArray(), storeName, password, alias);
-        fileHolder.reset();
-        fileHolder.write(signed);
-        return fileHolder;
+
+        return signPList(toSign, storeName, password, alias);
     }
 
-    private byte[] signPList(byte[] in, String storeName, String password, String alias) throws OXException {
+    private IFileHolder signPList(IFileHolder toSign, String storeName, String password, String alias) throws OXException {
+        IFileHolder input = toSign;
+
+        ThresholdFileHolder sink = null;
+        boolean error = true;
         try {
             PrivateKey privKey = getPrivateKey(storeName, password, alias);
             X509Certificate cert = getCertificate(storeName, password, alias);
             List<X509Certificate> certList = Collections.singletonList(cert);
-            Store certs = new JcaCertStore(certList);
+            Store<?> certs = new JcaCertStore(certList);
+
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
             JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
             gen.addSignerInfoGenerator(builder.build("SHA1withRSA", privKey, cert));
             gen.addCertificates(certs);
-            CMSTypedData data = new CMSProcessableByteArray(in);
+
+            CMSTypedData data;
+            {
+                // Ensure to deal with an instance of ThresholdFileHolder to yield appropriate processable data
+                if (input instanceof ThresholdFileHolder) {
+                    ThresholdFileHolder tfh = (ThresholdFileHolder) input;
+                    data = toProcessableData(tfh);
+                } else {
+                    ThresholdFileHolder tfh = new ThresholdFileHolder(input);
+                    input.close();
+                    input = tfh;
+                    data = toProcessableData(tfh);
+                }
+            }
+
+            // Sign it
             CMSSignedData signed = gen.generate(data, true);
-            return signed.getEncoded();
+            ContentInfo contentInfo = signed.toASN1Structure();
+
+            // Flush signed content to a new ThresholdFileHolder
+            sink = new ThresholdFileHolder();
+            ASN1OutputStream aOut = new ASN1OutputStream(sink.asOutputStream());
+            aOut.writeObject(contentInfo);
+            aOut.flush();
+            error = false; // Avoid preliminary closing
+            return sink;
         } catch (Exception e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+            Streams.close(input);
         }
+    }
+
+    private CMSTypedData toProcessableData(ThresholdFileHolder tfh) throws OXException {
+        File tempFile = tfh.getTempFile();
+        return null == tempFile ? new CMSProcessableByteArray(tfh.toByteArray()) : new CMSProcessableFile(tempFile);
     }
 
     private X509Certificate getCertificate(String storeName, String password, String alias) throws Exception {

@@ -76,7 +76,6 @@ import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.SimpleResultObject;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.osgi.Services;
-import com.openexchange.onboarding.signature.PListSigner;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.session.Session;
@@ -164,8 +163,7 @@ public class PlistResult implements Result {
             fileHolder.setContentType("application/x-apple-aspen-config; charset=UTF-8; name=" + name);// Or application/x-plist ?
             new PListWriter().write(pListDict, fileHolder.asOutputStream());
 
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList(session);
+            fileHolder = sign(fileHolder, session);
 
             NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
             ComposedMailMessage message = notify.createMail(data, Collections.singleton((IFileHolder) fileHolder));
@@ -197,8 +195,8 @@ public class PlistResult implements Result {
             fileHolder.setDelivery("download");
             new PListWriter().write(pListDict, fileHolder.asOutputStream());
 
-            PListSigner signer = new PListSigner(fileHolder);
-            fileHolder = signer.signPList(session);
+            // Sign it
+            fileHolder = sign(fileHolder, session);
 
             ResultObject resultObject = new SimpleResultObject(fileHolder, "file");
             error = false;
@@ -210,6 +208,19 @@ public class PlistResult implements Result {
                 Streams.close(fileHolder);
             }
         }
+    }
+
+    private ThresholdFileHolder sign(ThresholdFileHolder fileHolder, Session session) throws OXException, IOException {
+        PListSigner signer = Services.getService(PListSigner.class);
+        IFileHolder signed = signer.signPList(fileHolder, session);
+
+        if (signed instanceof ThresholdFileHolder) {
+            return (ThresholdFileHolder) signed;
+        }
+
+        ThresholdFileHolder tfh = new ThresholdFileHolder(signed);
+        signed.close();
+        return tfh;
     }
 
 }

@@ -16,6 +16,8 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.sw;version="4.2.0",
  com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
+ com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.java,
@@ -146,3 +148,6 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  org.xml.sax.helpers
 Export-Package: com.openexchange.onboarding.plist
 Bundle-Activator: com.openexchange.onboarding.plist.osgi.OnboardingPlistActivator
+Bundle-ClassPath: lib/bcpkix-jdk15on-152.jar,
+ lib/bcprov-jdk15on-152.jar,
+ .

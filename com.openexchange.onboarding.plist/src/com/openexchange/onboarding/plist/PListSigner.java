@@ -47,59 +47,28 @@
  *
  */
 
-package com.openexchange.onboarding.plist.osgi;
+package com.openexchange.onboarding.plist;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.onboarding.plist.PListSigner;
-import com.openexchange.onboarding.plist.internal.PListSignerImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingPlistActivator}
+ * {@link PListSigner} - Signs PLIST content.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingPlistActivator extends HousekeepingActivator {
+public interface PListSigner {
 
     /**
-     * Initializes a new {@link OnboardingPlistActivator}.
+     * Signs specified PLIST content.
+     *
+     * @param toSign The PLIST content to sign
+     * @param session The associated session
+     * @return The signed PLIST content
+     * @throws OXException If signing PLIST content fails
      */
-    public OnboardingPlistActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        PListSignerImpl signerImpl = new PListSignerImpl();
-        addService(PListSigner.class, signerImpl);
-        registerService(PListSigner.class, signerImpl);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        removeService(PListSigner.class);
-        Services.setServiceLookup(null);
-    }
-
-    @Override
-    public <S> boolean addService(Class<S> clazz, S service) {
-        return super.addService(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
-    }
+    IFileHolder signPList(IFileHolder toSign, Session session) throws OXException;
 
 }
