@@ -202,11 +202,11 @@ public abstract class WebDAVTest {
 
     @After
     public void after() throws Exception {
-        if (client != null) {
+        if (null != client) {
+            cleanupFolders();
             client.logout();
+            client = null;
         }
-
-        this.cleanupFolders();
     }
 
     public AJAXSession getSession() {
