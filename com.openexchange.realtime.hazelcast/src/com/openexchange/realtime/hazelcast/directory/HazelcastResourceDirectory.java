@@ -56,6 +56,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
@@ -104,6 +107,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     /** The logger */
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastResourceDirectory.class);
 
+    private static final Object PRESENT = new Object();
+
     /** Mapping of general IDs to full IDs e.g marc.arens@premium <-> ox://marc.arens@premium/random. */
     private final String id_map;
 
@@ -114,6 +119,9 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
     /** The reference to associated {@code DistributedGroupManager} instance */
     final AtomicReference<DistributedGroupManager> distributedGroupManagerRef;
+
+    /** Keep track of identifiers */
+    final ConcurrentMap<ID, Object> syntheticIDs;
 
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
@@ -129,6 +137,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         this.id_map = id_map;
         this.resource_map = resource_map;
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
+        this.syntheticIDs = new ConcurrentHashMap<ID, Object>(32, 0.9F, 1);
         addResourceMappingEntryListener(new ResourceMappingEntryAdapter() {
 
             @Override
@@ -157,6 +166,11 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 } catch (OXException e) {
                     LOG.warn("Could not handle eviction for id '{}'", id, e);
                 }
+
+                boolean removed = null != syntheticIDs.remove(id);
+                if (removed) {
+                    LOG.debug("Removed id from refresh list: {}", id);
+                }
             }
 
             @Override
@@ -166,8 +180,14 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 Member member = event.getMember();
                 Throwable trace = new Throwable("tracked thread");
                 LOG.debug("Source {} on Member: {} fired removal event for '{}'.", source, member, id, trace);
+
+                boolean removed = null != syntheticIDs.remove(id);
+                if (removed) {
+                    LOG.debug("Removed id from refresh list: {}", id);
+                }
             }
         }, false);
+        startRefreshTimer();
     }
 
     /**
@@ -433,6 +453,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             return null;
         }
 
+        syntheticIDs.put(id, PRESENT);
         PortableResource res = new PortableResource(HazelcastAccess.getLocalMember());
         PortableResource meantime = setIfAbsent(id, res);
         if (meantime == null) {
@@ -484,6 +505,36 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         }
     }
 
+    /**
+     * Starts the timer that refreshes synthetic resources
+     */
+    protected void startRefreshTimer() {
+        Services.getService(TimerService.class).scheduleAtFixedRate(new Runnable() {
+
+            @Override
+            public void run() {
+                for (Iterator<ID> it = syntheticIDs.keySet().iterator(); it.hasNext();) {
+                    ID id = it.next();
+                    try {
+                        /*
+                         * This performs a set on map entries to prevent eviction
+                         */
+                        PortableID currentPortableID = new PortableID(id);
+                        getIDMapping().get(currentPortableID.toGeneralForm());
+                        PortableResource portableResource = getResourceMapping().get(currentPortableID);
+                        if (portableResource == null) {
+                            LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
+                            it.remove();
+                        }
+                    } catch (Exception e) {
+                        LOG.error("Error while refreshing ID: {}", id, e);
+                    }
+                }
+            }
+
+        }, 1, 15, TimeUnit.MINUTES);
+    }
+
     @Override
     public void cleanupForId(ID id) {
         LOG.debug("Cleanup for ID: {}", id);
@@ -504,7 +555,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      */
     public String addResourceMappingEntryListener(ResourceMappingEntryListener entryListener, boolean includeValue) throws OXException {
         Optional<Predicate<PortableID, PortableResource>> predicate = entryListener.getPredicate();
-        if(predicate.isPresent()) {
+        if (predicate.isPresent()) {
             return getResourceMapping().addEntryListener(entryListener, predicate.get(), includeValue);
         } else {
             return getResourceMapping().addEntryListener(entryListener, includeValue);
