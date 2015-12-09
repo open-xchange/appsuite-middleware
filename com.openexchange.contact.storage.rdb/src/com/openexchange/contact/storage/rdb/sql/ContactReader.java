@@ -69,7 +69,6 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
-
 /**
  * {@link ContactReader}
  *
@@ -130,19 +129,21 @@ public class ContactReader {
     }
 
     private Contact patch(Contact contact, boolean withObjectUseCount) throws SQLException, OXException {
-        if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
-            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+        if (null != contact) {
+            if (0 < contact.getInternalUserId() && contact.containsEmail1()) {
+                String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
 
-            //TODO: Guests do not have mail settings
-            if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
-                UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
-                String defaultSendAddress = userSettingMail.getSendAddr();
-                if (false == Strings.isEmpty(defaultSendAddress)) {
-                    contact.setEmail1(defaultSendAddress);
+                //TODO: Guests do not have mail settings
+                if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+                    UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
+                    String defaultSendAddress = userSettingMail.getSendAddr();
+                    if (false == Strings.isEmpty(defaultSendAddress)) {
+                        contact.setEmail1(defaultSendAddress);
+                    }
+                } else {
+                    String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
+                    contact.setEmail1(primaryMail);
                 }
-            } else {
-                String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
-                contact.setEmail1(primaryMail);
             }
             if (withObjectUseCount) {
                 try {
