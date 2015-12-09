@@ -73,6 +73,7 @@ import com.openexchange.imap.config.IMAPReloadable;
 import com.openexchange.imap.notify.internal.IMAPNotifierMessageRecentListener;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailMessageStorage;
 import com.openexchange.mail.api.enhanced.MailMessageStorageLong;
@@ -81,6 +82,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.MimeSessionPropertyNames;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.IMAPFolder;
@@ -251,6 +253,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
     }
 
     private void openFolder(int desiredMode, IMAPFolder imapFolder) throws MessagingException {
+        LogProperties.put(LogProperties.Name.MAIL_FULL_NAME, MailFolderUtility.prepareFullname(accountId, imapFolder.getFullName()));
         openFolder(desiredMode, imapFolder, true);
     }
 
