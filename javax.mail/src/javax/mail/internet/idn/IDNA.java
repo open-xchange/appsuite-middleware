@@ -114,7 +114,7 @@ public final class IDNA {
             ae.setNextException(e);
             throw ae;
         } catch (RuntimeException e) {
-            AddressException ae = new AddressException(new StringBuilder("Failed to convert puny-code to ASCII address: '").append(idnAddress).append('\'').toString());
+            AddressException ae = new AddressException(new StringBuilder("Failed to convert IDN to ACE/puny-code address: '").append(idnAddress).append('\'').toString());
             ae.setNextException(e);
             throw ae;
         }
@@ -145,7 +145,7 @@ public final class IDNA {
             return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(unicode).toString();
         } catch (RuntimeException e) {
             // Decoding punycode failed
-            LOGGER.error("Failed to convert ASCII to puny-code address: {}", aceAddress, e);
+            LOGGER.error("Failed to convert ACE/puny-code to IDN address: {}", aceAddress, e);
             return aceAddress;
         }
     }
