@@ -244,6 +244,7 @@ public class OnboardingViewConverter implements ResultConverter {
                     // Generic action
                     // fall-through
                 case EMAIL:
+                    // Generic action
                     {
                         if (!actionCollector.usedIds.containsKey(action.getId())) {
                             actionCollector.addAction(action.getId(), new JSONObject(2).put("id", action.getId()));
