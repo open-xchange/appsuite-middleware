@@ -74,7 +74,7 @@ public class DefaultScenario implements Scenario {
      * @param i18nDescription The translatable description
      * @return The new  {@code DefaultScenario} instance
      */
-    public static DefaultScenario newInstance(String id, OnboardingType type, String link, Icon icon, String i18nDisplayName, String i18nDescription) {
+    public static DefaultScenario newInstance(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription) {
         return new DefaultScenario(id, type, link, icon, i18nDisplayName, i18nDescription);
     }
 
@@ -82,7 +82,7 @@ public class DefaultScenario implements Scenario {
 
     private final String id;
     private final OnboardingType type;
-    private final String link;
+    private final Link link;
     private final List<OnboardingProvider> providers;
     private final List<Scenario> alternatives;
     private final Icon icon;
@@ -94,11 +94,12 @@ public class DefaultScenario implements Scenario {
      *
      * @param id The scenario identifier
      * @param type The associated type
+     * @param link The optional link
      * @param icon The icon
      * @param i18nDisplayName The translatable display name
      * @param i18nDescription The translatable description
      */
-    protected DefaultScenario(String id, OnboardingType type, String link, Icon icon, String i18nDisplayName, String i18nDescription) {
+    protected DefaultScenario(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription) {
         super();
         this.id = id;
         this.type = type;
@@ -159,7 +160,7 @@ public class DefaultScenario implements Scenario {
     }
 
     @Override
-    public String getLink() {
+    public Link getLink() {
         return link;
     }
 

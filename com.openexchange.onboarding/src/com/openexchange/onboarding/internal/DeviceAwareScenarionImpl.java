@@ -51,9 +51,11 @@ package com.openexchange.onboarding.internal;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.CompositeId;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.Icon;
+import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingType;
@@ -72,6 +74,7 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     private final boolean enabled;
     private final Scenario scenario;
     private final Device device;
+    private final CompositeId compositeId;
     private final List<OnboardingAction> actions;
 
     /**
@@ -84,7 +87,14 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
         this.scenario = scenario;
         this.device = device;
         this.actions = actions;
+        this.compositeId = new CompositeId(device, scenario.getId());
     }
+
+    @Override
+    public CompositeId getCompositeId() {
+        return compositeId;
+    }
+
     @Override
     public Device getDevice() {
         return device;
@@ -106,7 +116,7 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     }
 
     @Override
-    public String getLink() {
+    public Link getLink() {
         return scenario.getLink();
     }
 

@@ -54,7 +54,9 @@ import java.util.Set;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.exception.OXException;
 import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.LinkResult;
+import com.openexchange.onboarding.LinkType;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -131,7 +133,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     }
 
     private Result linkResult(OnboardingRequest request, Session session) throws OXException {
-        return new LinkResult(getDownloadLink(request, session));
+        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON));
     }
 
     private String getDownloadLink(OnboardingRequest request, Session session) throws OXException {

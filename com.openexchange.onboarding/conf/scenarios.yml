@@ -12,8 +12,12 @@
 #       "link" for a link/URL to either Apple App Store or Google Play Store
 #
 #     link: <link>
-#       String. The link routing to the app. Only valid in case "type" is set to "link"!
-#       For specifying a property that provides the actual link, please use special "property" scheme; e.g. "property://com.openexchange.onboarding.app.mylink"
+#       Object. The link and type routing to the app in either Apple App Store or Google Play Store. ONLY VALID IN CASE "type" IS SET TO "link"!
+#         url: <url>
+#         String: The URL of the link. For specifying a property that provides the actual link, please use special "property" scheme; e.g. "property://com.openexchange.onboarding.app.mylink"
+#
+#         type: <appstore|playstore>
+#         String: Optional. Denotes to what store the URL points to (if it is not a common download link not pointing to a commercial store. Supported values are "appstore" and "playstore"
 #
 #     providers: <provider-identifiers>
 #       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
@@ -36,11 +40,46 @@
 ################################################################################
 
 # Only an example
-myappinstall:
+myappleappinstall:
     # Disabled...
     enabled: false
     type: link
-    link: property://com.openexchange.onboarding.app.store.url
+    link:
+        url: property://com.openexchange.onboarding.app.store.url
+        type: appstore
+    providers: [app]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+# Only another example
+mygoogleappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link:
+        url: http://play.google.com/store/apps/details?id=mygoogleapp
+        type: playstore
+    providers: [app]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    ## icon: <icon>
+    # The translatable display name
+    ## displayName_t10e: <the display name>
+    # The translatable description
+    ## description_t10e: <the description>
+
+# Yet another example
+myplainappinstall:
+    # Disabled...
+    enabled: false
+    type: link
+    link:
+        url: http://my.host.invalid/path/to/the/installer
     providers: [app]
     alternatives: []
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary

@@ -55,6 +55,7 @@ import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.LinkResult;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
@@ -123,8 +124,8 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
             case LINK:
                 {
                     // Return the link from associated scenario
-                    String link = request.getScenario().getLink();
-                    if (Strings.isEmpty(link)) {
+                    Link link = request.getScenario().getLink();
+                    if (null == link) {
                         throw OnboardingExceptionCodes.MISSING_PROPERTY.create("link");
                     }
                     return new LinkResult(link);

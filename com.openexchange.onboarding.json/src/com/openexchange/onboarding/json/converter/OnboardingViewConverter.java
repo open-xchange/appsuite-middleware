@@ -49,22 +49,37 @@
 
 package com.openexchange.onboarding.json.converter;
 
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import org.apache.commons.codec.binary.Base64;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.Converter;
 import com.openexchange.ajax.requesthandler.ResultConverter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
+import com.openexchange.onboarding.CompositeId;
+import com.openexchange.onboarding.DefaultOnboardingRequest;
 import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.DeviceAwareScenario;
 import com.openexchange.onboarding.Icon;
+import com.openexchange.onboarding.OnboardingAction;
 import com.openexchange.onboarding.Platform;
+import com.openexchange.onboarding.ResultObject;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.onboarding.service.OnboardingView;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -76,11 +91,16 @@ import com.openexchange.tools.session.ServerSession;
  */
 public class OnboardingViewConverter implements ResultConverter {
 
+    private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(OnboardingViewConverter.class);
+
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link OnboardingViewConverter}.
      */
-    public OnboardingViewConverter() {
+    public OnboardingViewConverter(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -107,13 +127,18 @@ public class OnboardingViewConverter implements ResultConverter {
 
         try {
             OnboardingView view = (OnboardingView) resultObject;
-            result.setResultObject(toJson(view, session), "json");
+            result.setResultObject(toJson(view, requestData, session), "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private JSONObject toJson(OnboardingView view, ServerSession session) throws OXException, JSONException {
+    private JSONObject toJson(OnboardingView view, AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        OnboardingService onboardingService = services.getOptionalService(OnboardingService.class);
+        if (null == onboardingService) {
+            throw ServiceExceptionCode.absentService(OnboardingService.class);
+        }
+
         JSONObject jView = new JSONObject(6);
 
         // Platforms
@@ -123,7 +148,7 @@ public class OnboardingViewConverter implements ResultConverter {
                 JSONObject jPlatform = new JSONObject(4);
                 jPlatform.put("id", platform.getId());
                 jPlatform.put("enabled", platform.isEnabled(session));
-                put2Json("displayName", platform.getDisplayName(session), jPlatform);
+                put2Json("name", platform.getDisplayName(session), jPlatform);
                 put2Json("description", platform.getDescription(session), jPlatform);
                 put2Json("icon", platform.getIcon(session), jPlatform);
                 jPlatforms.put(jPlatform);
@@ -131,17 +156,26 @@ public class OnboardingViewConverter implements ResultConverter {
             jView.put("platforms", jPlatforms);
         }
 
-        // Devices
+        // Devices, scenario-action-association, and actions
         {
-            JSONArray jDevices = new JSONArray(8);
-            for (Entry<Device, List<String>> deviceEntry : view.getDevices().entrySet()) {
+            Map<Device, List<CompositeId>> devices = view.getDevices();
+
+            ActionCollector actionCollector = new ActionCollector();
+            Set<String> scenarioIds = new LinkedHashSet<String>(16, 0.9F);
+            JSONArray jScenario2Action = new JSONArray(16);
+            JSONArray jScenarios = new JSONArray(16);
+            JSONArray jDevices = new JSONArray(devices.size());
+
+            // Iterate available (device -> scenarios) mapping and fill collections accordingly
+            for (Entry<Device, List<CompositeId>> deviceEntry : devices.entrySet()) {
                 Device device = deviceEntry.getKey();
-                List<String> compositeIds = deviceEntry.getValue();
+                List<CompositeId> compositeIds = deviceEntry.getValue();
 
                 JSONObject jDevice = new JSONObject(4);
                 jDevice.put("id", device.getId());
                 jDevice.put("enabled", device.isEnabled(session));
-                put2Json("displayName", device.getDisplayName(session), jDevice);
+                jDevice.put("platform", device.getPlatform().getId());
+                put2Json("name", device.getDisplayName(session), jDevice);
                 put2Json("description", device.getDescription(session), jDevice);
                 put2Json("icon", device.getIcon(session), jDevice);
 
@@ -149,18 +183,136 @@ public class OnboardingViewConverter implements ResultConverter {
                     jDevice.put("scenarios", new JSONArray(0));
                 } else {
                     JSONArray jCompositeIds = new JSONArray(compositeIds.size());
-                    for (String compositeId : compositeIds) {
-                        jCompositeIds.put(compositeId);
+                    for (CompositeId compositeId : compositeIds) {
+                        // Add to device's list of supported scenarios
+                        jCompositeIds.put(compositeId.toString());
+
+                        // Remember associated scenario
+                        if (scenarioIds.add(compositeId.getScenarioId())) {
+                            Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
+                            boolean available = onboardingService.isAvailableFor(compositeId.getScenarioId(), session);
+                            jScenarios.put(toJson(scenario, available, session));
+                        }
+
+                        // Add appropriate scenario-action-association entry
+                        JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, session);
+                        if (null != jScenario2ActionEntry) {
+                            jScenario2Action.put(jScenario2ActionEntry);
+                        }
                     }
                     jDevice.put("scenarios", jCompositeIds);
                 }
 
                 jDevices.put(jDevice);
             }
+
             jView.put("devices", jDevices);
+            jView.put("scenarios", jScenarios);
+            jView.put("actions", actionCollector.jActions);
+            jView.put("matching", jScenario2Action);
         }
 
         return jView;
+    }
+
+    private JSONObject createScenario2ActionEntry(CompositeId compositeId, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
+        DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
+
+        JSONArray jActionIds = new JSONArray(10);
+        collectActions(scenario, null, jActionIds, actionCollector, requestData, onboardingService, session);
+        if (jActionIds.length() > 0) {
+            JSONObject jScenario2ActionEntry = new JSONObject(6);
+            jScenario2ActionEntry.put("id", compositeId.toString());
+            jScenario2ActionEntry.put("enabled", scenario.isEnabled(session));
+
+            jScenario2ActionEntry.put("actions", jActionIds);
+            return jScenario2ActionEntry;
+        }
+
+        return null;
+    }
+
+    private void collectActions(DeviceAwareScenario scenario, String scenarioAppendix, JSONArray jActionIds, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
+        List<OnboardingAction> actions = scenario.getActions();
+        for (OnboardingAction action : actions) {
+            boolean added = true;
+            switch (action) {
+                case SMS:
+                    // Generic action
+                    // fall-through
+                case DOWNLOAD:
+                    // Generic action
+                    // fall-through
+                case EMAIL:
+                    {
+                        if (!actionCollector.usedIds.containsKey(action.getId())) {
+                            actionCollector.addAction(action.getId(), new JSONObject(2).put("id", action.getId()));
+                        }
+                    }
+                    break;
+                case DISPLAY:
+                    {
+                        String compositeActionId = new StringBuilder(action.getId()).append('/').append(scenario.getCompositeId().getScenarioId()).toString();
+                        if (!actionCollector.usedIds.containsKey(compositeActionId)) {
+                            try {
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                JSONObject jAction = new JSONObject(2);
+                                jAction.put("id", compositeActionId);
+                                jAction.put("data", result.getObject());
+                                actionCollector.addAction(compositeActionId, jAction);
+                            } catch (OXException e) {
+                                LOGGER.warn("Failed to retrive data for action '{}' and will therefore be ignored.", compositeActionId, e);
+                                added = false;
+                            }
+                        }
+                    }
+                    break;
+                case LINK:
+                    {
+                        String compositeActionId = new StringBuilder(action.getId()).append('/').append(scenario.getCompositeId().getScenarioId()).toString();
+                        try {
+                            JSONObject jAction = actionCollector.usedIds.get(compositeActionId);
+                            if (null == jAction) {
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                jAction = new JSONObject(2);
+                                jAction.put("id", compositeActionId);
+                                jAction.put(scenario.getDevice().getId(), result.getObject());
+                                actionCollector.addAction(compositeActionId, jAction);
+                            } else {
+                                ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
+                                jAction.put(scenario.getDevice().getId(), result.getObject());
+                            }
+                        } catch (OXException e) {
+                            LOGGER.warn("Failed to retrive link for action '{}' and will therefore be ignored.", compositeActionId, e);
+                            added = false;
+                        }
+                    }
+                    break;
+                default:
+                    break;
+
+            }
+
+            if (added) {
+                String actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
+                jActionIds.put(actionId);
+            }
+        }
+
+        for (Scenario alternative : scenario.getAlternatives(session)) {
+            DeviceAwareScenario alternativeDeviceAwareScenario = onboardingService.getScenario(alternative.getId(), scenario.getDevice(), session);
+            collectActions(alternativeDeviceAwareScenario, alternative.getId(), jActionIds, actionCollector, requestData, onboardingService, session);
+        }
+    }
+
+    private JSONObject toJson(Scenario scenario, boolean enabled, ServerSession session) throws OXException, JSONException {
+        JSONObject jScenario = new JSONObject(8);
+        jScenario.put("id", scenario.getId());
+        jScenario.put("enabled", enabled);
+        put2Json("name", scenario.getDisplayName(session), jScenario);
+        put2Json("description", scenario.getDescription(session), jScenario);
+        put2Json("icon", scenario.getIcon(session), jScenario);
+        return jScenario;
     }
 
     private void put2Json(String key, Object value, JSONObject jObject) throws JSONException {
@@ -172,6 +324,29 @@ public class OnboardingViewConverter implements ResultConverter {
             } else {
                 jObject.put(key, value);
             }
+        }
+    }
+
+    private DefaultOnboardingRequest createOnboardingRequest(DeviceAwareScenario scenario, AJAXRequestData requestData, OnboardingAction action) {
+        return new DefaultOnboardingRequest(scenario, action, scenario.getDevice(), requestData.getHostData(), null);
+    }
+
+    // -------------------------------------------------------------------------------------------
+
+    private static class ActionCollector {
+
+        final Map<String, JSONObject> usedIds;
+        final JSONArray jActions;
+
+        ActionCollector() {
+            super();
+            usedIds = new HashMap<String, JSONObject>(10, 0.9F);
+            jActions = new JSONArray(10);
+        }
+
+        void addAction(String id, JSONObject jAction) {
+            usedIds.put(id, jAction);
+            jActions.put(jAction);
         }
     }
 

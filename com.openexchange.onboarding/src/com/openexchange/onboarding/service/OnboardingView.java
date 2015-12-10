@@ -52,6 +52,7 @@ package com.openexchange.onboarding.service;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.onboarding.CompositeId;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Platform;
 
@@ -75,6 +76,6 @@ public interface OnboardingView {
      *
      * @return The devices
      */
-    Map<Device, List<String>> getDevices();
+    Map<Device, List<CompositeId>> getDevices();
 
 }

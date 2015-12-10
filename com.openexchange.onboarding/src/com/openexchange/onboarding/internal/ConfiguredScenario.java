@@ -64,7 +64,7 @@ public class ConfiguredScenario {
     private final String id;
     private final boolean enabled;
     private final OnboardingType type;
-    private final Link link;
+    private final ConfiguredLink link;
     private final List<String> providerIds;
     private final List<String> alternativeIds;
     private final Icon icon;
@@ -74,7 +74,7 @@ public class ConfiguredScenario {
     /**
      * Initializes a new {@link ConfiguredScenario}.
      */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, Link link, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
+    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, ConfiguredLink link, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
         super();
         this.id = id;
         this.enabled = enabled;
@@ -119,7 +119,7 @@ public class ConfiguredScenario {
      *
      * @return The link
      */
-    public Link getLink() {
+    public ConfiguredLink getLink() {
         return link;
     }
 

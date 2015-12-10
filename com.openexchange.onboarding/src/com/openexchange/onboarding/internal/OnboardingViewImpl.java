@@ -55,6 +55,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.onboarding.CompositeId;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Platform;
 import com.openexchange.onboarding.service.OnboardingView;
@@ -68,7 +69,7 @@ import com.openexchange.onboarding.service.OnboardingView;
 public class OnboardingViewImpl implements OnboardingView {
 
     private final EnumSet<Platform> platforms;
-    private final EnumMap<Device, List<String>> devices;
+    private final EnumMap<Device, List<CompositeId>> devices;
 
     /**
      * Initializes a new {@link OnboardingViewImpl}.
@@ -76,7 +77,7 @@ public class OnboardingViewImpl implements OnboardingView {
     public OnboardingViewImpl() {
         super();
         platforms = EnumSet.noneOf(Platform.class);
-        devices = new EnumMap<Device, List<String>>(Device.class);
+        devices = new EnumMap<Device, List<CompositeId>>(Device.class);
     }
 
     /**
@@ -84,8 +85,8 @@ public class OnboardingViewImpl implements OnboardingView {
      *
      * @param availableDevices The available devices to add
      */
-    public void add(Map<Device, List<String>> availableDevices) {
-        for (Map.Entry<Device, List<String>> availableDevice : availableDevices.entrySet()) {
+    public void add(Map<Device, List<CompositeId>> availableDevices) {
+        for (Map.Entry<Device, List<CompositeId>> availableDevice : availableDevices.entrySet()) {
             add(availableDevice.getKey(), availableDevice.getValue());
         }
     }
@@ -96,12 +97,12 @@ public class OnboardingViewImpl implements OnboardingView {
      * @param device The device to add
      * @param compositeIds The composite identifiers for available scenarios
      */
-    public void add(Device device, List<String> compositeIds) {
+    public void add(Device device, List<CompositeId> compositeIds) {
         platforms.add(device.getPlatform());
 
-        List<String> existingCompositeIds = this.devices.get(device);
+        List<CompositeId> existingCompositeIds = this.devices.get(device);
         if (null == existingCompositeIds) {
-            existingCompositeIds = new ArrayList<String>(compositeIds.size());
+            existingCompositeIds = new ArrayList<CompositeId>(compositeIds.size());
             this.devices.put(device, existingCompositeIds);
         }
         existingCompositeIds.addAll(compositeIds);
@@ -113,7 +114,7 @@ public class OnboardingViewImpl implements OnboardingView {
     }
 
     @Override
-    public Map<Device, List<String>> getDevices() {
+    public Map<Device, List<CompositeId>> getDevices() {
         return devices;
     }
 

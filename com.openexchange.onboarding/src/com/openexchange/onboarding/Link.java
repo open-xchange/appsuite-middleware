@@ -49,71 +49,47 @@
 
 package com.openexchange.onboarding;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import com.openexchange.onboarding.LinkType;
 
 /**
- * {@link DefaultDeviceAwareScenario} - The default entity implementation.
+ * {@link Link} - A link for a scenario having type set to "link".
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DefaultDeviceAwareScenario extends DefaultScenario implements DeviceAwareScenario {
+public class Link {
+
+    private final String url;
+    private final LinkType type;
 
     /**
-     * Creates a new {@code DefaultScenario} instance
+     * Initializes a new {@link Link}.
      *
-     * @param id The scenario identifier
-     * @param type The associated type
-     * @param link The optional link
-     * @param icon The icon
-     * @param i18nDisplayName The translatable display name
-     * @param i18nDescription The translatable description
-     * @param device The associated device
-     * @return The new {@code DefaultScenario} instance
+     * @param url The URL of the link
+     * @param type The link type
      */
-    public static DefaultDeviceAwareScenario newInstance(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        return new DefaultDeviceAwareScenario(id, type, link, icon, i18nDisplayName, i18nDescription, device);
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------------------------
-
-    private final Device device;
-    private final List<OnboardingAction> actions;
-    private final CompositeId compositeId;
-
-    private DefaultDeviceAwareScenario(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        super(new StringBuilder(32).append(device.getId()).append('/').append(id).toString(), type, link, icon, i18nDisplayName, i18nDescription);
-        this.device = device;
-        actions = new ArrayList<>(4);
-        compositeId = new CompositeId(device, id);
+    public Link(String url, LinkType type) {
+        super();
+        this.url = url;
+        this.type = type;
     }
 
     /**
-     * Adds specified action
+     * Gets the type
      *
-     * @param action The action
+     * @return The type
      */
-    public void addAction(OnboardingAction action) {
-        if (null != action) {
-            this.actions.add(action);
-        }
+    public LinkType getType() {
+        return type;
     }
 
-    @Override
-    public CompositeId getCompositeId() {
-        return compositeId;
-    }
-
-    @Override
-    public Device getDevice() {
-        return device;
-    }
-
-    @Override
-    public List<OnboardingAction> getActions() {
-        return Collections.unmodifiableList(actions);
+    /**
+     * Gets the URL of the link
+     *
+     * @return The URL of the link
+     */
+    public String getUrl() {
+        return url;
     }
 
 }

@@ -58,7 +58,9 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
+import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.LinkResult;
+import com.openexchange.onboarding.LinkType;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -143,19 +145,22 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
         return new LinkResult(getAppStoreLink(request, session));
     }
 
-    private String getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
+    private Link getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
 
+        LinkType linkType;
         String propertyName;
         {
             Device device = request.getDevice();
             switch (device.getPlatform()) {
                 case APPLE:
                     propertyName = "com.openexchange.onboarding.mailapp.store.apple.appstore";
+                    linkType = LinkType.APPLE_APP_STORE;
                     break;
                 case ANDROID_GOOGLE:
                     propertyName = "com.openexchange.onboarding.mailapp.store.google.playstore";
+                    linkType = LinkType.GOOGLE_PLAY_STORE;
                     break;
                 default:
                     throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());
@@ -172,7 +177,7 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return new Link(value, linkType);
     }
 
 }

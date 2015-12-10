@@ -62,24 +62,24 @@ import com.openexchange.session.Session;
  */
 public class LinkResult implements Result {
 
-    private final String link;
+    private final Link link;
 
     /**
      * Initializes a new {@link LinkResult}.
      *
      * @param link The link
      */
-    public LinkResult(String link) {
+    public LinkResult(Link link) {
         super();
         this.link = link;
     }
 
     /**
-     * Gets the link
+     * Gets the link.
      *
      * @return The result string
      */
-    public String getLink() {
+    public Link getLink() {
         return link;
     }
 
@@ -96,7 +96,8 @@ public class LinkResult implements Result {
         }
 
         try {
-            return new SimpleResultObject(new JSONObject(2).put("link", link), "json");
+            LinkType type = link.getType();
+            return new SimpleResultObject(new JSONObject(4).put("link", link.getUrl()).put("type", null == type ? LinkType.COMMON.getId() : type.getId()), "json");
         } catch (JSONException e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }

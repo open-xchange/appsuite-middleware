@@ -82,7 +82,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
         Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingJsonActivator.class);
         logger.info("Starting bundle: \"com.openexchange.onboarding.json\"");
 
-        registerService(ResultConverter.class, new OnboardingViewConverter());
+        registerService(ResultConverter.class, new OnboardingViewConverter(this));
         registerService(ResultConverter.class, new ScenarioConverter(this));
         registerModule(new OnboardingActionFactory(this), "onboarding");
     }

@@ -61,9 +61,11 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
+import com.openexchange.onboarding.CompositeId;
 import com.openexchange.onboarding.DefaultScenario;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DeviceAwareScenario;
+import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
@@ -189,12 +191,39 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-
         Scenario scenario = getScenario(scenarioId, configuredScenarios, session);
         if (null == scenario) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
         return scenario;
+    }
+
+    public boolean isAvailableFor(String scenarioId, Session session) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
+        ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
+        if (null == configuredScenario) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
+        if (!configuredScenario.isEnabled()) {
+            throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
+        }
+
+        // Iterate & check its providers
+        for (String providerId : configuredScenario.getProviderIds()) {
+            OnboardingProvider provider = providers.get(providerId);
+            if (null == provider) {
+                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
+                return false;
+            } else if (!provider.isAvailable(session)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -266,9 +295,17 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence, Session session) throws OXException {
-        String link = resolveLink(configuredScenario.getLink(), session);
+        // Resolve link (if any)
+        Link link;
+        {
+            ConfiguredLink configuredLink = configuredScenario.getLink();
+            link = resolveLink(configuredLink, session);
+        }
+
+        // Create scenario instance
         DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
 
+        // Iterate & check its providers
         for (String providerId : configuredScenario.getProviderIds()) {
             OnboardingProvider provider = providers.get(providerId);
             if (null == provider) {
@@ -281,6 +318,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             scenario.addProvider(getProvider(providerId));
         }
 
+        // Iterate & load its alternatives
         for (String alternativeId : configuredScenario.getAlternativeIds()) {
             ConfiguredScenario alternativeConfiguredScenario = configuredScenarios.get(alternativeId);
             if (null == alternativeConfiguredScenario) {
@@ -298,24 +336,39 @@ public class OnboardingServiceImpl implements OnboardingService {
         return scenario;
     }
 
-    private String resolveLink(Link link, Session session) throws OXException {
-        return null == link ? null : (link.isProperty() ? OnboardingUtility.getValueFromProperty(link.getLink(), null, session) : link.getLink());
+    private Link resolveLink(ConfiguredLink configuredLink, Session session) throws OXException {
+        if (null == configuredLink) {
+            return null;
+        }
+
+        if (false == configuredLink.isProperty()) {
+            return new Link(configuredLink.getUrl(), configuredLink.getType());
+        }
+
+        // Look up the actual link by retrieving the denoted property
+        String url = OnboardingUtility.getValueFromProperty(configuredLink.getUrl(), null, session);
+        if (null == url) {
+            // Property not defined
+            LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
+            return null;
+        }
+        return new Link(url, configuredLink.getType());
     }
 
     @Override
     public OnboardingView getViewFor(Session session) throws OXException {
-        Map<Device, List<String>> availableDevices;
+        Map<Device, List<CompositeId>> availableDevices;
 
         {
             Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
-            availableDevices = new EnumMap<Device, List<String>>(Device.class);
+            availableDevices = new EnumMap<Device, List<CompositeId>>(Device.class);
             for (Device device : Device.values()) {
                 List<String> availableScenarios = device.getScenarios(session);
                 if (null != availableScenarios && !availableScenarios.isEmpty()) {
 
-                    List<String> compositeIds = availableDevices.get(device);
+                    List<CompositeId> compositeIds = availableDevices.get(device);
                     if (null == compositeIds) {
-                        compositeIds = new ArrayList<String>(8);
+                        compositeIds = new ArrayList<CompositeId>(8);
                         availableDevices.put(device, compositeIds);
                     }
 
@@ -324,7 +377,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                         if (null != configuredScenario && configuredScenario.isEnabled()) {
                             Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
                             if (null != scenario) {
-                                compositeIds.add(new StringBuilder(32).append(device.getId()).append('/').append(scenarioId).toString());
+                                compositeIds.add(new CompositeId(device, scenarioId));
                             }
                         }
                     }

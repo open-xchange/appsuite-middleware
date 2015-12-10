@@ -63,6 +63,7 @@ import com.openexchange.java.ImageTypeDetector;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.DefaultIcon;
 import com.openexchange.onboarding.Icon;
+import com.openexchange.onboarding.LinkType;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingType;
 import com.openexchange.onboarding.TemplateIcon;
@@ -145,22 +146,39 @@ public class OnboardingConfig {
             }
 
             // Check for special "link" scenario
-            Link link = null;
+            ConfiguredLink link = null;
             if (OnboardingType.LINK == type) {
                 // The link
-                String sLink = (String) values.get("link");
-                if (!Strings.isEmpty(sLink)) {
-                    try {
-                        URI uri = new URI(sLink);
-                        if ("property".equalsIgnoreCase(uri.getScheme())) {
-                            // E.g. "property://com.openexchange.onboarding.app.link"
-                            link = new Link(uri.getAuthority(), true);
-                        } else {
-                            // E.g. "https://itunes.apple.com/us/app/keynote/id361285480?mt=8"
-                            link = new Link(sLink, false);
+                Object linkObject = values.get("link");
+                if (null != linkObject) {
+                    if (false == Map.class.isInstance(linkObject)) {
+                        throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                    }
+                    Map<String, Object> linkValues = (Map<String, Object>) linkObject;
+                    LinkType linkType = LinkType.COMMON;
+                    {
+                        String sType = (String) linkValues.get("type");
+                        if (!Strings.isEmpty(sType)) {
+                            linkType = LinkType.typeFor(sType);
+                            if (null == linkType) {
+                                throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                            }
                         }
-                    } catch (URISyntaxException e) {
-                        throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(e, id);
+                    }
+                    String sUrl = (String) linkValues.get("url");
+                    if (!Strings.isEmpty(sUrl)) {
+                        try {
+                            URI uri = new URI(sUrl);
+                            if ("property".equalsIgnoreCase(uri.getScheme())) {
+                                // E.g. "property://com.openexchange.onboarding.app.link"
+                                link = new ConfiguredLink(uri.getAuthority(), true, linkType);
+                            } else {
+                                // E.g. "https://itunes.apple.com/us/app/keynote/id361285480?mt=8"
+                                link = new ConfiguredLink(sUrl, false, linkType);
+                            }
+                        } catch (URISyntaxException e) {
+                            throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(e, id);
+                        }
                     }
                 }
             }

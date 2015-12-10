@@ -90,4 +90,9 @@ public class CompositeId {
         return scenarioId;
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder(device.getId()).append('/').append(scenarioId).toString();
+    }
+
 }

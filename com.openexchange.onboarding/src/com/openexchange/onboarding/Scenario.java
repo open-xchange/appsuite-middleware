@@ -72,7 +72,7 @@ public interface Scenario extends Entity {
      *
      * @return The link
      */
-    String getLink();
+    Link getLink();
 
     /**
      * Gets the associated on-boarding providers.

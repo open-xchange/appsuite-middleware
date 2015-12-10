@@ -147,7 +147,7 @@ public class ScenarioConverter implements ResultConverter {
         JSONObject jScenario = new JSONObject(8);
         jScenario.put("id", scenario.getId());
         jScenario.put("enabled", scenario.isEnabled(session));
-        put2Json("displayName", scenario.getDisplayName(session), jScenario);
+        put2Json("name", scenario.getDisplayName(session), jScenario);
         put2Json("description", scenario.getDescription(session), jScenario);
         put2Json("icon", scenario.getIcon(session), jScenario);
         {

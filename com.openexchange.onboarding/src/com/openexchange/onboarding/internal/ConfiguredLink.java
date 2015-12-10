@@ -49,36 +49,29 @@
 
 package com.openexchange.onboarding.internal;
 
+import com.openexchange.onboarding.Link;
+import com.openexchange.onboarding.LinkType;
+
 /**
- * {@link Link} - A link for a scenario having type set to "link".
+ * {@link ConfiguredLink} - A link for a scenario having type set to "link".
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class Link {
+public class ConfiguredLink extends Link {
 
-    private final String link;
     private final boolean property;
 
     /**
-     * Initializes a new {@link Link}.
+     * Initializes a new {@link ConfiguredLink}.
      *
      * @param link The link
      * @param property Whether the link denotes a property
+     * @param type The link type
      */
-    public Link(String link, boolean property) {
-        super();
-        this.link = link;
+    public ConfiguredLink(String link, boolean property, LinkType type) {
+        super(link, type);
         this.property = property;
-    }
-
-    /**
-     * Gets the link
-     *
-     * @return The link
-     */
-    public String getLink() {
-        return link;
     }
 
     /**

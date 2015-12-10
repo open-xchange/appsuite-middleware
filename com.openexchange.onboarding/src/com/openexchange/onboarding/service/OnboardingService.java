@@ -115,6 +115,16 @@ public interface OnboardingService {
     Scenario getScenario(String scenarioId, Session session) throws OXException;
 
     /**
+     * Checks if specified scenario is capability- / permission-wise available to given user.
+     *
+     * @param scenarioId The scenario identifier
+     * @param session The session
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     * @throws OXException If availability cannot be checked
+     */
+    boolean isAvailableFor(String scenarioId, Session session) throws OXException;
+
+    /**
      * Gets the device-aware scenario by specified identifier
      *
      * @param scenarioId The scenario identifier

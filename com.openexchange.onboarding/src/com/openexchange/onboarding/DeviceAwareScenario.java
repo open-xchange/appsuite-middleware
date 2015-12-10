@@ -73,4 +73,11 @@ public interface DeviceAwareScenario extends Scenario {
      */
     List<OnboardingAction> getActions();
 
+    /**
+     * Gets the composite identifier for this device-aware scenario
+     *
+     * @return The composite identifier
+     */
+    CompositeId getCompositeId();
+
 }
