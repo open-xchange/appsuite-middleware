@@ -152,13 +152,11 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
 
 
     private final static String CALDAV_LOGIN_FIELD = "caldav_login";
-    private final static String CALDAV_PASSWORD_FIELD = "caldav_password";
     private final static String CALDAV_HOST_FIELD = "caldav_hostName";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CALDAV_PASSWORD_FIELD, session.getPassword());
         configuration.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
         return new DisplayResult(configuration);
     }
@@ -189,7 +187,6 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
-        payloadContent.addStringValue("CalDAVPassword", session.getPassword());
         payloadContent.addStringValue("CalDAVHostName", getCalDAVUrl(request, session));
         payloadContent.addBooleanValue("CalDAVUseSSL", false);
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, session));

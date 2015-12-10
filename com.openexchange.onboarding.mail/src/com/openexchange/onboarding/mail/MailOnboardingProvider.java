@@ -211,12 +211,10 @@ public class MailOnboardingProvider implements OnboardingProvider {
     // --------------------------------------------------------------------------------------------------------------------------
 
     private final static String IMAP_LOGIN_FIELD = "imapLogin";
-    private final static String IMAP_PASSWORD_FIELD = "imapPassword";
     private final static String IMAP_SERVER_FIELD = "imapServer";
     private final static String IMAP_PORT_FIELD = "imapPort";
     private final static String IMAP_SECURE_FIELD = "imapSecure";
     private final static String SMTP_LOGIN_FIELD = "smtpLogin";
-    private final static String SMTP_PASSWORD_FIELD = "smtpPassword";
     private final static String SMTP_SERVER_FIELD = "smtpServer";
     private final static String SMTP_PORT_FIELD = "smtpPort";
     private final static String SMTP_SECURE_FIELD = "smtpSecure";
@@ -227,13 +225,11 @@ public class MailOnboardingProvider implements OnboardingProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
 
         configuration.put(IMAP_LOGIN_FIELD, configurations.imapConfig.login);
-        configuration.put(IMAP_PASSWORD_FIELD, configurations.imapConfig.password);
         configuration.put(IMAP_SERVER_FIELD, configurations.imapConfig.host);
         configuration.put(IMAP_PORT_FIELD, new Integer(configurations.imapConfig.port));
         configuration.put(IMAP_SECURE_FIELD, new Boolean(configurations.imapConfig.secure));
 
         configuration.put(SMTP_LOGIN_FIELD, configurations.smtpConfig.login);
-        configuration.put(SMTP_PASSWORD_FIELD, configurations.smtpConfig.password);
         configuration.put(SMTP_SERVER_FIELD, configurations.smtpConfig.host);
         configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
         configuration.put(SMTP_SECURE_FIELD, new Boolean(configurations.smtpConfig.secure));
@@ -312,16 +308,6 @@ public class MailOnboardingProvider implements OnboardingProvider {
         // Designates the user name for the email account, usually the same as the email address up to the @ character.
         // If not present in the payload, and the account is set up to require authentication for incoming email, the device will prompt for this string during profile installation.
         payloadContent.addStringValue("IncomingMailServerUsername", configurations.imapConfig.login);
-
-        // Password for the Incoming Mail Server. Use only with encrypted profiles.
-        payloadContent.addStringValue("IncomingPassword", configurations.imapConfig.password);
-
-
-        // Password for the Outgoing Mail Server. Use only with encrypted profiles.
-        payloadContent.addStringValue("OutgoingPassword", configurations.smtpConfig.password);
-
-        // If set, the user will be prompted for the password only once and it will be used for both outgoing and incoming mail.
-        payloadContent.addBooleanValue("OutgoingPasswordSameAsIncomingPassword", configurations.imapConfig.password.equals(configurations.smtpConfig.password));
 
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
         payloadContent.addStringValue("OutgoingMailServerAuthentication", "EmailAuthPassword");

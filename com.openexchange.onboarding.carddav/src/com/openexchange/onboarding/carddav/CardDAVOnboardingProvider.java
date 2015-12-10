@@ -153,13 +153,11 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
 
 
     private final static String CARDDAV_LOGIN_FIELD = "carddav_login";
-    private final static String CARDDAV_PASSWORD_FIELD = "carddav_password";
     private final static String CARDDAV_HOST_FIELD = "carddav_hostName";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CARDDAV_PASSWORD_FIELD, session.getPassword());
         configuration.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, session));
         return new DisplayResult(configuration);
     }
@@ -190,7 +188,6 @@ public class CardDAVOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CardDAVUsername", session.getLogin());
-        payloadContent.addStringValue("CardDAVPassword", session.getPassword());
         payloadContent.addStringValue("CardDAVHostName", getCardDAVUrl(request, session));
         payloadContent.addBooleanValue("CardDAVUseSSL", false);
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, session));

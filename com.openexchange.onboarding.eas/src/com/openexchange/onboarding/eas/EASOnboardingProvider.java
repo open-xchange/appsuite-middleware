@@ -154,13 +154,11 @@ public class EASOnboardingProvider implements OnboardingProvider {
 
 
     private final static String EAS_LOGIN_FIELD = "eas_login";
-    private final static String EAS_PASSWORD_FIELD = "eas_password";
     private final static String EAS_HOST_FIELD = "eas_hostName";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(EAS_LOGIN_FIELD, session.getLogin());
-        configuration.put(EAS_PASSWORD_FIELD, session.getPassword());
         configuration.put(EAS_HOST_FIELD, getEASUrl(request, session));
         return new DisplayResult(configuration);
     }
@@ -189,7 +187,6 @@ public class EASOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
         payloadContent.addStringValue("UserName", session.getLogin());
-        payloadContent.addStringValue("Password", session.getPassword());
         payloadContent.addStringValue("EmailAddress", getPrimaryEMailAddress(session));
         payloadContent.addStringValue("Host", getEASUrl(request, session));
         payloadContent.addBooleanValue("SSL", false);
