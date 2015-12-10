@@ -62,7 +62,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.exception.OXException;
 
 /**
  * Injects the {@link ConfigurationService} and publishes the DatabaseService.
@@ -115,7 +114,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                 AssignmentFactoryImpl assignmentFactoryImpl = new AssignmentFactoryImpl(service);
                 assignmentFactoryImpl.reload();
                 context.registerService(AssignmentFactory.class, assignmentFactoryImpl, null);
-            } catch (final OXException e) {
+            } catch (final Exception e) {
                 LOG.error("Publishing the DatabaseService failed.", e);
             }
         }
