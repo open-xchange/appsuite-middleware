@@ -129,8 +129,8 @@ public final class SMTPProvider extends TransportProvider {
     }
 
     @Override
-    public MailTransport createNewNoReplyTransport(int userId, int contextId) throws OXException {
-        return new NoReplySMTPTransport(userId, contextId);
+    public MailTransport createNewNoReplyTransport(int contextId) throws OXException {
+        return new NoReplySMTPTransport(contextId);
     }
 
     @Override

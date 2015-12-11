@@ -52,7 +52,6 @@ package com.openexchange.share.notification.impl.mail;
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
-import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
@@ -127,8 +126,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
-            int id = casted.getSession() != null ? casted.getSession().getUserId() : ConfigProviderService.NO_USER;
-            sendMail(transportProvider.createNewNoReplyTransport(id, casted.getContextID()), mail);
+            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
         }
     }
 
@@ -139,8 +137,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         if (ServerSessionAdapter.valueOf(casted.getSession()).getUserConfiguration().hasWebMail()) {
             sendMail(transportProvider.createNewMailTransport(casted.getSession()), mail);
         } else {
-            int id = casted.getSession() != null ? casted.getSession().getUserId() : ConfigProviderService.NO_USER;
-            sendMail(transportProvider.createNewNoReplyTransport(id, casted.getContextID()), mail);
+            sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
         }
     }
 
@@ -148,7 +145,7 @@ public class MailNotificationHandler implements ShareNotificationHandler<Interne
         TransportProvider transportProvider = getTransportProvider();
         PasswordResetConfirmNotification<InternetAddress> casted = (PasswordResetConfirmNotification<InternetAddress>) notification;
         ComposedMailMessage mail = ConfirmPasswordResetMail.init(casted, transportProvider, services).compose();
-        sendMail(transportProvider.createNewNoReplyTransport(ConfigProviderService.NO_USER, casted.getContextID()), mail);
+        sendMail(transportProvider.createNewNoReplyTransport(casted.getContextID()), mail);
     }
 
     private TransportProvider getTransportProvider() {

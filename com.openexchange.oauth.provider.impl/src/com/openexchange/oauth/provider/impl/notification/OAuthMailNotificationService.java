@@ -98,7 +98,7 @@ public class OAuthMailNotificationService {
     public void sendNotification(ServerSession serverSession, Client client, HttpServletRequest request) throws OXException {
         try {
             ComposedMailMessage mail = buildNewExternalApplicationMail(serverSession, client, request);
-            MailTransport transport = transportProvider.createNewNoReplyTransport(serverSession.getUserId(), serverSession.getContextId());
+            MailTransport transport = transportProvider.createNewNoReplyTransport(serverSession.getContextId());
             transport.sendMailMessage(mail, ComposeType.NEW, mail.getTo());
         } catch (UnsupportedEncodingException | MessagingException | URISyntaxException e) {
             throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e);

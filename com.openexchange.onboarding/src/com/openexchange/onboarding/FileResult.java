@@ -131,7 +131,7 @@ public class FileResult implements Result {
         }
 
         boolean error = true;
-        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getUserId(), session.getContextId());
+        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
             MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 

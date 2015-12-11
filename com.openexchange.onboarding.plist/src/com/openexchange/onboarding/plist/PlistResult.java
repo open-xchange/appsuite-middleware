@@ -152,7 +152,7 @@ public class PlistResult implements Result {
 
         ThresholdFileHolder fileHolder = null;
         boolean error = true;
-        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getUserId(), session.getContextId());
+        MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
             MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
 

@@ -64,11 +64,10 @@ public interface NoReplyConfigFactory {
      * Gets the no-reply configuration for the given context. The proper configuration values are determined via config cascade,
      * as they can be overridden in the context scope.
      *
-     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The {@link NoReplyConfig}
      * @throws OXException
      */
-    NoReplyConfig getNoReplyConfig(int userId, int contextId) throws OXException;
+    NoReplyConfig getNoReplyConfig(int contextId) throws OXException;
 
 }

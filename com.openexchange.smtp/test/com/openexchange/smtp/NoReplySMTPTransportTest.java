@@ -74,7 +74,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import com.dumbster.smtp.SimpleSmtpServer;
 import com.dumbster.smtp.SmtpMessage;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
@@ -141,7 +140,7 @@ public class NoReplySMTPTransportTest {
         String subject = UUID.randomUUID().toString();
         String body = UUID.randomUUID().toString();
 
-        MailTransport transport = SMTPProvider.getInstance().createNewNoReplyTransport(ConfigProviderService.NO_USER, CONTEXT_ID);
+        MailTransport transport = SMTPProvider.getInstance().createNewNoReplyTransport(CONTEXT_ID);
         MimeMessage mail = new MimeMessage(MimeDefaultSession.getDefaultSession());
         mail.setRecipients(RecipientType.TO, recipients);
         mail.setSubject(subject, "ASCII");
@@ -179,7 +178,7 @@ public class NoReplySMTPTransportTest {
             + body;
 
 
-        MailTransport transport = SMTPProvider.getInstance().createNewNoReplyTransport(ConfigProviderService.NO_USER, 1);
+        MailTransport transport = SMTPProvider.getInstance().createNewNoReplyTransport(1);
         transport.sendRawMessage(message.getBytes("ASCII"));
         transport.close();
 
@@ -257,7 +256,7 @@ public class NoReplySMTPTransportTest {
         });
         when(mockServices.getService(NoReplyConfigFactory.class)).thenReturn(new NoReplyConfigFactory() {
             @Override
-            public NoReplyConfig getNoReplyConfig(int userId, int contextId) throws OXException {
+            public NoReplyConfig getNoReplyConfig(int contextId) throws OXException {
                 return new NoReplyConfig() {
 
                     @Override

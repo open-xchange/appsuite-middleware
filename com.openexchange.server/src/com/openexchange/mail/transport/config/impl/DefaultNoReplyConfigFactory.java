@@ -81,14 +81,14 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
     }
 
     @Override
-    public NoReplyConfig getNoReplyConfig(final int userId, final int contextId) throws OXException {
-        return loadNoReplyConfig(userId, contextId);
+    public NoReplyConfig getNoReplyConfig(final int contextId) throws OXException {
+        return loadNoReplyConfig(contextId);
     }
 
-    public NoReplyConfig loadNoReplyConfig(int userId, int contextId) throws OXException {
+    public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(userId, contextId);
+        ConfigView view = factory.getView(ConfigProviderService.NO_USER, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
 
         {
