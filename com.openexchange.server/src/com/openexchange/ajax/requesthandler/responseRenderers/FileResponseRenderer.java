@@ -96,19 +96,30 @@ public class FileResponseRenderer implements ResponseRenderer {
 
     private static final String SAVE_AS_TYPE = "application/octet-stream";
 
+    // -------------------------------------------------------------------------------------------------------------------------------
+
     private final AtomicReference<File> tmpDirReference;
-
-    private static final TransformImageAction TRANSFORM_IMAGE_ACTION = new TransformImageAction();
-
-    private static final IFileResponseRendererAction REGISTERED_ACTIONS[] = { new CheckParametersAction(), TRANSFORM_IMAGE_ACTION, new SetBinaryInputStreamAction(), new PrepareResponseHeaderAction(), new RemovePragmaHeaderAction(), new UpdateETagHeaderAction(), new OutputBinaryContentAction() };
-
-
+    private final TransformImageAction imageAction;
+    private final List<IFileResponseRendererAction> registeredActions;
 
     /**
      * Initializes a new {@link FileResponseRenderer}.
      */
     public FileResponseRenderer() {
         super();
+
+        // Initialize renderer actions
+        imageAction = new TransformImageAction();
+        registeredActions = new ArrayList<IFileResponseRendererAction>(8);
+        registeredActions.add(new CheckParametersAction());
+        registeredActions.add(imageAction);
+        registeredActions.add(new SetBinaryInputStreamAction());
+        registeredActions.add(new PrepareResponseHeaderAction());
+        registeredActions.add(new RemovePragmaHeaderAction());
+        registeredActions.add(new UpdateETagHeaderAction());
+        registeredActions.add(new OutputBinaryContentAction());
+
+        // Initialize rest
         final AtomicReference<File> tmpDirReference = new AtomicReference<File>();
         this.tmpDirReference = tmpDirReference;
         final ServerServiceRegistry registry = ServerServiceRegistry.getInstance();
@@ -117,7 +128,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == cs) {
             throw new IllegalStateException("Missing configuration service");
         }
-        final String path = cs.getProperty("UPLOAD_DIRECTORY", new PropertyListener() {
+        String path = cs.getProperty("UPLOAD_DIRECTORY", new PropertyListener() {
 
             @Override
             public void onPropertyChange(final PropertyEvent event) {
@@ -140,7 +151,7 @@ public class FileResponseRenderer implements ResponseRenderer {
      * @param scaler The image scaler
      */
     public void setScaler(ImageTransformationService scaler) {
-        TRANSFORM_IMAGE_ACTION.setScaler(scaler);
+        imageAction.setScaler(scaler);
     }
 
     @Override
@@ -206,7 +217,7 @@ public class FileResponseRenderer implements ResponseRenderer {
 
         try {
             data.setUserAgent(AJAXUtility.sanitizeParam(req.getHeader("user-agent")));
-            for (IFileResponseRendererAction action : REGISTERED_ACTIONS) {
+            for (IFileResponseRendererAction action : registeredActions) {
                 action.call(data);
             }
         } catch (FileResponseRendererActionException ex) {
