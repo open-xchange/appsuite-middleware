@@ -47,63 +47,34 @@
  *
  */
 
-package com.openexchange.carddav.action;
+package com.openexchange.caldav.mixins;
 
-import static org.slf4j.LoggerFactory.getLogger;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.actions.PUTAction;
-import com.openexchange.exception.OXException;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.caldav.CaldavProtocol;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CardDAVPUTAction}
+ * {@link ManagedAttachmentsServerURL}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CardDAVPUTAction extends PUTAction {
-
-    private final GroupwareCarddavFactory factory;
+public class ManagedAttachmentsServerURL extends SingleXMLPropertyMixin {
 
     /**
-     * Initializes a new {@link CardDAVPUTAction}.
-     *
-     * @param factory The underlying factory
+     * Initializes a new {@link ManagedAttachmentsServerURL}.
      */
-    public CardDAVPUTAction(GroupwareCarddavFactory factory) {
-        super(factory.getProtocol());
-        this.factory = factory;
+    public ManagedAttachmentsServerURL() {
+        super(CaldavProtocol.CAL_NS.getURI(), "managed-attachments-server-URL");
     }
 
     @Override
-    protected WebdavProtocolException getSizeExceeded(WebdavRequest request) {
-        return new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", HttpServletResponse.SC_FORBIDDEN);
-    }
-
-    @Override
-    protected long getMaxSize() {
-        long maxVCardSize = factory.getState().getMaxVCardSize();
-        Long maxUploadSize = null;
-        try {
-            maxUploadSize = factory.optConfigValue("MAX_UPLOAD_SIZE", Long.class, Long.valueOf(104857600));
-        } catch (OXException e) {
-            getLogger(CardDAVPUTAction.class).error("Error getting MAX_UPLOAD_SIZE value", e);
-        }
-        if (null == maxUploadSize || 0 >= maxUploadSize.longValue()) {
-            return maxVCardSize;
-        }
-        if (0 >= maxVCardSize) {
-            return maxUploadSize.longValue();
-        }
-        return Math.min(maxVCardSize, maxUploadSize.longValue());
-    }
-
-    @Override
-    protected boolean includeResponseETag() {
-        return false;
+    protected String getValue() {
+        /*
+         * When no DAV:href element is present, the client MUST substitute
+         * the scheme and authority parts of the attachment URI with the
+         * scheme and authority part of the calendar home collection absolute
+         * URI.
+         */
+        return "";
     }
 
 }

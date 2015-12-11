@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.mixins.DummySyncToken;
+import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
@@ -93,7 +93,7 @@ public class RootCollection extends DAVRootCollection {
     public RootCollection(GroupwareCarddavFactory factory) {
     	super(factory, "Addressbooks");
     	this.factory = factory;
-        includeProperties(new DummySyncToken());
+    	includeProperties(new SyncToken(this));
     }
 
 	@Override

@@ -49,148 +49,39 @@
 
 package com.openexchange.caldav.servlet;
 
-import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.caldav.Tools;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
-import com.openexchange.tools.webdav.LoginCustomizer;
-import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CalDAV extends OXServlet {
+public class CalDAV extends DAVServlet {
 
 	private static final long serialVersionUID = -7768308794451862636L;
 
-	private final CaldavPerformer performer;
-
+	/**
+	 * Initializes a new {@link CalDAV}.
+	 *
+	 * @param performer The CalDAV performer
+	 */
 	public CalDAV(CaldavPerformer performer) {
-	    super();
-	    this.performer = performer;
+	    super(performer, Interface.CALDAV);
 	}
 
     @Override
-    protected Interface getInterface() {
-        return Interface.CALDAV;
-    }
-
-    @Override
-    protected void doCopy(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.COPY);
-    }
-
-    @Override
-    protected void doLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.LOCK);
-    }
-
-    @Override
-    protected void doMkCol(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.MKCOL);
-    }
-
-    @Override
-    protected void doMove(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.MOVE);
-    }
-
-    @Override
-    protected void doOptions(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.OPTIONS);
-    }
-
-    @Override
-    protected void doPropFind(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PROPFIND);
-    }
-
-    @Override
-    protected void doPropPatch(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PROPPATCH);
-    }
-
-    @Override
-    protected void doUnLock(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.UNLOCK);
-    }
-
-    @Override
-    protected void doDelete(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.DELETE);
-    }
-
-    @Override
-    protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.GET);
-    }
-
-    @Override
-    protected void doHead(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.HEAD);
-    }
-
-    @Override
-    protected void doPut(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PUT);
-    }
-
-    @Override
-    protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.POST);
-    }
-
-    @Override
-    protected void doTrace(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.TRACE);
-    }
-
-    @Override
-    protected void doReport(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.REPORT);
-    }
-
-    @Override
-    protected void doMkCalendar(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.MKCALENDAR);
-    }
-
-    @Override
-    protected void doAcl(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.ACL);
-    }
-
-    private void doIt(final HttpServletRequest req, final HttpServletResponse resp, final WebdavMethod action) throws ServletException, IOException {
-        ServerSession session = null;
+    protected boolean checkPermission(HttpServletRequest req, ServerSession session) {
         try {
-            session = ServerSessionAdapter.valueOf(getSession(req));
-            if (!checkPermission(req, session)) {
-                resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                return;
-            }
-        } catch (final OXException exc) {
-            resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        performer.doIt(req, resp, action, session);
-    }
-
-    private boolean checkPermission(HttpServletRequest req, ServerSession session) {
-        try {
-            final ComposedConfigProperty<Boolean> property = performer.getFactory().getService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
+            ComposedConfigProperty<Boolean> property = performer.getFactory().requireService(ConfigViewFactory.class).getView(session.getUserId(), session.getContextId()).property("com.openexchange.caldav.enabled", boolean.class);
             if (property.isDefined() && property.get() && session.getUserPermissionBits().hasCalendar()) {
                 OAuthGrant oAuthGrant = (OAuthGrant) req.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
                 if (oAuthGrant == null) {
@@ -200,28 +91,10 @@ public class CalDAV extends OXServlet {
                     return oAuthGrant.getScope().has(Tools.OAUTH_SCOPE);
                 }
             }
-        } catch (final OXException e) {
+        } catch (OXException e) {
             //
         }
-
         return false;
-    }
-
-    private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-
-    @Override
-    protected LoginCustomizer getLoginCustomizer() {
-        return ALLOW_ASTERISK;
-    }
-
-    @Override
-    protected boolean useCookies() {
-        return false;
-    }
-
-    @Override
-    protected boolean allowOAuthAccess() {
-        return true;
     }
 
 }

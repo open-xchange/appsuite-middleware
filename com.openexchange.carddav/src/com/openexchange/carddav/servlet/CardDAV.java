@@ -50,167 +50,34 @@
 package com.openexchange.carddav.servlet;
 
 import static org.slf4j.LoggerFactory.getLogger;
-import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.requesthandler.oauth.OAuthConstants;
 import com.openexchange.carddav.Tools;
-import com.openexchange.carddav.osgi.CarddavActivator;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dav.DAVServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
 import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.session.ServerSessionAdapter;
-import com.openexchange.tools.webdav.AllowAsteriskAsSeparatorCustomizer;
-import com.openexchange.tools.webdav.LoginCustomizer;
-import com.openexchange.tools.webdav.OXServlet;
-import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
  * The {@link CalDAV} servlet. It delegates all calls to the CaldavPerformer
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CardDAV extends OXServlet {
+public class CardDAV extends DAVServlet {
 
 	private static final long serialVersionUID = -6381396333467867154L;
-    private static final LoginCustomizer ALLOW_ASTERISK = new AllowAsteriskAsSeparatorCustomizer();
-
-	private final ServiceLookup services;
-	private final CarddavPerformer performer;
 
     /**
      * Initializes a new {@link CardDAV}.
      *
-     * @param services A service lookup reference
      * @param performer The CardDAV performer
      */
-    public CardDAV(ServiceLookup services, CarddavPerformer performer) {
-        super();
-        this.services = services;
-        this.performer = performer;
-    }
-
-    @Override
-    protected boolean useCookies() {
-        return false;
-    }
-
-    @Override
-    protected boolean allowOAuthAccess() {
-        return true;
-    }
-
-    @Override
-    protected LoginCustomizer getLoginCustomizer() {
-        return ALLOW_ASTERISK;
-    }
-
-    @Override
-    protected Interface getInterface() {
-        return Interface.CARDDAV;
-    }
-
-    @Override
-    protected void doCopy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.COPY);
-    }
-
-    @Override
-    protected void doLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.LOCK);
-    }
-
-    @Override
-    protected void doMkCol(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.MKCOL);
-    }
-
-    @Override
-    protected void doMove(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.MOVE);
-    }
-
-    @Override
-    protected void doOptions(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.OPTIONS);
-    }
-
-    @Override
-    protected void doPropFind(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PROPFIND);
-    }
-
-    @Override
-    protected void doPropPatch(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PROPPATCH);
-    }
-
-    @Override
-    protected void doUnLock(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.UNLOCK);
-    }
-
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.DELETE);
-    }
-
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.GET);
-    }
-
-    @Override
-    protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.HEAD);
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.PUT);
-    }
-
-    @Override
-    protected void doTrace(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.TRACE);
-    }
-
-    @Override
-    protected void doReport(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.REPORT);
-    }
-
-    @Override
-    protected void doAcl(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-        doIt(req, resp, WebdavMethod.ACL);
-    }
-
-    private void doIt(HttpServletRequest request, HttpServletResponse response, WebdavMethod method) throws ServletException, IOException {
-        /*
-         * get server session from request & check permissions
-         */
-        ServerSession session = null;;
-        try {
-            session = ServerSessionAdapter.valueOf(getSession(request));
-        } catch (OXException e) {
-            getLogger(CarddavActivator.class).error("Error getting server session from request", e);
-            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            return;
-        }
-        if (null == session || false == checkPermission(request, session)) {
-            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-            return;
-        }
-        /*
-         * perform the action
-         */
-        performer.doIt(request, response, method, session);
+    public CardDAV(CarddavPerformer performer) {
+        super(performer, Interface.CARDDAV);
     }
 
     /**
@@ -220,11 +87,12 @@ public class CardDAV extends OXServlet {
      * @param session The session to check permissions for
      * @return <code>true</code> if CardDAV is enabled, <code>false</code>, otherwise
      */
-    private boolean checkPermission(HttpServletRequest request, ServerSession session) {
+    @Override
+    protected boolean checkPermission(HttpServletRequest request, ServerSession session) {
         if (false == session.getUserPermissionBits().hasContact()) {
             return false;
         }
-        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+        ConfigViewFactory configViewFactory = performer.getFactory().getOptionalService(ConfigViewFactory.class);
         if (null == configViewFactory) {
             getLogger(CardDAV.class).warn("Unable to access confic cascade, unable to check servlet permissions.");
             return false;
@@ -245,7 +113,6 @@ public class CardDAV extends OXServlet {
             getLogger(CardDAV.class).error("Error checking if CardDAV is enabled for user {} in context {}: {}",
                 session.getUserId(), session.getContextId(), e.getMessage(), e);
         }
-
         return false;
     }
 

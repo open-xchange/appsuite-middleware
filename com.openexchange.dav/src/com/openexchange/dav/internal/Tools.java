@@ -49,9 +49,7 @@
 
 package com.openexchange.dav.internal;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.CommonObject;
@@ -125,20 +123,6 @@ public class Tools {
             }
         }
         return name;
-    }
-
-    public static boolean isDataTruncation(final OXException e) {
-        return e.equalsCode(72, "APP") || e.equalsCode(41, "TSK");
-    }
-
-    public static boolean isIncorrectString(OXException e) {
-        return e.equalsCode(71, "APP") || e.equalsCode(58, "TSK");
-    }
-
-    public static String formatAsUTC(Date date) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
-        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
-        return dateFormat.format(date);
     }
 
     private Tools() {

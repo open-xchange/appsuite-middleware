@@ -77,7 +77,6 @@ import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.loader.BulkLoader;
@@ -171,11 +170,6 @@ public class GroupwareCaldavFactory extends DAVFactory implements BulkLoader {
         return folders;
     }
 
-    @Override
-    public Session getSession() {
-        return getSessionObject();
-    }
-
     public ICalEmitter getIcalEmitter() {
         return icalEmitter;
     }
@@ -241,11 +235,24 @@ public class GroupwareCaldavFactory extends DAVFactory implements BulkLoader {
         private Date maxDateTime = null;
         private String treeID;
         private UserizedFolder defaultFolder = null;
+        private CalDAVAgent userAgent;
 
         public State(final GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
             this.knownCollections = new HashMap<WebdavPath, DAVCollection>();
+        }
+
+        /**
+         * Gets the user agent performing the CalDAV request.
+         *
+         * @return The CalDAV agent, or {@link CalDAVAgent#UNKNOWN} if not recognized
+         */
+        public CalDAVAgent getUserAgent() {
+            if (null == userAgent) {
+                userAgent = CalDAVAgent.parse((String) factory.getSession().getParameter("user-agent"));
+            }
+            return userAgent;
         }
 
         /**

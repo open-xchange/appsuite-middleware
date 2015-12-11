@@ -299,6 +299,11 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     }
 
     @Override
+    public void delete() throws WebdavProtocolException {
+        internalDelete();
+    }
+
+    @Override
     protected void internalDelete() throws WebdavProtocolException {
         if (null == folder) {
             throw protocolException(HttpServletResponse.SC_NOT_FOUND);

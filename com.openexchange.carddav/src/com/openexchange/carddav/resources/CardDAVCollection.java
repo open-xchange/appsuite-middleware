@@ -192,15 +192,12 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
     @Override
     protected AbstractResource createResource(Contact object, WebdavPath url) throws OXException {
-        if (null == object) {
-            return new ContactResource(factory, url, folder.getID());
-        }
-        return new ContactResource(object, factory, url);
+        return new ContactResource(factory, this, object, url);
     }
 
     @Override
     protected String getFileExtension() {
-        return CardDAVResource.EXTENSION_VCF;
+        return ContactResource.EXTENSION_VCF;
     }
 
 	@Override

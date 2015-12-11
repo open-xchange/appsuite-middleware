@@ -51,10 +51,11 @@ package com.openexchange.caldav.servlet;
 
 import java.util.EnumMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.caldav.action.CalDAVPOSTAction;
 import com.openexchange.caldav.action.WebdavMkCalendarAction;
-import com.openexchange.caldav.action.WebdavPostAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
@@ -120,9 +121,9 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.LOCK, prepare(new WebdavLockAction(), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.COPY, prepare(new WebdavCopyAction(factory), true, true, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, true)));
         actions.put(WebdavMethod.DELETE, prepare(new WebdavDeleteAction(), true, true, factory, new WebdavExistsAction(), new WebdavIfMatchAction(), new WebdavIfAction(0, true, false)));
-        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.POST, prepare(new WebdavPostAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.MKCALENDAR, prepare(new WebdavMkCalendarAction(), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, factory, new WebdavIfAction(0, false, false)));
@@ -139,7 +140,7 @@ public class CaldavPerformer extends DAVPerformer {
     }
 
     @Override
-    protected DAVFactory getFactory() {
+    public DAVFactory getFactory() {
         return factory;
     }
 

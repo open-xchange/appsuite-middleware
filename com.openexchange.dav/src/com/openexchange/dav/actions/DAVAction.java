@@ -55,15 +55,21 @@ import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.output.XMLOutputter;
+import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.loader.LoadingHints;
 import com.openexchange.webdav.protocol.Protocol;
+import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
@@ -136,14 +142,27 @@ public abstract class DAVAction extends AbstractAction {
      * @return The resource
      */
     protected DAVResource requireResource(WebdavRequest request) throws WebdavProtocolException {
+        return requireResource(request, DAVResource.class);
+    }
+
+    /**
+     * Gets the WebDAV resource targeted by the supplied WebDAV request, throwing appropriate exceptions in case no suitable resource is
+     * found.
+     *
+     * @param request The request to get the resource for
+     * @param clazz The target resource's type
+     * @return The resource
+     */
+    protected <T> T requireResource(WebdavRequest request, Class<T> clazz) throws WebdavProtocolException {
         WebdavResource resource = request.getResource();
         if (null == resource) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_NOT_FOUND);
         }
-        if (false == DAVResource.class.isInstance(resource)) {
+        try {
+            return clazz.cast(resource);
+        } catch (ClassCastException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_CONFLICT);
         }
-        return (DAVResource) resource;
     }
 
     /**
@@ -258,6 +277,27 @@ public abstract class DAVAction extends AbstractAction {
         } catch (IOException e) {
             org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error sending WebDAV response", e);
         }
+    }
+
+    protected HostData getHostData(WebdavRequest request) throws WebdavProtocolException {
+        /*
+         * get host data from request context or session parameter
+         */
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (null != requestContext) {
+            return requestContext.getHostData();
+        }
+        WebdavFactory factory = request.getFactory();
+        if (DAVFactory.class.isInstance(factory)) {
+            Session session = ((DAVFactory) factory).getSession();
+            if (null != session) {
+                HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+                if (null != hostData) {
+                    return hostData;
+                }
+            }
+        }
+        throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
 }

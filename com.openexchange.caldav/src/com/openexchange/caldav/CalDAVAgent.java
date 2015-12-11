@@ -47,75 +47,50 @@
  *
  */
 
-package com.openexchange.caldav.action;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.java.Streams;
-import com.openexchange.webdav.action.AbstractAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+package com.openexchange.caldav;
 
 /**
- * {@link WebdavPostAction}
+ * {@link CalDAVAgent}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class WebdavPostAction extends AbstractAction {
+public enum CalDAVAgent {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(WebdavPostAction.class);
-
-    protected final GroupwareCaldavFactory factory;
+    MAC_CALENDAR,
+    IOS_CALENDAR,
+    THUNDERBIRD_LIGHTNING,
+    EM_CLIENT,
+    SMOOTH_SYNC,
+    UNKNOWN
+    ;
 
     /**
-     * Initializes a new {@link WebdavPostAction}.
+     * Parses a user-agent string from a HTTP request and tries to map it to a known CalDAV client.
      *
-     * @param factory The factory
+     * @param userAgent The user agent string to parse
+     * @return The parsed CalDAV agent, or {@link CalDAVAgent#UNKNOWN} if not recognized or unknown
      */
-    public WebdavPostAction(GroupwareCaldavFactory factory) {
-	    this.factory = factory;
-	}
-
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		response.setContentType(resource.getContentType());
-		byte[] buffer = new byte[1024];
-		OutputStream outputStream = null;
-		InputStream inputStream = null;
-		try {
-			inputStream = resource.getBody();
-			outputStream = response.getOutputStream();
-			int length;
-			while ((length = inputStream.read(buffer)) > 0) {
-				outputStream.write(buffer, 0, length);
-			}
-			response.setStatus(HttpServletResponse.SC_OK);
-		} catch (IOException e) {
-			LOG.debug("Client gone?", e);
-		} finally {
-			Streams.close(inputStream);
-			Streams.close(outputStream);
-		}
-	}
+    public static CalDAVAgent parse(String userAgent) {
+        if (null != userAgent) {
+            if (userAgent.contains("Lightning") && userAgent.contains("Thunderbird") && userAgent.contains("Mozilla")) {
+                return THUNDERBIRD_LIGHTNING;
+            }
+            if (userAgent.contains("iOS") && userAgent.contains("dataaccessd")) {
+                return IOS_CALENDAR;
+            }
+            if ((userAgent.contains("Mac OS") || userAgent.contains("Mac+OS")) &&
+                (userAgent.contains("CalendarStore") || (userAgent.contains("CalendarAgent")))) {
+                return MAC_CALENDAR;
+            }
+            if (userAgent.contains("eM Client")) {
+                return EM_CLIENT;
+            }
+            if (userAgent.contains("SmoothSync")) {
+                return SMOOTH_SYNC;
+            }
+        }
+        return UNKNOWN;
+    }
 
 }

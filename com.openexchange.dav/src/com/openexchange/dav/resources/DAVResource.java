@@ -53,8 +53,13 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
+import com.openexchange.framework.request.RequestContextHolder;
+import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.groupware.notify.hostname.HostnameService;
+import com.openexchange.session.Session;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavLock;
@@ -85,6 +90,29 @@ public abstract class DAVResource extends AbstractResource {
         this.factory = factory;
         this.url = url;
         includeProperties(new CurrentUserPrincipal(factory));
+    }
+
+    /**
+     * Gets the host data valid for the currently executed WebDAV request, throwing an exception if no host data could be looked up.
+     *
+     * @return The host data
+     */
+    protected HostData getHostData() throws WebdavProtocolException {
+        /*
+         * get host data from request context or session parameter
+         */
+        com.openexchange.framework.request.RequestContext requestContext = RequestContextHolder.get();
+        if (null != requestContext) {
+            return requestContext.getHostData();
+        }
+        Session session = factory.getSession();
+        if (null != session) {
+            HostData hostData = (HostData) session.getParameter(HostnameService.PARAM_HOST_DATA);
+            if (null != hostData) {
+                return hostData;
+            }
+        }
+        throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
     @Override

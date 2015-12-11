@@ -47,10 +47,11 @@
  *
  */
 
-package com.openexchange.dav.root;
+package com.openexchange.dav.attachments;
 
 import java.util.EnumMap;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.server.ServiceLookup;
@@ -59,6 +60,7 @@ import com.openexchange.webdav.action.WebdavExistsAction;
 import com.openexchange.webdav.action.WebdavGetAction;
 import com.openexchange.webdav.action.WebdavHeadAction;
 import com.openexchange.webdav.action.WebdavIfAction;
+import com.openexchange.webdav.action.WebdavIfMatchAction;
 import com.openexchange.webdav.action.WebdavOptionsAction;
 import com.openexchange.webdav.action.WebdavPropfindAction;
 import com.openexchange.webdav.action.WebdavReportAction;
@@ -67,26 +69,26 @@ import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavMethod;
 
 /**
- * {@link RootPerformer}
+ * {@link AttachmentPerformer}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class RootPerformer extends DAVPerformer {
+public class AttachmentPerformer extends DAVPerformer {
 
     private static final Protocol PROTOCOL = new Protocol();
 
-    private final RootFactory factory;
+    private final AttachmentFactory factory;
     private final Map<WebdavMethod, WebdavAction> actions;
 
     /**
-     * Initializes a new {@link RootPerformer}.
+     * Initializes a new {@link AttachmentPerformer}.
      *
      * @param services A service lookup reference
      */
-    public RootPerformer(ServiceLookup services) {
+    public AttachmentPerformer(ServiceLookup services) {
         super();
-        this.factory = new RootFactory(PROTOCOL, services, this);
+        this.factory = new AttachmentFactory(PROTOCOL, services, this);
         this.actions = initActions();
     }
 
@@ -94,8 +96,8 @@ public class RootPerformer extends DAVPerformer {
         EnumMap<WebdavMethod, WebdavAction> actions = new EnumMap<WebdavMethod, WebdavAction>(WebdavMethod.class);
         actions.put(WebdavMethod.OPTIONS, prepare(new WebdavOptionsAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.PROPFIND, prepare(new WebdavPropfindAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
+        actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, null, new WebdavExistsAction(), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.REPORT, prepare(new WebdavReportAction(PROTOCOL), true, true, new WebdavExistsAction(), new WebdavIfAction(0, false, false)));
         makeLockNullTolerant(actions);
@@ -104,7 +106,7 @@ public class RootPerformer extends DAVPerformer {
 
     @Override
     protected String getURLPrefix() {
-        return "/";
+        return factory.getURLPrefix();
     }
 
     @Override

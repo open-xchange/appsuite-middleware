@@ -106,7 +106,6 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
      */
     public PlaceholderCollection(DAVFactory factory, WebdavPath url, ContentType contentType, String treeID) throws OXException {
         super(factory, url, null);
-        this.contentType = null;
         this.displayName = "New Folder";
         this.contentType = contentType;
         this.treeID = treeID;

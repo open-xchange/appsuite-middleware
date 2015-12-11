@@ -6,7 +6,10 @@ Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.data.conversion.ical.ical4j.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.api2,
+Import-Package: com.google.common.io;version="18.0.0",
+ com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.api2,
  com.openexchange.config,
  com.openexchange.data.conversion.ical,
  com.openexchange.data.conversion.ical.itip,
@@ -15,6 +18,7 @@ Import-Package: com.openexchange.api2,
  com.openexchange.freebusy,
  com.openexchange.group,
  com.openexchange.groupware,
+ com.openexchange.groupware.attach,
  com.openexchange.groupware.calendar,
  com.openexchange.groupware.container,
  com.openexchange.groupware.container.participants,

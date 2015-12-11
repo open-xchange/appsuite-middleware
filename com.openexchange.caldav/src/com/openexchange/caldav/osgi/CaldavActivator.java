@@ -118,34 +118,17 @@ public class CaldavActivator extends HousekeepingActivator {
         try {
             CaldavPerformer performer = new CaldavPerformer(this);
             final HttpService httpService = getService(HttpService.class);
+
             httpService.registerServlet(SERVLET_PATH, new CalDAV(performer), null, null);
             httpService.registerServlet(NULL_PATH, new DevNullServlet(), null, null);
 
             final OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, performer);
             performer.setGlobalMixins(mixin);
             this.mixin = mixin;
-
-//            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
-//
-//                @Override
-//                public PropertyMixin create(SessionHolder sessionHolder) {
-//                    return new CalendarUserAddressSet(sessionHolder);
-//                }
-//            });
-//            registerService(PropertyMixinFactory.class, new PropertyMixinFactory() {
-//
-//                @Override
-//                public PropertyMixin create(SessionHolder sessionHolder) {
-//                    return new CurrentUserPrincipal(sessionHolder);
-//                }
-//            });
             registerService(PropertyMixin.class, new ScheduleOutboxURL());
             registerService(PropertyMixin.class, new ScheduleInboxURL());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDate());
             registerService(PropertyMixin.class, new DefaultAlarmVeventDatetime());
-
-//            registerService(PathRegistration.class, new PathRegistration("caldav"));
-
             registerService(PreferencesItemService.class, new PreferencesItemService() {
 
                 @Override

@@ -49,7 +49,6 @@
 
 package com.openexchange.dav;
 
-import java.io.IOException;
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -102,13 +101,13 @@ public abstract class DAVPerformer implements SessionHolder {
      *
      * @return The WebDAV factory
      */
-    protected abstract DAVFactory getFactory();
+    public abstract DAVFactory getFactory();
 
     /**
      * Gets the WebDAV action that handles a specific WebDAV method.
      *
      * @param method The WebDAV method to get the action for
-     * @return The action
+     * @return The action, or <code>null</code> if no action is mapped
      */
     protected abstract WebdavAction getAction(WebdavMethod method);
 
@@ -213,11 +212,7 @@ public abstract class DAVPerformer implements SessionHolder {
                 if (PreconditionException.class.isInstance(e)) {
                     ((PreconditionException) e).sendError(response);
                 } else {
-                    try {
-                        response.sendError(e.getStatus(), e.getDisplayMessage(session.getUser().getLocale()));
-                    } catch (IOException x) {
-                        org.slf4j.LoggerFactory.getLogger(DAVPerformer.class).warn("Error sending error response", x);
-                    }
+                    response.setStatus(e.getStatus());
                 }
             }
         } finally {

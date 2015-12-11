@@ -54,6 +54,7 @@ import java.util.List;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.impl.mapping.AddressMapping;
 import com.openexchange.contact.vcard.impl.mapping.AnniversaryMapping;
+import com.openexchange.contact.vcard.impl.mapping.AttachMapping;
 import com.openexchange.contact.vcard.impl.mapping.BirthdayMapping;
 import com.openexchange.contact.vcard.impl.mapping.CategoriesMapping;
 import com.openexchange.contact.vcard.impl.mapping.ClassMapping;
@@ -107,6 +108,10 @@ public class VCardMapper {
          * ANNIVERSARY
          */
         mappings.add(new AnniversaryMapping());
+        /*
+         * ATTACH
+         */
+        mappings.add(new AttachMapping());
         /*
          * BIRTHDAY
          */

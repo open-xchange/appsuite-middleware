@@ -74,6 +74,8 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean keepOriginalVCard;
     private boolean removeImageFromKeptVCard;
     private boolean enforceUtf8;
+    private boolean importAttachments;
+    private boolean removeAttachmentsFromKeptVCard;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -200,6 +202,28 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setEnforceUtf8(boolean enforceUtf8) {
         this.enforceUtf8 = enforceUtf8;
+        return this;
+    }
+
+    @Override
+    public boolean isImportAttachments() {
+        return importAttachments;
+    }
+
+    @Override
+    public VCardParameters setImportAttachments(boolean importAttachments) {
+        this.importAttachments = importAttachments;
+        return this;
+    }
+
+    @Override
+    public boolean isRemoveAttachmentsFromKeptVCard() {
+        return removeAttachmentsFromKeptVCard;
+    }
+
+    @Override
+    public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
+        this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
         return this;
     }
 

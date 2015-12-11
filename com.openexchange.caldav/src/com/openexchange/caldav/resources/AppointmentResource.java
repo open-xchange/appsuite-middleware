@@ -66,6 +66,7 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
+import com.openexchange.caldav.CalDAVAgent;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.ParticipantTools;
 import com.openexchange.caldav.Patches;
@@ -157,6 +158,60 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         }
     }
 
+    @Override
+    protected List<Appointment> getTargetedObjects(String[] recurrenceIDs) throws OXException {
+        List<Appointment> objects = new ArrayList<Appointment>();
+        if (null == recurrenceIDs) {
+            /*
+             * all recurrence instances are targeted
+             */
+            objects.add(object);
+            CalendarDataObject[] changeExceptions = parent.loadChangeExceptions(object, false);
+            if (null != changeExceptions && 0 < changeExceptions.length) {
+                objects.addAll(Arrays.asList(changeExceptions));
+            }
+        } else {
+            for (String recurrenceID : recurrenceIDs) {
+                if ("M".equalsIgnoreCase(recurrenceID)) {
+                    /*
+                     * recurrence master instance
+                     */
+                    objects.add(object);
+                } else {
+                    /*
+                     * specific instance, determine targeted recurrence date position
+                     */
+                    String exceptionICal = new StringBuilder()
+                        .append("BEGIN:VCALENDAR\r\n")
+                        .append("PRODID:a\r\n")
+                        .append("BEGIN:VEVENT\r\n")
+                        .append("DTSTART:").append(recurrenceID).append("\r\n")
+                        .append("DTEND:").append(recurrenceID).append("\r\n")
+                        .append("RECURRENCE-ID:").append(recurrenceID).append("\r\n")
+                        .append("END:VEVENT\r\n")
+                        .append("END:VCALENDAR\r\n")
+                    .toString();
+                    String timeZone = null != object.getTimezone() ? object.getTimezone() : factory.getUser().getTimeZone();
+                    List<CalendarDataObject> appointments = factory.getIcalParser().parseAppointments(exceptionICal, TimeZone.getTimeZone(timeZone), factory.getContext(), new ArrayList<ConversionError>(), new ArrayList<ConversionWarning>());
+                    if (null == appointments || 1 != appointments.size() || null == appointments.get(0).getRecurrenceDatePosition()) {
+                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                    }
+                    /*
+                     * get matching change exception
+                     */
+                    Date recurrenceDatePosition = appointments.get(0).getRecurrenceDatePosition();
+                    CalendarDataObject[] originalExceptions = parent.loadChangeExceptions(object, false);
+                    CalendarDataObject targetedException = getMatchingException(originalExceptions, recurrenceDatePosition);
+                    if (null == targetedException) {
+                        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+                    }
+                    objects.add(targetedException);
+                }
+            }
+        }
+        return objects;
+    }
+
     private AppointmentSQLInterface getAppointmentInterface() {
         if (null == this.appointmentInterface) {
             this.appointmentInterface = factory.getAppointmentInterface();
@@ -219,6 +274,13 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 if (null != appointmentToSave.getLastModified()) {
                     clientLastModified = appointmentToSave.getLastModified();
                 }
+            }
+            /*
+             * process attachments
+             */
+            Date lastModified = handleAttachments(originalAppointment, appointmentToSave);
+            if (null != lastModified && lastModified.after(clientLastModified)) {
+                clientLastModified = lastModified;
             }
             /*
              * save next reminder based on last acknowledged occurrence
@@ -297,6 +359,18 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         clientLastModified = exceptionToSave.getLastModified();
                     }
                 }
+                /*
+                 * process attachments in exceptions (but not for the mac client who can't)
+                 */
+                if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                    lastModified = handleAttachments(originalException, exceptionToSave);
+                    if (null != lastModified && lastModified.after(clientLastModified)) {
+                        clientLastModified = lastModified;
+                    }
+                }
+                /*
+                 * save next reminder based on last acknowledged occurrence
+                 */
                 if (null != nextExceptionReminder) {
                     ReminderObject reminder = optReminder(exceptionToSave);
                     if (null != reminder) {
@@ -359,6 +433,13 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
             Date clientLastModified = appointmentToSave.getLastModified();
+            /*
+             * process attachments & reminders
+             */
+            Date lastModified = handleAttachments(null, appointmentToSave);
+            if (null != lastModified && lastModified.after(clientLastModified)) {
+                clientLastModified = lastModified;
+            }
             if (null != nextReminder) {
                 ReminderObject reminder = optReminder(appointmentToSave);
                 if (null != reminder) {
@@ -372,18 +453,31 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * create change exceptions
              */
-            for (final CalendarDataObject exception : exceptionsToSave) {
+            for (CalendarDataObject exception : exceptionsToSave) {
                 exception.removeObjectID(); // in case it's already assigned due to retry operations
                 exception.setObjectID(appointmentToSave.getObjectID());
                 Patches.Incoming.removeParticipantsForPrivateAppointmentInPublicfolder(
                     factory.getSession().getUserId(), parent.getFolder(), exception);
-                getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
+                hardConflicts = getAppointmentInterface().updateAppointmentObject(exception, parentFolderID, clientLastModified);
+                if (null != hardConflicts && 0 < hardConflicts.length) {
+                    throw new PreconditionException(
+                        DAVProtocol.CAL_NS.getURI(), "allowed-organizer-scheduling-object-change", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
                 clientLastModified = exception.getLastModified();
+                /*
+                 * process attachments in exceptions (but not for the mac client who can't)
+                 */
+                if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                    lastModified = handleAttachments(null, exception);
+                    if (null != lastModified && lastModified.after(clientLastModified)) {
+                        clientLastModified = lastModified;
+                    }
+                }
             }
             /*
              * create delete exceptions
              */
-            for (final CalendarDataObject exception : deleteExceptionsToSave) {
+            for (CalendarDataObject exception : deleteExceptionsToSave) {
                 exception.setObjectID(appointmentToSave.getObjectID());
                 getAppointmentInterface().deleteAppointmentObject(exception, parentFolderID, clientLastModified);
                 clientLastModified = exception.getLastModified();
@@ -460,57 +554,60 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 /*
                  * consider reminder as 'snoozed', store parameter for client-specific serialization
                  */
-                String userAgent = (String) factory.getSession().getParameter("user-agent");
-                if (null != userAgent && userAgent.contains("Lightning") && userAgent.contains("Thunderbird")) {
-                    /*
-                     * Thunderbird/Lightning likes to have a custom "X-MOZ-SNOOZE-TIME-<timestamp_of_recurrence>" property for recurring
-                     * events, and a custom "X-MOZ-SNOOZE-TIME" property for non-recurring ones
-                     */
-                    appointment.setProperty("com.openexchange.data.conversion.ical.alarm.mozSnooze", reminder.getDate());
-                    if (appointment.isMaster()) {
-                        calendar.setTime(regularReminder.getDate());
-                        calendar.add(Calendar.MINUTE, reminderMinutes);
-                        Date recurrenceID = calendar.getTime();
-                        appointment.setProperty("com.openexchange.data.conversion.ical.alarm.mozSnoozeTimestamp", recurrenceID);
-                    }
-                    return;
-                }
-                if (null != userAgent && userAgent.contains("iOS") && userAgent.contains("dataaccessd")) {
-                    /*
-                     * iOS calendar prefers a relative snooze time duration in the trigger
-                     */
-                    if (appointment.isMaster()) {
-                        calendar.setTime(regularReminder.getDate());
-                        calendar.add(Calendar.MINUTE, reminderMinutes);
-                        Date startDate = calendar.getTime();
-                        long diff = startDate.getTime() - reminder.getDate().getTime();
-                        if (diff >= 0) {
-                            appointment.setProperty("com.openexchange.data.conversion.ical.alarm.relativeSnooze", Integer.valueOf((int) (diff / 1000)));
-                            return;
+                switch (factory.getState().getUserAgent()) {
+                    case THUNDERBIRD_LIGHTNING:
+                        /*
+                         * Thunderbird/Lightning likes to have a custom "X-MOZ-SNOOZE-TIME-<timestamp_of_recurrence>" property for recurring
+                         * events, and a custom "X-MOZ-SNOOZE-TIME" property for non-recurring ones
+                         */
+                        appointment.setProperty("com.openexchange.data.conversion.ical.alarm.mozSnooze", reminder.getDate());
+                        if (appointment.isMaster()) {
+                            calendar.setTime(regularReminder.getDate());
+                            calendar.add(Calendar.MINUTE, reminderMinutes);
+                            Date recurrenceID = calendar.getTime();
+                            appointment.setProperty("com.openexchange.data.conversion.ical.alarm.mozSnoozeTimestamp", recurrenceID);
                         }
-                    }
+                        break;
+                    case IOS_CALENDAR:
+                        /*
+                         * iOS calendar prefers a relative snooze time duration in the trigger
+                         */
+                        if (appointment.isMaster()) {
+                            calendar.setTime(regularReminder.getDate());
+                            calendar.add(Calendar.MINUTE, reminderMinutes);
+                            Date startDate = calendar.getTime();
+                            long diff = startDate.getTime() - reminder.getDate().getTime();
+                            if (diff >= 0) {
+                                appointment.setProperty("com.openexchange.data.conversion.ical.alarm.relativeSnooze", Integer.valueOf((int) (diff / 1000)));
+                                break;
+                            }
+                        }
+                        // fall through, otherwise
+                    default:
+                        /*
+                         * apply default snooze handling
+                         */
+                        appointment.setProperty("com.openexchange.data.conversion.ical.alarm.snooze", reminder.getDate());
+                        break;
                 }
-                /*
-                 * apply default snooze handling, otherwise
-                 */
-                appointment.setProperty("com.openexchange.data.conversion.ical.alarm.snooze", reminder.getDate());
             }
         }
     }
 
     @Override
     protected String generateICal() throws OXException {
-        final ICalEmitter icalEmitter = factory.getIcalEmitter();
-        final ICalSession session = icalEmitter.createSession();
-        final List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
-        final List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
+        ICalEmitter icalEmitter = factory.getIcalEmitter();
+        ICalSession session = icalEmitter.createSession();
+        List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
+        List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
         try {
             /*
-             * load appointment, reminder & change exceptions
+             * load appointment & apply extended properties for serialization
              */
             CalendarDataObject appointment = parent.load(object, true);
             applyReminderProperties(appointment);
             applyPrivateComments(appointment);
+            applyAttachments(appointment);
             CalendarDataObject[] changeExceptions = 0 < object.getRecurrenceID() ? parent.loadChangeExceptions(object, true) : null;
             /*
              * transform change exceptions to delete-exceptions where user is removed from participants if needed (bug #26293)
@@ -529,6 +626,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 for (CalendarDataObject changeException : changeExceptions) {
                     applyReminderProperties(changeException);
                     applyPrivateComments(changeException);
+                    if (false == CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
+                        applyAttachments(changeException);
+                    }
                     icalEmitter.writeAppointment(session, changeException, factory.getContext(), conversionErrors, conversionWarnings);
                 }
             }
@@ -540,7 +640,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             String iCal = new String(bytes.toByteArray(), "UTF-8");
             iCal = Patches.Outgoing.removeEmptyRDates(iCal);
             return iCal;
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw protocolException(e);
         }
     }

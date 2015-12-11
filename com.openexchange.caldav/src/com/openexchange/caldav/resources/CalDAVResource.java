@@ -60,7 +60,11 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXException.IncorrectString;
+import com.openexchange.exception.OXException.ProblematicAttribute;
+import com.openexchange.exception.OXException.Truncated;
 import com.openexchange.groupware.container.CalendarObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Charsets;
@@ -79,16 +83,25 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public abstract class CalDAVResource<T extends CalendarObject> extends CommonResource<T> {
 
     public static final String EXTENSION_ICS = ".ics";
-
     private static final String CONTENT_TYPE = "text/calendar; charset=UTF-8";
+    private static final int MAX_RETRIES = 3;
 
     protected final GroupwareCaldavFactory factory;
 
     protected CalDAVFolderCollection<T> parent;
     private byte[] iCalFile;
     private TimeZone timeZone;
+    private int retryCount;
 
-    public CalDAVResource(GroupwareCaldavFactory factory, CalDAVFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
+    /**
+     * Initializes a new {@link CalDAVResource}.
+     *
+     * @param factory The CalDAV factory
+     * @param parent The parent folder collection
+     * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
+     * @param url The resource url
+     */
+    protected CalDAVResource(GroupwareCaldavFactory factory, CalDAVFolderCollection<T> parent, T object, WebdavPath url) throws OXException {
         super(parent, object, url);
         this.factory = factory;
         this.parent = parent;
@@ -132,15 +145,6 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
     @Override
     protected String getFileExtension() {
         return EXTENSION_ICS;
-    }
-
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return null;
-    }
-
-    @Override
-    public void setDisplayName(String displayName) throws WebdavProtocolException {
     }
 
     @Override
@@ -231,6 +235,150 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
         }
         this.parent = targetCollection;
         return this;
+    }
+
+    /**
+     * Handles given {@link OXException} instance and either throws an appropriate {@link WebdavProtocolException} instance or checks if a
+     * retry attempt is supposed to be performed.
+     *
+     * @param e The exception to handle
+     * @return <code>true</code> to signal that the operation should be retried; otherwise <code>false</code> if no retry should be performed
+     * @throws WebdavProtocolException The appropriate {@link WebdavProtocolException} instance in case no retry is feasible
+     */
+    protected boolean handle(OXException e) throws WebdavProtocolException {
+        boolean retry = false;
+        if (Tools.isDataTruncation(e)) {
+            /*
+             * handle by trimming truncated fields
+             */
+            if (this.trimTruncatedAttributes(e)) {
+                LOG.warn("{}: {} - trimming fields and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
+        } else if (Tools.isIncorrectString(e)) {
+            /*
+             * handle by removing problematic characters
+             */
+            if (replaceIncorrectStrings(e, "")) {
+                LOG.warn("{}: {} - removing problematic characters and trying again.", this.getUrl(), e.getMessage());
+                retry = true;
+            }
+        } else if (e.equalsCode(93, "APP")) { // APP-0093
+            /*
+             * 'Moving a recurring appointment to another folder is not supported.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else if (e.equalsCode(100, "APP")) { // APP-0100
+            /*
+             * 'Cannot insert appointment ABC. An appointment with the unique identifier (123) already exists.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else if (e.equalsCode(70, "APP")) { // APP-0070
+            /*
+             * 'You can not use the private flag in a non private folder.'
+             */
+            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+            /*
+             * throw appropriate protocol exception
+             */
+            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (Category.CATEGORY_CONFLICT.equals(e.getCategory())) {
+            /*
+             * throw appropriate protocol exception
+             */
+            throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else {
+            throw protocolException(e);
+        }
+
+        if (!retry) {
+            return false;
+        }
+
+        return ++retryCount <= MAX_RETRIES;
+    }
+
+    protected abstract boolean trimTruncatedAttribute(Truncated truncated);
+
+    private boolean trimTruncatedAttributes(OXException e) {
+        boolean hasTrimmed = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (Truncated.class.isInstance(problematic)) {
+                    hasTrimmed |= this.trimTruncatedAttribute((Truncated)problematic);
+                }
+            }
+        }
+        return hasTrimmed;
+    }
+
+    protected abstract boolean replaceIncorrectStrings(IncorrectString incorrectString, String replacement);
+
+    private boolean replaceIncorrectStrings(OXException e, String replacement) {
+        boolean hasReplaced = false;
+        if (null != e.getProblematics()) {
+            for (ProblematicAttribute problematic : e.getProblematics()) {
+                if (IncorrectString.class.isInstance(problematic)) {
+                    hasReplaced |= this.replaceIncorrectStrings((IncorrectString) problematic, replacement);
+                }
+            }
+        }
+        return hasReplaced;
+    }
+
+    protected abstract void saveObject() throws OXException;
+
+    protected abstract void deleteObject() throws OXException;
+
+    protected abstract void createObject() throws OXException;
+
+    @Override
+    public void create() throws WebdavProtocolException {
+        if (exists()) {
+            throw protocolException(HttpServletResponse.SC_CONFLICT);
+        }
+        try {
+            this.createObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                create();
+            } else {
+                throw protocolException(e);
+            }
+        }
+    }
+
+    @Override
+    public void delete() throws WebdavProtocolException {
+        if (false == exists()) {
+            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+        }
+        try {
+            deleteObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                delete();
+            } else {
+                throw protocolException(e);
+            }
+        }
+    }
+
+    @Override
+    public void save() throws WebdavProtocolException {
+        if (false == exists()) {
+            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+        }
+        try {
+            saveObject();
+        } catch (OXException e) {
+            if (handle(e)) {
+                save();
+            } else {
+                throw protocolException(e);
+            }
+        }
     }
 
 }

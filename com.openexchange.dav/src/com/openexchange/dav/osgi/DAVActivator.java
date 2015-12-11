@@ -51,14 +51,15 @@ package com.openexchange.dav.osgi;
 
 import org.osgi.service.http.HttpService;
 import com.openexchange.contact.ContactService;
+import com.openexchange.dav.DAVServlet;
+import com.openexchange.dav.attachments.AttachmentPerformer;
 import com.openexchange.dav.mixins.AddressbookHomeSet;
 import com.openexchange.dav.mixins.CalendarHomeSet;
 import com.openexchange.dav.mixins.PrincipalCollectionSet;
 import com.openexchange.dav.principals.PrincipalPerformer;
-import com.openexchange.dav.principals.PrincipalServlet;
 import com.openexchange.dav.root.RootPerformer;
-import com.openexchange.dav.root.RootServlet;
 import com.openexchange.group.GroupService;
+import com.openexchange.login.Interface;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
@@ -87,14 +88,19 @@ public class DAVActivator extends HousekeepingActivator {
          * root
          */
         RootPerformer rootPerformer = new RootPerformer(this);
-        RootServlet rootServlet = new RootServlet(rootPerformer);
-        httpService.registerServlet("/servlet/dav", rootServlet, null, null);
+        httpService.registerServlet("/servlet/dav", new DAVServlet(rootPerformer, Interface.CALDAV), null, null);
+        /*
+         * attachments
+         */
+        AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
+//        AttachmentServlet attachmentServlet = new AttachmentServlet(attachmentPerformer);
+        httpService.registerServlet("/servlet/dav/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-        PrincipalServlet principalServlet = new PrincipalServlet(principalPerformer);
-        httpService.registerServlet("/servlet/dav/principals", principalServlet, null, null);
+//        PrincipalServlet principalServlet = new PrincipalServlet(principalPerformer);
+        httpService.registerServlet("/servlet/dav/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
         this.mixin = mixin;

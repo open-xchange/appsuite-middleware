@@ -324,7 +324,7 @@ public abstract class OXServlet extends WebDavServlet {
         }
     }
 
-    private RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
+    protected RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
         int contextId = -1;
         int userId = -1;
         if (session != null) {
@@ -349,7 +349,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
      * @throws IOException If an I/O error occurs
      */
-    private boolean authenticate(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    protected boolean authenticate(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Session session = null;
         if (useCookies()) {
             /*

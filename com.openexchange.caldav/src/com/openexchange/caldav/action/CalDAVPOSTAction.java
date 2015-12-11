@@ -47,27 +47,58 @@
  *
  */
 
-package com.openexchange.carddav.mixins;
+package com.openexchange.caldav.action;
 
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
-
+import java.io.IOException;
+import com.openexchange.caldav.GroupwareCaldavFactory;
+import com.openexchange.dav.actions.POSTAction;
+import com.openexchange.webdav.action.WebdavRequest;
+import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
 
 /**
- * {@link DummySyncToken}
+ * {@link CalDAVPOSTAction}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class DummySyncToken extends SingleXMLPropertyMixin {
+public class CalDAVPOSTAction extends POSTAction {
 
+	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVPOSTAction.class);
 
-    public DummySyncToken() {
-        super(Protocol.DAV_NS.getURI(), "sync-token");
-    }
+    protected final GroupwareCaldavFactory factory;
 
-    @Override
-    protected String getValue() {
-        return "1337";
-    }
+    /**
+     * Initializes a new {@link CalDAVPOSTAction}.
+     *
+     * @param factory The factory
+     */
+    public CalDAVPOSTAction(GroupwareCaldavFactory factory) {
+        super(factory.getProtocol());
+	    this.factory = factory;
+	}
+
+	@Override
+	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+	    if (super.handleAction(request, response)) {
+	        return;
+	    }
+		WebdavResource resource = request.getResource();
+		if (null != request.getHeader("content-length")) {
+			resource.setLength(new Long(request.getHeader("content-length")));
+		}
+		/*
+		 * put request body
+		 */
+		try {
+			resource.putBodyAndGuessLength(request.getBody());
+		} catch (IOException e) {
+			LOG.debug("Client Gone?", e);
+		}
+		/*
+		 * write back response
+		 */
+		writeResource(resource, response);
+	}
 
 }

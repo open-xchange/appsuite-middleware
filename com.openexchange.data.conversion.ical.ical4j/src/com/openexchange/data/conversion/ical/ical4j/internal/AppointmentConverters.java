@@ -170,6 +170,7 @@ public final class AppointmentConverters {
         tmp.add(sequence);
         tmp.add(participants);
         tmp.add(xMicrosoftCdoAlldayEvent);
+        tmp.add(attach);
         return tmp;
     }
 

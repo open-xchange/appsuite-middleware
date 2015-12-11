@@ -99,9 +99,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register CardDAV servlet & WebDAV path
              */
-            CardDAV servlet = new CardDAV(this, performer);
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", servlet, null, null);
-//            registerService(PathRegistration.class, new PathRegistration("carddav"));
+            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(performer), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {
