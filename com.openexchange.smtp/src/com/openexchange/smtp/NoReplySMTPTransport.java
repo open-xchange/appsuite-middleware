@@ -81,14 +81,14 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
 
     private final NoReplyConfig noReplyConfig;
 
-    public NoReplySMTPTransport(int contextId) throws OXException {
+    public NoReplySMTPTransport(int userId, int contextId) throws OXException {
         super(contextId);
         NoReplyConfigFactory configFactory = Services.getService(NoReplyConfigFactory.class);
         if (configFactory == null) {
             throw ServiceExceptionCode.serviceUnavailable(NoReplyConfigFactory.class);
         }
 
-        noReplyConfig = configFactory.getNoReplyConfig(contextId);
+        noReplyConfig = configFactory.getNoReplyConfig(userId, contextId);
     }
 
     @Override

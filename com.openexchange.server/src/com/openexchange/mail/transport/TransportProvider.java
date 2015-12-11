@@ -187,11 +187,12 @@ public abstract class TransportProvider {
      * Gets a newly created {@link MailTransport} instance, that can be used to
      * send mails via the configured no-reply address.
      *
+     * @param userId The user ID
      * @param contextId The context ID
      * @return The transport
      * @throws OXException
      */
-    public abstract MailTransport createNewNoReplyTransport(int contextId) throws OXException;
+    public abstract MailTransport createNewNoReplyTransport(int userId, int contextId) throws OXException;
 
     /**
      * Gets the protocol properties
