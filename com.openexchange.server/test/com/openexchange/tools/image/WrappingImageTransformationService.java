@@ -47,63 +47,66 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.tools.image;
 
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.imagetransformation.ImageTransformationProvider;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ImageTransformations;
 
 /**
- * {@link TransformedImage}
+ * {@link WrappingImageTransformationService}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface TransformedImage {
+public class WrappingImageTransformationService implements ImageTransformationService {
+
+    private final ImageTransformationProvider provider;
 
     /**
-     * Gets the pixel width of the image.
-     *
-     * @return The width
+     * Initializes a new {@link WrappingImageTransformationService}.
      */
-    int getWidth();
+    public WrappingImageTransformationService(ImageTransformationProvider provider) {
+        super();
+        this.provider = provider;
+    }
 
-    /**
-     * Gets the pixel height of the image.
-     *
-     * @return The height
-     */
-    int getHeight();
+    @Override
+    public ImageTransformations transfom(BufferedImage sourceImage) {
+        return provider.transfom(sourceImage);
+    }
 
-    /**
-     * Gets the size of the image in bytes.
-     *
-     * @return The size
-     */
-    long getSize();
+    @Override
+    public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
+        return provider.transfom(sourceImage, source);
+    }
 
-    /**
-     * Gets the image format name.
-     *
-     * @return The width
-     */
-    String getFormatName();
+    @Override
+    public ImageTransformations transfom(InputStream imageStream) throws IOException {
+        return provider.transfom(imageStream);
+    }
 
-    /**
-     * Gets the image data.
-     *
-     * @return The image data
-     */
-    byte[] getImageData();
+    @Override
+    public ImageTransformations transfom(InputStream imageStream, Object source) throws IOException {
+        return provider.transfom(imageStream, source);
+    }
 
-    /**
-     * Gets the MD5 checksum of the image data.
-     *
-     * @return The md5 checksum
-     */
-    byte[] getMD5();
+    @Override
+    public ImageTransformations transfom(IFileHolder imageFile, Object source) throws IOException {
+        return provider.transfom(imageFile, source);
+    }
 
-    /**
-     * Gets the sum of transformation expenses.
-     * @see {@link ImageTransformations#LOW_EXPENSE} and {@link ImageTransformations#HIGH_EXPENSE}.
-     * @return The expenses.
-     */
-    int getTransformationExpenses();
+    @Override
+    public ImageTransformations transfom(byte[] imageData) throws IOException {
+        return provider.transfom(imageData);
+    }
+
+    @Override
+    public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
+        return provider.transfom(imageData, source);
+    }
 
 }

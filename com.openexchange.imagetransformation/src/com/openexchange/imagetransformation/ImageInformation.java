@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,19 +47,41 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.imagetransformation;
 
 /**
- * {@link ImageTransformationSignaler} - Call-back class for signaling certain image transformation events.
+ * {@link ImageInformation} - Provides basic image information (orientation, width, and height).
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public interface ImageTransformationSignaler {
+public class ImageInformation {
+
+    /** The image orientation */
+    public final int orientation;
+
+    /** The image width */
+    public final int width;
+
+    /** The image height */
+    public final int height;
 
     /**
-     * Invoked if actual image is read into an in-memory {@code BufferedImage} instance.
+     * Initializes a new {@link ImageInformation}.
+     *
+     * @param orientation The image orientation
+     * @param width The image width
+     * @param height The image height
      */
-    void onImageRead();
+    public ImageInformation(int orientation, int width, int height) {
+        super();
+        this.orientation = orientation;
+        this.width = width;
+        this.height = height;
+    }
 
+    @Override
+    public String toString() {
+        return new StringBuilder().append(width).append('x').append(height).append(',').append(orientation).toString();
+    }
 }

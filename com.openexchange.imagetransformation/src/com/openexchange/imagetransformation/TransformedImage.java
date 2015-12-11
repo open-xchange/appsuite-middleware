@@ -47,51 +47,63 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-import com.openexchange.tools.images.scheduler.Scheduler;
+package com.openexchange.imagetransformation;
 
 
 /**
- * {@link ImageToolsActivator}
+ * {@link TransformedImage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public interface TransformedImage {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
-    }
+    /**
+     * Gets the pixel width of the image.
+     *
+     * @return The width
+     */
+    int getWidth();
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
+    /**
+     * Gets the pixel height of the image.
+     *
+     * @return The height
+     */
+    int getHeight();
 
-        // Initialize through acquiring instance
-        Scheduler.init();
+    /**
+     * Gets the size of the image in bytes.
+     *
+     * @return The size
+     */
+    long getSize();
 
-        // Register services
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationService(), properties);
-    }
+    /**
+     * Gets the image format name.
+     *
+     * @return The width
+     */
+    String getFormatName();
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
-    }
+    /**
+     * Gets the image data.
+     *
+     * @return The image data
+     */
+    byte[] getImageData();
+
+    /**
+     * Gets the MD5 checksum of the image data.
+     *
+     * @return The md5 checksum
+     */
+    byte[] getMD5();
+
+    /**
+     * Gets the sum of transformation expenses.
+     * @see {@link ImageTransformations#LOW_EXPENSE} and {@link ImageTransformations#HIGH_EXPENSE}.
+     * @return The expenses.
+     */
+    int getTransformationExpenses();
 
 }

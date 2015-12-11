@@ -53,9 +53,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.imagetransformation.ImageTransformationProvider;
+import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.ImageTransformations;
 import com.openexchange.tools.images.transformations.ImageTransformationsTask;
 
 /**
@@ -64,7 +64,7 @@ import com.openexchange.tools.images.transformations.ImageTransformationsTask;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JavaImageTransformationService implements ImageTransformationService {
+public class JavaImageTransformationService implements ImageTransformationProvider {
 
     /**
      * Initializes a new {@link JavaImageTransformationService}.

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.imagetransformation;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

@@ -51,8 +51,8 @@ package com.openexchange.contact.storage.rdb.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.ContactStorage;
+import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbContactQuotaProvider;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
@@ -63,10 +63,10 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.quota.QuotaProvider;
-import com.openexchange.tools.images.ImageTransformationService;
 
 /**
  * {@link RdbContactStorageActivator}

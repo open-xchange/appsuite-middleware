@@ -47,13 +47,12 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.imagetransformation;
 
 import java.util.Map;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.server.reloadable.GenericReloadable;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.imagetransformation.osgi.Services;
 
 
 /**
@@ -72,7 +71,7 @@ public class Constants {
     }
 
     static {
-        GenericReloadable.getInstance().addReloadable(new Reloadable() {
+        ImageTransformationReloadable.getInstance().addReloadable(new Reloadable() {
 
             @Override
             public void reloadConfiguration(final ConfigurationService configService) {
@@ -98,8 +97,8 @@ public class Constants {
             synchronized (Constants.class) {
                 tmp = maxHeight;
                 if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxHeight = 4096;
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    int defaultMaxHeight = 4096;
                     if (null == service) {
                         return defaultMaxHeight;
                     }
@@ -122,8 +121,8 @@ public class Constants {
             synchronized (Constants.class) {
                 tmp = maxWidth;
                 if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final int defaultMaxWidth = 4096;
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
+                    int defaultMaxWidth = 4096;
                     if (null == service) {
                         return defaultMaxWidth;
                     }

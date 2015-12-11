@@ -80,9 +80,9 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**

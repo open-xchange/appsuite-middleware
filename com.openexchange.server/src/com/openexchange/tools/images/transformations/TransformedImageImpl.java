@@ -49,7 +49,7 @@
 
 package com.openexchange.tools.images.transformations;
 
-import com.openexchange.tools.images.TransformedImage;
+import com.openexchange.imagetransformation.TransformedImage;
 
 /**
  * {@link TransformedImageImpl}

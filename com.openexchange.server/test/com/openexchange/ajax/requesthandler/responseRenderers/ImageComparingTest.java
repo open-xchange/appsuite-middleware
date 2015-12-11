@@ -81,6 +81,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
+import com.openexchange.tools.image.WrappingImageTransformationService;
 import com.openexchange.tools.images.impl.JavaImageTransformationService;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -155,7 +156,7 @@ public class ImageComparingTest extends TestCase {
             ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
             resp.setOutputStream(servletOutputStream);
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new JavaImageTransformationService());
+            fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             final byte[] bytesCurrent = servletOutputStream.toByteArray();
 
@@ -217,7 +218,7 @@ public class ImageComparingTest extends TestCase {
             ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
             resp.setOutputStream(servletOutputStream);
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new JavaImageTransformationService());
+            fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             final byte[] bytesCurrent = servletOutputStream.toByteArray();
 
@@ -263,7 +264,7 @@ public class ImageComparingTest extends TestCase {
             ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
             resp.setOutputStream(servletOutputStream);
             final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-            fileResponseRenderer.setScaler(new JavaImageTransformationService());
+            fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
             fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
             final byte[] bytesCurrent = servletOutputStream.toByteArray();
 
@@ -298,7 +299,7 @@ public class ImageComparingTest extends TestCase {
         ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
         final FileResponseRenderer fileResponseRenderer = new FileResponseRenderer();
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertNull("Got exception: " + resp.getStatusMessage(), resp.getStatusMessage());
     }

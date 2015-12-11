@@ -58,9 +58,9 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.imagetransformation.ImageTransformationSignaler;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
-import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 /**

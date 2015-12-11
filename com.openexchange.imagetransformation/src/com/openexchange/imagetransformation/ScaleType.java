@@ -47,51 +47,71 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
-import com.openexchange.tools.images.scheduler.Scheduler;
-
+package com.openexchange.imagetransformation;
 
 /**
- * {@link ImageToolsActivator}
+ * {@link ScaleType}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public enum ScaleType {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
+    /**
+     * The "cover" scale type, specifying the minimum target dimensions. The source image will be resized in a way that the resulting
+     * image covers the target resolution entirely, with the original aspect ratio being preserved.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "cover", will result in the
+     * picture being resized to 267x200 pixels.
+     */
+    COVER("cover"),
+
+    /**
+     * The "contain" scale type, specifying the maximum target dimensions. The source image will be resized in a way that the resulting
+     * image fits into the target resolution entirely, with the original aspect ratio being preserved.
+     * <p/>
+     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the
+     * picture being resized to 200x150 pixels.
+     */
+    CONTAIN("contain"),
+
+    /**
+     * The "auto" scale type
+     */
+    AUTO("auto");
+
+    private final String keyword;
+
+    private ScaleType(String keyword) {
+        this.keyword = keyword;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Initialize through acquiring instance
-        Scheduler.init();
-
-        // Register services
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationService(), properties);
+    /**
+     * Gets the keyword
+     *
+     * @return The keyword
+     */
+    public String getKeyword() {
+        return keyword;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
+    /**
+     * Gets the scale type for given keyword.
+     *
+     * @param keyword The keyword
+     * @return The associated scale type or <code>null</code>
+     */
+    public static ScaleType getType(String keyword) {
+        if (keyword == null) {
+            return AUTO;
+        }
+        keyword = keyword.trim().toLowerCase();
+        if (keyword.equals(COVER.getKeyword())) {
+            return COVER;
+        } else if (keyword.equals(CONTAIN.getKeyword())) {
+            return CONTAIN;
+        } else {
+            return AUTO;
+        }
     }
-
 }

@@ -47,71 +47,72 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.imagetransformation.osgi;
+
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ScaleType}
+ * {@link Services} - The static service lookup.
  *
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> JavaDoc
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public enum ScaleType {
+public final class Services {
 
     /**
-     * The "cover" scale type, specifying the minimum target dimensions. The source image will be resized in a way that the resulting
-     * image covers the target resolution entirely, with the original aspect ratio being preserved.
-     * <p/>
-     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "cover", will result in the
-     * picture being resized to 267x200 pixels.
+     * Initializes a new {@link Services}.
      */
-    COVER("cover"),
+    private Services() {
+        super();
+    }
+
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
 
     /**
-     * The "contain" scale type, specifying the maximum target dimensions. The source image will be resized in a way that the resulting
-     * image fits into the target resolution entirely, with the original aspect ratio being preserved.
-     * <p/>
-     * For example, scaling an image with an original resolution of 640x480 pixels to 200x200 pixels and type "contain", will result in the
-     * picture being resized to 200x150 pixels.
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    CONTAIN("contain"),
-
-    /**
-     * The "auto" scale type
-     */
-    AUTO("auto");
-
-    private final String keyword;
-
-    private ScaleType(String keyword) {
-        this.keyword = keyword;
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Gets the keyword
+     * Gets the service lookup.
      *
-     * @return The keyword
+     * @return The service lookup or <code>null</code>
      */
-    public String getKeyword() {
-        return keyword;
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Gets the scale type for given keyword.
+     * Gets the service of specified type
      *
-     * @param keyword The keyword
-     * @return The associated scale type or <code>null</code>
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public static ScaleType getType(String keyword) {
-        if (keyword == null) {
-            return AUTO;
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imagetransformation\" not started?");
         }
-        keyword = keyword.trim().toLowerCase();
-        if (keyword.equals(COVER.getKeyword())) {
-            return COVER;
-        } else if (keyword.equals(CONTAIN.getKeyword())) {
-            return CONTAIN;
-        } else {
-            return AUTO;
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
         }
     }
+
 }

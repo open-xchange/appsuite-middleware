@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,48 @@
  *
  */
 
-package com.openexchange.contact.vcard.impl.osgi;
+package com.openexchange.imagetransformation.osgi;
 
-import org.osgi.framework.ServiceReference;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.contact.vcard.VCardService;
-import com.openexchange.contact.vcard.impl.internal.DefaultVCardService;
-import com.openexchange.contact.vcard.impl.internal.VCardParametersFactoryImpl;
-import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
-import com.openexchange.exception.OXException;
-import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.imagetransformation.ImageTransformationReloadable;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link ContactVCardActivator}
+ * {@link ImageTransformationActivator}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class ContactVCardActivator extends HousekeepingActivator {
+public class ImageTransformationActivator extends HousekeepingActivator {
+
+    /**
+     * Initializes a new {@link ImageTransformationActivator}.
+     */
+    public ImageTransformationActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        VCardServiceLookup.set(this);
-        final VCardParametersFactoryImpl vCardParametersFactory = new VCardParametersFactoryImpl();
-        track(ConfigurationService.class, new ServiceTrackerCustomizer<ConfigurationService, ConfigurationService>() {
+        Services.setServiceLookup(this);
 
-            @Override
-            public ConfigurationService addingService(ServiceReference<ConfigurationService> reference) {
-                ConfigurationService configService = context.getService(reference);
-                try {
-                    vCardParametersFactory.reinitialize(configService);
-                } catch (OXException e) {
-                    org.slf4j.LoggerFactory.getLogger(ContactVCardActivator.class).error("Error during reinitialization: {}", e.getMessage(), e);
-                }
-                return configService;
-            }
-
-            @Override
-            public void modifiedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
-                // no
-            }
-
-            @Override
-            public void removedService(ServiceReference<ConfigurationService> reference, ConfigurationService service) {
-                context.ungetService(reference);
-            }}
-        );
-        trackService(ImageTransformationService.class);
+        ImageTransformationServiceImpl serviceImpl = new ImageTransformationServiceImpl(context);
+        rememberTracker(serviceImpl);
         openTrackers();
-        registerService(VCardService.class, new DefaultVCardService(vCardParametersFactory));
+
+        registerService(Reloadable.class, ImageTransformationReloadable.getInstance());
     }
 
     @Override
     protected void stopBundle() throws Exception {
-        VCardServiceLookup.set(null);
-        closeTrackers();
         super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }
-

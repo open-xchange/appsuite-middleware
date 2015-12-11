@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.tools.images;
+package com.openexchange.imagetransformation;
 
 import java.util.List;
 import java.util.Map;

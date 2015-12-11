@@ -63,6 +63,8 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.imagetransformation.ImageInformation;
+import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
@@ -84,7 +86,7 @@ public class ImageTransformationUtility {
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-    private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
+    private static final String COVER = ScaleType.COVER.getKeyword();
 
     /**
      * Check if given AJAX request data seems to be a thumbnail request.

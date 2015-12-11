@@ -80,19 +80,19 @@ import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.Constants;
+import com.openexchange.imagetransformation.ImageInformation;
+import com.openexchange.imagetransformation.ImageTransformationReloadable;
+import com.openexchange.imagetransformation.ImageTransformationSignaler;
+import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.images.Constants;
-import com.openexchange.tools.images.ImageInformation;
-import com.openexchange.tools.images.ImageTransformationReloadable;
-import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.ImageTransformationUtility;
-import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.images.TransformedImage;
 import com.openexchange.tools.images.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 import com.openexchange.tools.stream.CountingInputStream.IOExceptionCreator;
+import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link ImageTransformationsImpl}
