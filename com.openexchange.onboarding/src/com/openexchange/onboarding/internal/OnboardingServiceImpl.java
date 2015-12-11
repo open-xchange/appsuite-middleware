@@ -198,6 +198,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         return scenario;
     }
 
+    @Override
     public boolean isAvailableFor(String scenarioId, Session session) throws OXException {
         if (null == scenarioId) {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
