@@ -52,6 +52,7 @@ package com.openexchange.tools.images.transformations;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import com.openexchange.imagetransformation.ImageInformation;
+import com.openexchange.imagetransformation.TransformationContext;
 
 /**
  * {@link ImageTransformation}

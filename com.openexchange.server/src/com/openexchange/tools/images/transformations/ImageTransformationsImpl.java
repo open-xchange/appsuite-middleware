@@ -60,9 +60,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.DigestOutputStream;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -86,8 +83,10 @@ import com.openexchange.imagetransformation.ImageTransformationReloadable;
 import com.openexchange.imagetransformation.ImageTransformationSignaler;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Streams;
+import com.openexchange.tools.images.DefaultTransformedImageCreator;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.images.osgi.Services;
 import com.openexchange.tools.stream.CountingInputStream;
@@ -428,39 +427,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
         return false;
     }
 
-    /**
-     * Writes out an image into a byte-array and wraps it into a transformed image.
-     *
-     * @param image The image to write
-     * @param formatName The format to use, e.g. "jpeg" or "tiff"
-     * @return The image data
-     * @throws IOException
-     */
     private TransformedImage writeTransformedImage(BufferedImage image, String formatName) throws IOException {
-        if (null == image) {
-            return null;
-        }
-        DigestOutputStream digestOutputStream = null;
-        UnsynchronizedByteArrayOutputStream outputStream = null;
-        try {
-            outputStream = new UnsynchronizedByteArrayOutputStream(8192);
-            digestOutputStream = new DigestOutputStream(outputStream, MessageDigest.getInstance("MD5"));
-            if (needsCompression(formatName)) {
-                writeCompressed(image, formatName, digestOutputStream, transformationContext);
-            } else {
-                write(image, formatName, digestOutputStream);
-            }
-
-            byte[] imageData = outputStream.toByteArray();
-            byte[] md5 = digestOutputStream.getMessageDigest().digest();
-            long size = null != imageData ? imageData.length : 0L;
-            return new TransformedImageImpl(image.getWidth(), image.getHeight(), size, formatName, imageData, md5, transformationContext.getExpenses());
-        } catch (NoSuchAlgorithmException e) {
-            throw new IOException(e);
-        } finally {
-            Streams.close(digestOutputStream, outputStream);
-        }
+        return new DefaultTransformedImageCreator().writeTransformedImage(image, formatName, transformationContext, needsCompression(formatName));
     }
+
 
     /**
      * Writes out an image into a byte-array.

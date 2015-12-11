@@ -57,6 +57,7 @@ import org.imgscalr.Scalr.Method;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.tools.images.impl.AutoDimensionConstrain;
 import com.openexchange.tools.images.impl.ContainDimensionConstrain;
 import com.openexchange.tools.images.impl.CoverDimensionConstrain;

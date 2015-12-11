@@ -47,54 +47,28 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
+package com.openexchange.imagetransformation;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.imagetransformation.TransformedImageCreator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.DefaultTransformedImageCreator;
-import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
-import com.openexchange.tools.images.scheduler.Scheduler;
-
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 /**
- * {@link ImageToolsActivator}
+ * {@link TransformedImageCreator} - Creates a {@link TransformedImage} from a {@link BufferedImage} instance.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public interface TransformedImageCreator {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Initialize through acquiring instance
-        Scheduler.init();
-
-        // Register services
-        registerService(TransformedImageCreator.class, new DefaultTransformedImageCreator());
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), properties);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
-    }
-
+    /**
+     * Writes out an image into a byte-array and wraps it into a transformed image.
+     *
+     * @param image The image to write
+     * @param formatName The format to use, e.g. "jpeg" or "tiff"
+     * @param transformationContext The transformation context
+     * @param needsCompression Whether compression is needed
+     * @return The image data
+     * @throws IOException If an I/O error occurs
+     */
+    TransformedImage writeTransformedImage(BufferedImage image, String formatName, TransformationContext transformationContext, boolean needsCompression) throws IOException;
 }
