@@ -81,7 +81,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.image.WrappingImageTransformationService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
@@ -489,7 +489,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertNotNull("Header content-type not found", resp.getContentType());
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
@@ -512,7 +512,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
@@ -536,7 +536,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
@@ -562,7 +562,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationService()));
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "text/html", resp.getContentType());

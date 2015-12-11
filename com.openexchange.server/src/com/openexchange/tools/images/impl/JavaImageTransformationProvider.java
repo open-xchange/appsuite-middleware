@@ -59,17 +59,17 @@ import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.tools.images.transformations.ImageTransformationsTask;
 
 /**
- * {@link JavaImageTransformationService}
+ * {@link JavaImageTransformationProvider}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JavaImageTransformationService implements ImageTransformationProvider {
+public class JavaImageTransformationProvider implements ImageTransformationProvider {
 
     /**
-     * Initializes a new {@link JavaImageTransformationService}.
+     * Initializes a new {@link JavaImageTransformationProvider}.
      */
-    public JavaImageTransformationService() {
+    public JavaImageTransformationProvider() {
         super();
     }
 

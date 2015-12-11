@@ -57,7 +57,7 @@ import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.processing.ProcessorService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 
@@ -84,7 +84,7 @@ public class ImageToolsActivator extends HousekeepingActivator {
         // Register services
         Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
         properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationService(), properties);
+        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), properties);
     }
 
     @Override
