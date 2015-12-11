@@ -77,9 +77,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -104,7 +103,7 @@ import com.openexchange.tools.session.ServerSession;
 public class TransformImageAction implements IFileResponseRendererAction {
 
     /** The logger constant */
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileResponseRenderer.class);
 
     private final AtomicReference<ImageTransformationService> scalerReference;
 
@@ -203,20 +202,26 @@ public class TransformImageAction implements IFileResponseRendererAction {
             }
         }
 
+        // Require session
+        final ServerSession session = request.getSession();
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("session");
+        }
+
         // Check cache first
         final ResourceCache resourceCache;
         {
             final ResourceCache tmp = ResourceCaches.getResourceCache();
-            resourceCache = null == tmp ? null : (tmp.isEnabledFor(request.getSession().getContextId(), request.getSession().getUserId()) ? tmp : null);
+            resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
         }
 
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);
-        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(request.getSession());
+        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(session);
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
-            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
+            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, session.getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
                 // Create appropriate IFileHolder
@@ -266,7 +271,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         // Start transformations: scale, rotate, ...
         ImageTransformations transformations;
         try {
-            transformations = scaler.transfom(file, request.getSession().getSessionID());
+            transformations = scaler.transfom(file, session.getSessionID());
         } catch (ImageTransformationDeniedIOException e) {
             // Quit with 404
             throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
@@ -312,7 +317,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
         try {
             String fileContentType = file.getContentType();
             if (null == fileContentType || !Strings.toLowerCase(fileContentType).startsWith("image/")) {
-                final String contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(file.getName());
+                String contentTypeByFileName = FileResponseRenderer.getContentTypeByFileName(file.getName());
                 if (null != contentTypeByFileName) {
                     fileContentType = contentTypeByFileName;
                 }
@@ -351,7 +356,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
             // (Asynchronously) Add to cache if possible
             final int size = transformed.length;
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
-            final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = fileContentType;
             AbstractTask<Void> task = new AbstractTask<Void>() {
@@ -368,29 +372,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     return null;
                 }
             };
+            ThreadPools.submitElseExecute(task);
 
-            // Acquire thread pool service
-            ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == threadPool) {
-                final Thread thread = Thread.currentThread();
-                boolean ran = false;
-                task.beforeExecute(thread);
-                try {
-                    task.call();
-                    ran = true;
-                    task.afterExecute(null);
-                } catch (final Exception ex) {
-                    if (!ran) {
-                        task.afterExecute(ex);
-                    }
-                    // Else the exception occurred within
-                    // afterExecute itself in which case we don't
-                    // want to call it again.
-                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
-                }
-            } else {
-                threadPool.submit(task);
-            }
             // Return
             return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
         } catch (final RuntimeException e) {

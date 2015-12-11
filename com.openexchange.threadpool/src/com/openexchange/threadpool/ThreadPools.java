@@ -63,6 +63,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import com.openexchange.exception.OXException;
 import com.openexchange.processing.ProcessorService;
+import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.timer.TimerService;
@@ -81,6 +82,21 @@ public final class ThreadPools {
      */
     private ThreadPools() {
         super();
+    }
+
+    /**
+     * Either submits given task to thread pool (if available) or executes it with current thread.
+     *
+     * @param task The task to execute
+     * @return The task's future
+     */
+    public static <V> Future<V> submitElseExecute(Task<V> task) {
+        ThreadPoolService threadPool = ThreadPoolActivator.REF_THREAD_POOL.get();
+        if (null != threadPool) {
+            return threadPool.submit(task, CallerRunsBehavior.<V> getInstance());
+        }
+
+        return new GetFuture<V>(execute(task));
     }
 
     /**
@@ -820,6 +836,40 @@ public final class ThreadPools {
          */
         protected TrackableCallable() {
             super();
+        }
+    }
+
+    private static final class GetFuture<V> implements Future<V> {
+
+        private final V result;
+
+        GetFuture(V result) {
+            this.result = result;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return true;
+        }
+
+        @Override
+        public V get() throws InterruptedException, ExecutionException {
+            return result;
+        }
+
+        @Override
+        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+            return result;
         }
     }
 
