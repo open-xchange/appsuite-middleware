@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -66,18 +67,20 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
+
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.IFileHolder;
-import com.openexchange.ajax.container.PushbackReadable;
 import com.openexchange.ajax.container.IFileHolder.RandomAccess;
 import com.openexchange.ajax.container.InputStreamReadable;
+import com.openexchange.ajax.container.PushbackReadable;
 import com.openexchange.ajax.container.Readable;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.helper.DownloadUtility;
@@ -677,6 +680,9 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
         } catch (ImageTransformationDeniedIOException e) {
+            // Quit with 406
+            String message = isEmpty(fileName) ? "Exception while trying to output image" : new StringBuilder("Exception while trying to output image ").append(fileName).toString();
+            LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
         } catch (final Exception e) {
             String message = isEmpty(fileName) ? "Exception while trying to output file" : new StringBuilder("Exception while trying to output file ").append(fileName).toString();
