@@ -57,6 +57,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 
@@ -77,6 +78,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
     private final DatagramSocket datagramSocket;
     private final String imapLoginDelimiter;
     private final MailNotifyPushListenerRegistry registry;
+    private final AtomicBoolean stopped;
     private volatile Future<Object> future;
 
     /**
@@ -84,6 +86,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
      */
     public MailNotifyPushUdpSocketListener(MailNotifyPushListenerRegistry registry, String udpListenHost, int udpListenPort, String imapLoginDelimiter, boolean multicast) throws OXException, IOException {
         super();
+        stopped = new AtomicBoolean(false);
         InetAddress senderAddress = InetAddress.getByName(udpListenHost);
         if (senderAddress == null) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Can't get Internet Protocol (IP) addres for given hostname " + udpListenHost);
@@ -112,7 +115,9 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
      * Closes this UDP listener.
      */
     public void close() {
-        datagramSocket.close();
+        if (stopped.compareAndSet(false, true)) {
+            datagramSocket.close();
+        }
 
         Future<Object> future = this.future;
         if (null != future) {
@@ -123,7 +128,7 @@ public class MailNotifyPushUdpSocketListener implements Runnable {
 
     @Override
     public void run() {
-        while (true) {
+        while (!stopped.get()) {
             DatagramPacket datagramPacket = new DatagramPacket(new byte[MAX_UDP_PACKET_SIZE], MAX_UDP_PACKET_SIZE);
             try {
                 datagramSocket.receive(datagramPacket);
