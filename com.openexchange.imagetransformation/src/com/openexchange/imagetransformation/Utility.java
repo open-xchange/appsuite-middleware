@@ -51,11 +51,8 @@ package com.openexchange.imagetransformation;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
-import com.openexchange.imagetransformation.ImageInformation;
-import com.openexchange.imagetransformation.ScaleType;
 
 
 /**

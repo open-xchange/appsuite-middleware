@@ -49,7 +49,12 @@
 
 package com.openexchange.tools.images.transformations;
 
+import java.io.InputStream;
+import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.java.Streams;
 
 /**
  * {@link TransformedImageImpl}
@@ -63,6 +68,7 @@ public class TransformedImageImpl implements TransformedImage {
     private final long size;
     private final String formatName;
     private final byte[] imageData;
+    private final ThresholdFileHolder imageFile;
     private final byte[] md5;
     private final int transformationExpenses;
 
@@ -73,6 +79,22 @@ public class TransformedImageImpl implements TransformedImage {
         this.size = size;
         this.formatName = formatName;
         this.imageData = imageData;
+        this.imageFile = null;
+        this.md5 = md5;
+        this.transformationExpenses = transformationExpenses;
+    }
+
+    public TransformedImageImpl(int width, int height, long size, String formatName, ThresholdFileHolder imageFile, byte[] md5, final int transformationExpenses) {
+        super();
+        if (null == imageFile) {
+            throw new IllegalArgumentException("imageFile must not be null");
+        }
+        this.width = width;
+        this.height = height;
+        this.size = size;
+        this.formatName = formatName;
+        this.imageData = null;
+        this.imageFile = imageFile;
         this.md5 = md5;
         this.transformationExpenses = transformationExpenses;
     }
@@ -98,8 +120,18 @@ public class TransformedImageImpl implements TransformedImage {
     }
 
     @Override
-    public byte[] getImageData() {
-        return imageData;
+    public byte[] getImageData() throws OXException {
+        return null != imageData ? imageData : imageFile.toByteArray();
+    }
+
+    @Override
+    public InputStream getImageStream() throws OXException {
+        return null != imageData ? Streams.newByteArrayInputStream(imageData) : imageFile.getStream();
+    }
+
+    @Override
+    public IFileHolder getImageFile() {
+        return imageFile;
     }
 
     @Override
@@ -115,6 +147,14 @@ public class TransformedImageImpl implements TransformedImage {
     @Override
     public String toString() {
         return formatName + " | " + width + " x " + height + " | " + size + " bytes";
+    }
+
+    @Override
+    public void close() {
+        ThresholdFileHolder imageFile = this.imageFile;
+        if (null != imageFile) {
+            imageFile.close();
+        }
     }
 
 }

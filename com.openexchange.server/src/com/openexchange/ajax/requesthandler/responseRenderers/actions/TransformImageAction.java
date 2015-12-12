@@ -51,6 +51,7 @@ package com.openexchange.ajax.requesthandler.responseRenderers.actions;
 
 import static com.openexchange.java.Strings.isEmpty;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -58,10 +59,11 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
-import com.openexchange.ajax.container.ByteArrayInputStreamClosure;
 import com.openexchange.ajax.container.FileHolder;
 import com.openexchange.ajax.container.ThresholdFileHolder;
+import com.openexchange.ajax.container.TmpFileFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.ajax.helper.ImageUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -322,9 +324,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     fileContentType = contentTypeByFileName;
                 }
             }
-            final byte[] transformed;
+            final TransformedImage transformedImage;
             try {
-                TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
+                transformedImage = transformations.getTransformedImage(fileContentType);
                 if (null == transformedImage) {
                     // ImageIO.read() returned null...
                     return file.repetitive() ? file : null;
@@ -334,8 +336,6 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 if (expenses >= ImageTransformations.HIGH_EXPENSE) {
                     cachingAdvised = true;
                 }
-
-                transformed = transformedImage.getImageData();
             } catch (final IOException ioe) {
                 if ("Unsupported Image Type".equals(ioe.getMessage())) {
                     return handleFailure(file);
@@ -343,39 +343,85 @@ public class TransformImageAction implements IFileResponseRendererAction {
                 // Rethrow...
                 throw ioe;
             }
-            if (null == transformed) {
-                LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
-                return handleFailure(file);
-            }
 
-            // Return immediately if not cacheable
-            if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, fileContentType, file.getName());
-            }
-
-            // (Asynchronously) Add to cache if possible
-            final int size = transformed.length;
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
-            final String fileName = file.getName();
-            final String contentType = fileContentType;
-            AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() {
-                    try {
-                        final CachedResource preview = new CachedResource(transformed, fileName, contentType, size);
-                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
-                    } catch (OXException e) {
-                        LOG.warn("Could not cache preview.", e);
-                    }
-
-                    return null;
+            ThresholdFileHolder optImageFileHolder = null;
+            {
+                IFileHolder fh = transformedImage.getImageFile();
+                if (null != fh) {
+                    optImageFileHolder = (ThresholdFileHolder) fh;
                 }
-            };
-            ThreadPools.submitElseExecute(task);
+            }
+            final int size = (int) transformedImage.getSize();
+            final String contentType = fileContentType;
+            final String fileName = file.getName();
 
-            // Return
-            return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
+
+            // Check whether to add to cache
+            if (cachingAdvised && null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+                // (Asynchronously) Add to cache if possible
+                final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
+
+                final File imgFile;
+                {
+                    File tempFile = null == optImageFileHolder ? null : optImageFileHolder.getTempFile();
+                    if (null != tempFile) {
+                        // Copy to avoid preliminary file deletion; self care about file deletion
+                        File newTempFile = TmpFileFileHolder.newTempFile(false);
+                        FileUtils.copyFile(tempFile, newTempFile, false);
+                        tempFile = newTempFile;
+                    }
+                    imgFile = tempFile;
+                }
+
+                final byte[] bytes;
+                if (null == imgFile) {
+                    bytes = (null == optImageFileHolder ? transformedImage.getImageData() : optImageFileHolder.toByteArray());
+                } else {
+                    // Do not need bytes if file is available
+                    bytes = null;
+                }
+
+                AbstractTask<Void> task = new AbstractTask<Void>() {
+
+                    @Override
+                    public Void call() {
+                        try {
+                            CachedResource preview;
+                            if (null != imgFile) {
+                                preview = new CachedResource(new FileInputStream(imgFile), fileName, contentType, size);
+                            } else {
+                                preview = new CachedResource(bytes, fileName, contentType, size);
+                            }
+
+                            resourceCache.save(cacheKey, preview, 0, session.getContextId());
+                        } catch (Exception e) {
+                            LOG.warn("Could not cache preview.", e);
+                        } finally {
+                            if (null != imgFile) {
+                                imgFile.delete();
+                            }
+                        }
+                        return null;
+                    }
+                };
+                ThreadPools.submitElseExecute(task);
+            }
+
+            IFileHolder imageFile;
+            if (null == optImageFileHolder) {
+                // Create new file having image-transformation content
+                FileHolder.InputStreamClosure closure = new TransformedImageInputStreamClosure(transformedImage);
+                imageFile = new FileHolder(closure, size, contentType, fileName);
+            } else {
+                optImageFileHolder.setName(fileName);
+                optImageFileHolder.setContentType(contentType);
+                imageFile = optImageFileHolder;
+            }
+
+            // Cleanse old one
+            Streams.close(file);
+
+            return imageFile;
         } catch (final RuntimeException e) {
             if (LOG.isDebugEnabled() && file.repetitive()) {
                 try {
@@ -468,6 +514,20 @@ public class TransformImageAction implements IFileResponseRendererAction {
             Streams.close(is, out);
         }
         return newFile;
+    }
+
+    private final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
+
+        private final TransformedImage transformedImage;
+
+        TransformedImageInputStreamClosure(TransformedImage transformedImage) {
+            this.transformedImage = transformedImage;
+        }
+
+        @Override
+        public InputStream newStream() throws OXException, IOException {
+            return transformedImage.getImageStream();
+        }
     }
 
 }

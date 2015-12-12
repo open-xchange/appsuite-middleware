@@ -133,18 +133,25 @@ public class PhotoMapping extends AbstractMapping {
             ImageType imageType = getImageType(contact.getImageContentType());
             TransformedImage transformedImage = null;
             try {
-                transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), parameters, warnings);
-            } catch (OXException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            } catch (RuntimeException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            }
-            if (null != transformedImage) {
-                Photo photo = new Photo(transformedImage.getImageData(), imageType);
-                photo.addParameter(X_ABCROP_RECTANGLE, getABCropRectangle(transformedImage));
-                return photo;
-            } else {
-                return new Photo(contactImage, imageType);
+                try {
+                    transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), parameters, warnings);
+                } catch (OXException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                } catch (RuntimeException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                }
+                if (null == transformedImage) {
+                    return new Photo(contactImage, imageType);
+                }
+                try {
+                    Photo photo = new Photo(transformedImage.getImageData(), imageType);
+                    photo.addParameter(X_ABCROP_RECTANGLE, getABCropRectangle(transformedImage));
+                    return photo;
+                } catch (OXException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                }
+            } finally {
+                Streams.close(transformedImage);
             }
         }
         return null;

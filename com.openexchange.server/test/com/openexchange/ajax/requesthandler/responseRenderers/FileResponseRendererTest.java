@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -924,6 +925,16 @@ public class FileResponseRendererTest extends TestCase {
                 }
 
                 @Override
+                public InputStream getImageStream() throws OXException {
+                    return new ByteArrayInputStream(imageData);
+                }
+
+                @Override
+                public IFileHolder getImageFile() {
+                    return null;
+                }
+
+                @Override
                 public int getHeight() {
                     return 0;
                 }
@@ -931,6 +942,11 @@ public class FileResponseRendererTest extends TestCase {
                 @Override
                 public String getFormatName() {
                     return null;
+                }
+
+                @Override
+                public void close() {
+                    // Nothing
                 }
             };
         }

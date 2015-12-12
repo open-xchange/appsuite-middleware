@@ -62,13 +62,13 @@ import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
 import org.slf4j.Logger;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.transformations.TransformedImageImpl;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
 
 /**
  * {@link DefaultTransformedImageCreator} - Default {@link TransformedImageCreator} implementation.
@@ -92,24 +92,25 @@ public class DefaultTransformedImageCreator implements TransformedImageCreator {
             return null;
         }
         DigestOutputStream digestOutputStream = null;
-        UnsynchronizedByteArrayOutputStream outputStream = null;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
         try {
-            outputStream = new UnsynchronizedByteArrayOutputStream(8192);
-            digestOutputStream = new DigestOutputStream(outputStream, MessageDigest.getInstance("MD5"));
+            digestOutputStream = new DigestOutputStream(sink.asOutputStream(), MessageDigest.getInstance("MD5"));
             if (needsCompression) {
                 writeCompressed(image, formatName, digestOutputStream, transformationContext);
             } else {
                 write(image, formatName, digestOutputStream);
             }
 
-            byte[] imageData = outputStream.toByteArray();
             byte[] md5 = digestOutputStream.getMessageDigest().digest();
-            long size = null != imageData ? imageData.length : 0L;
-            return new TransformedImageImpl(image.getWidth(), image.getHeight(), size, formatName, imageData, md5, transformationContext.getExpenses());
+            long size = sink.getLength();
+            TransformedImageImpl retval = new TransformedImageImpl(image.getWidth(), image.getHeight(), size, formatName, sink, md5, transformationContext.getExpenses());
+            sink = null; // Avoid preliminary closing
+            return retval;
         } catch (NoSuchAlgorithmException e) {
             throw new IOException(e);
         } finally {
-            Streams.close(digestOutputStream, outputStream);
+            Streams.close(digestOutputStream);
+            Streams.close(sink);
         }
     }
 

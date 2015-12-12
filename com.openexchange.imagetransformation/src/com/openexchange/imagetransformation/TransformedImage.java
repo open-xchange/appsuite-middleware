@@ -49,13 +49,17 @@
 
 package com.openexchange.imagetransformation;
 
+import java.io.Closeable;
+import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link TransformedImage}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface TransformedImage {
+public interface TransformedImage extends Closeable {
 
     /**
      * Gets the pixel width of the image.
@@ -89,8 +93,24 @@ public interface TransformedImage {
      * Gets the image data.
      *
      * @return The image data
+     * @throws OXException If image data cannot be returned
      */
-    byte[] getImageData();
+    byte[] getImageData() throws OXException;
+
+    /**
+     * Gets the image data as a stream.
+     *
+     * @return The image data as a stream
+     * @throws OXException If image stream cannot be returned
+     */
+    InputStream getImageStream() throws OXException;
+
+    /**
+     * Gets the image file.
+     *
+     * @return The image file or <code>null</code>
+     */
+    IFileHolder getImageFile();
 
     /**
      * Gets the MD5 checksum of the image data.
@@ -105,5 +125,11 @@ public interface TransformedImage {
      * @return The expenses.
      */
     int getTransformationExpenses();
+
+    /**
+     * Closes this {@link TransformedImage} instance and releases any system resources associated with it.
+     */
+    @Override
+    void close();
 
 }
