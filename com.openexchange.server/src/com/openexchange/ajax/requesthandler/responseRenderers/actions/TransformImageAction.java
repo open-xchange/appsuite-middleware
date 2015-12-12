@@ -273,8 +273,8 @@ public class TransformImageAction implements IFileResponseRendererAction {
         try {
             transformations = scaler.transfom(file, session.getSessionID());
         } catch (ImageTransformationDeniedIOException e) {
-            // Quit with 404
-            throw new FileResponseRenderer.FileResponseRendererActionException(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage());
+            // Rethrow as ImageTransformationDeniedIOException is specially handled in FileResponseRenderer
+            throw e;
         }
 
         // Rotate by default when not delivering as download
