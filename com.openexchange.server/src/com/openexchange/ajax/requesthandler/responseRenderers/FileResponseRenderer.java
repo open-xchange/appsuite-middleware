@@ -249,7 +249,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 sendErrorSafe(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, message, resp);
             }
         } catch (ImageTransformationDeniedIOException e) {
-            // Quit with 404
+            // Quit with 406
             String message = isEmpty(fileName) ? "Exception while trying to output image" : new StringBuilder("Exception while trying to output image ").append(fileName).toString();
             LOG.error(message, e);
             sendErrorSafe(HttpServletResponse.SC_NOT_ACCEPTABLE, e.getMessage(), resp);
