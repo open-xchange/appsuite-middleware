@@ -159,6 +159,12 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // Bad or expired access token. Need to re-authenticate user.
     public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
 
+    // Your rate limit has been exceeded and further access is not possible at the moment.
+    public static final String STORAGE_RATE_LIMIT_MSG = "Your rate limit has been exceeded and further access is not possible at the moment.";
+
+    // You need to get sufficient permissions to perform the operation on the specified entity.
+    public static final String INVALID_OBJECT_PERMISSIONS_SIMPLE_MSG = "You need to get sufficient permissions to perform the operation on the specified entity.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

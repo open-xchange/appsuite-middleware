@@ -67,6 +67,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpResponse;
@@ -178,7 +180,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     @Override
     public boolean exists(String folderId, String id, String version) throws OXException {
         try {
-            return null != getMetadata(folderId, id, version, Collections.singletonList(Field.ID));
+            return null != getMetadata(folderId, id, version, Collections.singletonList(Field.ID), 0);
         } catch (OXException e) {
             if (FileStorageExceptionCodes.FILE_NOT_FOUND.equals(e) || FileStorageExceptionCodes.FOLDER_NOT_FOUND.equals(e) ||
                 FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e)) {
@@ -190,7 +192,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public File getFileMetadata(String folderId, String id, String version) throws OXException {
-        return getMetadata(folderId, id, version, ALL_FIELDS);
+        return getMetadata(folderId, id, version, ALL_FIELDS, 0);
     }
 
     @Override
@@ -200,6 +202,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return saveFileMetadata(file, sequenceNumber, modifiedFields, 0);
+    }
+
+    private IDTuple saveFileMetadata(File file, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         if (null == modifiedFields || modifiedFields.contains(Field.FILENAME) || modifiedFields.contains(Field.VERSION)) {
             try {
                 Drive drive = googleDriveAccess.getDrive(session);
@@ -243,7 +249,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 }
                 return new IDTuple(file.getFolderId(), savedFile.getId());
             } catch (final HttpResponseException e) {
-                throw handleHttpResponseError(file.getId(), e);
+                if (!isUserRateLimitExceeded(e)) {
+                    // Otherwise throw exception
+                    throw handleHttpResponseError(file.getId(), e);
+                }
+
+                // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+                int retry = retryCount + 1;
+                if (retry > 5) {
+                    // Exceeded max. retry count
+                    throw handleHttpResponseError(file.getId(), e);
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return saveFileMetadata(file, sequenceNumber, modifiedFields, retry);
             } catch (final IOException e) {
                 throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
             } catch (final RuntimeException e) {
@@ -255,6 +275,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields) throws OXException {
+        return copy(source, version, destFolder, update, newFil, modifiedFields, 0);
+    }
+
+    private IDTuple copy(IDTuple source, String version, String destFolder, File update, InputStream newFil, List<Field> modifiedFields, int retryCount) throws OXException {
         if (version != CURRENT_VERSION) {
             // can only copy the current revision
             throw FileStorageExceptionCodes.VERSIONING_NOT_SUPPORTED.create(GoogleDriveConstants.ID);
@@ -316,7 +340,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
             return new IDTuple(destFolder, copiedFile.getId());
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return copy(source, version, destFolder, update, newFil, modifiedFields, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -326,6 +364,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields) throws OXException {
+        return move(source, destFolder, sequenceNumber, update, modifiedFields, 0);
+    }
+
+    private IDTuple move(IDTuple source, String destFolder, long sequenceNumber, File update, List<File.Field> modifiedFields, int retryCount) throws OXException {
         String id = source.getId();
         try {
             Drive drive = googleDriveAccess.getDrive(session);
@@ -361,7 +403,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
             return new IDTuple(destFolder, patchedFile.getId());
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return move(source, destFolder, sequenceNumber, update, modifiedFields, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -371,6 +427,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public InputStream getDocument(String folderId, String id, String version) throws OXException {
+        return getDocument(folderId, id, version, 0);
+    }
+
+    private InputStream getDocument(String folderId, String id, String version, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             /*
@@ -395,7 +455,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
             return resp.getContent();
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getDocument(folderId, id, version, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -405,6 +479,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public InputStream getThumbnailStream(String folderId, String id, String version) throws OXException {
+        return getThumbnailStream(folderId, id, version, 0);
+    }
+
+    private InputStream getThumbnailStream(String folderId, String id, String version, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             /*
@@ -432,7 +510,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(thumbnailLink)).execute();
             return resp.getContent();
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getThumbnailStream(folderId, id, version, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -447,6 +539,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields) throws OXException {
+        return saveDocument(file, data, sequenceNumber, modifiedFields, 0);
+    }
+
+    private IDTuple saveDocument(File file, InputStream data, long sequenceNumber, List<Field> modifiedFields, int retryCount) throws OXException {
         /*
          * prepare Google Drive file
          */
@@ -502,7 +598,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 return new IDTuple(file.getFolderId(), fileMetadata.getId());
             }
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(file.getId(), e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(file.getId(), e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(file.getId(), e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return saveDocument(file, data, sequenceNumber, modifiedFields, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -512,6 +622,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public void removeDocument(String folderId, long sequenceNumber) throws OXException {
+        removeDocument(folderId, sequenceNumber, 0);
+    }
+
+    private void removeDocument(String folderId, long sequenceNumber, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
 
@@ -553,7 +667,22 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
                 }
             }
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(folderId, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            removeDocument(folderId, sequenceNumber, retry);
+            return;
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -568,6 +697,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete) throws OXException {
+        return removeDocument(ids, sequenceNumber, hardDelete, 0);
+    }
+
+    private List<IDTuple> removeDocument(List<IDTuple> ids, long sequenceNumber, boolean hardDelete, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             Map<String, Boolean> knownTrashFolders = new HashMap<String, Boolean>();
@@ -598,7 +731,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
             return ret;
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(null, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(null, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return removeDocument(ids, sequenceNumber, hardDelete, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -623,6 +770,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order) throws OXException {
+        return getDocuments(folderId, fields, sort, order, 0);
+    }
+
+    private TimedResult<File> getDocuments(String folderId, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             List<File> files = new LinkedList<File>();
@@ -660,7 +811,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             sort(files, sort, order);
             return new FileTimedResult(files);
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(folderId, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getDocuments(folderId, fields, sort, order, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -672,7 +837,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public TimedResult<File> getDocuments(List<IDTuple> ids, List<Field> fields) throws OXException {
         List<File> files = new LinkedList<File>();
         for (IDTuple idTuple : ids) {
-            files.add(getMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION, fields));
+            files.add(getMetadata(idTuple.getFolder(), idTuple.getId(), CURRENT_VERSION, fields, 0));
         }
         return new FileTimedResult(files);
     }
@@ -684,6 +849,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted) throws OXException {
+        return getDelta(folderId, updateSince, fields, sort, order, ignoreDeleted, 0);
+    }
+
+    private Delta<File> getDelta(String folderId, long updateSince, List<Field> fields, Field sort, SortDirection order, boolean ignoreDeleted, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             List<File> updatedFiles = new LinkedList<File>();
@@ -742,7 +911,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             sort(newFiles, sort, order);
             return new FileDelta(newFiles, updatedFiles, deletedFiles, sequenceNumber);
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(folderId, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getDelta(folderId, updateSince, fields, sort, order, ignoreDeleted, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -759,7 +942,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
     public SearchIterator<File> search(String pattern, List<Field> fields, String folderId, boolean includeSubfolders, Field sort, SortDirection order, int start, int end) throws OXException {
         try {
             // Search by pattern
-            List<File> files = searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order);
+            List<File> files = searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order, 0);
 
             // Start, end...
             if ((start != NOT_SET) && (end != NOT_SET)) {
@@ -788,13 +971,31 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public Map<String, Long> getSequenceNumbers(List<String> folderIds) throws OXException {
+        return getSequenceNumbers(folderIds, 0);
+    }
+
+    private Map<String, Long> getSequenceNumbers(List<String> folderIds, int retryCount) throws OXException {
         Long largestChangeId;
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             ChangeList changeList = drive.changes().list().setFields("largestChangeId").execute();
             largestChangeId = changeList.getLargestChangeId();
         } catch (HttpResponseException e) {
-            throw handleHttpResponseError(null, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(null, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(null, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getSequenceNumbers(folderIds, retry);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
@@ -818,7 +1019,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param order The sort order to apply
      * @return The found files
      */
-    private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order) throws OXException {
+    private List<File> searchByFileNamePattern(String pattern, String folderId, boolean includeSubfolders, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             List<File> files = new ArrayList<File>();
@@ -882,7 +1083,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             sort(files, sort, order);
             return files;
         } catch (HttpResponseException e) {
-            throw handleHttpResponseError(folderId, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(folderId, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return searchByFileNamePattern(pattern, folderId, includeSubfolders, fields, sort, order, retry);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -922,6 +1137,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public String[] removeVersion(String folderId, String id, String[] versions) throws OXException {
+        return removeVersion(folderId, id, versions, 0);
+    }
+
+    private String[] removeVersion(String folderId, String id, String[] versions, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             for (String version : versions) {
@@ -929,7 +1148,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
             return new String[0];
         } catch (HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return removeVersion(folderId, id, versions, retry);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -949,6 +1182,10 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
 
     @Override
     public TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order) throws OXException {
+        return getVersions(folderId, id, fields, sort, order, 0);
+    }
+
+    private TimedResult<File> getVersions(String folderId, String id, List<Field> fields, Field sort, SortDirection order, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             /*
@@ -970,7 +1207,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             sort(versions, sort, order);
             return new FileTimedResult(versions);
         } catch (HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getVersions(folderId, id, fields, sort, order, retry);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
@@ -987,7 +1238,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
      * @param fields The fields to include
      * @return The file
      */
-    private GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields) throws OXException {
+    private GoogleDriveFile getMetadata(String folderId, String id, String version, List<Field> fields, int retryCount) throws OXException {
         try {
             Drive drive = googleDriveAccess.getDrive(session);
             /*
@@ -1028,7 +1279,21 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             }
             return metadata;
         } catch (final HttpResponseException e) {
-            throw handleHttpResponseError(id, e);
+            if (!isUserRateLimitExceeded(e)) {
+                // Otherwise throw exception
+                throw handleHttpResponseError(id, e);
+            }
+
+            // Handle user rate limit error following using exponential backoff (https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors#backoff)
+            int retry = retryCount + 1;
+            if (retry > 5) {
+                // Exceeded max. retry count
+                throw handleHttpResponseError(id, e);
+            }
+
+            long nanosToWait = TimeUnit.NANOSECONDS.convert((retry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+            LockSupport.parkNanos(nanosToWait);
+            return getMetadata(folderId, id, version, fields, retry);
         } catch (final IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
