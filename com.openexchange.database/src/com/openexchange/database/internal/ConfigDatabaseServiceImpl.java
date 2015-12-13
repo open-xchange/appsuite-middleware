@@ -57,6 +57,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
 import com.openexchange.database.migration.DBMigrationExecutorService;
@@ -110,7 +111,12 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
             @Override
             public void back(Connection connection) {
-                ConfigDatabaseServiceImpl.back(connection);
+                ConfigDatabaseServiceImpl.back(connection, false);
+            }
+
+            @Override
+            public void backAfterReading(Connection connection) {
+                ConfigDatabaseServiceImpl.back(connection, true);
             }
         };
         /*
@@ -131,13 +137,17 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
         return monitor.checkActualAndFallback(pools, assign, noTimeout, write);
     }
 
-    private static void back(final Connection con) {
+    static void back(Connection con, boolean usedAsRead) {
         if (null == con) {
             final OXException e = DBPoolingExceptionCodes.NULL_CONNECTION.create();
             LOG.error("", e);
             return;
         }
         try {
+            if (usedAsRead && (con instanceof JDBC4ConnectionReturner)) {
+                // Not the nice way to tell the replication monitor not to increment the counter.
+                ((JDBC4ConnectionReturner) con).setUsedAsRead(true);
+            }
             con.close();
         } catch (SQLException e) {
             OXException e1 = DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
@@ -174,17 +184,17 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
 
     @Override
     public void backReadOnly(final Connection con) {
-        back(con);
+        back(con, true);
     }
 
     @Override
     public void backWritable(final Connection con) {
-        back(con);
+        back(con, false);
     }
 
     @Override
     public void backForUpdateTask(Connection con) {
-        back(con);
+        back(con, false);
     }
 
     @Override

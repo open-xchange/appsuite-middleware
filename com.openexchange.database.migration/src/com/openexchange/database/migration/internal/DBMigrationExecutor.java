@@ -109,7 +109,7 @@ public class DBMigrationExecutor implements Runnable {
                     scheduledExecution.setDone(null);
                     notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
                     try {
-                        connectionProvider.back(connectionProvider.get());
+                        connectionProvider.backAfterReading(connectionProvider.get());
                     } catch (OXException e) {
                         LOG.error("", e);
                     }

@@ -73,4 +73,11 @@ public interface DBMigrationConnectionProvider {
      */
     void back(Connection connection);
 
+    /**
+     * Returns the database connection that was solely used for reading.
+     *
+     * @param connection The connection to return
+     */
+    void backAfterReading(Connection connection);
+
 }
