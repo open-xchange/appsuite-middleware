@@ -319,6 +319,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         return separator.charValue();
     }
 
+    private char getSeparator(char sep) {
+        if (null == separator) {
+            separator = Character.valueOf(sep);
+        }
+        return separator.charValue();
+    }
+
     @Override
     public boolean isInfoSupported() throws OXException {
         return true;
@@ -1142,11 +1149,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  * Check if parent holds folders
                  */
                 if ((parent.getType() & Folder.HOLDS_FOLDERS) == 0) {
-                    throw IMAPException.create(
-                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS,
-                        imapConfig,
-                        session,
-                        isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_FOLDERS, imapConfig, session, isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
                 }
                 /*
                  * Check ACLs if enabled
@@ -1166,21 +1169,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                         /*
                          * MYRIGHTS command failed for given mailbox
                          */
-                        if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                            parentFullname,
-                            imapStore,
-                            true,
-                            session,
-                            accountId)) {
+                        if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(parentFullname, imapStore, true, session, accountId)) {
                             /*
                              * No namespace support or given parent is NOT covered by user's personal namespaces.
                              */
-                            throw IMAPException.create(
-                                IMAPException.Code.NO_ACCESS,
-                                imapConfig,
-                                session,
-                                e,
-                                isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
+                            throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, isParentDefault ? DEFAULT_FOLDER_ID : parentFullname);
                         }
                         LOG.debug("MYRIGHTS command failed on namespace folder", e);
                     }
@@ -1188,7 +1181,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * Check if IMAP server is in MBox format; meaning folder either hold messages or subfolders but not both
                  */
-                final char separator = getSeparator();
+                final char separator = getSeparator(parent.getSeparator());
                 final boolean mboxEnabled =
                     MBoxEnabledCache.isMBoxEnabled(imapConfig, parent, new StringBuilder(parent.getFullName()).append(separator).toString());
                 if (!checkFolderNameValidity(name, separator, mboxEnabled)) {
@@ -1207,12 +1200,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                  * Obtain folder lock once to avoid multiple acquire/releases when invoking folder's getXXX() methods
                  */
                 synchronized (createMe) {
-                    if (createMe.exists()) {
-                        // Assume outdated cache as client expected that such a folder does not exist
-                        ListLsubCache.clearCache(accountId, session);
-                        throw IMAPException.create(IMAPException.Code.DUPLICATE_FOLDER, imapConfig, session, createMe.getFullName());
-                    }
-                    final int ftype = mboxEnabled ? getNameOf(createMe).endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES : FOLDER_TYPE;
+                    int ftype = mboxEnabled ? getNameOf(createMe).endsWith(String.valueOf(separator)) ? Folder.HOLDS_FOLDERS : Folder.HOLDS_MESSAGES : FOLDER_TYPE;
                     try {
                         if (!(created = createMe.create(ftype))) {
                             throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, createMe.getFullName(), isParentDefault ? DEFAULT_FOLDER_ID : parent.getFullName());
