@@ -53,6 +53,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -76,6 +77,7 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.database.DatabaseService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
@@ -1026,24 +1028,46 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     private void insertOrUpdateReminder(ReminderObject reminder) throws OXException {
         ReminderService reminderService = new ReminderHandler(factory.getContext());
-        if (0 < reminder.getObjectId()) {
-            ReminderObject reloadedReminder = null;
-            try {
-                reloadedReminder = reminderService.loadReminder(reminder.getObjectId());
-                reloadedReminder.setDate(reminder.getDate());
-                if (0 < reminder.getRecurrencePosition()) {
-                    reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
+        DatabaseService databaseService = factory.requireService(DatabaseService.class);
+        boolean committed = false;
+        Connection connection = null;
+        try {
+            connection = databaseService.getWritable(factory.getContext());
+            connection.setAutoCommit(false);
+            if (0 < reminder.getObjectId()) {
+                ReminderObject reloadedReminder = null;
+                try {
+                    reloadedReminder = reminderService.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
+                    reloadedReminder.setDate(reminder.getDate());
+                    if (0 < reminder.getRecurrencePosition()) {
+                        reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
+                    }
+                    reminderService.updateReminder(reloadedReminder, connection);
+                    connection.commit();
+                    committed = true;
+                    return;
+                } catch (OXException e) {
+                    if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
                 }
-                reminderService.updateReminder(reloadedReminder);
-                return;
-            } catch (OXException e) {
-                if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                    throw e;
+            }
+            reminder.setObjectId(0);
+            reminderService.insertReminder(reminder);
+            connection.commit();
+            committed = true;
+        } catch (SQLException e) {
+            throw ReminderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != connection) {
+                com.openexchange.tools.sql.DBUtils.autocommit(connection);
+                if (committed) {
+                    databaseService.backWritable(factory.getContext(), connection);
+                } else {
+                    databaseService.backWritableAfterReading(factory.getContext(), connection);
                 }
             }
         }
-        reminder.setObjectId(0);
-        reminderService.insertReminder(reminder);
     }
 
     /**
