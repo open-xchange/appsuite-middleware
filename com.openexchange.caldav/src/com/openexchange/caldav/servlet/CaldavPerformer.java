@@ -55,7 +55,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.action.CalDAVPOSTAction;
-import com.openexchange.caldav.action.WebdavMkCalendarAction;
+import com.openexchange.caldav.action.MKCALENDARAction;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVPerformer;
 import com.openexchange.dav.actions.ACLAction;
@@ -124,7 +124,7 @@ public class CaldavPerformer extends DAVPerformer {
         actions.put(WebdavMethod.GET, prepare(new WebdavGetAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.HEAD, prepare(new WebdavHeadAction(), true, true, false, factory, new WebdavExistsAction(), new WebdavIfAction(0, false, false), new WebdavIfMatchAction(HttpServletResponse.SC_NOT_MODIFIED)));
         actions.put(WebdavMethod.POST, prepare(new CalDAVPOSTAction(factory), true, true, factory, new WebdavIfAction(0, false, false)));
-        actions.put(WebdavMethod.MKCALENDAR, prepare(new WebdavMkCalendarAction(), true, true, factory, new WebdavIfAction(0, false, false)));
+        actions.put(WebdavMethod.MKCALENDAR, prepare(new MKCALENDARAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, false, false)));
         actions.put(WebdavMethod.ACL, prepare(new ACLAction(PROTOCOL), true, true, factory, new WebdavIfAction(0, true, false)));
         actions.put(WebdavMethod.TRACE, prepare(new WebdavTraceAction(), true, true, factory, new WebdavIfAction(0, false, false)));
         OXWebdavPutAction oxWebdavPut = new OXWebdavPutAction();
