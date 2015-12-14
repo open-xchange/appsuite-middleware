@@ -57,10 +57,13 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.push.PushListenerService;
+import com.openexchange.push.dovecot.DefaultRegistrationPerformer;
 import com.openexchange.push.dovecot.DovecotPushConfiguration;
 import com.openexchange.push.dovecot.DovecotPushDeleteListener;
+import com.openexchange.push.dovecot.DovecotPushListener;
 import com.openexchange.push.dovecot.DovecotPushManagerService;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
+import com.openexchange.push.dovecot.registration.RegistrationPerformer;
 import com.openexchange.push.dovecot.rest.DovecotPushRESTService;
 import com.openexchange.session.ObfuscatorService;
 import com.openexchange.sessiond.SessiondService;
@@ -93,6 +96,11 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        DovecotPushListener.setIfHigherRanked(new DefaultRegistrationPerformer(this));
+
+        track(RegistrationPerformer.class, new RegistrationPerformerTracker(context));
+
         DovecotPushConfiguration configuration = new DovecotPushConfiguration();
         configuration.init(this);
 
@@ -117,6 +125,7 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         DovecotPushManagerService.dropInstance();
+        DovecotPushListener.setIfHigherRanked(null);
         Services.setServiceLookup(null);
         super.stopBundle();
     }

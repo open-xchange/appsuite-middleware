@@ -50,37 +50,24 @@
 package com.openexchange.push.dovecot;
 
 import java.net.URI;
-import javax.mail.FolderClosedException;
-import javax.mail.MessagingException;
-import javax.mail.StoreClosedException;
+import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.imap.IMAPFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageDelegator;
-import com.openexchange.mail.api.IMailMessageStorage;
-import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.mime.MimeMailException;
-import com.openexchange.mail.mime.MimeMailExceptionCode;
-import com.openexchange.mail.service.MailService;
-import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
-import com.openexchange.push.dovecot.commands.RegistrationCommand;
-import com.openexchange.push.dovecot.commands.UnregistrationCommand;
 import com.openexchange.push.dovecot.locking.DovecotPushClusterLock;
 import com.openexchange.push.dovecot.locking.SessionInfo;
+import com.openexchange.push.dovecot.registration.RegistrationPerformer;
+import com.openexchange.push.dovecot.registration.RegistrationResult;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
-import com.sun.mail.imap.IMAPFolder;
-import com.sun.mail.imap.IMAPStore;
 
 /**
  * {@link DovecotPushListener}
@@ -95,6 +82,43 @@ public class DovecotPushListener implements PushListener, Runnable {
 
     /** The timeout threshold; cluster lock timeout minus one minute */
     private static final long TIMEOUT_THRESHOLD_MILLIS = DovecotPushClusterLock.TIMEOUT_MILLIS - 60000L;
+
+    private static final AtomicReference<RegistrationPerformer> REGISTRATION_PERFORMER_REFERENCE = new AtomicReference<RegistrationPerformer>();
+
+    /**
+     * Sets the registration performer to use.
+     *
+     * @param performer The performer
+     * @return The new unused performer after this call or <code>null</code> if there was none
+     */
+    public static RegistrationPerformer setIfHigherRanked(RegistrationPerformer performer) {
+        RegistrationPerformer current;
+        do {
+            current = REGISTRATION_PERFORMER_REFERENCE.get();
+            if (null != current && current.getRanking() >= performer.getRanking()) {
+                return performer;
+            }
+        } while (!REGISTRATION_PERFORMER_REFERENCE.compareAndSet(current, performer));
+        return current;
+    }
+
+    /**
+     * Replaces currently active registration performer with specified replacement
+     *
+     * @param toReplace The performer to replace
+     * @param replacement The performer to use
+     * @return <code>true</code> if replaced; otherwise <code>false</code>
+     */
+    public static boolean replaceIfActive(RegistrationPerformer toReplace, RegistrationPerformer replacement) {
+        RegistrationPerformer current;
+        do {
+            current = REGISTRATION_PERFORMER_REFERENCE.get();
+            if (null != current && !current.equals(toReplace)) {
+                return false;
+            }
+        } while (!REGISTRATION_PERFORMER_REFERENCE.compareAndSet(current, replacement));
+        return true;
+    }
 
     // ---------------------------------------------------------------------------------------------------------------------------------
 
@@ -202,40 +226,21 @@ public class DovecotPushListener implements PushListener, Runnable {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
 
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         boolean scheduleRetry = false;
         String logInfo = null;
         try {
-            MailService mailService = services.getOptionalService(MailService.class);
-            if (null == mailService) {
-                // Currently no MailService available
-                return "Currently no MailService available";
+            RegistrationPerformer performer = REGISTRATION_PERFORMER_REFERENCE.get();
+            RegistrationResult registrationResult = performer.initateRegistration(session);
+            if (registrationResult.isDenied()) {
+                return registrationResult.getReason();
+            }
+            if (registrationResult.isFailed()) {
+                scheduleRetry = registrationResult.scheduleRetry();
+                logInfo = registrationResult.getLogInfo();
+                throw registrationResult.getException();
             }
 
-            // Connect it
-            mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-            mailAccess.connect(false);
-
-            // Get IMAP store
-            final IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
-            logInfo = imapStore.toString();
-
-            // Check capability
-            if (!imapStore.hasCapability("METADATA")) {
-                // No METADATA support
-                LOGGER.info("No \"METADATA\" capability advertised for {}. Skipping listener registration.", imapStore);
-                return "No \"METADATA\" capability supported";
-            }
-
-            // Proceed & grab INBOX folder
-            final IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
-
-            // Advertise registration at Dovecot IMAP server through SETMETADATA command
-            Boolean result = (Boolean) imapFolder.doCommand(new RegistrationCommand(imapFolder, session));
-            if (false == result.booleanValue()) {
-                return "SETMETADATA command failed";
-            }
-
+            // Otherwise success
             // Mark as initialized
             initialized = true;
 
@@ -243,25 +248,9 @@ public class DovecotPushListener implements PushListener, Runnable {
             long delay = TIMEOUT_THRESHOLD_MILLIS;
             refreshLockTask = timerService.scheduleAtFixedRate(this, delay, delay);
             return null;
-        } catch (FolderClosedException e) {
-            scheduleRetry = true;
-            throw MimeMailException.handleMessagingException(e);
-        } catch (StoreClosedException e) {
-            scheduleRetry = true;
-            throw MimeMailException.handleMessagingException(e);
-        } catch (MessagingException e) {
-            scheduleRetry = true;
-            throw MimeMailException.handleMessagingException(e);
-        } catch (OXException e) {
-            if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
-                Throwable cause = null == e.getCause() ? e : e.getCause();
-                throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
-            }
-            throw e;
+        } catch (RuntimeException rte) {
+            throw PushExceptionCodes.UNEXPECTED_ERROR.create(rte, rte.getMessage());
         } finally {
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-
             if (scheduleRetry) {
                 long delay = 5000L;
                 retryTask = timerService.schedule(new RetryRunnable(logInfo), delay);
@@ -328,55 +317,8 @@ public class DovecotPushListener implements PushListener, Runnable {
     }
 
     private void doUnregistration() throws OXException {
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        try {
-            MailService mailService = services.getOptionalService(MailService.class);
-            if (null != mailService) {
-                // Connect it
-                mailAccess = mailService.getMailAccess(session, MailAccount.DEFAULT_ID);
-                mailAccess.connect(false);
-
-                // Get IMAP store & execute SETMETADATA for unregistration
-                IMAPStore imapStore = getImapFolderStorageFrom(mailAccess).getImapStore();
-                IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder("INBOX");
-                imapFolder.doCommand(new UnregistrationCommand(imapFolder));
-            }
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (OXException e) {
-            if (MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
-                Throwable cause = null == e.getCause() ? e : e.getCause();
-                throw PushExceptionCodes.AUTHENTICATION_ERROR.create(cause, new Object[0]);
-            }
-            throw e;
-        } finally {
-            closeMailAccess(mailAccess);
-            mailAccess = null;
-        }
-    }
-
-    private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
-        if (null != mailAccess) {
-            try {
-                mailAccess.close(false);
-            } catch (final Exception x) {
-                // Ignore
-            }
-        }
-    }
-
-    private static IMAPFolderStorage getImapFolderStorageFrom(final MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMailFolderStorage fstore = mailAccess.getFolderStorage();
-        if (!(fstore instanceof IMAPFolderStorage)) {
-            if (!(fstore instanceof IMailFolderStorageDelegator)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
-            }
-            fstore = ((IMailFolderStorageDelegator) fstore).getDelegateFolderStorage();
-            if (!(fstore instanceof IMAPFolderStorage)) {
-                throw PushExceptionCodes.UNEXPECTED_ERROR.create("Unknown MAL implementation: " + fstore.getClass().getName());
-            }
-        }
-        return (IMAPFolderStorage) fstore;
+        RegistrationPerformer registrationPerformer = REGISTRATION_PERFORMER_REFERENCE.get();
+        registrationPerformer.unregister(session);
     }
 
     // -------------------------------------------------------------------------------------------------------------------------------
