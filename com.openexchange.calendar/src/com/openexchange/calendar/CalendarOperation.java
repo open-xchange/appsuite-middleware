@@ -1025,7 +1025,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     private static final void handleFullTime(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFullTime()) {
-            if (cdao.containsStartDate() && cdao.containsEndDate()) {
+            if (cdao.getStartDate() != null && cdao.getEndDate() != null) {
                 final long mod = cdao.getStartDate().getTime() % Constants.MILLI_DAY;
                 if (mod != 0) {
                     cdao.setStartDate(new Date(cdao.getStartDate().getTime() - mod));
