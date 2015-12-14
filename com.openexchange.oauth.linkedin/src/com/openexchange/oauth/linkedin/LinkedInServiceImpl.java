@@ -351,7 +351,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                 JSONObject people = data.optJSONObject("people");
                 if (people != null) {
                     JSONArray values = people.optJSONArray("values");
-                    if (values.length() > 0) {
+                    if (null != values && values.length() > 0) {
                         JSONObject firstMatch = values.optJSONObject(0);
                         if (firstMatch != null) {
                             String id = firstMatch.optString("id");
@@ -374,7 +374,7 @@ public class LinkedInServiceImpl implements LinkedInService {
                     JSONObject people = data.optJSONObject("people");
                     if (people != null) {
                         JSONArray values = people.optJSONArray("values");
-                        if (values.length() > 0) {
+                        if (null != values && values.length() > 0) {
                             JSONObject firstMatch = values.optJSONObject(0);
                             if (firstMatch != null) {
                                 String id = firstMatch.optString("id");
