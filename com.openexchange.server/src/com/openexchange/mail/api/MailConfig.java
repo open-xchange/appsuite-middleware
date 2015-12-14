@@ -56,6 +56,7 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
 import com.google.common.cache.CacheBuilder;
@@ -456,7 +457,7 @@ public abstract class MailConfig {
         }
     }
 
-    private static final LoadingCache<UserID, int[]> USER_ID_CACHE = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(65536 << 1).initialCapacity(8192).build(new CacheLoader<UserID, int[]>() {
+    private static final LoadingCache<UserID, int[]> USER_ID_CACHE = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(65536 << 1).initialCapacity(8192).expireAfterAccess(30, TimeUnit.MINUTES).build(new CacheLoader<UserID, int[]>() {
 
         @Override
         public int[] load(UserID userID) throws Exception {

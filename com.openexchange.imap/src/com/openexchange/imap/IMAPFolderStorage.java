@@ -54,6 +54,7 @@ import static com.openexchange.mail.MailServletInterface.mailInterfaceMonitor;
 import static com.openexchange.mail.dataobjects.MailFolder.DEFAULT_FOLDER_ID;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TCharHashSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -1237,33 +1238,39 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                     if (imapConfig.isSupportsACLs() && toCreate.containsPermissions()) {
                         final ACL[] initialACLs = getACLSafe(createMe);
                         if (initialACLs != null) {
-                            final ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
-                            final Entity2ACL entity2ACL = getEntity2ACL();
-                            final Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
-                            final Map<String, ACL> m = acl2map(newACLs);
+                            ACL[] newACLs = permissions2ACL(toCreate.getPermissions(), createMe);
+                            Entity2ACL entity2ACL = getEntity2ACL();
+                            Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, createMe, imapConfig);
+                            Map<String, ACL> m = acl2map(newACLs);
                             if (!equals(initialACLs, m, entity2ACL, args)) {
-                                final ACLExtension aclExtension = imapConfig.getACLExtension();
+                                ACLExtension aclExtension = imapConfig.getACLExtension();
                                 if (aclExtension.canSetACL(createMe.myRights())) {
-                                    boolean adminFound = false;
-                                    for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
-                                        if (aclExtension.canSetACL(newACLs[i].getRights())) {
-                                            adminFound = true;
+                                    // Check for admin
+                                    {
+                                        boolean adminFound = false;
+                                        for (int i = 0; (i < newACLs.length) && !adminFound; i++) {
+                                            if (aclExtension.canSetACL(newACLs[i].getRights())) {
+                                                adminFound = true;
+                                            }
                                         }
-                                    }
-                                    if (!adminFound) {
-                                        throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
+                                        if (!adminFound) {
+                                            throw IMAPException.create(IMAPException.Code.NO_ADMIN_ACL, imapConfig, session, createMe.getFullName());
+                                        }
                                     }
                                     /*
                                      * Apply new ACLs
                                      */
                                     final Map<String, ACL> om = acl2map(initialACLs);
                                     for (int i = 0; i < newACLs.length; i++) {
-                                        createMe.addACL(validate(newACLs[i], om));
+                                        ACL validated = validate(newACLs[i], om);
+                                        if (null != validated) {
+                                            createMe.addACL(validated);
+                                        }
                                     }
                                     /*
                                      * Remove other ACLs
                                      */
-                                    final ACL[] removedACLs = getRemovedACLs(m, initialACLs);
+                                    ACL[] removedACLs = getRemovedACLs(m, initialACLs);
                                     if (removedACLs.length > 0) {
                                         for (int i = 0; i < removedACLs.length; i++) {
                                             if (isKnownEntity(removedACLs[i].getName(), entity2ACL, ctx, args)) {
@@ -1890,10 +1897,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                              */
                             final Map<String, ACL> om = acl2map(oldACLs);
                             for (int i = 0; i < newACLs.length; i++) {
-                                final ACL newACL = newACLs[i];
-                                updateMe.addACL(validate(newACL, om));
-                                entities.add(newACL);
-                                changed = true;
+                                ACL newACL = newACLs[i];
+                                ACL validated = validate(newACL, om);
+                                if (null != validated) {
+                                    updateMe.addACL(validated);
+                                    entities.add(newACL);
+                                    changed = true;
+                                }
                             }
                             /*
                              * Since the ACLs have changed remove cached rights
@@ -3020,34 +3030,29 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         }
     }
 
-    private static String stripPOSTRight(final String rights) {
-        final StringBuilder sb = new StringBuilder(rights.length());
-        final int length = rights.length();
+    private static char[] stripPOSTRight(final String rights) {
+        StringBuilder sb = new StringBuilder(rights.length());
+        int length = rights.length();
         for (int i = 0; i < length; i++) {
-            final char c = rights.charAt(i);
+            char c = rights.charAt(i);
             if ('p' != c && 'P' != c) {
                 sb.append(c);
             }
         }
-        return sb.toString();
+
+        int len = sb.length();
+        char[] retval = new char[len];
+        sb.getChars(0, len, retval, 0);
+        return retval;
     }
 
     private static boolean equalRights(final String rights1, final String rights2, final boolean ignorePOST) {
-        final char[] r1;
-        final char[] r2;
-        if (ignorePOST) {
-            r1 = stripPOSTRight(rights1).toCharArray();
-            r2 = stripPOSTRight(rights2).toCharArray();
-        } else {
-            r1 = rights1.toCharArray();
-            r2 = rights2.toCharArray();
-        }
+        char[] r1 = ignorePOST ? stripPOSTRight(rights1) : rights1.toCharArray();
+        char[] r2 = ignorePOST ? stripPOSTRight(rights2) : rights2.toCharArray();
         if (r1.length != r2.length) {
             return false;
         }
-        Arrays.sort(r1);
-        Arrays.sort(r2);
-        return Arrays.equals(r1, r2);
+        return new TCharHashSet(r1).containsAll(r2);
     }
 
     private static Map<String, ACL> acl2map(final ACL[] acls) {
@@ -3059,32 +3064,32 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private static ACL validate(final ACL newACL, final Map<String, ACL> oldACLs) {
-        final ACL oldACL = oldACLs.get(newACL.getName());
+        ACL oldACL = oldACLs.get(newACL.getName());
         if (null == oldACL) {
-            /*
-             * Either no corresponding old ACL or old ACL's rights is not equal to "p"
-             */
+            // Either no corresponding old ACL or old ACL's rights is not equal to "p"
             return newACL;
         }
-        final Rights newRights = newACL.getRights();
-        final Rights oldRights = oldACL.getRights();
-        /*
-         * Handle the POST-to-NOT-MAPPABLE problem
-         */
+
+        Rights newRights = newACL.getRights();
+        Rights oldRights = oldACL.getRights();
+        if (equalRights(newRights.toString(), oldRights.toString(), true)) {
+            // Nothing to do...
+            return null;
+        }
+
+        // Handle the POST-to-NOT-MAPPABLE problem
         if (oldRights.contains(Rights.Right.POST) && !newRights.contains(Rights.Right.POST)) {
             newRights.add(Rights.Right.POST);
         }
-        /*
-         * Handle the READ-KEEP_SEEN-to-READ problem
-         */
+
+        // Handle the READ-KEEP_SEEN-to-READ problem
         if (oldRights.contains(Rights.Right.READ) && newRights.contains(Rights.Right.READ)) {
-            /*
-             * Both allow READ access
-             */
+            // Both allow READ access
             if (!oldRights.contains(Rights.Right.KEEP_SEEN) && newRights.contains(Rights.Right.KEEP_SEEN)) {
                 newRights.remove(Rights.Right.KEEP_SEEN);
             }
         }
+
         return newACL;
     }
 

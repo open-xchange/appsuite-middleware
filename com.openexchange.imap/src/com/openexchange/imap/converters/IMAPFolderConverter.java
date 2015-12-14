@@ -106,6 +106,7 @@ public final class IMAPFolderConverter {
         private final int sessionUser;
         private final String fullname;
         private final char separator;
+        private final String otherUserNamespace;
 
         /**
          * Initializes a new {@link Entity2ACLArgsImpl}.
@@ -115,19 +116,21 @@ public final class IMAPFolderConverter {
          * @param sessionUser The session user ID
          * @param fullname The IMAP folder's full name
          * @param separator The separator character
+         * @param otherUserNamespaces The namespace for other users
          */
-        public Entity2ACLArgsImpl(final int accountId, final String serverUrl, final int sessionUser, final String fullname, final char separator) {
+        Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces) {
             super();
             this.accountId = accountId;
             this.serverUrl = serverUrl;
             this.sessionUser = sessionUser;
             this.fullname = fullname;
             this.separator = separator;
+            this.otherUserNamespace = null == otherUserNamespaces || otherUserNamespaces.length == 0 ? null : otherUserNamespaces[0];
         }
 
         @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
-            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator);
+            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace);
         }
     }
 
@@ -167,14 +170,15 @@ public final class IMAPFolderConverter {
      * @return An appropriate implementation of {@link Entity2ACLArgs}
      * @throws OXException If IMAP folder's attributes cannot be accessed
      */
-    public static Entity2ACLArgs getEntity2AclArgs(final Session session, final IMAPFolder imapFolder, final IMAPConfig imapConfig) throws OXException {
+    public static Entity2ACLArgs getEntity2AclArgs(Session session, IMAPFolder imapFolder, IMAPConfig imapConfig) throws OXException {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
                 new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
                 session.getUserId(),
                 imapFolder.getFullName(),
-                ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()));
+                ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
+                NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -685,8 +689,9 @@ public final class IMAPFolderConverter {
      * @param ownRights The rights granted to IMAP folder for session user
      * @param ctx The context
      * @throws OXException If ACLs cannot be mapped
+     * @throws MessagingException If a messaging error occurs
      */
-    private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws OXException {
+    private static void applyACL2Permissions(final IMAPFolder imapFolder, final ListLsubEntry listEntry, final Session session, final IMAPConfig imapConfig, final MailFolder mailFolder, final Rights ownRights, final Context ctx) throws OXException, MessagingException {
         final ACL[] acls;
         try {
             final List<ACL> list = listEntry.getACLs();
@@ -704,7 +709,7 @@ public final class IMAPFolderConverter {
             }
             throw MimeMailException.handleMessagingException(e);
         }
-        final Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator());
+        Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator(), NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
