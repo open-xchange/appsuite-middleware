@@ -230,7 +230,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
 
     @Override
     protected AbstractResource createResource(T object, WebdavPath url) throws OXException {
-        throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+        throw protocolException(HttpServletResponse.SC_CONFLICT); // https://tools.ietf.org/html/rfc2518#section-8.7.1
     }
 
     @Override

@@ -170,6 +170,9 @@ public abstract class CommonResource<T extends CommonObject> extends DAVResource
      * @return The appropriate {@link WebdavProtocolException} instance
      */
     protected WebdavProtocolException protocolException(OXException e) {
+        if (WebdavProtocolException.class.isInstance(e)) {
+            return (WebdavProtocolException) e;
+        }
         return protocolException(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 

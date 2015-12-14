@@ -103,6 +103,9 @@ public abstract class DAVCollection extends AbstractCollection {
     }
 
     protected WebdavProtocolException protocolException(Throwable t) {
+        if (WebdavProtocolException.class.isInstance(t)) {
+            return (WebdavProtocolException) t;
+        }
         return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
     }
 
