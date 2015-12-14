@@ -49,6 +49,7 @@
 
 package com.openexchange.dav.mixins;
 
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
@@ -76,7 +77,11 @@ public class CurrentUserPrincipal extends SingleXMLPropertyMixin {
 
     @Override
     protected String getValue() {
-        return "<D:href>" + PrincipalURL.forUser(sessionHolder.getSessionObject().getUserId()) + "</D:href>";
+        Session session = sessionHolder.getSessionObject();
+        if (null == session) {
+            return "<D:href><D:unauthenticated/></D:href>";
+        }
+        return "<D:href>" + PrincipalURL.forUser(session.getUserId()) + "</D:href>";
     }
 
 }
