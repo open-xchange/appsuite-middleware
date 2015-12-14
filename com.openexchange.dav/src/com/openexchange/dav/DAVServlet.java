@@ -118,23 +118,35 @@ public class DAVServlet extends OXServlet {
         return true;
     }
 
+    /**
+     * Gets a value indicating whether authentication is required for a specific HTTP request.
+     *
+     * @param request The request to check
+     * @return <code>true</code>, if authentication is required, <code>false</code>, otherwise
+     */
+    protected boolean needsAuthentication(HttpServletRequest request) {
+        return false == WebdavMethod.TRACE.toString().equals(request.getMethod());
+    }
+
     @Override
     protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        /*
+         * ensure to have a HTTP session when using cookies
+         */
         if (useCookies()) {
-            // create a new HttpSession it it's missing
             request.getSession(true);
         }
-        if (!"TRACE".equals(request.getMethod()) && useHttpAuth() && !authenticate(request, response)) {
+        /*
+         * authenticate request
+         */
+        if (useHttpAuth() && needsAuthentication(request) && false == authenticate(request, response)) {
             return;
         }
         Session session = getSession(request);
         incrementRequests();
         RequestContextHolder.set(buildRequestContext(request, response, session));
+        LogProperties.putSessionProperties(session);
         try {
-            if (session != null) {
-                LogProperties.putSessionProperties(session);
-                LOG.trace("Entering HTTP sub method. Session: {}", session);
-            }
             /*
              * wrap into counting request to check rate limit
              */
@@ -171,6 +183,7 @@ public class DAVServlet extends OXServlet {
             LOG.error("", e);
             throw new ServletException(e.getMessage(), e);
         } finally {
+            LogProperties.removeSessionProperties();
             RequestContextHolder.reset();
             decrementRequests();
         }
