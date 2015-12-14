@@ -50,21 +50,17 @@
 package com.openexchange.caldav.action;
 
 import java.io.IOException;
-import java.io.Writer;
 import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.output.XMLOutputter;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.dav.DAVProperty;
-import com.openexchange.java.AllocatingStringWriter;
-import com.openexchange.java.Streams;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.webdav.action.AbstractAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
 import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
@@ -91,6 +87,10 @@ public class WebdavMkCalendarAction extends AbstractAction {
             if (null == resource) {
                 throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(),HttpServletResponse.SC_NOT_FOUND);
             }
+            if (resource.exists()) {
+                // https://www.ietf.org/mail-archive/web/caldav/current/msg00123.html
+                throw new PreconditionException(Protocol.DAV_NS.getURI(), "resource-must-be-null", req.getUrl(), HttpServletResponse.SC_METHOD_NOT_ALLOWED);
+            }
             if (req.hasBody()) {
                 /*
                  * check body
@@ -114,7 +114,6 @@ public class WebdavMkCalendarAction extends AbstractAction {
                                 throw WebdavProtocolException.generalError(req.getUrl(), HttpServletResponse.SC_FORBIDDEN);
                             } else {
                                 resource.putProperty(new DAVProperty(propertyElement));
-//                                resource.putProperty(getProperty(propertyElement));
                             }
                         }
                     }
@@ -133,28 +132,4 @@ public class WebdavMkCalendarAction extends AbstractAction {
         }
     }
 
-    /**
-     * Extracts a WebDAV property from the supplied property XML element.
-     *
-     * @param propertyElement The XML element representing the property
-     * @return The WebDAV property
-     * @throws IOException
-     */
-    private static WebdavProperty getProperty(Element propertyElement) throws IOException {
-        WebdavProperty property = new WebdavProperty(propertyElement.getNamespaceURI(), propertyElement.getName());
-        if (null != propertyElement.getChildren() && 0 < propertyElement.getChildren().size()) {
-            property.setXML(true);
-            Writer writer = null;
-            try {
-                writer = new AllocatingStringWriter();
-                new XMLOutputter().output(propertyElement.cloneContent(), writer);
-                property.setValue(writer.toString());
-            } finally {
-                Streams.close(writer);
-            }
-        } else {
-            property.setValue(propertyElement.getText());
-        }
-        return property;
-    }
 }

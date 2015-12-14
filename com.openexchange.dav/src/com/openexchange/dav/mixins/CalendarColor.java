@@ -51,7 +51,9 @@ package com.openexchange.dav.mixins;
 
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.jdom2.Element;
 import org.jdom2.Namespace;
+import com.openexchange.dav.DAVProperty;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.folderstorage.UserizedFolder;
@@ -127,7 +129,13 @@ public class CalendarColor extends SingleXMLPropertyMixin {
      */
     public static String parse(WebdavProperty property) {
         if (null != property && NAMESPACE.getURI().equals(property.getNamespace()) && NAME.equals(property.getName())) {
-            String value = property.getValue();
+            String value;
+            if (DAVProperty.class.isInstance(property)) {
+                Element colorElement = ((DAVProperty) property).getElement();
+                value = null != colorElement ? colorElement.getValue() : null;
+            } else {
+                value = property.getValue();
+            }
             if (false == Strings.isEmpty(value)) {
                 value = value.toUpperCase().trim();
                 if (Pattern.matches("^\\#([A-F0-9]{8})$", value)) {
