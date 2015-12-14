@@ -118,7 +118,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
      */
     private DovecotEntity2ACL() {
         super();
-        cacheSharedOwners = CacheBuilder.newBuilder().maximumSize(5000).expireAfterAccess(30, TimeUnit.MINUTES).build();
+        cacheSharedOwners = CacheBuilder.newBuilder().maximumSize(50000).expireAfterAccess(30, TimeUnit.MINUTES).build();
     }
 
     private final String getSharedFolderOwner(final String sharedFolderName, final char delim, String otherUserNamespace) {
