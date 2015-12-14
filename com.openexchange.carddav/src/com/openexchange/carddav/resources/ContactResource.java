@@ -64,6 +64,8 @@ import com.openexchange.contact.vcard.VCardImport;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.exception.Category;
@@ -361,7 +363,7 @@ public class ContactResource extends CommonResource<Contact> {
             vCardImport.getContact().setVCardId(vCardID);
         }
         if (null == vCardImport || null == vCardImport.getContact()) {
-            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+            throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN);
         }
     }
 
