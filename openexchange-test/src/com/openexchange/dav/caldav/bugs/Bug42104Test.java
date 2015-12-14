@@ -52,7 +52,10 @@ package com.openexchange.dav.caldav.bugs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import java.util.Date;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.junit.Assert;
 import org.junit.Test;
+import com.openexchange.dav.Headers;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
@@ -100,8 +103,15 @@ public class Bug42104Test extends CalDAVTest {
         /*
          * get appointment with original eTag on client
          */
-        iCalResource = get(getDefaultFolderID(), uid, originalETag);
-        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        GetMethod get = null;
+        try {
+            String href = "/caldav/" + getDefaultFolderID() + "/" + uid + ".ics";
+            get = new GetMethod(getBaseUri() + href);
+            get.addRequestHeader(Headers.IF_MATCH, originalETag);
+            Assert.assertEquals("response code wrong", 304, getWebDAVClient().executeMethod(get));
+        } finally {
+            release(get);
+        }
     }
 
 }
