@@ -1,3 +1,9 @@
+open-xchange-sso (7.6.2-44) stable; urgency=medium
+
+  * Build for patch 2015-12-21 (2952)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 14 Dec 2015 11:06:05 +0100
+
 open-xchange-sso (7.6.2-43) stable; urgency=medium
 
   * Build for patch 2015-12-07 (2916)
