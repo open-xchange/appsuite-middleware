@@ -132,7 +132,7 @@ public final class PListSignerImpl implements PListSigner {
 
             CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
             JcaSimpleSignerInfoGeneratorBuilder builder = new JcaSimpleSignerInfoGeneratorBuilder();
-            gen.addSignerInfoGenerator(builder.build("SHA1withRSA", privKey, cert));
+            gen.addSignerInfoGenerator(builder.build("SHA256withRSA", privKey, cert));
             gen.addCertificates(certs);
 
             CMSTypedData data;
