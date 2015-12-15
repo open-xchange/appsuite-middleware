@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -86,6 +88,8 @@ public class Bug37887Test extends CalDAVTest {
             Map<String, Object> meta = folder.getMeta();
             if (null == meta) {
                 meta = new HashMap<String, Object>();
+            } else {
+                meta = new HashMap<String, Object>(meta);
             }
             color = "#000000FF";
             FolderObject toUpdate = new FolderObject(folderID);
