@@ -74,6 +74,9 @@ public abstract class DAVProtocol extends Protocol {
     /** urn:ietf:params:xml:ns:carddav */
     public static final Namespace CARD_NS = Namespace.getNamespace("CARD", "urn:ietf:params:xml:ns:carddav");
 
+    /** HTTP/1.1 507 Insufficient Storage */
+    public static final int SC_INSUFFICIENT_STORAGE = 507;
+
     @Override
     public WebdavAction getReportAction(String namespace, String name) {
         if (PrinicpalPropertySearchReport.NAMESPACE.equals(namespace) && PrinicpalPropertySearchReport.NAME.equals(name)) {

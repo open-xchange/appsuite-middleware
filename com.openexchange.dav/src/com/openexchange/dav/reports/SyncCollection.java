@@ -49,12 +49,10 @@
 
 package com.openexchange.dav.reports;
 
-import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
-import java.util.ArrayList;
-import java.util.List;
-import org.jdom2.Document;
+import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Element;
 import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.webdav.action.WebdavRequest;
@@ -65,6 +63,7 @@ import com.openexchange.webdav.protocol.WebdavResource;
 import com.openexchange.webdav.protocol.WebdavStatus;
 import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
+
 /**
  * {@link SyncCollection}
  *
@@ -85,48 +84,54 @@ public class SyncCollection extends PROPFINDAction {
     }
 
     @Override
-    public void perform(WebdavRequest req, WebdavResponse res) throws WebdavProtocolException {
-        Document requestBody = optRequestBody(req);
-        String token = getSyncToken(req, requestBody);
-        SyncStatus<WebdavResource> syncStatus = ((CommonFolderCollection<?>) req.getCollection()).getSyncStatus(token);
-        final List<Element> all = new ArrayList<Element>();
-        final int[] statusCodes = syncStatus.getStatusCodes();
-        final PropertiesMarshaller helper = new PropertiesMarshaller(req.getURLPrefix(), req.getCharset());
-
-        ResourceMarshaller marshaller = getMarshaller(req, requestBody);
-        for (final int sc : statusCodes) {
-            if (sc == 404) {
-                for(final WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
-                    final WebdavResource resource = status.getAdditional();
-                    final Element r =  new Element("response",DAV_NS);
-                    r.addContent(helper.marshalHREF(resource.getUrl(), resource.getResourceType() != null));
-                    r.addContent(helper.marshalStatus(404));
-                    all.add(r);
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        /*
+         * extract client sync-token
+         */
+        Element rootElement = requireRootElement(request, Protocol.DAV_NS, "sync-collection");
+        Element syncTokenElement = rootElement.getChild("sync-token", DAVProtocol.DAV_NS);
+        String syncToken = null != syncTokenElement ? syncTokenElement.getText() : null;
+        Element limitElement = rootElement.getChild("limit", DAVProtocol.DAV_NS);
+        if (null != limitElement) {
+            throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "number-of-matches-within-limits", request.getUrl(), DAVProtocol.SC_INSUFFICIENT_STORAGE);
+        }
+        /*
+         * query sync status from targeted folder collection
+         */
+        CommonFolderCollection<?> folderCollection = requireResource(request, CommonFolderCollection.class);
+        SyncStatus<WebdavResource> syncStatus = folderCollection.getSyncStatus(syncToken);
+        /*
+         * marshal multistatus response
+         */
+        ResourceMarshaller marshaller = getMarshaller(request, requireRequestBody(request));
+        PropertiesMarshaller helper = new PropertiesMarshaller(request.getURLPrefix(), request.getCharset());
+        Element multistatusElement = prepareMultistatusElement();
+        for (int status : syncStatus.getStatusCodes()) {
+            if (HttpServletResponse.SC_NOT_FOUND == status) {
+                /*
+                 * marshal explicit "not found" response for each deleted resource
+                 */
+                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                    WebdavResource resource = webdavStatus.getAdditional();
+                    multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                        .addContent(helper.marshalHREF(resource.getUrl(), resource.isCollection()))
+                        .addContent(helper.marshalStatus(status))
+                    );
                 }
             } else {
-                for(final WebdavStatus<WebdavResource> status : syncStatus.toIterable(sc)) {
-                    final List<Element> marshalled = marshaller.marshal(status.getAdditional());
-                    all.addAll(marshalled);
+                /*
+                 * marshal common multistatus response for each new/updated resource
+                 */
+                for (WebdavStatus<WebdavResource> webdavStatus : syncStatus.toIterable(status)) {
+                    multistatusElement.addContent(marshaller.marshal(webdavStatus.getAdditional()));
                 }
             }
         }
-
-        Element multistatusElement = prepareMultistatusElement();
-        Element syncToken = new Element("sync-token", DAV_NS);
-        syncToken.setText(syncStatus.getToken());
-        multistatusElement.addContent(syncToken);
-        multistatusElement.addContent(all);
-        sendMultistatusResponse(res, multistatusElement);
+        /*
+         * include next sync-token & send response
+         */
+        multistatusElement.addContent(new Element("sync-token", Protocol.DAV_NS).setText(syncStatus.getToken()));
+        sendMultistatusResponse(response, multistatusElement);
     }
 
-    private String getSyncToken(final WebdavRequest req, final Document requestBody) throws WebdavProtocolException {
-
-        final List<Element> children = null == requestBody ? null : requestBody.getRootElement().getChildren("sync-token", DAV_NS);
-        if (children == null || children.isEmpty()) {
-            return null;
-        }
-
-        final Element tokenElement = children.get(0);
-        return tokenElement.getText();
-    }
 }

@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
 import org.jdom2.output.XMLOutputter;
 import com.openexchange.dav.DAVFactory;
 import com.openexchange.dav.DAVProtocol;
@@ -117,6 +118,23 @@ public abstract class DAVAction extends AbstractAction {
         } catch (JDOMException | IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
         }
+    }
+
+    /**
+     * Gets the root element of the request body from the supplied WebDAV request, throwing an appropriate exception if there is none or
+     * parsing fails.
+     *
+     * @param request The WebDAV request
+     * @param namespace The expected namespace of the root element
+     * @param name The expected name of the root element
+     * @return The root element
+     */
+    protected Element requireRootElement(WebdavRequest request, Namespace namespace, String name) throws WebdavProtocolException {
+        Element rootElement = requireRequestBody(request).getRootElement();
+        if (null == rootElement || false == rootElement.getNamespace().equals(namespace) || false == rootElement.getName().equals(name)) {
+            throw WebdavProtocolException.generalError(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST);
+        }
+        return rootElement;
     }
 
     /**
