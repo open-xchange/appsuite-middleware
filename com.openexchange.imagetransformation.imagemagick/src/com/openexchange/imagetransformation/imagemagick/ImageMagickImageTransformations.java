@@ -98,10 +98,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator) {
+    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        this.cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd();
+        cmd.setSearchPath(searchPath);
+        this.cmd = cmd;
         this.op = new IMOperation();
         op.addImage();
 
@@ -115,10 +117,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator) {
+    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        this.cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd();
+        cmd.setSearchPath(searchPath);
+        this.cmd = cmd;
         this.op = new IMOperation();
         op.addImage("-"); // read from stdin
 
@@ -132,10 +136,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator) {
+    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        this.cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd();
+        cmd.setSearchPath(searchPath);
+        this.cmd = cmd;
         this.op = new IMOperation();
         op.addImage("-"); // read from stdin
 

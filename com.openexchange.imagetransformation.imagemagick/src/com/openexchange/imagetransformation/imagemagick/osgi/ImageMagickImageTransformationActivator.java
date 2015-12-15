@@ -52,6 +52,7 @@ package com.openexchange.imagetransformation.imagemagick.osgi;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import org.osgi.framework.Constants;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.imagetransformation.imagemagick.ImageMagickImageTransformationProvider;
@@ -80,14 +81,17 @@ public class ImageMagickImageTransformationActivator extends HousekeepingActivat
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TransformedImageCreator.class };
+        return new Class<?>[] { TransformedImageCreator.class, ConfigurationService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
+        ConfigurationService configService = getService(ConfigurationService.class);
+        String searchPath = configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin");
+
         Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
         properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-        registerService(ImageTransformationProvider.class, new ImageMagickImageTransformationProvider(getService(TransformedImageCreator.class)), properties);
+        registerService(ImageTransformationProvider.class, new ImageMagickImageTransformationProvider(getService(TransformedImageCreator.class), searchPath), properties);
     }
 
 }

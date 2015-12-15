@@ -52,7 +52,11 @@ package com.openexchange.imagetransformation.imagemagick;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformedImageCreator;
@@ -64,16 +68,28 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImageMagickImageTransformationProvider implements ImageTransformationProvider {
+public class ImageMagickImageTransformationProvider implements ImageTransformationProvider, Reloadable {
 
     private final TransformedImageCreator transformedImageCreator;
+    private final AtomicReference<String> searchPathRef;
 
     /**
      * Initializes a new {@link ImageMagickImageTransformationProvider}.
      */
-    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator) {
+    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath) {
         super();
         this.transformedImageCreator = transformedImageCreator;
+        searchPathRef = new AtomicReference<String>(searchPath);
+    }
+
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        searchPathRef.set(configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin"));
+    }
+
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        return null;
     }
 
     @Override
@@ -83,7 +99,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
-        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator);
+        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get());
     }
 
     @Override
@@ -93,12 +109,12 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(InputStream imageStream, Object source) throws IOException {
-        return new ImageMagickImageTransformations(imageStream, source, transformedImageCreator);
+        return new ImageMagickImageTransformations(imageStream, source, transformedImageCreator, searchPathRef.get());
     }
 
     @Override
     public ImageTransformations transfom(IFileHolder imageFile, Object source) throws IOException {
-        return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator);
+        return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPathRef.get());
     }
 
     @Override
@@ -108,7 +124,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
-        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator);
+        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get());
     }
 
 }
