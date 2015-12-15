@@ -121,7 +121,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
     final AtomicReference<DistributedGroupManager> distributedGroupManagerRef;
 
     /** Keep track of identifiers */
-    final ConcurrentMap<ID, Object> syntheticIDs;
+    final ConcurrentMap<ID, Object> localIDsToTouch;
 
     /**
      * Initializes a new {@link HazelcastResourceDirectory}.
@@ -137,7 +137,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
         this.id_map = id_map;
         this.resource_map = resource_map;
         this.managementObject = new HazelcastResourceDirectoryManagement(this);
-        this.syntheticIDs = new ConcurrentHashMap<ID, Object>(32, 0.9F, 1);
+        this.localIDsToTouch = new ConcurrentHashMap<ID, Object>(32, 0.9F, 1);
         addResourceMappingEntryListener(new ResourceMappingEntryAdapter() {
 
             @Override
@@ -152,7 +152,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                         if (null != distributedGroupManager.getMembers(id)) {
                             // Detected preliminary eviction attempt
                             Throwable trace = new Throwable("tracked thread");
-                            LOG.warn("Source {} on Member: {} fired preliminary eviction event for '{}'. ID is still in use by associated {}", source, member, id, DistributedGroupManager.class.getSimpleName(), trace);
+                            LOG.warn("Source {} on Member: {} fired eviction event for '{}'. ID is still in use by associated {}", source, member, id, DistributedGroupManager.class.getSimpleName(), trace);
                         }
                     } catch (Exception e) {
                         // Ignore...
@@ -167,7 +167,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     LOG.warn("Could not handle eviction for id '{}'", id, e);
                 }
 
-                boolean removed = null != syntheticIDs.remove(id);
+                boolean removed = null != localIDsToTouch.remove(id);
                 if (removed) {
                     LOG.debug("Removed id from refresh list: {}", id);
                 }
@@ -181,7 +181,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 Throwable trace = new Throwable("tracked thread");
                 LOG.debug("Source {} on Member: {} fired removal event for '{}'.", source, member, id, trace);
 
-                boolean removed = null != syntheticIDs.remove(id);
+                boolean removed = null != localIDsToTouch.remove(id);
                 if (removed) {
                     LOG.debug("Removed id from refresh list: {}", id);
                 }
@@ -316,6 +316,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             IMap<PortableID,PortableResource> allResources = getResourceMapping();
             if (!concreteIds.isEmpty()) {
                 for (PortableID id : concreteIds) {
+                    localIDsToTouch.remove(id);
                     idMapping.remove(id.toGeneralForm(), id);
                     PortableResource removedResource = allResources.remove(id);
                     if(removedResource != null) {
@@ -328,6 +329,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 for (PortableID generalId : generalIds) {
                     Collection<PortableID> foundConcreteIds = idMapping.remove(generalId);
                     for (PortableID concreteId : foundConcreteIds) {
+                        localIDsToTouch.remove(concreteId);
                         PortableResource removedResource = allResources.remove(concreteId);
                         if(removedResource != null) {
                             removedResources.put(concreteId, removedResource);
@@ -355,6 +357,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 Collection<PortableID> removedConcreteIds = idMapping.remove(currentPortableId);
                 if (removedConcreteIds != null) {
                     for (PortableID concreteId : removedConcreteIds) {
+                        localIDsToTouch.remove(concreteId);
                         PortableResource removedResource = allResources.remove(concreteId);
                         if (removedResource != null) {
                             removedResources.put(concreteId, removedResource);
@@ -362,6 +365,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                     }
                 }
             } else {
+                localIDsToTouch.remove(currentPortableId);
                 idMapping.remove(currentPortableId.toGeneralForm(), currentPortableId);
                 PortableResource removedResource = allResources.remove(currentPortableId);
                 if (removedResource != null) {
@@ -407,6 +411,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                         previousPortableResource = resourceMapping.putIfAbsent(currentPortableID, currentPortableResource);
                     }
                 }
+                localIDsToTouch.put(currentPortableID, PRESENT);
             } else {
                 // current resource provides Presence data
                 if(overwrite) {
@@ -414,6 +419,7 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                 } else {
                     previousPortableResource = resourceMapping.putIfAbsent(currentPortableID, currentPortableResource);
                 }
+                localIDsToTouch.put(currentPortableID, PRESENT);
             }
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -453,7 +459,6 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             return null;
         }
 
-        syntheticIDs.put(id, PRESENT);
         PortableResource res = new PortableResource(HazelcastAccess.getLocalMember());
         PortableResource meantime = setIfAbsent(id, res);
         if (meantime == null) {
@@ -513,22 +518,35 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
 
             @Override
             public void run() {
-                for (Iterator<ID> it = syntheticIDs.keySet().iterator(); it.hasNext();) {
-                    ID id = it.next();
-                    try {
-                        /*
-                         * This performs a set on map entries to prevent eviction
-                         */
-                        PortableID currentPortableID = new PortableID(id);
-                        getIDMapping().get(currentPortableID.toGeneralForm());
-                        PortableResource portableResource = getResourceMapping().get(currentPortableID);
-                        if (portableResource == null) {
-                            LOG.debug("Unable to refresh id, might have been removed in the meantime: {}", id);
-                            it.remove();
+                Iterator<ID> it = localIDsToTouch.keySet().iterator();
+                if (!it.hasNext()) {
+                    return;
+                }
+
+                try {
+                    MultiMap<PortableID, PortableID> idMapping = getIDMapping();
+                    IMap<PortableID, PortableResource> resourceMapping = getResourceMapping();
+                    do {
+                        ID id = it.next();
+                        try {
+                            /*
+                             * This performs a set on map entries to prevent eviction
+                             */
+                            PortableID currentPortableID = new PortableID(id);
+                            idMapping.get(currentPortableID.toGeneralForm());
+                            PortableResource portableResource = resourceMapping.get(currentPortableID);
+                            if (portableResource == null) {
+                                LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", id);
+                                it.remove();
+                            } else {
+                                LOG.debug("Touched ID: {}", id);
+                            }
+                        } catch (Exception e) {
+                            LOG.error("Error while touching ID: {}", id, e);
                         }
-                    } catch (Exception e) {
-                        LOG.error("Error while refreshing ID: {}", id, e);
-                    }
+                    } while (it.hasNext());
+                } catch (Exception e) {
+                    LOG.error("Error while touching IDs.", e);
                 }
             }
 
