@@ -669,6 +669,8 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             int count = mp.getEnclosedCount();
             if (count > 2) {
@@ -720,6 +722,8 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
             int count = mp.getCount();
             if (count > 2) {
@@ -763,6 +767,8 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
     public static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (bodystructure.isMulti()) {
             if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
                 if (bodystructure.bodies.length > 2) {

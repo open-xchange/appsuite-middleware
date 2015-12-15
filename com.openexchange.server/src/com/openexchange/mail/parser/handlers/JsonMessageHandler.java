@@ -345,6 +345,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 }
                 if (mail.containsHasAttachment()) {
                     // jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                    // See bug 42695 & 42862
                     jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
                 }
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
@@ -1208,6 +1209,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         } else {
                             if (jsonObject.has(HAS_ATTACHMENTS)) {
                                 // Do not overwrite existing "has-attachment" information in a mail's JSON representation
+                                // See bug 42695 & 42862
                                 jsonObject.put(HAS_REAL_ATTACHMENTS, true);
                             } else {
                                 jsonObject.put(HAS_ATTACHMENTS, true);
