@@ -129,7 +129,7 @@ public abstract class DAVAction extends AbstractAction {
         try {
             return request.getBodyAsDocument();
         } catch (JDOMException | IOException e) {
-            org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error getting WebDAV request body", e);
+            org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error getting WebDAV request body", e);
             return null;
         }
     }
@@ -177,7 +177,7 @@ public abstract class DAVAction extends AbstractAction {
             try {
                 return Long.parseLong(value);
             } catch (NumberFormatException e) {
-                org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error parsing \"Content-Length\" header", e);
+                org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error parsing \"Content-Length\" header", e);
             }
         }
         return -1;
@@ -275,7 +275,11 @@ public abstract class DAVAction extends AbstractAction {
             response.setContentType("text/xml; charset=UTF-8");
             OUTPUTTER.output(responseBody, response.getOutputStream());
         } catch (IOException e) {
-            org.slf4j.LoggerFactory.getLogger(PROPFINDAction.class).warn("Error sending WebDAV response", e);
+            if ("Connection reset by peer".equals(e.getMessage())) {
+                org.slf4j.LoggerFactory.getLogger(DAVAction.class).debug("Error sending WebDAV response", e);
+            } else {
+                org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error sending WebDAV response", e);
+            }
         }
     }
 
