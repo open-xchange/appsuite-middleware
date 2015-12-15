@@ -70,6 +70,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -403,13 +404,21 @@ public class GroupwareCarddavFactory extends DAVFactory {
         public List<UserizedFolder> getReducedFolders() throws OXException {
             if (null == this.reducedFolders) {
                 reducedFolders = new ArrayList<UserizedFolder>();
-                UserizedFolder defaultContactsFolder = this.getDefaultFolder();
-                if (false == this.isBlacklisted(defaultContactsFolder)) {
+                UserizedFolder defaultContactsFolder = getDefaultFolder();
+                if (false == isBlacklisted(defaultContactsFolder)) {
                     reducedFolders.add(defaultContactsFolder);
                 }
-                UserizedFolder globalAddressBookFolder = factory.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null);
-                if (false == this.isBlacklisted(globalAddressBookFolder)) {
-                    reducedFolders.add(globalAddressBookFolder);
+                try {
+                    UserizedFolder globalAddressBookFolder = factory.getFolderService().getFolder(FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, factory.getSession(), null);
+                    if (false == isBlacklisted(globalAddressBookFolder)) {
+                        reducedFolders.add(globalAddressBookFolder);
+                    }
+                } catch (OXException e) {
+                    if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
+                        LOG.debug("No permission for global addressbook, skipping.", e);
+                    } else {
+                        throw e;
+                    }
                 }
             }
             return this.reducedFolders;
