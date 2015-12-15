@@ -140,7 +140,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching users
          */
         Set<User> users = new HashSet<User>();
-        if (null != applyToPrincipalCollectionSet || UserPrincipalCollection.URL.equals(request.getUrl()) || 0 == request.getUrl().size()) {
+        if (null != applyToPrincipalCollectionSet || UserPrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
             /*
              * prepare composite search term
              */
@@ -223,7 +223,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching groups
          */
         Set<Group> groups = new HashSet<Group>();
-        if (null != applyToPrincipalCollectionSet || GroupPrincipalCollection.URL.equals(request.getUrl()) || 0 == request.getUrl().size()) {
+        if (null != applyToPrincipalCollectionSet || GroupPrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
             for (Element propertySearch : propertySearches) {
                 Element matchElement = propertySearch.getChild("match", DAV_NS);
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {
@@ -264,7 +264,7 @@ public class PrinicpalPropertySearchReport extends PROPFINDAction {
          * search matching resources
          */
         Set<Resource> resources = new HashSet<Resource>();
-        if (null != applyToPrincipalCollectionSet || ResourcePrincipalCollection.URL.equals(request.getUrl()) || 0 == request.getUrl().size()) {
+        if (null != applyToPrincipalCollectionSet || ResourcePrincipalCollection.NAME.equals(request.getUrl().name()) || 0 == request.getUrl().size()) {
             for (Element propertySearch : propertySearches) {
                 Element matchElement = propertySearch.getChild("match", DAV_NS);
                 if (null == matchElement || Strings.isEmpty(matchElement.getText())) {

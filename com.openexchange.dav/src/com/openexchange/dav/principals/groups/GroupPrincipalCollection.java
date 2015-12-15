@@ -76,7 +76,6 @@ import com.openexchange.webdav.protocol.WebdavResource;
 public class GroupPrincipalCollection extends DAVCollection {
 
     public static final String NAME = "groups";
-    public static final WebdavPath URL = new WebdavPath("principals", NAME);
 
     private final PrincipalFactory factory;
 
@@ -84,9 +83,10 @@ public class GroupPrincipalCollection extends DAVCollection {
      * Initializes a new {@link GroupPrincipalCollection}.
      *
      * @param factory The factory
+     * @param url The WebDAV path
      */
-    public GroupPrincipalCollection(PrincipalFactory factory) {
-        super(factory, URL);
+    public GroupPrincipalCollection(PrincipalFactory factory, WebdavPath url) {
+        super(factory, url);
         this.factory = factory;
         includeProperties(new CurrentUserPrincipal(factory));
     }

@@ -84,9 +84,9 @@ public class RootPrincipalCollection extends DAVRootCollection {
     @Override
     public List<WebdavResource> getChildren() throws WebdavProtocolException {
         List<WebdavResource> children = new ArrayList<WebdavResource>(3);
-        children.add(new UserPrincipalCollection(factory));
-        children.add(new GroupPrincipalCollection(factory));
-        children.add(new ResourcePrincipalCollection(factory));
+        children.add(new UserPrincipalCollection(factory, constructPathForChildResource(UserPrincipalCollection.NAME)));
+        children.add(new GroupPrincipalCollection(factory, constructPathForChildResource(GroupPrincipalCollection.NAME)));
+        children.add(new ResourcePrincipalCollection(factory, constructPathForChildResource(ResourcePrincipalCollection.NAME)));
         return children;
     }
 
@@ -96,13 +96,13 @@ public class RootPrincipalCollection extends DAVRootCollection {
             throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_BAD_REQUEST);
         }
         if (UserPrincipalCollection.NAME.equals(name)) {
-            return new UserPrincipalCollection(factory);
+            return new UserPrincipalCollection(factory, constructPathForChildResource(UserPrincipalCollection.NAME));
         }
         if (GroupPrincipalCollection.NAME.equals(name)) {
-            return new GroupPrincipalCollection(factory);
+            return new GroupPrincipalCollection(factory, constructPathForChildResource(GroupPrincipalCollection.NAME));
         }
         if (ResourcePrincipalCollection.NAME.equals(name)) {
-            return new ResourcePrincipalCollection(factory);
+            return new ResourcePrincipalCollection(factory, constructPathForChildResource(ResourcePrincipalCollection.NAME));
         }
         throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_NOT_FOUND);
     }

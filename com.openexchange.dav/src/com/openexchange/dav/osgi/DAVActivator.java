@@ -93,13 +93,11 @@ public class DAVActivator extends HousekeepingActivator {
          * attachments
          */
         AttachmentPerformer attachmentPerformer = new AttachmentPerformer(this);
-//        AttachmentServlet attachmentServlet = new AttachmentServlet(attachmentPerformer);
         httpService.registerServlet("/servlet/dav/attachments", new DAVServlet(attachmentPerformer, Interface.CALDAV), null, null);
         /*
          * principals
          */
         PrincipalPerformer principalPerformer = new PrincipalPerformer(this);
-//        PrincipalServlet principalServlet = new PrincipalServlet(principalPerformer);
         httpService.registerServlet("/servlet/dav/principals", new DAVServlet(principalPerformer, Interface.CARDDAV), null, null);
         OSGiPropertyMixin mixin = new OSGiPropertyMixin(context, principalPerformer);
         principalPerformer.setGlobalMixins(mixin);
@@ -115,7 +113,7 @@ public class DAVActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        final OSGiPropertyMixin mixin = this.mixin;
+        OSGiPropertyMixin mixin = this.mixin;
         if (null != mixin) {
             mixin.close();
             this.mixin = null;
