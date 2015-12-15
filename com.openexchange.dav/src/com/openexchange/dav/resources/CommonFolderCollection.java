@@ -56,6 +56,8 @@ import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.internal.Tools;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
@@ -77,6 +79,7 @@ import com.openexchange.folderstorage.type.SharedType;
 import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -199,20 +202,18 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     }
 
     /**
-     * Gets an updated {@link Syncstatus} based on the supplied sync token for
-     * this collection.
+     * Gets an updated {@link SyncStatus} based on the supplied sync token for this collection.
      *
-     * @param syncToken the sync token as supplied by the client
-     * @return the sync status
-     * @throws WebdavProtocolException
+     * @param syncToken The last sync token as supplied by the client, or <code>null</code> for the initial synchronization
+     * @return The sync status
      */
     public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
         long since = 0;
-        if (null != token && 0 < token.length()) {
+        if (Strings.isNotEmpty(token)) {
             try {
                 since = Long.parseLong(token);
             } catch (NumberFormatException e) {
-                LOG.warn("Invalid sync token: '{}', falling back to '0'.", token);
+                throw new PreconditionException(DAVProtocol.DAV_NS.getURI(), "valid-sync-token", getUrl(), HttpServletResponse.SC_FORBIDDEN);
             }
         }
         try {
