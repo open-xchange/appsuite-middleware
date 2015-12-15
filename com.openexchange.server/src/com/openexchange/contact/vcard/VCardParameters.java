@@ -276,4 +276,22 @@ public interface VCardParameters {
      */
     VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard);
 
+    /**
+     * Gets the value of an arbitrary extended parameter.
+     *
+     * @param name The parameter name
+     * @param clazz The parameter value's class
+     * @return The parameter's value, or <code>null</code> if not set
+     */
+    <T> T get(String name, Class<T> clazz);
+
+    /**
+     * Sets the value for an arbitrary extended parameter.
+     *
+     * @param name The parameter name
+     * @param value The parameter value, or <code>null</code> to remove the parameter
+     * @return A self reference
+     */
+    <T> VCardParameters set(String name, T value);
+
 }
