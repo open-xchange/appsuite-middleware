@@ -131,6 +131,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String ACCOUNT_ID = MailJSONField.ACCOUNT_ID.getKey();
     private static final String ACCOUNT_NAME = MailJSONField.ACCOUNT_NAME.getKey();
     private static final String HAS_ATTACHMENTS = MailJSONField.HAS_ATTACHMENTS.getKey();
+    private static final String HAS_REAL_ATTACHMENTS = "real_attachment";
     private static final String UNREAD = MailJSONField.UNREAD.getKey();
     private static final String ATTACHMENT_FILE_NAME = MailJSONField.ATTACHMENT_FILE_NAME.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
@@ -342,7 +343,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (unreadMessages >= 0) {
                     jsonObject.put(UNREAD, unreadMessages);
                 }
-                jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                if (mail.containsHasAttachment()) {
+                    // jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                    jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
+                }
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
@@ -1202,7 +1206,12 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         if (jAttachment.hasAndNotNull(VIRTUAL) && jAttachment.getBoolean(VIRTUAL)) {
                             jAttachment.remove(VIRTUAL);
                         } else {
-                            jsonObject.put(HAS_ATTACHMENTS, true);
+                            if (jsonObject.has(HAS_ATTACHMENTS)) {
+                                // Do not overwrite existing "has-attachment" information in a mail's JSON representation
+                                jsonObject.put(HAS_REAL_ATTACHMENTS, true);
+                            } else {
+                                jsonObject.put(HAS_ATTACHMENTS, true);
+                            }
                         }
                         if (token && !jAttachment.hasAndNotNull("token")) {
                             try {
