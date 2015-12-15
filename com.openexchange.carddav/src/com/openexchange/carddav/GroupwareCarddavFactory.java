@@ -769,15 +769,15 @@ public class GroupwareCarddavFactory extends DAVFactory {
                 }
                 searchTerm.addSearchTerm(orTerm);
             }
-//            CompositeSearchTerm noDistListTerm = new CompositeSearchTerm(CompositeOperation.OR);
-//            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.EQUALS);
-//            term1.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
-//            term1.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
-//            noDistListTerm.addSearchTerm(term1);
-//            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.ISNULL);
-//            term2.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
-//            noDistListTerm.addSearchTerm(term2);
-//            searchTerm.addSearchTerm(noDistListTerm);
+            CompositeSearchTerm noDistListTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            SingleSearchTerm term1 = new SingleSearchTerm(SingleOperation.EQUALS);
+            term1.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+            term1.addOperand(new ConstantOperand<Integer>(Integer.valueOf(0)));
+            noDistListTerm.addSearchTerm(term1);
+            SingleSearchTerm term2 = new SingleSearchTerm(SingleOperation.ISNULL);
+            term2.addOperand(new ContactFieldOperand(ContactField.NUMBER_OF_DISTRIBUTIONLIST));
+            noDistListTerm.addSearchTerm(term2);
+            searchTerm.addSearchTerm(noDistListTerm);
             /*
              * get contacts
              */
