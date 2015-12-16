@@ -618,7 +618,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
      */
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
         try {
-            if (imageFile.getLength() > maxSize) {
+            if (maxSize > 0 && imageFile.getLength() > maxSize) {
                 throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
             }
 
