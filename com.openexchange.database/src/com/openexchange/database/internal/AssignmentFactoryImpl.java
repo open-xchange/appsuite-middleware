@@ -117,10 +117,9 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             result = stmt.executeQuery();
 
             while (result.next()) {
-                int pos = 1;
-                writePoolId = result.getInt(pos++);
-                readPoolId = result.getInt(pos++);
-                String schema = result.getString(pos++);
+                writePoolId = result.getInt("write_db_pool_id");
+                readPoolId = result.getInt("read_db_pool_id");
+                String schema = result.getString("name");
                 if (readPoolId == 0) {
                     readPoolId = writePoolId;
                 }

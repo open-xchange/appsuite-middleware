@@ -578,9 +578,11 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         final List<String> basicTemplateNames = getBasicTemplateNames(filter);
-        final ArrayList<String> userTemplates = new ArrayList<String>(names);
-        Collections.sort(userTemplates);
-        basicTemplateNames.addAll(userTemplates);
+        if (!names.isEmpty()) {
+            final ArrayList<String> userTemplates = new ArrayList<String>(names);
+            Collections.sort(userTemplates);
+            basicTemplateNames.addAll(userTemplates);
+        }
         return basicTemplateNames;
     }
 
