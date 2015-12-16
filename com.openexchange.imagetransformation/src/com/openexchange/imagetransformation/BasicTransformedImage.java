@@ -49,32 +49,66 @@
 
 package com.openexchange.imagetransformation;
 
+import java.io.Closeable;
+import java.io.InputStream;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
+
 /**
- * {@link TransformedImage} - The transformed image representation providing additional information; like {@link #getWidth()} and {@link #getHeight()}.
+ * {@link BasicTransformedImage} - A transformed image representation providing basic image information.
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public interface TransformedImage extends BasicTransformedImage {
+public interface BasicTransformedImage extends Closeable {
 
     /**
-     * Gets the pixel width of the image.
+     * Gets the size of the image in bytes.
+     *
+     * @return The size
+     */
+    long getSize();
+
+    /**
+     * Gets the image format name.
      *
      * @return The width
      */
-    int getWidth();
+    String getFormatName();
 
     /**
-     * Gets the pixel height of the image.
+     * Gets the image data.
      *
-     * @return The height
+     * @return The image data
+     * @throws OXException If image data cannot be returned
      */
-    int getHeight();
+    byte[] getImageData() throws OXException;
 
     /**
-     * Gets the MD5 checksum of the image data.
+     * Gets the image data as a stream.
      *
-     * @return The md5 checksum
+     * @return The image data as a stream
+     * @throws OXException If image stream cannot be returned
      */
-    byte[] getMD5();
+    InputStream getImageStream() throws OXException;
+
+    /**
+     * Gets the image file.
+     *
+     * @return The image file or <code>null</code>
+     */
+    IFileHolder getImageFile();
+
+    /**
+     * Gets the sum of transformation expenses.
+     * @see {@link ImageTransformations#LOW_EXPENSE} and {@link ImageTransformations#HIGH_EXPENSE}.
+     * @return The expenses.
+     */
+    int getTransformationExpenses();
+
+    /**
+     * Closes this {@link BasicTransformedImage} instance and releases any system resources associated with it.
+     */
+    @Override
+    void close();
 
 }

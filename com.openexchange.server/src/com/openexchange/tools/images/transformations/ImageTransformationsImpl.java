@@ -85,6 +85,7 @@ import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -333,7 +334,14 @@ public class ImageTransformationsImpl implements ImageTransformations {
     }
 
     @Override
-    public TransformedImage getTransformedImage(String formatName) throws IOException {
+    public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
+        String imageFormat = getImageFormat(formatName);
+        BufferedImage bufferedImage = getImage(imageFormat, null);
+        return writeTransformedImage(bufferedImage, imageFormat);
+    }
+
+    @Override
+    public TransformedImage getFullTransformedImage(String formatName) throws IOException {
         String imageFormat = getImageFormat(formatName);
         BufferedImage bufferedImage = getImage(imageFormat, null);
         return writeTransformedImage(bufferedImage, imageFormat);

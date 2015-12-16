@@ -58,7 +58,7 @@ import java.io.InputStream;
  * {@link ImageTransformations}
  *
  * Allows chaining of multiple transformations to an image. Every transformation has an expense.
- * Expenses are summed up during processing and can be retrieved from a resulting {@link TransformedImage}.
+ * Expenses are summed up during processing and can be retrieved from a resulting {@link BasicTransformedImage}.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -140,6 +140,14 @@ public interface ImageTransformations {
      *
      * @return The resulting transformed image
      */
-    TransformedImage getTransformedImage(String formatName) throws IOException;
+    BasicTransformedImage getTransformedImage(String formatName) throws IOException;
+
+    /**
+     * Applies all transformations and writes the result as raw image data in the given format, including some meta information wrapped
+     * into a transformed image reference.
+     *
+     * @return The resulting transformed image
+     */
+    TransformedImage getFullTransformedImage(String formatName) throws IOException;
 
 }

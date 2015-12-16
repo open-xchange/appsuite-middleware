@@ -70,6 +70,7 @@ import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
@@ -287,10 +288,33 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     }
 
     @Override
-    public TransformedImage getTransformedImage(String formatName) throws IOException {
-        formatName = getImageFormat(formatName);
-        BufferedImage bufferedImage = getImage(formatName);
-        return transformedImageCreator.writeTransformedImage(bufferedImage, formatName, new TransformationContext(), needsCompression(formatName));
+    public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
+        String frmtName = getImageFormat(formatName);
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
+        try {
+            sink.write(getInputStream(formatName));
+            BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);
+            error = false;
+            return retval;
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
+        }
+    }
+
+    @Override
+    public TransformedImage getFullTransformedImage(String formatName) throws IOException {
+        String frmtName = getImageFormat(formatName);
+        BufferedImage bufferedImage = getImage(frmtName);
+        return transformedImageCreator.writeTransformedImage(bufferedImage, frmtName, new TransformationContext(), needsCompression(frmtName));
     }
 
     private boolean needsCompression(String formatName) {
@@ -419,6 +443,52 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 }
                 throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
             }
+        }
+    }
+
+    private static class BasicTransformedImageImpl implements BasicTransformedImage {
+
+        private final String frmtName;
+        private final ThresholdFileHolder sink;
+
+        BasicTransformedImageImpl(String frmtName, ThresholdFileHolder sink) {
+            this.frmtName = frmtName;
+            this.sink = sink;
+        }
+
+        @Override
+        public int getTransformationExpenses() {
+            return ImageTransformations.LOW_EXPENSE;
+        }
+
+        @Override
+        public long getSize() {
+            return sink.getLength();
+        }
+
+        @Override
+        public InputStream getImageStream() throws OXException {
+            return sink.getStream();
+        }
+
+        @Override
+        public IFileHolder getImageFile() {
+            return sink;
+        }
+
+        @Override
+        public byte[] getImageData() throws OXException {
+            return sink.toByteArray();
+        }
+
+        @Override
+        public String getFormatName() {
+            return frmtName;
+        }
+
+        @Override
+        public void close() {
+            sink.close();
         }
     }
 

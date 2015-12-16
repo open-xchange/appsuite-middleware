@@ -53,7 +53,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
- * {@link TransformedImageCreator} - Creates a {@link TransformedImage} from a {@link BufferedImage} instance.
+ * {@link TransformedImageCreator} - Creates a {@link BasicTransformedImage} from a {@link BufferedImage} instance.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1

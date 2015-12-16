@@ -80,7 +80,7 @@ import com.openexchange.imagetransformation.Constants;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
-import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -324,7 +324,7 @@ public class TransformImageAction implements IFileResponseRendererAction {
                     fileContentType = contentTypeByFileName;
                 }
             }
-            final TransformedImage transformedImage;
+            final BasicTransformedImage transformedImage;
             try {
                 transformedImage = transformations.getTransformedImage(fileContentType);
                 if (null == transformedImage) {
@@ -518,9 +518,9 @@ public class TransformImageAction implements IFileResponseRendererAction {
 
     private final class TransformedImageInputStreamClosure implements FileHolder.InputStreamClosure {
 
-        private final TransformedImage transformedImage;
+        private final BasicTransformedImage transformedImage;
 
-        TransformedImageInputStreamClosure(TransformedImage transformedImage) {
+        TransformedImageInputStreamClosure(BasicTransformedImage transformedImage) {
             this.transformedImage = transformedImage;
         }
 

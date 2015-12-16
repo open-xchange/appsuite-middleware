@@ -78,6 +78,7 @@ import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -896,7 +897,48 @@ public class FileResponseRendererTest extends TestCase {
         }
 
         @Override
-        public TransformedImage getTransformedImage(String formatName) throws IOException {
+        public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
+            return new BasicTransformedImage() {
+
+                @Override
+                public int getTransformationExpenses() {
+                    return expenses;
+                }
+
+                @Override
+                public long getSize() {
+                    return 0;
+                }
+
+                @Override
+                public byte[] getImageData() {
+                    return imageData;
+                }
+
+                @Override
+                public InputStream getImageStream() throws OXException {
+                    return new ByteArrayInputStream(imageData);
+                }
+
+                @Override
+                public IFileHolder getImageFile() {
+                    return null;
+                }
+
+                @Override
+                public String getFormatName() {
+                    return null;
+                }
+
+                @Override
+                public void close() {
+                    // Nothing
+                }
+            };
+        }
+
+        @Override
+        public TransformedImage getFullTransformedImage(String formatName) throws IOException {
             return new TransformedImage() {
 
                 @Override
