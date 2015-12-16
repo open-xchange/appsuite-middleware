@@ -49,13 +49,9 @@
 
 package com.openexchange.imagetransformation.imagemagick.osgi;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
+import com.openexchange.config.Reloadable;
 import com.openexchange.imagetransformation.TransformedImageCreator;
-import com.openexchange.imagetransformation.imagemagick.ImageMagickImageTransformationProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -66,6 +62,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  * @since v7.8.1
  */
 public class ImageMagickImageTransformationActivator extends HousekeepingActivator {
+
+    private volatile ImageMagickRegisterer registerer;
 
     /**
      * Initializes a new {@link ImageMagickImageTransformationActivator}.
@@ -86,12 +84,20 @@ public class ImageMagickImageTransformationActivator extends HousekeepingActivat
 
     @Override
     protected void startBundle() throws Exception {
-        ConfigurationService configService = getService(ConfigurationService.class);
-        String searchPath = configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin");
+        ImageMagickRegisterer registerer = new ImageMagickRegisterer(context, this);
+        this.registerer = registerer;
+        registerService(Reloadable.class, registerer);
+        registerer.perform(getService(ConfigurationService.class));
+    }
 
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-        registerService(ImageTransformationProvider.class, new ImageMagickImageTransformationProvider(getService(TransformedImageCreator.class), searchPath), properties);
+    @Override
+    protected void stopBundle() throws Exception {
+        ImageMagickRegisterer registerer = this.registerer;
+        if (null != registerer) {
+            this.registerer = null;
+            registerer.close();
+        }
+        super.stopBundle();
     }
 
 }

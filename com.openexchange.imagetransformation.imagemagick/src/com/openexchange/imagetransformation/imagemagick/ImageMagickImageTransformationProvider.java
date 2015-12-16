@@ -52,11 +52,8 @@ package com.openexchange.imagetransformation.imagemagick;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformedImageCreator;
@@ -68,7 +65,7 @@ import com.openexchange.java.Streams;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImageMagickImageTransformationProvider implements ImageTransformationProvider, Reloadable {
+public class ImageMagickImageTransformationProvider implements ImageTransformationProvider {
 
     private final TransformedImageCreator transformedImageCreator;
     private final AtomicReference<String> searchPathRef;
@@ -82,14 +79,13 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         searchPathRef = new AtomicReference<String>(searchPath);
     }
 
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        searchPathRef.set(configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin"));
-    }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        return null;
+    /**
+     * Sets the search path where to look-up the "convert" command.
+     *
+     * @param searchPath The search path; e.g. <code>"/usr/bin"</code>
+     */
+    public void setSearchPath(String searchPath) {
+        searchPathRef.set(searchPath);
     }
 
     @Override

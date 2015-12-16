@@ -54,7 +54,6 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedOutputStream;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -72,7 +71,6 @@ import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
-import com.openexchange.java.ExceptionAwarePipedInputStream;
 import com.openexchange.java.Streams;
 
 
@@ -258,13 +256,17 @@ public class ImageMagickImageTransformations implements ImageTransformations {
             return bytes.asInputStream();
         }
 
+        InputStream is = null;
+        ThresholdFileHolder sink = null;
         try {
-            PipedOutputStream pos = new PipedOutputStream();
-            final ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+            is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
+            sink = new ThresholdFileHolder();
 
-            InputStream is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
-            Pipe pipeIn  = new Pipe(is,null);
-            Pipe pipeOut = new Pipe(null,pos);
+            //PipedOutputStream pos = new PipedOutputStream();
+            //ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+
+            Pipe pipeIn  = new Pipe(is, null);
+            Pipe pipeOut = new Pipe(null, sink.asOutputStream());
 
             // Set up command
             cmd.setInputProvider(pipeIn);
@@ -272,7 +274,9 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
             cmd.run(op);
 
-            return pin;
+            InputStream retval = sink.getClosingStream();
+            sink = null;
+            return retval;
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -284,6 +288,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
             throw new IOException("I/O operation has been interrupted.", e);
         } catch (IM4JavaException e) {
             throw new IOException("ImageMagick error.", e);
+        } finally {
+            Streams.close(is, sink);
         }
     }
 
