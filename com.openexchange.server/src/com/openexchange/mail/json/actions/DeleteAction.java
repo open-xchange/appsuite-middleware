@@ -51,7 +51,10 @@ package com.openexchange.mail.json.actions;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -62,11 +65,14 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.json.OXJSONWriter;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced;
+import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
+import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
@@ -83,6 +89,20 @@ import com.openexchange.server.ServiceLookup;
 responseDescription = "An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted.")
 public final class DeleteAction extends AbstractMailAction {
 
+    private static class FolderInfo {
+
+        final int total;
+        final int unread;
+
+        FolderInfo(int total, int unread) {
+            super();
+            this.total = total;
+            this.unread = unread;
+        }
+    }
+
+    // ---------------------------------------------------------------------------------
+
     /**
      * Initializes a new {@link DeleteAction}.
      *
@@ -95,58 +115,133 @@ public final class DeleteAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            /*
-             * Read in parameters
-             */
-            final boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
-            final JSONArray jsonIDs = (JSONArray) req.getRequest().requireData();
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final OXJSONWriter jsonWriter = new OXJSONWriter();
-            /*
-             * Start response
-             */
-            jsonWriter.array();
-            final int length = jsonIDs.length();
+            // Read in parameters
+            boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
+            boolean withFolders = AJAXRequestDataTools.parseBoolParameter(req.getParameter("withFolders"));
+            JSONArray jsonIds = (JSONArray) req.getRequest().requireData();
+
+            // Get mail interface
+            MailServletInterface mailInterface = getMailInterface(req);
+
+            JSONObject jResponse = null;
+            int length = jsonIds.length();
             if (length > 0) {
-                final List<MailPath> l = new ArrayList<MailPath>(length);
+
+                // Collect affected mail paths
+                List<MailPath> l = new ArrayList<MailPath>(length);
+                Map<FullnameArgument, FolderInfo> folders = withFolders ? new LinkedHashMap<FullnameArgument, FolderInfo>(length) : null;
                 for (int i = 0; i < length; i++) {
-                    final JSONObject obj = jsonIDs.getJSONObject(i);
-                    final FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(obj.getString(AJAXServlet.PARAMETER_FOLDERID));
-                    l.add(new MailPath(fa.getAccountId(), fa.getFullname(), obj.getString(AJAXServlet.PARAMETER_ID)));
+                    JSONObject jId = jsonIds.getJSONObject(i);
+                    FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(jId.getString(AJAXServlet.PARAMETER_FOLDERID));
+                    l.add(new MailPath(fa.getAccountId(), fa.getFullname(), jId.getString(AJAXServlet.PARAMETER_ID)));
                 }
+
+                // Try to batch-delete per folder
                 Collections.sort(l, MailPath.COMPARATOR);
                 String lastFldArg = l.get(0).getFolderArgument();
-                final List<String> arr = new ArrayList<String>(length);
+                List<String> arr = new ArrayList<String>(length);
                 for (int i = 0; i < length; i++) {
-                    final MailPath current = l.get(i);
-                    final String folderArgument = current.getFolderArgument();
+                    MailPath current = l.get(i);
+                    String folderArgument = current.getFolderArgument();
+
+                    // Check if collectable
                     if (!lastFldArg.equals(folderArgument)) {
-                        /*
-                         * Delete all collected UIDs til here and reset
-                         */
-                        final String[] uids = arr.toArray(new String[arr.size()]);
+                        // Delete all collected UIDs until here and reset
+                        String[] uids = arr.toArray(new String[arr.size()]);
                         mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
+
+                        if (null != folders) {
+                            int connectedAccount = mailInterface.getAccountID();
+
+                            // Add folder
+                            FullnameArgument fa = new FullnameArgument(connectedAccount, current.getFolder());
+                            folders.put(fa, getFolderInfo(current.getFolder(), mailInterface));
+
+                            // Check if trash needs to be added, too
+                            if (!hardDelete) {
+                                // Add account's trash folder
+                                FullnameArgument trash = MailFolderUtility.prepareMailFolderParam(mailInterface.getTrashFolder(connectedAccount));
+                                if (!trash.equals(fa)) {
+                                    folders.put(trash, getFolderInfo(trash.getFullName(), mailInterface));
+                                }
+                            }
+                        }
                         arr.clear();
                         lastFldArg = folderArgument;
                     }
                     arr.add(current.getMailID());
                 }
-                if (arr.size() > 0) {
-                    final String[] uids = arr.toArray(new String[arr.size()]);
+
+                // Delete all collected remaining UIDs
+                int size = arr.size();
+                if (size > 0) {
+                    String[] uids = arr.toArray(new String[size]);
                     mailInterface.deleteMessages(lastFldArg, uids, hardDelete);
+
+                    if (null != folders) {
+                        int connectedAccount = mailInterface.getAccountID();
+
+                        // Add folder
+                        FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(lastFldArg);
+                        folders.put(fa, getFolderInfo(fa.getFullName(), mailInterface));
+
+                        // Check if trash needs to be added, too
+                        if (!hardDelete) {
+                            // Add account's trash folder
+                            FullnameArgument trash = MailFolderUtility.prepareMailFolderParam(mailInterface.getTrashFolder(connectedAccount));
+                            if (!trash.equals(fa)) {
+                                folders.put(trash, getFolderInfo(trash.getFullName(), mailInterface));
+                            }
+                        }
+                    }
+                }
+
+                if (withFolders && null != folders && !folders.isEmpty()) {
+                    jResponse = new JSONObject(4);
+                    jResponse.put("conflicts", new JSONArray(0));
+
+                    JSONArray jFolders = new JSONArray(4);
+                    for (Entry<FullnameArgument, FolderInfo> infoEntry : folders.entrySet()) {
+                        JSONObject jFolder = new JSONObject(4);
+
+                        FullnameArgument fa = infoEntry.getKey();
+                        jFolder.put(com.openexchange.ajax.fields.FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(fa.getAccountId(), fa.getFullName()));
+
+                        FolderInfo folderInfo = infoEntry.getValue();
+                        jFolder.put("total", folderInfo.total).put("unread", folderInfo.unread);
+
+                        jFolders.put(jFolder);
+                    }
+                    jResponse.put("folders", jFolders);
                 }
             }
-            jsonWriter.endArray();
 
-            return new AJAXRequestResult(jsonWriter.getObject(), "json");
+            return new AJAXRequestResult(null == jResponse ? new JSONArray(0) : jResponse, "json");
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         } catch (final RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
+    }
+
+    private FolderInfo getFolderInfo(String fullName, MailServletInterface mailInterface) throws OXException {
+        IMailFolderStorage folderStorage = mailInterface.getMailAccess().getFolderStorage();
+
+        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
+            IMailFolderStorageEnhanced2 enhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
+            int[] totalAndUnread = enhanced2.getTotalAndUnreadCounter(fullName);
+            return new FolderInfo(totalAndUnread[0], totalAndUnread[1]);
+        }
+
+        if (folderStorage instanceof IMailFolderStorageEnhanced) {
+            IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) folderStorage;
+            int total = enhanced.getTotalCounter(fullName);
+            int unread = enhanced.getUnreadCounter(fullName);
+            return new FolderInfo(total, unread);
+        }
+
+        MailFolder folder = folderStorage.getFolder(fullName);
+        return new FolderInfo(folder.getMessageCount(), folder.getUnreadMessageCount());
     }
 
 }
