@@ -99,6 +99,33 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         searchPathRef.set(searchPath);
     }
 
+    private void checkResolution(InputStream pInput, long maxResolution, String searchPath) throws IOException, InterruptedException, IM4JavaException, ImageTransformationDeniedIOException {
+        IMOperation op = new IMOperation();
+        op.ping();
+        op.format("%w\n%h");
+        op.addImage("-");
+        IdentifyCmd identify = new IdentifyCmd();
+        identify.setSearchPath(searchPath);
+        ArrayListOutputConsumer output = new ArrayListOutputConsumer();
+        identify.setOutputConsumer(output);
+        if (pInput != null) {
+            Pipe inputPipe = new Pipe(pInput, null);
+            identify.setInputProvider(inputPipe);
+        }
+        identify.run(op);
+
+        // ... and parse result
+        ArrayList<String> cmdOutput = output.getOutput();
+        Iterator<String> iter = cmdOutput.iterator();
+        int width = Integer.parseInt(iter.next()); // Width
+        int height = Integer.parseInt(iter.next()); // Height
+
+        long resolution = width * height;
+        if (resolution > maxResolution) {
+            throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too big. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
+        }
+    }
+
     @Override
     public ImageTransformations transfom(BufferedImage sourceImage) {
         return transfom(sourceImage, null);
@@ -128,43 +155,23 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 }
             }
 
+            // Get the search path
+            String searchPath = searchPathRef.get();
+
             // Check resolution
             {
                 long maxResolution = ImageMagickRegisterer.maxResolution();
                 if (maxResolution > 0) {
                     InputStream pInput = sink.getStream();
                     try {
-                        IMOperation op = new IMOperation();
-                        op.ping();
-                        op.format("%w\n%h");
-                        op.addImage("-");
-                        IdentifyCmd identify = new IdentifyCmd();
-                        identify.setSearchPath(searchPathRef.get());
-                        ArrayListOutputConsumer output = new ArrayListOutputConsumer();
-                        identify.setOutputConsumer(output);
-                        if (pInput != null) {
-                            Pipe inputPipe = new Pipe(pInput, null);
-                            identify.setInputProvider(inputPipe);
-                        }
-                        identify.run(op);
-
-                        // ... and parse result
-                        ArrayList<String> cmdOutput = output.getOutput();
-                        Iterator<String> iter = cmdOutput.iterator();
-                        int width = Integer.parseInt(iter.next()); // Width
-                        int height = Integer.parseInt(iter.next()); // Height
-
-                        long resolution = width * height;
-                        if (resolution > maxResolution) {
-                            throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too big. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
-                        }
+                        checkResolution(pInput, maxResolution, searchPath);
                     } finally {
                         Streams.close(pInput);
                     }
                 }
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPathRef.get());
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath);
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -200,36 +207,16 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 }
             }
 
+            // Get the search path
+            String searchPath = searchPathRef.get();
+
             // Check resolution
             {
                 long maxResolution = ImageMagickRegisterer.maxResolution();
                 if (maxResolution > 0) {
                     InputStream pInput = null == sink ? imageFile.getStream() : sink.getStream();
                     try {
-                        IMOperation op = new IMOperation();
-                        op.ping();
-                        op.format("%w\n%h");
-                        op.addImage("-");
-                        IdentifyCmd identify = new IdentifyCmd();
-                        identify.setSearchPath(searchPathRef.get());
-                        ArrayListOutputConsumer output = new ArrayListOutputConsumer();
-                        identify.setOutputConsumer(output);
-                        if (pInput != null) {
-                            Pipe inputPipe = new Pipe(pInput, null);
-                            identify.setInputProvider(inputPipe);
-                        }
-                        identify.run(op);
-
-                        // ... and parse result
-                        ArrayList<String> cmdOutput = output.getOutput();
-                        Iterator<String> iter = cmdOutput.iterator();
-                        int width = Integer.parseInt(iter.next()); // Width
-                        int height = Integer.parseInt(iter.next()); // Height
-
-                        long resolution = width * height;
-                        if (resolution > maxResolution) {
-                            throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too big. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
-                        }
+                        checkResolution(pInput, maxResolution, searchPath);
                     } finally {
                         Streams.close(pInput);
                     }
@@ -237,10 +224,10 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             }
 
             if (null == sink) {
-                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPathRef.get());
+                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath);
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPathRef.get());
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath);
             sink = null;
             return transformations;
         } catch (OXException e) {
