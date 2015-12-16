@@ -296,12 +296,35 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     @Override
     public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
         String frmtName = getImageFormat(formatName);
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        boolean error = true;
+
+        op.addImage(frmtName + ":-");
+
+        if (null != sourceImage) {
+            ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
+
+            cmd.setOutputConsumer(bytes);
+            runCommand();
+
+            return new BasicTransformedImageImpl(frmtName, bytes.getSink());
+        }
+
+        InputStream is = null;
+        ThresholdFileHolder sink = null;
         try {
-            sink.write(getInputStream(formatName));
+            is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
+            sink = new ThresholdFileHolder();
+
+            Pipe pipeIn  = new Pipe(is, null);
+            Pipe pipeOut = new Pipe(null, sink.asOutputStream());
+
+            // Set up command
+            cmd.setInputProvider(pipeIn);
+            cmd.setOutputConsumer(pipeOut);
+
+            cmd.run(op);
+
             BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);
-            error = false;
+            sink = null;
             return retval;
         } catch (OXException e) {
             Throwable cause = e.getCause();
@@ -309,10 +332,13 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 throw (IOException) cause;
             }
             throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("I/O operation has been interrupted.", e);
+        } catch (IM4JavaException e) {
+            throw new IOException("ImageMagick error.", e);
         } finally {
-            if (error) {
-                Streams.close(sink);
-            }
+            Streams.close(is, sink);
         }
     }
 
@@ -400,6 +426,15 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         ByteCollectingOutputConsumer() {
             super();
             sink = new ThresholdFileHolder();
+        }
+
+        /**
+         * Gets the sink
+         *
+         * @return The sink
+         */
+        ThresholdFileHolder getSink() {
+            return sink;
         }
 
         @Override
