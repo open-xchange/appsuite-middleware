@@ -292,7 +292,10 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
         final File tmpDir = new File(path);
         if (!tmpDir.exists()) {
-            throw new IllegalArgumentException("Directory " + path + " does not exist.");
+            if (!tmpDir.mkdirs()) {
+                throw new IllegalArgumentException("Directory " + path + " does not exist and cannot be created.");
+            }
+            LOG.info("Directory " + path + " did not exist, but could be created.");
         }
         if (!tmpDir.isDirectory()) {
             throw new IllegalArgumentException(path + " is not a directory.");
