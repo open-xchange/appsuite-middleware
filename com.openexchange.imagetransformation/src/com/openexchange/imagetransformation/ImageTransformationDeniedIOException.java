@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,55 @@
  *
  */
 
-package com.openexchange.imagetransformation.imagemagick.osgi;
+package com.openexchange.imagetransformation;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.imagetransformation.TransformedImageCreator;
-import com.openexchange.osgi.HousekeepingActivator;
-
+import java.io.IOException;
 
 /**
- * {@link ImageMagickImageTransformationActivator}
+ * {@link ImageTransformationDeniedIOException} - The special I/O error signaling that image transformation has been denied.
+ * <p>
+ * Image either exceeds allowed max. size or resolution.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImageMagickImageTransformationActivator extends HousekeepingActivator {
+public class ImageTransformationDeniedIOException extends IOException {
 
-    private volatile ImageMagickRegisterer registerer;
+    private static final long serialVersionUID = 6657928423486571747L;
 
     /**
-     * Initializes a new {@link ImageMagickImageTransformationActivator}.
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
      */
-    public ImageMagickImageTransformationActivator() {
+    public ImageTransformationDeniedIOException() {
         super();
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    /**
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     *
+     * @param message The detail message
+     * @param cause The cause
+     */
+    public ImageTransformationDeniedIOException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TransformedImageCreator.class, ConfigurationService.class };
+    /**
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     *
+     * @param message The detail message
+     */
+    public ImageTransformationDeniedIOException(String message) {
+        super(message);
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        ImageMagickRegisterer registerer = new ImageMagickRegisterer(context, this);
-        this.registerer = registerer;
-        registerService(Reloadable.class, registerer);
-        registerer.perform(getService(ConfigurationService.class));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        ImageMagickRegisterer registerer = this.registerer;
-        if (null != registerer) {
-            this.registerer = null;
-            registerer.close();
-        }
-        Services.setServiceLookup(null);
-        super.stopBundle();
+    /**
+     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     *
+     * @param cause The cause
+     */
+    public ImageTransformationDeniedIOException(Throwable cause) {
+        super(cause);
     }
 
 }

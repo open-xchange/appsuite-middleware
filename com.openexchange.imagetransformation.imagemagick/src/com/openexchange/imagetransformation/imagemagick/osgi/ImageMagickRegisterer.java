@@ -74,6 +74,48 @@ public class ImageMagickRegisterer implements Reloadable {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageMagickRegisterer.class);
 
+    private static volatile Long maxSize;
+    public static long maxSize() {
+        Long tmp = maxSize;
+        if (null == tmp) {
+            synchronized (ImageMagickRegisterer.class) {
+                tmp = maxSize;
+                if (null == tmp) {
+                    int defaultValue = 5242880; // 5 MB
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxSize", defaultValue));
+                    maxSize = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    private static volatile Long maxResolution;
+    public static long maxResolution() {
+        Long tmp = maxResolution;
+        if (null == tmp) {
+            synchronized (ImageMagickRegisterer.class) {
+                tmp = maxResolution;
+                if (null == tmp) {
+                    int defaultValue = 12087962; // 4064 x 2704 (11.1 megapixels) + 10%
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    tmp = Long.valueOf(configService.getIntProperty("com.openexchange.tools.images.transformations.maxResolution", defaultValue));
+                    maxResolution = tmp;
+                }
+            }
+        }
+        return tmp.longValue();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------
+
     private final BundleContext context;
     private final ServiceLookup services;
     private ServiceRegistration<ImageTransformationProvider> registration;
@@ -142,6 +184,8 @@ public class ImageMagickRegisterer implements Reloadable {
 
     @Override
     public void reloadConfiguration(ConfigurationService configService) {
+        maxSize = null;
+        maxResolution = null;
         perform(configService);
     }
 

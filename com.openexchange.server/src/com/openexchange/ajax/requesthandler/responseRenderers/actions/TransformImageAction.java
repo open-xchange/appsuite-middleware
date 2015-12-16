@@ -76,18 +76,18 @@ import com.openexchange.ajax.requesthandler.converters.preview.AbstractPreviewRe
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.Constants;
+import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.ScaleType;
-import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.images.ImageTransformationUtility;
-import com.openexchange.tools.images.transformations.ImageTransformationDeniedIOException;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 

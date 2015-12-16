@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,55 +47,72 @@
  *
  */
 
-package com.openexchange.tools.images.transformations;
+package com.openexchange.imagetransformation.imagemagick.osgi;
 
-import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link ImageTransformationDeniedIOException} - The special I/O error signaling that image transformation has been denied.
- * <p>
- * Image either exceeds allowed max. size or resolution.
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
  */
-public class ImageTransformationDeniedIOException extends IOException {
-
-    private static final long serialVersionUID = 6657928423486571747L;
+public final class Services {
 
     /**
-     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     * Initializes a new {@link Services}.
      */
-    public ImageTransformationDeniedIOException() {
+    private Services() {
         super();
     }
 
+    private static final AtomicReference<ServiceLookup> REF = new AtomicReference<ServiceLookup>();
+
     /**
-     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     * Sets the service lookup.
      *
-     * @param message The detail message
-     * @param cause The cause
+     * @param serviceLookup The service lookup or <code>null</code>
      */
-    public ImageTransformationDeniedIOException(String message, Throwable cause) {
-        super(message, cause);
+    public static void setServiceLookup(final ServiceLookup serviceLookup) {
+        REF.set(serviceLookup);
     }
 
     /**
-     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     * Gets the service lookup.
      *
-     * @param message The detail message
+     * @return The service lookup or <code>null</code>
      */
-    public ImageTransformationDeniedIOException(String message) {
-        super(message);
+    public static ServiceLookup getServiceLookup() {
+        return REF.get();
     }
 
     /**
-     * Initializes a new {@link ImageTransformationDeniedIOException}.
+     * Gets the service of specified type
      *
-     * @param cause The cause
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
      */
-    public ImageTransformationDeniedIOException(Throwable cause) {
-        super(cause);
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        final com.openexchange.server.ServiceLookup serviceLookup = REF.get();
+        if (null == serviceLookup) {
+            throw new IllegalStateException("Missing ServiceLookup instance. Bundle \"com.openexchange.imagetransformation.imagemagick\" not started?");
+        }
+        return serviceLookup.getService(clazz);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }
