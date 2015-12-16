@@ -50,7 +50,8 @@
 package com.openexchange.ajax.onboarding;
 
 import com.openexchange.ajax.onboarding.tests.ConfigTest;
-import com.openexchange.ajax.onboarding.tests.DAVSyncProfileViaEmailTest;
+import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
+import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -66,7 +67,8 @@ public class OnboardingAJAXSuite {
     public static Test suite() {
         TestSuite tests = new TestSuite(OnboardingAJAXSuite.class.getName());
         tests.addTestSuite(ConfigTest.class);
-        tests.addTestSuite(DAVSyncProfileViaEmailTest.class);
+        tests.addTestSuite(DAVSyncProfileTest.class);
+        tests.addTestSuite(EASSyncProfileTest.class);
         return tests;
     }
 

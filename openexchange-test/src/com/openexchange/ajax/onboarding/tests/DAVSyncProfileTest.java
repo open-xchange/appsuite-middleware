@@ -49,24 +49,27 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import java.util.List;
 import org.json.JSONObject;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
+import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 import com.openexchange.ajax.onboarding.actions.StartSMTPRequest;
 import com.openexchange.ajax.onboarding.actions.StopSMTPRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsRequest;
 import com.openexchange.ajax.smtptest.actions.GetMailsResponse;
+import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 
 
 /**
- * {@link DAVSyncProfileViaEmailTest}
+ * {@link DAVSyncProfileTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class DAVSyncProfileViaEmailTest extends AbstractAJAXSession {
+public class DAVSyncProfileTest extends AbstractAJAXSession {
 
-    public DAVSyncProfileViaEmailTest(String name) {
+    public DAVSyncProfileTest(String name) {
         super(name);
     }
 
@@ -93,8 +96,24 @@ public class DAVSyncProfileViaEmailTest extends AbstractAJAXSession {
         client.execute(req);
         GetMailsRequest mailReq = new GetMailsRequest();
         GetMailsResponse mailResp = client.execute(mailReq);
-        assertNotNull(mailResp.getMessages());
-        assertEquals(1, mailResp.getMessages().size());
+        List<Message> messages = mailResp.getMessages();
+        assertNotNull(messages);
+        assertEquals(1, messages.size());
     }
+
+    public void testDAVSyncProfileViaDisplay() throws Exception {
+        ExecuteRequest req = new ExecuteRequest("apple.mac/davmanual", "display", null, false);
+        OnboardingTestResponse resp = client.execute(req);
+        assertFalse(resp.hasError());
+        JSONObject json = (JSONObject) resp.getData();
+        assertTrue(json.hasAndNotNull("carddav_hostName"));
+        assertTrue(json.hasAndNotNull("carddav_login"));
+    }
+
+    //    public void testDAVSyncProfileViaDownload() throws Exception {
+    //        ExecuteRequest req = new ExecuteRequest("apple.mac/davsync", "download", null, false);
+    //        OnboardingTestResponse resp = client.execute(req);
+    //        assertFalse(resp.hasError());
+    //    }
 
 }
