@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,60 +47,90 @@
  *
  */
 
-package com.openexchange.groupware.infostore.facade.impl;
+package com.openexchange.java;
 
 import java.io.IOException;
 import java.io.InputStream;
-import com.openexchange.ajax.fileholder.IFileHolder.InputStreamClosure;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.groupware.infostore.DocumentAndMetadata;
-import com.openexchange.groupware.infostore.DocumentMetadata;
-import com.openexchange.java.SizeKnowingInputStream;
-
 
 /**
- * {@link DocumentAndMetadataImpl}
+ * {@link SizeKnowingInputStream} - A simple {@link InputStream} knowing the size.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class DocumentAndMetadataImpl implements DocumentAndMetadata {
+public class SizeKnowingInputStream extends InputStream {
 
-    private final DocumentMetadata metadata;
-    private final InputStreamClosure isClosure;
-    private final String eTag;
+    private final InputStream in;
+    private final long size;
 
     /**
-     * Initializes a new {@link DocumentAndMetadataImpl}.
+     * Initializes a new {@link SizeKnowingInputStream}.
      *
-     * @param metadata The metadata
-     * @param isClosure The input stream closure, or <code>null</code> if not set
-     * @param eTag The E-Tag
+     * @param in The input stream delegate
+     * @param size The size or <code>-1</code> if unknown
      */
-    public DocumentAndMetadataImpl(DocumentMetadata metadata, InputStreamClosure isClosure, String eTag) {
+    public SizeKnowingInputStream(InputStream in, long size) {
         super();
-        this.metadata = metadata;
-        this.isClosure = isClosure;
-        this.eTag = eTag;
+        this.in = in;
+        this.size = size;
+    }
+
+    /**
+     * Gets the size of this stream in bytes
+     *
+     * @return The size in bytes or <code>-1</code> if unknown
+     */
+    public long getSize() {
+        return size;
     }
 
     @Override
-    public DocumentMetadata getMetadata() {
-        return metadata;
+    public int read() throws IOException {
+        return in.read();
     }
 
     @Override
-    public String getETag() {
-        return eTag;
+    public int read(byte[] b) throws IOException {
+        return in.read(b);
     }
 
     @Override
-    public InputStream getData() throws OXException {
-        try {
-            return new SizeKnowingInputStream(isClosure.newStream(), metadata.getFileSize());
-        } catch (IOException e) {
-            throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+    public int read(byte[] b, int off, int len) throws IOException {
+        return in.read(b, off, len);
     }
 
+    @Override
+    public long skip(long n) throws IOException {
+        return in.skip(n);
+    }
+
+    @Override
+    public String toString() {
+        return in.toString();
+    }
+
+    @Override
+    public int available() throws IOException {
+        return in.available();
+    }
+
+    @Override
+    public void close() throws IOException {
+        in.close();
+    }
+
+    @Override
+    public void mark(int readlimit) {
+        in.mark(readlimit);
+    }
+
+    @Override
+    public void reset() throws IOException {
+        in.reset();
+    }
+
+    @Override
+    public boolean markSupported() {
+        return in.markSupported();
+    }
 }

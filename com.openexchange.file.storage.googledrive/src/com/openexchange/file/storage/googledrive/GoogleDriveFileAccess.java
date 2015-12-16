@@ -99,6 +99,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.googledrive.access.GoogleDriveAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -453,7 +454,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              * get content stream
              */
             HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
-            return resp.getContent();
+            return new SizeKnowingInputStream(resp.getContent(), file.getFileSize().longValue());
         } catch (final HttpResponseException e) {
             if (!isUserRateLimitExceeded(e)) {
                 // Otherwise throw exception

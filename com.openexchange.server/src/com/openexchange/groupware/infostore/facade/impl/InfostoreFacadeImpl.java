@@ -149,6 +149,7 @@ import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -373,10 +374,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
         if (0 == offset && -1 == length) {
-            return fileStorage.getFile(metadata.getFilestoreLocation());
-        } else {
-            return fileStorage.getFile(metadata.getFilestoreLocation(), offset, length);
+            return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation()), metadata.getFileSize());
         }
+        return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation(), offset, length), length);
     }
 
     /**

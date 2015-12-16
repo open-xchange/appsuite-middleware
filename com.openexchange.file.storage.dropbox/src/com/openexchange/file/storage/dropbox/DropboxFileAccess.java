@@ -58,6 +58,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import com.dropbox.client2.DropboxAPI.DropboxInputStream;
 import com.dropbox.client2.DropboxAPI.Entry;
 import com.dropbox.client2.DropboxAPI.ThumbFormat;
 import com.dropbox.client2.DropboxAPI.ThumbSize;
@@ -80,6 +81,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.dropbox.access.DropboxOAuthAccess;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
@@ -291,7 +293,9 @@ public class DropboxFileAccess extends AbstractDropboxAccess implements Thumbnai
     public InputStream getDocument(final String folderId, final String id, final String version) throws OXException {
         String path = toPath(folderId, id);
         try {
-            return dropboxAPI.getFileStream(path, version);
+            DropboxInputStream fileStream = dropboxAPI.getFileStream(path, version);
+            long fileSize = fileStream.getFileInfo().getFileSize();
+            return new SizeKnowingInputStream(fileStream, fileSize);
         } catch (Exception e) {
             throw handle(e, path);
         }
