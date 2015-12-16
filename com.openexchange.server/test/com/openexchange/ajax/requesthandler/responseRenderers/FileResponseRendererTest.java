@@ -754,6 +754,8 @@ public class FileResponseRendererTest extends TestCase {
         fileResponseRenderer.setScaler(new TestableImageTransformationService(bytes, ImageTransformations.LOW_EXPENSE));
         final AJAXRequestData requestData = new AJAXRequestData();
         requestData.setSession(new SimServerSession(1, 1));
+        requestData.putParameter("width", "80");
+        requestData.putParameter("height", "80");
         final AJAXRequestResult result = new AJAXRequestResult(fileHolder, "file");
         result.setHeader("ETag", "1323jjlksldfsdkfms");
         final SimHttpServletRequest req = new SimHttpServletRequest();
