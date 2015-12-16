@@ -147,7 +147,9 @@ public class ExpiredSharesTest extends ShareTest {
 			System.out.println("Share resolve response exception: " + shareResolveResponse.getException().getMessage());
 			System.out.println("Share resolve response content: " + shareResolveResponse.getResponse().getJSON());
 		}
-		System.out.println("Share resolve response conflicts: " + shareResolveResponse.getConflicts().size());
+		if (null != shareResolveResponse.getConflicts()) {
+		    System.out.println("Share resolve response conflicts: " + shareResolveResponse.getConflicts().size());
+		}
 		assertEquals("Status wrong", ResolveShareResponse.NOT_FOUND, shareResolveResponse.getStatus());
 		/*
 		 * check permissions of previously shared folder
