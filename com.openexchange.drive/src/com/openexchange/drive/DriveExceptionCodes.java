@@ -78,6 +78,7 @@ import static com.openexchange.drive.DriveExceptionMessages.PATH_NOT_FOUND_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.QUOTA_REACHED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.SERVER_BUSY_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.TOKEN_ALREADY_REGISTERED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_DIRECTORIES_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_FILES_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG;
@@ -201,6 +202,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
 
     /** The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please remove some files and try again. */
     TOO_MANY_FILES(TOO_MANY_FILES_MSG, TOO_MANY_FILES_MSG, Category.CATEGORY_CAPACITY, 36),
+
+    /** The token \"%1$s\" is already registered. */
+    TOKEN_ALREADY_REGISTERED(TOKEN_ALREADY_REGISTERED_MSG, TOKEN_ALREADY_REGISTERED_MSG, Category.CATEGORY_CONFLICT, 37),
 
     ;
 

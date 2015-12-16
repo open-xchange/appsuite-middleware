@@ -86,9 +86,17 @@ public class SQL {
         "DELETE FROM driveEventSubscriptions " +
         "WHERE cid=? AND service=? AND token=?;";
 
+    public static final String EXISTS_TOKEN_STMT =
+        "SELECT 1 FROM driveEventSubscriptions " +
+        "WHERE cid=? AND service=? AND token=?;";
+
     public static final String UPDATE_TOKEN_STMT =
         "UPDATE driveEventSubscriptions SET token=? " +
         "WHERE cid=? AND service=? AND token=?;";
+
+    public static final String EXISTS_TOKEN_WITHOUT_SERVICE_STMT =
+        "SELECT 1 FROM driveEventSubscriptions " +
+        "WHERE cid=? AND token=?;";
 
     public static final String UPDATE_TOKEN_WITHOUT_SERVICE_STMT =
         "UPDATE driveEventSubscriptions SET token=? " +
