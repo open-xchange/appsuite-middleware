@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -80,14 +81,16 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     private final TransformedImageCreator transformedImageCreator;
     private final AtomicReference<String> searchPathRef;
+    private final AtomicBoolean useGraphicsMagickRef;
 
     /**
      * Initializes a new {@link ImageMagickImageTransformationProvider}.
      */
-    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath) {
+    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
         super();
         this.transformedImageCreator = transformedImageCreator;
         searchPathRef = new AtomicReference<String>(searchPath);
+        useGraphicsMagickRef = new AtomicBoolean(useGraphicsMagick);
     }
 
     /**
@@ -97,6 +100,15 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
      */
     public void setSearchPath(String searchPath) {
         searchPathRef.set(searchPath);
+    }
+
+    /**
+     * Sets whether GraphicsMagick is supposed to be used
+     *
+     * @param useGraphicsMagick <code>true</code> to use GraphicsMagick; otherwise <code>false</code>
+     */
+    public void setUseGraphicsMagick(boolean useGraphicsMagick) {
+        useGraphicsMagickRef.set(useGraphicsMagick);
     }
 
     private void checkResolution(InputStream pInput, long maxResolution, String searchPath) throws IOException, InterruptedException, IM4JavaException, ImageTransformationDeniedIOException {
@@ -133,7 +145,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
-        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get());
+        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get());
     }
 
     @Override
@@ -171,7 +183,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 }
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath);
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get());
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -223,11 +235,12 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 }
             }
 
+            boolean useGraphicsMagick = useGraphicsMagickRef.get();
             if (null == sink) {
-                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath);
+                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick);
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath);
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath, useGraphicsMagick);
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -253,7 +266,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
-        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get());
+        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get());
     }
 
 }

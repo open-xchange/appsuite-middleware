@@ -139,7 +139,8 @@ public class ImageMagickRegisterer implements Reloadable {
         boolean enabled = configService.getBoolProperty("com.openexchange.imagetransformation.imagemagick.enabled", true);
         if (enabled) {
             String searchPath = configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin");
-            register(searchPath);
+            boolean useGraphicsMagick = configService.getBoolProperty("com.openexchange.imagetransformation.imagemagick.useGraphicsMagick", false);
+            register(searchPath, useGraphicsMagick);
         } else {
             unregister();
         }
@@ -149,18 +150,20 @@ public class ImageMagickRegisterer implements Reloadable {
      * Registers the ImageMagick-based image transformation provider
      *
      * @param searchPath The search path where "convert" command is located
+     * @param useGraphicsMagick Whether GraphicsMagick is supposed to be used
      */
-    private void register(String searchPath) {
+    private void register(String searchPath, boolean useGraphicsMagick) {
         if (null == provider) {
-            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath);
+            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick);
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
             registration = context.registerService(ImageTransformationProvider.class, provider, properties);
-            LOG.info("ImageMagick-based image transformation provider successfully registered using search path {}", searchPath);
+            LOG.info("ImageMagick-based image transformation provider successfully registered using search path {} with GraphicsMagick utilization set to {}", searchPath, Boolean.valueOf(useGraphicsMagick));
         } else {
             provider.setSearchPath(searchPath);
-            LOG.info("ImageMagick-based image transformation provider now using search path {}", searchPath);
+            provider.setUseGraphicsMagick(useGraphicsMagick);
+            LOG.info("ImageMagick-based image transformation provider now using search path {} with GraphicsMagick utilization set to {}", searchPath, Boolean.valueOf(useGraphicsMagick));
         }
     }
 

@@ -97,10 +97,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
+    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        ConvertCmd cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
         this.cmd = cmd;
         this.op = new IMOperation();
@@ -116,10 +116,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
+    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        ConvertCmd cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
         this.cmd = cmd;
         this.op = new IMOperation();
@@ -135,10 +135,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath) {
+    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
         super();
         this.transformedImageCreator = transformedImageCreator;
-        ConvertCmd cmd = new ConvertCmd();
+        ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
         this.cmd = cmd;
         this.op = new IMOperation();
