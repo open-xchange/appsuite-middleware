@@ -55,6 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import org.im4java.core.ConvertCmd;
@@ -105,6 +106,23 @@ public class ImageMagickImageTransformations implements ImageTransformations {
             return new IOException(null == message ? "Image transformation failed" : message, t);
         }
     };
+
+    private static class LatchAwareFutureTask<V> extends FutureTask<V> {
+
+        private final CountDownLatch latch;
+
+        LatchAwareFutureTask(Callable<V> callable, CountDownLatch latch) {
+            super(callable);
+            this.latch = latch;
+        }
+
+        @Override
+        public void run() {
+            latch.countDown();
+            super.run();
+        }
+
+    }
 
     // ----------------------------------------------------------------------------------------------------------------------
 
@@ -185,6 +203,22 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         this.optSource = optSource;
     }
 
+    private void awaitCountDown(CountDownLatch latch) throws IOException {
+        if (null != latch) {
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new IOException("I/O operation has been interrupted.", e);
+            }
+        }
+    }
+
+    private <V> void execute(FutureTask<V> task, final CountDownLatch optLatch) throws IOException {
+        processor.execute(optSource, task);
+        awaitCountDown(optLatch);
+    }
+
     @Override
     public ImageTransformations rotate() {
         op.autoOrient();
@@ -252,10 +286,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     BufferedImage getImage(String formatName) throws IOException {
         op.addImage(getImageFormat(formatName) + ":-");
 
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<BufferedImage> task = new FutureTask<>(new Callable<BufferedImage>() {
 
             @Override
             public BufferedImage call() throws Exception {
+                latch.countDown();
                 Stream2BufferedImage s2b = new Stream2BufferedImage();
                 cmd.setOutputConsumer(s2b);
 
@@ -264,21 +300,23 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 return s2b.getImage();
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
     public BufferedImage getImage() throws IOException {
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<BufferedImage> task = new FutureTask<>(new Callable<BufferedImage>() {
 
             @Override
             public BufferedImage call() throws Exception {
+                latch.countDown();
                 return getImage("png");
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
@@ -287,10 +325,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     public byte[] getBytes(String formatName) throws IOException {
         op.addImage(getImageFormat(formatName) + ":-");
 
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<byte[]> task = new FutureTask<>(new Callable<byte[]>() {
 
             @Override
             public byte[] call() throws Exception {
+                latch.countDown();
                 ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                 cmd.setOutputConsumer(bytes);
 
@@ -299,7 +339,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 return bytes.toByteArray();
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
@@ -309,10 +349,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         op.addImage(getImageFormat(formatName) + ":-");
 
         if (null != sourceImage) {
+            final CountDownLatch latch = new CountDownLatch(1);
             FutureTask<InputStream> task = new FutureTask<>(new Callable<InputStream>() {
 
                 @Override
                 public InputStream call() throws Exception {
+                    latch.countDown();
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                     cmd.setOutputConsumer(bytes);
 
@@ -321,15 +363,17 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     return bytes.asInputStream();
                 }
             });
-            processor.execute(optSource, task);
+            execute(task, latch);
 
             return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
         }
 
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<InputStream> task = new FutureTask<>(new Callable<InputStream>() {
 
             @Override
             public InputStream call() throws Exception {
+                latch.countDown();
                 InputStream is = null;
                 ThresholdFileHolder sink = null;
                 try {
@@ -367,7 +411,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 }
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
@@ -379,10 +423,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         op.addImage(frmtName + ":-");
 
         if (null != sourceImage) {
+            final CountDownLatch latch = new CountDownLatch(1);
             FutureTask<BasicTransformedImage> task = new FutureTask<>(new Callable<BasicTransformedImage>() {
 
                 @Override
                 public BasicTransformedImage call() throws Exception {
+                    latch.countDown();
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
 
                     cmd.setOutputConsumer(bytes);
@@ -391,15 +437,17 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     return new BasicTransformedImageImpl(frmtName, bytes.getSink());
                 }
             });
-            processor.execute(optSource, task);
+            execute(task, latch);
 
             return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
         }
 
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<BasicTransformedImage> task = new FutureTask<>(new Callable<BasicTransformedImage>() {
 
             @Override
             public BasicTransformedImage call() throws Exception {
+                latch.countDown();
                 InputStream is = null;
                 ThresholdFileHolder sink = null;
                 try {
@@ -434,7 +482,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 }
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
@@ -443,15 +491,17 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     public TransformedImage getFullTransformedImage(String formatName) throws IOException {
         final String frmtName = getImageFormat(formatName);
 
+        final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<TransformedImage> task = new FutureTask<>(new Callable<TransformedImage>() {
 
             @Override
             public TransformedImage call() throws Exception {
+                latch.countDown();
                 BufferedImage bufferedImage = getImage(frmtName);
                 return transformedImageCreator.writeTransformedImage(bufferedImage, frmtName, new TransformationContext(), needsCompression(frmtName));
             }
         });
-        processor.execute(optSource, task);
+        execute(task, latch);
 
         return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
