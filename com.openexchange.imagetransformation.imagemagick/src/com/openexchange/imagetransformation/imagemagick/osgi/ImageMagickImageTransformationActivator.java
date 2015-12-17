@@ -53,6 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.processing.ProcessorService;
 
 
 /**
@@ -79,7 +80,7 @@ public class ImageMagickImageTransformationActivator extends HousekeepingActivat
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { TransformedImageCreator.class, ConfigurationService.class };
+        return new Class<?>[] { TransformedImageCreator.class, ConfigurationService.class, ProcessorService.class };
     }
 
     @Override

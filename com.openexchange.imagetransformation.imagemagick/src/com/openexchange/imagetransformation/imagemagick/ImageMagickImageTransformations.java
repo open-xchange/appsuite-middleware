@@ -54,6 +54,9 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import org.im4java.core.ConvertCmd;
 import org.im4java.core.IM4JavaException;
 import org.im4java.core.IMOperation;
@@ -72,6 +75,9 @@ import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.java.Streams;
+import com.openexchange.processing.Processor;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 
 
 /**
@@ -82,13 +88,35 @@ import com.openexchange.java.Streams;
  */
 public class ImageMagickImageTransformations implements ImageTransformations {
 
-    private final TransformedImageCreator transformedImageCreator;
+    /** The exception factory constant */
+    private static final ExpectedExceptionFactory<IOException> EXCEPTION_FACTORY = new ExpectedExceptionFactory<IOException>() {
 
-    private final ConvertCmd cmd;
-    private final IMOperation op;
+        @Override
+        public Class<IOException> getType() {
+            return IOException.class;
+        }
 
-    private final InputStream sourceImageStream;
-    private final IFileHolder sourceImageFile;
+        @Override
+        public IOException newUnexpectedError(final Throwable t) {
+            if (t instanceof java.util.concurrent.TimeoutException) {
+                return new IOException("Image transformation timed out", t);
+            }
+            String message = t.getMessage();
+            return new IOException(null == message ? "Image transformation failed" : message, t);
+        }
+    };
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
+    private final Processor processor;
+    final TransformedImageCreator transformedImageCreator;
+    private final int timeoutSecs;
+
+    final ConvertCmd cmd;
+    final IMOperation op;
+
+    final InputStream sourceImageStream;
+    final IFileHolder sourceImageFile;
     private final BufferedImage sourceImage;
     private final Object optSource;
 
@@ -97,8 +125,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
+    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
         super();
+        this.processor = processor;
+        this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
         ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
@@ -116,8 +146,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
+    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
         super();
+        this.processor = processor;
+        this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
         ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
@@ -135,8 +167,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick) {
+    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
         super();
+        this.processor = processor;
+        this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
         ConvertCmd cmd = new ConvertCmd(useGraphicsMagick);
         cmd.setSearchPath(searchPath);
@@ -196,7 +230,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         return this;
     }
 
-    private void runCommand() throws IOException {
+    void runCommand() throws IOException {
         try {
             if (null != sourceImage) {
                 cmd.run(op, sourceImage);
@@ -215,32 +249,59 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         }
     }
 
-    private BufferedImage getImage(String formatName) throws IOException {
+    BufferedImage getImage(String formatName) throws IOException {
         op.addImage(getImageFormat(formatName) + ":-");
 
-        Stream2BufferedImage s2b = new Stream2BufferedImage();
-        cmd.setOutputConsumer(s2b);
+        FutureTask<BufferedImage> task = new FutureTask<>(new Callable<BufferedImage>() {
 
-        runCommand();
+            @Override
+            public BufferedImage call() throws Exception {
+                Stream2BufferedImage s2b = new Stream2BufferedImage();
+                cmd.setOutputConsumer(s2b);
 
-        return s2b.getImage();
+                runCommand();
+
+                return s2b.getImage();
+            }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
     public BufferedImage getImage() throws IOException {
-        return getImage("png");
+        FutureTask<BufferedImage> task = new FutureTask<>(new Callable<BufferedImage>() {
+
+            @Override
+            public BufferedImage call() throws Exception {
+                return getImage("png");
+            }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
         op.addImage(getImageFormat(formatName) + ":-");
 
-        ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
-        cmd.setOutputConsumer(bytes);
+        FutureTask<byte[]> task = new FutureTask<>(new Callable<byte[]>() {
 
-        runCommand();
+            @Override
+            public byte[] call() throws Exception {
+                ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
+                cmd.setOutputConsumer(bytes);
 
-        return bytes.toByteArray();
+                runCommand();
+
+                return bytes.toByteArray();
+            }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
@@ -248,108 +309,154 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         op.addImage(getImageFormat(formatName) + ":-");
 
         if (null != sourceImage) {
-            ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
-            cmd.setOutputConsumer(bytes);
+            FutureTask<InputStream> task = new FutureTask<>(new Callable<InputStream>() {
 
-            runCommand();
+                @Override
+                public InputStream call() throws Exception {
+                    ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
+                    cmd.setOutputConsumer(bytes);
 
-            return bytes.asInputStream();
+                    runCommand();
+
+                    return bytes.asInputStream();
+                }
+            });
+            processor.execute(optSource, task);
+
+            return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
         }
 
-        InputStream is = null;
-        ThresholdFileHolder sink = null;
-        try {
-            is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
-            sink = new ThresholdFileHolder();
+        FutureTask<InputStream> task = new FutureTask<>(new Callable<InputStream>() {
 
-            //PipedOutputStream pos = new PipedOutputStream();
-            //ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
+            @Override
+            public InputStream call() throws Exception {
+                InputStream is = null;
+                ThresholdFileHolder sink = null;
+                try {
+                    is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
+                    sink = new ThresholdFileHolder();
 
-            Pipe pipeIn  = new Pipe(is, null);
-            Pipe pipeOut = new Pipe(null, sink.asOutputStream());
+                    //PipedOutputStream pos = new PipedOutputStream();
+                    //ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
-            // Set up command
-            cmd.setInputProvider(pipeIn);
-            cmd.setOutputConsumer(pipeOut);
+                    Pipe pipeIn  = new Pipe(is, null);
+                    Pipe pipeOut = new Pipe(null, sink.asOutputStream());
 
-            cmd.run(op);
+                    // Set up command
+                    cmd.setInputProvider(pipeIn);
+                    cmd.setOutputConsumer(pipeOut);
 
-            InputStream retval = sink.getClosingStream();
-            sink = null;
-            return retval;
-        } catch (OXException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
+                    cmd.run(op);
+
+                    InputStream retval = sink.getClosingStream();
+                    sink = null;
+                    return retval;
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof IOException) {
+                        throw (IOException) cause;
+                    }
+                    throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("I/O operation has been interrupted.", e);
+                } catch (IM4JavaException e) {
+                    throw new IOException("ImageMagick error.", e);
+                } finally {
+                    Streams.close(is, sink);
+                }
             }
-            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("I/O operation has been interrupted.", e);
-        } catch (IM4JavaException e) {
-            throw new IOException("ImageMagick error.", e);
-        } finally {
-            Streams.close(is, sink);
-        }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
     public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
-        String frmtName = getImageFormat(formatName);
+        final String frmtName = getImageFormat(formatName);
 
         op.addImage(frmtName + ":-");
 
         if (null != sourceImage) {
-            ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
+            FutureTask<BasicTransformedImage> task = new FutureTask<>(new Callable<BasicTransformedImage>() {
 
-            cmd.setOutputConsumer(bytes);
-            runCommand();
+                @Override
+                public BasicTransformedImage call() throws Exception {
+                    ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
 
-            return new BasicTransformedImageImpl(frmtName, bytes.getSink());
+                    cmd.setOutputConsumer(bytes);
+                    runCommand();
+
+                    return new BasicTransformedImageImpl(frmtName, bytes.getSink());
+                }
+            });
+            processor.execute(optSource, task);
+
+            return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
         }
 
-        InputStream is = null;
-        ThresholdFileHolder sink = null;
-        try {
-            is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
-            sink = new ThresholdFileHolder();
+        FutureTask<BasicTransformedImage> task = new FutureTask<>(new Callable<BasicTransformedImage>() {
 
-            Pipe pipeIn  = new Pipe(is, null);
-            Pipe pipeOut = new Pipe(null, sink.asOutputStream());
+            @Override
+            public BasicTransformedImage call() throws Exception {
+                InputStream is = null;
+                ThresholdFileHolder sink = null;
+                try {
+                    is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
+                    sink = new ThresholdFileHolder();
 
-            // Set up command
-            cmd.setInputProvider(pipeIn);
-            cmd.setOutputConsumer(pipeOut);
+                    Pipe pipeIn  = new Pipe(is, null);
+                    Pipe pipeOut = new Pipe(null, sink.asOutputStream());
 
-            cmd.run(op);
+                    // Set up command
+                    cmd.setInputProvider(pipeIn);
+                    cmd.setOutputConsumer(pipeOut);
 
-            BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);
-            sink = null;
-            return retval;
-        } catch (OXException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
+                    cmd.run(op);
+
+                    BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);
+                    sink = null;
+                    return retval;
+                } catch (OXException e) {
+                    Throwable cause = e.getCause();
+                    if (cause instanceof IOException) {
+                        throw (IOException) cause;
+                    }
+                    throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    throw new IOException("I/O operation has been interrupted.", e);
+                } catch (IM4JavaException e) {
+                    throw new IOException("ImageMagick error.", e);
+                } finally {
+                    Streams.close(is, sink);
+                }
             }
-            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("I/O operation has been interrupted.", e);
-        } catch (IM4JavaException e) {
-            throw new IOException("ImageMagick error.", e);
-        } finally {
-            Streams.close(is, sink);
-        }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
     @Override
     public TransformedImage getFullTransformedImage(String formatName) throws IOException {
-        String frmtName = getImageFormat(formatName);
-        BufferedImage bufferedImage = getImage(frmtName);
-        return transformedImageCreator.writeTransformedImage(bufferedImage, frmtName, new TransformationContext(), needsCompression(frmtName));
+        final String frmtName = getImageFormat(formatName);
+
+        FutureTask<TransformedImage> task = new FutureTask<>(new Callable<TransformedImage>() {
+
+            @Override
+            public TransformedImage call() throws Exception {
+                BufferedImage bufferedImage = getImage(frmtName);
+                return transformedImageCreator.writeTransformedImage(bufferedImage, frmtName, new TransformationContext(), needsCompression(frmtName));
+            }
+        });
+        processor.execute(optSource, task);
+
+        return ThreadPools.getFrom(task, timeoutSecs, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }
 
-    private boolean needsCompression(String formatName) {
+    boolean needsCompression(String formatName) {
         return this.compress && null != formatName && "jpeg".equalsIgnoreCase(formatName) || "jpg".equalsIgnoreCase(formatName);
     }
 
