@@ -105,6 +105,7 @@ import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.images.Constants;
 import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -765,8 +766,12 @@ public class FileResponseRenderer implements ResponseRenderer {
                         LOG.warn("(Possible) Image file misses stream data");
                         return file;
                     }
-                    if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
-                        transform = true;
+                    try {
+	                    if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
+	                        transform = true;
+	                    }
+                    } finally {
+                    	Streams.close(stream);
                     }
                 }
             }
@@ -776,19 +781,25 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
         }
 
+        // Require session
+        final ServerSession session = request.getSession();
+        if (null == session) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create("session");
+        }
+        
         // Check cache first
         final ResourceCache resourceCache;
-        {
+		{
             final ResourceCache tmp = ResourceCaches.getResourceCache();
-            resourceCache = null == tmp ? null : (tmp.isEnabledFor(request.getSession().getContextId(), request.getSession().getUserId()) ? tmp : null);
+            resourceCache = null == tmp ? null : (tmp.isEnabledFor(session.getContextId(), session.getUserId()) ? tmp : null);
         }
         // Get eTag from result that provides the IFileHolder
         final String eTag = result.getHeader("ETag");
         final boolean isValidEtag = !isEmpty(eTag);
-        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(request.getSession());
+        final String previewLanguage = AbstractPreviewResultConverter.getUserLanguage(session);
         if (null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
-            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, request.getSession().getContextId());
+            final CachedResource cachedResource = resourceCache.get(cacheKey, 0, session.getContextId());
             if (null != cachedResource) {
                 // Scaled version already cached
                 // Create appropriate IFileHolder
@@ -817,7 +828,9 @@ public class FileResponseRenderer implements ResponseRenderer {
         // OK, so far we assume image transformation is needed
         // Ensure IFileHolder is repetitive
         if (!file.repetitive()) {
-            file = new ThresholdFileHolder(file);
+        	ThresholdFileHolder tmp = new ThresholdFileHolder(file);
+            file.close();
+            file = tmp;
         }
 
         // Validate...
@@ -835,7 +848,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         }
 
         // Start transformations: scale, rotate, ...
-        ImageTransformations transformations = scaler.transfom(file, request.getSession().getSessionID());
+        ImageTransformations transformations = scaler.transfom(file, session.getSessionID());
 
         // Rotate by default when not delivering as download
         final Boolean rotate = request.isSet("rotate") ? request.getParameter("rotate", Boolean.class) : null;
@@ -882,6 +895,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     fileContentType = contentTypeByFileName;
                 }
             }
+            
             final byte[] transformed;
             try {
                 TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
@@ -902,57 +916,38 @@ public class FileResponseRenderer implements ResponseRenderer {
                 // Rethrow...
                 throw ioe;
             }
+            
             if (null == transformed) {
                 LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 return handleFailure(file);
             }
-            // Return immediately if not cacheable
-            if (!cachingAdvised || null == resourceCache || !isValidEtag || !AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
-                return new FileHolder(Streams.newByteArrayInputStream(transformed), -1, fileContentType, file.getName());
-            }
-
-            // (Asynchronously) Add to cache if possible
+            
             final int size = transformed.length;
-            final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
-            final ServerSession session = request.getSession();
             final String fileName = file.getName();
             final String contentType = fileContentType;
-            final AbstractTask<Void> task = new AbstractTask<Void>() {
-
-                @Override
-                public Void call() {
-                    try {
-                        final CachedResource preview = new CachedResource(transformed, fileName, contentType, size);
-                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
-                    } catch (OXException e) {
-                        LOG.warn("Could not cache preview.", e);
-                    }
-
-                    return null;
-                }
-            };
-            // Acquire thread pool service
-            final ThreadPoolService threadPool = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class);
-            if (null == threadPool) {
-                final Thread thread = Thread.currentThread();
-                boolean ran = false;
-                task.beforeExecute(thread);
-                try {
-                    task.call();
-                    ran = true;
-                    task.afterExecute(null);
-                } catch (final Exception ex) {
-                    if (!ran) {
-                        task.afterExecute(ex);
-                    }
-                    // Else the exception occurred within
-                    // afterExecute itself in which case we don't
-                    // want to call it again.
-                    throw (ex instanceof OXException ? (OXException) ex : AjaxExceptionCodes.UNEXPECTED_ERROR.create(ex, ex.getMessage()));
-                }
-            } else {
-                threadPool.submit(task);
+            
+            if (cachingAdvised && null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
+            	final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
+            	AbstractTask<Void> task = new AbstractTask<Void>() {
+            		
+	                @Override
+	                public Void call() {
+	                    try {
+	                        final CachedResource preview = new CachedResource(transformed, fileName, contentType, size);
+	                        resourceCache.save(cacheKey, preview, 0, session.getContextId());
+	                    } catch (OXException e) {
+	                        LOG.warn("Could not cache preview.", e);
+	                    }
+	
+	                    return null;
+	                }
+	            };
+	            ThreadPools.submitElseExecute(task);
             }
+            
+            // Cleanse old one
+            Streams.close(file);
+            
             // Return
             return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
         } catch (final RuntimeException e) {

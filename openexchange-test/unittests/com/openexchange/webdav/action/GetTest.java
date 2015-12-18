@@ -6,6 +6,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
@@ -141,9 +142,7 @@ public class GetTest extends ActionTestCase {
 			is.read(bytes);
 			return bytes;
 		} finally {
-			if(is != null) {
-				is.close();
-			}
+		    Streams.close(is);
 		}
 	}
 }

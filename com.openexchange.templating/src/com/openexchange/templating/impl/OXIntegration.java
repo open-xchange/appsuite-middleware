@@ -210,7 +210,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             LOG.error("", e);
             throw TemplateErrorMessage.IOException.create(e);
         } finally {
-            Streams.close(reader);
+            Streams.close(reader, is);
         }
     }
 
