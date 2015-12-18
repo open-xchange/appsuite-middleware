@@ -378,7 +378,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 ThresholdFileHolder sink = null;
                 try {
                     is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
-                    sink = new ThresholdFileHolder();
+                    sink = new ThresholdFileHolder(false);
 
                     //PipedOutputStream pos = new PipedOutputStream();
                     //ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
@@ -452,7 +452,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 ThresholdFileHolder sink = null;
                 try {
                     is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
-                    sink = new ThresholdFileHolder();
+                    sink = new ThresholdFileHolder(false);
 
                     Pipe pipeIn  = new Pipe(is, null);
                     Pipe pipeOut = new Pipe(null, sink.asOutputStream());
@@ -582,7 +582,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
         ByteCollectingOutputConsumer() {
             super();
-            sink = new ThresholdFileHolder();
+            sink = new ThresholdFileHolder(false);
         }
 
         /**
