@@ -48,6 +48,10 @@
 # debian postinst is going to fail when not set'ting +e
 set +e
 
+# CentOS moves utils like pidof to /sbin so we have to append it to $PATH if
+# not already contained
+[[ "$PATH" =~ (^|:)/sbin:* ]] || PATH=${PATH}:/sbin
+
 JAVA_BIN=
 
 ox_set_JAVA_BIN() {
