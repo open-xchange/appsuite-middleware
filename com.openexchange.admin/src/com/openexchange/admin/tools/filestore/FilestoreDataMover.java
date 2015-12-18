@@ -87,6 +87,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.groupware.filestore.FileLocationHandler;
+import com.openexchange.java.Streams;
 
 /**
  * {@link FilestoreDataMover} - The base implementation to move files from one storage to another.
@@ -391,15 +392,20 @@ public abstract class FilestoreDataMover implements Callable<Void> {
 
             int i = 1;
             for (String file : files) {
-                InputStream is = srcStorage.getFile(file);
-                String newFile = dstStorage.saveNewFile(is);
-                if (null != newFile) {
-                    prevFileName2newFileName.put(file, newFile);
+                InputStream is = null;
+                try {
+                    is = srcStorage.getFile(file);
+                    String newFile = dstStorage.saveNewFile(is);
+                    if (null != newFile) {
+                        prevFileName2newFileName.put(file, newFile);
 
-                    if ((i % 10) == 0) {
-                        LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                        if ((i % 10) == 0) {
+                            LOGGER.info("{} copied {} files of {} in total", threadName, Integer.valueOf(i), size);
+                        }
+                        i++;
                     }
-                    i++;
+                } finally {
+                    Streams.close(is);
                 }
             }
 

@@ -142,8 +142,7 @@ public class POSTAction extends DAVAction {
         } catch (IOException e) {
             org.slf4j.LoggerFactory.getLogger(POSTAction.class).debug("Client gone?", e);
         } finally {
-            Streams.close(inputStream);
-            Streams.close(outputStream);
+            Streams.close(inputStream, outputStream);
         }
     }
 

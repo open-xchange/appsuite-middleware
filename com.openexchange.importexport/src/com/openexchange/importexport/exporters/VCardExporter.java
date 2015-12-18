@@ -78,6 +78,7 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -331,13 +332,16 @@ public class VCardExporter implements Exporter {
         }
 
         InputStream originalVCard = null;
-        VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
-        if (vCardStorage != null && contactObj.getVCardId() != null) {
-            originalVCard = vCardStorage.getVCard(contactObj.getVCardId(), session.getContextId());
+        try {
+            VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
+            if (vCardStorage != null && contactObj.getVCardId() != null) {
+                originalVCard = vCardStorage.getVCard(contactObj.getVCardId(), session.getContextId());
+            }
+            VCardExport vCardExport = ImportExportServices.getVCardService().exportContact(contactObj, originalVCard, null);
+            return vCardExport.getVCard().getStream(); //TODO: getClosingStream()?
+        } finally {
+            Streams.close(originalVCard);
         }
-
-        VCardExport vCardExport = ImportExportServices.getVCardService().exportContact(contactObj, originalVCard, null);
-        return vCardExport.getVCard().getStream(); //TODO: getClosingStream()?
     }
 
     private boolean isSaveToDisk(final Map<String, Object> optionalParams) {

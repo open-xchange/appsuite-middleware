@@ -501,7 +501,7 @@ public final class DownloadUtility {
         } catch (final IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(sink);
+            Streams.close(sink, inputStream);
         }
     }
 

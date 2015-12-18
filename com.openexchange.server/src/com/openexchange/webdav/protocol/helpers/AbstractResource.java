@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
 import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavCollection;
@@ -145,7 +146,12 @@ public abstract class AbstractResource implements WebdavResource {
     public WebdavResource copy(final WebdavPath dest, final boolean noroot, final boolean overwrite) throws WebdavProtocolException {
 		final AbstractResource clone = instance(dest);
 		if(hasBody()) {
-			clone.putBody(getBody());
+			InputStream body = getBody();
+            try {
+                clone.putBody(body);
+            } finally {
+                Streams.close(body);
+            }
 		}
 		for(final WebdavProperty prop : getAllProps()) {
 			clone.putProperty(prop);
