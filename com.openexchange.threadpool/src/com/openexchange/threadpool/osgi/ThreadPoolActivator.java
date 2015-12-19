@@ -55,10 +55,13 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -68,6 +71,7 @@ import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
 import com.openexchange.sessiond.SessiondEventConstants;
+import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
@@ -89,6 +93,8 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     public static final AtomicReference<ProcessorService> REF_PROCESSOR = new AtomicReference<ProcessorService>();
 
+    public static final AtomicReference<CloseableControlService> REF_CLOSEABLE_CONTROL = new AtomicReference<CloseableControlService>();
+
     private volatile ThreadPoolServiceImpl threadPool;
     private volatile ProcessorServiceImpl processorService;
 
@@ -104,6 +110,7 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
         final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ThreadPoolActivator.class);
         try {
             LOG.info("starting bundle: com.openexchange.threadpool");
+            final BundleContext context = this.context;
             /*
              * Initialize thread pool
              */
@@ -118,6 +125,26 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
              * Service trackers
              */
             track(ManagementService.class, new ManagementServiceTrackerCustomizer(context, threadPool));
+            track(CloseableControlService.class, new ServiceTrackerCustomizer<CloseableControlService, CloseableControlService>() {
+
+                @Override
+                public CloseableControlService addingService(ServiceReference<CloseableControlService> reference) {
+                    CloseableControlService closeableControl = context.getService(reference);
+                    REF_CLOSEABLE_CONTROL.set(closeableControl);
+                    return null;
+                }
+
+                @Override
+                public void modifiedService(ServiceReference<CloseableControlService> reference, CloseableControlService service) {
+                    // Ignore
+                }
+
+                @Override
+                public void removedService(ServiceReference<CloseableControlService> reference, CloseableControlService service) {
+                    REF_CLOSEABLE_CONTROL.set(null);
+                    context.ungetService(reference);
+                }
+            });
             /*
              * Register
              */
