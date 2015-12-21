@@ -65,10 +65,12 @@ import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 /**
- * The {@link SessionRESTService} allows clients to retrieve capabilities for arbitrary users.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @since v7.6.2
+ * The {@link SessionRESTService} allows clients to retrieve session information.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:benjamin.gruedelbach@open-xchange.com">Benjamin Gruedelbach</a>
+ * @since v7.8.1
  */
 @Path("/session/v1/")
 public class SessionRESTService {
@@ -100,7 +102,10 @@ public class SessionRESTService {
 
         try {
             Session ses = sessiondService.getSession(session);
-            return new JSONObject(4).put("context", ses.getContextId()).put("user", ses.getUserId());
+            if(ses != null){
+                return new JSONObject(4).put("context", ses.getContextId()).put("user", ses.getUserId());
+            }
+            return new JSONObject();
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
