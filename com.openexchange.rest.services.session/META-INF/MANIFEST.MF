@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The REST service for capabilities
+Bundle-SymbolicName: com.openexchange.rest.services.capabilities
+Bundle-Version: 7.8.1
+Bundle-Vendor: Open-Xchange Inc.
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware.contexts.impl,
+ com.openexchange.groupware.ldap,
+ com.openexchange.java.util,
+ com.openexchange.osgi,
+ com.openexchange.rest.services,
+ com.openexchange.server,
+ com.openexchange.session,
+ com.openexchange.sessiond,
+ com.openexchange.tools.servlet,
+ javax.inject,
+ javax.ws.rs;version="[2.0.0,3.0.0)",
+ javax.ws.rs.core;version="[2.0.0,3.0.0)",
+ jersey.repackaged.com.google.common.base;version="[2.3.0,3.0.0)",
+ org.glassfish.hk2.utilities;version="2.4.0",
+ org.glassfish.hk2.utilities.cache;version="2.4.0",
+ org.glassfish.jersey;version="[2.3.0,3.0.0)",
+ org.json,
+ org.jvnet.hk2.external.generator;version="2.4.0",
+ org.osgi.framework,
+ org.osgi.service.http
+Bundle-Activator: com.openexchange.rest.services.session.osgi.SessionRESTActivator
