@@ -112,7 +112,7 @@ public class CXFActivator extends HousekeepingActivator {
 
                     @Override
                     public void removedService(final ServiceReference<HttpService> reference, final HttpService service) {
-                        final HttpService httpService = getService(HttpService.class);
+                        final HttpService httpService = service;
                         if (httpService != null) {
                             try {
                                 httpService.unregister(alias);

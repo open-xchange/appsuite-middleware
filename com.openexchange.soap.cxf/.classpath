@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry exported="true" kind="lib" path="lib/wss4j-1.6.19.jar" sourcepath="lib/source/wss4j-1.6.19-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/cxf-bundle-2.6.8.jar" sourcepath="lib/source/cxf-bundle-2.6.8-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/neethi-3.0.2.jar" sourcepath="lib/source/neethi-3.0.2-sources.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xmlschema-core-2.0.3.jar" sourcepath="lib/source/xmlschema-core-2.0.3-sources.jar"/>
