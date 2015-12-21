@@ -132,6 +132,7 @@ import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.http.grizzly.osgi.Services;
 import com.openexchange.http.grizzly.util.RequestTools;
 import com.openexchange.java.Charsets;
+import com.openexchange.marker.OXThreadMarker;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -296,6 +297,19 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
 
     // ----------------------------------------------------- Methods from Filter
 
+    private static final OXThreadMarker DUMMY = new OXThreadMarker() {
+
+        @Override
+        public void setHttpRequestProcessing(boolean httpProcessing) {
+            // Nothing
+        }
+
+        @Override
+        public boolean isHttpRequestProcessing() {
+            return false;
+        }
+    };
+
     @SuppressWarnings({ "unchecked", "ReturnInsideFinallyBlock" })
     @Override
     public NextAction handleRead(final FilterChainContext ctx) throws IOException {
@@ -303,99 +317,108 @@ public class OXHttpServerFilter extends HttpServerFilter implements JmxMonitorin
         final Connection connection = ctx.getConnection();
 
         if (HttpPacket.isHttp(message)) {
+            OXThreadMarker threadMarker;
+            {
+                Thread t = Thread.currentThread();
+                threadMarker = t instanceof OXThreadMarker ? (OXThreadMarker) t : DUMMY;
+            }
+            threadMarker.setHttpRequestProcessing(true);
+            try {
+                // Otherwise cast message to a HttpContent
+                final HttpContent httpContent = (HttpContent) message;
 
-            // Otherwise cast message to a HttpContent
-            final HttpContent httpContent = (HttpContent) message;
+                Request handlerRequest = httpRequestInProcessAttr.get(connection);
 
-            Request handlerRequest = httpRequestInProcessAttr.get(connection);
+                if (handlerRequest == null) {
+                    // It's a new HTTP request
+                    final HttpRequestPacket request = (HttpRequestPacket) httpContent.getHttpHeader();
+                    final HttpResponsePacket response = request.getResponse();
+                    handlerRequest = OXRequest.create();
+                    handlerRequest.parameters.setLimit(getConfiguration().getMaxRequestParameters());
+                    httpRequestInProcessAttr.set(connection, handlerRequest);
+                    final Response handlerResponse = handlerRequest.getResponse();
 
-            if (handlerRequest == null) {
-                // It's a new HTTP request
-                final HttpRequestPacket request = (HttpRequestPacket) httpContent.getHttpHeader();
-                final HttpResponsePacket response = request.getResponse();
-                handlerRequest = OXRequest.create();
-                handlerRequest.parameters.setLimit(getConfiguration().getMaxRequestParameters());
-                httpRequestInProcessAttr.set(connection, handlerRequest);
-                final Response handlerResponse = handlerRequest.getResponse();
+                    handlerRequest.initialize(/* handlerResponse, */request, ctx, this);
+                    final SuspendStatus suspendStatus = handlerResponse.initialize(handlerRequest, response, ctx, suspendedResponseQueue, this);
 
-                handlerRequest.initialize(/* handlerResponse, */request, ctx, this);
-                final SuspendStatus suspendStatus = handlerResponse.initialize(handlerRequest, response, ctx, suspendedResponseQueue, this);
+                    HttpServerProbeNotifier.notifyRequestReceive(this, connection, handlerRequest);
 
-                HttpServerProbeNotifier.notifyRequestReceive(this, connection, handlerRequest);
+                    boolean wasSuspended = false;
+                    boolean pingInitiated = false;
 
-                boolean wasSuspended = false;
-                boolean pingInitiated = false;
+                    try {
+                        ctx.setMessage(handlerResponse);
 
-                try {
-                    ctx.setMessage(handlerResponse);
+                        if (!getConfiguration().isPassTraceRequest() && request.getMethod() == Method.TRACE) {
+                            onTraceRequest(handlerRequest, handlerResponse);
+                        } else {
+                            final HttpHandler httpHandlerLocal = httpHandler;
+                            if (httpHandlerLocal != null) {
+                                // Initiate ping (if required)
+                                if (ping != Ping.NONE && allowsPing(handlerRequest) && !isLongRunning(handlerRequest)) {
+                                    pingInitiated = initiatePing(handlerResponse, ctx, ping);
+                                }
 
-                    if (!getConfiguration().isPassTraceRequest() && request.getMethod() == Method.TRACE) {
-                        onTraceRequest(handlerRequest, handlerResponse);
-                    } else {
-                        final HttpHandler httpHandlerLocal = httpHandler;
-                        if (httpHandlerLocal != null) {
-                            // Initiate ping (if required)
-                            if (ping != Ping.NONE && allowsPing(handlerRequest) && !isLongRunning(handlerRequest)) {
-                                pingInitiated = initiatePing(handlerResponse, ctx, ping);
+                                // Handle HTTP message
+                                httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
                             }
+                        }
+                    } catch (Exception t) {
+                        handlerRequest.getRequest().getProcessingState().setError(true);
 
-                            // Handle HTTP message
-                            httpHandlerLocal.doHandle(handlerRequest, handlerResponse);
+                        if (!response.isCommitted()) {
+                            final ByteBuffer b = HtmlHelper.getExceptionErrorPage("Internal Server Error", "Grizzly/2.0", t);
+                            handlerResponse.reset();
+                            handlerResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+                            handlerResponse.setContentType("text/html");
+                            handlerResponse.setCharacterEncoding("UTF-8");
+                            final MemoryManager mm = ctx.getMemoryManager();
+                            final Buffer buf = Buffers.wrap(mm, b);
+                            handlerResponse.getOutputBuffer().writeBuffer(buf);
+                        }
+                    } catch (Throwable t) {
+                        ExceptionUtils.handleThrowable(t);
+                        LOGGER.log(Level.WARNING, "Unexpected error", t);
+                        throw new IllegalStateException(t);
+                    } finally {
+                        // don't forget to invalidate the suspendStatus
+                        wasSuspended = suspendStatus.getAndInvalidate();
+
+                        if (pingInitiated) {
+                            final WatchInfo watchInfo = pingMap.remove(ctx);
+                            if (null != watchInfo) {
+                                watchInfo.stopPing();
+                                watchInfo.timerTask.cancel(false);
+                                ctx.removeCompletionListener(watchInfo);
+                                connection.getMonitoringConfig().removeProbes(watchInfo);
+                                // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
+                            }
                         }
                     }
-                } catch (Exception t) {
-                    handlerRequest.getRequest().getProcessingState().setError(true);
 
-                    if (!response.isCommitted()) {
-                        final ByteBuffer b = HtmlHelper.getExceptionErrorPage("Internal Server Error", "Grizzly/2.0", t);
-                        handlerResponse.reset();
-                        handlerResponse.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-                        handlerResponse.setContentType("text/html");
-                        handlerResponse.setCharacterEncoding("UTF-8");
-                        final MemoryManager mm = ctx.getMemoryManager();
-                        final Buffer buf = Buffers.wrap(mm, b);
-                        handlerResponse.getOutputBuffer().writeBuffer(buf);
+                    if (!wasSuspended) {
+                        return afterService(ctx, connection, handlerRequest, handlerResponse);
+                    } else {
+                        return ctx.getSuspendAction();
                     }
-                } catch (Throwable t) {
-                    ExceptionUtils.handleThrowable(t);
-                    LOGGER.log(Level.WARNING, "Unexpected error", t);
-                    throw new IllegalStateException(t);
-                } finally {
-                    // don't forget to invalidate the suspendStatus
-                    wasSuspended = suspendStatus.getAndInvalidate();
-
-                    if (pingInitiated) {
-                        final WatchInfo watchInfo = pingMap.remove(ctx);
-                        if (null != watchInfo) {
-                            watchInfo.stopPing();
-                            watchInfo.timerTask.cancel(false);
-                            ctx.removeCompletionListener(watchInfo);
-                            connection.getMonitoringConfig().removeProbes(watchInfo);
-                            // Canceled timer task gets purged by CustomThreadPoolExecutorTimerService.PurgeRunnable
-                        }
-                    }
-                }
-
-                if (!wasSuspended) {
-                    return afterService(ctx, connection, handlerRequest, handlerResponse);
                 } else {
-                    return ctx.getSuspendAction();
-                }
-            } else {
-                // We're working with suspended HTTP request
-                try {
-                    if (!handlerRequest.getInputBuffer().append(httpContent)) {
-                        // we don't want this thread/context to reset
-                        // OP_READ on Connection
+                    // We're working with suspended HTTP request
+                    try {
+                        if (!handlerRequest.getInputBuffer().append(httpContent)) {
+                            // we don't want this thread/context to reset
+                            // OP_READ on Connection
 
-                        // we have enough data? - terminate filter chain execution
-                        final NextAction action = ctx.getSuspendAction();
-                        ctx.completeAndRecycle();
-                        return action;
+                            // we have enough data? - terminate filter chain execution
+                            final NextAction action = ctx.getSuspendAction();
+                            ctx.completeAndRecycle();
+                            return action;
+                        }
+                    } finally {
+                        httpContent.recycle();
                     }
-                } finally {
-                    httpContent.recycle();
                 }
+            } finally {
+                threadMarker.setHttpRequestProcessing(false);
             }
         } else { // this code will be run, when we resume the context
             if (Boolean.TRUE.equals(reregisterForReadAttr.remove(ctx))) {

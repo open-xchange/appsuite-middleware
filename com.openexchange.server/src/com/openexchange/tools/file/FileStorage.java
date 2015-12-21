@@ -125,6 +125,8 @@ public class FileStorage {
     }
 
     public InputStream getFile(final String name) throws OXException {
+        Thread thread = Thread.currentThread();
+
         return delegate.getFile(name);
     }
 

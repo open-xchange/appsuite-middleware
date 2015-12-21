@@ -319,66 +319,70 @@ public class LocalFileStorage extends DefaultFileStorage {
      */
     @Override
     public String saveNewFile(final InputStream input) throws OXException {
-    	initialize();
-        String nextentry = null;
-        State state = null;
-        lock(LOCK_TIMEOUT);
-        try {
-            state = loadState();
-            // Look for an empty slot
-            while (nextentry == null && state.hasUnused()) {
-                nextentry = state.getUnused();
-                if (exists(nextentry)) {
-                    nextentry = null;
-                }
-            }
-            // If no empty slot can be found use the next free one.
-            if (nextentry == null) {
-                nextentry = state.getNextEntry();
-                // Does the next entry exist already? Then calculate the next.
-                while (nextentry != null && exists(nextentry)) {
-                    nextentry = computeNextEntry(nextentry);
-                }
-                // No empty slot and no next free slot then scan for an unused
-                // slot.
-                if (nextentry == null) {
-                    final Set<String> unused = scanForUnusedEntries();
-                    if (unused.isEmpty()) {
-                        throw FileStorageCodes.STORE_FULL.create();
-                    }
-                    final Iterator<String> iter = unused.iterator();
-                    nextentry = iter.next();
-                    while (iter.hasNext()) {
-                        state.addUnused(iter.next());
-                    }
-                }
-                // Calculate next slot and store it.
-                final String savenextentry = computeNextEntry(nextentry);
-                if (savenextentry == null) {
-                    state.setNextEntry(nextentry);
-                } else {
-                    state.setNextEntry(savenextentry);
-                }
-            }
-            saveState(state);
-        } finally {
-            unlock();
-        }
-        try {
-            save(nextentry, input);
-        } catch (final OXException ie) {
-            delete(new String[] { nextentry });
+    	try {
+            initialize();
+            String nextentry = null;
+            State state = null;
             lock(LOCK_TIMEOUT);
             try {
                 state = loadState();
-                state.addUnused(nextentry);
+                // Look for an empty slot
+                while (nextentry == null && state.hasUnused()) {
+                    nextentry = state.getUnused();
+                    if (exists(nextentry)) {
+                        nextentry = null;
+                    }
+                }
+                // If no empty slot can be found use the next free one.
+                if (nextentry == null) {
+                    nextentry = state.getNextEntry();
+                    // Does the next entry exist already? Then calculate the next.
+                    while (nextentry != null && exists(nextentry)) {
+                        nextentry = computeNextEntry(nextentry);
+                    }
+                    // No empty slot and no next free slot then scan for an unused
+                    // slot.
+                    if (nextentry == null) {
+                        final Set<String> unused = scanForUnusedEntries();
+                        if (unused.isEmpty()) {
+                            throw FileStorageCodes.STORE_FULL.create();
+                        }
+                        final Iterator<String> iter = unused.iterator();
+                        nextentry = iter.next();
+                        while (iter.hasNext()) {
+                            state.addUnused(iter.next());
+                        }
+                    }
+                    // Calculate next slot and store it.
+                    final String savenextentry = computeNextEntry(nextentry);
+                    if (savenextentry == null) {
+                        state.setNextEntry(nextentry);
+                    } else {
+                        state.setNextEntry(savenextentry);
+                    }
+                }
                 saveState(state);
             } finally {
                 unlock();
             }
-            throw ie;
+            try {
+                save(nextentry, input);
+            } catch (final OXException ie) {
+                delete(new String[] { nextentry });
+                lock(LOCK_TIMEOUT);
+                try {
+                    state = loadState();
+                    state.addUnused(nextentry);
+                    saveState(state);
+                } finally {
+                    unlock();
+                }
+                throw ie;
+            }
+            return nextentry;
+        } finally {
+            Streams.close(input);
         }
-        return nextentry;
     }
 
     /**
@@ -696,11 +700,15 @@ public class LocalFileStorage extends DefaultFileStorage {
      * @throws OXException if the saving fails.
      */
     protected void saveState(final State state) throws OXException {
+        InputStream in = null;
         try {
-            save(STATEFILENAME, state.saveState());
+            in = state.saveState();
+            save(STATEFILENAME, in);
         } catch (final OXException e) {
             delete(new String[] { STATEFILENAME });
             throw e;
+        } finally {
+            Streams.close(in);
         }
     }
 

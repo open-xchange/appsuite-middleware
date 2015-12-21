@@ -96,14 +96,14 @@ public class CompositeFileStorageService implements FileStorageService, ServiceT
             }
         }
         if (null != candidate && candidate.getRanking() >= DEFAULT_RANKING) {
-            return candidate.getFileStorage(uri);
+            return new CloseableTrackingFileStorage(candidate.getFileStorage(uri));
         }
 
         /*
          * Fall back to default implementation
          */
 
-        return getInternalFileStorage(uri);
+        return new CloseableTrackingFileStorage(getInternalFileStorage(uri));
     }
 
     @Override

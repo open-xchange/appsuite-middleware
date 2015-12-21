@@ -54,7 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * {@link CloseableControlService} - The closeable control to register {@link Closeable} instances that are suppoed to be closed on shut-down.
+ * {@link CloseableControlService} - The closeable control to register {@link Closeable} instances that are supposed to be closed on thread termination.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1

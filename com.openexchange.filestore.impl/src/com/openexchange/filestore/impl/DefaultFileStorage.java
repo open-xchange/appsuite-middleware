@@ -204,15 +204,26 @@ public abstract class DefaultFileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         EnhancedRandomAccessFile eraf = eraf(name, true);
+        boolean error = true;
         try {
             if (offset > eraf.length() || -1 != length && length > eraf.length() - offset) {
                 throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, eraf.length());
             }
-            return new RandomAccessFileInputStream(eraf, offset, length);
+            RandomAccessFileInputStream in = new RandomAccessFileInputStream(eraf, offset, length);
+            error = false;
+            return in;
         } catch (FileNotFoundException e) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(e, name);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } finally {
+            if (error) {
+                try {
+                    eraf.close();
+                } catch (Exception e) {
+                    LoggerFactory.getLogger(DefaultFileStorage.class).warn("error closing random access file", e);
+                }
+            }
         }
     }
 
@@ -238,10 +249,11 @@ public abstract class DefaultFileStorage implements FileStorage {
             if (null != eraf) {
                 try {
                     eraf.close();
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LoggerFactory.getLogger(DefaultFileStorage.class).warn("error closing random access file", e);
                 }
             }
+            Streams.close(file);
         }
     }
 

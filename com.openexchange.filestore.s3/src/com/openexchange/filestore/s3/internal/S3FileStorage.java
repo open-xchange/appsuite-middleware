@@ -204,7 +204,7 @@ public class S3FileStorage implements FileStorage {
                 }
             }
         } finally {
-            Streams.close(chunk, chunkedUpload);
+            Streams.close(chunk, chunkedUpload, file);
         }
         return removePrefix(key);
     }
@@ -318,40 +318,44 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        /*
-         * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
-         * http://ceph.com/docs/next/radosgw/s3/#features-support
-         */
-        /*
-         * get existing object
-         */
-        String key = addPrefix(name);
-        S3Object s3Object = getObject(key);
-        long currentLength = s3Object.getObjectMetadata().getContentLength();
-        if (currentLength != offset) {
-            throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
-        }
-        /*
-         * append both streams at temporary location
-         */
-        String tempName = null;
-        SequenceInputStream inputStream = null;
         try {
-            inputStream = new SequenceInputStream(s3Object.getObjectContent(), file);
-            tempName = saveNewFile(inputStream);
+            /*
+                 * TODO: This would be more efficient using the "CopyPartRequest", which is not yet supported by ceph
+                 * http://ceph.com/docs/next/radosgw/s3/#features-support
+                 */
+            /*
+             * get existing object
+             */
+            String key = addPrefix(name);
+            S3Object s3Object = getObject(key);
+            long currentLength = s3Object.getObjectMetadata().getContentLength();
+            if (currentLength != offset) {
+                throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
+            }
+            /*
+             * append both streams at temporary location
+             */
+            String tempName = null;
+            SequenceInputStream inputStream = null;
+            try {
+                inputStream = new SequenceInputStream(s3Object.getObjectContent(), file);
+                tempName = saveNewFile(inputStream);
+            } finally {
+                Streams.close(inputStream);
+            }
+            /*
+             * replace old file, cleanup
+             */
+            try {
+                String tempKey = addPrefix(tempName);
+                amazonS3.copyObject(bucketName, tempKey, bucketName, key);
+                amazonS3.deleteObject(bucketName, tempKey);
+                return getMetadata(key).getContentLength();
+            } catch (AmazonClientException e) {
+                throw wrap(e, key);
+            }
         } finally {
-            Streams.close(inputStream);
-        }
-        /*
-         * replace old file, cleanup
-         */
-        try {
-            String tempKey = addPrefix(tempName);
-            amazonS3.copyObject(bucketName, tempKey, bucketName, key);
-            amazonS3.deleteObject(bucketName, tempKey);
-            return getMetadata(key).getContentLength();
-        } catch (AmazonClientException e) {
-            throw wrap(e, key);
+            Streams.close(file);
         }
     }
 

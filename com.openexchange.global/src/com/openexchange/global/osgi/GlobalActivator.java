@@ -78,7 +78,7 @@ import com.openexchange.session.inspector.internal.ServiceSet;
 import com.openexchange.session.inspector.internal.SessionInspectorChainImpl;
 import com.openexchange.startup.CloseableControlService;
 import com.openexchange.startup.ThreadControlService;
-import com.openexchange.startup.impl.CloseableControl;
+import com.openexchange.startup.impl.ThreadLocalCloseableControl;
 import com.openexchange.startup.impl.ThreadControl;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.CompositeParser;
@@ -142,7 +142,7 @@ public final class GlobalActivator implements BundleActivator {
             context.registerService(PasswordMechFactory.class, passwordMechFactoryImpl, null);
 
             threadControlRegistration = context.registerService(ThreadControlService.class, ThreadControl.getInstance(), null);
-            closeableControlRegistration = context.registerService(CloseableControlService.class, CloseableControl.getInstance(), null);
+            closeableControlRegistration = context.registerService(CloseableControlService.class, ThreadLocalCloseableControl.getInstance(), null);
 
             logger.info("Global bundle successfully started");
         } catch (final Exception e) {

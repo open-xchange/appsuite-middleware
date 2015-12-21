@@ -53,41 +53,40 @@ import java.io.Closeable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ConcurrentMap;
 import com.openexchange.java.Streams;
 import com.openexchange.startup.CloseableControlService;
 
 
 /**
- * {@link CloseableControl} - The singleton Closeable control.
+ * {@link ThreadLocalCloseableControl} - The singleton Closeable control.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class CloseableControl implements CloseableControlService {
+public class ThreadLocalCloseableControl implements CloseableControlService {
 
-    private static final CloseableControlService INSTANCE = new CloseableControl();
+    private static final ThreadLocalCloseableControl INSTANCE = new ThreadLocalCloseableControl();
 
     /**
      * Gets the instance
      *
      * @return The instance
      */
-    public static CloseableControlService getInstance() {
+    public static ThreadLocalCloseableControl getInstance() {
         return INSTANCE;
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
-    private final ConcurrentMap<Thread, Queue<Closeable>> closeables;
+    /** The current closeables */
+    final ThreadLocal<Queue<Closeable>> closeables;
 
     /**
-     * Initializes a new {@link CloseableControl}.
+     * Initializes a new {@link ThreadLocalCloseableControl}.
      */
-    private CloseableControl() {
+    private ThreadLocalCloseableControl() {
         super();
-        closeables = new ConcurrentHashMap<Thread, Queue<Closeable>>(256, 0.9F, 1);
+        closeables = new ThreadLocal<Queue<Closeable>>();
     }
 
     @Override
@@ -96,15 +95,13 @@ public class CloseableControl implements CloseableControlService {
             return false;
         }
 
-        Thread thread = Thread.currentThread();
-        Queue<Closeable> queue = closeables.get(thread);
+        Queue<Closeable> queue = closeables.get();
         if (null == queue) {
             Queue<Closeable> nq = new ConcurrentLinkedQueue<Closeable>();
-            queue = closeables.putIfAbsent(thread, nq);
-            if (null == queue) {
-                queue = nq;
-            }
+            closeables.set(nq);
+            queue = nq;
         }
+
         return queue.offer(closeable);
     }
 
@@ -114,19 +111,23 @@ public class CloseableControl implements CloseableControlService {
             return false;
         }
 
-        Queue<Closeable> queue = closeables.get(Thread.currentThread());
-        return null == queue ? false : queue.remove(closeable);
+        Queue<Closeable> queue = closeables.get();
+        if (null == queue) {
+            return false;
+        }
+
+        return queue.remove(closeable);
     }
 
     @Override
     public Collection<Closeable> getCurrentCloseables() {
-        Queue<Closeable> queue = closeables.get(Thread.currentThread());
+        Queue<Closeable> queue = closeables.get();
         return null == queue ? Collections.<Closeable> emptyList() : Collections.<Closeable> unmodifiableCollection(queue);
     }
 
     @Override
     public void closeAll() {
-        Queue<Closeable> queue = closeables.remove(Thread.currentThread());
+        Queue<Closeable> queue = closeables.get();
         if (null != queue) {
             for (Closeable closeable; (closeable = queue.poll()) != null;) {
                 Streams.close(closeable);
