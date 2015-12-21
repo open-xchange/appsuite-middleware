@@ -193,8 +193,12 @@ public class TransformImageAction implements IFileResponseRendererAction {
                         LOG.warn("(Possible) Image file misses stream data");
                         return file;
                     }
-                    if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
-                        transform = true;
+                    try {
+                        if (ImageTransformationUtility.requiresRotateTransformation(stream)) {
+                            transform = true;
+                        }
+                    } finally {
+                        Streams.close(stream);
                     }
                 }
             }
