@@ -123,10 +123,17 @@ public class UserCopyTask implements CopyUserTaskService {
 
         final UserMapping mapping = new UserMapping();
         try {
-            final User srcUser = service.getUser(srcCon, srcUsrId.intValue(), srcCtx);
+            User srcUser = service.getUser(srcCon, srcUsrId.intValue(), srcCtx);
             if (userExistsInDestinationCtx(dstCtx, srcUser, dstCon)) {
                 throw UserCopyExceptionCodes.USER_ALREADY_EXISTS.create(srcUser.getLoginInfo(), Integer.valueOf(dstCtx.getContextId()));
             }
+
+            int fileStorageOwner = srcUser.getFileStorageOwner();
+            if (fileStorageOwner > 0) {
+                // Cannot copy a user whose files belong to another user in source context
+                throw UserCopyExceptionCodes.FILE_STORAGE_CONFLICT.create(fileStorageOwner, srcCtx.getContextId());
+            }
+
             final int dstUsrId = service.createUser(dstCon, dstCtx, srcUser);
             final User dstUser = service.getUser(dstCon, dstUsrId, dstCtx);
 

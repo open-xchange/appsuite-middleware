@@ -125,7 +125,7 @@ public class RdbUserStorage extends UserStorage {
 
     private static final String SELECT_IMAPLOGIN = "SELECT id FROM user WHERE cid=? AND imapLogin=?";
 
-    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, " + "preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, " + "homeDirectory, loginShell, guestCreatedBy) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_USER = "INSERT INTO user (cid, id, imapServer, imapLogin, mail, mailDomain, mailEnabled, preferredLanguage, shadowLastChange, smtpServer, timeZone, userPassword, contactId, passwordMech, uidNumber, gidNumber, homeDirectory, loginShell, guestCreatedBy, filestore_id, filestore_owner, filestore_name, filestore_login, filestore_passwd, quota_max) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String INSERT_ATTRIBUTES = "INSERT INTO user_attribute (cid, id, name, value, uuid) VALUES (?, ?, ?, ?, ?)";
 
@@ -199,6 +199,25 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         try {
             final int userId = IDGenerator.getId(context, com.openexchange.groupware.Types.PRINCIPAL, con);
+
+            // Check for individual file storage
+            if (user.getFilestoreId() > 0 && user.getFileStorageOwner() <= 0) {
+                // This user is supposed to have his own file storage
+                stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,?,0)");
+                stmt.setInt(1, context.getContextId());
+                stmt.setInt(2, userId);
+                try {
+                    stmt.executeUpdate();
+                } catch (SQLException e) {
+                    if (!Databases.isPrimaryKeyConflictInMySQL(e)) {
+                        throw e;
+                    }
+                    // All fine... Seems that it already exists
+                }
+                closeSQLStuff(stmt);
+            }
+
+            // Insert user...
             stmt = con.prepareStatement(INSERT_USER);
             int i = 1;
             stmt.setInt(i++, context.getContextId());
@@ -233,6 +252,23 @@ public class RdbUserStorage extends UserStorage {
             setStringOrNull(i++, stmt, "/home/" + user.getGivenName());
             setStringOrNull(i++, stmt, "/bin/bash");
             stmt.setInt(i++, user.getCreatedBy());
+
+            // File storage & quota information
+            stmt.setInt(i++, user.getFilestoreId() <= 0 ? 0 : user.getFilestoreId()); // filestore_id
+            stmt.setInt(i++, user.getFileStorageOwner() <= 0 ? 0 : user.getFileStorageOwner()); // filestore_owner
+            setStringOrNull(i++, stmt, Strings.isEmpty(user.getFilestoreName()) ? null : user.getFilestoreName()); // filestore_name
+            {
+                String[] auth = user.getFileStorageAuth();
+                if (null != auth && auth.length == 2) {
+                    setStringOrNull(i++, stmt, auth[0]); // filestore_login
+                    setStringOrNull(i++, stmt, auth[1]); // filestore_password
+                } else {
+                    setStringOrNull(i++, stmt, null); // filestore_login
+                    setStringOrNull(i++, stmt, null); // filestore_password
+                }
+            }
+            stmt.setLong(i++, user.getFileStorageQuota() <= 0 ? 0 : user.getFileStorageQuota()); // quota_max
+
             stmt.executeUpdate();
 
             if (false == user.isGuest()) {
