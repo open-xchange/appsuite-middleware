@@ -61,8 +61,11 @@ public class UserCopyExceptionMessages implements LocalizableStrings {
     // A user named %1$s already exists in destination context %2$s.
     public static final String USER_ALREADY_EXISTS_MSG = "A user named %1$s already exists in destination context %2$s.";
 
+    // The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.
+    public static final String FILE_STORAGE_CONFLICT_MSG = "The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.";
 
     private UserCopyExceptionMessages() {
         super();
     }
+
 }

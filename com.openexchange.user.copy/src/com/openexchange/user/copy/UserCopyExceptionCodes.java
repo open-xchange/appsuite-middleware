@@ -96,6 +96,10 @@ public enum UserCopyExceptionCodes implements DisplayableOXExceptionCode {
      /** A user named %1$s already exists in destination context %2$s. */
     USER_ALREADY_EXISTS("A user named %1$s already exists in destination context %2$s.", Category.CATEGORY_USER_INPUT, 11,
         UserCopyExceptionMessages.USER_ALREADY_EXISTS_MSG),
+
+    /** The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first. */
+    FILE_STORAGE_CONFLICT("The user's files are owned by user %1$s in source context %2$s. Please set individual or context-associated file storage first.", Category.CATEGORY_USER_INPUT, 12,
+       UserCopyExceptionMessages.FILE_STORAGE_CONFLICT_MSG),
     ;
 
     private final String message;
