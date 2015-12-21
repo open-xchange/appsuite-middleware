@@ -125,7 +125,6 @@ public class DovecotPushActivator extends HousekeepingActivator {
     @Override
     protected void stopBundle() throws Exception {
         DovecotPushManagerService.dropInstance();
-        DovecotPushListener.setIfHigherRanked(null);
         Services.setServiceLookup(null);
         super.stopBundle();
     }
