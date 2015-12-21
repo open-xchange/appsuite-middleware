@@ -62,6 +62,7 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
     private volatile String originalName;
     private volatile String appendix;
     private volatile boolean changed;
+    private volatile boolean httpProcessing;
 
     /**
      * Initializes a new {@link CustomThread}.
@@ -78,6 +79,16 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
         originalName = name;
         int pos = originalName.indexOf('-');
         appendix = pos > 0 ? name.substring(pos) : null;
+    }
+
+    @Override
+    public boolean isHttpRequestProcessing() {
+        return httpProcessing;
+    }
+
+    @Override
+    public void setHttpRequestProcessing(boolean httpProcessing) {
+        this.httpProcessing = httpProcessing;
     }
 
     /**
