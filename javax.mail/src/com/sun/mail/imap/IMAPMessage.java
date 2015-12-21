@@ -1269,7 +1269,11 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		// load the entire message by using the superclass
 		// MimeMessage.parse method
 		// first, save the size of the message
-		try {
+        if (null == headerStream) {
+            checkExpunged();
+            throw new MessagingException("Failed to fetch headers");
+        }
+	    try {
 		    size = headerStream.available();
 		} catch (IOException ex) {
 		    // should never occur
