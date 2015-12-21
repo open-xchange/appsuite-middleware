@@ -64,6 +64,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.Utility;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
@@ -198,6 +199,8 @@ public class ImageTransformationUtility {
             return RotateTransformation.getInstance().needsRotation(imageInformation);
         } catch (ImageProcessingException e) {
             LOG.debug("error getting metadata.", e);
+        } finally {
+            Streams.close(in);
         }
 
         // RotateTransformation does nothing if 'ImageInformation' is absent
