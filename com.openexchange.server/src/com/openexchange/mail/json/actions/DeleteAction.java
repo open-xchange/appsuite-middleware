@@ -65,6 +65,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
@@ -117,7 +118,7 @@ public final class DeleteAction extends AbstractMailAction {
         try {
             // Read in parameters
             boolean hardDelete = AJAXRequestDataTools.parseBoolParameter(req.getParameter(AJAXServlet.PARAMETER_HARDDELETE));
-            boolean withFolders = AJAXRequestDataTools.parseBoolParameter(req.getParameter("withFolders"));
+            boolean returnAffectedFolders = AJAXRequestDataTools.parseBoolParameter(req.getParameter("returnAffectedFolders"));
             JSONArray jsonIds = (JSONArray) req.getRequest().requireData();
 
             // Get mail interface
@@ -129,7 +130,7 @@ public final class DeleteAction extends AbstractMailAction {
 
                 // Collect affected mail paths
                 List<MailPath> l = new ArrayList<MailPath>(length);
-                Map<FullnameArgument, FolderInfo> folders = withFolders ? new LinkedHashMap<FullnameArgument, FolderInfo>(length) : null;
+                Map<FullnameArgument, FolderInfo> folders = returnAffectedFolders ? new LinkedHashMap<FullnameArgument, FolderInfo>(length) : null;
                 for (int i = 0; i < length; i++) {
                     JSONObject jId = jsonIds.getJSONObject(i);
                     FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(jId.getString(AJAXServlet.PARAMETER_FOLDERID));
@@ -196,7 +197,7 @@ public final class DeleteAction extends AbstractMailAction {
                     }
                 }
 
-                if (withFolders && null != folders && !folders.isEmpty()) {
+                if (returnAffectedFolders && null != folders && !folders.isEmpty()) {
                     jResponse = new JSONObject(4);
                     jResponse.put("conflicts", new JSONArray(0));
 
