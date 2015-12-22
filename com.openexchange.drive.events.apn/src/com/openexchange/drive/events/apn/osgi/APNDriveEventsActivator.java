@@ -142,7 +142,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }, 1);
                 LOG.info("Successfully registered APN certificate provider for Mac OS.");
             } else {
-                LOG.info("No APN access confgiured for Mac OS, skipping certificate provider registration.");
+                LOG.info("No APN access configured for Mac OS, skipping certificate provider registration.");
             }
             /*
              * register publisher
