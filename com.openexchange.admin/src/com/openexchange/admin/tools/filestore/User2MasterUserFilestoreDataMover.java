@@ -116,7 +116,7 @@ public class User2MasterUserFilestoreDataMover extends FilestoreDataMover {
         Reverter reverter = null;
         try {
             // Check
-            if (masterUser.getFilestoreOwner().intValue() <= 0) {
+            if (masterUser.getFilestoreId().intValue() <= 0) {
                 throw new StorageException("Master user " + masterUserId + " has no individual file storage.");
             }
             if (srcUser.getFilestoreOwner().intValue() > 0 && srcUser.getFilestoreOwner().intValue() != srcUserId) {
