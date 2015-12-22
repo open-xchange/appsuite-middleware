@@ -201,17 +201,12 @@ public final class DeleteAction extends AbstractMailAction {
                     jResponse = new JSONObject(4);
                     jResponse.put("conflicts", new JSONArray(0));
 
-                    JSONArray jFolders = new JSONArray(4);
+                    JSONObject jFolders = new JSONObject(folders.size());
                     for (Entry<FullnameArgument, FolderInfo> infoEntry : folders.entrySet()) {
-                        JSONObject jFolder = new JSONObject(4);
-
                         FullnameArgument fa = infoEntry.getKey();
-                        jFolder.put(com.openexchange.ajax.fields.FolderChildFields.FOLDER_ID, MailFolderUtility.prepareFullname(fa.getAccountId(), fa.getFullName()));
-
+                        String id = MailFolderUtility.prepareFullname(fa.getAccountId(), fa.getFullName());
                         FolderInfo folderInfo = infoEntry.getValue();
-                        jFolder.put("total", folderInfo.total).put("unread", folderInfo.unread);
-
-                        jFolders.put(jFolder);
+                        jFolders.put(id, new JSONObject(4).put("total", folderInfo.total).put("unread", folderInfo.unread));
                     }
                     jResponse.put("folders", jFolders);
                 }
