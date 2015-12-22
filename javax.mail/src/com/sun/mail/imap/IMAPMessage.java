@@ -282,6 +282,48 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    throw new MessageRemovedException();
     }
 
+    // Convenience routine
+    protected void checkExists() throws MessagingException {
+        synchronized (getMessageCacheLock()) { // Acquire Lock
+            try {
+            IMAPProtocol p = getProtocol();
+            checkExpunged(); // insure that message is not expunged
+
+            int seqnum = getSequenceNumber();
+            long uid = getUID();
+            if (uid < 0) {
+                UID u = p.fetchUID(seqnum);
+                if (u == null) {
+                    // Does not exist
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                return;
+            }
+
+            Response[] r = p.fetch(uid, "UID");
+            int len = r.length - 1;
+            Response response = r[len];
+            if (response.isOK()) {
+                UID u = FetchResponse.getItem(r, seqnum, UID.class);
+                if (u == null) {
+                    // Does not exist
+                    throw new MessageRemovedException("Message "+seqnum+" has been removed");
+                }
+                return;
+            } else if (response.isNO()) {
+                // Does not exist
+                throw new MessageRemovedException("Message "+seqnum+" has been removed");
+            }
+            p.handleResult(response);
+            throw new MessageRemovedException("Message "+seqnum+" has been removed");
+            } catch (ConnectionException cex) {
+                throw new FolderClosedException(folder, cex.getMessage(), cex);
+            } catch (ProtocolException pex) {
+                throw new MessagingException(pex.getMessage(), pex);
+            }
+        }
+    }
+
     /**
      * Do a NOOP to force any untagged EXPUNGE responses
      * and then check if this message is expunged.
@@ -1270,7 +1312,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		// MimeMessage.parse method
 		// first, save the size of the message
         if (null == headerStream) {
-            checkExpunged();
+            checkExists();
             throw new MessagingException("Failed to fetch headers");
         }
 	    try {
