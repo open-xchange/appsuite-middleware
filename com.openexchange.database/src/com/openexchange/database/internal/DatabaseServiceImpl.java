@@ -515,17 +515,17 @@ public final class DatabaseServiceImpl implements DatabaseService {
      * {@inheritDoc}
      */
     @Override
-    public Connection getReadOnly(Assignment assignment) throws OXException {
+    public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
         AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
-        return get(assignmentImpl, false, false);
+        return get(assignmentImpl, false, noTimeout);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Connection getWritable(Assignment assignment) throws OXException {
+    public Connection getWritable(Assignment assignment, boolean noTimeout) throws OXException {
         AssignmentImpl assignmentImpl = new AssignmentImpl(assignment);
-        return get(assignmentImpl, true, false);
+        return get(assignmentImpl, true, noTimeout);
     }
 }

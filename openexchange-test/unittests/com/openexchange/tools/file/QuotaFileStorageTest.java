@@ -464,13 +464,13 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
-        public Connection getWritable(Assignment assignment) throws OXException {
+        public Connection getWritable(Assignment assignment, boolean noTimeout) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }
 
         @Override
-        public Connection getReadOnly(Assignment assignment) throws OXException {
+        public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
             // TODO Auto-generated method stub
             return null;
         }

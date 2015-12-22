@@ -316,33 +316,19 @@ public interface DatabaseService extends ConfigDatabaseService, GlobalDatabaseSe
      * Returns a writable connection based on the given {@link Assignment}
      *
      * @param assignment The {@link Assignment} to get a {@link Connection} for
+     * @param noTimeout Flag if the writable {@link Connection} should have a timeout or not
      * @return a writable connection to the database of the specified {@link Assignment}
      * @throws OXException
      */
-    Connection getWritable(Assignment assignment) throws OXException;
-
-    /**
-     * Returns a writable connection to the database of the given {@link Assignment} to the pool.
-     *
-     * @param assignment The writable assignment to return the connection for.
-     * @param connection writable connection to return.
-     */
-//    void backWritable(Assignment assignment, Connection connection) throws OXException;
+    Connection getWritable(Assignment assignment, boolean noTimeout) throws OXException;
 
     /**
      * Returns a read only connection based on the given {@link Assignment}
      *
      * @param assignment The {@link Assignment} to get a {@link Connection} for
+     * @param noTimeout Flag if the writable {@link Connection} should have a timeout or not
      * @return a read only connection to the database of the specified {@link Assignment}
      * @throws OXException
      */
-    Connection getReadOnly(Assignment assignment) throws OXException;
-
-    /**
-     * Returns a read only connection to the database of the given {@link Assignment} to the pool.
-     *
-     * @param assignment The read only assignment to return the connection for.
-     * @param connection Read only connection to return.
-     */
-//    void backReadOnly(Assignment assignment, Connection connection) throws OXException;
+    Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException;
 }
