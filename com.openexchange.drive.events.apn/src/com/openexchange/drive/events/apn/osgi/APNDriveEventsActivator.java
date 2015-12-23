@@ -111,7 +111,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }, 1);
                 LOG.info("Successfully registered APN certificate provider for iOS.");
             } else {
-                LOG.info("No APN access confgiured for iOS, skipping certificate provider registration.");
+                LOG.info("No APN access configured for iOS, skipping certificate provider registration.");
             }
             /*
              * register publisher
