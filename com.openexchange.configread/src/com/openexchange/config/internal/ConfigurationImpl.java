@@ -177,7 +177,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private final Map<File, byte[]> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
-    private final Map<String, String> yamlPaths;
+    private final Map<String, File> yamlPaths;
 
     private final Map<File, byte[]> xmlFiles;
 
@@ -207,7 +207,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
         yamlFiles = new HashMap<File, byte[]>(64);
-        yamlPaths = new HashMap<String, String>(64);
+        yamlPaths = new HashMap<String, File>(64);
         dirs = new File[directories.length];
         xmlFiles = new HashMap<File, byte[]>(2048);
         loadConfiguration(directories);
@@ -217,9 +217,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
         }
+
         // First filter+processor pair
-        final FileFilter fileFilter = new PropertyFileFilter();
-        final FileProcessor processor = new FileProcessor() {
+        FileFilter fileFilter = new PropertyFileFilter();
+        FileProcessor processor = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
@@ -227,8 +228,9 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
+
         // Second filter+processor pair
-        final FileFilter fileFilter2 = new FileFilter() {
+        FileFilter fileFilter2 = new FileFilter() {
 
             @Override
             public boolean accept(final File pathname) {
@@ -237,11 +239,13 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
-        final FileProcessor processor2 = new FileProcessor() {
+        final Map<String, File> yamlPaths = this.yamlPaths;
+        final Map<File, byte[]> yamlFiles = this.yamlFiles;
+        FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
-                yamlPaths.put(file.getName(), file.getPath());
+                yamlPaths.put(file.getName(), file);
                 yamlFiles.put(file, readFile(file).getBytes());
             }
 
@@ -255,6 +259,7 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         };
 
+        final Map<File, byte[]> xmlFiles = this.xmlFiles;
         FileProcessor processor3 = new FileProcessor() {
 
             @Override
@@ -697,7 +702,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
-    private String readFile(final File file) {
+    String readFile(final File file) {
         Reader reader = null;
         try {
             reader = new InputStreamReader(new FileInputStream(file));
@@ -720,15 +725,38 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public Object getYaml(final String filename) {
-        String path = yamlPaths.get(filename);
+        if (null == filename) {
+            return null;
+        }
+
+        boolean isPath = filename.indexOf(File.separatorChar) >= 0;
+        if (isPath) {
+            FileNameMatcher matcher = PATH_MATCHER;
+            for (Map.Entry<File, byte[]> entry : yamlFiles.entrySet()) {
+                if (matcher.matches(filename, entry.getKey())) {
+                    try {
+                        return Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8));
+                    } catch (YamlException e) {
+                        // Failed to load .yml file
+                        throw new IllegalStateException("Failed to load YAML file '" + entry.getKey() + "'. Reason:" + e.getMessage(), e);
+                    }
+                }
+            }
+
+            // No such YAML file
+            return null;
+        }
+
+        // Look-up by file name
+        File path = yamlPaths.get(filename);
         if (path == null) {
             path = yamlPaths.get(filename + ".yml");
-        }
-        if (path == null) {
-            path = yamlPaths.get(filename + ".yaml");
-        }
-        if (path == null) {
-            return null;
+            if (path == null) {
+                path = yamlPaths.get(filename + ".yaml");
+                if (path == null) {
+                    return null;
+                }
+            }
         }
 
         try {
@@ -979,7 +1007,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return reloadableServices.values();
     }
 
-    private byte[] getHash(File file) {
+    byte[] getHash(File file) {
         byte[] retval = null;
         MessageDigest md;
         try {
