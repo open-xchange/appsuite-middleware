@@ -717,7 +717,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                 // Allow inline images
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             } else {
-                                attrBuilder.append(' ').append(attr).append("=\"\"");
+                                attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
                                 imageURLFound = true;
                                 // return;
                             }
@@ -745,7 +745,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                             // Allow inline images
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         } else {
-                                            attrBuilder.append(' ').append(attr).append("=\"\"");
+                                            attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
                                             imageURLFound = true;
                                             // return;
                                         }
