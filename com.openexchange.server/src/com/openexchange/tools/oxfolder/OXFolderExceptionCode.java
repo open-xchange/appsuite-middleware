@@ -577,6 +577,10 @@ public enum OXFolderExceptionCode implements DisplayableOXExceptionCode  {
      * The folder name \"%1$s\" is reserved. Please choose another name.
      */
     NO_RESERVED_FOLDER("The folder name \"%1$s\" is reserved. Please choose another name.", OXFolderExceptionMessage.NO_RESERVED_FOLDER_MSG, Category.CATEGORY_PERMISSION_DENIED, 93),
+    /**
+     * The permissions of trash folder %1$s must not be changed in context %2$s.
+     */
+    NO_TRASH_PERMISSIONS_CHANGE_ALLOWED("The permissions of trash folder %1$s must not be changed in context %2$s.", OXFolderExceptionMessage.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG, Category.CATEGORY_PERMISSION_DENIED, 94)
 
     ;
 

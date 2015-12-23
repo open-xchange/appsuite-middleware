@@ -840,6 +840,29 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
             new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), lastModified);
         }
+
+        OXFolderAccess folderAccess = getOXFolderAccess();
+        if (containsPermissions) {
+            FolderObject trashFolder = getTrashFolder(storageObj.getModule());
+            if (null != trashFolder) {
+                boolean belowTrash;
+                int trashFolderID = trashFolder.getObjectID();
+                if (storageObj.getObjectID() == trashFolderID || storageObj.getParentFolderID() == trashFolderID) {
+                    belowTrash = true;
+                } else {
+                    FolderObject p = storageObj;
+                    while (p.getParentFolderID() != trashFolderID && FolderObject.MIN_FOLDER_ID < p.getParentFolderID()) {
+                        p = folderAccess.getFolderObject(p.getParentFolderID());
+                    }
+                    belowTrash = p.getParentFolderID() == trashFolderID;
+                }
+
+                if (belowTrash && !OXFolderUtility.equalPermissions(fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray())) {
+                    throw OXFolderExceptionCode.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
+                }
+            }
+        }
+
         boolean rename = false;
         if (fo.containsFolderName() && !storageObj.getFolderName().equals(fo.getFolderName())) {
             rename = true;
@@ -869,7 +892,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                          */
                         final int fuid = iter.next();
                         if (fuid != fo.getObjectID()) {
-                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuid);
+                            allSharedFolders[i] = folderAccess.getFolderObject(fuid);
                         }
                     }
                 } catch (final DataTruncation e) {
@@ -1444,8 +1467,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 /*
                  * trash folder available, check if folder already located below trash
                  */
-                int trashFolderID = trashFolder.getObjectID();
                 boolean belowTrash;
+                int trashFolderID = trashFolder.getObjectID();
                 if (parentFolder.getObjectID() == trashFolderID || parentFolder.getParentFolderID() == trashFolderID) {
                     belowTrash = true;
                 } else {

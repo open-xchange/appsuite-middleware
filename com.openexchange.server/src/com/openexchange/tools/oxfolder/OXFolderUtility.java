@@ -112,6 +112,38 @@ public final class OXFolderUtility {
     }
 
     /**
+     * Checks equality of specified permissions.
+     *
+     * @param permissions1 The first permissions
+     * @param permissions2 The second permissions
+     * @return <code>true</code> if both permissions are equal; otherwise <code>false</code>
+     */
+    public static boolean equalPermissions(OCLPermission[] permissions1, OCLPermission[] permissions2) {
+        if (null == permissions1) {
+            return null == permissions2;
+        }
+        if (null == permissions2) {
+            return false;
+        }
+        if (permissions1.length != permissions2.length) {
+            return false;
+        }
+        for (OCLPermission permission : permissions1) {
+            boolean found = false;
+            for (int i = 0; !found && i < permissions2.length; i++) {
+                OCLPermission other = permissions2[i];
+                if (permission.getEntity() == other.getEntity() && permission.equalsPermission(other)) {
+                    found = true;
+                }
+            }
+            if (!found) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * Gets the appropriate accessible module for DB folder queries.
      *
      * @param accessibleModules The accessible modules as indicated by user configuration

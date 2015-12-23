@@ -167,8 +167,15 @@ public class FolderTestManager implements TestManager{
     /**
      * Updates a folder via HTTP-API and returns the same folder for convenience
      */
-    public FolderObject updateFolderOnServer(final FolderObject folder) {
-        final UpdateRequest request = new UpdateRequest(EnumAPI.OX_OLD, folder);
+    public FolderObject updateFolderOnServer(FolderObject folder) {
+        return updateFolderOnServer(folder, true);
+    }
+
+    /**
+     * Updates a folder via HTTP-API and returns the same folder for convenience
+     */
+    public FolderObject updateFolderOnServer(FolderObject folder, boolean failOnError) {
+        final UpdateRequest request = new UpdateRequest(EnumAPI.OX_OLD, folder, failOnError);
         try {
             setLastResponse(client.execute(request));
             remember(folder);

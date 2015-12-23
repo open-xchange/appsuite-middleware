@@ -129,4 +129,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     // You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
     public static final String INVALID_ENTITY_FROM_USER_MSG = "You are not allowed to share the folder to \"%2$s\"";
 
+    // You are not allowed to change the permissions of the trash folder or any of its subfolders
+    public static final String NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG = "You are not allowed to change the permissions of the trash folder or any of its subfolders";
+
 }
