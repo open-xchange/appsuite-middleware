@@ -916,16 +916,18 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
             msg.setSentDate(env.date);
         }
 
-        private InternetAddress[] wrap(final InternetAddress... addresses) {
+        private InternetAddress[] wrap(InternetAddress... addresses) {
             if (null == addresses || 0 == addresses.length) {
                 return null;
             }
-            final int length = addresses.length;
-            final InternetAddress[] ret = new InternetAddress[length];
-            for (int i = 0; i < length; i++) {
+
+            int length = addresses.length;
+            InternetAddress[] ret = new InternetAddress[length];
+            for (int i = length; i-- > 0;) {
                 try {
                     ret[i] = new QuotedInternetAddress(addresses[i].toString());
-                } catch (final AddressException e) {
+                } catch (AddressException e) {
+                    // Use as-is
                     ret[i] = addresses[i];
                 }
             }

@@ -393,9 +393,9 @@ public class CompositingFileAccessTest extends AbstractCompositingIDBasedFileAcc
             File.Field.TITLE,
             File.Field.ID,
             File.Field.FOLDER_ID,
-            File.Field.LAST_MODIFIED), folderId.getFolderId(), File.Field.TITLE, SortDirection.DESC, 10, 20);
+            File.Field.LAST_MODIFIED), folderId.getFolderId(), false, File.Field.TITLE, SortDirection.DESC, 10, 20);
 
-        search("query", Arrays.asList(File.Field.TITLE), folderId.toUniqueID(), File.Field.TITLE, SortDirection.DESC, 10, 20);
+        search("query", Arrays.asList(File.Field.TITLE), folderId.toUniqueID(), false, File.Field.TITLE, SortDirection.DESC, 10, 20);
 
         verifyAccount();
 

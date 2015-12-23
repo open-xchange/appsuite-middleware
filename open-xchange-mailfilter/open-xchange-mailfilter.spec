@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -77,6 +77,8 @@ fi
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
 
 %changelog
+* Fri Dec 11 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-12-21 (2953)
 * Tue Dec 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-12-07 (2918)
 * Thu Nov 19 2015 Marcus Klein <marcus.klein@open-xchange.com>

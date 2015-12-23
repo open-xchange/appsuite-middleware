@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 11
+%define        ox_release 12
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -58,6 +58,12 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2492
     ox_add_property com.openexchange.http.grizzly.maxHttpHeaderSize 8192 $PFILE
+
+    # SoftwareChange_Request-2864
+    ox_add_property com.openexchange.http.grizzly.keepAlive true $PFILE
+    ox_add_property com.openexchange.http.grizzly.tcpNoDelay true $PFILE
+    ox_add_property com.openexchange.http.grizzly.readTimeoutMillis 60000 $PFILE
+    ox_add_property com.openexchange.http.grizzly.writeTimeoutMillis 60000 $PFILE
 fi
 
 %clean
@@ -73,6 +79,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Fri Dec 11 2015 Marc Arens <marc.arens@open-xchange.com>
+Build for patch 2015-12-21 (2953)
 * Tue Dec 08 2015 Marc Arens <marc.arens@open-xchange.com>
 Build for patch 2015-12-07 (2918)
 * Thu Nov 19 2015 Marc Arens <marc.arens@open-xchange.com>

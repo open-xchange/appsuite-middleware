@@ -47,45 +47,44 @@
  *
  */
 
-package com.openexchange.quota.json.actions;
+package com.openexchange.java;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.Quota;
-import com.openexchange.quota.json.QuotaAJAXRequest;
-import com.openexchange.server.ServiceLookup;
-
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
- * {@link FilestoreAction}
+ * {@link Reflections} - A helper class for Java Reflection.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-@Action(method = RequestMethod.GET, name = "filestore", description = "Get the filestore usage data", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
-}, responseDescription = "A JSON Object containing the fields \"use\" and \"quota\". \"use\" represents the uploaded files sizes sum and the field \"quota\" represents the maximum.")
-public final class FilestoreAction extends AbstractQuotaAction {
+public class Reflections {
 
     /**
-     * Initializes a new {@link FilestoreAction}.
-     *
-     * @param services The OSGi service look-up
+     * Initializes a new {@link Reflections}.
      */
-    public FilestoreAction(final ServiceLookup services) {
-        super(services);
+    private Reflections() {
+        super();
     }
 
-    @Override
-    protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
-    	Quota storageQuota = req.getStorageQuota();
-        JSONObject data = new JSONObject(4).put("quota", storageQuota.getLimit()).put("use", storageQuota.getUsage());
-        return new AJAXRequestResult(data, "json");
+    /**
+     * Forces the specified <code>private final</code> field to be accessible.
+     * <p>
+     * As described in <a href="http://zarnekow.blogspot.de/2013/01/java-hacks-changing-final-fields.html">Sebastian Zarnekow's Blog</a>.
+     *
+     * @param field The field
+     * @throws NoSuchFieldException If associated class' <code>"modifiers"</code> cannot be accessed
+     * @throws SecurityException If the request is denied.
+     * @throws IllegalAccessException If new class' <code>"modifiers"</code> cannot be set
+     * @throws IllegalArgumentException If new class' <code>"modifiers"</code> cannot be set
+     */
+    public static void makeModifiable(Field field) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
+        field.setAccessible(true);
+        int modifiers = field.getModifiers();
+        Field modifierField = field.getClass().getDeclaredField("modifiers");
+        modifiers = modifiers & ~Modifier.FINAL;
+        modifierField.setAccessible(true);
+        modifierField.setInt(field, modifiers);
     }
 
 }

@@ -85,7 +85,7 @@ import com.openexchange.folderstorage.StoragePriority;
 import com.openexchange.folderstorage.StorageType;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
-import com.openexchange.folderstorage.internal.TransactionManager;
+import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.type.FileStorageType;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;

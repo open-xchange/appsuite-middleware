@@ -52,12 +52,15 @@ package com.openexchange.quota.json;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
+
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -77,10 +80,6 @@ public final class QuotaAJAXRequest {
 
     private final AJAXRequestData request;
 
-    private QuotaFileStorage qfs;
-
-    private OXException fsException;
-
     private TimeZone timeZone;
 
     /**
@@ -88,36 +87,40 @@ public final class QuotaAJAXRequest {
      *
      * @param session The session
      * @param request The request
+     * @param services A service lookup reference
      */
-    public QuotaAJAXRequest(final AJAXRequestData request, final ServerSession session) {
+    public QuotaAJAXRequest(final AJAXRequestData request, final ServerSession session, ServiceLookup services) {
         super();
-        try {
-            final Context ctx = session.getContext();
-            this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-        } catch (final OXException e) {
-            this.fsException = e;
-        }
         this.request = request;
         this.session = session;
         timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
     }
 
-    /**
-     * Gets the qfs
-     *
-     * @return The qfs
-     */
-    public QuotaFileStorage getQfs() {
-        return qfs;
+    private QuotaFileStorage getFileStorage(int userId, int contextId) throws OXException {
+        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+        if (null == storageService) {
+            throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+        }
+        return storageService.getQuotaFileStorage(userId, contextId);
     }
 
     /**
-     * Gets the fsException
+     * Gets the STORAGE quota from file storage.
      *
-     * @return The fsException
+     * @return The STORAGE quota
+     * @throws OXException If STORAGE quota cannot be returned
      */
-    public OXException getFsException() {
-        return fsException;
+    public com.openexchange.file.storage.Quota getStorageQuota() throws OXException {
+        long limit = com.openexchange.file.storage.Quota.UNLIMITED;
+        long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+
+        QuotaFileStorage fileStorage = getFileStorage(session.getUserId(), session.getContextId());
+        limit = fileStorage.getQuota();
+        if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+            usage = fileStorage.getUsage();
+        }
+
+        return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
     }
 
     /**

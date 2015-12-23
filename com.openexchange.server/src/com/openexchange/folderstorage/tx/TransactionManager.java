@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.folderstorage.internal;
+package com.openexchange.folderstorage.tx;
 
 import java.sql.Connection;
 import java.sql.SQLException;

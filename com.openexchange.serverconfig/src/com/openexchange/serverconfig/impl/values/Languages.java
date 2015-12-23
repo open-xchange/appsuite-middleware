@@ -49,6 +49,7 @@
 
 package com.openexchange.serverconfig.impl.values;
 
+import java.io.File;
 import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,8 +57,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ComputedServerConfigValueService;
@@ -81,7 +80,7 @@ public class Languages implements ComputedServerConfigValueService {
         super();
 
         ConfigurationService config = services.getService(ConfigurationService.class);
-        Properties properties = config.getPropertiesInFolder("languages/appsuite");
+        Properties properties = config.getPropertiesInFolder("languages" + File.separatorChar + "appsuite");
 
         languages = new ArrayList<SimpleEntry<String,String>>();
         for (Object key : properties.keySet()) {
