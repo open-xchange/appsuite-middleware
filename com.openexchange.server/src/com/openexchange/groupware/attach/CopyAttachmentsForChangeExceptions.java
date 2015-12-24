@@ -60,6 +60,7 @@ import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.session.ServerSession;
 
@@ -97,8 +98,13 @@ public class CopyAttachmentsForChangeExceptions implements CalendarListener {
                 copy.setFolderId(folderId);
                 copy.setModuleId(Types.APPOINTMENT);
 
-                final InputStream is = attachmentBase.getAttachedFile(session, folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
-                attachmentBase.attachToObject(copy, is, session, ctx, userObject, userConfig);
+                InputStream is = null;
+                try {
+                    is = attachmentBase.getAttachedFile(session, folderId, exception.getObjectID(), Types.APPOINTMENT, attachment.getId(), ctx, userObject, userConfig);
+                    attachmentBase.attachToObject(copy, is, session, ctx, userObject, userConfig);
+                } finally {
+                    Streams.close(is);
+                }
             }
             attachmentBase.commit();
         } catch (final OXException x) {

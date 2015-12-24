@@ -163,14 +163,10 @@ public final class GetDocumentAction extends AbstractAttachmentAction {
                 }
             }
             /*
-             * Get input stream
+             * Get input stream & write to sink
              */
-            final InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
-            /*-
-             *
-             * Read from stream
-             */
-            final ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
+            InputStream documentData = ATTACHMENT_BASE.getAttachedFile(session, folderId, attachedId, moduleId, id, ctx, user, userConfig);
             try {
                 fileHolder.write(documentData);
             } finally {

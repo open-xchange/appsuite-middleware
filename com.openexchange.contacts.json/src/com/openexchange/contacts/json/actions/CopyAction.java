@@ -49,6 +49,7 @@
 
 package com.openexchange.contacts.json.actions;
 
+import java.io.InputStream;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -67,6 +68,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Streams;
 import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -153,14 +155,13 @@ public class CopyAction extends ContactAction {
                     copy.setFolderId(folderId);
                     copy.setAttachedId(contactObj.getObjectID());
                     copy.setId(AttachmentBase.NEW);
-                    attachmentBase.attachToObject(copy, attachmentBase.getAttachedFile(
-                        session, origFolderId,
-                        origObjectId,
-                        Types.CONTACT,
-                        orig.getId(),
-                        ctx,
-                        user,
-                        uc), session, ctx, user, uc);
+                    InputStream file = null;
+                    try {
+                        file = attachmentBase.getAttachedFile(session, origFolderId, origObjectId, Types.CONTACT, orig.getId(), ctx, user, uc);
+                        attachmentBase.attachToObject(copy, file, session, ctx, user, uc);
+                    } finally {
+                        Streams.close(file);
+                    }
                 } while (iterator.hasNext());
                 attachmentBase.commit();
             } catch (final SearchIteratorException e) {

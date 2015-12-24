@@ -70,6 +70,7 @@ import com.openexchange.groupware.attach.AttachmentMetadata;
 import com.openexchange.groupware.attach.util.GetSwitch;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -144,30 +145,27 @@ public class SaveAsAction extends AbstractWriteAction {
         });
 
         file.setId(FileStorageFileAccess.NEW);
-        final InputStream fileData = attachments.getAttachedFile(
-            session, folderId,
-            attachedId,
-            moduleId,
-            attachment,
-            session.getContext(),
-            user,
-            userConfiguration);
-        /*
-         * save attachment in storage, ignoring potential warnings
-         */
-        List<Field> modifiedColumns = null != sentColumns ? new ArrayList<Field>(sentColumns) : new ArrayList<Field>();
-        modifiedColumns.add(Field.FILENAME);
-        modifiedColumns.add(Field.FILE_SIZE);
-        modifiedColumns.add(Field.FILE_MIMETYPE);
-        modifiedColumns.add(Field.TITLE);
-        modifiedColumns.add(Field.DESCRIPTION);
-        String newID = fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
-        AJAXRequestResult result = new AJAXRequestResult(newID, new Date(file.getSequenceNumber()));
-        List<OXException> warnings = fileAccess.getAndFlushWarnings();
-        if (null != warnings && 0 < warnings.size()) {
-            result.addWarnings(warnings);
+        InputStream fileData = attachments.getAttachedFile(session, folderId, attachedId, moduleId, attachment, session.getContext(), user, userConfiguration);
+        try {
+            /*
+             * save attachment in storage, ignoring potential warnings
+             */
+            List<Field> modifiedColumns = null != sentColumns ? new ArrayList<Field>(sentColumns) : new ArrayList<Field>();
+            modifiedColumns.add(Field.FILENAME);
+            modifiedColumns.add(Field.FILE_SIZE);
+            modifiedColumns.add(Field.FILE_MIMETYPE);
+            modifiedColumns.add(Field.TITLE);
+            modifiedColumns.add(Field.DESCRIPTION);
+            String newID = fileAccess.saveDocument(file, fileData, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
+            AJAXRequestResult result = new AJAXRequestResult(newID, new Date(file.getSequenceNumber()));
+            List<OXException> warnings = fileAccess.getAndFlushWarnings();
+            if (null != warnings && 0 < warnings.size()) {
+                result.addWarnings(warnings);
+            }
+            return result;
+        } finally {
+            Streams.close(fileData);
         }
-        return result;
     }
 
     protected AttachmentField getMatchingAttachmentField(final File.Field fileField) {

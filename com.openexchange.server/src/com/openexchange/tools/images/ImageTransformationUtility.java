@@ -63,6 +63,7 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
@@ -257,6 +258,8 @@ public class ImageTransformationUtility {
             return RotateTransformation.getInstance().needsRotation(imageInformation);
         } catch (ImageProcessingException e) {
             LOG.debug("error getting metadata.", e);
+        } finally {
+        	Streams.close(in);
         }
 
         // RotateTransformation does nothing if 'ImageInformation' is absent

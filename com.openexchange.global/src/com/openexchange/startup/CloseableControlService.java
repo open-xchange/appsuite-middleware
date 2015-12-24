@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2012 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,74 @@
  *
  */
 
-package com.openexchange.marker;
+package com.openexchange.startup;
 
+import java.io.Closeable;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
- * {@link OXThreadMarker} - The interface to mark such <code>Thread</code>s that are spawned by Open-Xchange Server's thread pool.
+ * {@link CloseableControlService} - The closeable control to register {@link Closeable} instances that are supposed to be closed on thread termination.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface OXThreadMarker {
+public interface CloseableControlService {
 
     /**
-     * Checks whether this thread is processing an HTTP request
-     *
-     * @return <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * The dummy <code>Closeable</code> control that does nothing at all.
      */
-    boolean isHttpRequestProcessing();
+    public static final CloseableControlService DUMMY_CONTROL = new CloseableControlService() {
+
+        @Override
+        public boolean removeCloseable(Closeable closeable) {
+            return false;
+        }
+
+        @Override
+        public void closeAll() {
+            // Nothing to do
+        }
+
+        @Override
+        public Collection<Closeable> getCurrentCloseables() {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public boolean addCloseable(Closeable closeable) {
+            return false;
+        }
+    };
+
+    // -------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Sets whether this thread is processing an HTTP request
+     * Adds specified <code>Closeable</code> to this control
      *
-     * @param httpProcessing <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * @param closeable The <code>Closeable</code> to add
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
      */
-    void setHttpRequestProcessing(boolean httpProcessing);
+    boolean addCloseable(Closeable closeable);
+
+    /**
+     * Removes specified <code>Closeable</code> from this control
+     *
+     * @param closeable The <code>Closeable</code> to remove
+     * @return <code>true</code> if successfully removed; otherwise <code>false</code> if no such <code>Closeable</code> is present in this control
+     */
+    boolean removeCloseable(Closeable closeable);
+
+    /**
+     * Gets the (unmodifiable) {@link Collection} view on currently managed <code>Closeable</code> instances.
+     *
+     * @return The currently managed <code>Closeable</code> instances
+     */
+    Collection<Closeable> getCurrentCloseables();
+
+    /**
+     * Closes & removes all currently managed <code>Closeable</code> instances.
+     */
+    void closeAll();
+
 }

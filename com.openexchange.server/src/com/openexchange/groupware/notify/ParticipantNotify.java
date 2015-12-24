@@ -52,6 +52,7 @@ package com.openexchange.groupware.notify;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -138,6 +139,7 @@ import com.openexchange.i18n.tools.replacement.StringReplacement;
 import com.openexchange.i18n.tools.replacement.TaskActionReplacement;
 import com.openexchange.i18n.tools.replacement.TaskPriorityReplacement;
 import com.openexchange.i18n.tools.replacement.TaskStatusReplacement;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
@@ -1081,7 +1083,12 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                             /*
                              * Set content through a DataHandler
                              */
-                            bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachmentBase.getAttachedFile(session, folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config), ct)));
+                            InputStream in = attachmentBase.getAttachedFile(session, folderId, objectId, Types.APPOINTMENT, metadata.getId(), context, user, config);
+                            try {
+                                bodyPart.setDataHandler(new DataHandler(new MessageDataSource(in, ct)));
+                            } finally {
+                                Streams.close(in);
+                            }
                             final String fileName = metadata.getFilename();
                             if (fileName != null && !ct.containsNameParameter()) {
                                 ct.setNameParameter(fileName);

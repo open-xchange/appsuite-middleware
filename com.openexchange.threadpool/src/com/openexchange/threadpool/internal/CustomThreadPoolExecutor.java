@@ -49,6 +49,7 @@
 
 package com.openexchange.threadpool.internal;
 
+import java.io.Closeable;
 import java.io.File;
 import java.util.AbstractCollection;
 import java.util.Arrays;
@@ -80,6 +81,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.LockSupport;
 import java.util.concurrent.locks.ReentrantLock;
@@ -87,11 +89,13 @@ import org.cliffc.high_scale_lib.NonBlockingHashMap;
 import org.slf4j.MDC;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.log.LogProperties;
+import com.openexchange.startup.CloseableControlService;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.MdcProvider;
 import com.openexchange.threadpool.Task;
 import com.openexchange.threadpool.TaskWrapper;
 import com.openexchange.threadpool.ThreadRenamer;
+import com.openexchange.threadpool.osgi.ThreadPoolActivator;
 import com.openexchange.threadpool.osgi.ThreadPoolServiceRegistry;
 
 /**
@@ -242,6 +246,8 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CustomThreadPoolExecutor.class);
 
     static final Object PRESENT = new Object();
+
+    private static final AtomicReference<CloseableControlService> REF_CLOSEABLE_CONTROL = ThreadPoolActivator.REF_CLOSEABLE_CONTROL;
 
     /**
      * Only used to force toArray() to produce a Runnable[].
@@ -1632,6 +1638,7 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
     @Override
     protected void afterExecute(final Runnable r, final Throwable throwable) {
         super.afterExecute(r, throwable);
+        closeCloseables();
         deleteTempFiles();
         MDC.clear(); // Drop possible log properties
         if (r instanceof CustomFutureTask<?>) {
@@ -2500,6 +2507,16 @@ public final class CustomThreadPoolExecutor extends ThreadPoolExecutor implement
         @Override
         public void run() {
             delegate.run();
+        }
+    }
+
+    /**
+     * Closes tracked {@link Closeable} instances.
+     */
+    static void closeCloseables() {
+        CloseableControlService closeableControl = REF_CLOSEABLE_CONTROL.get();
+        if (null != closeableControl) {
+            closeableControl.closeAll();
         }
     }
 

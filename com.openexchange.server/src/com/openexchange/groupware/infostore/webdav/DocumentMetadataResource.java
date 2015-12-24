@@ -72,6 +72,7 @@ import com.openexchange.groupware.infostore.utils.SetSwitch;
 import com.openexchange.groupware.infostore.webdav.URLCache.Type;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -696,7 +697,11 @@ public class DocumentMetadataResource extends AbstractResource implements
 			throws WebdavProtocolException {
 		final InputStream in = getBody();
 		if (in != null) {
-			copy.putBody(in);
+			try {
+                copy.putBody(in);
+            } finally {
+                Streams.close(in);
+            }
 		}
 	}
 

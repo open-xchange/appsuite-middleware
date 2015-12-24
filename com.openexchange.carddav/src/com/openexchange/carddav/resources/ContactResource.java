@@ -356,27 +356,29 @@ public class ContactResource extends CardDAVResource {
          * retrieve an original vCard if available
          */
         InputStream originalVCard = null;
-        String vCardID = contact.getVCardId();
-        if (null != vCardID) {
-            int contextId = factory.getSession().getContextId();
-            VCardStorageService vCardStorage = factory.getVCardStorageService(contextId);
-            if (null != vCardStorage) {
-                try {
-                    originalVCard = vCardStorage.getVCard(vCardID, contextId);
-                } catch (OXException oxException) {
-                    LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, contextId, oxException);
-                }
-            }
-        }
-        /*
-         * export current contact data & return resulting vCard stream
-         */
-        VCardParameters parameters = factory.getVCardService().createParameters(factory.getSession());
         try {
-            VCardExport vCardExport = factory.getVCardService().exportContact(contact, originalVCard, parameters);
-            return vCardExport.getClosingStream();
-        } catch (OXException e) {
-            throw protocolException(e);
+	        String vCardID = contact.getVCardId();
+	        if (null != vCardID) {
+	            int contextId = factory.getSession().getContextId();
+	            VCardStorageService vCardStorage = factory.getVCardStorageService(contextId);
+	            if (null != vCardStorage) {
+	                try {
+	                    originalVCard = vCardStorage.getVCard(vCardID, contextId);
+	                } catch (OXException oxException) {
+	                    LOG.warn("Error while retrieving VCard with id {} in context {} from storage.", vCardID, contextId, oxException);
+	                }
+	            }
+	        }
+	        /*
+	         * export current contact data & return resulting vCard stream
+	         */
+	        VCardParameters parameters = factory.getVCardService().createParameters(factory.getSession());
+	        try {
+	            VCardExport vCardExport = factory.getVCardService().exportContact(contact, originalVCard, parameters);
+	            return vCardExport.getClosingStream();
+	        } catch (OXException e) {
+	            throw protocolException(e);
+	        }
         } finally {
             Streams.close(originalVCard);
         }

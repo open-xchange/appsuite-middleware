@@ -71,6 +71,7 @@ import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserStorage;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
+import com.openexchange.java.Streams;
 import com.openexchange.login.Interface;
 import com.openexchange.monitoring.MonitoringInfo;
 import com.openexchange.session.Session;
@@ -269,6 +270,7 @@ public final class attachments extends OXServlet {
 
         Session sessionObj = null;
 
+        InputStream is = null;
         try {
             sessionObj = getSession(req);
 
@@ -309,33 +311,20 @@ public final class attachments extends OXServlet {
                 }
             }
 
+            Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
+            User u = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
+
             ATTACHMENT_BASE.startTransaction();
-            final Context ctx = ContextStorage.getInstance().getContext(sessionObj.getContextId());
-            final User u = UserStorage.getInstance().getUser(sessionObj.getUserId(), ctx);
-            final AttachmentMetadata attachmentMeta = ATTACHMENT_BASE.getAttachment(
-                sessionObj, folder_id,
-                target_id,
-                module,
-                object_id,
-                ctx,
-                u,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
-            final InputStream is = ATTACHMENT_BASE.getAttachedFile(
-                sessionObj, folder_id,
-                target_id,
-                module,
-                object_id,
-                ctx,
-                u,
-                UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
+            AttachmentMetadata attachmentMeta = ATTACHMENT_BASE.getAttachment(sessionObj, folder_id, target_id, module, object_id, ctx, u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
+            is = ATTACHMENT_BASE.getAttachedFile(sessionObj, folder_id, target_id, module, object_id, ctx, u, UserConfigurationStorage.getInstance().getUserConfigurationSafe(sessionObj.getUserId(), ctx));
             ATTACHMENT_BASE.commit();
             resp.setContentType(attachmentMeta.getFileMIMEType());
 
-            final byte b[] = new byte[8192];
-            int i = is.read(b);
-            while (i > 0) {
-                os.write(b, 0, i);
-                i = is.read(b);
+            byte[] b = new byte[8192];
+            int numBytes = is.read(b);
+            while (numBytes > 0) {
+                os.write(b, 0, numBytes);
+                numBytes = is.read(b);
             }
         } catch (final OXException exc) {
             if (exc.isGeneric(Generic.CONFLICT)) {
@@ -351,6 +340,7 @@ public final class attachments extends OXServlet {
             doError(resp, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Server Error: " + exc.toString());
             rollbackTransaction();
         } finally {
+            Streams.close(is);
             finishTransaction();
         }
     }

@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.database.impl.versioncontrol;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,6 +74,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
 import com.openexchange.groupware.infostore.database.impl.DocumentMetadataImpl;
+import com.openexchange.java.Streams;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 
 /**
@@ -301,20 +303,26 @@ public final class VersionControlUtil {
         // Move versions to new file storage
         for (DocumentMetadata version : versions) {
             String copiedLocation;
-            try {
-                copiedLocation = destFs.saveNewFile(srcFs.getFile(version.getFilestoreLocation()));
-            } catch (OXException e) {
-                for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
-                    Integer documentId = documentEntry.getKey();
-                    List<VersionControlResult> versionInfo = documentEntry.getValue();
+            {
+                InputStream in = null;
+                try {
+                    in = srcFs.getFile(version.getFilestoreLocation());
+                    copiedLocation = destFs.saveNewFile(in);
+                } catch (OXException e) {
+                    for (Map.Entry<Integer, List<VersionControlResult>> documentEntry : resultMap.entrySet()) {
+                        Integer documentId = documentEntry.getKey();
+                        List<VersionControlResult> versionInfo = documentEntry.getValue();
 
-                    try {
-                        VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), context, con);
-                    } catch (Exception x) {
-                        LOG.error("Failed to restore file storage locations for document {} in context {}", documentId, context.getContextId(), x);
+                        try {
+                            VersionControlUtil.restoreVersionControl(Collections.singletonMap(documentId, versionInfo), context, con);
+                        } catch (Exception x) {
+                            LOG.error("Failed to restore file storage locations for document {} in context {}", documentId, context.getContextId(), x);
+                        }
                     }
+                    throw e;
+                } finally {
+                    Streams.close(in);
                 }
-                throw e;
             }
             srcFs.deleteFile(version.getFilestoreLocation());
             results.add(new VersionControlResult(srcFs, destFs, version.getVersion(), version.getFilestoreLocation(), copiedLocation));
@@ -400,7 +408,16 @@ public final class VersionControlUtil {
             List<VersionControlRestored> restoreds = new LinkedList<VersionControlRestored>();
             for (VersionControlResult result : entry.getValue()) {
                 QuotaFileStorage destFs = result.getDestFileStorage();
-                String restoredLocation = result.getSourceFileStorage().saveNewFile(destFs.getFile(result.getDestLocation()));
+                String restoredLocation;
+                {
+                    InputStream in = null;
+                    try {
+                        in = destFs.getFile(result.getDestLocation());
+                        restoredLocation = result.getSourceFileStorage().saveNewFile(in);
+                    } finally {
+                        Streams.close(in);
+                    }
+                }
                 destFs.deleteFile(result.getDestLocation());
                 restoreds.add(new VersionControlRestored(result.getVersion(), restoredLocation));
             }

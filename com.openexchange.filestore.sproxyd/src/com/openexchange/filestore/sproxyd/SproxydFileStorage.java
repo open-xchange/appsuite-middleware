@@ -91,9 +91,13 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public String saveNewFile(InputStream file) throws OXException {
-        UUID documentId = UUID.randomUUID();
-        upload(documentId, file, 0);
-        return UUIDs.getUnformattedString(documentId);
+        try {
+            UUID documentId = UUID.randomUUID();
+            upload(documentId, file, 0);
+            return UUIDs.getUnformattedString(documentId);
+        } finally {
+            Streams.close(file);
+        }
     }
 
     @Override
@@ -102,9 +106,11 @@ public class SproxydFileStorage implements FileStorage {
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+
         if (1 == chunks.size()) {
             return client.get(chunks.get(0).getScalityId());
         }
+
         return new SproxydBufferedInputStream(chunks, client);
     }
 
@@ -178,16 +184,20 @@ public class SproxydFileStorage implements FileStorage {
 
     @Override
     public long appendToFile(InputStream file, String name, long offset) throws OXException {
-        UUID documentId = UUIDs.fromUnformattedString(name);
-        Chunk lastChunk = chunkStorage.getLastChunk(documentId);
-        if (null == lastChunk) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+        try {
+            UUID documentId = UUIDs.fromUnformattedString(name);
+            Chunk lastChunk = chunkStorage.getLastChunk(documentId);
+            if (null == lastChunk) {
+                throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            }
+            long currentSize = lastChunk.getOffset() + lastChunk.getLength();
+            if (offset != currentSize) {
+                throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
+            }
+            return upload(documentId, file, offset);
+        } finally {
+            Streams.close(file);
         }
-        long currentSize = lastChunk.getOffset() + lastChunk.getLength();
-        if (offset != currentSize) {
-            throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
-        }
-        return upload(documentId, file, offset);
     }
 
     @Override
@@ -229,10 +239,12 @@ public class SproxydFileStorage implements FileStorage {
         if (0 >= offset && 0 >= length) {
             return getFile(name);
         }
+
         List<Chunk> chunks = chunkStorage.getChunks(UUIDs.fromUnformattedString(name));
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+
         if (1 == chunks.size()) {
             /*
              * download parts of a single chunk
@@ -244,19 +256,19 @@ public class SproxydFileStorage implements FileStorage {
             long rangeStart = 0 < offset ? offset : 0;
             long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
             return client.get(chunk.getScalityId(), rangeStart, rangeEnd);
-        } else {
-            /*
-             * download from multiple chunks
-             */
-            Chunk lastChunk = chunks.get(chunks.size() - 1);
-            long totalLength = lastChunk.getOffset() + lastChunk.getLength();
-            if (offset > totalLength || -1 != length && length > totalLength - offset) {
-                throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
-            }
-            long rangeStart = 0 < offset ? offset : 0;
-            long rangeEnd = (0 < length ? rangeStart + length : totalLength) - 1;
-            return new SproxydBufferedInputStream(chunks, client, rangeStart, rangeEnd);
         }
+
+        /*
+         * download from multiple chunks
+         */
+        Chunk lastChunk = chunks.get(chunks.size() - 1);
+        long totalLength = lastChunk.getOffset() + lastChunk.getLength();
+        if (offset > totalLength || -1 != length && length > totalLength - offset) {
+            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
+        }
+        long rangeStart = 0 < offset ? offset : 0;
+        long rangeEnd = (0 < length ? rangeStart + length : totalLength) - 1;
+        return new SproxydBufferedInputStream(chunks, client, rangeStart, rangeEnd);
     }
 
     /**

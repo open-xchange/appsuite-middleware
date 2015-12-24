@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,25 +49,83 @@
 
 package com.openexchange.marker;
 
+import java.io.Closeable;
+import com.openexchange.startup.impl.ThreadLocalCloseableControl;
 
 /**
- * {@link OXThreadMarker} - The interface to mark such <code>Thread</code>s that are spawned by Open-Xchange Server's thread pool.
+ * {@link OXThreadMarkers} - Utility class for {@link OXThreadMarker}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface OXThreadMarker {
+public class OXThreadMarkers {
 
     /**
-     * Checks whether this thread is processing an HTTP request
-     *
-     * @return <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * Initializes a new {@link OXThreadMarkers}.
      */
-    boolean isHttpRequestProcessing();
+    private OXThreadMarkers() {
+        super();
+    }
 
     /**
-     * Sets whether this thread is processing an HTTP request
+     * Checks if current thread is processing an HTTP request.
      *
-     * @param httpProcessing <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * @return <code>true</code> if is processing an HTTP request; otherwise <code>false</code>
      */
-    void setHttpRequestProcessing(boolean httpProcessing);
+    public static boolean isHttpRequestProcessing() {
+        return isHttpRequestProcessing(Thread.currentThread());
+    }
+
+    /**
+     * Checks if specified thread is processing an HTTP request.
+     *
+     * @param t The thread to check
+     * @return <code>true</code> if is processing an HTTP request; otherwise <code>false</code>
+     */
+    public static boolean isHttpRequestProcessing(Thread t) {
+        return ((t instanceof OXThreadMarker) && ((OXThreadMarker) t).isHttpRequestProcessing());
+    }
+
+    /**
+     * Remembers specified {@code Closeable} instance.
+     *
+     * @param closeable The {@code Closeable} instance
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
+     */
+    public static boolean rememberCloseable(Closeable closeable) {
+        if (null == closeable) {
+            return false;
+        }
+
+        try {
+            return ThreadLocalCloseableControl.getInstance().addCloseable(closeable);
+        } catch (Exception e) {
+            // Ignore
+        }
+        return false;
+    }
+
+    /**
+     * Remembers specified {@code Closeable} instance if current thread is processing an HTTP request.
+     *
+     * @param closeable The {@code Closeable} instance
+     * @return <code>true</code> if successfully added; otherwise <code>false</code>
+     */
+    public static boolean rememberCloseableIfHttpRequestProcessing(Closeable closeable) {
+        if (null == closeable) {
+            return false;
+        }
+
+        Thread t = Thread.currentThread();
+        if ((t instanceof OXThreadMarker) && ((OXThreadMarker) t).isHttpRequestProcessing()) {
+            try {
+                return ThreadLocalCloseableControl.getInstance().addCloseable(closeable);
+            } catch (Exception e) {
+                // Ignore
+            }
+        }
+
+        return false;
+    }
+
 }

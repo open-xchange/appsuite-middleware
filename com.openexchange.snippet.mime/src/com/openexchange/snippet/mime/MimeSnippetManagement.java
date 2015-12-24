@@ -345,18 +345,23 @@ public final class MimeSnippetManagement implements SnippetManagement {
                 stmt = null;
             }
             MimeMessage mimeMessage;
-            try {
-                QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
-                InputStream in = fileStorage.getFile(file);
-                mimeMessage = new MimeMessage(getDefaultSession(), in);
-            } catch (OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
+            {
+                InputStream in = null;
+                try {
+                    QuotaFileStorage fileStorage = getFileStorage(session.getContextId());
+                    in = fileStorage.getFile(file);
+                    mimeMessage = new MimeMessage(getDefaultSession(), in);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
 
-                // Obviously associated file does no more exist
-                deleteSnippetSafe(identifier, userId, contextId);
-                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+                    // Obviously associated file does no more exist
+                    deleteSnippetSafe(identifier, userId, contextId);
+                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+                } finally {
+                    Streams.close(in);
+                }
             }
             com.openexchange.mail.mime.converters.MimeMessageConverter.saveChanges(mimeMessage);
             final DefaultSnippet snippet = new DefaultSnippet().setId(identifier).setCreatedBy(creator);
@@ -625,16 +630,22 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             // Create MIME message from existing file
             MimeMessage storageMessage;
-            try {
-                storageMessage = new MimeMessage(getDefaultSession(), fileStorage.getFile(oldFile));
-            } catch (OXException e) {
-                if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
-                    throw e;
-                }
+            {
+                InputStream in = null;
+                try {
+                    in = fileStorage.getFile(oldFile);
+                    storageMessage = new MimeMessage(getDefaultSession(), in);
+                } catch (OXException e) {
+                    if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                        throw e;
+                    }
 
-                // Obviously associated file does no more exist
-                deleteSnippetSafe(identifier, userId, contextId);
-                throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+                    // Obviously associated file does no more exist
+                    deleteSnippetSafe(identifier, userId, contextId);
+                    throw SnippetExceptionCodes.SNIPPET_NOT_FOUND.create(e, identifier);
+                } finally {
+                    Streams.close(in);
+                }
             }
             final ContentType storageContentType;
             {

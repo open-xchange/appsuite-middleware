@@ -47,27 +47,92 @@
  *
  */
 
-package com.openexchange.marker;
+package com.openexchange.startup.impl;
+
+import java.io.Closeable;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
+import com.openexchange.startup.CloseableControlService;
 
 
 /**
- * {@link OXThreadMarker} - The interface to mark such <code>Thread</code>s that are spawned by Open-Xchange Server's thread pool.
+ * {@link ThreadLocalCloseableControl} - The singleton Closeable control.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public interface OXThreadMarker {
+public class ThreadLocalCloseableControl implements CloseableControlService {
+
+    private static final ThreadLocalCloseableControl INSTANCE = new ThreadLocalCloseableControl();
 
     /**
-     * Checks whether this thread is processing an HTTP request
+     * Gets the instance
      *
-     * @return <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * @return The instance
      */
-    boolean isHttpRequestProcessing();
+    public static ThreadLocalCloseableControl getInstance() {
+        return INSTANCE;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------ //
+
+    /** The current closeables */
+    final ThreadLocal<Queue<Closeable>> closeables;
 
     /**
-     * Sets whether this thread is processing an HTTP request
-     *
-     * @param httpProcessing <code>true</code> if processing an HTTP request; otherwise <code>false</code>
+     * Initializes a new {@link ThreadLocalCloseableControl}.
      */
-    void setHttpRequestProcessing(boolean httpProcessing);
+    private ThreadLocalCloseableControl() {
+        super();
+        closeables = new ThreadLocal<Queue<Closeable>>();
+    }
+
+    @Override
+    public boolean addCloseable(Closeable closeable) {
+        if (null == closeable) {
+            return false;
+        }
+
+        Queue<Closeable> queue = closeables.get();
+        if (null == queue) {
+            Queue<Closeable> nq = new ConcurrentLinkedQueue<Closeable>();
+            closeables.set(nq);
+            queue = nq;
+        }
+
+        return queue.offer(closeable);
+    }
+
+    @Override
+    public boolean removeCloseable(Closeable closeable) {
+        if (null == closeable) {
+            return false;
+        }
+
+        Queue<Closeable> queue = closeables.get();
+        if (null == queue) {
+            return false;
+        }
+
+        return queue.remove(closeable);
+    }
+
+    @Override
+    public Collection<Closeable> getCurrentCloseables() {
+        Queue<Closeable> queue = closeables.get();
+        return null == queue ? Collections.<Closeable> emptyList() : Collections.<Closeable> unmodifiableCollection(queue);
+    }
+
+    @Override
+    public void closeAll() {
+        Queue<Closeable> queue = closeables.get();
+        if (null != queue) {
+            for (Closeable closeable; (closeable = queue.poll()) != null;) {
+                Streams.close(closeable);
+            }
+        }
+    }
+
 }

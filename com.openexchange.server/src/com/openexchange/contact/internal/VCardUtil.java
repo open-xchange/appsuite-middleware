@@ -89,13 +89,13 @@ public class VCardUtil {
     public static VCardExport exportContact(Contact contact, Session session) throws OXException {
         VCardService vCardService = ServerServiceRegistry.getInstance().getService(VCardService.class, true);
         InputStream originalVCard = null;
-        if (null != contact.getVCardId()) {
-            VCardStorageService vCardStorageService = getVCardStorageService(session.getContextId());
-            if (vCardStorageService != null) {
-                originalVCard = vCardStorageService.getVCard(contact.getVCardId(), session.getContextId());
-            }
-        }
         try {
+            if (null != contact.getVCardId()) {
+                VCardStorageService vCardStorageService = getVCardStorageService(session.getContextId());
+                if (vCardStorageService != null) {
+                    originalVCard = vCardStorageService.getVCard(contact.getVCardId(), session.getContextId());
+                }
+            }
             return vCardService.exportContact(contact, originalVCard, vCardService.createParameters(session));
         } finally {
             Streams.close(originalVCard);
