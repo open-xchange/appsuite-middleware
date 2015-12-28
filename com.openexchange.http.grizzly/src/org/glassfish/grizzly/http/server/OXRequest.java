@@ -181,6 +181,9 @@ public class OXRequest extends Request {
                 removeInvalidSessionCookie(requestedSessionId);
             }
             if (session != null) {
+                if (isRequestedSessionIdFromURL() && !hasSessionCookie(requestedSessionId)) {
+                    response.addCookie(createSessionCookie(session.getIdInternal()));
+                }
                 return session;
             }
         }
@@ -323,6 +326,21 @@ public class OXRequest extends Request {
         }
 
         return jSessionIdCookie;
+    }
+
+    private boolean hasSessionCookie(String sessionID) {
+        Cookie[] cookies = getCookies();
+        if (null == cookies || cookies.length <= 0) {
+            return false;
+        }
+
+        for (Cookie cookie : cookies) {
+            if (Globals.SESSION_COOKIE_NAME.equals(cookie.getName()) && sessionID.equals(cookie.getValue())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
