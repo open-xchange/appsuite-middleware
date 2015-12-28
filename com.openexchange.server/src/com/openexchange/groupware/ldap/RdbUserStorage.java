@@ -56,13 +56,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import static com.openexchange.tools.sql.DBUtils.startTransaction;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -86,6 +79,7 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionStrings;
 import com.openexchange.exception.OXExceptions;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -106,6 +100,13 @@ import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.user.internal.mapping.UserField;
 import com.openexchange.user.internal.mapping.UserMapper;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * This class implements the user storage using a relational database instead
@@ -254,20 +255,30 @@ public class RdbUserStorage extends UserStorage {
             stmt.setInt(i++, user.getCreatedBy());
 
             // File storage & quota information
-            stmt.setInt(i++, user.getFilestoreId() <= 0 ? 0 : user.getFilestoreId()); // filestore_id
-            stmt.setInt(i++, user.getFileStorageOwner() <= 0 ? 0 : user.getFileStorageOwner()); // filestore_owner
-            setStringOrNull(i++, stmt, Strings.isEmpty(user.getFilestoreName()) ? null : user.getFilestoreName()); // filestore_name
-            {
-                String[] auth = user.getFileStorageAuth();
-                if (null != auth && auth.length == 2) {
-                    setStringOrNull(i++, stmt, auth[0]); // filestore_login
-                    setStringOrNull(i++, stmt, auth[1]); // filestore_password
-                } else {
-                    setStringOrNull(i++, stmt, null); // filestore_login
-                    setStringOrNull(i++, stmt, null); // filestore_password
+            int filestoreId = user.getFilestoreId();
+            if (filestoreId > 0) {
+                stmt.setInt(i++, filestoreId); // filestore_id
+                stmt.setInt(i++, user.getFileStorageOwner() <= 0 ? 0 : user.getFileStorageOwner()); // filestore_owner
+                setStringOrNull(i++, stmt, FileStorages.getNameForUser(userId, context.getContextId())); // filestore_name; e.g. "1337_ctx_17_user_store"
+                {
+                    String[] auth = user.getFileStorageAuth();
+                    if (null != auth && auth.length == 2) {
+                        setStringOrNull(i++, stmt, auth[0]); // filestore_login
+                        setStringOrNull(i++, stmt, auth[1]); // filestore_password
+                    } else {
+                        setStringOrNull(i++, stmt, null); // filestore_login
+                        setStringOrNull(i++, stmt, null); // filestore_password
+                    }
                 }
+                stmt.setLong(i++, user.getFileStorageQuota() <= 0 ? 0 : user.getFileStorageQuota()); // quota_max
+            } else {
+                stmt.setInt(i++, 0); // filestore_id
+                stmt.setInt(i++, 0); // filestore_owner
+                setStringOrNull(i++, stmt, null); // filestore_name
+                setStringOrNull(i++, stmt, null); // filestore_login
+                setStringOrNull(i++, stmt, null); // filestore_password
+                stmt.setLong(i++, 0); // quota_max
             }
-            stmt.setLong(i++, user.getFileStorageQuota() <= 0 ? 0 : user.getFileStorageQuota()); // quota_max
 
             stmt.executeUpdate();
 
