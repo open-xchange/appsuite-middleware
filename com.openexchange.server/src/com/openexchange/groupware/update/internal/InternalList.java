@@ -593,6 +593,9 @@ public final class InternalList {
         // Corrects values in the 'created_from' column for folders nested below/underneath personal 'Trash' folder
         list.add(new com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask());
 
+        // Checks and drops obsolete tables possibly created for managing POP3 accounts
+        list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
