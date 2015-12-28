@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -98,7 +97,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
         if (null == ifCommand) {
             return null;
         }
-        final List<ActionCommand> actionCommands = ifCommand.getActioncommands();
+        final List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (final ActionCommand actionCommand : actionCommands) {
             final JSONObject object = new JSONObject();
             createJSONFromActionCommand(object, actionCommand);
@@ -108,23 +107,25 @@ final class ActionCommandMapper implements Mapper<Rule> {
     }
 
     @Override
-    public boolean isNull(final Rule obj) {
+    public boolean isNull(Rule obj) {
         return (null == obj.getIfCommand());
     }
 
     @Override
-    public void setAttribute(final Rule rule, final Object obj) throws JSONException, SieveException, OXException {
-        final JSONArray jarray = (JSONArray) obj;
-        final IfCommand ifCommand = rule.getIfCommand();
+    public void setAttribute(Rule rule, Object obj) throws JSONException, SieveException, OXException {
+        IfCommand ifCommand = rule.getIfCommand();
         if (null == ifCommand) {
             throw new SieveException("There is no if command where the action command can be applied to in rule " + rule);
         }
+
         // Delete all existing actions, this is especially needed if this is used by update
-        ifCommand.setActioncommands(null);
-        for (int i = 0; i < jarray.length(); i++) {
-            final JSONObject object = jarray.getJSONObject(i);
-            final ActionCommand actionCommand = createActionCommandFromJSON(object);
-            ifCommand.addActioncommands(actionCommand);
+        ifCommand.setActionCommands(null);
+        JSONArray jarray = (JSONArray) obj;
+        int jLength = jarray.length();
+        for (int i = 0; i < jLength; i++) {
+            JSONObject object = jarray.getJSONObject(i);
+            ActionCommand actionCommand = createActionCommandFromJSON(object);
+            ifCommand.addActionCommand(actionCommand);
         }
     }
 

@@ -147,7 +147,7 @@ public class InternalVisitor implements SieveParserVisitor {
                         ifCommand.setTestcommand(command);
                     } else if (jjtAccept instanceof ArrayList) {
                         final ArrayList command = (ArrayList) jjtAccept;
-                        ifCommand.setActioncommands(command);
+                        ifCommand.setActionCommands(command);
                     }
                 }
                 final ArrayList<Command> commands = new ArrayList<Command>();
@@ -238,7 +238,7 @@ public class InternalVisitor implements SieveParserVisitor {
                         actionCommands.add(actionCommand);
                         final IfOrElseIfCommand ifCommand = new IfCommand();
                         ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
-                        ifCommand.setActioncommands(actionCommands);
+                        ifCommand.setActionCommands(actionCommands);
                         final ArrayList<Command> commands = new ArrayList<Command>();
                         commands.add(ifCommand);
                         ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));

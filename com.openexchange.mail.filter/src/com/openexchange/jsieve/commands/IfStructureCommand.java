@@ -50,18 +50,32 @@ package com.openexchange.jsieve.commands;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 
+/**
+ * {@link IfStructureCommand}
+ */
 public abstract class IfStructureCommand extends ControlCommand {
 
-    private List<ActionCommand> actioncommands;
+    private List<ActionCommand> actionCommands;
 
+    /**
+     * Initializes a new {@link IfStructureCommand}.
+     */
     protected IfStructureCommand() {
+        super();
     }
 
-    protected IfStructureCommand(final List<ActionCommand> actioncommands) {
-        this.actioncommands = actioncommands;
+    /**
+     * Initializes a new {@link IfStructureCommand}.
+     *
+     * @param actionCommands The initial action commands
+     */
+    protected IfStructureCommand(final List<ActionCommand> actionCommands) {
+        super();
+        this.actionCommands = sort(actionCommands);
     }
 
     /**
@@ -69,40 +83,113 @@ public abstract class IfStructureCommand extends ControlCommand {
      *
      * @return The first command or <code>null</code> (if there is no action command available)
      */
-    public final Commands getFirstCommand() {
-        final List<ActionCommand> thisActionCommands = this.actioncommands;
+    public Commands getFirstCommand() {
+        final List<ActionCommand> thisActionCommands = this.actionCommands;
         return null == thisActionCommands ? null : (thisActionCommands.isEmpty() ? null : thisActionCommands.get(0).getCommand());
     }
 
     /**
-     * Gets the action command
+     * Gets the action commands associated with this <code>"if"</code> command.
      *
-     * @return The list of action command; never <code>null</code>
+     * @return The list of action commands; never <code>null</code>
      */
-    public final List<ActionCommand> getActioncommands() {
-        final List<ActionCommand> thisActionCommands = this.actioncommands;
+    public List<ActionCommand> getActionCommands() {
+        List<ActionCommand> thisActionCommands = this.actionCommands;
         return null == thisActionCommands ? Collections.<ActionCommand> emptyList() : thisActionCommands;
     }
 
-    public final void setActioncommands(final List<ActionCommand> actioncommands) {
-        this.actioncommands = actioncommands;
+    /**
+     * Sets the action commands for this <code>"if"</code> command (replacing any existing commands).
+     *
+     * @param commands The action commands to set
+     */
+    public void setActionCommands(final List<ActionCommand> commands) {
+        this.actionCommands = sort(commands);
     }
 
     /**
-     * @param o
-     * @return
-     * @see java.util.List#add(java.lang.Object)
+     * Adds specified action command to this <code>"if"</code> command.
+     *
+     * @param command The action command to add
      */
-    public boolean addActioncommands(final ActionCommand o) {
-        if (null == this.actioncommands) {
-            this.actioncommands = new ArrayList<ActionCommand>();
+    public void addActionCommand(final ActionCommand command) {
+        List<ActionCommand> actionCommands = this.actionCommands;
+        if (null == actionCommands) {
+            actionCommands = new ArrayList<ActionCommand>();
+            this.actionCommands = actionCommands;
         }
-        return this.actioncommands.add(o);
+        actionCommands.add(command);
+        this.actionCommands = sort(actionCommands);
     }
 
     @Override
     public String toString() {
-        return (null != this.actioncommands) ? this.actioncommands.toString() : null;
+        List<ActionCommand> actionCommands = this.actionCommands;
+        return (null == actionCommands) ? "<empty>" : actionCommands.toString();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Sorts specified action commands associated with an <tt>"if"</tt> command.
+     * <p>
+     * Ensures a <tt>"fileinto"</tt> happens after any message-modifying command (e.g. <tt>"addflag"</tt>, <tt>"addheader"</tt>, <tt>"deleteheader"</tt>)
+     * while trying to maintain the order of other commands.
+     *
+     * @param actionCommands The action commands to sort
+     * @return The sorted action commands
+     */
+    protected static List<ActionCommand> sort(List<ActionCommand> actionCommands) {
+        if (null == actionCommands) {
+            return actionCommands;
+        }
+
+        int size = actionCommands.size();
+        if (size <= 1) {
+            return actionCommands;
+        }
+
+        int msize = size - 1;
+        boolean keepOn = true;
+        int start = 0;
+        while (keepOn) {
+            keepOn = false;
+
+            for (int i = start; i <= msize; i++) {
+                ActionCommand actionCommand1 = actionCommands.get(i);
+                if (isFileInto(actionCommand1)) {
+                    if (i < msize) {
+                        int swap = -1;
+                        for (int j = i+1; j <= msize; j++) {
+                            ActionCommand actionCommand2 = actionCommands.get(j);
+                            if (isMessageOp(actionCommand2)) {
+                                swap = j;
+                                j = size;
+                            }
+                        }
+
+                        if (swap >= 0) {
+                            actionCommands.add(i, actionCommands.remove(swap));
+                            keepOn = true;
+                            start = i + 1;
+                            i = size;
+                        }
+                    }
+                }
+            }
+        }
+
+        return actionCommands;
+    }
+
+    private static boolean isFileInto(ActionCommand actionCommand) {
+        return ActionCommand.Commands.FILEINTO.equals(actionCommand.getCommand());
+    }
+
+    private static final EnumSet<ActionCommand.Commands> MESSAGE_OPS = EnumSet.of(ActionCommand.Commands.ADDFLAG, ActionCommand.Commands.ADDHEADER, ActionCommand.Commands.DELETEHEADER);
+
+    private static boolean isMessageOp(ActionCommand actionCommand) {
+        return MESSAGE_OPS.contains(actionCommand.getCommand());
     }
 
 }

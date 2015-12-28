@@ -91,7 +91,7 @@ public abstract class IfOrElseIfCommand extends IfStructureCommand {
     public HashSet<String> getRequired() {
         final HashSet<String> retval = new HashSet<String>();
         retval.addAll(this.testcommand.getRequired());
-        for (final ActionCommand actionCommand : super.getActioncommands()) {
+        for (final ActionCommand actionCommand : super.getActionCommands()) {
             retval.addAll(actionCommand.getRequired());
         }
         return retval;

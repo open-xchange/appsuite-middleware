@@ -528,7 +528,7 @@ public final class SieveTextFilter {
             if (command instanceof IfStructureCommand) {
                 i += 2;
                 final IfStructureCommand ifstructure = (IfStructureCommand) command;
-                i += getActionCommandSize(ifstructure.getActioncommands());
+                i += getActionCommandSize(ifstructure.getActionCommands());
                 i++;
             } else {
                 i++;

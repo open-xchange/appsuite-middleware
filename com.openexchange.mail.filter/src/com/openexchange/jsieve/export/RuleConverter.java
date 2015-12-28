@@ -299,7 +299,7 @@ public class RuleConverter {
                         tcommand.jjtAddChild(arguments, 0);
 
                         // ... and finally the actioncommand block
-                        final ASTblock tblock = createActionBlockForTest(ifcommand.getActioncommands(), js, rule.getLinenumber());
+                        final ASTblock tblock = createActionBlockForTest(ifcommand.getActionCommands(), js, rule.getLinenumber());
                         tcommand.jjtAddChild(tblock, 1);
                         tcommands.jjtAddChild(tcommand, o);
                     } else if (command instanceof ElseCommand) {
@@ -312,7 +312,7 @@ public class RuleConverter {
                         tcommand.jjtAddChild(arguments, 0);
 
                         // ... and finally the actioncommand block
-                        final ASTblock tblock = createActionBlockForTest(elsecommand.getActioncommands(), js, rule.getLinenumber());
+                        final ASTblock tblock = createActionBlockForTest(elsecommand.getActionCommands(), js, rule.getLinenumber());
                         tcommand.jjtAddChild(tblock, 1);
                         tcommands.jjtAddChild(tcommand, o);
                     } else if (command instanceof ActionCommand) {

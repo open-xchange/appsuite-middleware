@@ -163,6 +163,37 @@ public final class MailFilterServiceImpl implements MailFilterService {
         useSIEVEResponseCodes = Boolean.parseBoolean(config.getProperty(MailFilterProperties.Values.USE_SIEVE_RESPONSE_CODES.property));
     }
 
+    /**
+     * Closes given <tt>SieveHandler</tt> instance
+     *
+     * @param sieveHandler The <tt>SieveHandler</tt> instance to close
+     * @throws OXException If closing fails
+     */
+    private void closeSieveHandler(SieveHandler sieveHandler) throws OXException {
+        if (null != sieveHandler) {
+            try {
+                sieveHandler.close();
+            } catch (UnsupportedEncodingException e) {
+                throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
+            } catch (IOException e) {
+                throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
+            }
+        }
+    }
+
+    /**
+     * Gets the active Sieve script or an empty string if no active script is available
+     * <p>
+     * <b>Must only be called when holding lock!</b>
+     *
+     * @param sieveHandler The Sieve handler to use
+     * @return The action Siege script or an empty string
+     */
+    private String getScript(SieveHandler sieveHandler) throws OXSieveHandlerException, UnsupportedEncodingException, IOException {
+        String activeScript = sieveHandler.getActiveScript();
+        return null != activeScript ? sieveHandler.getScript(activeScript) : "";
+    }
+
     @Override
     public final int createFilterRule(Credentials credentials, Rule rule) throws OXException {
         Object lock = lockFor(credentials);
@@ -209,15 +240,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.handleSieveException(e);
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -256,15 +279,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -275,7 +290,6 @@ public final class MailFilterServiceImpl implements MailFilterService {
         synchronized (lock) {
             SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
-
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
 
@@ -307,15 +321,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.handleSieveException(e);
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -335,6 +341,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
+            } finally {
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -346,8 +354,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String activeScript = sieveHandler.getActiveScript();
-                return (null != activeScript) ? sieveHandler.getScript(activeScript) : "";
+                return getScript(sieveHandler);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
             } catch (IOException e) {
@@ -359,23 +366,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (RuntimeException re) {
                 throw MailFilterExceptionCode.PROBLEM.create(re, re.getMessage());
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * @see com.openexchange.mailfilter.MailFilterService#listRules(com.openexchange.mailfilter.Credentials)
-     */
     @Override
     public List<Rule> listRules(Credentials credentials, FilterType flag) throws OXException {
         Object lock = lockFor(credentials);
@@ -383,8 +378,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String activeScript = sieveHandler.getActiveScript();
-                String script = null != activeScript ? sieveHandler.getScript(activeScript) : "";
+                String script = getScript(sieveHandler);
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -403,15 +397,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -423,8 +409,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
             try {
                 handlerConnect(sieveHandler, credentials.getSubject());
-                String activeScript = sieveHandler.getActiveScript();
-                String script = null != activeScript ? sieveHandler.getScript(activeScript) : "";
+                String script = getScript(sieveHandler);
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
@@ -445,15 +430,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -498,15 +475,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (IOException e) {
                 throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e, sieveHandler.getSieveHost(), Integer.valueOf(sieveHandler.getSievePort()));
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -549,15 +518,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.handleSieveException(e);
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
@@ -574,15 +535,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
             } catch (OXSieveHandlerException e) {
                 throw MailFilterExceptionCode.handleParsingException(e, credentials, useSIEVEResponseCodes);
             } finally {
-                if (null != sieveHandler) {
-                    try {
-                        sieveHandler.close();
-                    } catch (UnsupportedEncodingException e) {
-                        throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
-                    } catch (IOException e) {
-                        throw MailFilterExceptionCode.IO_CONNECTION_ERROR.create(e);
-                    }
-                }
+                closeSieveHandler(sieveHandler);
             }
         }
     }
