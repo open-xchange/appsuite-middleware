@@ -52,6 +52,7 @@ package com.openexchange.push.imapidle.control;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
+import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link ImapIdleRegistration}
@@ -63,16 +64,16 @@ class ImapIdleRegistration implements Delayed {
 
     private final long stamp;
     private final ImapIdlePushListener pushListener;
-    private final Thread imapIdleThread;
+    private final IMAPFolder imapFolder;
     private final int hash;
 
     /**
      * Initializes a new {@link ImapIdleRegistration}.
      */
-    ImapIdleRegistration(ImapIdlePushListener pushListener, long elapseMillis) {
+    ImapIdleRegistration(ImapIdlePushListener pushListener,  IMAPFolder imapFolder, long elapseMillis) {
         super();
         stamp = System.currentTimeMillis() + elapseMillis;
-        imapIdleThread = Thread.currentThread();
+        this.imapFolder = imapFolder;
         this.pushListener = pushListener;
         hash = 31 * 1 + ((pushListener == null) ? 0 : pushListener.hashCode());
     }
@@ -83,7 +84,7 @@ class ImapIdleRegistration implements Delayed {
     ImapIdleRegistration(ImapIdlePushListener pushListener) {
         super();
         stamp = 0L;
-        imapIdleThread = null;
+        imapFolder = null;
         this.pushListener = pushListener;
         hash = 31 * 1 + ((pushListener == null) ? 0 : pushListener.hashCode());
     }
@@ -102,21 +103,21 @@ class ImapIdleRegistration implements Delayed {
     }
 
     /**
-     * Gets the thread currently doing the IMAP IDLE.
-     *
-     * @return The thread
-     */
-    public Thread getThread() {
-        return imapIdleThread;
-    }
-
-    /**
      * Get the push listener.
      *
      * @return The push listener
      */
     public ImapIdlePushListener getPushListener() {
         return pushListener;
+    }
+
+    /**
+     * Gets the IMAP folder currently idle on.
+     *
+     * @return The IMAP folder
+     */
+    public IMAPFolder getImapFolder() {
+        return imapFolder;
     }
 
     @Override
