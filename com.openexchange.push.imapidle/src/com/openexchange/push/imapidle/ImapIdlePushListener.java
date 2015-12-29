@@ -53,10 +53,7 @@ import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.FetchProfile;
@@ -94,14 +91,12 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.imapidle.control.ImapIdleListenerControl;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -122,26 +117,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
-    private static final long TIMEOUT_THRESHOLD_NANOS = TimeUnit.MILLISECONDS.toNanos(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L);
-
-    /**
-     * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
-     */
-    private static final class ImapIdleTask extends AbstractTask<Void> {
-
-        private final IMAPFolder imapFolder;
-
-        ImapIdleTask(IMAPFolder imapFolder) {
-            super();
-            this.imapFolder = imapFolder;
-        }
-
-        @Override
-        public Void call() throws MessagingException {
-            imapFolder.idle(true);
-            return null;
-        }
-    }
+    private static final long TIMEOUT_THRESHOLD_MILLIS = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L;
 
     /**
      * The push mode; either <code>"newmail"</code> or <code>"always"</code>.
@@ -205,6 +181,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
     private volatile long lastLockRefreshNanos;
+    private volatile boolean interrupted;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
@@ -238,6 +215,31 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         } catch (OXException e) {
             return false;
         }
+    }
+
+    /**
+     * Gets the context identifier.
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    /**
+     * Gets the user identifier.
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return session.getUserId();
+    }
+
+    /**
+     * Marks this IMAP-IDLE listener as interrupted while IDL'ing.
+     */
+    public void markInterrupted() {
+        this.interrupted = true;
     }
 
     /**
@@ -333,7 +335,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                         mailAccess.setWaiting(true);
                         try {
-                            if (false == doImapIdleTimeoutAware(imapFolder)) {
+                            if (false == doImapIdle(imapFolder)) {
                                 // Timeout elapsed
                                 error = false;
                                 return;
@@ -444,11 +446,6 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     LOGGER.debug("Awaiting next IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
                 }
             }
-        } catch (InterruptedException e) {
-            // Thread interrupted - keep interrupted flag
-            Thread.currentThread().interrupt();
-            LOGGER.debug("Thread interrupted during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
-            cancel(true);
         } catch (Exception e) {
             // Any aborting error
             LOGGER.warn("Severe error during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
@@ -464,7 +461,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doRefreshLock() {
         long last = lastLockRefreshNanos;
         long nanos = System.nanoTime();
-        if (nanos - last > TIMEOUT_THRESHOLD_NANOS) {
+        if (nanos - last > TimeUnit.MILLISECONDS.toNanos(TIMEOUT_THRESHOLD_MILLIS)) {
             lastLockRefreshNanos = nanos;
             return true;
         }
@@ -484,20 +481,30 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      *
      * @param imapFolder The associated mailbox for which to enter the IMAP-IDLE command
      * @return <code>true</code> in case an IMAP server notification terminated the IMAP-IDLE; otherwise <code>false</code> if timeout elapsed
-     * @throws InterruptedException If idle'ing thread has been interrupted
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
-    private boolean doImapIdleTimeoutAware(IMAPFolder imapFolder) throws InterruptedException, MessagingException {
-        Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
+    private boolean doImapIdle(IMAPFolder imapFolder) throws MessagingException {
+        interrupted = false;
+
+        ImapIdleListenerControl control = ImapIdleListenerControl.getInstance();
+        control.add(this, TIMEOUT_THRESHOLD_MILLIS);
         try {
-            f.get(TIMEOUT_THRESHOLD_NANOS, TimeUnit.NANOSECONDS);
+            imapFolder.idle(true);
             return true;
-        } catch (TimeoutException e) {
-            // Next run...
-            f.cancel(true);
-            return false;
-        } catch (ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, MessagingException.class);
+        } catch (MessagingException e) {
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleListenerControlTask
+                return false;
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleListenerControlTask
+                return false;
+            }
+            throw new MessagingException(e.getMessage(), e);
+        } finally {
+            control.remove(this);
         }
     }
 
