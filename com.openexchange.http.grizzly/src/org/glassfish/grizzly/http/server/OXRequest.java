@@ -73,6 +73,8 @@ public class OXRequest extends Request {
 
     private static final ThreadCache.CachedTypeIndex<Request> CACHE_IDX = ThreadCache.obtainIndex(Request.class, 16);
 
+    private static final String SESSION_COOKIE_NAME = Globals.SESSION_COOKIE_NAME;
+
     // ---------------------------- Members ---------------------------- //
 
     public static Request create() {
@@ -231,9 +233,15 @@ public class OXRequest extends Request {
      * @param invalidSessionId The invalid sessionId requested by the browser/cookie
      */
     private void removeInvalidSessionCookie(String invalidSessionId) {
+        Cookie[] cookies = getCookies();
+        if (null == cookies || cookies.length <= 0) {
+            return;
+        }
+
         LOG.debug("Removing invalid JSessionId Cookie: {}", invalidSessionId);
+        String sessionCookieName = SESSION_COOKIE_NAME;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().startsWith(Globals.SESSION_COOKIE_NAME)) {
+            if (cookie.getName().startsWith(sessionCookieName)) {
                 if (cookie.getValue().equals(invalidSessionId)) {
                     response.addCookie(createinvalidationCookie(cookie));
                     String domain = extractDomainValue(cookie.getValue());
@@ -300,7 +308,7 @@ public class OXRequest extends Request {
      * @return The new JSessionId Cookie
      */
     private Cookie createSessionCookie(String sessionID) {
-        Cookie jSessionIdCookie = new Cookie(Globals.SESSION_COOKIE_NAME, sessionID);
+        Cookie jSessionIdCookie = new Cookie(SESSION_COOKIE_NAME, sessionID);
 
         jSessionIdCookie.setPath("/");
 
@@ -328,14 +336,21 @@ public class OXRequest extends Request {
         return jSessionIdCookie;
     }
 
+    /**
+     * Checks if this request has a session cookie associated with specified session identifier.
+     *
+     * @param sessionID The session identifier to use for look-up
+     * @return <code>true</code> if this request contains such a session cookie; otherwise <code>false</code>
+     */
     private boolean hasSessionCookie(String sessionID) {
         Cookie[] cookies = getCookies();
         if (null == cookies || cookies.length <= 0) {
             return false;
         }
 
+        String sessionCookieName = SESSION_COOKIE_NAME;
         for (Cookie cookie : cookies) {
-            if (Globals.SESSION_COOKIE_NAME.equals(cookie.getName()) && sessionID.equals(cookie.getValue())) {
+            if (sessionCookieName.equals(cookie.getName()) && sessionID.equals(cookie.getValue())) {
                 return true;
             }
         }
