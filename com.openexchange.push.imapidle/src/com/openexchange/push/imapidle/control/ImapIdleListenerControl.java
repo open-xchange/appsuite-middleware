@@ -53,6 +53,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.DelayQueue;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
+import com.sun.mail.imap.IMAPFolder;
 
 /**
  * {@link ImapIdleListenerControl}
@@ -89,11 +90,12 @@ public class ImapIdleListenerControl {
      * Adds the specified IMAP-IDLE push listener with given timeout.
      *
      * @param listener The listener to add
+     * @param imapFolder The IMAP folder to idle on
      * @param timeoutMillis The timeout
      * @return <tt>true</tt>
      */
-    public boolean add(ImapIdlePushListener listener, long timeoutMillis) {
-        return queue.offer(new ImapIdleRegistration(listener, timeoutMillis));
+    public boolean add(ImapIdlePushListener listener, IMAPFolder imapFolder, long timeoutMillis) {
+        return queue.offer(new ImapIdleRegistration(listener, imapFolder, timeoutMillis));
     }
 
     /**

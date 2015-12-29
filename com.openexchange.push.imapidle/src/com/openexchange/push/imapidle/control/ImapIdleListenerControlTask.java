@@ -81,7 +81,7 @@ public class ImapIdleListenerControlTask implements Runnable {
                 ImapIdlePushListener pushListener = registration.getPushListener();
                 try {
                     pushListener.markInterrupted();
-                    registration.getThread().interrupt();
+                    registration.getImapFolder().close(false);
                 } catch (Exception e) {
                     LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId());
                 }

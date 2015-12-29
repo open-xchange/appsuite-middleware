@@ -49,8 +49,6 @@
 
 package com.openexchange.push.imapidle;
 
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -105,6 +103,8 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link ImapIdlePushListener}
@@ -487,9 +487,13 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         interrupted = false;
 
         ImapIdleListenerControl control = ImapIdleListenerControl.getInstance();
-        control.add(this, TIMEOUT_THRESHOLD_MILLIS);
+        control.add(this, imapFolder, TIMEOUT_THRESHOLD_MILLIS);
         try {
             imapFolder.idle(true);
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleListenerControlTask
+                return false;
+            }
             return true;
         } catch (MessagingException e) {
             if (interrupted) {
