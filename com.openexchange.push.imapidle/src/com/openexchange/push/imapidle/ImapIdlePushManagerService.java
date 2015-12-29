@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
@@ -67,12 +68,17 @@ import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
+import com.openexchange.push.imapidle.control.ImapIdleListenerControl;
+import com.openexchange.push.imapidle.control.ImapIdleListenerControlTask;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.SessiondServiceExtended;
+import com.openexchange.timer.ScheduledTimerTask;
+import com.openexchange.timer.TimerService;
 
 
 /**
@@ -100,7 +106,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return instance;
     }
 
-    public static ImapIdlePushManagerService newInstance(ImapIdleConfiguration configuration, ServiceLookup services) {
+    public static ImapIdlePushManagerService newInstance(ImapIdleConfiguration configuration, ServiceLookup services) throws OXException {
         ImapIdlePushManagerService tmp = new ImapIdlePushManagerService(configuration.getFullName(), configuration.getAccountId(), configuration.getPushMode(), configuration.getDelay(), configuration.getClusterLock(), services);
         instance = tmp;
         return tmp;
@@ -116,11 +122,12 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
     private final PushMode pushMode;
     private final ImapIdleClusterLock clusterLock;
     private final long delay;
+    private final ScheduledTimerTask timerTask;
 
     /**
      * Initializes a new {@link ImapIdlePushManagerService}.
      */
-    private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, ServiceLookup services) {
+    private ImapIdlePushManagerService(String fullName, int accountId, PushMode pushMode, long delay, ImapIdleClusterLock clusterLock, ServiceLookup services) throws OXException {
         super();
         name = "IMAP-IDLE Push Manager";
         this.pushMode = pushMode;
@@ -130,6 +137,20 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.clusterLock = clusterLock;
         this.services = services;
         listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512, 0.9f, 1);
+
+        // Initialize timer task to check for expired IMAP-IDLE push listeners for every 30 seconds
+        TimerService timerService = services.getOptionalService(TimerService.class);
+        if (null == timerService) {
+            throw ServiceExceptionCode.absentService(TimerService.class);
+        }
+        timerTask = timerService.scheduleWithFixedDelay(new ImapIdleListenerControlTask(ImapIdleListenerControl.getInstance()), 30, 30, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Shuts-down this IMAP-IDLE push manager.
+     */
+    public void shutDown() {
+        timerTask.cancel();
     }
 
     @Override
