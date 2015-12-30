@@ -140,8 +140,9 @@ public class ImageMagickRegisterer implements Reloadable {
         if (enabled) {
             String searchPath = configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin");
             boolean useGraphicsMagick = configService.getBoolProperty("com.openexchange.imagetransformation.imagemagick.useGraphicsMagick", false);
+            int numThreads = configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.numThreads", 10);
             int timeoutSecs = configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.timeoutSecs", 0);
-            register(searchPath, useGraphicsMagick, timeoutSecs);
+            register(searchPath, useGraphicsMagick, numThreads, timeoutSecs);
         } else {
             unregister();
         }
@@ -152,11 +153,12 @@ public class ImageMagickRegisterer implements Reloadable {
      *
      * @param searchPath The search path where "convert" command is located
      * @param useGraphicsMagick Whether GraphicsMagick is supposed to be used
+     * @param numThreads The number of threads to use
      * @param timeoutSecs The timeout in seconds
      */
-    private void register(String searchPath, boolean useGraphicsMagick, int timeoutSecs) {
+    private void register(String searchPath, boolean useGraphicsMagick, int numThreads, int timeoutSecs) {
         if (null == provider) {
-            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick, timeoutSecs);
+            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick, numThreads, timeoutSecs);
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
@@ -165,6 +167,7 @@ public class ImageMagickRegisterer implements Reloadable {
         } else {
             provider.setSearchPath(searchPath);
             provider.setUseGraphicsMagick(useGraphicsMagick);
+            provider.setNumThreads(numThreads);
             LOG.info("ImageMagick-based image transformation provider now using search path {} with GraphicsMagick utilization set to {}", searchPath, Boolean.valueOf(useGraphicsMagick));
         }
     }

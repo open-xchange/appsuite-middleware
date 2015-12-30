@@ -64,7 +64,6 @@ import org.im4java.process.ArrayListOutputConsumer;
 import org.im4java.process.Pipe;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
 import com.openexchange.imagetransformation.ImageTransformationIdler;
@@ -89,16 +88,18 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
     private final TransformedImageCreator transformedImageCreator;
     private final AtomicReference<String> searchPathRef;
     private final AtomicBoolean useGraphicsMagickRef;
+    private final AtomicInteger numThreadsRef;
     private final AtomicInteger timeoutSecsRef;
 
     /**
      * Initializes a new {@link ImageMagickImageTransformationProvider}.
      */
-    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs) {
+    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int numThreads, int timeoutSecs) {
         super();
         this.transformedImageCreator = transformedImageCreator;
         searchPathRef = new AtomicReference<String>(searchPath);
         useGraphicsMagickRef = new AtomicBoolean(useGraphicsMagick);
+        numThreadsRef = new AtomicInteger(numThreads);
         timeoutSecsRef = new AtomicInteger(timeoutSecs);
     }
 
@@ -109,9 +110,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 tmp = processor;
                 if (null == tmp) {
                     try {
-                        int defaultNumThreads = 10;
-                        ConfigurationService configService = Services.optService(ConfigurationService.class);
-                        int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.numThreads", defaultNumThreads);
+                        int numThreads = numThreadsRef.get();
                         ProcessorService processorService = Services.getService(ProcessorService.class);
                         tmp = processorService.newProcessor("ImageMagick", numThreads);
                         processor = tmp;
@@ -153,6 +152,19 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
      */
     public void setUseGraphicsMagick(boolean useGraphicsMagick) {
         useGraphicsMagickRef.set(useGraphicsMagick);
+    }
+
+    /**
+     * Sets the number of threads to use
+     *
+     * @param numThreads The number of threads to use
+     */
+    public void setNumThreads(int numThreads) {
+        int prev = numThreadsRef.get();
+        if (prev != numThreads) {
+            numThreadsRef.set(numThreads);
+            idle();
+        }
     }
 
     /**
