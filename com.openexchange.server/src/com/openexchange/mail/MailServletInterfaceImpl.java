@@ -2460,7 +2460,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         initConnection(accountId);
     }
 
-    private void initConnection(int accountId) throws OXException {
+    void initConnection(int accountId) throws OXException {
         if (!init) {
             mailAccess = initMailAccess(accountId);
             mailConfig = mailAccess.getMailConfig();
@@ -4094,6 +4094,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     } else {
                         exceptionRef.setValue(e);
                     }
+                } catch (RuntimeException e) {
+                    exceptionRef.setValue(new OXException(e));
                 }
                 return proceed;
             }
@@ -4111,7 +4113,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         move2Archive(msgs, fullName, archiveFullname, separator, cal, result);
     }
 
-    private void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, List<ArchiveDataWrapper> result) throws OXException {
+    void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, List<ArchiveDataWrapper> result) throws OXException {
         Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
         for (MailMessage mailMessage : msgs) {
             Date receivedDate = mailMessage.getReceivedDate();
@@ -4183,7 +4185,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
      * @return The archive full name
      * @throws OXException If checking archive full name fails
      */
-    private String checkArchiveFullNameFor(final ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
+    String checkArchiveFullNameFor(final ServerSession session, int[] separatorRef, boolean useDefaultName, boolean createIfAbsent) throws OXException {
         final int accountId = mailAccess.getAccountId();
 
         MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
