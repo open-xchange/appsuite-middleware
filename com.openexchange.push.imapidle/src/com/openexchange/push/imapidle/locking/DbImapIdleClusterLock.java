@@ -135,7 +135,7 @@ public class DbImapIdleClusterLock extends AbstractImapIdleClusterLock {
             Databases.closeSQLStuff(rs, stmt);
 
             // Check if valid
-            if (validValue(previous, now, services.getOptionalService(HazelcastInstance.class))) {
+            if (validValue(previous, now, sessionInfo.isTransient(), services.getOptionalService(HazelcastInstance.class))) {
                 // Locked
                 return false;
             }

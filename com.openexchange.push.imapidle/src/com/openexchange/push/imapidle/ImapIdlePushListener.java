@@ -49,6 +49,7 @@
 
 package com.openexchange.push.imapidle;
 
+import static com.openexchange.push.imapidle.ImapIdlePushManagerService.isTransient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -334,7 +335,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                     // Refresh lock prior to entering IMAP-IDLE
                     if (doRefreshLock()) {
-                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent));
+                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                     }
 
                     // Are there already new messages?
@@ -625,7 +626,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     // No other listener available
                     // Give up lock and return
                     try {
-                        instance.releaseLock(new SessionInfo(session, permanent));
+                        instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                     } catch (Exception e) {
                         LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                     }
@@ -637,7 +638,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                         // Give up lock and return
                         try {
-                            instance.releaseLock(new SessionInfo(session, permanent));
+                            instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                         } catch (Exception x) {
                             LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
                         }

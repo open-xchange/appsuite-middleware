@@ -140,7 +140,7 @@ public class HzImapIdleClusterLock extends AbstractImapIdleClusterLock {
         }
 
         // Check if valid
-        if (validValue(previous, now, hzInstance)) {
+        if (validValue(previous, now, sessionInfo.isTransient(), hzInstance)) {
             // Locked
             return false;
         }
