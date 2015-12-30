@@ -297,4 +297,9 @@ public class SessiondServiceImpl implements SessiondServiceExtended {
         return all;
     }
 
+    @Override
+    public boolean isApplicableForSessionStorage(Session session) {
+        return SessionHandler.useSessionStorage(session);
+    }
+
 }

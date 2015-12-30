@@ -112,6 +112,11 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         return tmp;
     }
 
+    public static boolean isTransient(Session session, ServiceLookup services) {
+        SessiondService service = services.getService(SessiondService.class);
+        return (service instanceof SessiondServiceExtended) ? false == ((SessiondServiceExtended) service).isApplicableForSessionStorage(session) : false;
+    }
+
     // ---------------------------------------------------------------------------------------------------- //
 
     private final String name;
@@ -218,7 +223,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         int contextId = session.getContextId();
         int userId = session.getUserId();
 
-        SessionInfo sessionInfo = new SessionInfo(session, true);
+        SessionInfo sessionInfo = new SessionInfo(session, true, false);
         if (clusterLock.acquireLock(sessionInfo)) {
             synchronized (this) {
                 // Locked...
@@ -287,7 +292,8 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         }
         int contextId = session.getContextId();
         int userId = session.getUserId();
-        SessionInfo sessionInfo = new SessionInfo(session, false);
+
+        SessionInfo sessionInfo = new SessionInfo(session, false, isTransient(session, services));
         if (clusterLock.acquireLock(sessionInfo)) {
             synchronized (this) {
                 // Locked...
