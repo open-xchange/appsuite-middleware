@@ -95,6 +95,7 @@ import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -270,6 +271,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         String sContextId = Integer.toString(session.getContextId());
         String sUserId = Integer.toString(session.getUserId());
 
+        // Set thread name
+        ThreadRenamer renamer = getThreadRenamer();
+        if (null != renamer) {
+            renamer.renamePrefix("ImapIdle");
+        }
         try {
             boolean error = true;
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
@@ -450,6 +456,10 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
             // Any aborting error
             LOGGER.warn("Severe error during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
             cancel(true);
+        } finally {
+            if (null != renamer) {
+                renamer.restoreName();
+            }
         }
     }
 
@@ -812,6 +822,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         mailMessage.setSubject(MimeMessageConverter.getSubject(im));
         mailMessage.setUnreadMessages(unread);
         return mailMessage;
+    }
+
+    private ThreadRenamer getThreadRenamer() {
+        Thread t = Thread.currentThread();
+        return (t instanceof ThreadRenamer) ? (ThreadRenamer)t : null;
     }
 
     private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {
