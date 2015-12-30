@@ -53,9 +53,11 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.imagetransformation.ImageTransformationIdler;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
+import com.openexchange.tools.images.scheduler.Scheduler;
 import com.openexchange.tools.images.transformations.ImageTransformationsTask;
 
 /**
@@ -64,7 +66,7 @@ import com.openexchange.tools.images.transformations.ImageTransformationsTask;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class JavaImageTransformationProvider implements ImageTransformationProvider {
+public class JavaImageTransformationProvider implements ImageTransformationProvider, ImageTransformationIdler {
 
     /**
      * Initializes a new {@link JavaImageTransformationProvider}.
@@ -106,6 +108,11 @@ public class JavaImageTransformationProvider implements ImageTransformationProvi
     @Override
     public ImageTransformations transfom(final byte[] imageData, final Object source) throws IOException {
         return transfom(new UnsynchronizedByteArrayInputStream(imageData), source);
+    }
+
+    @Override
+    public void idle() {
+        Scheduler.shutDown();
     }
 
 }

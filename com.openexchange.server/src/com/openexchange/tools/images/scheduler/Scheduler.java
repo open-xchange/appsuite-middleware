@@ -83,9 +83,11 @@ public final class Scheduler {
     }
 
     /**
-     * Initializes the processor
+     * Gets the processor instance; initializes it if not yet done.
+     *
+     * @return The instance
      */
-    public static void init() throws OXException {
+    public static Processor getInstance() throws OXException {
         Processor tmp = instance;
         if (null == tmp) {
             synchronized (Scheduler.class) {
@@ -105,15 +107,7 @@ public final class Scheduler {
                 }
             }
         }
-    }
-
-    /**
-     * Gets the processor instance.
-     *
-     * @return The instance
-     */
-    public static Processor getInstance() {
-        return instance;
+        return tmp;
     }
 
 }

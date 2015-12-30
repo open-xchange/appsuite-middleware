@@ -71,9 +71,10 @@ public interface ImageTransformationProvider {
      *
      * @param sourceImage The source image to use
      * @return A new {@link ImageTransformations} instance for the image
+     * @throws IOException If an I/O error occurs
      * @see #transfom(BufferedImage, Object)
      */
-    ImageTransformations transfom(BufferedImage sourceImage);
+    ImageTransformations transfom(BufferedImage sourceImage) throws IOException;
 
     /**
      * Initializes a new {@link ImageTransformations} working on the supplied source image.
@@ -81,8 +82,9 @@ public interface ImageTransformationProvider {
      * @param sourceImage The source image to use
      * @param source The source for this invocation; if <code>null</code> calling {@link Thread} is referenced as source
      * @return A new {@link ImageTransformations} instance for the image
+     * @throws IOException If an I/O error occurs
      */
-    ImageTransformations transfom(BufferedImage sourceImage, Object source);
+    ImageTransformations transfom(BufferedImage sourceImage, Object source) throws IOException;
 
     // ----------------------------------------------------------------------------------------------------------- //
 

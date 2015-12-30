@@ -59,12 +59,9 @@ import org.osgi.framework.ServiceRegistration;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.imagetransformation.imagemagick.ImageMagickImageTransformationProvider;
-import com.openexchange.processing.Processor;
-import com.openexchange.processing.ProcessorService;
 import com.openexchange.server.ServiceLookup;
 
 /**
@@ -137,16 +134,14 @@ public class ImageMagickRegisterer implements Reloadable {
      * Performs the registration/unregistration for ImageMagick-based image transformation provider.
      *
      * @param configService The configuration service
-     * @throws OXException If registration/unregistration cannt be performed
      */
-    public synchronized void perform(ConfigurationService configService) throws OXException {
+    public synchronized void perform(ConfigurationService configService) {
         boolean enabled = configService.getBoolProperty("com.openexchange.imagetransformation.imagemagick.enabled", true);
         if (enabled) {
             String searchPath = configService.getProperty("com.openexchange.imagetransformation.imagemagick.searchPath", "/usr/bin");
             boolean useGraphicsMagick = configService.getBoolProperty("com.openexchange.imagetransformation.imagemagick.useGraphicsMagick", false);
-            int numThreads = configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.numThreads", 10);
             int timeoutSecs = configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.timeoutSecs", 0);
-            register(searchPath, useGraphicsMagick, numThreads, timeoutSecs);
+            register(searchPath, useGraphicsMagick, timeoutSecs);
         } else {
             unregister();
         }
@@ -157,15 +152,11 @@ public class ImageMagickRegisterer implements Reloadable {
      *
      * @param searchPath The search path where "convert" command is located
      * @param useGraphicsMagick Whether GraphicsMagick is supposed to be used
-     * @param numThreads The number of threads to use
      * @param timeoutSecs The timeout in seconds
-     * @throws OXException If initialization fails
      */
-    private void register(String searchPath, boolean useGraphicsMagick, int numThreads, int timeoutSecs) throws OXException {
+    private void register(String searchPath, boolean useGraphicsMagick, int timeoutSecs) {
         if (null == provider) {
-            ProcessorService processorService = services.getService(ProcessorService.class);
-            Processor processor = processorService.newProcessor("ImageMagick", numThreads);
-            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick, timeoutSecs, processor);
+            provider = new ImageMagickImageTransformationProvider(services.getService(TransformedImageCreator.class), searchPath, useGraphicsMagick, timeoutSecs);
 
             Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
@@ -201,11 +192,7 @@ public class ImageMagickRegisterer implements Reloadable {
         maxSize = null;
         maxResolution = null;
 
-        try {
-            perform(configService);
-        } catch (OXException e) {
-            LOG.error("Failed to reload ImageMagick configuration", e);
-        }
+        perform(configService);
     }
 
     @Override

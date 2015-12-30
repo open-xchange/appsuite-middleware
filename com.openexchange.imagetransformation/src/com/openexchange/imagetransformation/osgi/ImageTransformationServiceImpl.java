@@ -57,6 +57,7 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.imagetransformation.ImageTransformationIdler;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.imagetransformation.ImageTransformations;
@@ -73,6 +74,7 @@ public class ImageTransformationServiceImpl extends ServiceTracker<ImageTransfor
 
     private final ConcurrentPriorityQueue<RankedService<ImageTransformationProvider>> trackedProviders;
     private ServiceRegistration<ImageTransformationService> registration; // non-volatile, protected by synchronized blocks
+    private ImageTransformationProvider activeProvider;
 
     /**
      * Initializes a new {@link ImageTransformationServiceImpl}.
@@ -87,6 +89,16 @@ public class ImageTransformationServiceImpl extends ServiceTracker<ImageTransfor
         ImageTransformationProvider provider = context.getService(reference);
         trackedProviders.offer(new RankedService<ImageTransformationProvider>(provider, RankedService.getRanking(reference)));
 
+        // Check what provider is now active after offering to queue
+        RankedService<ImageTransformationProvider> rankedService = trackedProviders.peek();
+        if (null != rankedService && !rankedService.service.equals(activeProvider)) {
+            // Switch "active" provider after offering to queue
+            if (activeProvider instanceof ImageTransformationIdler) {
+                ((ImageTransformationIdler) activeProvider).idle();
+            }
+            activeProvider = rankedService.service;
+        }
+
         if (null == registration) {
             registration = context.registerService(ImageTransformationService.class, this, null);
         }
@@ -100,8 +112,22 @@ public class ImageTransformationServiceImpl extends ServiceTracker<ImageTransfor
     }
 
     @Override
-    public synchronized void removedService(ServiceReference<ImageTransformationProvider> reference, ImageTransformationProvider service) {
-        trackedProviders.remove(service);
+    public synchronized void removedService(ServiceReference<ImageTransformationProvider> reference, ImageTransformationProvider provider) {
+        trackedProviders.remove(new RankedService<ImageTransformationProvider>(provider, RankedService.getRanking(reference)));
+
+        // Check what provider is now active after removing from queue
+        RankedService<ImageTransformationProvider> rankedService = trackedProviders.peek();
+        if (null != rankedService && !rankedService.service.equals(activeProvider)) {
+            // Switch "active" provider after removing from queue
+            if (activeProvider instanceof ImageTransformationIdler) {
+                ((ImageTransformationIdler) activeProvider).idle();
+            }
+            // Check whether to "idle" currently disappearing provider
+            if (!activeProvider.equals(provider) && (provider instanceof ImageTransformationIdler)) {
+                ((ImageTransformationIdler) provider).idle();
+            }
+            activeProvider = rankedService.service;
+        }
 
         if (trackedProviders.isEmpty() && null != registration) {
             registration.unregister();
@@ -125,7 +151,7 @@ public class ImageTransformationServiceImpl extends ServiceTracker<ImageTransfor
 
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
+    public ImageTransformations transfom(BufferedImage sourceImage) throws IOException {
         ImageTransformationProvider provider = getHighestRankedImageTransformationProvider();
         if (null == provider) {
             // About to shut-down
@@ -135,7 +161,7 @@ public class ImageTransformationServiceImpl extends ServiceTracker<ImageTransfor
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
+    public ImageTransformations transfom(BufferedImage sourceImage, Object source) throws IOException {
         ImageTransformationProvider provider = getHighestRankedImageTransformationProvider();
         if (null == provider) {
             // About to shut-down

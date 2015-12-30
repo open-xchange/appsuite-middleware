@@ -64,14 +64,18 @@ import org.im4java.process.ArrayListOutputConsumer;
 import org.im4java.process.Pipe;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.ImageTransformationDeniedIOException;
+import com.openexchange.imagetransformation.ImageTransformationIdler;
 import com.openexchange.imagetransformation.ImageTransformationProvider;
 import com.openexchange.imagetransformation.ImageTransformations;
 import com.openexchange.imagetransformation.TransformedImageCreator;
 import com.openexchange.imagetransformation.imagemagick.osgi.ImageMagickRegisterer;
+import com.openexchange.imagetransformation.imagemagick.osgi.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.processing.Processor;
+import com.openexchange.processing.ProcessorService;
 
 /**
  * {@link ImageMagickImageTransformationProvider}
@@ -79,9 +83,9 @@ import com.openexchange.processing.Processor;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImageMagickImageTransformationProvider implements ImageTransformationProvider {
+public class ImageMagickImageTransformationProvider implements ImageTransformationProvider, ImageTransformationIdler {
 
-    private final Processor processor;
+    private volatile Processor processor;
     private final TransformedImageCreator transformedImageCreator;
     private final AtomicReference<String> searchPathRef;
     private final AtomicBoolean useGraphicsMagickRef;
@@ -90,13 +94,47 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
     /**
      * Initializes a new {@link ImageMagickImageTransformationProvider}.
      */
-    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
+    public ImageMagickImageTransformationProvider(TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs) {
         super();
-        this.processor = processor;
         this.transformedImageCreator = transformedImageCreator;
         searchPathRef = new AtomicReference<String>(searchPath);
         useGraphicsMagickRef = new AtomicBoolean(useGraphicsMagick);
         timeoutSecsRef = new AtomicInteger(timeoutSecs);
+    }
+
+    private Processor getProcessor() throws IOException {
+        Processor tmp = processor;
+        if (null == tmp) {
+            synchronized (this) {
+                tmp = processor;
+                if (null == tmp) {
+                    try {
+                        int defaultNumThreads = 10;
+                        ConfigurationService configService = Services.optService(ConfigurationService.class);
+                        int numThreads = null == configService ? defaultNumThreads : configService.getIntProperty("com.openexchange.imagetransformation.imagemagick.numThreads", defaultNumThreads);
+                        ProcessorService processorService = Services.getService(ProcessorService.class);
+                        tmp = processorService.newProcessor("ImageMagick", numThreads);
+                        processor = tmp;
+                    } catch (OXException e) {
+                        Throwable cause = e.getCause();
+                        if (cause instanceof IOException) {
+                            throw (IOException) cause;
+                        }
+                        throw new IOException(null == cause ? e : cause);
+                    }
+                }
+            }
+        }
+        return tmp;
+    }
+
+    @Override
+    public void idle() {
+        Processor tmp = processor;
+        if (null != tmp) {
+            processor = null;
+            tmp.stop();
+        }
     }
 
     /**
@@ -154,13 +192,13 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
+    public ImageTransformations transfom(BufferedImage sourceImage) throws IOException {
         return transfom(sourceImage, null);
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
-        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), processor);
+    public ImageTransformations transfom(BufferedImage sourceImage, Object source) throws IOException {
+        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
     }
 
     @Override
@@ -198,7 +236,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
                 }
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get(), timeoutSecsRef.get(), processor);
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -253,10 +291,10 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             boolean useGraphicsMagick = useGraphicsMagickRef.get();
             int timeoutSecs = timeoutSecsRef.get();
             if (null == sink) {
-                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, processor);
+                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, processor);
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -282,7 +320,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
-        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), processor);
+        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
     }
 
 }

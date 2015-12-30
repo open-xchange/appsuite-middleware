@@ -47,51 +47,19 @@
  *
  */
 
-package com.openexchange.tools.images.osgi;
-
-import java.util.Dictionary;
-import java.util.Hashtable;
-import org.osgi.framework.Constants;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.imagetransformation.ImageTransformationProvider;
-import com.openexchange.imagetransformation.TransformedImageCreator;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.processing.ProcessorService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.DefaultTransformedImageCreator;
-import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
-import com.openexchange.tools.images.scheduler.Scheduler;
+package com.openexchange.imagetransformation;
 
 
 /**
- * {@link ImageToolsActivator}
+ * {@link ImageTransformationIdler} - Implemented by {@link ImageTransformationProvider providers} that support being idle.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class ImageToolsActivator extends HousekeepingActivator {
+public interface ImageTransformationIdler {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, ProcessorService.class, TimerService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-
-        // Register services
-        registerService(TransformedImageCreator.class, new DefaultTransformedImageCreator());
-        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
-        properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-        registerService(ImageTransformationProvider.class, new JavaImageTransformationProvider(), properties);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.setServiceLookup(null);
-        Scheduler.shutDown();
-        super.stopBundle();
-    }
-
+    /**
+     * Instructs this instance to be idle; releasing any currently acquired resources and re-spawn them when needed.
+     */
+    void idle();
 }

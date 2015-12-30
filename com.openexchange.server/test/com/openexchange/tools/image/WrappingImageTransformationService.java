@@ -75,12 +75,12 @@ public class WrappingImageTransformationService implements ImageTransformationSe
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage) {
+    public ImageTransformations transfom(BufferedImage sourceImage) throws IOException {
         return provider.transfom(sourceImage);
     }
 
     @Override
-    public ImageTransformations transfom(BufferedImage sourceImage, Object source) {
+    public ImageTransformations transfom(BufferedImage sourceImage, Object source) throws IOException {
         return provider.transfom(sourceImage, source);
     }
 
