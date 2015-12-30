@@ -56,32 +56,19 @@ import com.openexchange.push.imapidle.ImapIdlePushListener;
 import com.sun.mail.imap.IMAPFolder;
 
 /**
- * {@link ImapIdleListenerControl}
+ * {@link ImapIdleControl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImapIdleListenerControl {
-
-    private static final ImapIdleListenerControl INSTANCE = new ImapIdleListenerControl();
-
-    /**
-     * Gets the instance
-     *
-     * @return The instance
-     */
-    public static ImapIdleListenerControl getInstance() {
-        return INSTANCE;
-    }
-
-    // -------------------------------------------------------------------------------------------------------------------
+public class ImapIdleControl {
 
     private final DelayQueue<ImapIdleRegistration> queue;
 
     /**
-     * Initializes a new {@link ImapIdleListenerControl}.
+     * Initializes a new {@link ImapIdleControl}.
      */
-    private ImapIdleListenerControl() {
+    public ImapIdleControl() {
         super();
         queue = new DelayQueue<ImapIdleRegistration>();
     }

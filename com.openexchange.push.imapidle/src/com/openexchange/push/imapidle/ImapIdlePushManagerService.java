@@ -68,8 +68,8 @@ import com.openexchange.push.PushUser;
 import com.openexchange.push.PushUserInfo;
 import com.openexchange.push.PushUtility;
 import com.openexchange.push.imapidle.ImapIdlePushListener.PushMode;
-import com.openexchange.push.imapidle.control.ImapIdleListenerControl;
-import com.openexchange.push.imapidle.control.ImapIdleListenerControlTask;
+import com.openexchange.push.imapidle.control.ImapIdleControl;
+import com.openexchange.push.imapidle.control.ImapIdleControlTask;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
@@ -116,6 +116,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
 
     private final String name;
     private final ServiceLookup services;
+    private final ImapIdleControl control;
     private final ConcurrentMap<SimpleKey, ImapIdlePushListener> listeners;
     private final String fullName;
     private final int accountId;
@@ -136,6 +137,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         this.accountId = accountId;
         this.clusterLock = clusterLock;
         this.services = services;
+        this.control = new ImapIdleControl();
         listeners = new ConcurrentHashMap<SimpleKey, ImapIdlePushListener>(512, 0.9f, 1);
 
         // Initialize timer task to check for expired IMAP-IDLE push listeners for every 30 seconds
@@ -143,7 +145,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
         if (null == timerService) {
             throw ServiceExceptionCode.absentService(TimerService.class);
         }
-        timerTask = timerService.scheduleWithFixedDelay(new ImapIdleListenerControlTask(ImapIdleListenerControl.getInstance()), 30, 30, TimeUnit.SECONDS);
+        timerTask = timerService.scheduleWithFixedDelay(new ImapIdleControlTask(control), 30, 30, TimeUnit.SECONDS);
     }
 
     /**
@@ -222,7 +224,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Locked...
                 boolean unlock = true;
                 try {
-                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, supportsPermanentListeners(), services);
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, true, supportsPermanentListeners(), control, services);
                     ImapIdlePushListener current = listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener);
                     if (null == current) {
                         listener.start();
@@ -291,7 +293,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
                 // Locked...
                 boolean unlock = true;
                 try {
-                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, supportsPermanentListeners(), services);
+                    ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, session, false, supportsPermanentListeners(), control, services);
                     if (null == listeners.putIfAbsent(SimpleKey.valueOf(userId, contextId), listener)) {
                         listener.start();
                         unlock = false;
@@ -460,7 +462,7 @@ public final class ImapIdlePushManagerService implements PushManagerExtendedServ
      * @throws OXException If operation fails
      */
     public InjectedImapIdlePushListener injectAnotherListenerUsing(Session newSession, boolean permanent) {
-        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, newSession, permanent, supportsPermanentListeners(), services);
+        ImapIdlePushListener listener = new ImapIdlePushListener(fullName, accountId, pushMode, delay, newSession, permanent, supportsPermanentListeners(), control, services);
         // Replace old/existing one
         ImapIdlePushListener prev = listeners.put(SimpleKey.valueOf(newSession), listener);
         return new InjectedImapIdlePushListener(listener, prev);
