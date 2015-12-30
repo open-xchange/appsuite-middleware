@@ -100,9 +100,7 @@ public final class CustomThread extends Thread implements ThreadRenamer, OXThrea
         return originalName;
     }
 
-    /**
-     * Restores the original name.
-     */
+    @Override
     public void restoreName() {
         if (!changed) {
             return;
