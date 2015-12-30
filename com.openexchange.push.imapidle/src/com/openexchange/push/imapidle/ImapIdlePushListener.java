@@ -89,7 +89,7 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
-import com.openexchange.push.imapidle.control.ImapIdleListenerControl;
+import com.openexchange.push.imapidle.control.ImapIdleControl;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
@@ -170,6 +170,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     // ------------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
+    private final ImapIdleControl control;
     private final Session session;
     private ScheduledTimerTask timerTask;
     private final int accountId;
@@ -183,11 +184,12 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private volatile Map<String, Object> additionalProps;
     private volatile long lastLockRefreshNanos;
     private volatile boolean interrupted;
+    private volatile boolean idling;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      */
-    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, boolean supportsPermanentListeners, ServiceLookup services) {
+    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, boolean supportsPermanentListeners, ImapIdleControl control, ServiceLookup services) {
         super();
         canceled = new AtomicBoolean();
         this.permanent = permanent;
@@ -197,6 +199,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.session = session;
         this.delayNanos = TimeUnit.MILLISECONDS.toNanos(delay <= 0 ? 5000L : delay);
         this.services = services;
+        this.control = control;
         this.pushMode = pushMode;
         additionalProps = null;
         lastLockRefreshNanos = System.nanoTime();
@@ -250,6 +253,15 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      */
     public boolean isPermanent() {
         return permanent;
+    }
+
+    /**
+     * Checks if this listener is currently idl'ing.
+     *
+     * @return <code>true</code> if idl'ing; otherwise <code>false</code>
+     */
+    public boolean isIdling() {
+        return idling;
     }
 
     @Override
@@ -496,27 +508,33 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doImapIdle(IMAPFolder imapFolder) throws MessagingException {
         interrupted = false;
 
-        ImapIdleListenerControl control = ImapIdleListenerControl.getInstance();
         control.add(this, imapFolder, TIMEOUT_THRESHOLD_MILLIS);
         try {
-            imapFolder.idle(true);
+            // Enter IMAP-IDLE
+            idling = true;
+            try {
+                imapFolder.idle(true);
+            } finally {
+                idling = false;
+            }
+
             if (interrupted) {
-                // Consciously interrupted by ImapIdleListenerControlTask
+                // Consciously interrupted by ImapIdleControlTask
                 return false;
             }
             return true;
         } catch (MessagingException e) {
             if (interrupted) {
-                // Consciously interrupted by ImapIdleListenerControlTask
+                // Consciously interrupted by ImapIdleControlTask
                 return false;
             }
             throw e;
         } catch (RuntimeException e) {
             if (interrupted) {
-                // Consciously interrupted by ImapIdleListenerControlTask
+                // Consciously interrupted by ImapIdleControlTask
                 return false;
             }
-            throw new MessagingException(e.getMessage(), e);
+            throw e;
         } finally {
             control.remove(this);
         }

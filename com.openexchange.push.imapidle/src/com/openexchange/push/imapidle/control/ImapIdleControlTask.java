@@ -53,21 +53,21 @@ import java.util.List;
 import com.openexchange.push.imapidle.ImapIdlePushListener;
 
 /**
- * {@link ImapIdleListenerControlTask} - Responsible for interrupting expired threads currently performing IMAP IDLE.
+ * {@link ImapIdleControlTask} - Responsible for interrupting expired threads currently performing IMAP IDLE.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ImapIdleListenerControlTask implements Runnable {
+public class ImapIdleControlTask implements Runnable {
 
-    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdleListenerControlTask.class);
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdleControlTask.class);
 
-    private final ImapIdleListenerControl control;
+    private final ImapIdleControl control;
 
     /**
-     * Initializes a new {@link ImapIdleListenerControlTask}.
+     * Initializes a new {@link ImapIdleControlTask}.
      */
-    public ImapIdleListenerControlTask(ImapIdleListenerControl control) {
+    public ImapIdleControlTask(ImapIdleControl control) {
         super();
         this.control = control;
     }
@@ -79,11 +79,13 @@ public class ImapIdleListenerControlTask implements Runnable {
             for (ImapIdleRegistration registration : expired) {
                 // Idl'ing for too long
                 ImapIdlePushListener pushListener = registration.getPushListener();
-                try {
-                    pushListener.markInterrupted();
-                    registration.getImapFolder().close(false);
-                } catch (Exception e) {
-                    LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId());
+                if (pushListener.isIdling()) {
+                    try {
+                        pushListener.markInterrupted();
+                        registration.getImapFolder().close(false);
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to interrupt elapsed {}IMAP-IDLE listener for user {} in context {}.", pushListener.isPermanent() ? "permanent " : "", pushListener.getUserId(), pushListener.getContextId());
+                    }
                 }
             }
         } catch (Exception e) {

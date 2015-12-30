@@ -103,7 +103,7 @@ class ImapIdleRegistration implements Delayed {
     }
 
     /**
-     * Get the push listener.
+     * Gets the push listener.
      *
      * @return The push listener
      */
