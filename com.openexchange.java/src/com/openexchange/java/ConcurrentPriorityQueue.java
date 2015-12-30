@@ -65,7 +65,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConcurrentPriorityQueue<E extends Comparable<E>> extends AbstractQueue<E> {
 
-    private transient final ReentrantLock lock = new ReentrantLock();
+    transient final ReentrantLock lock = new ReentrantLock();
     private final PriorityQueue<E> q = new PriorityQueue<E>();
 
     /**
