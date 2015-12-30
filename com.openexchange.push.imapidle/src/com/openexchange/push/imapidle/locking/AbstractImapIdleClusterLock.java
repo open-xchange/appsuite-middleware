@@ -155,7 +155,7 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
             }
         }
 
-        if (!tranzient && null != hzInstance) {
+        if (null != hzInstance) {
             // Check in cluster
             Cluster cluster = hzInstance.getCluster();
 
