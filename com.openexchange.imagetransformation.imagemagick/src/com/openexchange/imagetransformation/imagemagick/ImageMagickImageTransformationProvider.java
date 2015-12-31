@@ -127,13 +127,17 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         return tmp;
     }
 
-    @Override
-    public void idle() {
+    private void stopProcessor() {
         Processor tmp = processor;
         if (null != tmp) {
             processor = null;
             tmp.stop();
         }
+    }
+
+    @Override
+    public void idle() {
+        stopProcessor();
     }
 
     /**
@@ -163,7 +167,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         int prev = numThreadsRef.get();
         if (prev != numThreads) {
             numThreadsRef.set(numThreads);
-            idle();
+            stopProcessor();
         }
     }
 
