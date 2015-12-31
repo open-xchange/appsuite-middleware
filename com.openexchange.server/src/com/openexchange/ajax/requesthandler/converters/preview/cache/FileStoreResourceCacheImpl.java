@@ -289,15 +289,17 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                 return true;
             }
         } catch (RejectedExecutionException e) {
-            alignmentRequests.remove(contextId);
-            LOG.warn("Could not schedule alignment task for context {}.", contextId, e);
+            Integer iContextId = Integer.valueOf(contextId);
+            alignmentRequests.remove(iContextId);
+            LOG.warn("Could not schedule alignment task for context {}.", iContextId, e);
         }
 
         return false;
     }
 
     protected void alignToQuota(final int contextId) {
-        if (!alignmentRequests.replace(contextId, SCHEDULED, RUNNING)) {
+        Integer iContextId = Integer.valueOf(contextId);
+        if (!alignmentRequests.replace(iContextId, SCHEDULED, RUNNING)) {
             return;
         }
 
@@ -307,6 +309,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             final Connection con = dbService.getWritable(contextId);
             final Set<String> refIds = new HashSet<String>();
             boolean transactionStarted = false;
+            boolean rollback = false;
             try {
                 long globalQuota = getGlobalQuota();
                 long usedContextQuota = metadataStore.getUsedSize(con, contextId);
@@ -316,6 +319,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
                     Databases.startTransaction(con);
                     transactionStarted = true;
+                    rollback = true;
                     List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
                     Iterator<ResourceCacheMetadata> it = entries.iterator();
                     while (collected < neededSpace && it.hasNext()) {
@@ -331,14 +335,15 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                         metadataStore.removeByRefIds(con, contextId, refIds);
                     }
                     con.commit();
+                    rollback = false;
                 }
             } catch (SQLException s) {
-                if (transactionStarted) {
+                LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
+            } finally {
+                if (rollback) {
                     Databases.rollback(con);
                 }
-                LOG.error("Could not align preview cache for context {} to quota.", contextId, s);
-            } finally {
-                alignmentRequests.remove(contextId);
+                alignmentRequests.remove(iContextId);
                 if (transactionStarted) {
                     Databases.autocommit(con);
                 }
@@ -351,13 +356,13 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             }
 
             if (refIds.isEmpty()) {
-                LOG.debug("No need to align preview cache for context {} to quota.", contextId);
+                LOG.debug("No need to align preview cache for context {} to quota.", iContextId);
             } else {
-                LOG.debug("Aligning preview cache for context {} to quota.", contextId);
+                LOG.debug("Aligning preview cache for context {} to quota.", iContextId);
                 batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
             }
         } catch (Exception e) {
-            LOG.error("Could not align preview cache for context {} to quota.", contextId, e);
+            LOG.error("Could not align preview cache for context {} to quota.", iContextId, e);
         }
     }
 
