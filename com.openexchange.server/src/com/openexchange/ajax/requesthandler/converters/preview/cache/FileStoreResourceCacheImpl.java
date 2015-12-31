@@ -72,16 +72,14 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.
@@ -90,17 +88,18 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
-    protected static long ALIGNMENT_DELAY = 10000L;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
-    private static FileStorage getFileStorage(final Context ctx, final boolean quotaAware) throws OXException {
-        final URI uri = FilestoreStorage.createURI(ctx);
-        return quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
-    }
+    protected static long ALIGNMENT_DELAY = 10000L;
 
-    private static FileStorage getFileStorage(final int contextId, final boolean quotaAware) throws OXException {
-        return getFileStorage(ContextStorage.getStorageContext(contextId), quotaAware);
+    private static FileStorage getFileStorage(int contextId, boolean quotaAware) throws OXException {
+        QuotaFileStorageService qfss = FileStorages.getQuotaFileStorageService();
+        if (quotaAware) {
+            return qfss.getQuotaFileStorage(contextId);
+        }
+
+        URI uri = qfss.getFileStorageUriFor(0, contextId);
+        return FileStorages.getFileStorageService().getFileStorage(uri);
     }
 
     // ------------------------------------------------------------------------------- //

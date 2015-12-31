@@ -214,7 +214,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         }
     }
 
-    private <V> void execute(FutureTask<V> task, final CountDownLatch optLatch) throws IOException {
+    private <V> void execute(FutureTask<V> task, CountDownLatch optLatch) throws IOException {
         processor.execute(optSource, task);
         awaitCountDown(optLatch);
     }
