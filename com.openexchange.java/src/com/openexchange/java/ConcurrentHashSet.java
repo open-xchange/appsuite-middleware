@@ -52,9 +52,9 @@ package com.openexchange.java;
 import java.io.Serializable;
 import java.util.AbstractSet;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * {@link ConcurrentHashSet} - This class implements the <tt>Set</tt> interface, backed by a map (actually a <tt>ConcurrentHashMap</tt>
@@ -104,7 +104,7 @@ public final class ConcurrentHashSet<E> extends AbstractSet<E> implements Clonea
     /**
      * The backing concurrent map.
      */
-    private Map<E, Object> map;
+    private ConcurrentMap<E, Object> map;
 
     /**
      * Creates a new, empty set with the specified initial capacity, load factor, and concurrency level.
