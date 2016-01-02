@@ -162,7 +162,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
-        if (fitsQuotas(bytes.length)) {
+        long globalQuota = getGlobalQuota(userId, contextId);
+        if (fitsQuotas(bytes.length, globalQuota, userId, contextId)) {
             /*
              * If the resource fits the quotas we store it even if we exceed the quota when storing it.
              * Removing old cache entries is done asynchronously in the finally block.
@@ -203,7 +204,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     metadataStore.store(con, newMetadata);
                 }
 
-                long globalQuota = getGlobalQuota();
                 if (globalQuota > 0) {
                     long usedSize = metadataStore.getUsedSize(con, contextId);
                     if (usedSize > globalQuota) {
@@ -245,7 +245,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     }
 
                     // Storing the resource exceeded the quota. We schedule an alignment task if this wasn't already done.
-                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(contextId)) {
+                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(globalQuota, contextId)) {
                         LOG.debug("Scheduling alignment task for context {}.", contextId);
                     } else {
                         LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
@@ -275,14 +275,14 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return false;
     }
 
-    protected boolean scheduleAlignmentTask(final int contextId) {
+    protected boolean scheduleAlignmentTask(final long globalQuota, final int contextId) {
         try {
             TimerService timerService = optTimerService();
             if (timerService != null) {
                 timerService.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        alignToQuota(contextId);
+                        alignToQuota(globalQuota, contextId);
                     }
                 }, ALIGNMENT_DELAY);
 
@@ -297,7 +297,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return false;
     }
 
-    protected void alignToQuota(final int contextId) {
+    protected void alignToQuota(long globalQuota, int contextId) {
         Integer iContextId = Integer.valueOf(contextId);
         if (!alignmentRequests.replace(iContextId, SCHEDULED, RUNNING)) {
             return;
@@ -311,7 +311,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             boolean transactionStarted = false;
             boolean rollback = false;
             try {
-                long globalQuota = getGlobalQuota();
                 long usedContextQuota = metadataStore.getUsedSize(con, contextId);
                 if (globalQuota > 0 && usedContextQuota > globalQuota) {
                     long neededSpace = usedContextQuota - globalQuota;
@@ -465,9 +464,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return true;
     }
 
-    private boolean fitsQuotas(final long desiredSize) {
-        final long globalQuota = getGlobalQuota();
-        final long documentQuota = getDocumentQuota();
+    private boolean fitsQuotas(long desiredSize, long globalQuota, int userId, int contextId) throws OXException {
+        long documentQuota = getDocumentQuota(userId, contextId);
         if (globalQuota > 0L || documentQuota > 0L) {
             if (globalQuota <= 0L) {
                 return (documentQuota <= 0 || desiredSize <= documentQuota);
