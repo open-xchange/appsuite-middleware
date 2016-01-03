@@ -276,7 +276,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         ThresholdFileHolder sink = null;
         try {
             if (!imageFile.repetitive()) {
-                sink = new ThresholdFileHolder(sink);
+                sink = new ThresholdFileHolder(imageFile);
             }
 
             // Check size
