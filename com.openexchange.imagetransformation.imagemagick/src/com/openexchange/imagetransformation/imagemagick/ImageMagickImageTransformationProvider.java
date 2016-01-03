@@ -273,18 +273,18 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(IFileHolder imageFile, Object source) throws IOException {
-        ThresholdFileHolder sink = null;
+        ThresholdFileHolder backup = null;
         try {
             if (!imageFile.repetitive()) {
-                sink = new ThresholdFileHolder(imageFile);
+                backup = new ThresholdFileHolder(imageFile);
                 Streams.close(imageFile);
-                imageFile = sink;
+                imageFile = backup;
             }
 
             // Check size
             {
                 long maxSize = ImageMagickRegisterer.maxSize();
-                long size = null == sink ? imageFile.getLength() : sink.getLength();
+                long size = imageFile.getLength();
                 if (maxSize > 0 && size > maxSize) {
                     throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Size is too big. (current=").append(size).append(", max=").append(maxSize).append(')').toString());
                 }
@@ -297,7 +297,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             {
                 long maxResolution = ImageMagickRegisterer.maxResolution();
                 if (maxResolution > 0) {
-                    InputStream pInput = null == sink ? imageFile.getStream() : sink.getStream();
+                    InputStream pInput = imageFile.getStream();
                     try {
                         checkResolution(pInput, maxResolution, searchPath);
                     } finally {
@@ -309,7 +309,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             boolean useGraphicsMagick = useGraphicsMagickRef.get();
             int timeoutSecs = timeoutSecsRef.get();
             ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
-            sink = null; // Null'ify to avoid preliminary closing
+            backup = null; // Null'ify to avoid preliminary closing
             return transformations;
         } catch (OXException e) {
             Throwable cause = e.getCause();
@@ -323,7 +323,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         } catch (IM4JavaException e) {
             throw new IOException("ImageMagick error.", e);
         } finally {
-            Streams.close(sink);
+            Streams.close(backup);
         }
     }
 
