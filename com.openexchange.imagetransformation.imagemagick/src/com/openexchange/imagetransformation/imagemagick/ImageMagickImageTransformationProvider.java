@@ -277,6 +277,8 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         try {
             if (!imageFile.repetitive()) {
                 sink = new ThresholdFileHolder(imageFile);
+                Streams.close(imageFile);
+                imageFile = sink;
             }
 
             // Check size
@@ -306,12 +308,8 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
             boolean useGraphicsMagick = useGraphicsMagickRef.get();
             int timeoutSecs = timeoutSecsRef.get();
-            if (null == sink) {
-                return new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
-            }
-
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
-            sink = null;
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
+            sink = null; // Null'ify to avoid preliminary closing
             return transformations;
         } catch (OXException e) {
             Throwable cause = e.getCause();
