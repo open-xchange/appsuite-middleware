@@ -108,26 +108,9 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         }
     };
 
-    private static class LatchAwareFutureTask<V> extends FutureTask<V> {
-
-        private final CountDownLatch latch;
-
-        LatchAwareFutureTask(Callable<V> callable, CountDownLatch latch) {
-            super(callable);
-            this.latch = latch;
-        }
-
-        @Override
-        public void run() {
-            latch.countDown();
-            super.run();
-        }
-
-    }
-
     // ----------------------------------------------------------------------------------------------------------------------
 
-    final boolean doNothing;
+    private final boolean doNothing;
 
     private final Processor processor;
     final TransformedImageCreator transformedImageCreator;
@@ -286,14 +269,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         return this;
     }
 
-    void runCommand(String formatName) throws IOException {
+    void runCommand() throws IOException {
         try {
-            if (doNothing) {
-                // -alpha off
-                if (Utility.supportsTransparency(formatName)) {
-                    op.alpha("off");
-                }
-            }
             if (null != sourceImage) {
                 cmd.run(op, sourceImage);
             } else if (null != sourceImageFile) {
@@ -312,7 +289,14 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     }
 
     BufferedImage getImage(String formatName) throws IOException {
-        final String frmtName = getImageFormat(formatName);
+        String frmtName = getImageFormat(formatName);
+
+        if (doNothing) {
+            // -alpha off
+            if (false == Utility.supportsTransparency(frmtName)) {
+                op.alpha("off");
+            }
+        }
         op.addImage(frmtName + ":-");
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -324,7 +308,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 Stream2BufferedImage s2b = new Stream2BufferedImage();
                 cmd.setOutputConsumer(s2b);
 
-                runCommand(frmtName);
+                runCommand();
 
                 return s2b.getImage();
             }
@@ -352,7 +336,14 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
-        final String frmtName = getImageFormat(formatName);
+        String frmtName = getImageFormat(formatName);
+
+        if (doNothing) {
+            // -alpha off
+            if (false == Utility.supportsTransparency(frmtName)) {
+                op.alpha("off");
+            }
+        }
         op.addImage(frmtName + ":-");
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -364,7 +355,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                 cmd.setOutputConsumer(bytes);
 
-                runCommand(frmtName);
+                runCommand();
 
                 return bytes.toByteArray();
             }
@@ -376,7 +367,14 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public InputStream getInputStream(String formatName) throws IOException {
-        final String frmtName = getImageFormat(formatName);
+        String frmtName = getImageFormat(formatName);
+
+        if (doNothing) {
+            // -alpha off
+            if (false == Utility.supportsTransparency(frmtName)) {
+                op.alpha("off");
+            }
+        }
         op.addImage(frmtName + ":-");
 
         if (null != sourceImage) {
@@ -389,7 +387,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                     cmd.setOutputConsumer(bytes);
 
-                    runCommand(frmtName);
+                    runCommand();
 
                     return bytes.asInputStream();
                 }
@@ -421,12 +419,6 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     cmd.setInputProvider(pipeIn);
                     cmd.setOutputConsumer(pipeOut);
 
-                    if (doNothing) {
-                        // -alpha off
-                        if (Utility.supportsTransparency(frmtName)) {
-                            op.alpha("off");
-                        }
-                    }
                     cmd.run(op);
 
                     InputStream retval = sink.getClosingStream();
@@ -457,6 +449,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
         final String frmtName = getImageFormat(formatName);
 
+        if (doNothing) {
+            // -alpha off
+            if (false == Utility.supportsTransparency(frmtName)) {
+                op.alpha("off");
+            }
+        }
         op.addImage(frmtName + ":-");
 
         if (null != sourceImage) {
@@ -469,7 +467,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
 
                     cmd.setOutputConsumer(bytes);
-                    runCommand(frmtName);
+                    runCommand();
 
                     return new BasicTransformedImageImpl(frmtName, bytes.getSink());
                 }
@@ -498,12 +496,6 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     cmd.setInputProvider(pipeIn);
                     cmd.setOutputConsumer(pipeOut);
 
-                    if (doNothing) {
-                        // -alpha off
-                        if (Utility.supportsTransparency(frmtName)) {
-                            op.alpha("off");
-                        }
-                    }
                     cmd.run(op);
 
                     BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);
