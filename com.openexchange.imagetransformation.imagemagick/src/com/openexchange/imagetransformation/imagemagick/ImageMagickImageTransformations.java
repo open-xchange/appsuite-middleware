@@ -64,7 +64,6 @@ import org.im4java.core.IMOperation;
 import org.im4java.core.Stream2BufferedImage;
 import org.im4java.process.InputProvider;
 import org.im4java.process.OutputConsumer;
-import org.im4java.process.Pipe;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
@@ -402,7 +401,6 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
             @Override
             public InputStream call() throws Exception {
-                latch.countDown();
                 InputStream is = null;
                 ThresholdFileHolder sink = null;
                 try {
@@ -412,8 +410,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     //PipedOutputStream pos = new PipedOutputStream();
                     //ExceptionAwarePipedInputStream pin = new ExceptionAwarePipedInputStream(pos, 65536);
 
-                    Pipe pipeIn  = new Pipe(is, null);
-                    Pipe pipeOut = new Pipe(null, sink.asOutputStream());
+                    PipeIn pipeIn = new PipeIn(is, latch);
+                    PipeOut pipeOut = new PipeOut(sink.asOutputStream());
 
                     // Set up command
                     cmd.setInputProvider(pipeIn);
@@ -436,6 +434,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 } catch (IM4JavaException e) {
                     throw new IOException("ImageMagick error.", e);
                 } finally {
+                    latch.countDown(); // For safety reason
                     Streams.close(is, sink);
                 }
             }
@@ -482,15 +481,14 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
             @Override
             public BasicTransformedImage call() throws Exception {
-                latch.countDown();
                 InputStream is = null;
                 ThresholdFileHolder sink = null;
                 try {
                     is = null != sourceImageStream ? sourceImageStream : sourceImageFile.getStream();
                     sink = new ThresholdFileHolder(false);
 
-                    Pipe pipeIn  = new Pipe(is, null);
-                    Pipe pipeOut = new Pipe(null, sink.asOutputStream());
+                    PipeIn pipeIn = new PipeIn(is, latch);
+                    PipeOut pipeOut = new PipeOut(sink.asOutputStream());
 
                     // Set up command
                     cmd.setInputProvider(pipeIn);
@@ -513,6 +511,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 } catch (IM4JavaException e) {
                     throw new IOException("ImageMagick error.", e);
                 } finally {
+                    latch.countDown(); // For safety reason
                     Streams.close(is, sink);
                 }
             }
