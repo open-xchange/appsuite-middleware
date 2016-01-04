@@ -2928,7 +2928,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 mailSent = true;
             } catch (OXException e) {
-                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
                     throw e;
                 }
 

@@ -301,7 +301,11 @@ public class MimeMailException extends OXException {
                 Address[] addrs = sendFailedError.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available
-                    return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(sendFailedError, smtpInfo.toString());
+                    addrs = sendFailedError.getValidUnsentAddresses();
+                    if (null == addrs || addrs.length == 0) {
+                        // Neither valid unsent addresses
+                        return MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.create(sendFailedError, smtpInfo.toString());
+                    }
                 }
 
                 return MimeMailExceptionCode.SEND_FAILED_EXT.create(sendFailedError, Arrays.toString(addrs), smtpInfo.toString());
@@ -316,18 +320,27 @@ public class MimeMailException extends OXException {
                         smtpInfo = getSmtpInfo(failedError);
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
+                            if (null == invalidAddresses || invalidAddresses.length == 0) {
+                                invalidAddresses = failedError.getValidUnsentAddresses();
+                            }
                         }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPSenderFailedException) {
                         com.sun.mail.smtp.SMTPSenderFailedException failedError = (com.sun.mail.smtp.SMTPSenderFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
+                            if (null == invalidAddresses || invalidAddresses.length == 0) {
+                                invalidAddresses = failedError.getValidUnsentAddresses();
+                            }
                         }
                     } else if (nextException instanceof com.sun.mail.smtp.SMTPAddressFailedException) {
                         com.sun.mail.smtp.SMTPAddressFailedException failedError = (com.sun.mail.smtp.SMTPAddressFailedException) nextException;
                         smtpInfo = getSmtpInfo(failedError);
                         if (invalidAddresses == null || invalidAddresses.length == 0) {
                             invalidAddresses = failedError.getInvalidAddresses();
+                            if (null == invalidAddresses || invalidAddresses.length == 0) {
+                                invalidAddresses = failedError.getValidUnsentAddresses();
+                            }
                         }
                     }
                 }

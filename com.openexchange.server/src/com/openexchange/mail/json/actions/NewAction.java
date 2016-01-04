@@ -576,7 +576,7 @@ public final class NewAction extends AbstractMailAction {
                     sentMail = transport.sendRawMessage(m.getSourceBytes());
                 }
             } catch (OXException e) {
-                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
                     throw e;
                 }
 
