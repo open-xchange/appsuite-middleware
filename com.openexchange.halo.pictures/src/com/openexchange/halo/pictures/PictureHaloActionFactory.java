@@ -64,8 +64,8 @@ import com.openexchange.server.ServiceLookup;
  */
 public class PictureHaloActionFactory implements AJAXActionServiceFactory {
 
-    private GetPictureAction GET_PICTURE;
-    
+    private final GetPictureAction GET_PICTURE;
+
     public PictureHaloActionFactory(ServiceLookup services) {
         super();
         GET_PICTURE = new GetPictureAction(services);
