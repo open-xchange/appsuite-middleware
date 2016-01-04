@@ -75,6 +75,7 @@ import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.imagetransformation.TransformedImageCreator;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.Streams;
 import com.openexchange.processing.Processor;
 import com.openexchange.threadpool.ThreadPools;
@@ -126,6 +127,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
+    final boolean doNothing;
+
     private final Processor processor;
     final TransformedImageCreator transformedImageCreator;
     private final int timeoutSecs;
@@ -143,8 +146,9 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
+    public ImageMagickImageTransformations(BufferedImage sourceImage, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor, boolean doNothing) {
         super();
+        this.doNothing = doNothing;
         this.processor = processor;
         this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
@@ -164,8 +168,9 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
+    public ImageMagickImageTransformations(IFileHolder sourceImageFile, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor, boolean doNothing) {
         super();
+        this.doNothing = doNothing;
         this.processor = processor;
         this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
@@ -185,8 +190,9 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     /**
      * Initializes a new {@link ImageMagickImageTransformations}.
      */
-    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor) {
+    public ImageMagickImageTransformations(InputStream sourceImageStream, Object optSource, TransformedImageCreator transformedImageCreator, String searchPath, boolean useGraphicsMagick, int timeoutSecs, Processor processor, boolean doNothing) {
         super();
+        this.doNothing = doNothing;
         this.processor = processor;
         this.timeoutSecs = timeoutSecs;
         this.transformedImageCreator = transformedImageCreator;
@@ -221,6 +227,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public ImageTransformations rotate() {
+        if (doNothing) {
+            return this;
+        }
+
         op.autoOrient();
         return this;
     }
@@ -232,6 +242,10 @@ public class ImageMagickImageTransformations implements ImageTransformations {
         }
         if (maxHeight > Constants.getMaxHeight()) {
             throw new IllegalArgumentException("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
+        }
+
+        if (doNothing) {
+            return this;
         }
 
         switch (scaleType) {
@@ -254,18 +268,32 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public ImageTransformations crop(int x, int y, int width, int height) {
+        if (doNothing) {
+            return this;
+        }
+
         op.crop(Integer.valueOf(width), Integer.valueOf(height), Integer.valueOf(x), Integer.valueOf(y));
         return this;
     }
 
     @Override
     public ImageTransformations compress() {
+        if (doNothing) {
+            return this;
+        }
+
         compress = true;
         return this;
     }
 
-    void runCommand() throws IOException {
+    void runCommand(String formatName) throws IOException {
         try {
+            if (doNothing) {
+                // -alpha off
+                if (Utility.supportsTransparency(formatName)) {
+                    op.alpha("off");
+                }
+            }
             if (null != sourceImage) {
                 cmd.run(op, sourceImage);
             } else if (null != sourceImageFile) {
@@ -284,7 +312,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
     }
 
     BufferedImage getImage(String formatName) throws IOException {
-        op.addImage(getImageFormat(formatName) + ":-");
+        final String frmtName = getImageFormat(formatName);
+        op.addImage(frmtName + ":-");
 
         final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<BufferedImage> task = new FutureTask<>(new Callable<BufferedImage>() {
@@ -295,7 +324,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 Stream2BufferedImage s2b = new Stream2BufferedImage();
                 cmd.setOutputConsumer(s2b);
 
-                runCommand();
+                runCommand(frmtName);
 
                 return s2b.getImage();
             }
@@ -323,7 +352,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public byte[] getBytes(String formatName) throws IOException {
-        op.addImage(getImageFormat(formatName) + ":-");
+        final String frmtName = getImageFormat(formatName);
+        op.addImage(frmtName + ":-");
 
         final CountDownLatch latch = new CountDownLatch(1);
         FutureTask<byte[]> task = new FutureTask<>(new Callable<byte[]>() {
@@ -334,7 +364,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                 ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                 cmd.setOutputConsumer(bytes);
 
-                runCommand();
+                runCommand(frmtName);
 
                 return bytes.toByteArray();
             }
@@ -346,7 +376,8 @@ public class ImageMagickImageTransformations implements ImageTransformations {
 
     @Override
     public InputStream getInputStream(String formatName) throws IOException {
-        op.addImage(getImageFormat(formatName) + ":-");
+        final String frmtName = getImageFormat(formatName);
+        op.addImage(frmtName + ":-");
 
         if (null != sourceImage) {
             final CountDownLatch latch = new CountDownLatch(1);
@@ -358,7 +389,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
                     cmd.setOutputConsumer(bytes);
 
-                    runCommand();
+                    runCommand(frmtName);
 
                     return bytes.asInputStream();
                 }
@@ -390,6 +421,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     cmd.setInputProvider(pipeIn);
                     cmd.setOutputConsumer(pipeOut);
 
+                    if (doNothing) {
+                        // -alpha off
+                        if (Utility.supportsTransparency(frmtName)) {
+                            op.alpha("off");
+                        }
+                    }
                     cmd.run(op);
 
                     InputStream retval = sink.getClosingStream();
@@ -432,7 +469,7 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     ByteCollectingOutputConsumer bytes = new ByteCollectingOutputConsumer();
 
                     cmd.setOutputConsumer(bytes);
-                    runCommand();
+                    runCommand(frmtName);
 
                     return new BasicTransformedImageImpl(frmtName, bytes.getSink());
                 }
@@ -461,6 +498,12 @@ public class ImageMagickImageTransformations implements ImageTransformations {
                     cmd.setInputProvider(pipeIn);
                     cmd.setOutputConsumer(pipeOut);
 
+                    if (doNothing) {
+                        // -alpha off
+                        if (Utility.supportsTransparency(frmtName)) {
+                            op.alpha("off");
+                        }
+                    }
                     cmd.run(op);
 
                     BasicTransformedImage retval = new BasicTransformedImageImpl(frmtName, sink);

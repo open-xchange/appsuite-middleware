@@ -180,7 +180,7 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         timeoutSecsRef.set(timeoutSecs);
     }
 
-    private void checkResolution(InputStream pInput, long maxResolution, String searchPath) throws IOException, InterruptedException, IM4JavaException, ImageTransformationDeniedIOException {
+    private Dimension getDimension(InputStream pInput, String searchPath) throws IOException, InterruptedException, IM4JavaException {
         IMOperation op = new IMOperation();
         op.ping();
         op.format("%w\n%h");
@@ -200,8 +200,11 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
         Iterator<String> iter = cmdOutput.iterator();
         int width = Integer.parseInt(iter.next()); // Width
         int height = Integer.parseInt(iter.next()); // Height
+        return new Dimension(width, height);
+    }
 
-        long resolution = width * height;
+    private void checkResolution(Dimension dimension, long maxResolution) throws ImageTransformationDeniedIOException {
+        long resolution = dimension.width * dimension.height;
         if (resolution > maxResolution) {
             throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too big. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
         }
@@ -214,7 +217,9 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(BufferedImage sourceImage, Object source) throws IOException {
-        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
+        // Obey existing image transformation contract:
+        boolean doNothing = (sourceImage.getHeight() <= 3 || sourceImage.getWidth() <= 3);
+        return new ImageMagickImageTransformations(sourceImage, source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor(), doNothing);
     }
 
     @Override
@@ -239,20 +244,29 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             // Get the search path
             String searchPath = searchPathRef.get();
 
+            // Get image width/height dimension
+            Dimension dimension;
+            {
+                InputStream pInput = sink.getStream();
+                try {
+                    dimension = getDimension(pInput, searchPath);
+                } finally {
+                    Streams.close(pInput);
+                }
+            }
+
             // Check resolution
             {
                 long maxResolution = ImageMagickRegisterer.maxResolution();
                 if (maxResolution > 0) {
-                    InputStream pInput = sink.getStream();
-                    try {
-                        checkResolution(pInput, maxResolution, searchPath);
-                    } finally {
-                        Streams.close(pInput);
-                    }
+                    checkResolution(dimension, maxResolution);
                 }
             }
 
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
+            // Obey existing image transformation contract:
+            boolean doNothing = (dimension.height <= 3 || dimension.width <= 3);
+
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(sink.getClosingStream(), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor(), doNothing);
             sink = null;
             return transformations;
         } catch (OXException e) {
@@ -293,22 +307,31 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
             // Get the search path
             String searchPath = searchPathRef.get();
 
+            // Get image width/height dimension
+            Dimension dimension;
+            {
+                InputStream pInput = imageFile.getStream();
+                try {
+                    dimension = getDimension(pInput, searchPath);
+                } finally {
+                    Streams.close(pInput);
+                }
+            }
+
             // Check resolution
             {
                 long maxResolution = ImageMagickRegisterer.maxResolution();
                 if (maxResolution > 0) {
-                    InputStream pInput = imageFile.getStream();
-                    try {
-                        checkResolution(pInput, maxResolution, searchPath);
-                    } finally {
-                        Streams.close(pInput);
-                    }
+                    checkResolution(dimension, maxResolution);
                 }
             }
 
+            // Obey existing image transformation contract:
+            boolean doNothing = (dimension.height <= 3 || dimension.width <= 3);
+
             boolean useGraphicsMagick = useGraphicsMagickRef.get();
             int timeoutSecs = timeoutSecsRef.get();
-            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor());
+            ImageMagickImageTransformations transformations = new ImageMagickImageTransformations(imageFile, source, transformedImageCreator, searchPath, useGraphicsMagick, timeoutSecs, getProcessor(), doNothing);
             backup = null; // Null'ify to avoid preliminary closing
             return transformations;
         } catch (OXException e) {
@@ -334,7 +357,47 @@ public class ImageMagickImageTransformationProvider implements ImageTransformati
 
     @Override
     public ImageTransformations transfom(byte[] imageData, Object source) throws IOException {
-        return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPathRef.get(), useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor());
+        try {
+            // Check size
+            {
+                long maxSize = ImageMagickRegisterer.maxSize();
+                if (maxSize > 0 && imageData.length > maxSize) {
+                    throw new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Size is too big. (current=").append(imageData.length).append(", max=").append(maxSize).append(')').toString());
+                }
+            }
+
+            // Get the search path
+            String searchPath = searchPathRef.get();
+
+            // Get image width/height dimension
+            Dimension dimension;
+            {
+                InputStream pInput = Streams.newByteArrayInputStream(imageData);
+                try {
+                    dimension = getDimension(pInput, searchPath);
+                } finally {
+                    Streams.close(pInput);
+                }
+            }
+
+            // Check resolution
+            {
+                long maxResolution = ImageMagickRegisterer.maxResolution();
+                if (maxResolution > 0) {
+                    checkResolution(dimension, maxResolution);
+                }
+            }
+
+            // Obey existing image transformation contract:
+            boolean doNothing = (dimension.height <= 3 || dimension.width <= 3);
+
+            return new ImageMagickImageTransformations(Streams.newByteArrayInputStream(imageData), source, transformedImageCreator, searchPath, useGraphicsMagickRef.get(), timeoutSecsRef.get(), getProcessor(), doNothing);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("I/O operation has been interrupted.", e);
+        } catch (IM4JavaException e) {
+            throw new IOException("ImageMagick error.", e);
+        }
     }
 
 }
