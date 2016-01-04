@@ -269,6 +269,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             facets.add(new NameFacet(prefix, prefixTokens));
             facets.add(new EmailFacet(prefix, prefixTokens));
             facets.add(new PhoneFacet(prefix, prefixTokens));
+            facets.add(new DepartmentFacet(prefix, prefixTokens));
             facets.add(new AddressFacet(prefix, prefixTokens));
 
             AutocompleteParameters parameters = AutocompleteParameters.newInstance();
@@ -342,23 +343,25 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
         switch (type) {
-        case ADDRESS:
-            return Utils.getSearchTerm(session, AddressFacet.ADDRESS_FIELDS, queries);
-        case CONTACT:
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-            searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
-            return searchTerm;
-        case CONTACT_TYPE:
-            return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
-        case EMAIL:
-            return Utils.getSearchTerm(session, EmailFacet.EMAIL_FIELDS, queries);
-        case NAME:
-            return Utils.getSearchTerm(session, NameFacet.NAME_FIELDS, queries);
-        case PHONE:
-            return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
-        default:
-            throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
+            case ADDRESS:
+                return Utils.getSearchTerm(session, AddressFacet.ADDRESS_FIELDS, queries);
+            case CONTACT:
+                SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
+                searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
+                return searchTerm;
+            case CONTACT_TYPE:
+                return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
+            case EMAIL:
+                return Utils.getSearchTerm(session, EmailFacet.EMAIL_FIELDS, queries);
+            case NAME:
+                return Utils.getSearchTerm(session, NameFacet.NAME_FIELDS, queries);
+            case PHONE:
+                return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
+            case DEPARTMENT:
+                return Utils.getSearchTerm(session, DepartmentFacet.DEPARTMENT_FIELDS, queries);
+            default:
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
     }
 

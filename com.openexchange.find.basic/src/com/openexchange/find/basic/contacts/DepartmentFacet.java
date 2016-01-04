@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,49 +47,42 @@
  *
  */
 
-package com.openexchange.find.contacts;
+package com.openexchange.find.basic.contacts;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.util.List;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * Contact-specific strings are potentially displayed in client applications and should therefore be localized.
+ * {@link DepartmentFacet}
  *
- * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.6.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.0
  */
-public class ContactsStrings implements LocalizableStrings {
+public class DepartmentFacet extends ContactSearchFieldFacet {
 
-    public static final String FACET_TYPE_CONTACT_TYPE = "Type";
+    private static final long serialVersionUID = -9131205652463933031L;
 
-    public static final String FACET_TYPE_CONTACT = "Contact";
+    static final ContactField[] DEPARTMENT_FIELDS = {
+        ContactField.DEPARTMENT
+    };
 
-    // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in names.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_NAME = "in names";
+    /**
+     * Initializes a new {@link PhoneFacet}.
+     *
+     * @param query The query to insert into the display item
+     * @param tokenized The tokenized query to insert into the filter
+     */
+    public DepartmentFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.DEPARTMENT, new FormattableDisplayItem(ContactsStrings.FACET_DEPARTMENT, query), tokenized);
+    }
 
-    // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in e-mail addresses.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_EMAIL = "in e-mail addresses";
-
-    // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in phone numbers.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_PHONE = "in phone numbers";
-
-    // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in addresses.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_ADDRESS = "in addresses";
-
-    // Context: Searching in contacts.
-    // Displayed as: [Search for] 'user input' in departments.
-    // The 'user input' part is always prepended, please heed this in translations.
-    public static final String FACET_DEPARTMENT = "in departments";
-
-    public static final String CONTACT_TYPE_CONTACT = "Contact";
-
-    public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";
+    @Override
+    protected ContactField[] getFields() {
+        return DEPARTMENT_FIELDS;
+    }
 
 }
+
