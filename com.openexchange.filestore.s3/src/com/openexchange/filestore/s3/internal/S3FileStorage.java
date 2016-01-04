@@ -329,22 +329,23 @@ public class S3FileStorage implements FileStorage {
             /*
              * get existing object
              */
-            String key = addPrefix(name);
-            S3Object s3Object = getObject(key);
-            long currentLength = s3Object.getObjectMetadata().getContentLength();
-            if (currentLength != offset) {
-                throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
-            }
-            /*
-             * append both streams at temporary location
-             */
             String tempName = null;
+            String key = addPrefix(name);
+            S3Object s3Object = null;
             SequenceInputStream inputStream = null;
             try {
+                s3Object = getObject(key);
+                long currentLength = s3Object.getObjectMetadata().getContentLength();
+                if (currentLength != offset) {
+                    throw FileStorageCodes.INVALID_OFFSET.create(Long.valueOf(offset), name, Long.valueOf(currentLength));
+                }
+                /*
+                 * append both streams at temporary location
+                 */
                 inputStream = new SequenceInputStream(s3Object.getObjectContent(), file);
                 tempName = saveNewFile(inputStream);
             } finally {
-                Streams.close(inputStream);
+                Streams.close(inputStream, s3Object);
             }
             /*
              * replace old file, cleanup
