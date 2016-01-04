@@ -167,13 +167,16 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                      * Get content according to output format
                      */
                     final byte[] bytes;
-                    {
-                        final InputStream in = cachedPreview.getInputStream();
+                    InputStream in = null;
+                    try {
+                        in = cachedPreview.getInputStream();
                         if (null == in) {
                             bytes = cachedPreview.getBytes();
                         } else {
                             bytes = Streams.stream2bytes(in);
                         }
+                    } finally {
+                        Streams.close(in);
                     }
                     /*
                      * Convert meta data to a map
