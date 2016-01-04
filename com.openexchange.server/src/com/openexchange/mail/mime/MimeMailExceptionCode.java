@@ -163,7 +163,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     MESSAGE_TOO_LARGE_EXT("Message could not be sent because it is too large (%1$s)", CATEGORY_USER_INPUT, 1012, MimeMailExceptionMessage.MESSAGE_TOO_LARGE_EXT_MSG_DISPLAY),
     /**
-     * Message could not be sent to following recipients: %1$s
+     * MSG-1013 - Message could not be sent to following recipients: %1$s
      * <p>
      * The exception includes those addresses to which the message could not be sent as well as the valid addresses to which the message was
      * sent and valid addresses to which the message was not sent.
@@ -171,7 +171,7 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     SEND_FAILED("Message could not be sent to the following recipients: %1$s", CATEGORY_USER_INPUT, 1013, MimeMailExceptionMessage.SEND_FAILED_MSG_DISPLAY),
     /**
-     * Message could not be sent to following recipients: %1$s (%2$s) (<i>arbitrary server information</i>)
+     * MSG-1013 - Message could not be sent to following recipients: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
     SEND_FAILED_EXT("Message could not be sent to the following recipients: %1$s (%2$s)", CATEGORY_USER_INPUT, 1013, MimeMailExceptionMessage.SEND_FAILED_EXT_MSG_DISPLAY),
     /**
@@ -263,11 +263,11 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      */
     PROTOCOL_ERROR_EXT("Protocol error in data sent to the mail server %1$s with login %2$s (user=%3$s, context=%4$s). Error message: %5$s", PROTOCOL_ERROR.category, PROTOCOL_ERROR.detailNumber),
     /**
-     * Message could not be sent: %1$s
+     * MSG-1028 - Message could not be sent: %1$s
      */
     SEND_FAILED_MSG_ERROR("Message could not be sent: %1$s", CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_MSG_ERROR_MSG_DISPLAY),
     /**
-     * Message could not be sent: %1$s (%2$s) (<i>arbitrary server information</i>)
+     * MSG-1028 - Message could not be sent: %1$s (%2$s) (<i>arbitrary server information</i>)
      */
     SEND_FAILED_MSG_EXT_ERROR("Message could not be sent: %1$s (%2$s)", CATEGORY_ERROR, 1028, MimeMailExceptionMessage.SEND_FAILED_EXT_MSG_ERROR_MSG_DISPLAY),
     /**
