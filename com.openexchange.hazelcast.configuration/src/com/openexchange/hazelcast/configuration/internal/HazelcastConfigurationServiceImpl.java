@@ -78,6 +78,7 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
+import com.openexchange.java.Enums;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.StringParser;
@@ -308,6 +309,8 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         System.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_LOGGING_TYPE, loggingType);
         config.setProperty(GroupProperties.PROP_VERSION_CHECK_ENABLED, "false");
+        config.setProperty(GroupProperties.PROP_HEALTH_MONITORING_LEVEL,
+            configService.getProperty("com.openexchange.hazelcast.healthMonitorLevel", "silent").toUpperCase());
         config.setProperty(GroupProperties.PROP_OPERATION_CALL_TIMEOUT_MILLIS,
             configService.getProperty("com.openexchange.hazelcast.maxOperationTimeout", "30000"));
         config.setProperty(GroupProperties.PROP_ENABLE_JMX, configService.getProperty("com.openexchange.hazelcast.jmx", "true"));
