@@ -1773,12 +1773,20 @@ public class Contact extends CommonObject {
     public void setNumberOfDistributionLists(final int listsize) {
         number_of_dlists = listsize;
         b_number_of_dlists = true;
-        setMarkAsDistributionlist(0 < listsize);
+        if (listsize >= 0) {
+            setMarkAsDistributionlist(true);
+        } else {
+            setMarkAsDistributionlist(false);
+        }
     }
 
     public void setDistributionList(final DistributionListEntryObject[] dleo) {
         dlists = dleo;
-        setNumberOfDistributionLists(null == dleo ? 0 : dleo.length);
+        if (null == dleo) {
+            setNumberOfDistributionLists(-1);
+        } else {
+            setNumberOfDistributionLists(dleo.length);
+        }
     }
 
     public void setContextId(final int cid) {
