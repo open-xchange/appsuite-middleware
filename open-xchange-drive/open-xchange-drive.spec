@@ -14,7 +14,7 @@ BuildRequires:  java7-devel
 BuildRequires:  java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define         ox_release 13
+%define         ox_release 14
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -73,6 +73,8 @@ ox_update_permissions /opt/open-xchange/etc/drive.properties root:open-xchange 6
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Dec 29 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
+Build for patch 2016-01-05 (2989)
 * Tue Dec 22 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
 Build for patch 2015-12-23 (2971)
 * Fri Dec 11 2015 Tobias Friedrich <tobias.friedrich@open-xchange.com>
