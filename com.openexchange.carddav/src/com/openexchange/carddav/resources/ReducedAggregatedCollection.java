@@ -54,6 +54,7 @@ import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 /**
  * {@link ReducedAggregatedCollection} - CardDAV collection aggregating the contents
@@ -61,7 +62,9 @@ import com.openexchange.webdav.protocol.WebdavPath;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ReducedAggregatedCollection extends AggregatedCollection {
+public class ReducedAggregatedCollection extends CardDAVCollection {
+
+    private final String displayName;
 
     /**
      * Initializes a new {@link AggregatedCollection}.
@@ -71,12 +74,18 @@ public class ReducedAggregatedCollection extends AggregatedCollection {
      * @param displayName The displayname to use
      */
     public ReducedAggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
-        super(factory, url, displayName);
+        super(factory, url, factory.getState().getDefaultFolder());
+        this.displayName = displayName;
     }
 
     @Override
     protected List<UserizedFolder> getFolders() throws OXException {
         return factory.getState().getReducedFolders();
+    }
+
+    @Override
+    public String getDisplayName() throws WebdavProtocolException {
+        return displayName;
     }
 
 }
