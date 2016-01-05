@@ -115,7 +115,7 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
             closeSQLStuff(stmt);
         }
     }
-
+    
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
