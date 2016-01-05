@@ -52,20 +52,15 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
@@ -76,7 +71,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
-public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
+public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -121,35 +116,6 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private Set<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            stmt = conn.prepareStatement("SELECT cid, id, value, uuid FROM user_attribute WHERE name='alias'");
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-
-            Set<Alias> aliases = new LinkedHashSet<Alias>();
-            int index;
-            do {
-                index = 0;
-                int cid = rs.getInt(++index);
-                int uid = rs.getInt(++index);
-                String alias = rs.getString(++index);
-                byte[] bytes = rs.getBytes(++index);
-                UUID uuid = UUIDs.toUUID(bytes);
-                aliases.add(new Alias(cid, uid, alias, uuid));
-            } while (rs.next());
-
-            return aliases;
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -185,78 +151,4 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
     public TaskAttributes getAttributes() {
         return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BLOCKING);
     }
-
-    private class Alias {
-
-        private final int cid;
-        private final int userId;
-        private final String alias;
-        private final int hash;
-        private final UUID uuid;
-
-        Alias(int cid, int userId, String alias, UUID uuid) {
-            this.cid = cid;
-            this.userId = userId;
-            this.alias = alias;
-            this.uuid = uuid;
-
-            int prime = 31;
-            int result = prime * 1 + cid;
-            result = prime * result + userId;
-            result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-            this.hash = result;
-        }
-
-        public int getCid() {
-            return cid;
-        }
-
-        public int getUserId() {
-            return userId;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        /**
-         * Gets the uuid
-         *
-         * @return The uuid
-         */
-        public UUID getUuid() {
-            return uuid;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Alias)) {
-                return false;
-            }
-            Alias other = (Alias) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            if (alias == null) {
-                if (other.alias != null) {
-                    return false;
-                }
-            } else if (!alias.equals(other.alias)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
 }

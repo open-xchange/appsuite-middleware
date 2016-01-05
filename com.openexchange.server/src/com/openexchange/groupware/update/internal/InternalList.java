@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpd
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
@@ -580,6 +581,9 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.8.1 starts here. +++++++++++++++++++++++++++++++++
 
         list.add(new DropVersionTableTask());
+        
+        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and migrates all UUIDs for each alias entry 
+        list.add(new MigrateUUIDsForUserAliasTable());
 
         // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
         list.add(new RemoveAliasInUserAttributesTable());
@@ -596,9 +600,6 @@ public final class InternalList {
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
         
-        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and fills it with random UUIDs for each entry 
-        list.add(new com.openexchange.groupware.update.tasks.AddUUIDForUserAliasTable());
-
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 
