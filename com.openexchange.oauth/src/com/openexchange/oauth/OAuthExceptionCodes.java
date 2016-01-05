@@ -122,7 +122,7 @@ public enum OAuthExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The account "%1$s" (id=%2$s) is invalid, please recreate it.
      */
-    INVALID_ACCOUNT_EXTENDED("The account \"%1$s\" (id=%2$s) is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_MSG), // Yapp, the same error code
+    INVALID_ACCOUNT_EXTENDED("The account \"%1$s\" (id=%2$s) is invalid, please recreate it.", CATEGORY_TRY_AGAIN, 13, OAuthExceptionMessages.INVALID_ACCOUNT_EXTENDED_MSG), // Yapp, the same error code
     /**
      * Please provide a display name.
      */
