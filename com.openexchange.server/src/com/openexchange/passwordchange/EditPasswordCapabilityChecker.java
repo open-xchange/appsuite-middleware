@@ -94,7 +94,9 @@ public class EditPasswordCapabilityChecker implements CapabilityChecker {
             if ((contextId > 0) && (userId > 0)) {
                 User user = session.getUser();
                 if ((user != null) && (user.isGuest())) {
-                    return true;
+                    if (Strings.isNotEmpty(user.getMail())) {
+                        return true;
+                    }
                 } else {
                     PasswordChangeService optionalService = serviceLookup.getOptionalService(PasswordChangeService.class);
                     if (optionalService != null) {
