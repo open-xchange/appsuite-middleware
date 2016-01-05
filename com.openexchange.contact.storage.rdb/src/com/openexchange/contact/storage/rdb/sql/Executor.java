@@ -74,6 +74,7 @@ import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
+import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
 import com.openexchange.exception.OXException;
@@ -536,7 +537,12 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter;
+        if (FulltextAutocompleteAdapter.hasFulltextIndex(connection, contextID)) {
+            adapter = new FulltextAutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        } else {
+            adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        }
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions, true));

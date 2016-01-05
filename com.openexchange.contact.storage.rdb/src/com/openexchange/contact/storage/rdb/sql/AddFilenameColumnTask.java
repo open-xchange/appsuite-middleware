@@ -54,7 +54,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-
+import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -71,11 +71,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class AddFilenameColumnTask extends UpdateTaskAdapter {
 
-	private final DatabaseService dbService;
-
-	public AddFilenameColumnTask(DatabaseService dbService) {
+	public AddFilenameColumnTask() {
 		super();
-		this.dbService = dbService;
 	}
 
     @Override
@@ -85,6 +82,7 @@ public class AddFilenameColumnTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
         int contextID = params.getContextId();
         Connection connnection = dbService.getForUpdateTask(contextID);
         Column filenameColumn = new Column("filename", "VARCHAR(255) COLLATE utf8_unicode_ci DEFAULT NULL");

@@ -136,6 +136,30 @@ public final class Tools {
     }
 
     /**
+     * Lists the names of available indexes for specified table.
+     *
+     * @param con The connection to use
+     * @param table The table name
+     * @return The names of available indexes
+     * @throws SQLException If listing the names of available indexes fails
+     */
+    public static final String[] listIndexes(Connection con, String table) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        ResultSet result = null;
+        try {
+            result = metaData.getIndexInfo(null, null, table, false, false);
+            List<String> names = new LinkedList<String>();
+            while (result.next()) {
+                String indexName = result.getString(6);
+                names.add(indexName);
+            }
+            return names.toArray(new String[names.size()]);
+        } finally {
+            closeSQLStuff(result);
+        }
+    }
+
+    /**
      * @param con readable database connection.
      * @param table table name that indexes should be tested.
      * @param columns column names that the index must cover.
@@ -239,7 +263,7 @@ public final class Tools {
     /**
      * This method drops the primary key on the table. Beware, this method is vulnerable to SQL injection because table and index name can
      * not be set through a {@link PreparedStatement}.
-     * 
+     *
      * @param con writable database connection.
      * @param table table name that primary key should be dropped.
      * @throws SQLExceptionif some SQL problem occurs.
@@ -892,7 +916,7 @@ public final class Tools {
 
     /**
      * Changes the column to a new size
-     * 
+     *
      * @param colName The column to enlarge
      * @param newSize The new size to set the column to
      * @param tableName The table name

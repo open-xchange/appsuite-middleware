@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,38 +47,44 @@
  *
  */
 
-package com.openexchange.contact.storage.rdb.sql;
+package com.openexchange.contact.storage.rdb.groupware;
 
-import static com.openexchange.groupware.update.UpdateConcurrency.BACKGROUND;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Arrays;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
+import com.openexchange.contact.storage.rdb.mapping.Mappers;
+import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
+import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.update.Attributes;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.tools.sql.DBUtils;
+import com.openexchange.tools.update.Tools;
+import com.planetj.math.rabinhash.RabinHashFunction32;
 
 /**
- * {@link CorrectNumberOfImagesTask}
+ * {@link AddFulltextIndexTask} - Checks existence of an appropriate FULLTEXT index for fields configured via
+ * <code>"com.openexchange.contact.fulltextIndexFields"</code> setting; creates it if missing &  dropping obsolete ones.
  *
- * Sets the number of images (intfield04) column in prg_contacts to NULL for
- * entries without corresponding data in prg_contacts_image.
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
+public class AddFulltextIndexTask extends UpdateTaskAdapter {
 
-    public CorrectNumberOfImagesTask() {
-		super();
-	}
+    /**
+     * Initializes a new {@link AddFulltextIndexTask}.
+     */
+    public AddFulltextIndexTask() {
+        super();
+    }
 
     @Override
     public String[] getDependencies() {
@@ -86,39 +92,57 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public TaskAttributes getAttributes() {
-        return new Attributes(BACKGROUND);
-    }
-
-    @Override
     public void perform(PerformParameters params) throws OXException {
         DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
-        int updated = -1;
-        int contextID = params.getContextId();
-        PreparedStatement statement = null;
-        Connection connnection = dbService.getForUpdateTask(contextID);
-        try {
-            connnection.setAutoCommit(false);
-            statement = connnection.prepareStatement("UPDATE prg_contacts " +
-            "SET intfield04 = NULL " +
-            "WHERE intfield04 > 0 AND NOT EXISTS " +
-                "(SELECT intfield01 FROM prg_contacts_image WHERE " +
-                "prg_contacts.intfield01 = prg_contacts_image.intfield01 AND prg_contacts.cid = prg_contacts_image.cid)");
-            updated = statement.executeUpdate();
-            connnection.commit();
 
-            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
-            logger.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
+        // Prepare indexed columns
+        ContactField[] fields = FulltextAutocompleteAdapter.fulltextIndexFields();
+        String[] columns = new String[fields.length];
+        for (int i = fields.length; i-- > 0;) {
+            columns[i] = Mappers.CONTACT.get(fields[i]).getColumnLabel();
+        }
+
+        // Generate expected index name (dependent on configured fields)
+        int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(Arrays.toString(columns));
+        String expectedName = new StringBuilder("autocomplete").append(hash).toString();
+
+        // Create index unless it already exists
+        int contextID = params.getContextId();
+        Connection connection = dbService.getForUpdateTask(contextID);
+        try {
+            connection.setAutoCommit(false);
+            if (false == expectedName.equals(Tools.existsIndex(connection, Table.CONTACTS.getName(), columns))) {
+                // Drop possible obsolete FULLTEXT index
+                String[] indexNames = Tools.listIndexes(connection, Table.CONTACTS.getName());
+                for (String indexName : indexNames) {
+                    if (null != indexName && indexName.startsWith("autocomplete")) {
+                        Tools.dropIndex(connection, Table.CONTACTS.getName(), indexName);
+                    }
+                }
+
+                // Create new one
+                addFulltextIndex(expectedName, fields, connection);
+            }
+            connection.commit();
         } catch (SQLException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            rollback(connnection);
+            rollback(connection);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
-            autocommit(connnection);
-            DBUtils.closeSQLStuff(statement);
-            Database.backNoTimeout(contextID, true, connnection);
+            autocommit(connection);
+            Database.backNoTimeout(contextID, true, connection);
+        }
+    }
+
+    private static boolean addFulltextIndex(String name, ContactField[] fields, Connection connection) throws SQLException, OXException {
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX ").append(name).append(" ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
+        } finally {
+            closeSQLStuff(stmt);
         }
     }
 
