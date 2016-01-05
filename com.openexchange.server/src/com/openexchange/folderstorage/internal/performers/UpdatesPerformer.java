@@ -297,15 +297,22 @@ public final class UpdatesPerformer extends AbstractUserizedFolderPerformer {
                             /*
                              * Public
                              */
-                            final String parentID = f.getParentID();
-                            final Folder parent = getFolder(FolderStorage.REAL_TREE_ID, parentID, realFolderStorages);
-                            final Permission parentPerm = getEffectivePermission(parent);
-                            if (parentPerm.isVisible()) {
+                            Folder parentFolder;
+                            try {
+                                parentFolder = getFolder(FolderStorage.REAL_TREE_ID, f.getParentID(), realFolderStorages);
+                            } catch (OXException e) {
+                                if ("FLD-0008".equals(e.getErrorCode())) {
+                                    parentFolder = null; // "Folder X does not exist in context Y"
+                                } else {
+                                    throw e;
+                                }
+                            }
+                            if (null != parentFolder && getEffectivePermission(parentFolder).isVisible()) {
                                 /*
                                  * Parent is visible
                                  */
-                                if (treeChecker.containsVirtualFolder(parentID, treeId, StorageType.WORKING)) {
-                                    updatedList.add(parent);
+                                if (treeChecker.containsVirtualFolder(parentFolder.getID(), treeId, StorageType.WORKING)) {
+                                    updatedList.add(parentFolder);
                                 }
                             } else {
                                 /*
