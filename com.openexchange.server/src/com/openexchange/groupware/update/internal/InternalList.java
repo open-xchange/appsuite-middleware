@@ -60,6 +60,7 @@ import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpd
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
+import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
@@ -769,9 +770,9 @@ public final class InternalList {
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
         
-        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and fills it with random UUIDs for each entry 
-        list.add(new com.openexchange.groupware.update.tasks.AddUUIDForUserAliasTable());
-
+        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and migrates all UUIDs for each alias entry 
+        list.add(new MigrateUUIDsForUserAliasTable());
+        
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

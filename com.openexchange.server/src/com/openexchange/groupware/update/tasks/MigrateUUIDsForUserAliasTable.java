@@ -54,28 +54,28 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Set;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
 /**
- * {@link AddUUIDForUserAliasTable}
+ * {@link MigrateUUIDsForUserAliasTable}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddUUIDForUserAliasTable extends UpdateTaskAdapter {
+public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTask {
 
     /**
-     * Initialises a new {@link AddUUIDForUserAliasTable}.
+     * Initialises a new {@link MigrateUUIDsForUserAliasTable}.
      */
-    public AddUUIDForUserAliasTable() {
+    public MigrateUUIDsForUserAliasTable() {
         super();
     }
 
@@ -91,8 +91,16 @@ public class AddUUIDForUserAliasTable extends UpdateTaskAdapter {
         try {
             DBUtils.startTransaction(connection);
             if (!Tools.columnExists(connection, "user_alias", "uuid")) {
+                // Create the 'uuid' column
                 Tools.addColumns(connection, "user_alias", new Column("uuid", "BINARY(16) DEFAULT NULL"));
-                insertUUID(connection);
+                // Get the aliases
+                Set<Alias> aliases = getAllAliasesInUserAttributes(connection);
+                // Migrate the UUIDs
+                if (!aliases.isEmpty()) {
+                    migrateUUIDs(connection, aliases);
+                }
+                // Generate random UUIDs for those aliases that have none
+                insertUUIDs(connection);
             }
             connection.commit();
         } catch (SQLException e) {
@@ -120,7 +128,7 @@ public class AddUUIDForUserAliasTable extends UpdateTaskAdapter {
      * @param connection The writable connection
      * @throws SQLException If an SQL error occurs
      */
-    private void insertUUID(Connection connection) throws SQLException {
+    private void insertUUIDs(Connection connection) throws SQLException {
         Statement statement = null;
         ResultSet resultSet = null;
         PreparedStatement preparedStatment = null;
@@ -128,24 +136,51 @@ public class AddUUIDForUserAliasTable extends UpdateTaskAdapter {
             statement = connection.createStatement();
             resultSet = statement.executeQuery("SELECT cid, user, alias FROM user_alias WHERE uuid IS NULL");
             preparedStatment = connection.prepareStatement("UPDATE user_alias SET uuid = ? WHERE cid = ? AND user = ? AND alias = ?");
-            int columnIndex = 0;
             while (resultSet.next()) {
-                int contextId = resultSet.getInt(++columnIndex);
-                int userId = resultSet.getInt(++columnIndex);
-                String alias = resultSet.getString(++columnIndex);
-
-                columnIndex = 0;
-                preparedStatment.setBytes(++columnIndex, UUIDs.toByteArray(UUID.randomUUID()));
-                preparedStatment.setInt(++columnIndex, contextId);
-                preparedStatment.setInt(++columnIndex, userId);
-                preparedStatment.setString(++columnIndex, alias);
-                preparedStatment.addBatch();
-                columnIndex = 0;
+                addBatch(preparedStatment, resultSet.getInt(1), resultSet.getInt(2), resultSet.getString(3), UUIDs.toByteArray(UUID.randomUUID()));
             }
             preparedStatment.executeBatch();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
             DBUtils.closeSQLStuff(preparedStatment);
         }
+    }
+
+    /**
+     * Migrate the existing UUIDs from the 'user_attribute' table to the 'user_alias' table
+     * 
+     * @param connection The writable connection
+     * @param aliases The set of a
+     * @throws SQLException
+     */
+    private void migrateUUIDs(Connection connection, Set<Alias> aliases) throws SQLException {
+        PreparedStatement preparedStatment = null;
+        try {
+            preparedStatment = connection.prepareStatement("UPDATE user_alias SET uuid = ? WHERE cid = ? AND user = ? AND alias = ?");
+            for (Alias alias : aliases) {
+                addBatch(preparedStatment, alias.getCid(), alias.getUserId(), alias.getAlias(), UUIDs.toByteArray(alias.getUuid()));
+            }
+            preparedStatment.executeBatch();
+        } finally {
+            DBUtils.closeSQLStuff(preparedStatment);
+        }
+    }
+
+    /**
+     * Add a batch to the prepared statement
+     * 
+     * @param preparedStatement The prepared statement
+     * @param contextId The context identifier
+     * @param userId The user identifier
+     * @param alias The alias
+     * @param uuid The UUID as byte array
+     * @throws SQLException if an SQL error is occurred
+     */
+    private void addBatch(PreparedStatement preparedStatement, int contextId, int userId, String alias, byte[] uuid) throws SQLException {
+        int columnIndex = 0;
+        preparedStatement.setBytes(++columnIndex, uuid);
+        preparedStatement.setInt(++columnIndex, contextId);
+        preparedStatement.setInt(++columnIndex, userId);
+        preparedStatement.setString(++columnIndex, alias);
+        preparedStatement.addBatch();
     }
 }
