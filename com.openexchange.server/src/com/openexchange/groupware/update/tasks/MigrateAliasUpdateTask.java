@@ -58,6 +58,7 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -108,11 +110,12 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         try {
             stmt = conn.createStatement();
             stmt.execute("CREATE TABLE `user_alias` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
-                + "`cid` INT4 UNSIGNED NOT NULL, "
-                + "`user` INT4 UNSIGNED NOT NULL, "
-                + "`alias` VARCHAR(255) NOT NULL, "
-                + "PRIMARY KEY (`cid`, `user`, `alias`) "
-                + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
+            + "`cid` INT4 UNSIGNED NOT NULL, " 
+            + "`user` INT4 UNSIGNED NOT NULL, " 
+            + "`alias` VARCHAR(255) NOT NULL, " 
+            + "`uuid` BINARY(16) NOT NULL," 
+            + "PRIMARY KEY (`cid`, `user`, `alias`, `uuid`) " 
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         } finally {
             closeSQLStuff(stmt);
         }
@@ -123,7 +126,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         ResultSet rs = null;
 
         try {
-            stmt = conn.prepareStatement("SELECT cid, id, value FROM user_attribute WHERE name='alias'");
+            stmt = conn.prepareStatement("SELECT cid, id, value. uuid FROM user_attribute WHERE name='alias'");
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptySet();
@@ -136,7 +139,9 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
                 int cid = rs.getInt(++index);
                 int uid = rs.getInt(++index);
                 String alias = rs.getString(++index);
-                aliases.add(new Alias(cid, uid, alias));
+                byte[] bytes = rs.getBytes(++index);
+                UUID uuid = UUIDs.toUUID(bytes);
+                aliases.add(new Alias(cid, uid, alias, uuid));
             } while (rs.next());
 
             return aliases;
@@ -148,13 +153,15 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement("REPLACE INTO user_alias (cid, user, alias) VALUES(?, ?, ?)");
+            stmt = conn.prepareStatement("REPLACE INTO user_alias (cid, user, alias, uuid) VALUES(?, ?, ?, ?)");
             int index;
             for (Alias alias : aliases) {
                 index = 0;
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
+                final byte[] uuid = UUIDs.toByteArray(alias.getUuid());
+                stmt.setBytes(++index, uuid);
                 stmt.addBatch();
             }
             int[] updateCounts = stmt.executeBatch();
@@ -185,11 +192,13 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         private final int userId;
         private final String alias;
         private final int hash;
+        private final UUID uuid;
 
-        Alias(int cid, int userId, String alias) {
+        Alias(int cid, int userId, String alias, UUID uuid) {
             this.cid = cid;
             this.userId = userId;
             this.alias = alias;
+            this.uuid = uuid;
 
             int prime = 31;
             int result = prime * 1 + cid;
@@ -213,6 +222,15 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         @Override
         public int hashCode() {
             return hash;
+        }
+
+        /**
+         * Gets the uuid
+         *
+         * @return The uuid
+         */
+        public UUID getUuid() {
+            return uuid;
         }
 
         @Override

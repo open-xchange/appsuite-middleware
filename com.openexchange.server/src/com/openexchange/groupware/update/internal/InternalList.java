@@ -583,7 +583,7 @@ public final class InternalList {
 
         // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
         list.add(new RemoveAliasInUserAttributesTable());
-
+        
         // Create object_use_count table
         list.add(new CreateObjectUseCountTableTask());
 
@@ -595,6 +595,9 @@ public final class InternalList {
 
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
+        
+        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and fills it with random UUIDs for each entry 
+        list.add(new com.openexchange.groupware.update.tasks.AddUUIDForUserAliasTable());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
