@@ -327,10 +327,7 @@ public class Contact extends CommonObject {
     public static final int[] ADDRESS_FIELDS_OTHER;
 
     static {
-        int[] ia =
-            new int[] {
-                Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.STATE_BUSINESS,
-                Contact.STREET_BUSINESS };
+        int[] ia = new int[] { Contact.CITY_BUSINESS, Contact.COUNTRY_BUSINESS, Contact.POSTAL_CODE_BUSINESS, Contact.STATE_BUSINESS, Contact.STREET_BUSINESS };
         Arrays.sort(ia);
         ADDRESS_FIELDS_BUSINESS = ia;
 
@@ -343,19 +340,7 @@ public class Contact extends CommonObject {
         ADDRESS_FIELDS_OTHER = ia;
     }
 
-    public static final int[] CONTENT_COLUMNS = {
-        DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME,
-        BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION,
-        EMPLOYEE_TYPE, ROOM_NUMBER, STREET_BUSINESS, POSTAL_CODE_BUSINESS, CITY_BUSINESS, STATE_BUSINESS, COUNTRY_BUSINESS,
-        NUMBER_OF_EMPLOYEE, SALES_VOLUME, TAX_ID, COMMERCIAL_REGISTER, BRANCHES, BUSINESS_CATEGORY, INFO, MANAGER_NAME, ASSISTANT_NAME,
-        STREET_OTHER, POSTAL_CODE_OTHER, CITY_OTHER, STATE_OTHER, COUNTRY_OTHER, TELEPHONE_BUSINESS1, TELEPHONE_BUSINESS2, FAX_BUSINESS,
-        TELEPHONE_CALLBACK, TELEPHONE_CAR, TELEPHONE_COMPANY, TELEPHONE_HOME1, TELEPHONE_HOME2, FAX_HOME, CELLULAR_TELEPHONE1,
-        CELLULAR_TELEPHONE2, TELEPHONE_OTHER, FAX_OTHER, EMAIL1, EMAIL2, EMAIL3, URL, TELEPHONE_ISDN, TELEPHONE_PAGER, TELEPHONE_PRIMARY,
-        TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT,
-        COMPANY, IMAGE1, IMAGE1_CONTENT_TYPE, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08,
-        USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18,
-        USERFIELD19, USERFIELD20, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME,
-        ADDRESS_OTHER, UID
+    public static final int[] CONTENT_COLUMNS = { DISPLAY_NAME, GIVEN_NAME, SUR_NAME, MIDDLE_NAME, SUFFIX, TITLE, STREET_HOME, POSTAL_CODE_HOME, CITY_HOME, STATE_HOME, COUNTRY_HOME, BIRTHDAY, MARITAL_STATUS, NUMBER_OF_CHILDREN, PROFESSION, NICKNAME, SPOUSE_NAME, ANNIVERSARY, NOTE, DEPARTMENT, POSITION, EMPLOYEE_TYPE, ROOM_NUMBER, STREET_BUSINESS, POSTAL_CODE_BUSINESS, CITY_BUSINESS, STATE_BUSINESS, COUNTRY_BUSINESS, NUMBER_OF_EMPLOYEE, SALES_VOLUME, TAX_ID, COMMERCIAL_REGISTER, BRANCHES, BUSINESS_CATEGORY, INFO, MANAGER_NAME, ASSISTANT_NAME, STREET_OTHER, POSTAL_CODE_OTHER, CITY_OTHER, STATE_OTHER, COUNTRY_OTHER, TELEPHONE_BUSINESS1, TELEPHONE_BUSINESS2, FAX_BUSINESS, TELEPHONE_CALLBACK, TELEPHONE_CAR, TELEPHONE_COMPANY, TELEPHONE_HOME1, TELEPHONE_HOME2, FAX_HOME, CELLULAR_TELEPHONE1, CELLULAR_TELEPHONE2, TELEPHONE_OTHER, FAX_OTHER, EMAIL1, EMAIL2, EMAIL3, URL, TELEPHONE_ISDN, TELEPHONE_PAGER, TELEPHONE_PRIMARY, TELEPHONE_RADIO, TELEPHONE_TELEX, TELEPHONE_TTYTDD, INSTANT_MESSENGER1, INSTANT_MESSENGER2, TELEPHONE_IP, TELEPHONE_ASSISTANT, COMPANY, IMAGE1, IMAGE1_CONTENT_TYPE, USERFIELD01, USERFIELD02, USERFIELD03, USERFIELD04, USERFIELD05, USERFIELD06, USERFIELD07, USERFIELD08, USERFIELD09, USERFIELD10, USERFIELD11, USERFIELD12, USERFIELD13, USERFIELD14, USERFIELD15, USERFIELD16, USERFIELD17, USERFIELD18, USERFIELD19, USERFIELD20, DISTRIBUTIONLIST, YOMI_FIRST_NAME, YOMI_LAST_NAME, YOMI_COMPANY, ADDRESS_BUSINESS, ADDRESS_HOME, ADDRESS_OTHER, UID
     };
     public static final int[] ALL_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
         // From ContactObject itself
@@ -378,10 +363,7 @@ public class Contact extends CommonObject {
         // From DataObject
         OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC });
 
-    public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] {
-        OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC,
-        USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT,
-        NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT, DEFAULT_ADDRESS, MARK_AS_DISTRIBUTIONLIST
+    public static final int[] JSON_COLUMNS = com.openexchange.tools.arrays.Arrays.addUniquely(CONTENT_COLUMNS, new int[] { OBJECT_ID, CREATED_BY, MODIFIED_BY, CREATION_DATE, LAST_MODIFIED, LAST_MODIFIED_UTC, USE_COUNT, FILE_AS, NUMBER_OF_IMAGES, INTERNAL_USERID, CATEGORIES, FOLDER_ID, IMAGE1_URL, LAST_MODIFIED_OF_NEWEST_ATTACHMENT, NUMBER_OF_ATTACHMENTS, PRIVATE_FLAG, USE_COUNT, DEFAULT_ADDRESS, MARK_AS_DISTRIBUTIONLIST
     });
 
     protected String display_name;
@@ -1773,12 +1755,12 @@ public class Contact extends CommonObject {
     public void setNumberOfDistributionLists(final int listsize) {
         number_of_dlists = listsize;
         b_number_of_dlists = true;
-        setMarkAsDistributionlist(0 < listsize);
     }
 
     public void setDistributionList(final DistributionListEntryObject[] dleo) {
         dlists = dleo;
         setNumberOfDistributionLists(null == dleo ? 0 : dleo.length);
+        setMarkAsDistributionlist(null == dleo ? false : true);
     }
 
     public void setContextId(final int cid) {
@@ -2833,335 +2815,335 @@ public class Contact extends CommonObject {
     @Override
     public void set(final int field, final Object value) {
         switch (field) {
-        case POSTAL_CODE_HOME:
-            setPostalCodeHome((String) value);
-            break;
-        case USERFIELD08:
-            setUserField08((String) value);
-            break;
-        case CITY_OTHER:
-            setCityOther((String) value);
-            break;
-        case USERFIELD09:
-            setUserField09((String) value);
-            break;
-        case USERFIELD06:
-            setUserField06((String) value);
-            break;
-        case STATE_BUSINESS:
-            setStateBusiness((String) value);
-            break;
-        case NUMBER_OF_IMAGES:
-            setNumberOfImages(((Integer) value).intValue());
-            break;
-        case IMAGE1_CONTENT_TYPE:
-            setImageContentType((String) value);
-            break;
-        case GIVEN_NAME:
-            setGivenName((String) value);
-            break;
-        case ANNIVERSARY:
-            setAnniversary( (Date) value );
-            break;
-        case USERFIELD18:
-            setUserField18((String) value);
-            break;
-        case SALES_VOLUME:
-            setSalesVolume((String) value);
-            break;
-        case STREET_OTHER:
-            setStreetOther((String) value);
-            break;
-        case USERFIELD04:
-            setUserField04((String) value);
-            break;
-        case POSTAL_CODE_BUSINESS:
-            setPostalCodeBusiness((String) value);
-            break;
-        case TELEPHONE_HOME1:
-            setTelephoneHome1((String) value);
-            break;
-        case USERFIELD19:
-            setUserField19((String) value);
-            break;
-        case FAX_OTHER:
-            setFaxOther((String) value);
-            break;
-        case USERFIELD14:
-            setUserField14((String) value);
-            break;
-        case CITY_HOME:
-            setCityHome((String) value);
-            break;
-        case USERFIELD07:
-            setUserField07((String) value);
-            break;
-        case TITLE:
-            setTitle((String) value);
-            break;
-        case TELEPHONE_ASSISTANT:
-            setTelephoneAssistant((String) value);
-            break;
-        case FAX_BUSINESS:
-            setFaxBusiness((String) value);
-            break;
-        case PROFESSION:
-            setProfession((String) value);
-            break;
-        case DEPARTMENT:
-            setDepartment((String) value);
-            break;
-        case USERFIELD01:
-            setUserField01((String) value);
-            break;
-        case USERFIELD12:
-            setUserField12((String) value);
-            break;
-        case TELEPHONE_IP:
-            setTelephoneIP((String) value);
-            break;
-        case URL:
-            setURL((String) value);
-            break;
-        case NUMBER_OF_EMPLOYEE:
-            setNumberOfEmployee((String) value);
-            break;
-        case POSTAL_CODE_OTHER:
-            setPostalCodeOther((String) value);
-            break;
-        case USERFIELD10:
-            setUserField10((String) value);
-            break;
-        case BIRTHDAY:
-            setBirthday( (Date) value );
-            break;
-        case EMAIL1:
-            setEmail1((String) value);
-            break;
-        case STATE_HOME:
-            setStateHome((String) value);
-            break;
-        case TELEPHONE_HOME2:
-            setTelephoneHome2((String) value);
-            break;
-        case TELEPHONE_TTYTDD:
-            setTelephoneTTYTTD((String) value);
-            break;
-        case TELEPHONE_OTHER:
-            setTelephoneOther((String) value);
-            break;
-        case COMMERCIAL_REGISTER:
-            setCommercialRegister((String) value);
-            break;
-        case COUNTRY_BUSINESS:
-            setCountryBusiness((String) value);
-            break;
-        case USERFIELD11:
-            setUserField11((String) value);
-            break;
-        case BUSINESS_CATEGORY:
-            setBusinessCategory((String) value);
-            break;
-        case CONTEXTID:
-            setContextId(((Integer) value).intValue());
-            break;
-        case STATE_OTHER:
-            setStateOther((String) value);
-            break;
-        case INTERNAL_USERID:
-            setInternalUserId(((Integer) value).intValue());
-            break;
-        case CELLULAR_TELEPHONE1:
-            setCellularTelephone1((String) value);
-            break;
-        case BRANCHES:
-            setBranches((String) value);
-            break;
-        case NOTE:
-            setNote((String) value);
-            break;
-        case EMAIL3:
-            setEmail3((String) value);
-            break;
-        case CELLULAR_TELEPHONE2:
-            setCellularTelephone2((String) value);
-            break;
-        case INSTANT_MESSENGER1:
-            setInstantMessenger1((String) value);
-            break;
-        case MANAGER_NAME:
-            setManagerName((String) value);
-            break;
-        case TELEPHONE_TELEX:
-            setTelephoneTelex((String) value);
-            break;
-        case EMAIL2:
-            setEmail2((String) value);
-            break;
-        case EMPLOYEE_TYPE:
-            setEmployeeType((String) value);
-            break;
-        case TELEPHONE_RADIO:
-            setTelephoneRadio((String) value);
-            break;
-        case NUMBER_OF_CHILDREN:
-            setNumberOfChildren((String) value);
-            break;
-        case STREET_BUSINESS:
-            setStreetBusiness((String) value);
-            break;
-        case DEFAULT_ADDRESS:
-            setDefaultAddress(((Integer) value).intValue());
-            break;
-        case MARK_AS_DISTRIBUTIONLIST:
-            setMarkAsDistributionlist(((Boolean) value).booleanValue());
-            break;
-        case TELEPHONE_ISDN:
-            setTelephoneISDN((String) value);
-            break;
-        case FAX_HOME:
-            setFaxHome((String) value);
-            break;
-        case MIDDLE_NAME:
-            setMiddleName((String) value);
-            break;
-        case USERFIELD13:
-            setUserField13((String) value);
-            break;
-        case ROOM_NUMBER:
-            setRoomNumber((String) value);
-            break;
-        case MARITAL_STATUS:
-            setMaritalStatus((String) value);
-            break;
-        case USERFIELD15:
-            setUserField15((String) value);
-            break;
-        case COUNTRY_HOME:
-            setCountryHome((String) value);
-            break;
-        case NICKNAME:
-            setNickname((String) value);
-            break;
-        case SUR_NAME:
-            setSurName((String) value);
-            break;
-        case CITY_BUSINESS:
-            setCityBusiness((String) value);
-            break;
-        case USERFIELD20:
-            setUserField20((String) value);
-            break;
-        case TELEPHONE_CALLBACK:
-            setTelephoneCallback((String) value);
-            break;
-        case USERFIELD17:
-            setUserField17((String) value);
-            break;
-        case TELEPHONE_PAGER:
-            setTelephonePager((String) value);
-            break;
-        case COUNTRY_OTHER:
-            setCountryOther((String) value);
-            break;
-        case TAX_ID:
-            setTaxID((String) value);
-            break;
-        case USERFIELD03:
-            setUserField03((String) value);
-            break;
-        case TELEPHONE_COMPANY:
-            setTelephoneCompany((String) value);
-            break;
-        case SUFFIX:
-            setSuffix((String) value);
-            break;
-        case FILE_AS:
-            setFileAs((String) value);
-            break;
-        case USERFIELD02:
-            setUserField02((String) value);
-            break;
-        case TELEPHONE_BUSINESS2:
-            setTelephoneBusiness2((String) value);
-            break;
-        case USERFIELD05:
-            setUserField05((String) value);
-            break;
-        case USERFIELD16:
-            setUserField16((String) value);
-            break;
-        case INFO:
-            setInfo((String) value);
-            break;
-        case COMPANY:
-            setCompany((String) value);
-            break;
-        case DISPLAY_NAME:
-            setDisplayName((String) value);
-            break;
-        case STREET_HOME:
-            setStreetHome((String) value);
-            break;
-        case ASSISTANT_NAME:
-            setAssistantName((String) value);
-            break;
-        case TELEPHONE_CAR:
-            setTelephoneCar((String) value);
-            break;
-        case POSITION:
-            setPosition((String) value);
-            break;
-        case TELEPHONE_PRIMARY:
-            setTelephonePrimary((String) value);
-            break;
-        case SPOUSE_NAME:
-            setSpouseName((String) value);
-            break;
-        case IMAGE_LAST_MODIFIED:
-            setImageLastModified((Date) value);
-            break;
-        case INSTANT_MESSENGER2:
-            setInstantMessenger2((String) value);
-            break;
-        case IMAGE1:
-            setImage1( (byte[]) value);
-            break;
-        case TELEPHONE_BUSINESS1:
-            setTelephoneBusiness1((String) value);
-            break;
-        case DISTRIBUTIONLIST:
-            setDistributionList((DistributionListEntryObject[]) value);
-            break;
-        case NUMBER_OF_DISTRIBUTIONLIST:
-            setNumberOfDistributionLists( ( (Integer) value ).intValue() );
-            break;
-        case USE_COUNT:
-            setUseCount(((Integer) value).intValue());
-            break;
-        case YOMI_FIRST_NAME:
-            setYomiFirstName((String) value);
-            break;
-        case YOMI_LAST_NAME:
-            setYomiLastName((String) value);
-            break;
-        case YOMI_COMPANY:
-            setYomiCompany((String) value);
-            break;
-        case ADDRESS_BUSINESS:
-            setAddressBusiness((String) value);
-            break;
-        case ADDRESS_HOME:
-            setAddressHome((String) value);
-            break;
-        case ADDRESS_OTHER:
-            setAddressOther((String) value);
-            break;
-        case VCARD_ID:
-            setVCardId((String) value);
-            break;
-        default:
-            super.set(field, value);
+            case POSTAL_CODE_HOME:
+                setPostalCodeHome((String) value);
+                break;
+            case USERFIELD08:
+                setUserField08((String) value);
+                break;
+            case CITY_OTHER:
+                setCityOther((String) value);
+                break;
+            case USERFIELD09:
+                setUserField09((String) value);
+                break;
+            case USERFIELD06:
+                setUserField06((String) value);
+                break;
+            case STATE_BUSINESS:
+                setStateBusiness((String) value);
+                break;
+            case NUMBER_OF_IMAGES:
+                setNumberOfImages(((Integer) value).intValue());
+                break;
+            case IMAGE1_CONTENT_TYPE:
+                setImageContentType((String) value);
+                break;
+            case GIVEN_NAME:
+                setGivenName((String) value);
+                break;
+            case ANNIVERSARY:
+                setAnniversary((Date) value);
+                break;
+            case USERFIELD18:
+                setUserField18((String) value);
+                break;
+            case SALES_VOLUME:
+                setSalesVolume((String) value);
+                break;
+            case STREET_OTHER:
+                setStreetOther((String) value);
+                break;
+            case USERFIELD04:
+                setUserField04((String) value);
+                break;
+            case POSTAL_CODE_BUSINESS:
+                setPostalCodeBusiness((String) value);
+                break;
+            case TELEPHONE_HOME1:
+                setTelephoneHome1((String) value);
+                break;
+            case USERFIELD19:
+                setUserField19((String) value);
+                break;
+            case FAX_OTHER:
+                setFaxOther((String) value);
+                break;
+            case USERFIELD14:
+                setUserField14((String) value);
+                break;
+            case CITY_HOME:
+                setCityHome((String) value);
+                break;
+            case USERFIELD07:
+                setUserField07((String) value);
+                break;
+            case TITLE:
+                setTitle((String) value);
+                break;
+            case TELEPHONE_ASSISTANT:
+                setTelephoneAssistant((String) value);
+                break;
+            case FAX_BUSINESS:
+                setFaxBusiness((String) value);
+                break;
+            case PROFESSION:
+                setProfession((String) value);
+                break;
+            case DEPARTMENT:
+                setDepartment((String) value);
+                break;
+            case USERFIELD01:
+                setUserField01((String) value);
+                break;
+            case USERFIELD12:
+                setUserField12((String) value);
+                break;
+            case TELEPHONE_IP:
+                setTelephoneIP((String) value);
+                break;
+            case URL:
+                setURL((String) value);
+                break;
+            case NUMBER_OF_EMPLOYEE:
+                setNumberOfEmployee((String) value);
+                break;
+            case POSTAL_CODE_OTHER:
+                setPostalCodeOther((String) value);
+                break;
+            case USERFIELD10:
+                setUserField10((String) value);
+                break;
+            case BIRTHDAY:
+                setBirthday((Date) value);
+                break;
+            case EMAIL1:
+                setEmail1((String) value);
+                break;
+            case STATE_HOME:
+                setStateHome((String) value);
+                break;
+            case TELEPHONE_HOME2:
+                setTelephoneHome2((String) value);
+                break;
+            case TELEPHONE_TTYTDD:
+                setTelephoneTTYTTD((String) value);
+                break;
+            case TELEPHONE_OTHER:
+                setTelephoneOther((String) value);
+                break;
+            case COMMERCIAL_REGISTER:
+                setCommercialRegister((String) value);
+                break;
+            case COUNTRY_BUSINESS:
+                setCountryBusiness((String) value);
+                break;
+            case USERFIELD11:
+                setUserField11((String) value);
+                break;
+            case BUSINESS_CATEGORY:
+                setBusinessCategory((String) value);
+                break;
+            case CONTEXTID:
+                setContextId(((Integer) value).intValue());
+                break;
+            case STATE_OTHER:
+                setStateOther((String) value);
+                break;
+            case INTERNAL_USERID:
+                setInternalUserId(((Integer) value).intValue());
+                break;
+            case CELLULAR_TELEPHONE1:
+                setCellularTelephone1((String) value);
+                break;
+            case BRANCHES:
+                setBranches((String) value);
+                break;
+            case NOTE:
+                setNote((String) value);
+                break;
+            case EMAIL3:
+                setEmail3((String) value);
+                break;
+            case CELLULAR_TELEPHONE2:
+                setCellularTelephone2((String) value);
+                break;
+            case INSTANT_MESSENGER1:
+                setInstantMessenger1((String) value);
+                break;
+            case MANAGER_NAME:
+                setManagerName((String) value);
+                break;
+            case TELEPHONE_TELEX:
+                setTelephoneTelex((String) value);
+                break;
+            case EMAIL2:
+                setEmail2((String) value);
+                break;
+            case EMPLOYEE_TYPE:
+                setEmployeeType((String) value);
+                break;
+            case TELEPHONE_RADIO:
+                setTelephoneRadio((String) value);
+                break;
+            case NUMBER_OF_CHILDREN:
+                setNumberOfChildren((String) value);
+                break;
+            case STREET_BUSINESS:
+                setStreetBusiness((String) value);
+                break;
+            case DEFAULT_ADDRESS:
+                setDefaultAddress(((Integer) value).intValue());
+                break;
+            case MARK_AS_DISTRIBUTIONLIST:
+                setMarkAsDistributionlist(((Boolean) value).booleanValue());
+                break;
+            case TELEPHONE_ISDN:
+                setTelephoneISDN((String) value);
+                break;
+            case FAX_HOME:
+                setFaxHome((String) value);
+                break;
+            case MIDDLE_NAME:
+                setMiddleName((String) value);
+                break;
+            case USERFIELD13:
+                setUserField13((String) value);
+                break;
+            case ROOM_NUMBER:
+                setRoomNumber((String) value);
+                break;
+            case MARITAL_STATUS:
+                setMaritalStatus((String) value);
+                break;
+            case USERFIELD15:
+                setUserField15((String) value);
+                break;
+            case COUNTRY_HOME:
+                setCountryHome((String) value);
+                break;
+            case NICKNAME:
+                setNickname((String) value);
+                break;
+            case SUR_NAME:
+                setSurName((String) value);
+                break;
+            case CITY_BUSINESS:
+                setCityBusiness((String) value);
+                break;
+            case USERFIELD20:
+                setUserField20((String) value);
+                break;
+            case TELEPHONE_CALLBACK:
+                setTelephoneCallback((String) value);
+                break;
+            case USERFIELD17:
+                setUserField17((String) value);
+                break;
+            case TELEPHONE_PAGER:
+                setTelephonePager((String) value);
+                break;
+            case COUNTRY_OTHER:
+                setCountryOther((String) value);
+                break;
+            case TAX_ID:
+                setTaxID((String) value);
+                break;
+            case USERFIELD03:
+                setUserField03((String) value);
+                break;
+            case TELEPHONE_COMPANY:
+                setTelephoneCompany((String) value);
+                break;
+            case SUFFIX:
+                setSuffix((String) value);
+                break;
+            case FILE_AS:
+                setFileAs((String) value);
+                break;
+            case USERFIELD02:
+                setUserField02((String) value);
+                break;
+            case TELEPHONE_BUSINESS2:
+                setTelephoneBusiness2((String) value);
+                break;
+            case USERFIELD05:
+                setUserField05((String) value);
+                break;
+            case USERFIELD16:
+                setUserField16((String) value);
+                break;
+            case INFO:
+                setInfo((String) value);
+                break;
+            case COMPANY:
+                setCompany((String) value);
+                break;
+            case DISPLAY_NAME:
+                setDisplayName((String) value);
+                break;
+            case STREET_HOME:
+                setStreetHome((String) value);
+                break;
+            case ASSISTANT_NAME:
+                setAssistantName((String) value);
+                break;
+            case TELEPHONE_CAR:
+                setTelephoneCar((String) value);
+                break;
+            case POSITION:
+                setPosition((String) value);
+                break;
+            case TELEPHONE_PRIMARY:
+                setTelephonePrimary((String) value);
+                break;
+            case SPOUSE_NAME:
+                setSpouseName((String) value);
+                break;
+            case IMAGE_LAST_MODIFIED:
+                setImageLastModified((Date) value);
+                break;
+            case INSTANT_MESSENGER2:
+                setInstantMessenger2((String) value);
+                break;
+            case IMAGE1:
+                setImage1((byte[]) value);
+                break;
+            case TELEPHONE_BUSINESS1:
+                setTelephoneBusiness1((String) value);
+                break;
+            case DISTRIBUTIONLIST:
+                setDistributionList((DistributionListEntryObject[]) value);
+                break;
+            case NUMBER_OF_DISTRIBUTIONLIST:
+                setNumberOfDistributionLists(((Integer) value).intValue());
+                break;
+            case USE_COUNT:
+                setUseCount(((Integer) value).intValue());
+                break;
+            case YOMI_FIRST_NAME:
+                setYomiFirstName((String) value);
+                break;
+            case YOMI_LAST_NAME:
+                setYomiLastName((String) value);
+                break;
+            case YOMI_COMPANY:
+                setYomiCompany((String) value);
+                break;
+            case ADDRESS_BUSINESS:
+                setAddressBusiness((String) value);
+                break;
+            case ADDRESS_HOME:
+                setAddressHome((String) value);
+                break;
+            case ADDRESS_OTHER:
+                setAddressOther((String) value);
+                break;
+            case VCARD_ID:
+                setVCardId((String) value);
+                break;
+            default:
+                super.set(field, value);
 
         }
     }
@@ -3169,228 +3151,228 @@ public class Contact extends CommonObject {
     @Override
     public Object get(final int field) {
         switch (field) {
-        case POSTAL_CODE_HOME:
-            return getPostalCodeHome();
-        case USERFIELD08:
-            return getUserField08();
-        case CITY_OTHER:
-            return getCityOther();
-        case USERFIELD09:
-            return getUserField09();
-        case USERFIELD06:
-            return getUserField06();
-        case STATE_BUSINESS:
-            return getStateBusiness();
-        case NUMBER_OF_IMAGES:
-            return I(getNumberOfImages());
-        case IMAGE1_CONTENT_TYPE:
-            return getImageContentType();
-        case GIVEN_NAME:
-            return getGivenName();
-        case ANNIVERSARY:
-            return getAnniversary();
-        case USERFIELD18:
-            return getUserField18();
-        case SALES_VOLUME:
-            return getSalesVolume();
-        case STREET_OTHER:
-            return getStreetOther();
-        case USERFIELD04:
-            return getUserField04();
-        case POSTAL_CODE_BUSINESS:
-            return getPostalCodeBusiness();
-        case TELEPHONE_HOME1:
-            return getTelephoneHome1();
-        case USERFIELD19:
-            return getUserField19();
-        case FAX_OTHER:
-            return getFaxOther();
-        case USERFIELD14:
-            return getUserField14();
-        case CITY_HOME:
-            return getCityHome();
-        case USERFIELD07:
-            return getUserField07();
-        case TITLE:
-            return getTitle();
-        case TELEPHONE_ASSISTANT:
-            return getTelephoneAssistant();
-        case FAX_BUSINESS:
-            return getFaxBusiness();
-        case PROFESSION:
-            return getProfession();
-        case DEPARTMENT:
-            return getDepartment();
-        case USERFIELD01:
-            return getUserField01();
-        case USERFIELD12:
-            return getUserField12();
-        case TELEPHONE_IP:
-            return getTelephoneIP();
-        case URL:
-            return getURL();
-        case NUMBER_OF_EMPLOYEE:
-            return getNumberOfEmployee();
-        case POSTAL_CODE_OTHER:
-            return getPostalCodeOther();
-        case USERFIELD10:
-            return getUserField10();
-        case BIRTHDAY:
-            return getBirthday();
-        case EMAIL1:
-            return getEmail1();
-        case STATE_HOME:
-            return getStateHome();
-        case TELEPHONE_HOME2:
-            return getTelephoneHome2();
-        case TELEPHONE_TTYTDD:
-            return getTelephoneTTYTTD();
-        case TELEPHONE_OTHER:
-            return getTelephoneOther();
-        case COMMERCIAL_REGISTER:
-            return getCommercialRegister();
-        case COUNTRY_BUSINESS:
-            return getCountryBusiness();
-        case USERFIELD11:
-            return getUserField11();
-        case BUSINESS_CATEGORY:
-            return getBusinessCategory();
-        case CONTEXTID:
-            return I(getContextId());
-        case STATE_OTHER:
-            return getStateOther();
-        case INTERNAL_USERID:
-            return I(getInternalUserId());
-        case CELLULAR_TELEPHONE1:
-            return getCellularTelephone1();
-        case BRANCHES:
-            return getBranches();
-        case NOTE:
-            return getNote();
-        case EMAIL3:
-            return getEmail3();
-        case CELLULAR_TELEPHONE2:
-            return getCellularTelephone2();
-        case INSTANT_MESSENGER1:
-            return getInstantMessenger1();
-        case MANAGER_NAME:
-            return getManagerName();
-        case TELEPHONE_TELEX:
-            return getTelephoneTelex();
-        case EMAIL2:
-            return getEmail2();
-        case EMPLOYEE_TYPE:
-            return getEmployeeType();
-        case TELEPHONE_RADIO:
-            return getTelephoneRadio();
-        case NUMBER_OF_CHILDREN:
-            return getNumberOfChildren();
-        case STREET_BUSINESS:
-            return getStreetBusiness();
-        case DEFAULT_ADDRESS:
-            return I(getDefaultAddress());
-        case MARK_AS_DISTRIBUTIONLIST:
-            return B(getMarkAsDistribtuionlist());
-        case TELEPHONE_ISDN:
-            return getTelephoneISDN();
-        case FAX_HOME:
-            return getFaxHome();
-        case MIDDLE_NAME:
-            return getMiddleName();
-        case USERFIELD13:
-            return getUserField13();
-        case ROOM_NUMBER:
-            return getRoomNumber();
-        case MARITAL_STATUS:
-            return getMaritalStatus();
-        case USERFIELD15:
-            return getUserField15();
-        case COUNTRY_HOME:
-            return getCountryHome();
-        case NICKNAME:
-            return getNickname();
-        case SUR_NAME:
-            return getSurName();
-        case CITY_BUSINESS:
-            return getCityBusiness();
-        case USERFIELD20:
-            return getUserField20();
-        case TELEPHONE_CALLBACK:
-            return getTelephoneCallback();
-        case USERFIELD17:
-            return getUserField17();
-        case TELEPHONE_PAGER:
-            return getTelephonePager();
-        case COUNTRY_OTHER:
-            return getCountryOther();
-        case TAX_ID:
-            return getTaxID();
-        case USERFIELD03:
-            return getUserField03();
-        case TELEPHONE_COMPANY:
-            return getTelephoneCompany();
-        case SUFFIX:
-            return getSuffix();
-        case FILE_AS:
-            return getFileAs();
-        case USERFIELD02:
-            return getUserField02();
-        case TELEPHONE_BUSINESS2:
-            return getTelephoneBusiness2();
-        case USERFIELD05:
-            return getUserField05();
-        case USERFIELD16:
-            return getUserField16();
-        case INFO:
-            return getInfo();
-        case COMPANY:
-            return getCompany();
-        case DISPLAY_NAME:
-            return getDisplayName();
-        case STREET_HOME:
-            return getStreetHome();
-        case ASSISTANT_NAME:
-            return getAssistantName();
-        case TELEPHONE_CAR:
-            return getTelephoneCar();
-        case POSITION:
-            return getPosition();
-        case TELEPHONE_PRIMARY:
-            return getTelephonePrimary();
-        case SPOUSE_NAME:
-            return getSpouseName();
-        case IMAGE_LAST_MODIFIED:
-            return getImageLastModified();
-        case INSTANT_MESSENGER2:
-            return getInstantMessenger2();
-        case IMAGE1:
-            return getImage1();
-        case TELEPHONE_BUSINESS1:
-            return getTelephoneBusiness1();
-        case DISTRIBUTIONLIST:
-            return getDistributionList();
-        case NUMBER_OF_DISTRIBUTIONLIST:
-            return Integer.valueOf( getNumberOfDistributionLists() );
-        case USE_COUNT:
-            return Integer.valueOf(getUseCount());
-        case YOMI_FIRST_NAME:
-            return getYomiFirstName();
-        case YOMI_LAST_NAME:
-            return getYomiLastName();
-        case YOMI_COMPANY:
-            return getYomiCompany();
-        case ADDRESS_BUSINESS:
-            return getAddressBusiness();
-        case ADDRESS_HOME:
-            return getAddressHome();
-        case ADDRESS_OTHER:
-            return getAddressOther();
-        case SPECIAL_SORTING:
-            return getSortName();
-        case VCARD_ID:
-            return getVCardId();
-        default:
-            return super.get(field);
+            case POSTAL_CODE_HOME:
+                return getPostalCodeHome();
+            case USERFIELD08:
+                return getUserField08();
+            case CITY_OTHER:
+                return getCityOther();
+            case USERFIELD09:
+                return getUserField09();
+            case USERFIELD06:
+                return getUserField06();
+            case STATE_BUSINESS:
+                return getStateBusiness();
+            case NUMBER_OF_IMAGES:
+                return I(getNumberOfImages());
+            case IMAGE1_CONTENT_TYPE:
+                return getImageContentType();
+            case GIVEN_NAME:
+                return getGivenName();
+            case ANNIVERSARY:
+                return getAnniversary();
+            case USERFIELD18:
+                return getUserField18();
+            case SALES_VOLUME:
+                return getSalesVolume();
+            case STREET_OTHER:
+                return getStreetOther();
+            case USERFIELD04:
+                return getUserField04();
+            case POSTAL_CODE_BUSINESS:
+                return getPostalCodeBusiness();
+            case TELEPHONE_HOME1:
+                return getTelephoneHome1();
+            case USERFIELD19:
+                return getUserField19();
+            case FAX_OTHER:
+                return getFaxOther();
+            case USERFIELD14:
+                return getUserField14();
+            case CITY_HOME:
+                return getCityHome();
+            case USERFIELD07:
+                return getUserField07();
+            case TITLE:
+                return getTitle();
+            case TELEPHONE_ASSISTANT:
+                return getTelephoneAssistant();
+            case FAX_BUSINESS:
+                return getFaxBusiness();
+            case PROFESSION:
+                return getProfession();
+            case DEPARTMENT:
+                return getDepartment();
+            case USERFIELD01:
+                return getUserField01();
+            case USERFIELD12:
+                return getUserField12();
+            case TELEPHONE_IP:
+                return getTelephoneIP();
+            case URL:
+                return getURL();
+            case NUMBER_OF_EMPLOYEE:
+                return getNumberOfEmployee();
+            case POSTAL_CODE_OTHER:
+                return getPostalCodeOther();
+            case USERFIELD10:
+                return getUserField10();
+            case BIRTHDAY:
+                return getBirthday();
+            case EMAIL1:
+                return getEmail1();
+            case STATE_HOME:
+                return getStateHome();
+            case TELEPHONE_HOME2:
+                return getTelephoneHome2();
+            case TELEPHONE_TTYTDD:
+                return getTelephoneTTYTTD();
+            case TELEPHONE_OTHER:
+                return getTelephoneOther();
+            case COMMERCIAL_REGISTER:
+                return getCommercialRegister();
+            case COUNTRY_BUSINESS:
+                return getCountryBusiness();
+            case USERFIELD11:
+                return getUserField11();
+            case BUSINESS_CATEGORY:
+                return getBusinessCategory();
+            case CONTEXTID:
+                return I(getContextId());
+            case STATE_OTHER:
+                return getStateOther();
+            case INTERNAL_USERID:
+                return I(getInternalUserId());
+            case CELLULAR_TELEPHONE1:
+                return getCellularTelephone1();
+            case BRANCHES:
+                return getBranches();
+            case NOTE:
+                return getNote();
+            case EMAIL3:
+                return getEmail3();
+            case CELLULAR_TELEPHONE2:
+                return getCellularTelephone2();
+            case INSTANT_MESSENGER1:
+                return getInstantMessenger1();
+            case MANAGER_NAME:
+                return getManagerName();
+            case TELEPHONE_TELEX:
+                return getTelephoneTelex();
+            case EMAIL2:
+                return getEmail2();
+            case EMPLOYEE_TYPE:
+                return getEmployeeType();
+            case TELEPHONE_RADIO:
+                return getTelephoneRadio();
+            case NUMBER_OF_CHILDREN:
+                return getNumberOfChildren();
+            case STREET_BUSINESS:
+                return getStreetBusiness();
+            case DEFAULT_ADDRESS:
+                return I(getDefaultAddress());
+            case MARK_AS_DISTRIBUTIONLIST:
+                return B(getMarkAsDistribtuionlist());
+            case TELEPHONE_ISDN:
+                return getTelephoneISDN();
+            case FAX_HOME:
+                return getFaxHome();
+            case MIDDLE_NAME:
+                return getMiddleName();
+            case USERFIELD13:
+                return getUserField13();
+            case ROOM_NUMBER:
+                return getRoomNumber();
+            case MARITAL_STATUS:
+                return getMaritalStatus();
+            case USERFIELD15:
+                return getUserField15();
+            case COUNTRY_HOME:
+                return getCountryHome();
+            case NICKNAME:
+                return getNickname();
+            case SUR_NAME:
+                return getSurName();
+            case CITY_BUSINESS:
+                return getCityBusiness();
+            case USERFIELD20:
+                return getUserField20();
+            case TELEPHONE_CALLBACK:
+                return getTelephoneCallback();
+            case USERFIELD17:
+                return getUserField17();
+            case TELEPHONE_PAGER:
+                return getTelephonePager();
+            case COUNTRY_OTHER:
+                return getCountryOther();
+            case TAX_ID:
+                return getTaxID();
+            case USERFIELD03:
+                return getUserField03();
+            case TELEPHONE_COMPANY:
+                return getTelephoneCompany();
+            case SUFFIX:
+                return getSuffix();
+            case FILE_AS:
+                return getFileAs();
+            case USERFIELD02:
+                return getUserField02();
+            case TELEPHONE_BUSINESS2:
+                return getTelephoneBusiness2();
+            case USERFIELD05:
+                return getUserField05();
+            case USERFIELD16:
+                return getUserField16();
+            case INFO:
+                return getInfo();
+            case COMPANY:
+                return getCompany();
+            case DISPLAY_NAME:
+                return getDisplayName();
+            case STREET_HOME:
+                return getStreetHome();
+            case ASSISTANT_NAME:
+                return getAssistantName();
+            case TELEPHONE_CAR:
+                return getTelephoneCar();
+            case POSITION:
+                return getPosition();
+            case TELEPHONE_PRIMARY:
+                return getTelephonePrimary();
+            case SPOUSE_NAME:
+                return getSpouseName();
+            case IMAGE_LAST_MODIFIED:
+                return getImageLastModified();
+            case INSTANT_MESSENGER2:
+                return getInstantMessenger2();
+            case IMAGE1:
+                return getImage1();
+            case TELEPHONE_BUSINESS1:
+                return getTelephoneBusiness1();
+            case DISTRIBUTIONLIST:
+                return getDistributionList();
+            case NUMBER_OF_DISTRIBUTIONLIST:
+                return Integer.valueOf(getNumberOfDistributionLists());
+            case USE_COUNT:
+                return Integer.valueOf(getUseCount());
+            case YOMI_FIRST_NAME:
+                return getYomiFirstName();
+            case YOMI_LAST_NAME:
+                return getYomiLastName();
+            case YOMI_COMPANY:
+                return getYomiCompany();
+            case ADDRESS_BUSINESS:
+                return getAddressBusiness();
+            case ADDRESS_HOME:
+                return getAddressHome();
+            case ADDRESS_OTHER:
+                return getAddressOther();
+            case SPECIAL_SORTING:
+                return getSortName();
+            case VCARD_ID:
+                return getVCardId();
+            default:
+                return super.get(field);
 
         }
     }
@@ -3398,226 +3380,226 @@ public class Contact extends CommonObject {
     @Override
     public boolean contains(final int field) {
         switch (field) {
-        case POSTAL_CODE_HOME:
-            return containsPostalCodeHome();
-        case USERFIELD08:
-            return containsUserField08();
-        case CITY_OTHER:
-            return containsCityOther();
-        case USERFIELD09:
-            return containsUserField09();
-        case USERFIELD06:
-            return containsUserField06();
-        case STATE_BUSINESS:
-            return containsStateBusiness();
-        case IMAGE1_CONTENT_TYPE:
-            return containsImageContentType();
-        case GIVEN_NAME:
-            return containsGivenName();
-        case ANNIVERSARY:
-            return containsAnniversary();
-        case USERFIELD18:
-            return containsUserField18();
-        case SALES_VOLUME:
-            return containsSalesVolume();
-        case STREET_OTHER:
-            return containsStreetOther();
-        case USERFIELD04:
-            return containsUserField04();
-        case POSTAL_CODE_BUSINESS:
-            return containsPostalCodeBusiness();
-        case TELEPHONE_HOME1:
-            return containsTelephoneHome1();
-        case USERFIELD19:
-            return containsUserField19();
-        case FAX_OTHER:
-            return containsFaxOther();
-        case USERFIELD14:
-            return containsUserField14();
-        case CITY_HOME:
-            return containsCityHome();
-        case USERFIELD07:
-            return containsUserField07();
-        case TITLE:
-            return containsTitle();
-        case TELEPHONE_ASSISTANT:
-            return containsTelephoneAssistant();
-        case FAX_BUSINESS:
-            return containsFaxBusiness();
-        case PROFESSION:
-            return containsProfession();
-        case DEPARTMENT:
-            return containsDepartment();
-        case USERFIELD01:
-            return containsUserField01();
-        case USERFIELD12:
-            return containsUserField12();
-        case TELEPHONE_IP:
-            return containsTelephoneIP();
-        case URL:
-            return containsURL();
-        case NUMBER_OF_EMPLOYEE:
-            return containsNumberOfEmployee();
-        case POSTAL_CODE_OTHER:
-            return containsPostalCodeOther();
-        case USERFIELD10:
-            return containsUserField10();
-        case BIRTHDAY:
-            return containsBirthday();
-        case EMAIL1:
-            return containsEmail1();
-        case STATE_HOME:
-            return containsStateHome();
-        case TELEPHONE_HOME2:
-            return containsTelephoneHome2();
-        case TELEPHONE_TTYTDD:
-            return containsTelephoneTTYTTD();
-        case TELEPHONE_OTHER:
-            return containsTelephoneOther();
-        case COMMERCIAL_REGISTER:
-            return containsCommercialRegister();
-        case COUNTRY_BUSINESS:
-            return containsCountryBusiness();
-        case USERFIELD11:
-            return containsUserField11();
-        case BUSINESS_CATEGORY:
-            return containsBusinessCategory();
-        case CONTEXTID:
-            return containsContextId();
-        case STATE_OTHER:
-            return containsStateOther();
-        case INTERNAL_USERID:
-            return containsInternalUserId();
-        case CELLULAR_TELEPHONE1:
-            return containsCellularTelephone1();
-        case BRANCHES:
-            return containsBranches();
-        case NOTE:
-            return containsNote();
-        case EMAIL3:
-            return containsEmail3();
-        case CELLULAR_TELEPHONE2:
-            return containsCellularTelephone2();
-        case INSTANT_MESSENGER1:
-            return containsInstantMessenger1();
-        case MANAGER_NAME:
-            return containsManagerName();
-        case TELEPHONE_TELEX:
-            return containsTelephoneTelex();
-        case EMAIL2:
-            return containsEmail2();
-        case EMPLOYEE_TYPE:
-            return containsEmployeeType();
-        case TELEPHONE_RADIO:
-            return containsTelephoneRadio();
-        case NUMBER_OF_CHILDREN:
-            return containsNumberOfChildren();
-        case STREET_BUSINESS:
-            return containsStreetBusiness();
-        case DEFAULT_ADDRESS:
-            return containsDefaultAddress();
-        case MARK_AS_DISTRIBUTIONLIST:
-            return containsMarkAsDistributionlist();
-        case TELEPHONE_ISDN:
-            return containsTelephoneISDN();
-        case FAX_HOME:
-            return containsFaxHome();
-        case MIDDLE_NAME:
-            return containsMiddleName();
-        case USERFIELD13:
-            return containsUserField13();
-        case ROOM_NUMBER:
-            return containsRoomNumber();
-        case MARITAL_STATUS:
-            return containsMaritalStatus();
-        case USERFIELD15:
-            return containsUserField15();
-        case COUNTRY_HOME:
-            return containsCountryHome();
-        case NICKNAME:
-            return containsNickname();
-        case SUR_NAME:
-            return containsSurName();
-        case CITY_BUSINESS:
-            return containsCityBusiness();
-        case USERFIELD20:
-            return containsUserField20();
-        case TELEPHONE_CALLBACK:
-            return containsTelephoneCallback();
-        case USERFIELD17:
-            return containsUserField17();
-        case TELEPHONE_PAGER:
-            return containsTelephonePager();
-        case COUNTRY_OTHER:
-            return containsCountryOther();
-        case TAX_ID:
-            return containsTaxID();
-        case USERFIELD03:
-            return containsUserField03();
-        case TELEPHONE_COMPANY:
-            return containsTelephoneCompany();
-        case SUFFIX:
-            return containsSuffix();
-        case FILE_AS:
-            return containsFileAs();
-        case USERFIELD02:
-            return containsUserField02();
-        case TELEPHONE_BUSINESS2:
-            return containsTelephoneBusiness2();
-        case USERFIELD05:
-            return containsUserField05();
-        case USERFIELD16:
-            return containsUserField16();
-        case INFO:
-            return containsInfo();
-        case COMPANY:
-            return containsCompany();
-        case DISPLAY_NAME:
-            return containsDisplayName();
-        case STREET_HOME:
-            return containsStreetHome();
-        case ASSISTANT_NAME:
-            return containsAssistantName();
-        case TELEPHONE_CAR:
-            return containsTelephoneCar();
-        case POSITION:
-            return containsPosition();
-        case TELEPHONE_PRIMARY:
-            return containsTelephonePrimary();
-        case SPOUSE_NAME:
-            return containsSpouseName();
-        case IMAGE_LAST_MODIFIED:
-            return containsImageLastModified();
-        case INSTANT_MESSENGER2:
-            return containsInstantMessenger2();
-        case IMAGE1:
-            return containsImage1();
-        case TELEPHONE_BUSINESS1:
-            return containsTelephoneBusiness1();
-        case DISTRIBUTIONLIST:
-            return containsDistributionLists();
-        case NUMBER_OF_DISTRIBUTIONLIST:
-            return containsNumberOfDistributionLists();
-        case NUMBER_OF_IMAGES:
-            return containsImage1();
-        case USE_COUNT:
-            return containsUseCount();
-        case YOMI_FIRST_NAME:
-            return containsYomiFirstName();
-        case YOMI_LAST_NAME:
-            return containsYomiLastName();
-        case YOMI_COMPANY:
-            return containsYomiCompany();
-        case ADDRESS_BUSINESS:
-            return containsAddressBusiness();
-        case ADDRESS_HOME:
-            return containsAddressHome();
-        case ADDRESS_OTHER:
-            return containsAddressOther();
-        case VCARD_ID:
-            return containsVCardId();
-        default:
-            return super.contains(field);
+            case POSTAL_CODE_HOME:
+                return containsPostalCodeHome();
+            case USERFIELD08:
+                return containsUserField08();
+            case CITY_OTHER:
+                return containsCityOther();
+            case USERFIELD09:
+                return containsUserField09();
+            case USERFIELD06:
+                return containsUserField06();
+            case STATE_BUSINESS:
+                return containsStateBusiness();
+            case IMAGE1_CONTENT_TYPE:
+                return containsImageContentType();
+            case GIVEN_NAME:
+                return containsGivenName();
+            case ANNIVERSARY:
+                return containsAnniversary();
+            case USERFIELD18:
+                return containsUserField18();
+            case SALES_VOLUME:
+                return containsSalesVolume();
+            case STREET_OTHER:
+                return containsStreetOther();
+            case USERFIELD04:
+                return containsUserField04();
+            case POSTAL_CODE_BUSINESS:
+                return containsPostalCodeBusiness();
+            case TELEPHONE_HOME1:
+                return containsTelephoneHome1();
+            case USERFIELD19:
+                return containsUserField19();
+            case FAX_OTHER:
+                return containsFaxOther();
+            case USERFIELD14:
+                return containsUserField14();
+            case CITY_HOME:
+                return containsCityHome();
+            case USERFIELD07:
+                return containsUserField07();
+            case TITLE:
+                return containsTitle();
+            case TELEPHONE_ASSISTANT:
+                return containsTelephoneAssistant();
+            case FAX_BUSINESS:
+                return containsFaxBusiness();
+            case PROFESSION:
+                return containsProfession();
+            case DEPARTMENT:
+                return containsDepartment();
+            case USERFIELD01:
+                return containsUserField01();
+            case USERFIELD12:
+                return containsUserField12();
+            case TELEPHONE_IP:
+                return containsTelephoneIP();
+            case URL:
+                return containsURL();
+            case NUMBER_OF_EMPLOYEE:
+                return containsNumberOfEmployee();
+            case POSTAL_CODE_OTHER:
+                return containsPostalCodeOther();
+            case USERFIELD10:
+                return containsUserField10();
+            case BIRTHDAY:
+                return containsBirthday();
+            case EMAIL1:
+                return containsEmail1();
+            case STATE_HOME:
+                return containsStateHome();
+            case TELEPHONE_HOME2:
+                return containsTelephoneHome2();
+            case TELEPHONE_TTYTDD:
+                return containsTelephoneTTYTTD();
+            case TELEPHONE_OTHER:
+                return containsTelephoneOther();
+            case COMMERCIAL_REGISTER:
+                return containsCommercialRegister();
+            case COUNTRY_BUSINESS:
+                return containsCountryBusiness();
+            case USERFIELD11:
+                return containsUserField11();
+            case BUSINESS_CATEGORY:
+                return containsBusinessCategory();
+            case CONTEXTID:
+                return containsContextId();
+            case STATE_OTHER:
+                return containsStateOther();
+            case INTERNAL_USERID:
+                return containsInternalUserId();
+            case CELLULAR_TELEPHONE1:
+                return containsCellularTelephone1();
+            case BRANCHES:
+                return containsBranches();
+            case NOTE:
+                return containsNote();
+            case EMAIL3:
+                return containsEmail3();
+            case CELLULAR_TELEPHONE2:
+                return containsCellularTelephone2();
+            case INSTANT_MESSENGER1:
+                return containsInstantMessenger1();
+            case MANAGER_NAME:
+                return containsManagerName();
+            case TELEPHONE_TELEX:
+                return containsTelephoneTelex();
+            case EMAIL2:
+                return containsEmail2();
+            case EMPLOYEE_TYPE:
+                return containsEmployeeType();
+            case TELEPHONE_RADIO:
+                return containsTelephoneRadio();
+            case NUMBER_OF_CHILDREN:
+                return containsNumberOfChildren();
+            case STREET_BUSINESS:
+                return containsStreetBusiness();
+            case DEFAULT_ADDRESS:
+                return containsDefaultAddress();
+            case MARK_AS_DISTRIBUTIONLIST:
+                return containsMarkAsDistributionlist();
+            case TELEPHONE_ISDN:
+                return containsTelephoneISDN();
+            case FAX_HOME:
+                return containsFaxHome();
+            case MIDDLE_NAME:
+                return containsMiddleName();
+            case USERFIELD13:
+                return containsUserField13();
+            case ROOM_NUMBER:
+                return containsRoomNumber();
+            case MARITAL_STATUS:
+                return containsMaritalStatus();
+            case USERFIELD15:
+                return containsUserField15();
+            case COUNTRY_HOME:
+                return containsCountryHome();
+            case NICKNAME:
+                return containsNickname();
+            case SUR_NAME:
+                return containsSurName();
+            case CITY_BUSINESS:
+                return containsCityBusiness();
+            case USERFIELD20:
+                return containsUserField20();
+            case TELEPHONE_CALLBACK:
+                return containsTelephoneCallback();
+            case USERFIELD17:
+                return containsUserField17();
+            case TELEPHONE_PAGER:
+                return containsTelephonePager();
+            case COUNTRY_OTHER:
+                return containsCountryOther();
+            case TAX_ID:
+                return containsTaxID();
+            case USERFIELD03:
+                return containsUserField03();
+            case TELEPHONE_COMPANY:
+                return containsTelephoneCompany();
+            case SUFFIX:
+                return containsSuffix();
+            case FILE_AS:
+                return containsFileAs();
+            case USERFIELD02:
+                return containsUserField02();
+            case TELEPHONE_BUSINESS2:
+                return containsTelephoneBusiness2();
+            case USERFIELD05:
+                return containsUserField05();
+            case USERFIELD16:
+                return containsUserField16();
+            case INFO:
+                return containsInfo();
+            case COMPANY:
+                return containsCompany();
+            case DISPLAY_NAME:
+                return containsDisplayName();
+            case STREET_HOME:
+                return containsStreetHome();
+            case ASSISTANT_NAME:
+                return containsAssistantName();
+            case TELEPHONE_CAR:
+                return containsTelephoneCar();
+            case POSITION:
+                return containsPosition();
+            case TELEPHONE_PRIMARY:
+                return containsTelephonePrimary();
+            case SPOUSE_NAME:
+                return containsSpouseName();
+            case IMAGE_LAST_MODIFIED:
+                return containsImageLastModified();
+            case INSTANT_MESSENGER2:
+                return containsInstantMessenger2();
+            case IMAGE1:
+                return containsImage1();
+            case TELEPHONE_BUSINESS1:
+                return containsTelephoneBusiness1();
+            case DISTRIBUTIONLIST:
+                return containsDistributionLists();
+            case NUMBER_OF_DISTRIBUTIONLIST:
+                return containsNumberOfDistributionLists();
+            case NUMBER_OF_IMAGES:
+                return containsImage1();
+            case USE_COUNT:
+                return containsUseCount();
+            case YOMI_FIRST_NAME:
+                return containsYomiFirstName();
+            case YOMI_LAST_NAME:
+                return containsYomiLastName();
+            case YOMI_COMPANY:
+                return containsYomiCompany();
+            case ADDRESS_BUSINESS:
+                return containsAddressBusiness();
+            case ADDRESS_HOME:
+                return containsAddressHome();
+            case ADDRESS_OTHER:
+                return containsAddressOther();
+            case VCARD_ID:
+                return containsVCardId();
+            default:
+                return super.contains(field);
 
         }
     }
@@ -3625,348 +3607,339 @@ public class Contact extends CommonObject {
     @Override
     public void remove(final int field) {
         switch (field) {
-        case POSTAL_CODE_HOME:
-            removePostalCodeHome();
-            break;
-        case USERFIELD08:
-            removeUserField08();
-            break;
-        case CITY_OTHER:
-            removeCityOther();
-            break;
-        case USERFIELD09:
-            removeUserField09();
-            break;
-        case USERFIELD06:
-            removeUserField06();
-            break;
-        case STATE_BUSINESS:
-            removeStateBusiness();
-            break;
-        case IMAGE1_CONTENT_TYPE:
-            removeImageContentType();
-            break;
-        case GIVEN_NAME:
-            removeGivenName();
-            break;
-        case ANNIVERSARY:
-            removeAnniversary();
-            break;
-        case USERFIELD18:
-            removeUserField18();
-            break;
-        case SALES_VOLUME:
-            removeSalesVolume();
-            break;
-        case STREET_OTHER:
-            removeStreetOther();
-            break;
-        case USERFIELD04:
-            removeUserField04();
-            break;
-        case POSTAL_CODE_BUSINESS:
-            removePostalCodeBusiness();
-            break;
-        case TELEPHONE_HOME1:
-            removeTelephoneHome1();
-            break;
-        case USERFIELD19:
-            removeUserField19();
-            break;
-        case FAX_OTHER:
-            removeFaxOther();
-            break;
-        case USERFIELD14:
-            removeUserField14();
-            break;
-        case CITY_HOME:
-            removeCityHome();
-            break;
-        case USERFIELD07:
-            removeUserField07();
-            break;
-        case TITLE:
-            removeTitle();
-            break;
-        case TELEPHONE_ASSISTANT:
-            removeTelephoneAssistant();
-            break;
-        case FAX_BUSINESS:
-            removeFaxBusiness();
-            break;
-        case PROFESSION:
-            removeProfession();
-            break;
-        case DEPARTMENT:
-            removeDepartment();
-            break;
-        case USERFIELD01:
-            removeUserField01();
-            break;
-        case USERFIELD12:
-            removeUserField12();
-            break;
-        case TELEPHONE_IP:
-            removeTelephoneIP();
-            break;
-        case URL:
-            removeURL();
-            break;
-        case NUMBER_OF_EMPLOYEE:
-            removeNumberOfEmployee();
-            break;
-        case POSTAL_CODE_OTHER:
-            removePostalCodeOther();
-            break;
-        case USERFIELD10:
-            removeUserField10();
-            break;
-        case BIRTHDAY:
-            removeBirthday();
-            break;
-        case EMAIL1:
-            removeEmail1();
-            break;
-        case STATE_HOME:
-            removeStateHome();
-            break;
-        case TELEPHONE_HOME2:
-            removeTelephoneHome2();
-            break;
-        case TELEPHONE_TTYTDD:
-            removeTelephoneTTYTTD();
-            break;
-        case TELEPHONE_OTHER:
-            removeTelephoneOther();
-            break;
-        case COMMERCIAL_REGISTER:
-            removeCommercialRegister();
-            break;
-        case COUNTRY_BUSINESS:
-            removeCountryBusiness();
-            break;
-        case USERFIELD11:
-            removeUserField11();
-            break;
-        case BUSINESS_CATEGORY:
-            removeBusinessCategory();
-            break;
-        case CONTEXTID:
-            removeContextID();
-            break;
-        case STATE_OTHER:
-            removeStateOther();
-            break;
-        case INTERNAL_USERID:
-            removeInternalUserId();
-            break;
-        case CELLULAR_TELEPHONE1:
-            removeCellularTelephone1();
-            break;
-        case BRANCHES:
-            removeBranches();
-            break;
-        case NOTE:
-            removeNote();
-            break;
-        case EMAIL3:
-            removeEmail3();
-            break;
-        case CELLULAR_TELEPHONE2:
-            removeCellularTelephone2();
-            break;
-        case INSTANT_MESSENGER1:
-            removeInstantMessenger1();
-            break;
-        case MANAGER_NAME:
-            removeManagerName();
-            break;
-        case TELEPHONE_TELEX:
-            removeTelephoneTelex();
-            break;
-        case EMAIL2:
-            removeEmail2();
-            break;
-        case EMPLOYEE_TYPE:
-            removeEmployeeType();
-            break;
-        case TELEPHONE_RADIO:
-            removeTelephoneRadio();
-            break;
-        case NUMBER_OF_CHILDREN:
-            removeNumberOfChildren();
-            break;
-        case STREET_BUSINESS:
-            removeStreetBusiness();
-            break;
-        case DEFAULT_ADDRESS:
-            removeDefaultAddress();
-            break;
-        case MARK_AS_DISTRIBUTIONLIST:
-            removeMarkAsDistributionlist();
-            break;
-        case TELEPHONE_ISDN:
-            removeTelephoneISDN();
-            break;
-        case FAX_HOME:
-            removeFaxHome();
-            break;
-        case MIDDLE_NAME:
-            removeMiddleName();
-            break;
-        case USERFIELD13:
-            removeUserField13();
-            break;
-        case ROOM_NUMBER:
-            removeRoomNumber();
-            break;
-        case MARITAL_STATUS:
-            removeMaritalStatus();
-            break;
-        case USERFIELD15:
-            removeUserField15();
-            break;
-        case COUNTRY_HOME:
-            removeCountryHome();
-            break;
-        case NICKNAME:
-            removeNickname();
-            break;
-        case SUR_NAME:
-            removeSurName();
-            break;
-        case CITY_BUSINESS:
-            removeCityBusiness();
-            break;
-        case USERFIELD20:
-            removeUserField20();
-            break;
-        case TELEPHONE_CALLBACK:
-            removeTelephoneCallback();
-            break;
-        case USERFIELD17:
-            removeUserField17();
-            break;
-        case TELEPHONE_PAGER:
-            removeTelephonePager();
-            break;
-        case COUNTRY_OTHER:
-            removeCountryOther();
-            break;
-        case TAX_ID:
-            removeTaxID();
-            break;
-        case USERFIELD03:
-            removeUserField03();
-            break;
-        case TELEPHONE_COMPANY:
-            removeTelephoneCompany();
-            break;
-        case SUFFIX:
-            removeSuffix();
-            break;
-        case USERFIELD02:
-            removeUserField02();
-            break;
-        case TELEPHONE_BUSINESS2:
-            removeTelephoneBusiness2();
-            break;
-        case USERFIELD05:
-            removeUserField05();
-            break;
-        case USERFIELD16:
-            removeUserField16();
-            break;
-        case INFO:
-            removeInfo();
-            break;
-        case COMPANY:
-            removeCompany();
-            break;
-        case DISPLAY_NAME:
-            removeDisplayName();
-            break;
-        case STREET_HOME:
-            removeStreetHome();
-            break;
-        case ASSISTANT_NAME:
-            removeAssistantName();
-            break;
-        case TELEPHONE_CAR:
-            removeTelephoneCar();
-            break;
-        case POSITION:
-            removePosition();
-            break;
-        case TELEPHONE_PRIMARY:
-            removeTelephonePrimary();
-            break;
-        case SPOUSE_NAME:
-            removeSpouseName();
-            break;
-        case INSTANT_MESSENGER2:
-            removeInstantMessenger2();
-            break;
-        case IMAGE1:
-            removeImage1();
-            break;
-        case TELEPHONE_BUSINESS1:
-            removeTelephoneBusiness1();
-            break;
-        case FILE_AS:
-            removeFileAs();
-            break;
-        case IMAGE_LAST_MODIFIED:
-            removeImageLastModified();
-            break;
-        case DISTRIBUTIONLIST:
-            removeDistributionLists();
-            break;
-        case NUMBER_OF_DISTRIBUTIONLIST:
-            removeNumberOfDistributionLists();
-            break;
-        case USE_COUNT:
-            removeUseCount();
-            break;
-        case YOMI_FIRST_NAME:
-            removeYomiFirstName();
-            break;
-        case YOMI_LAST_NAME:
-            removeYomiLastName();
-            break;
-        case YOMI_COMPANY:
-            removeYomiCompany();
-            break;
-        case ADDRESS_BUSINESS:
-            removeAddressBusiness();
-            break;
-        case ADDRESS_HOME:
-            removeAddressHome();
-            break;
-        case ADDRESS_OTHER:
-            removeAddressOther();
-            break;
-        case VCARD_ID:
-            removeVCardId();
-            break;
-        default:
-            super.remove(field);
+            case POSTAL_CODE_HOME:
+                removePostalCodeHome();
+                break;
+            case USERFIELD08:
+                removeUserField08();
+                break;
+            case CITY_OTHER:
+                removeCityOther();
+                break;
+            case USERFIELD09:
+                removeUserField09();
+                break;
+            case USERFIELD06:
+                removeUserField06();
+                break;
+            case STATE_BUSINESS:
+                removeStateBusiness();
+                break;
+            case IMAGE1_CONTENT_TYPE:
+                removeImageContentType();
+                break;
+            case GIVEN_NAME:
+                removeGivenName();
+                break;
+            case ANNIVERSARY:
+                removeAnniversary();
+                break;
+            case USERFIELD18:
+                removeUserField18();
+                break;
+            case SALES_VOLUME:
+                removeSalesVolume();
+                break;
+            case STREET_OTHER:
+                removeStreetOther();
+                break;
+            case USERFIELD04:
+                removeUserField04();
+                break;
+            case POSTAL_CODE_BUSINESS:
+                removePostalCodeBusiness();
+                break;
+            case TELEPHONE_HOME1:
+                removeTelephoneHome1();
+                break;
+            case USERFIELD19:
+                removeUserField19();
+                break;
+            case FAX_OTHER:
+                removeFaxOther();
+                break;
+            case USERFIELD14:
+                removeUserField14();
+                break;
+            case CITY_HOME:
+                removeCityHome();
+                break;
+            case USERFIELD07:
+                removeUserField07();
+                break;
+            case TITLE:
+                removeTitle();
+                break;
+            case TELEPHONE_ASSISTANT:
+                removeTelephoneAssistant();
+                break;
+            case FAX_BUSINESS:
+                removeFaxBusiness();
+                break;
+            case PROFESSION:
+                removeProfession();
+                break;
+            case DEPARTMENT:
+                removeDepartment();
+                break;
+            case USERFIELD01:
+                removeUserField01();
+                break;
+            case USERFIELD12:
+                removeUserField12();
+                break;
+            case TELEPHONE_IP:
+                removeTelephoneIP();
+                break;
+            case URL:
+                removeURL();
+                break;
+            case NUMBER_OF_EMPLOYEE:
+                removeNumberOfEmployee();
+                break;
+            case POSTAL_CODE_OTHER:
+                removePostalCodeOther();
+                break;
+            case USERFIELD10:
+                removeUserField10();
+                break;
+            case BIRTHDAY:
+                removeBirthday();
+                break;
+            case EMAIL1:
+                removeEmail1();
+                break;
+            case STATE_HOME:
+                removeStateHome();
+                break;
+            case TELEPHONE_HOME2:
+                removeTelephoneHome2();
+                break;
+            case TELEPHONE_TTYTDD:
+                removeTelephoneTTYTTD();
+                break;
+            case TELEPHONE_OTHER:
+                removeTelephoneOther();
+                break;
+            case COMMERCIAL_REGISTER:
+                removeCommercialRegister();
+                break;
+            case COUNTRY_BUSINESS:
+                removeCountryBusiness();
+                break;
+            case USERFIELD11:
+                removeUserField11();
+                break;
+            case BUSINESS_CATEGORY:
+                removeBusinessCategory();
+                break;
+            case CONTEXTID:
+                removeContextID();
+                break;
+            case STATE_OTHER:
+                removeStateOther();
+                break;
+            case INTERNAL_USERID:
+                removeInternalUserId();
+                break;
+            case CELLULAR_TELEPHONE1:
+                removeCellularTelephone1();
+                break;
+            case BRANCHES:
+                removeBranches();
+                break;
+            case NOTE:
+                removeNote();
+                break;
+            case EMAIL3:
+                removeEmail3();
+                break;
+            case CELLULAR_TELEPHONE2:
+                removeCellularTelephone2();
+                break;
+            case INSTANT_MESSENGER1:
+                removeInstantMessenger1();
+                break;
+            case MANAGER_NAME:
+                removeManagerName();
+                break;
+            case TELEPHONE_TELEX:
+                removeTelephoneTelex();
+                break;
+            case EMAIL2:
+                removeEmail2();
+                break;
+            case EMPLOYEE_TYPE:
+                removeEmployeeType();
+                break;
+            case TELEPHONE_RADIO:
+                removeTelephoneRadio();
+                break;
+            case NUMBER_OF_CHILDREN:
+                removeNumberOfChildren();
+                break;
+            case STREET_BUSINESS:
+                removeStreetBusiness();
+                break;
+            case DEFAULT_ADDRESS:
+                removeDefaultAddress();
+                break;
+            case MARK_AS_DISTRIBUTIONLIST:
+                removeMarkAsDistributionlist();
+                break;
+            case TELEPHONE_ISDN:
+                removeTelephoneISDN();
+                break;
+            case FAX_HOME:
+                removeFaxHome();
+                break;
+            case MIDDLE_NAME:
+                removeMiddleName();
+                break;
+            case USERFIELD13:
+                removeUserField13();
+                break;
+            case ROOM_NUMBER:
+                removeRoomNumber();
+                break;
+            case MARITAL_STATUS:
+                removeMaritalStatus();
+                break;
+            case USERFIELD15:
+                removeUserField15();
+                break;
+            case COUNTRY_HOME:
+                removeCountryHome();
+                break;
+            case NICKNAME:
+                removeNickname();
+                break;
+            case SUR_NAME:
+                removeSurName();
+                break;
+            case CITY_BUSINESS:
+                removeCityBusiness();
+                break;
+            case USERFIELD20:
+                removeUserField20();
+                break;
+            case TELEPHONE_CALLBACK:
+                removeTelephoneCallback();
+                break;
+            case USERFIELD17:
+                removeUserField17();
+                break;
+            case TELEPHONE_PAGER:
+                removeTelephonePager();
+                break;
+            case COUNTRY_OTHER:
+                removeCountryOther();
+                break;
+            case TAX_ID:
+                removeTaxID();
+                break;
+            case USERFIELD03:
+                removeUserField03();
+                break;
+            case TELEPHONE_COMPANY:
+                removeTelephoneCompany();
+                break;
+            case SUFFIX:
+                removeSuffix();
+                break;
+            case USERFIELD02:
+                removeUserField02();
+                break;
+            case TELEPHONE_BUSINESS2:
+                removeTelephoneBusiness2();
+                break;
+            case USERFIELD05:
+                removeUserField05();
+                break;
+            case USERFIELD16:
+                removeUserField16();
+                break;
+            case INFO:
+                removeInfo();
+                break;
+            case COMPANY:
+                removeCompany();
+                break;
+            case DISPLAY_NAME:
+                removeDisplayName();
+                break;
+            case STREET_HOME:
+                removeStreetHome();
+                break;
+            case ASSISTANT_NAME:
+                removeAssistantName();
+                break;
+            case TELEPHONE_CAR:
+                removeTelephoneCar();
+                break;
+            case POSITION:
+                removePosition();
+                break;
+            case TELEPHONE_PRIMARY:
+                removeTelephonePrimary();
+                break;
+            case SPOUSE_NAME:
+                removeSpouseName();
+                break;
+            case INSTANT_MESSENGER2:
+                removeInstantMessenger2();
+                break;
+            case IMAGE1:
+                removeImage1();
+                break;
+            case TELEPHONE_BUSINESS1:
+                removeTelephoneBusiness1();
+                break;
+            case FILE_AS:
+                removeFileAs();
+                break;
+            case IMAGE_LAST_MODIFIED:
+                removeImageLastModified();
+                break;
+            case DISTRIBUTIONLIST:
+                removeDistributionLists();
+                break;
+            case NUMBER_OF_DISTRIBUTIONLIST:
+                removeNumberOfDistributionLists();
+                break;
+            case USE_COUNT:
+                removeUseCount();
+                break;
+            case YOMI_FIRST_NAME:
+                removeYomiFirstName();
+                break;
+            case YOMI_LAST_NAME:
+                removeYomiLastName();
+                break;
+            case YOMI_COMPANY:
+                removeYomiCompany();
+                break;
+            case ADDRESS_BUSINESS:
+                removeAddressBusiness();
+                break;
+            case ADDRESS_HOME:
+                removeAddressHome();
+                break;
+            case ADDRESS_OTHER:
+                removeAddressOther();
+                break;
+            case VCARD_ID:
+                removeVCardId();
+                break;
+            default:
+                super.remove(field);
 
         }
     }
 
-    public boolean canFormDisplayName(){
-        return contains(DISPLAY_NAME)
-            || contains(SUR_NAME)
-            || contains(GIVEN_NAME)
-            || contains(EMAIL1)
-            || contains(EMAIL2)
-            || contains(EMAIL3)
-            || contains(COMPANY)
-            || contains(NICKNAME)
-            || contains(MIDDLE_NAME);
+    public boolean canFormDisplayName() {
+        return contains(DISPLAY_NAME) || contains(SUR_NAME) || contains(GIVEN_NAME) || contains(EMAIL1) || contains(EMAIL2) || contains(EMAIL3) || contains(COMPANY) || contains(NICKNAME) || contains(MIDDLE_NAME);
     }
-
 
     @Override
     public String toString() {
@@ -4021,11 +3994,11 @@ public class Contact extends CommonObject {
     }
 
     @Override
-    public Contact clone(){
+    public Contact clone() {
         final Contact clone = new Contact();
-        for(final ContactField field: ContactField.values()){
+        for (final ContactField field : ContactField.values()) {
             final int fieldNum = field.getNumber();
-            if(!field.isVirtual() && contains(fieldNum)) {
+            if (!field.isVirtual() && contains(fieldNum)) {
                 clone.set(fieldNum, get(fieldNum));
             }
         }
@@ -4064,7 +4037,7 @@ public class Contact extends CommonObject {
         return matches(other, ALL_COLUMNS);
     }
 
-    public boolean equalsContentwise(final Object obj){
+    public boolean equalsContentwise(final Object obj) {
         if (this == obj) {
             return true;
         }
@@ -4078,24 +4051,24 @@ public class Contact extends CommonObject {
         return matches(other, CONTENT_COLUMNS);
     }
 
-    public boolean matches(final Contact other, final int[] fields){
-        for(final int col: fields){
-            if(! contains(col) && other.contains(col)) {
+    public boolean matches(final Contact other, final int[] fields) {
+        for (final int col : fields) {
+            if (!contains(col) && other.contains(col)) {
                 return false;
             }
-            if(contains(col) && !other.contains(col)) {
+            if (contains(col) && !other.contains(col)) {
                 return false;
             }
-            if(contains(col) && other.contains(col)){
+            if (contains(col) && other.contains(col)) {
                 final Object thisValue = get(col);
                 final Object otherValue = other.get(col);
-                if(thisValue == null){
-                    if(otherValue != null) {
+                if (thisValue == null) {
+                    if (otherValue != null) {
                         return false;
                     }
                     continue;
                 }
-                if(! thisValue.equals(otherValue)) {
+                if (!thisValue.equals(otherValue)) {
                     return false;
                 }
             }
