@@ -59,7 +59,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
  * {@link DepartmentFacet}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class DepartmentFacet extends ContactSearchFieldFacet {
 

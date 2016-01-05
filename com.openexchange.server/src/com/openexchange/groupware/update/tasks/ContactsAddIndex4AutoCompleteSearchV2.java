@@ -107,6 +107,7 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
             createIndexIfNeeded(log, connection, new String[] { "cid", "field65" }, "email1");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field66" }, "email2");
             createIndexIfNeeded(log, connection, new String[] { "cid", "field67" }, "email3");
+            createIndexIfNeeded(log, connection, new String[] { "cid", "field19" }, "department");
             connection.commit();
             committed = true;
         } catch (SQLException e) {
