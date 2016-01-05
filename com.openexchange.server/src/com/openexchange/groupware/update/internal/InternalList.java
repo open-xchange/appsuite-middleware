@@ -600,9 +600,6 @@ public final class InternalList {
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
         
-        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and fills it with random UUIDs for each entry 
-        list.add(new com.openexchange.groupware.update.tasks.AddUUIDForUserAliasTable());
-
         //(Re-)adds department index in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
 
