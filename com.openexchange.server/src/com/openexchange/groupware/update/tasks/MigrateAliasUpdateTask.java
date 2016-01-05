@@ -126,7 +126,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         ResultSet rs = null;
 
         try {
-            stmt = conn.prepareStatement("SELECT cid, id, value. uuid FROM user_attribute WHERE name='alias'");
+            stmt = conn.prepareStatement("SELECT cid, id, value, uuid FROM user_attribute WHERE name='alias'");
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptySet();
