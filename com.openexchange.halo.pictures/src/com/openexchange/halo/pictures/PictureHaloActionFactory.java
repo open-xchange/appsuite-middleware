@@ -64,16 +64,21 @@ import com.openexchange.server.ServiceLookup;
  */
 public class PictureHaloActionFactory implements AJAXActionServiceFactory {
 
-    private final GetPictureAction GET_PICTURE;
+    private final GetPictureAction getPictureAction;
 
+    /**
+     * Initializes a new {@link PictureHaloActionFactory}.
+     *
+     * @param services The OSGi service look-up
+     */
     public PictureHaloActionFactory(ServiceLookup services) {
         super();
-        GET_PICTURE = new GetPictureAction(services);
+        getPictureAction = new GetPictureAction(services);
     }
 
     @Override
     public AJAXActionService createActionService(String action) throws OXException {
-        return GET_PICTURE;
+        return getPictureAction;
     }
 
     @Override
