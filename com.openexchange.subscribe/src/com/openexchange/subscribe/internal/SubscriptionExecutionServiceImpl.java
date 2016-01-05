@@ -236,7 +236,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     @Override
     public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session, Collection<OXException> optErrors) throws OXException {
         int sum = 0;
-        for (final Subscription subscription : subscriptionsToRefresh) {
+        for (Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if (!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
@@ -292,6 +292,9 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                             SearchIterators.close(data);
                         }
                     } catch (OXException oxException) {
+                        if (subscriptionsToRefresh.size() == 1) {
+                            throw oxException;
+                        }
                         LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
                     } finally {
                         unlock(subscriptionId, session);
