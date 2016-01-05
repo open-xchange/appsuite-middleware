@@ -81,6 +81,15 @@ public final class ByteArrayFileHolder implements IFileHolder {
         tasks = new LinkedList<Runnable>();
     }
 
+    /**
+     * Gets the bytes
+     *
+     * @return The bytes
+     */
+    public byte[] getBytes() {
+        return bytes;
+    }
+
     @Override
     public List<Runnable> getPostProcessingTasks() {
         return tasks;
