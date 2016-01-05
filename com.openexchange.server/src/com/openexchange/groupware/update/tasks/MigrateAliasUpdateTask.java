@@ -58,6 +58,7 @@ import java.sql.Statement;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
@@ -65,6 +66,7 @@ import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -82,12 +84,13 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         + "`cid` INT4 UNSIGNED NOT NULL, "
         + "`user` INT4 UNSIGNED NOT NULL, "
         + "`alias` VARCHAR(255) NOT NULL, "
-        + "PRIMARY KEY (`cid`, `user`, `alias`) "
+        + "`uuid` BINARY(16) NOT NULL,"
+        + "PRIMARY KEY (`cid`, `user`, `alias`, `uuid`) "
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-    private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name FROM user_attribute WHERE name='alias'";
+    private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name, uuid FROM user_attribute WHERE name='alias'";
 
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
+    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias, uuid) VALUES(?, ?, ?, ?)";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -144,7 +147,9 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
                 int cid = rs.getInt(++index);
                 int uid = rs.getInt(++index);
                 String alias = rs.getString(++index);
-                aliases.add(new Alias(cid, uid, alias));
+                byte[] bytes = rs.getBytes(++index);
+                UUID uuid = UUIDs.toUUID(bytes);
+                aliases.add(new Alias(cid, uid, alias, uuid));
             } while (rs.next());
 
             return aliases;
@@ -163,6 +168,8 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
+                final byte[] uuid = UUIDs.toByteArray(alias.getUuid());
+                stmt.setBytes(++index, uuid);
                 stmt.addBatch();
             }
             int[] updateCounts = stmt.executeBatch();
@@ -192,11 +199,20 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         private final int cid;
         private final int userId;
         private final String alias;
+        private final int hash;
+        private final UUID uuid;
 
-        public Alias(int cid, int userId, String alias) {
+        Alias(int cid, int userId, String alias, UUID uuid) {
             this.cid = cid;
             this.userId = userId;
             this.alias = alias;
+            this.uuid = uuid;
+
+            int prime = 31;
+            int result = prime * 1 + cid;
+            result = prime * result + userId;
+            result = prime * result + ((alias == null) ? 0 : alias.hashCode());
+            this.hash = result;
         }
 
         public int getCid() {
@@ -209,6 +225,45 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
 
         public String getAlias() {
             return alias;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        /**
+         * Gets the uuid
+         *
+         * @return The uuid
+         */
+        public UUID getUuid() {
+            return uuid;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof Alias)) {
+                return false;
+            }
+            Alias other = (Alias) obj;
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (alias == null) {
+                if (other.alias != null) {
+                    return false;
+                }
+            } else if (!alias.equals(other.alias)) {
+                return false;
+            }
+            return true;
         }
     }
 }

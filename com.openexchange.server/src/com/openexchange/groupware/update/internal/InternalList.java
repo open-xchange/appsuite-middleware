@@ -768,6 +768,9 @@ public final class InternalList {
 
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
+        
+        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and fills it with random UUIDs for each entry 
+        list.add(new com.openexchange.groupware.update.tasks.AddUUIDForUserAliasTable());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
