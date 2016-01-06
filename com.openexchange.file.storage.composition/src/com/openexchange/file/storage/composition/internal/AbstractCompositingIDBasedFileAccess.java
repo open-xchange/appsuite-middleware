@@ -112,6 +112,7 @@ import com.openexchange.file.storage.ThumbnailAware;
 import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandler;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.search.SearchTerm;
@@ -807,6 +808,12 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
     }
 
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
+
+        if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
+            String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
+            throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
+        }
+
         if (FileStorageFileAccess.NEW == document.getId()) {
             /*
              * create new file, determine target file storage

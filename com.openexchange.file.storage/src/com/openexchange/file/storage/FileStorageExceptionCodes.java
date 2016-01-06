@@ -325,6 +325,11 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      */
     UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_USER_INPUT, 64, FileStorageExceptionMessages.UNLINKED_ERROR_MSG),
 
+    /**
+     * File name contains illegal characters: \"%1$s\"
+     */
+    ILLEGAL_CHARACTERS("File name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 65, FileStorageExceptionMessages.ILLEGAL_CHARACTERS_MSG)
+
     ;
 
     /**

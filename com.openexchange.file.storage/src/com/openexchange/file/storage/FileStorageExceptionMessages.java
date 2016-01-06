@@ -165,6 +165,9 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // You need to get sufficient permissions to perform the operation on the specified entity.
     public static final String INVALID_OBJECT_PERMISSIONS_SIMPLE_MSG = "You need to get sufficient permissions to perform the operation on the specified entity.";
 
+    // File name contains not allowed characters: \"%1$s\"
+    public static final String ILLEGAL_CHARACTERS_MSG = "File name contains illegal characters: \"%1$s\"";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */
