@@ -139,7 +139,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
 
         // ... and return URL
-        return Utils.getFileUrl(serverUrl, branding, exeFileName);
+        return Utils.getFileUrl(serverUrl, exeFileName);
     }
 
     @Override
@@ -153,9 +153,9 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         String exeFileName = getExeFileName(branding);
         String msiFileName = getMsiFileName(branding);
         try {
-            values.put("URL", Utils.getFileUrl(serverUrl, branding, exeFileName));
+            values.put("URL", Utils.getFileUrl(serverUrl, exeFileName));
             values.put("MD5", provider.getMD5(branding, exeFileName));
-            values.put("MSI_URL", Utils.getFileUrl(serverUrl, branding, msiFileName));
+            values.put("MSI_URL", Utils.getFileUrl(serverUrl, msiFileName));
             values.put("MSI_MD5", provider.getMD5(branding, msiFileName));
             values.put("ICON", loadIcon(branding));
 

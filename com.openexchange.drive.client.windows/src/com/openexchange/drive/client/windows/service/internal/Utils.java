@@ -132,8 +132,8 @@ public class Utils {
         return login;
     }
 
-    public static String getFileUrl(String serverUrl, String branding, String fileName) {
-        return compileUrl(serverUrl, getServletPrefix(), Constants.DOWNLOAD_SERVLET, branding, fileName);
+    public static String getFileUrl(String serverUrl, String fileName) {
+        return compileUrl(serverUrl, getServletPrefix(), Constants.DOWNLOAD_SERVLET, fileName);
     }
 
     public static String getUpdateXMLUrl(String serverUrl) {

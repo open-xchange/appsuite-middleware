@@ -106,7 +106,7 @@ public interface DriveUpdateService {
     public String[] getNecessaryPermission();
 
     /**
-     * Returns if this service is able to deliver the file identified by the given name.
+     * Returns true if this service is able to deliver the file identified by the given name.
      *
      * This method exists to support the old oxupdater and will eventually be removed in the future.
      *

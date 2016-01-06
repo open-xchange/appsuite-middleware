@@ -118,13 +118,9 @@ public class DownloadServlet extends OXServlet {
                 fileName = fileName.substring(1, fileName.length());
             }
             
-            int pos = fileName.indexOf("/");
-            String branding = null;
-            if (pos != -1) {
-                branding = fileName.substring(0, pos);
-                fileName = fileName.substring(pos + 1);
-            }
-
+            ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
+            ConfigView configView = configFactory.getView(session.getUserId(), session.getContextId());
+            String branding = configView.get(Constants.BRANDING_CONF, String.class);
 
             if (provider.contains(branding, fileName)) {
                 // The updater itself shall be downloaded
