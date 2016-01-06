@@ -49,21 +49,22 @@
 
 package com.openexchange.java;
 
-
 /**
- * {@link Enums}
+ * {@link Enums} - A utility class for working with <b><code>enum</code></b> classes.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class Enums {
 
     /**
-     * Parses the supplied value into an enumeration constant, ignoring case.
+     * Parses the supplied value to an enumeration constant, ignore-case.
      *
      * @param enumeration The enumeration class from which to return a constant
      * @param name The name of the constant to return
-     * @return The enum constant
+     * @return The <code>enum</code> constant
      * @throws IllegalArgumentException If there's no suitable enum constant for the supplied name
+     * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
      */
     public static <T extends Enum<T>> T parse(Class<T> enumeration, String name) {
         T value = parse(enumeration, name, null);
@@ -74,12 +75,13 @@ public class Enums {
     }
 
     /**
-     * Parses the supplied value into an enumeration constant, ignoring case.
+     * Parses the supplied value to an enumeration constant, ignore-case.
      *
      * @param enumeration The enumeration class from which to return a constant
      * @param name The name of the constant to return
      * @param defaultValue The enumeration constant to return if parsing fails
-     * @return The enum constant
+     * @return The <code>enum</code> constant
+     * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
      */
     public static <T extends Enum<T>> T parse(Class<T> enumeration, String name, T defaultValue) {
         for (T value : enumeration.getEnumConstants()) {
@@ -88,6 +90,44 @@ public class Enums {
             }
         }
         return defaultValue;
+    }
+
+    /**
+     * Parses specified names to enumeration constants, ignore-case.
+     *
+     * @param enumeration The enumeration class from which to return a constant
+     * @param names The names of the constants to return
+     * @return The <code>enum</code> constants (having <code>null</code> elements for non-matching names)
+     * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
+     */
+    public static <T extends Enum<T>> T[] parse(Class<T> enumeration, String... names) {
+        if (null == names) {
+            return null;
+        }
+        if (names.length <= 0) {
+            return (T[]) new Object[0];
+        }
+
+        Object[] elementData = new Object[names.length];
+        for (int i = names.length; i-- > 0;) {
+            elementData[i] = parse(enumeration, names[i], null);
+        }
+        return (T[]) elementData;
+    }
+
+    /**
+     * Parses specified comma-separated names to enumeration constants, ignore-case.
+     *
+     * @param enumeration The enumeration class from which to return a constant
+     * @param csv The comma-separated names
+     * @return The <code>enum</code> constants (having <code>null</code> elements for non-matching names)
+     * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
+     */
+    public static <T extends Enum<T>> T[] parseCsv(Class<T> enumeration, String csv) {
+        if (Strings.isEmpty(csv)) {
+            return (T[]) new Object[0];
+        }
+        return parse(enumeration, Strings.splitByComma(Strings.unquote(csv)));
     }
 
     private Enums() {

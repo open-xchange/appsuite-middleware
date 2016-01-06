@@ -73,6 +73,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.ContactExceptionCodes;
 import com.openexchange.groupware.contact.Search;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.java.Enums;
 import com.openexchange.java.SimpleTokenizer;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Tools;
@@ -262,7 +263,7 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
                 if (null != previous) {
                     EnumSet<ContactField> prevSet = EnumSet.copyOf(Arrays.asList(previous));
                     String defaultValue = "DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3";
-                    EnumSet<ContactField> curSet = EnumSet.copyOf(Arrays.asList(toFields(configService.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue))));
+                    EnumSet<ContactField> curSet = EnumSet.copyOf(Arrays.asList(Enums.parseCsv(ContactField.class, configService.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue))));
                     if (!prevSet.equals(curSet)) {
                         fulltextIndexFields = null;
                         FULLTEXT_INDEX_SCHEMAS.clear();
@@ -303,7 +304,7 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
                     }
 
                     String value = service.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue);
-                    tmp = toFields(value);
+                    tmp = Enums.parseCsv(ContactField.class, value);
                     if (null == tmp) {
                         throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Invalid configuration setting for \"com.openexchange.contact.fulltextIndexFields\": " + value);
                     }
@@ -312,36 +313,6 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
             }
         }
         return tmp;
-    }
-
-    static ContactField[] toFields(String value) {
-        class Helper {
-
-            ContactField[] getFieldsFor(String value) {
-                String val = Strings.unquote(value);
-                String[] split = Strings.splitByComma(val);
-                List<ContactField> l = new ArrayList<ContactField>(split.length);
-                for (String v : split) {
-                    ContactField field = getFieldFor(v);
-                    if (null == field) {
-                        return null;
-                    }
-                    l.add(field);
-                }
-                return l.toArray(new ContactField[l.size()]);
-            }
-
-            private ContactField getFieldFor(String v) {
-                for (ContactField contactField : ContactField.values()) {
-                    if (v.equalsIgnoreCase(contactField.name())) {
-                        return contactField;
-                    }
-                }
-                return null;
-            }
-        }
-
-        return new Helper().getFieldsFor(value);
     }
 
     static volatile Boolean fulltextAutocomplete;
