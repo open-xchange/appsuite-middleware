@@ -58,10 +58,15 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.locks.LockSupport;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.AutocompleteParameters;
@@ -76,6 +81,8 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.java.Enums;
 import com.openexchange.java.SimpleTokenizer;
 import com.openexchange.java.Strings;
+import com.openexchange.threadpool.ThreadPools;
+import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
 import com.openexchange.tools.update.Tools;
 
 /**
@@ -342,7 +349,20 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
         return tmp.booleanValue();
     }
 
-    static final ConcurrentMap<String, Boolean> FULLTEXT_INDEX_SCHEMAS = new ConcurrentHashMap<String, Boolean>(32, 0.9F, 1);
+    private static final ExpectedExceptionFactory<SQLException> EXCEPTION_FACTORY = new ExpectedExceptionFactory<SQLException>() {
+
+        @Override
+        public SQLException newUnexpectedError(Throwable t) {
+            return new SQLException("unchecked", t);
+        }
+
+        @Override
+        public Class<SQLException> getType() {
+            return SQLException.class;
+        }
+    };
+
+    static final ConcurrentMap<String, Future<Boolean>> FULLTEXT_INDEX_SCHEMAS = new ConcurrentHashMap<String, Future<Boolean>>(32, 0.9F, 1);
 
     /**
      * Gets a value indicating whether the supplied database connection points to a database schema that contains a special
@@ -352,44 +372,88 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
      * @param contextID The context identifier
      * @return <code>true</code> if the <code>prg_contacts</code> table has the <code>autocomplete</code> index, <code>false</code>, otherwise
      */
-    public static boolean hasFulltextIndex(Connection connection, int contextID) throws OXException {
+    public static boolean hasFulltextIndex(final Connection connection, int contextID) throws OXException {
         if (false == fulltextAutocomplete()) {
             // Not enabled
             return false;
         }
 
+        // Determine schema name
+        String schemaName = getSchemaName(connection, contextID);
+
+        // Check for existence of FULLTEXT index
+        boolean removeOnError = false;
+        boolean error = true;
         try {
-            String schemaName = connection.getCatalog();
-            if (null == schemaName) {
-                schemaName = RdbServiceLookup.getService(DatabaseService.class).getSchemaName(contextID);
-                if (null == schemaName) {
-                    throw ContactExceptionCodes.SQL_PROBLEM.create("No schema name for connection");
-                }
-            }
+            Future<Boolean> f = FULLTEXT_INDEX_SCHEMAS.get(schemaName);
+            if (null == f) {
+                FutureTask<Boolean> ft = new FutureTask<Boolean>(new Callable<Boolean>() {
 
-            Boolean value = FULLTEXT_INDEX_SCHEMAS.get(schemaName);
-            if (null == value) {
-                // Wait random nanos
-                long nanosToWait = TimeUnit.NANOSECONDS.convert(((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
-                LockSupport.parkNanos(nanosToWait);
-
-                // Re-check
-                value = FULLTEXT_INDEX_SCHEMAS.get(schemaName);
-                if (null == value) {
-                    // Check for "autocomplete" FULLTEXT index
-                    ContactField[] fields = fulltextIndexFields();
-                    String[] columns = new String[fields.length];
-                    for (int i = fields.length; i-- > 0;) {
-                        columns[i] = Mappers.CONTACT.get(fields[i]).getColumnLabel();
+                    @Override
+                    public Boolean call() throws Exception {
+                        // Check for "autocomplete" FULLTEXT index
+                        ContactField[] fields = fulltextIndexFields();
+                        String[] columns = new String[fields.length];
+                        for (int i = fields.length; i-- > 0;) {
+                            columns[i] = Mappers.CONTACT.get(fields[i]).getColumnLabel();
+                        }
+                        String indexName = Tools.existsIndex(connection, Table.CONTACTS.getName(), columns);
+                        return Boolean.valueOf((null != indexName) && indexName.startsWith("autocomplete"));
                     }
-                    String indexName = Tools.existsIndex(connection, Table.CONTACTS.getName(), columns);
-                    value = Boolean.valueOf((null != indexName) && indexName.startsWith("autocomplete"));
-                    FULLTEXT_INDEX_SCHEMAS.putIfAbsent(schemaName, value);
+                });
+                f = FULLTEXT_INDEX_SCHEMAS.putIfAbsent(schemaName, ft);
+                if (null == f) {
+                    f = ft;
+                    removeOnError = true;
+                    ft.run();
                 }
             }
+
+            Boolean value = ThreadPools.getFrom(f, EXCEPTION_FACTORY);
+            error = false;
             return value.booleanValue();
         } catch (SQLException e) {
+            if ("unchecked".equals(e.getMessage())) {
+                Throwable cause = e.getCause();
+                if (null != cause) {
+                    throw (cause instanceof OXException) ? (OXException) cause : ContactExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+                }
+            }
             throw ContactExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } finally {
+            if (error && removeOnError) {
+                FULLTEXT_INDEX_SCHEMAS.remove(schemaName);
+            }
+        }
+    }
+
+    private static final Cache<Integer, String> CACHE_SCHEMA_NAMES = CacheBuilder.newBuilder().expireAfterAccess(30, TimeUnit.MINUTES).build();
+
+    private static String getSchemaName(final Connection connection, final int contextID) throws OXException {
+        try {
+            return CACHE_SCHEMA_NAMES.get(Integer.valueOf(contextID), new Callable<String>() {
+
+                @Override
+                public String call() throws Exception {
+                    String schemaName = connection.getCatalog();
+                    if (null == schemaName) {
+                        schemaName = RdbServiceLookup.getService(DatabaseService.class).getSchemaName(contextID);
+                        if (null == schemaName) {
+                            throw ContactExceptionCodes.SQL_PROBLEM.create("No schema name for connection");
+                        }
+                    }
+                    return schemaName;
+                }
+            });
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            if (cause instanceof SQLException) {
+                throw ContactExceptionCodes.SQL_PROBLEM.create(cause, cause.getMessage());
+            }
+            throw ContactExceptionCodes.UNEXPECTED_ERROR.create(cause, cause.getMessage());
         }
     }
 
