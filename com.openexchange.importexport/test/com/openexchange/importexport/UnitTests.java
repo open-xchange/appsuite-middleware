@@ -52,17 +52,19 @@ package com.openexchange.importexport;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.importexport.importers.Bug43229Test;
 import com.openexchange.importexport.importers.CSVContactImporterTest;
 
 /**
  * Unit tests for the bundle com.openexchange.importexport
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.6.0
  */
 @RunWith(Suite.class)
 @SuiteClasses({
-    CSVContactImporterTest.class
+    CSVContactImporterTest.class,
+    Bug43229Test.class
 })
 public class UnitTests {
 
