@@ -103,8 +103,13 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
         }
 
         // Generate expected index name (dependent on configured fields)
-        int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(Arrays.toString(columns));
-        String expectedName = new StringBuilder("autocomplete").append(hash).toString();
+        String expectedName;
+        {
+            String[] copiedcolumns = Arrays.copyOf(columns, columns.length);
+            Arrays.sort(copiedcolumns);
+            int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(Arrays.toString(copiedcolumns));
+            expectedName = new StringBuilder("autocomplete").append(hash).toString();
+        }
 
         // Create index unless it already exists
         int contextID = params.getContextId();
