@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 15
+%define        ox_release 14
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -54,8 +54,6 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Mon Jan 04 2016 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-13 (2982)
 * Tue Dec 29 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-01-05 (2989)
 * Tue Dec 22 2015 Marcus Klein <marcus.klein@open-xchange.com>
