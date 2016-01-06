@@ -182,18 +182,15 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	}
 
 	protected static String getEMailAutoCompleteClause(boolean ignoreDistributionLists) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-            .append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
+        StringBuilder stringBuilder = new StringBuilder()
+            .append('(').append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
             .append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
-            .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>''");
-        String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
+            .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'')");
         if (ignoreDistributionLists) {
         	stringBuilder.append(" AND ").append(getIgnoreDistributionListsClause());
         } else {
-        	stringBuilder.append(" OR ").append(dlColumn).append(">0");
+        	stringBuilder.append(" OR ").append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0");
         }
-
         return stringBuilder.toString();
     }
 
