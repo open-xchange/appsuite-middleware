@@ -263,7 +263,7 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
                 if (null != previous) {
                     EnumSet<ContactField> prevSet = EnumSet.copyOf(Arrays.asList(previous));
                     String defaultValue = "DISPLAY_NAME, SUR_NAME, GIVEN_NAME, TITLE, SUFFIX, MIDDLE_NAME, COMPANY, EMAIL1, EMAIL2, EMAIL3";
-                    EnumSet<ContactField> curSet = EnumSet.copyOf(Arrays.asList(Enums.parseCsv(ContactField.class, configService.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue))));
+                    EnumSet<ContactField> curSet = EnumSet.copyOf(Enums.parseCsv(ContactField.class, configService.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue)));
                     if (!prevSet.equals(curSet)) {
                         fulltextIndexFields = null;
                         FULLTEXT_INDEX_SCHEMAS.clear();
@@ -304,10 +304,11 @@ public class FulltextAutocompleteAdapter extends DefaultSearchAdapter {
                     }
 
                     String value = service.getProperty("com.openexchange.contact.fulltextIndexFields", defaultValue);
-                    tmp = Enums.parseCsv(ContactField.class, value);
-                    if (null == tmp) {
+                    List<ContactField> fields = Enums.parseCsv(ContactField.class, value);
+                    if (null == fields || 0 == fields.size()) {
                         throw ContactExceptionCodes.UNEXPECTED_ERROR.create("Invalid configuration setting for \"com.openexchange.contact.fulltextIndexFields\": " + value);
                     }
+                    tmp = fields.toArray(new ContactField[fields.size()]);
                     fulltextIndexFields = tmp;
                 }
             }

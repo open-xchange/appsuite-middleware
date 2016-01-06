@@ -49,6 +49,10 @@
 
 package com.openexchange.java;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * {@link Enums} - A utility class for working with <b><code>enum</code></b> classes.
  *
@@ -100,19 +104,18 @@ public class Enums {
      * @return The <code>enum</code> constants (having <code>null</code> elements for non-matching names)
      * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
      */
-    public static <T extends Enum<T>> T[] parse(Class<T> enumeration, String... names) {
+    public static <T extends Enum<T>> List<T> parse(Class<T> enumeration, String... names) {
         if (null == names) {
             return null;
         }
         if (names.length <= 0) {
-            return (T[]) new Object[0];
+            return Collections.emptyList();
         }
-
-        Object[] elementData = new Object[names.length];
-        for (int i = names.length; i-- > 0;) {
-            elementData[i] = parse(enumeration, names[i], null);
+        ArrayList<T> elements = new ArrayList<T>(names.length);
+        for (String name : names) {
+            elements.add(parse(enumeration, name, null));
         }
-        return (T[]) elementData;
+        return elements;
     }
 
     /**
@@ -123,9 +126,9 @@ public class Enums {
      * @return The <code>enum</code> constants (having <code>null</code> elements for non-matching names)
      * @throws NullPointerException If <code>enumeration</code> is <code>null</code>
      */
-    public static <T extends Enum<T>> T[] parseCsv(Class<T> enumeration, String csv) {
+    public static <T extends Enum<T>> List<T> parseCsv(Class<T> enumeration, String csv) {
         if (Strings.isEmpty(csv)) {
-            return (T[]) new Object[0];
+            return Collections.emptyList();
         }
         return parse(enumeration, Strings.splitByComma(Strings.unquote(csv)));
     }
