@@ -463,7 +463,7 @@ public class CSVContactImporter extends AbstractImporter {
      * @param maxLines The maximum number of lines to parse, or -1 to read all available lines
      * @return The line-wise parsed input, or <code>null</code> if no appropriate mapper was detected
      */
-    private List<List<String>> parse(InputStream input, int maxLines) throws OXException, IOException {
+    protected List<List<String>> parse(InputStream input, int maxLines) throws OXException, IOException {
         ThresholdFileHolder fileHolder = null;
         try {
             fileHolder = new ThresholdFileHolder(new FileHolder(input, -1, null, null));
@@ -478,6 +478,7 @@ public class CSVContactImporter extends AbstractImporter {
             /*
              * determine the overall best matching mapper
              */
+            OXException parseException = null;
             int maxMappedFields = 0;
             CSVParser bestParser = null;
             ContactFieldMapper bestMapper = null;
@@ -489,7 +490,12 @@ public class CSVContactImporter extends AbstractImporter {
                  */
                 String firstLine = readLines(fileHolder.getStream(), entry.getKey(), false, 1);
                 CSVParser csvParser = getCSVParser(determineDelimiter(firstLine));
-                List<List<String>> parsedFirstLine = csvParser.parse(firstLine);
+                List<List<String>> parsedFirstLine = null;
+                try {
+                    parsedFirstLine = csvParser.parse(firstLine);
+                } catch (OXException e) {
+                    parseException = e;
+                }
                 if (null == parsedFirstLine || 0 == parsedFirstLine.size() || null == parsedFirstLine.get(0)) {
                     continue;
                 }
@@ -508,6 +514,9 @@ public class CSVContactImporter extends AbstractImporter {
              */
             currentMapper = bestMapper;
             if (null == currentMapper) {
+                if (null != parseException) {
+                    throw parseException;
+                }
                 return null;
             }
             return bestParser.parse(readLines(fileHolder.getStream(), bestCharset, false, maxLines));
@@ -599,7 +608,7 @@ public class CSVContactImporter extends AbstractImporter {
     }
 
 
-    private ContactFieldMapper getCurrentMapper() {
+    protected ContactFieldMapper getCurrentMapper() {
         return currentMapper;
     }
 
