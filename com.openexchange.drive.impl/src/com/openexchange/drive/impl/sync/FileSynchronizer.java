@@ -77,6 +77,7 @@ import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 
 
@@ -319,7 +320,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * new on client
              */
             if (mayCreate()) {
-                if (DriveUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
+                    if (FilenameValidationUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
                     /*
                      * invalid name, indicate as error with quarantine flag
                      */

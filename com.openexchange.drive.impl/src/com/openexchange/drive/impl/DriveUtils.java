@@ -139,19 +139,6 @@ public class DriveUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied folder name is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param name The folder name to check
-     * @return <code>true</code> if the name is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    public static boolean isInvalidFolderName(String name) throws OXException {
-        // same check as for filenames for now
-        return isInvalidFileName(name);
-    }
-
-    /**
      * Gets a value indicating whether the supplied path is ignored, i.e. it is excluded from synchronization by definition.
      *
      * @param session The sync session
@@ -180,26 +167,6 @@ public class DriveUtils {
             if (null != trashPath && trashPath.equals(path)) {
                 return true; // no trash path
             }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
-     */
-    public static boolean isInvalidFileName(String fileName) {
-        if (Strings.isEmpty(fileName)) {
-            return true; // no empty filenames
-        }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return true; // no invalid filenames
-        }
-        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
-            return true; // no too long filenames
         }
         return false;
     }

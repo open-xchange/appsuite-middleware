@@ -77,6 +77,7 @@ import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
@@ -340,7 +341,7 @@ public class SyncSession {
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();
             String folderID = entry.getValue().getId();
-            if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(entry.getValue().getName())) {
+            if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(entry.getValue().getName())) {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());

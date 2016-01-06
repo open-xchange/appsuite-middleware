@@ -82,6 +82,7 @@ import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.File.Field;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -124,7 +125,7 @@ public class DriveUtilityImpl implements DriveUtility {
 
     @Override
     public boolean isInvalidFileName(String fileName) {
-        return DriveUtils.isInvalidFileName(fileName);
+        return FilenameValidationUtils.isInvalidFileName(fileName);
     }
 
     @Override

@@ -89,6 +89,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -609,7 +610,7 @@ public class DriveStorage {
 
                 @Override
                 protected boolean accept(String fileName) throws OXException {
-                    return false == DriveUtils.isInvalidFileName(fileName) &&
+                    return false == FilenameValidationUtils.isInvalidFileName(fileName) &&
                         false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName) &&
                         false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
@@ -1026,7 +1027,7 @@ public class DriveStorage {
      * @throws OXException
      */
     private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
-        if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(folder.getName())) {
+        if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(folder.getName())) {
             return true;
         }
         if (session.getTemp().supported() && path.equals(session.getTemp().getPath(false))) {
