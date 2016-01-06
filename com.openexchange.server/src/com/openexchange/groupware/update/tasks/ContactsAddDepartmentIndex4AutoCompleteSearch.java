@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -68,18 +68,19 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.WorkingLevel;
 
 /**
- * {@link ContactsAddIndex4AutoCompleteSearchV2}
+ * {@link ContactsAddDepartmentIndex4AutoCompleteSearch}
  *
- * (Re-)adds indexes in prg_contacts for "auto-complete" queries
- *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * (Re-)adds department index in prg_contacts for "auto-complete" queries
+ * 
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
+public class ContactsAddDepartmentIndex4AutoCompleteSearch extends UpdateTaskAdapter {
 
     /**
      * Initializes a new {@link ContactsAddIndex4AutoCompleteSearchV2}.
      */
-    public ContactsAddIndex4AutoCompleteSearchV2() {
+    public ContactsAddDepartmentIndex4AutoCompleteSearch() {
         super();
     }
 
@@ -95,18 +96,13 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
-        Logger log = org.slf4j.LoggerFactory.getLogger(ContactsAddIndex4AutoCompleteSearchV2.class);
-        log.info("Performing update task {}", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
+        Logger log = org.slf4j.LoggerFactory.getLogger(ContactsAddDepartmentIndex4AutoCompleteSearch.class);
+        log.info("Performing update task {}", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
         Connection connection = Database.getNoTimeout(params.getContextId(), true);
         boolean committed = false;
         try {
             connection.setAutoCommit(false);
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field03" }, "givenname");
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field02" }, "surname");
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field01" }, "displayname");
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field65" }, "email1");
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field66" }, "email2");
-            createIndexIfNeeded(log, connection, new String[] { "cid", "field67" }, "email3");
+            createIndexIfNeeded(log, connection, new String[] { "cid", "field19" }, "department");
             connection.commit();
             committed = true;
         } catch (SQLException e) {
@@ -120,7 +116,7 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
             autocommit(connection);
             Database.backNoTimeout(params.getContextId(), true, connection);
         }
-        log.info("{} successfully performed.", ContactsAddIndex4AutoCompleteSearchV2.class.getSimpleName());
+        log.info("{} successfully performed.", ContactsAddDepartmentIndex4AutoCompleteSearch.class.getSimpleName());
     }
 
     private static void createIndexIfNeeded(Logger log, Connection connection, String[] columns, String indexName) throws SQLException {
@@ -132,5 +128,4 @@ public class ContactsAddIndex4AutoCompleteSearchV2 extends UpdateTaskAdapter {
             log.info("Found existing index named \"{}\" with columns ({}) on table \"prg_contacts\".", indexName, Arrays.toString(columns));
         }
     }
-
 }
