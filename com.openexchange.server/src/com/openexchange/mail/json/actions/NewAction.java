@@ -111,6 +111,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -242,6 +243,10 @@ public final class NewAction extends AbstractMailAction {
                  * ... and save draft
                  */
                 ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                UserSettingMail usm = session.getUserSettingMail();
+                usm.setNoSave(true);
+                checkAndApplyLineWrapAfter(request, usm);
+                composedMail.setMailSettings(usm);
                 MailPath msgref = composedMail.getMsgref();
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
@@ -377,6 +382,12 @@ public final class NewAction extends AbstractMailAction {
                         }
                     }
                 }
+                checkAndApplyLineWrapAfter(request, usm);
+                for (final ComposedMailMessage cm : composedMails) {
+                    if (null != cm) {
+                        cm.setMailSettings(usm);
+                    }
+                }
                 userSettingMail = usm;
                 /*
                  * Check
@@ -430,6 +441,21 @@ public final class NewAction extends AbstractMailAction {
         final AJAXRequestResult result = new AJAXRequestResult(msgIdentifier, "string");
         result.addWarnings(warnings);
         return result;
+    }
+
+    private void checkAndApplyLineWrapAfter(AJAXRequestData request, UserSettingMail usm) throws OXException {
+        String paramName = "lineWrapAfter";
+        if (request.containsParameter(paramName)) { // Provided as URL parameter
+            String sLineWrapAfter = request.getParameter(paramName);
+            if (null != sLineWrapAfter) {
+                try {
+                    int lineWrapAfter = Integer.parseInt(sLineWrapAfter.trim());
+                    usm.setAutoLinebreak(lineWrapAfter <= 0 ? 0 : lineWrapAfter);
+                } catch (NumberFormatException nfe) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(nfe, paramName, sLineWrapAfter);
+                }
+            }
+        }
     }
 
     private boolean isDraftAction(ComposeType sendType) {

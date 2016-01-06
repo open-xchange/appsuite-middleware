@@ -85,14 +85,14 @@ import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
+/**
+ * The composition parameters associated with a session.
+ */
 public final class SessionCompositionParameters implements CompositionParameters {
 
     private final Session session;
-
     private final Context ctx;
-
     private final UserSettingMail usm;
-
     private int accountId = MailAccount.DEFAULT_ID;
 
     public SessionCompositionParameters(final Session session, final Context ctx, final UserSettingMail usm) {

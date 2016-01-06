@@ -118,6 +118,7 @@ import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -220,7 +221,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      */
     protected abstract void setReplyHeaders(MimeMessage mimeMessage, MailPath msgref) throws OXException, MessagingException;
 
-    protected abstract SMTPMessageFiller createSMTPMessageFiller() throws OXException;
+    protected abstract SMTPMessageFiller createSMTPMessageFiller(UserSettingMail optMailSettings) throws OXException;
 
     protected abstract SMTPConfig createSMTPConfig() throws OXException;
 
@@ -728,7 +729,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Set common headers
                          */
-                        final SMTPMessageFiller smtpFiller = createSMTPMessageFiller();
+                        final SMTPMessageFiller smtpFiller = createSMTPMessageFiller(null);
                         smtpFiller.setAccountId(accountId);
                         smtpFiller.setCommonHeaders(mimeMessage);
                     }
@@ -745,7 +746,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 /*
                  * Fill message dependent on send type
                  */
-                final SMTPMessageFiller smtpFiller = createSMTPMessageFiller();
+                final SMTPMessageFiller smtpFiller = createSMTPMessageFiller(composedMail.getMailSettings());
                 smtpFiller.setAccountId(accountId);
                 composedMail.setFiller(smtpFiller);
                 try {

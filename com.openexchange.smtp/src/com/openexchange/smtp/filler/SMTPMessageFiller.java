@@ -85,7 +85,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @param ctx The context
      * @param usm The user's mail settings
      */
-    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final Session session, final Context ctx, final UserSettingMail usm) {
+    public SMTPMessageFiller(ISMTPProperties smtpProperties, Session session, Context ctx, UserSettingMail usm) {
         super(new SessionCompositionParameters(session, ctx, usm));
         this.smtpProperties = smtpProperties;
     }
@@ -96,7 +96,7 @@ public final class SMTPMessageFiller extends MimeMessageFiller {
      * @param smtpProperties
      * @param compositionParameters
      */
-    public SMTPMessageFiller(final ISMTPProperties smtpProperties, final CompositionParameters compositionParameters) {
+    public SMTPMessageFiller(ISMTPProperties smtpProperties, CompositionParameters compositionParameters) {
         super(compositionParameters);
         this.smtpProperties = smtpProperties;
     }

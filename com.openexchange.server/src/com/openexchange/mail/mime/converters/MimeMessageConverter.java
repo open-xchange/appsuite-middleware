@@ -128,6 +128,7 @@ import com.openexchange.mail.mime.filler.ContextCompositionParameters;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -528,17 +529,22 @@ public final class MimeMessageConverter {
      */
     public static MailMessage fillComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Fill message
              */
-            CompositionParameters compositionParameters;
-            if (composedMail.getSession() == null) {
-                compositionParameters = new ContextCompositionParameters(composedMail.getContext());
-            } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+            MimeMessageFiller filler;
+            {
+                CompositionParameters compositionParameters;
+                if (composedMail.getSession() == null) {
+                    compositionParameters = new ContextCompositionParameters(composedMail.getContext());
+                } else {
+                    UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                    compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
+                }
+                filler = new MimeMessageFiller(compositionParameters);
             }
-            final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
+
             filler.setAccountId(composedMail.getAccountId());
             composedMail.setFiller(filler);
             /*

@@ -159,6 +159,7 @@ import com.openexchange.mail.parser.handlers.MailPartHandler;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.text.TextFinder;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailMessageComparator;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
@@ -3689,13 +3690,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage saveDraft(final String draftFullName, final ComposedMailMessage composedMail) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(imapAccess.getMailSession());
+            MimeMessage mimeMessage = new MimeMessage(imapAccess.getMailSession());
             /*
              * Fill message
              */
-            final long uid;
+            long uid;
             try {
-                final MimeMessageFiller filler = new MimeMessageFiller(session, ctx);
+                UserSettingMail customSettings = composedMail.getMailSettings();
+                MimeMessageFiller filler = null == customSettings ? new MimeMessageFiller(session, ctx) : new MimeMessageFiller(session, ctx, customSettings);
                 filler.setAccountId(accountId);
                 composedMail.setFiller(filler);
                 /*
