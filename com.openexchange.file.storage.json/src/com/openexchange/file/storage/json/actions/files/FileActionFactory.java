@@ -108,6 +108,8 @@ public class FileActionFactory implements AJAXActionServiceFactory {
         actions.put("documentdelta", new DocumentDeltaAction());
         actions.put("documentsig", new DocumentSigAction());
         actions.put("documentpatch", new DocumentPatchAction());
+
+        actions.put("checkname", new CheckNameAction());
         this.actions = Collections.unmodifiableMap(actions);
     }
 
