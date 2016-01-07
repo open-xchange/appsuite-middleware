@@ -159,7 +159,7 @@ public class EASOnboardingProvider implements OnboardingProvider {
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(EAS_LOGIN_FIELD, session.getLogin());
-        configuration.put(EAS_HOST_FIELD, getEASUrl(request, session));
+        configuration.put(EAS_HOST_FIELD, getEASUrl(request, false, session));
         return new DisplayResult(configuration);
     }
 
@@ -188,8 +188,9 @@ public class EASOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
         payloadContent.addStringValue("UserName", session.getLogin());
         payloadContent.addStringValue("EmailAddress", getPrimaryEMailAddress(session));
-        payloadContent.addStringValue("Host", getEASUrl(request, session));
-        payloadContent.addBooleanValue("SSL", false);
+        String easUrl = getEASUrl(request, false, session);
+        payloadContent.addStringValue("Host", easUrl);
+        payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
         payloadContent.setPayloadVersion(1);
 
         // Add payload content dictionary to top-level dictionary
@@ -199,17 +200,21 @@ public class EASOnboardingProvider implements OnboardingProvider {
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
-    private String getEASUrl(OnboardingRequest request, Session session) throws OXException {
+    private String getEASUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.eas.url", String.class);
+        String propertyName = "com.openexchange.onboarding.eas.url";
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
             return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/Microsoft-Server-ActiveSync", false, null).toString();
         }
 
         String value = property.get();
         if (Strings.isEmpty(value)) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/Microsoft-Server-ActiveSync", false, null).toString();
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/Microsoft-Server-ActiveSync", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
         return value;
