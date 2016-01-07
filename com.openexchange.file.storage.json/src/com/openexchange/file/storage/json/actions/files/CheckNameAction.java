@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -81,7 +82,7 @@ public class CheckNameAction extends AbstractFileAction {
             String invalid = FilenameValidationUtils.checkCharacters(name);
             throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(invalid);
         }
-        return new AJAXRequestResult();
+        return new AJAXRequestResult(new JSONObject());
     }
 
 }
