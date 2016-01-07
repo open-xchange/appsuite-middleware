@@ -157,7 +157,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
                     }
                 }
 
-                int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(updates.toArray(new String[updates.size()]));
+                int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(updates.toString());
                 expectedName = new StringBuilder("autocomplete").append(hash).toString();
             }
 
