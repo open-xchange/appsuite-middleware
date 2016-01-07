@@ -1,3 +1,9 @@
+open-xchange-filestore-s3 (7.6.3-3) stable; urgency=medium
+
+  * Build for patch 2016-01-13 (2972)
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Thu, 07 Jan 2016 15:24:32 +0100
+
 open-xchange-filestore-s3 (7.6.3-2) stable; urgency=medium
 
   * Second candidate for 7.6.3 release
