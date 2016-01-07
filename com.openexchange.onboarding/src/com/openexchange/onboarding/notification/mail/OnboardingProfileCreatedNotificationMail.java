@@ -62,7 +62,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.notification.mail.MailData;
-import com.openexchange.notification.mail.MailData.Builder;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.notification.OnboardingNotificationStrings;
 import com.openexchange.onboarding.osgi.Services;
@@ -159,26 +158,14 @@ public class OnboardingProfileCreatedNotificationMail {
         Context ctx = contextService.getContext(session.getContextId());
         ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
 
-        Builder builder;
-        if (null == vars || vars.isEmpty()) {
-            builder = MailData.newBuilder()
-                .setRecipient(recipient)
-                .setSubject(subject)
-                .setHtmlTemplate(templateFileName)
-                .setTemplateVars(Collections.<String, Object> emptyMap())
-                .setMailConfig(serverConfig.getNotificationMailConfig())
-                .setContext(ctx);
-        } else {
-            builder = MailData.newBuilder()
-                .setRecipient(recipient)
-                .setSubject(subject)
-                .setHtmlTemplate(templateFileName)
-                .setTemplateVars(vars)
-                .setMailConfig(serverConfig.getNotificationMailConfig())
-                .setContext(ctx);
-        }
-
-        return builder.build();
+        return MailData.newBuilder()
+            .setRecipient(recipient)
+            .setSubject(subject)
+            .setHtmlTemplate(templateFileName)
+            .setTemplateVars((null == vars) ? Collections.<String, Object> emptyMap() : vars)
+            .setMailConfig(serverConfig.getNotificationMailConfig())
+            .setContext(ctx)
+            .build();
     }
 
 }
