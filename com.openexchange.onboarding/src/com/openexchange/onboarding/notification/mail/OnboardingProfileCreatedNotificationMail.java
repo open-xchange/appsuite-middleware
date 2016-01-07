@@ -133,7 +133,7 @@ public class OnboardingProfileCreatedNotificationMail {
      * @param hostName The associated host name
      * @param session The session providing user data
      * @param templateFileName The file name of the HTML template
-     * @param subjectTranslation The translation string for the mail's subject
+     * @param subject The string for the mail's subject
      * @param vars The variables to insert
      * @return A new {@code MailData} instance
      * @throws OXException If {@code MailData} instance cannot be returned
