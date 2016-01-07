@@ -203,7 +203,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             stmt = connection.prepareStatement("SHOW VARIABLES LIKE ?");
             stmt.setString(1, name);
             rs = stmt.executeQuery();
-            return rs.next() ? rs.getString(1) : null;
+            return rs.next() ? rs.getString(2) : null;
         } finally {
             closeSQLStuff(rs, stmt);
         }
