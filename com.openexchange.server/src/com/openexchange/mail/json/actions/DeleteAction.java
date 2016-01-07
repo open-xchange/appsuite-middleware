@@ -65,15 +65,10 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
 import com.openexchange.mail.MailServletInterface;
-import com.openexchange.mail.api.IMailFolderStorage;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced;
-import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
-import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
@@ -89,20 +84,6 @@ import com.openexchange.server.ServiceLookup;
 }, requestBody = "An array of objects providing folder IDs and object IDs of the deleted mails. [{ \"folder\":\"default0/INBOX\", \"id\":\"123\" } ... { \"folder\":\"default0/MyFolder\", \"id\":\"134\" }]",
 responseDescription = "An array with object IDs of mails which were modified after the specified timestamp and were therefore not deleted.")
 public final class DeleteAction extends AbstractMailAction {
-
-    private static class FolderInfo {
-
-        final int total;
-        final int unread;
-
-        FolderInfo(int total, int unread) {
-            super();
-            this.total = total;
-            this.unread = unread;
-        }
-    }
-
-    // ---------------------------------------------------------------------------------
 
     /**
      * Initializes a new {@link DeleteAction}.
@@ -221,23 +202,7 @@ public final class DeleteAction extends AbstractMailAction {
     }
 
     private FolderInfo getFolderInfo(String fullName, MailServletInterface mailInterface) throws OXException {
-        IMailFolderStorage folderStorage = mailInterface.getMailAccess().getFolderStorage();
-
-        if (folderStorage instanceof IMailFolderStorageEnhanced2) {
-            IMailFolderStorageEnhanced2 enhanced2 = (IMailFolderStorageEnhanced2) folderStorage;
-            int[] totalAndUnread = enhanced2.getTotalAndUnreadCounter(fullName);
-            return new FolderInfo(totalAndUnread[0], totalAndUnread[1]);
-        }
-
-        if (folderStorage instanceof IMailFolderStorageEnhanced) {
-            IMailFolderStorageEnhanced enhanced = (IMailFolderStorageEnhanced) folderStorage;
-            int total = enhanced.getTotalCounter(fullName);
-            int unread = enhanced.getUnreadCounter(fullName);
-            return new FolderInfo(total, unread);
-        }
-
-        MailFolder folder = folderStorage.getFolder(fullName);
-        return new FolderInfo(folder.getMessageCount(), folder.getUnreadMessageCount());
+        return FolderInfo.getFolderInfo(fullName, mailInterface.getMailAccess().getFolderStorage());
     }
 
 }

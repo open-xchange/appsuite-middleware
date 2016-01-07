@@ -130,6 +130,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
+import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
 import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
@@ -196,7 +197,7 @@ import net.htmlparser.jericho.Source;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport {
+public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailMessageStorageExt, IMailMessageStorageBatch, ISimplifiedThreadStructure, IMailMessageStorageMimeSupport, IMailMessageStorageBatchCopyMove {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPMessageStorage.class);
 
@@ -2557,6 +2558,109 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     }
 
     @Override
+    public void copyMessages(String sourceFolder, String destFolder) throws OXException {
+        copyOrMoveAllMessages(sourceFolder, destFolder, false);
+    }
+
+    @Override
+    public void moveMessages(String sourceFolder, String destFolder) throws OXException {
+        copyOrMoveAllMessages(sourceFolder, destFolder, true);
+    }
+
+    private void copyOrMoveAllMessages(String sourceFullName, String destFullName, boolean move) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(destFullName)) {
+            throw IMAPException.create(IMAPException.Code.NO_ROOT_MOVE, imapConfig, session, new Object[0]);
+        }
+        if ((sourceFullName == null) || (sourceFullName.length() == 0)) {
+            throw IMAPException.create(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, imapConfig, session, "source");
+        } else if ((destFullName == null) || (destFullName.length() == 0)) {
+            throw IMAPException.create(IMAPException.Code.MISSING_SOURCE_TARGET_FOLDER_ON_MOVE, imapConfig, session, "target");
+        } else if (sourceFullName.equals(destFullName) && move) {
+            // Source equals destination, just return the message ids without throwing an exception or doing anything
+            return;
+        }
+
+        try {
+            /*
+             * Open and check user rights on source folder
+             */
+            try {
+                imapFolder = setAndOpenFolder(imapFolder, sourceFullName, move ? READ_WRITE : READ_ONLY);
+            } catch (final MessagingException e) {
+                final Exception next = e.getNextException();
+                if ((null == next) || !(next instanceof com.sun.mail.iap.CommandFailedException) || (Strings.toUpperCase(next.getMessage()).indexOf("[NOPERM]") <= 0)) {
+                    throw handleMessagingException(sourceFullName, e);
+                }
+                throw IMAPException.create(IMAPException.Code.NO_FOLDER_OPEN, imapConfig, session, e, sourceFullName);
+            }
+            try {
+                if (!holdsMessages()) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
+                }
+                if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
+                    throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
+                }
+            } catch (final MessagingException e) {
+                throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, imapFolder.getFullName());
+            }
+
+            {
+                /*
+                 * Open and check user rights on destination folder
+                 */
+                final IMAPFolder destFolder = (IMAPFolder) imapStore.getFolder(destFullName);
+                {
+                    final ListLsubEntry listEntry = ListLsubCache.getCachedLISTEntry(destFullName, accountId, destFolder, session, this.ignoreSubscriptions);
+                    if (!"INBOX".equals(destFullName) && !listEntry.exists()) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, destFullName);
+                    }
+                    if (!listEntry.canOpen()) {
+                        throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, destFullName);
+                    }
+                }
+                try {
+                    /*
+                     * Check if COPY/APPEND is allowed on destination folder
+                     */
+                    if (imapConfig.isSupportsACLs() && !aclExtension.canInsert(RightsCache.getCachedRights(
+                        destFolder,
+                        true,
+                        session,
+                        accountId))) {
+                        throw IMAPException.create(IMAPException.Code.NO_INSERT_ACCESS, imapConfig, session, destFolder.getFullName());
+                    }
+                } catch (final MessagingException e) {
+                    throw IMAPException.create(IMAPException.Code.NO_ACCESS, imapConfig, session, e, destFolder.getFullName());
+                }
+            }
+
+            if (imapFolder.getMessageCount() <= 0) {
+                // Folder is empty
+                return;
+            }
+
+            boolean supportsMove = move && imapConfig.asMap().containsKey("MOVE");
+
+            AbstractIMAPCommand<long[]> command;
+            if (supportsMove) {
+                command = new MoveIMAPCommand(imapFolder, destFullName);
+            } else {
+                command = new CopyIMAPCommand(imapFolder, destFullName);
+            }
+            command.doCommand();
+
+            if (move && !supportsMove) {
+                new FlagsIMAPCommand(imapFolder, FLAGS_DELETED, true, true).doCommand();
+                IMAPCommandsCollection.fastExpunge(imapFolder);
+            }
+        } catch (final MessagingException e) {
+            throw handleMessagingException(sourceFullName, e);
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
+    }
+
+    @Override
     public long[] copyMessagesLong(final String sourceFolder, final String destFolder, final long[] mailIds, final boolean fast) throws OXException {
         return copyOrMoveMessages(sourceFolder, destFolder, mailIds, false, fast);
     }
@@ -2598,17 +2702,9 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             }
             try {
                 if (!holdsMessages()) {
-                    throw IMAPException.create(
-                        IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES,
-                        imapConfig,
-                        session,
-                        imapFolder.getFullName());
+                    throw IMAPException.create(IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES, imapConfig, session, imapFolder.getFullName());
                 }
-                if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(
-                    imapFolder,
-                    true,
-                    session,
-                    accountId))) {
+                if (move && imapConfig.isSupportsACLs() && !aclExtension.canDeleteMessages(RightsCache.getCachedRights(imapFolder, true, session, accountId))) {
                     throw IMAPException.create(IMAPException.Code.NO_DELETE_ACCESS, imapConfig, session, imapFolder.getFullName());
                 }
             } catch (final MessagingException e) {

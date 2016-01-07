@@ -130,6 +130,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageBatch;
+import com.openexchange.mail.api.IMailMessageStorageBatchCopyMove;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.IMailMessageStorageMimeSupport;
 import com.openexchange.mail.api.ISimplifiedThreadStructure;
@@ -505,23 +506,13 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                         /*
                          * Handle spam
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(
-                            accountId,
-                            sourceFullname,
-                            msgUIDs,
-                            false,
-                            session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
                     } else {
                         flagInfo = messageStorage.getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                         /*
                          * Handle ham.
                          */
-                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(
-                            accountId,
-                            sourceFullname,
-                            msgUIDs,
-                            false,
-                            session);
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
                     }
                 }
             }
@@ -584,24 +575,14 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     /*
                      * Handle ham.
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(
-                        accountId,
-                        sourceFullname,
-                        msgUIDs,
-                        false,
-                        session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, msgUIDs, false, session);
                 }
                 if (SPAM_SPAM == spamActionDest) {
                     flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, msgUIDs, new MailField[] { MailField.FLAGS });
                     /*
                      * Handle spam
                      */
-                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(
-                        accountId,
-                        sourceFullname,
-                        msgUIDs,
-                        false,
-                        session);
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, msgUIDs, false, session);
                 }
             }
             // Chunk wise copy
@@ -668,6 +649,247 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
             // Return destination identifiers
             return retval.toArray(new String[retval.size()]);
+        } finally {
+            destAccess.close(true);
+        }
+    }
+
+    @Override
+    public void copyAllMessages(String sourceFolder, String destFolder, boolean move) throws OXException {
+        FullnameArgument source = prepareMailFolderParam(sourceFolder);
+        FullnameArgument dest = prepareMailFolderParam(destFolder);
+        String sourceFullname = source.getFullname();
+        String destFullname = dest.getFullname();
+        int sourceAccountId = source.getAccountId();
+        initConnection(sourceAccountId);
+        int destAccountId = dest.getAccountId();
+        if (sourceAccountId == destAccountId) {
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            String[] mailIds = null;
+            MailMessage[] flagInfo = null;
+            if (move) {
+                // Check for spam action; meaning a move/copy from/to spam folder
+                String spamFullname = mailAccess.getFolderStorage().getSpamFolder();
+                int spamAction;
+                if (usm.isSpamEnabled()) {
+                    spamAction = spamFullname.equals(sourceFullname) ? SPAM_HAM : (spamFullname.equals(destFullname) ? SPAM_SPAM : SPAM_NOOP);
+                } else {
+                    spamAction = SPAM_NOOP;
+                }
+                if (spamAction != SPAM_NOOP) {
+                    if (spamAction == SPAM_SPAM) {
+                        {
+                            MailMessage[] allIds = messageStorage.getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                            mailIds = new String[allIds.length];
+                            for (int i = allIds.length; i-- > 0;) {
+                                MailMessage idm = allIds[i];
+                                mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                            }
+                        }
+                        flagInfo = messageStorage.getMessages(sourceFullname, mailIds, new MailField[] { MailField.FLAGS });
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, mailIds, false, session);
+                    } else {
+                        {
+                            MailMessage[] allIds = messageStorage.getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                            mailIds = new String[allIds.length];
+                            for (int i = allIds.length; i-- > 0;) {
+                                MailMessage idm = allIds[i];
+                                mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                            }
+                        }
+                        flagInfo = messageStorage.getMessages(sourceFullname, mailIds, new MailField[] { MailField.FLAGS });
+                        SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, mailIds, false, session);
+                    }
+                }
+            }
+
+            if (messageStorage instanceof IMailMessageStorageBatchCopyMove) {
+                IMailMessageStorageBatchCopyMove batchCopyMove = (IMailMessageStorageBatchCopyMove) messageStorage;
+                if (move) {
+                    batchCopyMove.moveMessages(sourceFullname, destFullname);
+                    postEvent(sourceAccountId, sourceFullname, true, true);
+                } else {
+                    batchCopyMove.copyMessages(sourceFullname, destFullname);
+                }
+            } else {
+                if (null == mailIds) {
+                    MailMessage[] allIds = messageStorage.getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                    mailIds = new String[allIds.length];
+                    for (int i = allIds.length; i-- > 0;) {
+                        MailMessage idm = allIds[i];
+                        mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                    }
+                }
+                if (move) {
+                    messageStorage.moveMessages(sourceFullname, destFullname, mailIds, true);
+                    postEvent(sourceAccountId, sourceFullname, true, true);
+                } else {
+                    messageStorage.copyMessages(sourceFullname, destFullname, mailIds, true);
+                }
+            }
+
+            // Restore \Seen flags
+            if (null != flagInfo) {
+                if (null == mailIds) {
+                    MailMessage[] allIds = messageStorage.getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                    mailIds = new String[allIds.length];
+                    for (int i = allIds.length; i-- > 0;) {
+                        MailMessage idm = allIds[i];
+                        mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                    }
+                }
+
+                List<String> list = new LinkedList<String>();
+                for (int i = 0; i < mailIds.length; i++) {
+                    MailMessage mailMessage = flagInfo[i];
+                    if (null != mailMessage && !mailMessage.isSeen()) {
+                        list.add(mailIds[i]);
+                    }
+                }
+                messageStorage.updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
+            }
+
+            postEvent(sourceAccountId, destFullname, true, true);
+
+            // Invalidate message cache
+            try {
+                if (move) {
+                    MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                }
+                MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
+            } catch (OXException e) {
+                LOG.error("", e);
+            }
+            return;
+        }
+
+        // Differing accounts...
+        MailAccess<?, ?> destAccess = initMailAccess(destAccountId);
+        try {
+            String[] mailIds = null;
+            MailMessage[] flagInfo = null;
+            if (move) {
+                /*
+                 * Check for spam action; meaning a move/copy from/to spam folder
+                 */
+                int spamActionSource = SPAM_NOOP;
+                int spamActionDest = SPAM_NOOP;
+                if (usm.isSpamEnabled()) {
+                    if (sourceFullname.equals(mailAccess.getFolderStorage().getSpamFolder())) {
+                        spamActionSource = SPAM_HAM;
+                    }
+                    if (destFullname.equals(destAccess.getFolderStorage().getSpamFolder())) {
+                        spamActionDest = SPAM_SPAM;
+                    }
+                }
+                if (SPAM_HAM == spamActionSource) {
+                    {
+                        MailMessage[] allIds = mailAccess.getMessageStorage().getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                        mailIds = new String[allIds.length];
+                        for (int i = allIds.length; i-- > 0;) {
+                            MailMessage idm = allIds[i];
+                            mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                        }
+                    }
+                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, mailIds, new MailField[] { MailField.FLAGS });
+                    /*
+                     * Handle ham.
+                     */
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleHam(accountId, sourceFullname, mailIds, false, session);
+                }
+                if (SPAM_SPAM == spamActionDest) {
+                    {
+                        MailMessage[] allIds = mailAccess.getMessageStorage().getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                        mailIds = new String[allIds.length];
+                        for (int i = allIds.length; i-- > 0;) {
+                            MailMessage idm = allIds[i];
+                            mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                        }
+                    }
+                    flagInfo = mailAccess.getMessageStorage().getMessages(sourceFullname, mailIds, new MailField[] { MailField.FLAGS });
+                    /*
+                     * Handle spam
+                     */
+                    SpamHandlerRegistry.getSpamHandlerBySession(session, accountId).handleSpam(accountId, sourceFullname, mailIds, false, session);
+                }
+            }
+
+            // Chunk wise copy
+            int chunkSize;
+            {
+                ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                chunkSize = null == service ? 50 : service.getIntProperty("com.openexchange.mail.externalChunkSize", 50);
+            }
+
+            // Iterate chunks
+            if (null == mailIds) {
+                MailMessage[] allIds = mailAccess.getMessageStorage().getAllMessages(sourceFullname, null, MailSortField.RECEIVED_DATE, OrderDirection.ASC, new MailField[] { MailField.ID });
+                mailIds = new String[allIds.length];
+                for (int i = allIds.length; i-- > 0;) {
+                    MailMessage idm = allIds[i];
+                    mailIds[i] = null == idm ? null : allIds[i].getMailId();
+                }
+            }
+
+
+            int total = mailIds.length;
+            List<String> retval = new LinkedList<String>();
+            for (int start = 0; start < total;) {
+                int end = start + chunkSize;
+                String[] ids;
+                {
+                    int len;
+                    if (end > total) {
+                        end = total;
+                        len = end - start;
+                    } else {
+                        len = chunkSize;
+                    }
+                    ids = new String[len];
+                    System.arraycopy(mailIds, start, ids, 0, len);
+                }
+
+                // Fetch messages from source folder
+                MailMessage[] messages = mailAccess.getMessageStorage().getMessages(sourceFullname, ids, FIELDS_FULL);
+
+                // Append them to destination folder
+                String[] destIds = destAccess.getMessageStorage().appendMessages(destFullname, messages);
+                if (null == destIds || 0 == destIds.length) {
+                    return;
+                }
+
+                // Delete source messages if a move shall be performed
+                if (move) {
+                    mailAccess.getMessageStorage().deleteMessages(sourceFullname, messages2ids(messages), true);
+                    postEvent(sourceAccountId, sourceFullname, true, true);
+                }
+
+                // Restore \Seen flags
+                if (null != flagInfo) {
+                    List<String> list = new LinkedList<String>();
+                    for (int i = 0; i < destIds.length; i++) {
+                        MailMessage mailMessage = flagInfo[i];
+                        if (null != mailMessage && !mailMessage.isSeen()) {
+                            list.add(destIds[i]);
+                        }
+                    }
+                    destAccess.getMessageStorage().updateMessageFlags(destFullname, list.toArray(new String[list.size()]), MailMessage.FLAG_SEEN, false);
+                }
+                postEvent(destAccountId, destFullname, true, true);
+
+                // Invalidate message cache
+                try {
+                    if (move) {
+                        MailMessageCache.getInstance().removeFolderMessages(sourceAccountId, sourceFullname, session.getUserId(), contextId);
+                    }
+                    MailMessageCache.getInstance().removeFolderMessages(destAccountId, destFullname, session.getUserId(), contextId);
+                } catch (OXException e) {
+                    LOG.error("", e);
+                }
+                // Prepare for next iteration
+                retval.addAll(Arrays.asList(destIds));
+                start = end;
+            }
         } finally {
             destAccess.close(true);
         }

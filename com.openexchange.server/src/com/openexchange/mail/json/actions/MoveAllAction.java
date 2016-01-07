@@ -49,62 +49,89 @@
 
 package com.openexchange.mail.json.actions;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.json.MailRequest;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link CopyAction}
+ * {@link MoveAllAction}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-@Action(method = RequestMethod.PUT, name = "copy", description = "Copy mails.", parameters = {
+@Action(method = RequestMethod.PUT, name = "move_all", description = "Moves all mails of a folder to another folder.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "id", description = "Object ID of the requested mail."),
     @Parameter(name = "folder", description = "Object ID of the source folder.")
 }, requestBody = "A JSON object containing the id of the destination folder inside the \"folder_id\" field: e.g.: {\"folder_id\": 1376}.",
-responseDescription = "A JSON array containing the ID of the copied mail.")
-public final class CopyAction extends AbstractMailAction {
+responseDescription = "A JSON response providing information for affected folders;e.g. {\"default0/INBOX\":{\"total\":0,\"unread\":0},\"default0/INBOX/Trash\":{\"total\":82,\"unread\":8}")
+public final class MoveAllAction extends AbstractMailAction {
 
     /**
-     * Initializes a new {@link CopyAction}.
+     * Initializes a new {@link MoveAllAction}.
      *
      * @param services
      */
-    public CopyAction(final ServiceLookup services) {
+    public MoveAllAction(final ServiceLookup services) {
         super(services);
     }
 
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            //Read in parameters
-            String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            // Read in parameters
             String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
             String destFolder = ((JSONObject) req.getRequest().requireData()).getString(FolderChildFields.FOLDER_ID);
 
             // Get mail interface
             MailServletInterface mailInterface = getMailInterface(req);
-            String msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, false)[0];
+            mailInterface.copyAllMessages(sourceFolder, destFolder, true);
 
-            JSONObject data = new JSONObject(4);
-            data.put(FolderChildFields.FOLDER_ID, destFolder);
-            data.put(DataFields.ID, msgUID);
-            return new AJAXRequestResult(data, "json");
-        } catch (final JSONException e) {
+            Map<FullnameArgument, FolderInfo> folders = new LinkedHashMap<FullnameArgument, FolderInfo>(4);
+            FullnameArgument first = MailFolderUtility.prepareMailFolderParam(sourceFolder);
+            FullnameArgument other = MailFolderUtility.prepareMailFolderParam(destFolder);
+            if (first.getAccountId() == other.getAccountId()) {
+                folders.put(first, FolderInfo.getFolderInfo(first.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                if (!folders.containsKey(other)) {
+                    folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                }
+            } else {
+                // MailServletInterface is still connected to other account
+                folders.put(other, FolderInfo.getFolderInfo(other.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                if (!folders.containsKey(first)) {
+                    // Reconnect to previous account
+                    mailInterface.openFor(sourceFolder);
+                    folders.put(first, FolderInfo.getFolderInfo(first.getFullName(), mailInterface.getMailAccess().getFolderStorage()));
+                }
+            }
+
+            // Return folder information
+            JSONObject jResponse = new JSONObject(2);
+            JSONObject jFolders = new JSONObject(folders.size());
+            for (Entry<FullnameArgument, FolderInfo> infoEntry : folders.entrySet()) {
+                FullnameArgument fa = infoEntry.getKey();
+                String id = MailFolderUtility.prepareFullname(fa.getAccountId(), fa.getFullName());
+                FolderInfo folderInfo = infoEntry.getValue();
+                jFolders.put(id, new JSONObject(4).put("total", folderInfo.total).put("unread", folderInfo.unread));
+            }
+            jResponse.put("folders", jFolders);
+            return new AJAXRequestResult(jResponse, "json");
+        } catch (JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
+        } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

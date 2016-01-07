@@ -190,7 +190,7 @@ public abstract class MailServletInterface implements Closeable {
 
     /**
      * Archives all mails within a given folder which are older than given days
-     * 
+     *
      * @param days the minimum age of a mail to be archived
      * @param folderID the id of the folder
      * @param session
@@ -202,7 +202,7 @@ public abstract class MailServletInterface implements Closeable {
 
     /**
      * Archives given mails within given folder.
-     * 
+     *
      * @param folderID the id of the folder
      * @param ids the id's of the mails
      * @param session
@@ -215,7 +215,7 @@ public abstract class MailServletInterface implements Closeable {
 
     /**
      * Archives given mails
-     * 
+     *
      * @param mails a list of String[] which contain a folderId and a mailId
      * @param session
      * @param useDefaultName if set to true, uses the default archive folder name if none is set
@@ -549,6 +549,11 @@ public abstract class MailServletInterface implements Closeable {
      * Copies or moves (if <code>move</code> is set) the defined message from source folder to destination folder.
      */
     public abstract String[] copyMessages(String sourceFolder, String destFolder, String[] msgUIDs, boolean move) throws OXException;
+
+    /**
+     * Copies or moves (if <code>move</code> is set) all messages from source folder to destination folder.
+     */
+    public abstract void copyAllMessages(String sourceFolder, String destFolder, boolean move) throws OXException;
 
     /**
      * Updates the color label stored in message's user flags

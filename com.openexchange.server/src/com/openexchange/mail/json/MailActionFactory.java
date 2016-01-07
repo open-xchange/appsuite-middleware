@@ -88,6 +88,7 @@ import com.openexchange.mail.json.actions.GetUpdatesAction;
 import com.openexchange.mail.json.actions.GetVersitAction;
 import com.openexchange.mail.json.actions.ImportAction;
 import com.openexchange.mail.json.actions.ListAction;
+import com.openexchange.mail.json.actions.MoveAllAction;
 import com.openexchange.mail.json.actions.NewAction;
 import com.openexchange.mail.json.actions.ReceiptAckAction;
 import com.openexchange.mail.json.actions.ResendAction;
@@ -153,6 +154,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("get_structure", new GetStructureAction(services));
         actions.put("count", new GetMailCountAction(services));
         actions.put("copy", new CopyAction(services));
+        actions.put("move_all", new MoveAllAction(services));
         actions.put("archive", new ArchiveAction(services));
         actions.put("archive_folder", new ArchiveFolderAction(services));
         actions.put("reply", new GetReplyAction(services));
