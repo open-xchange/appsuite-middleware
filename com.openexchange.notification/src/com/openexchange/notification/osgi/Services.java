@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,50 +49,63 @@
 
 package com.openexchange.notification.osgi;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.templating.TemplateService;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link NotificationActivator}
+ * {@link Services}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class NotificationActivator extends HousekeepingActivator {
+public final class Services {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TemplateService.class, HtmlService.class };
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-        trackService(MimeTypeMap.class);
-        openTrackers();
-
-        NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
-            getService(ConfigurationService.class),
-            getService(TemplateService.class),
-            getService(HtmlService.class));
-        registerService(NotificationMailFactory.class, notificationMailFactory);
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.set(null);
-        super.stopBundle();
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
     }
 
 }

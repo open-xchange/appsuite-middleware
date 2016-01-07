@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,66 @@
  *
  */
 
-package com.openexchange.notification.osgi;
+package com.openexchange.notification.mail.impl;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.activation.DataSource;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.datasource.FileDataSource;
 import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.templating.TemplateService;
+import com.openexchange.notification.osgi.Services;
+
 
 /**
- * {@link NotificationActivator}
+ * {@link FileMailAttachment}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class NotificationActivator extends HousekeepingActivator {
+public class FileMailAttachment extends AbstractMailAttachment {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TemplateService.class, HtmlService.class };
+    private final File file;
+
+    /**
+     * Initializes a new {@link FileMailAttachment}.
+     */
+    public FileMailAttachment(File file) {
+        super();
+        this.file = file;
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
-
-        trackService(MimeTypeMap.class);
-        openTrackers();
-
-        NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
-            getService(ConfigurationService.class),
-            getService(TemplateService.class),
-            getService(HtmlService.class));
-        registerService(NotificationMailFactory.class, notificationMailFactory);
+    public DataSource asDataHandler() throws IOException, OXException {
+        return new FileDataSource(file, getContentType());
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        Services.set(null);
-        super.stopBundle();
+    public InputStream getStream() throws IOException {
+        return Streams.bufferedInputStreamFor(new FileInputStream(file));
     }
 
     @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    public long getLength() {
+        return file.length();
+    }
+
+    @Override
+    public String getName() {
+        return name == null ? file.getName() : name;
+    }
+
+    @Override
+    public String getContentType() {
+        return contentType == null ? determineMimeTypeByFile() : contentType;
+    }
+
+    private String determineMimeTypeByFile() {
+        MimeTypeMap mimeTypeMap = Services.getOptionalService(MimeTypeMap.class);
+        return null == mimeTypeMap ? "application/octet-stream" : mimeTypeMap.getContentType(file);
     }
 
 }

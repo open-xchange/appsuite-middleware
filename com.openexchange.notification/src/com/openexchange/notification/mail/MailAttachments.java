@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,52 +47,57 @@
  *
  */
 
-package com.openexchange.notification.osgi;
+package com.openexchange.notification.mail;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.html.HtmlService;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.templating.TemplateService;
+import java.io.File;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.notification.mail.impl.ByteArrayMailAttachment;
+import com.openexchange.notification.mail.impl.FileHolderMailAttachment;
+import com.openexchange.notification.mail.impl.FileMailAttachment;
 
 /**
- * {@link NotificationActivator}
+ * {@link MailAttachments} - Utility class for mail attachments of notification mails.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class NotificationActivator extends HousekeepingActivator {
+public class MailAttachments {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TemplateService.class, HtmlService.class };
+    /**
+     * Initializes a new {@link MailAttachments}.
+     */
+    private MailAttachments() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.set(this);
-
-        trackService(MimeTypeMap.class);
-        openTrackers();
-
-        NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
-            getService(ConfigurationService.class),
-            getService(TemplateService.class),
-            getService(HtmlService.class));
-        registerService(NotificationMailFactory.class, notificationMailFactory);
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified byte array.
+     *
+     * @param bytes The byte array
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(byte[] bytes) {
+        return new ByteArrayMailAttachment(bytes);
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        Services.set(null);
-        super.stopBundle();
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified file.
+     *
+     * @param file The file
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(File file) {
+        return new FileMailAttachment(file);
     }
 
-    @Override
-    protected boolean stopOnServiceUnavailability() {
-        return true;
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified file holder.
+     *
+     * @param fileHolder The file holder
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(IFileHolder fileHolder) {
+        return new FileHolderMailAttachment(fileHolder);
     }
 
 }

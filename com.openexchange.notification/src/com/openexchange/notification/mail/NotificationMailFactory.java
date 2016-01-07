@@ -50,7 +50,6 @@
 package com.openexchange.notification.mail;
 
 import java.util.Collection;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 
@@ -107,6 +106,6 @@ public interface NotificationMailFactory {
      * @return The composed message
      * @throws OXException
      */
-    ComposedMailMessage createMail(MailData mailData, Collection<IFileHolder> attachments) throws OXException;
+    ComposedMailMessage createMail(MailData mailData, Collection<MailAttachment> attachments) throws OXException;
 
 }
