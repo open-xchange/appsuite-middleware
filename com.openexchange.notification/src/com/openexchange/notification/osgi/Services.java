@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2013 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,65 @@
  *
  */
 
-package com.openexchange.onboarding.notification;
+package com.openexchange.notification.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link Services}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public final class Services {
 
-    private OnboardingNotificationStrings() {
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
         super();
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
+    }
 
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your configuration profile";
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
 
-    // Your on-boarding information.
-    public static final String DEFAULT = "Your onboarding information.";
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
+        }
+        return service;
+    }
 
 }

@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.json;
 
+import java.util.HashSet;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -84,8 +86,8 @@ public class FileStorageAccountWriter {
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
      */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder) throws JSONException {
-        JSONObject accountJSON = new JSONObject(6);
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities) throws JSONException {
+        JSONObject accountJSON = new JSONObject(7);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
@@ -99,6 +101,13 @@ public class FileStorageAccountWriter {
             JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
+
+        //add capabilities
+        if(capabilities==null)
+        {
+            capabilities=new HashSet<String>(0);
+        }
+        accountJSON.put("capabilities", capabilities);
         return accountJSON;
     }
 

@@ -52,9 +52,9 @@ package com.openexchange.mail.transport.config.impl;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.slf4j.Logger;
-import com.openexchange.config.cascade.ConfigProviderService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
@@ -87,8 +87,30 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
     public NoReplyConfig loadNoReplyConfig(int contextId) throws OXException {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
+
+        /*-
+         * At least one user is needed from the specified context in order to properly support context-set-level properties:
+         *
+         * Seems to be "as designed".
+         *
+         * - "server", "context", "user" is set as precedence; consciously ignoring "contextSets"
+         * - Even directly accessing the provider for "contextSets" statically returns special constant "com.openexchange.config.cascade.ConfigProviderService.NO_PROPERTY"
+         *   when invoking "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)"
+         *
+         *
+         * The reason is determined by the implementation logic for "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)":
+         *
+         * The user-sensitive UserPermissionBits instance is needed in order to retrieve the applicable "specification" (the set of tags that do apply).
+         *
+         */
+
+        int contextAdminId;
+        {
+            ContextService contextService = services.getService(ContextService.class);
+            contextAdminId = contextService.getContext(contextId).getMailadmin();
+        }
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(ConfigProviderService.NO_USER, contextId);
+        ConfigView view = factory.getView(contextAdminId, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
 
         {

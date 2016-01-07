@@ -54,8 +54,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -74,9 +72,8 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 @Action(method = RequestMethod.PUT, name = "move_all", description = "Moves all mails of a folder to another folder.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "folder", description = "Object ID of the source folder.")
-}, requestBody = "A JSON object containing the id of the destination folder inside the \"folder_id\" field: e.g.: {\"folder_id\": 1376}.",
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module.")
+}, requestBody = "A JSON object containing the identifers of the source and destination folders; e.g.: {\"source\": \"default0/INBOX\", \"target\": \"default0/INBOX/Trash\"}.",
 responseDescription = "A JSON response providing information for affected folders;e.g. {\"default0/INBOX\":{\"total\":0,\"unread\":0},\"default0/INBOX/Trash\":{\"total\":82,\"unread\":8}")
 public final class MoveAllAction extends AbstractMailAction {
 
@@ -93,8 +90,16 @@ public final class MoveAllAction extends AbstractMailAction {
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
             // Read in parameters
-            String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            String destFolder = ((JSONObject) req.getRequest().requireData()).getString(FolderChildFields.FOLDER_ID);
+            JSONObject jBody = (JSONObject) req.getRequest().requireData();
+            String sourceFolder = jBody.optString("source", null);
+            if (null == sourceFolder) {
+                sourceFolder = jBody.getString("from");
+            }
+
+            String destFolder = jBody.optString("target", null);
+            if (null == destFolder) {
+                destFolder = jBody.getString("to");
+            }
 
             // Get mail interface
             MailServletInterface mailInterface = getMailInterface(req);

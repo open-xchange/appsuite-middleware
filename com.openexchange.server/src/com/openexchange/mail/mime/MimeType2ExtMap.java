@@ -71,6 +71,7 @@ import com.openexchange.configuration.SystemConfig;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -85,6 +86,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
  * <li>The file or resource denoted by property <i>MimeTypeFileName</i>.</li>
  * </ol>
+ * <p>
+ * Available as OSGi service through {@link MimeTypeMap} interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

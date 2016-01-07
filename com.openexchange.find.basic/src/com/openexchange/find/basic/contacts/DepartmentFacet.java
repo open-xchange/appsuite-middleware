@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,42 @@
  *
  */
 
-package com.openexchange.onboarding.notification;
+package com.openexchange.find.basic.contacts;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.List;
+import com.openexchange.find.contacts.ContactsFacetType;
+import com.openexchange.find.contacts.ContactsStrings;
+import com.openexchange.find.facet.FormattableDisplayItem;
+import com.openexchange.groupware.contact.helpers.ContactField;
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link DepartmentFacet}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class DepartmentFacet extends ContactSearchFieldFacet {
 
-    private OnboardingNotificationStrings() {
-        super();
+    private static final long serialVersionUID = -9131205652463933031L;
+
+    static final ContactField[] DEPARTMENT_FIELDS = {
+        ContactField.DEPARTMENT
+    };
+
+    /**
+     * Initializes a new {@link PhoneFacet}.
+     *
+     * @param query The query to insert into the display item
+     * @param tokenized The tokenized query to insert into the filter
+     */
+    public DepartmentFacet(String query, List<String> tokenized) {
+        super(ContactsFacetType.DEPARTMENT, new FormattableDisplayItem(ContactsStrings.FACET_DEPARTMENT, query), tokenized);
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
-
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
-
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your configuration profile";
-
-    // Your on-boarding information.
-    public static final String DEFAULT = "Your onboarding information.";
+    @Override
+    protected ContactField[] getFields() {
+        return DEPARTMENT_FIELDS;
+    }
 
 }
+

@@ -59,6 +59,7 @@ import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.find.basic.Services;
 import com.openexchange.find.basic.calendar.BasicCalendarDriver;
+import com.openexchange.find.basic.contacts.AutocompleteFields;
 import com.openexchange.find.basic.contacts.BasicContactsDriver;
 import com.openexchange.find.basic.drive.BasicDriveDriver;
 import com.openexchange.find.basic.mail.BasicMailDriver;
@@ -68,6 +69,7 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.infostore.InfostoreSearchEngine;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
@@ -103,6 +105,7 @@ public class FindBasicActivator extends HousekeepingActivator {
         registerService(ModuleSearchDriver.class, new BasicContactsDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicCalendarDriver(), defaultProperties());
         registerService(ModuleSearchDriver.class, new BasicTasksDriver(), defaultProperties());
+        registerService(PreferencesItemService.class, AutocompleteFields.class.newInstance());
     }
 
     private Dictionary<String, Object> defaultProperties() {

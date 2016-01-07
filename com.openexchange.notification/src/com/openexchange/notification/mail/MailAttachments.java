@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,57 @@
  *
  */
 
-package com.openexchange.onboarding.notification;
+package com.openexchange.notification.mail;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.io.File;
+import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.notification.mail.impl.ByteArrayMailAttachment;
+import com.openexchange.notification.mail.impl.FileHolderMailAttachment;
+import com.openexchange.notification.mail.impl.FileMailAttachment;
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link MailAttachments} - Utility class for mail attachments of notification mails.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class MailAttachments {
 
-    private OnboardingNotificationStrings() {
+    /**
+     * Initializes a new {@link MailAttachments}.
+     */
+    private MailAttachments() {
         super();
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified byte array.
+     *
+     * @param bytes The byte array
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(byte[] bytes) {
+        return new ByteArrayMailAttachment(bytes);
+    }
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified file.
+     *
+     * @param file The file
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(File file) {
+        return new FileMailAttachment(file);
+    }
 
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your configuration profile";
-
-    // Your on-boarding information.
-    public static final String DEFAULT = "Your onboarding information.";
+    /**
+     * Creates a new <code>MailAttachment</code> instance backed by specified file holder.
+     *
+     * @param fileHolder The file holder
+     * @return A new <code>MailAttachment</code> instance
+     */
+    public static MailAttachment newMailAttachment(IFileHolder fileHolder) {
+        return new FileHolderMailAttachment(fileHolder);
+    }
 
 }

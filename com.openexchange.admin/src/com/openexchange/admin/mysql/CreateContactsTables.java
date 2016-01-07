@@ -298,6 +298,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX `email1` (`cid`,`field65`(255)),"
         + "INDEX `email2` (`cid`,`field66`(255)),"
         + "INDEX `email3` (`cid`,`field67`(255)),"
+        + "INDEX `department` (`cid`,`field19`(255)),"
         + "PRIMARY KEY (cid, intfield01, fid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
@@ -438,6 +439,7 @@ public class CreateContactsTables extends AbstractCreateTableImpl {
         + "INDEX `email1` (`cid`,`field65`(255)),"
         + "INDEX `email2` (`cid`,`field66`(255)),"
         + "INDEX `email3` (`cid`,`field67`(255)),"
+        + "INDEX `department` (`cid`,`field19`(255)),"
         + "PRIMARY KEY (cid, intfield01, fid)"
         + ") ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 

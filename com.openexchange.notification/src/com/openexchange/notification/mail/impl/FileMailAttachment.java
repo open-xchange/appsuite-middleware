@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,66 @@
  *
  */
 
-package com.openexchange.onboarding.notification;
+package com.openexchange.notification.mail.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.activation.DataSource;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.datasource.FileDataSource;
+import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.notification.osgi.Services;
 
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link FileMailAttachment}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class FileMailAttachment extends AbstractMailAttachment {
 
-    private OnboardingNotificationStrings() {
+    private final File file;
+
+    /**
+     * Initializes a new {@link FileMailAttachment}.
+     */
+    public FileMailAttachment(File file) {
         super();
+        this.file = file;
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    @Override
+    public DataSource asDataHandler() throws IOException, OXException {
+        return new FileDataSource(file, getContentType());
+    }
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
+    @Override
+    public InputStream getStream() throws IOException {
+        return Streams.bufferedInputStreamFor(new FileInputStream(file));
+    }
 
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your configuration profile";
+    @Override
+    public long getLength() {
+        return file.length();
+    }
 
-    // Your on-boarding information.
-    public static final String DEFAULT = "Your onboarding information.";
+    @Override
+    public String getName() {
+        return name == null ? file.getName() : name;
+    }
+
+    @Override
+    public String getContentType() {
+        return contentType == null ? determineMimeTypeByFile() : contentType;
+    }
+
+    private String determineMimeTypeByFile() {
+        MimeTypeMap mimeTypeMap = Services.getOptionalService(MimeTypeMap.class);
+        return null == mimeTypeMap ? "application/octet-stream" : mimeTypeMap.getContentType(file);
+    }
 
 }

@@ -68,6 +68,7 @@ modules/tasks/notifyNewModifiedDeleted > io.ox/tasks//notifyNewModifiedDeleted
 
 # Search
 minimumSearchCharacters > io.ox/contacts//search/minimumQueryLength
+autocompleteFields >  io.ox/contacts//search/autocompleteFields
 
 # InfoStore/Files/Drive
 modules/infostore/folder/trash > io.ox/files//folder/trash

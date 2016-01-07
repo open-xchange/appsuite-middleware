@@ -51,9 +51,14 @@ package com.openexchange.contact.storage.rdb.search;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.AutocompleteParameters;
+import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
 import com.openexchange.exception.OXException;
@@ -78,6 +83,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     private static final int MAX_PATTERNS = 5;
 	private final StringBuilder stringBuilder;
     private final AutocompleteParameters autoCompleteParameters;
+    private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.fields";
+    private static final Logger LOG = LoggerFactory.getLogger(AutocompleteAdapter.class);
 
     /**
      * Initializes a new {@link AutocompleteAdapter}.
@@ -185,7 +192,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         String selectClause = getSelectClause(fields, forUser);
 
         boolean first = true;
-        for (ContactField field : ALTERNATIVE_INDEXED_FIELDS) {
+        EnumSet<ContactField> enumFields = getConfiguredIndexFields();
+        for (ContactField field : enumFields) {
             if (first) {
                 appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists);
                 first = false;
@@ -208,7 +216,8 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         String selectClause = getSelectClause(fields, true);
 
         boolean first = true;
-        for (ContactField field : ALTERNATIVE_INDEXED_FIELDS) {
+        EnumSet<ContactField> enumFields = getConfiguredIndexFields();
+        for (ContactField field : enumFields) {
             if (first) {
                 appendComparison(contextIDClause, folderIDsClause, selectClause, field, pattern, requireEmail, ignoreDistributionLists);
                 first = false;
@@ -347,4 +356,26 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
         return resultingPatterns;
     }
 
+    private static EnumSet<ContactField> getConfiguredIndexFields() {
+
+        ArrayList<ContactField> contacFields = new ArrayList<ContactField>();
+        try {
+            ConfigurationService confServ = RdbServiceLookup.getService(ConfigurationService.class);
+            List<String> fields = confServ.getProperty(AUTOCOMPLETE_CONFIGURATION, "", ",");
+            if (fields == null || fields.isEmpty()) {
+                return ALTERNATIVE_INDEXED_FIELDS;
+            }
+            for (String field : fields) {
+                try {
+                    contacFields.add(ContactField.valueOf(field));
+                } catch (IllegalArgumentException ex) {
+                    LOG.warn("\"" + field + "\" is not a valid column and will be skipped!");
+                }
+            }
+        } catch (OXException ex) {
+            LOG.error(ex.getMessage());
+            return ALTERNATIVE_INDEXED_FIELDS;
+        }
+        return EnumSet.copyOf(contacFields);
+    }
 }

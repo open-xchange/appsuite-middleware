@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,48 @@
  *
  */
 
-package com.openexchange.onboarding.notification;
+package com.openexchange.notification.mail.impl;
 
-import com.openexchange.i18n.LocalizableStrings;
+import java.io.IOException;
+import java.io.InputStream;
+import javax.activation.DataSource;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Streams;
+import com.openexchange.mail.mime.ContentType;
+import com.openexchange.mail.mime.datasource.MessageDataSource;
 
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link ByteArrayMailAttachment}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class ByteArrayMailAttachment extends AbstractMailAttachment {
 
-    private OnboardingNotificationStrings() {
+    private final byte[] bytes;
+
+    /**
+     * Initializes a new {@link ByteArrayMailAttachment}.
+     */
+    public ByteArrayMailAttachment(byte[] bytes) {
         super();
+        this.bytes = bytes;
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    @Override
+    public DataSource asDataHandler() throws IOException, OXException {
+        return new MessageDataSource(getStream(), new ContentType(contentType).getBaseType());
+    }
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
+    @Override
+    public InputStream getStream() {
+        return Streams.newByteArrayInputStream(bytes);
+    }
 
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your configuration profile";
-
-    // Your on-boarding information.
-    public static final String DEFAULT = "Your onboarding information.";
+    @Override
+    public long getLength() {
+        return bytes.length;
+    }
 
 }
