@@ -83,7 +83,7 @@ public class AutocompleteAdapter extends DefaultSearchAdapter {
     private static final int MAX_PATTERNS = 5;
 	private final StringBuilder stringBuilder;
     private final AutocompleteParameters autoCompleteParameters;
-    private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.columns";
+    private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.fields";
     private static final Logger LOG = LoggerFactory.getLogger(AutocompleteAdapter.class);
 
     /**

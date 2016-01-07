@@ -121,7 +121,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
     private static final String NAME_FIELDS_NAME = "NAME_FIELDS";
     private static final String PHONE_FIELDS_NAME = "PHONE_FIELDS";
 
-    private static final String ADDRESSBOOK_FIELDS_CONFIG = "com.openexchange.contact.search.columns";
+    private static final String ADDRESSBOOK_FIELDS_CONFIG = "com.openexchange.contact.search.fields";
 
     private static final Logger LOG = LoggerFactory.getLogger(BasicContactsDriver.class);
 

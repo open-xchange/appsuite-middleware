@@ -73,7 +73,7 @@ import com.openexchange.session.Session;
 public class AutocompleteFields implements PreferencesItemService {
 
     private static final String NAME = "autocompleteFields";
-    private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.columns";
+    private static final String AUTOCOMPLETE_CONFIGURATION = "com.openexchange.contact.autocomplete.fields";
 
     /**
      * Default constructor.
