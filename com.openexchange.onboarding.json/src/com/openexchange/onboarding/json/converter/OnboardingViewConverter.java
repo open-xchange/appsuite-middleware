@@ -262,7 +262,7 @@ public class OnboardingViewConverter implements ResultConverter {
                                 jAction.put("data", result.getObject());
                                 actionCollector.addAction(compositeActionId, jAction);
                             } catch (OXException e) {
-                                LOGGER.warn("Failed to retrive data for action '{}' and will therefore be ignored.", compositeActionId, e);
+                                LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
                                 added = false;
                             }
                         }
@@ -284,7 +284,7 @@ public class OnboardingViewConverter implements ResultConverter {
                                 jAction.put(scenario.getDevice().getId(), result.getObject());
                             }
                         } catch (OXException e) {
-                            LOGGER.warn("Failed to retrive link for action '{}' and will therefore be ignored.", compositeActionId, e);
+                            LOGGER.warn("Failed to retrieve link for action '{}' and will therefore be ignored.", compositeActionId, e);
                             added = false;
                         }
                     }
