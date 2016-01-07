@@ -53,9 +53,14 @@ import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
@@ -67,6 +72,7 @@ import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.update.Tools;
 import com.planetj.math.rabinhash.RabinHashFunction32;
 
@@ -102,20 +108,59 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
             columns[i] = Mappers.CONTACT.get(fields[i]).getColumnLabel();
         }
 
-        // Generate expected index name (dependent on configured fields)
-        String expectedName;
-        {
-            String[] copiedcolumns = Arrays.copyOf(columns, columns.length);
-            Arrays.sort(copiedcolumns);
-            int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(Arrays.toString(copiedcolumns));
-            expectedName = new StringBuilder("autocomplete").append(hash).toString();
-        }
-
         // Create index unless it already exists
         int contextID = params.getContextId();
         Connection connection = dbService.getForUpdateTask(contextID);
         try {
             connection.setAutoCommit(false);
+
+            // Generate expected index name (dependent on configured fields)
+            String expectedName;
+            {
+                // Consider sorted column names
+                List<String> updates = new ArrayList<String>(Arrays.asList(columns));
+                Collections.sort(updates);
+
+                /*-
+                 * Also consider any of FULLTEXT-affecting MySQL configuration options:
+                 *  - innodb_ft_min_token_size
+                 *  - innodb_ft_max_token_size
+                 *  - innodb_ft_server_stopword_table
+                 *  - innodb_ft_user_stopword_table
+                 *  - innodb_ft_enable_stopword
+                 *  - ngram_token_size
+                 */
+                {
+                    String tmp = getConfigOption("innodb_ft_min_token_size", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                    tmp = getConfigOption("innodb_ft_max_token_size", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                    tmp = getConfigOption("innodb_ft_server_stopword_table", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                    tmp = getConfigOption("innodb_ft_user_stopword_table", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                    tmp = getConfigOption("innodb_ft_enable_stopword", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                    tmp = getConfigOption("ngram_token_size", connection);
+                    if (!Strings.isEmpty(tmp)) {
+                        updates.add(tmp);
+                    }
+                }
+
+                int hash = RabinHashFunction32.DEFAULT_HASH_FUNCTION.hash(updates.toArray(new String[updates.size()]));
+                expectedName = new StringBuilder("autocomplete").append(hash).toString();
+            }
+
             if (false == expectedName.equals(Tools.existsIndex(connection, Table.CONTACTS.getName(), columns))) {
                 // Drop possible obsolete FULLTEXT index
                 String[] indexNames = Tools.listIndexes(connection, Table.CONTACTS.getName());
@@ -141,13 +186,26 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
         }
     }
 
-    private static boolean addFulltextIndex(String name, ContactField[] fields, Connection connection) throws SQLException, OXException {
+    private boolean addFulltextIndex(String name, ContactField[] fields, Connection connection) throws SQLException, OXException {
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
             return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX ").append(name).append(" ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
         } finally {
             closeSQLStuff(stmt);
+        }
+    }
+
+    private String getConfigOption(String name, Connection connection) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SHOW VARIABLES LIKE ?");
+            stmt.setString(1, name);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getString(1) : null;
+        } finally {
+            closeSQLStuff(rs, stmt);
         }
     }
 
