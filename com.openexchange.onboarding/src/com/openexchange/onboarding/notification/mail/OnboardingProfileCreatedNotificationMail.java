@@ -61,6 +61,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.notification.OnboardingNotificationStrings;
@@ -69,6 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 
@@ -97,15 +99,11 @@ public class OnboardingProfileCreatedNotificationMail {
         Map<String, Object> vars = new HashMap<String, Object>(4);
 
         // Get translator
-        UserService userService = Services.getService(UserService.class);
-        if (null == userService) {
-            throw ServiceExceptionCode.absentService(UserService.class);
-        }
         TranslatorFactory factory = Services.getService(TranslatorFactory.class);
         if (null == factory) {
             throw ServiceExceptionCode.absentService(TranslatorFactory.class);
         }
-        User user = userService.getUser(session.getUserId(), session.getContextId());
+        User user = getUser(session);
         Translator translator = factory.translatorFor(user.getLocale());
 
         // Salutation
@@ -141,12 +139,7 @@ public class OnboardingProfileCreatedNotificationMail {
      * @throws OXException If {@code MailData} instance cannot be returned
      */
     private static MailData createNotificationMail(String mailAddress, String hostName, Session session, String templateFileName, String subject, Map<String, Object> vars) throws OXException {
-        InternetAddress recipient = null;
-        try {
-            recipient = new InternetAddress(mailAddress);
-        } catch (AddressException e) {
-            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+        // Acquire needed services
         ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
         if (null == serverConfigService) {
             throw ServiceExceptionCode.absentService(ServerConfigService.class);
@@ -155,17 +148,36 @@ public class OnboardingProfileCreatedNotificationMail {
         if (null == contextService) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
-        Context ctx = contextService.getContext(session.getContextId());
-        ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
 
-        return MailData.newBuilder()
-            .setRecipient(recipient)
-            .setSubject(subject)
-            .setHtmlTemplate(templateFileName)
-            .setTemplateVars((null == vars) ? Collections.<String, Object> emptyMap() : vars)
-            .setMailConfig(serverConfig.getNotificationMailConfig())
-            .setContext(ctx)
-            .build();
+        // Build MailData instance
+        try {
+            InternetAddress recipient = new QuotedInternetAddress(mailAddress);
+            Context ctx = contextService.getContext(session.getContextId());
+            ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
+
+            return MailData.newBuilder()
+                .setRecipient(recipient)
+                .setSubject(subject)
+                .setHtmlTemplate(templateFileName)
+                .setTemplateVars((null == vars) ? Collections.<String, Object> emptyMap() : vars)
+                .setMailConfig(serverConfig.getNotificationMailConfig())
+                .setContext(ctx)
+                .build();
+        } catch (AddressException e) {
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
+
+        UserService userService = Services.getService(UserService.class);
+        if (null == userService) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+        return userService.getUser(session.getUserId(), session.getContextId());
     }
 
 }
