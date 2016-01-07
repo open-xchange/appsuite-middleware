@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1257,8 +1257,6 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
-* Thu Dec 31 2015 Marcus Klein <marcus.klein@open-xchange.com>
-Build for patch 2016-01-13 (2972)
 * Tue Dec 01 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Second candidate for 7.6.3 release
 * Mon Oct 26 2015 Marcus Klein <marcus.klein@open-xchange.com>
