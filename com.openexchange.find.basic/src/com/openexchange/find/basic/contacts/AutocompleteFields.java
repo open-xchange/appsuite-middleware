@@ -117,7 +117,6 @@ public class AutocompleteFields implements PreferencesItemService {
                     }
                 }
                 setting.setSingleValue(result.toString());
-                //                setting.setSingleValue("display_name,email1,email2,email3,first_name,last_name,department");
             }
         };
     }
