@@ -7,7 +7,9 @@ import com.openexchange.ajax.infostore.test.AnotherCreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.Bug27722Test;
 import com.openexchange.ajax.infostore.test.Bug32004Test;
 import com.openexchange.ajax.infostore.test.Bug40142Test;
+import com.openexchange.ajax.infostore.test.CheckNameActionTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
+import com.openexchange.ajax.infostore.test.CreateFileWithIllegalCharactersTest;
 import com.openexchange.ajax.infostore.test.InfostoreObjectCountTest;
 import com.openexchange.ajax.infostore.test.TrashTest;
 import com.openexchange.ajax.infostore.test.ZipDocumentsTest;
@@ -40,6 +42,8 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(TrashTest.class);
         tests.addTestSuite(Bug32004Test.class);
         tests.addTestSuite(Bug40142Test.class);
+        tests.addTestSuite(CreateFileWithIllegalCharactersTest.class);
+        tests.addTestSuite(CheckNameActionTest.class);
 
         return tests;
     }
