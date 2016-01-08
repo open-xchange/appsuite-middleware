@@ -85,6 +85,8 @@ public final class FilenameValidationUtils {
 
     public static final Pattern ILLEGAL_CHARACTER_PATTERN = Pattern.compile("(<)|(>)|(:)|(\\/)|(\\?)|(\\*)|(\\\")|(\\\\)");
 
+    public static final Pattern RESERVED_NAME_PATTERN = Pattern.compile("(CON)|(PRN)|(AUX)|(NUL)|(COM[1-9])|(LPT[1-9])", Pattern.CASE_INSENSITIVE);
+
     public static String checkCharacters(String filename) {
         StringBuilder sb = new StringBuilder();
         Matcher matcher = ILLEGAL_CHARACTER_PATTERN.matcher(filename);
@@ -98,6 +100,14 @@ public final class FilenameValidationUtils {
             sb.deleteCharAt(sb.length() - 1);
         }
         return sb.toString();
+    }
+
+    public static String checkName(String filename) {
+        Matcher matcher = RESERVED_NAME_PATTERN.matcher(filename);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
     }
 
     /**

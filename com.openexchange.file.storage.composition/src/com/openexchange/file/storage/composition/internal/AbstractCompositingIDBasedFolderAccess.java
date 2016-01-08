@@ -82,6 +82,7 @@ import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -149,6 +150,9 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
         if (FilenameValidationUtils.isInvalidFolderName(toCreate.getName())) {
             String illegalCharacters = FilenameValidationUtils.checkCharacters(toCreate.getName());
+            if (Strings.isEmpty(illegalCharacters)) {
+                illegalCharacters = FilenameValidationUtils.checkName(toCreate.getName());
+            }
             throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
         }
 

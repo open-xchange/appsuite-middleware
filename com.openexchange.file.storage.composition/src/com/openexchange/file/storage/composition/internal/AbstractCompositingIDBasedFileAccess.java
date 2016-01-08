@@ -811,6 +811,9 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
         if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
             String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
+            if (Strings.isEmpty(illegalCharacters)) {
+                illegalCharacters = FilenameValidationUtils.checkName(document.getFileName());
+            }
             throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
         }
 
