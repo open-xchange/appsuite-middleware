@@ -116,19 +116,23 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 try {
                     FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
                     FileStorageFolder rootFolder = access.getRootFolder();
-                    
-                    //check filestorage capabilities
-                    Set<String> caps = new HashSet<String>();
-                    if(access instanceof CapabilityAware){
-                        
-                        if (((CapabilityAware) access).supports(FileStorageCapability.FILE_VERSIONS)) {
-                            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+
+                    if (null != rootFolder) {
+                        // Check file storage capabilities
+                        Set<String> caps = new HashSet<String>();
+                        if (access instanceof CapabilityAware) {
+                            CapabilityAware capabilityAware = (CapabilityAware) access;
+                            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+                            if (null != supported && supported.booleanValue()) {
+                                caps.add(FileStorageCapability.FILE_VERSIONS.name());
+                            }
+                            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+                            if (null != supported && supported.booleanValue()) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
                         }
-                        if (((CapabilityAware) access).supports(FileStorageCapability.EXTENDED_METADATA)) {
-                            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-                        }
+                        result.put(writer.write(account, rootFolder, caps));
                     }
-                    result.put(writer.write(account, rootFolder, caps));
                 } catch (OXException e) {
                     if (e.equalsCode(6, "OAUTH")) {
                         // "OAUTH-0006" --> OAuth account not found
