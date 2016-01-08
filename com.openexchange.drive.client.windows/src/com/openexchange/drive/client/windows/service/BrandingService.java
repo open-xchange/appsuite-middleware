@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2011 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,57 +49,45 @@
 
 package com.openexchange.drive.client.windows.service;
 
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.drive.client.windows.service.internal.Services;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Constants}
+ * {@link BrandingService}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class Constants {
+public class BrandingService {
 
     /**
-     * The updater template configuration key
+     * Retrieves the branding for the given session.
+     * 
+     * @param session
+     * @return
+     * @throws OXException
      */
-    public static final String TMPL_UPDATER_CONFIG = "com.openexchange.drive.updater.tmpl";
-    /**
-     * The updater template default value
-     */
-    public static final String TMPL_UPDATER_DEFAULT = "oxdrive_update.tmpl";
-    /**
-     * The address of the download servlet
-     */
-    public static final String DOWNLOAD_SERVLET = "drive/client/windows/download";
-    /**
-     * The address of the update servlet
-     */
-    public static final String UPDATE_SERVLET = "drive/client/windows/v1/update.xml";
-    /**
-     * The address of the install servlet
-     */
-    public static final String INSTALL_SERVLET = "drive/client/windows/install";
+    public static String getBranding(Session session) throws OXException {
+        return getBranding(session.getUserId(), session.getContextId());
+    }
 
     /**
-     * The configuration key of the regex expression for binary '.exe' files.
+     * Retrieves the branding for the given user.
+     * 
+     * @param userId
+     * @param contextId
+     * @return
+     * @throws OXException
      */
-    public static final String PROP_BINARY_REGEX_EXE = "com.openexchange.drive.windows.binaryRegex.exe";
-    /**
-     * The configuration key of the regex expression for binary '.msi' files.
-     */
-    public static final String PROP_BINARY_REGEX_MSI = "com.openexchange.drive.windows.binaryRegex.msi";
+    public static String getBranding(int userId, int contextId) throws OXException {
+        ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView configView = configFactory.getView(userId, contextId);
+        return configView.get(Constants.BRANDING_CONF, String.class);
 
-    public static final String AUTO_EXTRACTER = "7zS.sfx";
+    }
 
-    /**
-     * The path to the branding configurations.
-     */
-    public static final String BRANDINGS_PATH = "com.openexchange.drive.updater.path";
-    /**
-     * The branding configuration key.
-     */
-    public static final String BRANDING_CONF = "com.openexchange.drive.update.branding";
-
-    public static final String BRANDING_ID = "id";
-    public static final String BRANDING_NAME = "name";
-    public static final String BRANDING_VERSION = "version";
-    public static final String BRANDING_RELEASE = "release";
 }

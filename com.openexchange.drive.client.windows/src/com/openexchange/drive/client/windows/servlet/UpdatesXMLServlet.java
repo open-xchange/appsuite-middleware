@@ -56,8 +56,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.drive.client.windows.service.BrandingService;
 import com.openexchange.drive.client.windows.service.Constants;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.drive.client.windows.service.internal.Services;
@@ -114,10 +113,7 @@ public class UpdatesXMLServlet extends OXServlet {
                     updateTmplName = config.getProperty(Constants.TMPL_UPDATER_CONFIG, Constants.TMPL_UPDATER_DEFAULT);
                 }
                 final OXTemplate productsTemplate = templateService.loadTemplate(updateTmplName);
-
-                ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
-                ConfigView configView = configFactory.getView(session.getUserId(), session.getContextId());
-                String branding = configView.get(Constants.BRANDING_CONF, String.class);
+                String branding = BrandingService.getBranding(session);
                 Map<String, Object> map = null;
                 try {
                     map = driveUpdate.getTemplateValues(serverUrl, Utils.getUserName(session), branding);
