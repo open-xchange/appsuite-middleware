@@ -130,6 +130,13 @@ public class AllAction extends AbstractFileStorageAccountAction {
                             if (null != supported && supported.booleanValue()) {
                                 caps.add(FileStorageCapability.EXTENDED_METADATA.name());
                             }
+
+                            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
+                            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
                         }
                         result.put(writer.write(account, rootFolder, caps));
                     }
