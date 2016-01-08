@@ -151,9 +151,9 @@ davsync:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
-    displayName_t10e: "CalDAV & CardDAV Sync"
+    displayName_t10e: "Calendar + Contacts"
     # The translatable description
-    description_t10e: "To use Calendar & Contacts on your device, simply enable CalDAV & CardDAV Sync"
+    description_t10e: "Synchronize your data via Calendar and Addressbook natively on your device"
 
 #davsync_mybrand:
 #    enabled: true
@@ -175,9 +175,9 @@ davmanual:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
-    displayName_t10e: "CalDAV & CardDAV server details"
+    displayName_t10e: "Calendar + Contacts"
     # The translatable description
-    description_t10e: "To setup CalDAV & CardDAV account, please use the folling server details"
+    description_t10e: "To manually setup your Calendar & Addressbook accounts, please use the following information"
 
 
 ### Exchange ActiveSync
@@ -221,9 +221,9 @@ mailsync:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailsync.png
     # The translatable display name
-    displayName_t10e: "IMAP/SMTP"
+    displayName_t10e: "eMail"
     # The translatable description
-    description_t10e: "Access & send your emails"
+    description_t10e: "Use Apple Mail to manage your daily eMail"
 
 mailmanual:
     enabled: true
@@ -233,7 +233,7 @@ mailmanual:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailsync.png
     # The translatable display name
-    displayName_t10e: "IMAP/SMTP"
+    displayName_t10e: "eMail"
     # The translatable description
-    description_t10e: "Access & send your emails"
+    description_t10e: "To manually setup your eMail client, please use the following information"
 
