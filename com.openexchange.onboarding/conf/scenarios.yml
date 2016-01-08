@@ -223,7 +223,7 @@ mailsync:
     # The translatable display name
     displayName_t10e: "eMail"
     # The translatable description
-    description_t10e: "Use Apple Mail to manage your daily eMail"
+    description_t10e: "Use your Apple Mail App to manage your mailbox"
 
 mailmanual:
     enabled: true
