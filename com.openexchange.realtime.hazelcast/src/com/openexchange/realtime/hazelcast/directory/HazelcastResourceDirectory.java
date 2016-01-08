@@ -498,19 +498,32 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             @Override
             public void run() {
                 try {
+                    DistributedGroupManager distributedGroupManager = distributedGroupManagerRef.get();
                     MultiMap<PortableID, PortableID> idMapping = getIDMapping();
                     IMap<PortableID, PortableResource> resourceMapping = getResourceMapping();
                     for (PortableID portableID : new LinkedHashSet<PortableID>(resourceMapping.localKeySet())) { // Copy local key set
-                        idMapping.get(portableID.toGeneralForm());
-                        PortableResource portableResource = resourceMapping.get(portableID);
-                        if (portableResource == null) {
-                            LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", portableID);
+                        if (null == distributedGroupManager) {
+                            // No chance to check if active; just do it
+                            touch(idMapping, resourceMapping, portableID);
                         } else {
-                            LOG.debug("Touched ID: {}", portableID);
+                            if (null != distributedGroupManager.getMembers(portableID)) {
+                                // ID is still in use
+                                touch(idMapping, resourceMapping, portableID);
+                            }
                         }
                     }
                 } catch (Exception e) {
                     LOG.error("Error while touching IDs.", e);
+                }
+            }
+
+            private void touch(MultiMap<PortableID, PortableID> idMapping, IMap<PortableID, PortableResource> resourceMapping, PortableID portableID) {
+                idMapping.get(portableID.toGeneralForm());
+                PortableResource portableResource = resourceMapping.get(portableID);
+                if (portableResource == null) {
+                    LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", portableID);
+                } else {
+                    LOG.debug("Touched ID: {}", portableID);
                 }
             }
 
