@@ -515,7 +515,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId()));
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), searchIterators);
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     @Override
@@ -1496,7 +1496,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), new LinkedList<SearchIterator<File>>(results));
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), new LinkedList<SearchIterator<File>>(results));
     }
 
     static <V> V getFrom(Future<V> future) throws OXException {
@@ -1793,7 +1793,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(searchIterator);
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), searchIterators);
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     /**
