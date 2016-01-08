@@ -152,7 +152,8 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
                         if (null != distributedGroupManager.getMembers(id)) {
                             // Detected preliminary eviction attempt
                             Throwable trace = new Throwable("tracked thread");
-                            LOG.warn("Source {} on Member: {} fired eviction event for '{}'. ID is still in use by associated {}", source, member, id, DistributedGroupManager.class.getSimpleName(), trace);
+                            boolean contained = localIDsToTouch.containsKey(id);
+                            LOG.warn("Source {} on Member: {} fired eviction event for '{}'. ID is still in use by associated {} and is {} in local (frequently touched) identifiers.", source, member, id, DistributedGroupManager.class.getSimpleName(), contained ? "contained" : "not contained", trace);
                         }
                     } catch (Exception e) {
                         // Ignore...
