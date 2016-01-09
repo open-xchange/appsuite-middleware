@@ -89,7 +89,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     public DriveAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "app";
+        identifier = "driveapp";
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
     }
 
