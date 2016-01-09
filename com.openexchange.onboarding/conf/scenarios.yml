@@ -90,7 +90,7 @@ myplainappinstall:
     ## description_t10e: <the description>
 
 
-### OX Drive App
+### Installer for Drive Windows Client
 ################################################################################
 
 drivewindowsclientinstall:
