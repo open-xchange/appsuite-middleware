@@ -76,6 +76,7 @@ import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -166,8 +167,14 @@ public class OnboardingUtility {
      */
     public static boolean hasCapability(String capability, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
+
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+            return false;
+        }
+
         CapabilityService service = Services.getService(CapabilityService.class);
-        return null == capability ? false : service.getCapabilities(session).contains(capability);
+        return null == capability ? false : service.getCapabilities(serverSession).contains(capability);
     }
 
     /**
