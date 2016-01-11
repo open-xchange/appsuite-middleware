@@ -73,6 +73,10 @@ public class Constants {
      * The address of the update servlet
      */
     public static final String UPDATE_SERVLET = "drive/client/windows/v1/update.xml";
+    /**
+     * The address of the install servlet
+     */
+    public static final String INSTALL_SERVLET = "drive/client/windows/install";
 
     /**
      * The configuration key of the regex expression for binary '.exe' files.

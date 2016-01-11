@@ -51,6 +51,7 @@ package com.openexchange.notification.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.html.HtmlService;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.notification.mail.impl.NotificationMailFactoryImpl;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -71,11 +72,22 @@ public class NotificationActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        Services.set(this);
+
+        trackService(MimeTypeMap.class);
+        openTrackers();
+
         NotificationMailFactoryImpl notificationMailFactory = new NotificationMailFactoryImpl(
             getService(ConfigurationService.class),
             getService(TemplateService.class),
             getService(HtmlService.class));
         registerService(NotificationMailFactory.class, notificationMailFactory);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        Services.set(null);
+        super.stopBundle();
     }
 
     @Override

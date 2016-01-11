@@ -253,8 +253,9 @@ public class SearchEngineImpl extends DBService {
 
         {
             Connection con = getReadConnection(session.getContext());
-            boolean keepConnection = false;
+            boolean successful = false;
             PreparedStatement stmt = null;
+            InfostoreSearchIterator iter = null;
             try {
                 stmt = con.prepareStatement(SQL_QUERY.toString());
                 if (addQuery) {
@@ -262,9 +263,9 @@ public class SearchEngineImpl extends DBService {
                         stmt.setString(i + 1, q);
                     }
                 }
-                final InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
+                iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), con, stmt);
                 // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
-                keepConnection = true;
+                successful = true;
                 return iter;
             } catch (final SQLException e) {
                 LOG.error("", e);
@@ -273,8 +274,13 @@ public class SearchEngineImpl extends DBService {
                 LOG.error("", e);
                 throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
             } finally {
-                if (con != null && !keepConnection) {
-                    releaseReadConnection(session.getContext(), con);
+                if (!successful) {
+                    if (iter != null) {
+                        SearchIterators.close(iter);
+                    } else if (con != null) {
+                        releaseReadConnection(session.getContext(), con);
+                        DBUtils.closeSQLStuff(stmt);
+                    }
                 }
             }
         }
@@ -485,13 +491,14 @@ public class SearchEngineImpl extends DBService {
         sqlQuery.append(getResultFieldsSelect(cols));
         sqlQuery.append(" FROM infostore JOIN infostore_document ON infostore_document.cid = infostore.cid AND infostore_document.infostore_id = infostore.id AND infostore_document.version_number = infostore.version WHERE infostore.cid = ").append(session.getContextId()).append(" AND infostore.id IN (").append(join(objectIDs)).append(")");
         appendOrderBy(sqlQuery, sortedBy, dir);
-        boolean keepConnection = false;
+        boolean successful = false;
         PreparedStatement stmt = null;
+        InfostoreSearchIterator iter = null;
         try {
             stmt = connection.prepareStatement(sqlQuery.toString());
-            InfostoreSearchIterator iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
+            iter = new InfostoreSearchIterator(stmt.executeQuery(), this, cols, session.getContext(), connection, stmt);
             // Iterator has been successfully generated, thus closing DB resources is performed by iterator instance.
-            keepConnection = true;
+            successful = true;
             return iter;
         } catch (final SQLException e) {
             LOG.error("", e);
@@ -500,8 +507,13 @@ public class SearchEngineImpl extends DBService {
             LOG.error("", e);
             throw InfostoreExceptionCodes.PREFETCH_FAILED.create(e);
         } finally {
-            if (connection != null && !keepConnection) {
-                releaseReadConnection(session.getContext(), connection);
+            if (!successful) {
+                if (iter != null) {
+                    SearchIterators.close(iter);
+                } else if (connection != null) {
+                    releaseReadConnection(session.getContext(), connection);
+                    DBUtils.closeSQLStuff(stmt);
+                }
             }
         }
     }

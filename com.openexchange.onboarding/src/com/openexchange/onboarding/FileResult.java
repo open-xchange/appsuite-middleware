@@ -60,6 +60,8 @@ import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
+import com.openexchange.notification.mail.MailAttachment;
+import com.openexchange.notification.mail.MailAttachments;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
@@ -133,10 +135,13 @@ public class FileResult implements Result {
         boolean error = true;
         MailTransport transport = getTransportProvider().createNewNoReplyTransport(session.getContextId());
         try {
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
-
             NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
-            ComposedMailMessage message = notify.createMail(data, Collections.singleton(file));
+
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
+            MailAttachment mailAttachment = MailAttachments.newMailAttachment(file);
+            // TODO: Add Content-Id?
+
+            ComposedMailMessage message = notify.createMail(data, Collections.singleton(mailAttachment));
             transport.sendMailMessage(message, ComposeType.NEW);
 
             ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session), "string");

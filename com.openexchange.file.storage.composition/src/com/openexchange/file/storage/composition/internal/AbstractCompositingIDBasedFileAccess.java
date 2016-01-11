@@ -515,7 +515,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(fixIDs(searchIterator, accountAccess.getService().getId(), accountAccess.getAccountId()));
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), searchIterators);
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     @Override
@@ -809,9 +809,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
 
-        if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
-            String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
-            throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
+        if (Strings.isNotEmpty(document.getFileName())) {
+            if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
+                String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
+                if (Strings.isEmpty(illegalCharacters)) {
+                    illegalCharacters = FilenameValidationUtils.checkName(document.getFileName());
+                }
+                throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
+            }
         }
 
         if (FileStorageFileAccess.NEW == document.getId()) {
@@ -1496,7 +1501,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
 
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), new LinkedList<SearchIterator<File>>(results));
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), new LinkedList<SearchIterator<File>>(results));
     }
 
     static <V> V getFrom(Future<V> future) throws OXException {
@@ -1793,7 +1798,7 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                 searchIterators.add(searchIterator);
             }
         }
-        return new MergingSearchIterator<File>(order.comparatorBy(sort), searchIterators);
+        return new MergingSearchIterator<File>(order.comparatorBy(sort), order.equals(SortDirection.ASC), searchIterators);
     }
 
     /**

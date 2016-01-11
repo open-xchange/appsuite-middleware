@@ -64,8 +64,14 @@ public class OnboardingNotificationStrings implements LocalizableStrings {
         super();
     }
 
-    // Your requested on-boarding profile.
-    public static final String PROFILE_CREATED = "Your requested on-boarding profile.";
+    // The user salutation; e.g. "Dear John Doe,"
+    public static final String SALUTATION = "Dear %1$s,";
+
+    // The content of the E-Mail providing the profile attachment
+    public static final String CONTENT = "to automatically configure your device, please download & install the configuration profile, which is attached to this E-Mail.";
+
+    // The subject of the E-Mail providing the profile attachment
+    public static final String SUBJECT = "Your configuration profile";
 
     // Your on-boarding information.
     public static final String DEFAULT = "Your onboarding information.";

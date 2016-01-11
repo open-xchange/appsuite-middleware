@@ -50,14 +50,19 @@
 package com.openexchange.file.storage.json.actions.accounts;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
@@ -109,8 +114,32 @@ public class AllAction extends AbstractFileStorageAccountAction {
             // Iterate accounts and append its JSON representation
             for (FileStorageAccount account : userAccounts) {
                 try {
-                    FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
-                    result.put(writer.write(account, rootFolder));
+                    FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
+                    FileStorageFolder rootFolder = access.getRootFolder();
+
+                    if (null != rootFolder) {
+                        // Check file storage capabilities
+                        Set<String> caps = new HashSet<String>();
+                        if (access instanceof CapabilityAware) {
+                            CapabilityAware capabilityAware = (CapabilityAware) access;
+                            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+                            if (null != supported && supported.booleanValue()) {
+                                caps.add(FileStorageCapability.FILE_VERSIONS.name());
+                            }
+                            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+                            if (null != supported && supported.booleanValue()) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
+
+                            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
+                            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
+                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                            }
+                        }
+                        result.put(writer.write(account, rootFolder, caps));
+                    }
                 } catch (OXException e) {
                     if (e.equalsCode(6, "OAUTH")) {
                         // "OAUTH-0006" --> OAuth account not found

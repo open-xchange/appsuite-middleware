@@ -83,7 +83,9 @@ public class AllFileaccountRequest extends AbstractFileaccountRequest<AllFileacc
     public Parameter[] getParameters() throws JSONException {
         List<Parameter> tmp = new ArrayList<Parameter>(3);
         tmp.add(new Parameter(AJAXServlet.PARAMETER_ACTION, AJAXServlet.ACTION_ALL));
-        tmp.add(new URLParameter("filestorageService", filestorageService));
+        if (filestorageService != null) {
+            tmp.add(new URLParameter("filestorageService", filestorageService));
+        }
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 

@@ -78,7 +78,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.io.BaseEncoding;
 import com.google.common.io.ByteStreams;
-import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -98,6 +97,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.notification.mail.MailAttachment;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.serverconfig.NotificationMailConfig;
@@ -135,11 +135,11 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
 
     @Override
     public ComposedMailMessage createMail(MailData data) throws OXException {
-        return createMail(data, Collections.<IFileHolder> emptyList());
+        return createMail(data, Collections.<MailAttachment> emptyList());
     }
 
     @Override
-    public ComposedMailMessage createMail(MailData data, Collection<IFileHolder> attachments) throws OXException {
+    public ComposedMailMessage createMail(MailData data, Collection<MailAttachment> attachments) throws OXException {
         try {
             NotificationMailConfig mailConfig = data.getMailConfig();
             Map<String, Object> templateVars = getMutableTemplateVars(data);
@@ -211,13 +211,31 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
                 multipart = new MimeMultipart("mixed");
                 multipart.addBodyPart(tmp);
 
-                for (IFileHolder attachment : attachments) {
+                for (MailAttachment attachment : attachments) {
                     String contentType = attachment.getContentType();
                     MimeBodyPart bodyPart = new MimeBodyPart();
-                    bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getStream(), new ContentType(contentType).getBaseType())));
+
+                    // Set MIME part's DataHandler
+                    if (attachment instanceof AbstractMailAttachment) {
+                        AbstractMailAttachment ama = (AbstractMailAttachment) attachment;
+                        bodyPart.setDataHandler(new DataHandler(ama.asDataHandler()));
+                    } else {
+                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getStream(), new ContentType(contentType).getBaseType())));
+                    }
+
+                    // Basic headers
                     bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
                     bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
                     bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType(attachment.getDisposition()));
+
+                    // Other headers (if available)
+                    Map<String, String> headers = attachment.getHeaders();
+                    if (null != headers) {
+                        for (Map.Entry<String,String> entry : headers.entrySet()) {
+                            bodyPart.setHeader(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     multipart.addBodyPart(bodyPart);
                 }
             }

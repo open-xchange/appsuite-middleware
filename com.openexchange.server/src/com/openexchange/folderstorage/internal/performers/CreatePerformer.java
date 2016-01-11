@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -70,6 +71,7 @@ import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
@@ -135,6 +137,17 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If creation fails
      */
     public String doCreate(final Folder toCreate) throws OXException {
+
+        if (Strings.isNotEmpty(toCreate.getName())) {
+            if (FilenameValidationUtils.isInvalidFileName(toCreate.getName())) {
+                String illegalCharacters = FilenameValidationUtils.checkCharacters(toCreate.getName());
+                if (Strings.isEmpty(illegalCharacters)) {
+                    illegalCharacters = FilenameValidationUtils.checkName(toCreate.getName());
+                }
+                throw FolderExceptionErrorMessage.ILLEGAL_CHARACTERS.create(illegalCharacters);
+            }
+        }
+
         final String parentId = toCreate.getParentID();
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);

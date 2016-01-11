@@ -19,6 +19,7 @@ import com.openexchange.drive.client.windows.service.internal.DriveUpdateService
 import com.openexchange.drive.client.windows.service.internal.Services;
 import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
 import com.openexchange.drive.client.windows.servlet.DownloadServlet;
+import com.openexchange.drive.client.windows.servlet.InstallServlet;
 import com.openexchange.drive.client.windows.servlet.UpdatesXMLServlet;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
@@ -33,6 +34,7 @@ public class Activator extends HousekeepingActivator {
 
     private String downloadServletAlias;
     private String updateServletAlias;
+    private String installServletAlias;
     private ServiceRegistration<Remote> serviceRegistration;
 
     @Override
@@ -63,6 +65,10 @@ public class Activator extends HousekeepingActivator {
         updateServletAlias = prefix + Constants.UPDATE_SERVLET;
         final TemplateService templateService = getService(TemplateService.class);
         getService(HttpService.class).registerServlet(updateServletAlias, new UpdatesXMLServlet(templateService, updateService), null, null);
+
+        //register install servlet
+        installServletAlias = prefix + Constants.INSTALL_SERVLET;
+        getService(HttpService.class).registerServlet(installServletAlias, new InstallServlet(updateService), null, null);
 
         //register rmi interface
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);

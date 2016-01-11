@@ -88,6 +88,11 @@ public enum ContactsFacetType implements FacetType {
      * The "contact" facet
      */
     CONTACT("contact", ContactsStrings.FACET_TYPE_CONTACT),
+    /**
+     * The "department" facet
+     */
+    DEPARTMENT("department", null),
+
     ;
 
     private final String id;

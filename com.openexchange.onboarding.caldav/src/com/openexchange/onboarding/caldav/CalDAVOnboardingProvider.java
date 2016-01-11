@@ -157,7 +157,7 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, session));
+        configuration.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, false, session));
         return new DisplayResult(configuration);
     }
 
@@ -187,8 +187,9 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", session.getLogin());
-        payloadContent.addStringValue("CalDAVHostName", getCalDAVUrl(request, session));
-        payloadContent.addBooleanValue("CalDAVUseSSL", false);
+        String calDAVUrl = getCalDAVUrl(request, false, session);
+        payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
+        payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, session));
 
         // Add payload content dictionary to top-level dictionary
@@ -198,17 +199,21 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
-    private String getCalDAVUrl(OnboardingRequest request, Session session) throws OXException {
+    private String getCalDAVUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.caldav.url", String.class);
+        String propertyName = "com.openexchange.onboarding.caldav.url";
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
             return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
         }
 
         String value = property.get();
         if (Strings.isEmpty(value)) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
         return value;

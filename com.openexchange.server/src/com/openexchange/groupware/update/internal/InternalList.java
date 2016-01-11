@@ -599,7 +599,10 @@ public final class InternalList {
 
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
-        
+
+        //(Re-)adds department index in prg_contacts for "auto-complete" queries
+        list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
+
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 

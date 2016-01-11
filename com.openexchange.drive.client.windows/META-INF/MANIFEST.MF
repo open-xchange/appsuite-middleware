@@ -9,7 +9,8 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.drive.client.windows.service,
  com.openexchange.drive.client.windows.service.rmi
-Import-Package: com.openexchange.ajax.helper,
+Import-Package: com.openexchange.ajax,
+ com.openexchange.ajax.helper,
  com.openexchange.capabilities,
  com.openexchange.config,
  com.openexchange.config.cascade,

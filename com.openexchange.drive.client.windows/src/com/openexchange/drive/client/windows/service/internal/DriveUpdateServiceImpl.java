@@ -57,9 +57,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
+import com.openexchange.drive.client.windows.service.BrandingService;
 import com.openexchange.drive.client.windows.service.Constants;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
 import com.openexchange.drive.client.windows.service.UpdaterExceptionCodes;
@@ -124,9 +123,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         // Get associated branding
         String branding;
         {
-            ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
-            ConfigView configView = configFactory.getView(session.getUserId(), session.getContextId());
-            branding = configView.get(Constants.BRANDING_CONF, String.class);
+            branding = BrandingService.getBranding(session);
             if (!isValid(branding)) {
                 throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
             }

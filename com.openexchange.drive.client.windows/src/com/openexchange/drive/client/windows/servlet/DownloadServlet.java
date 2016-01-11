@@ -58,12 +58,9 @@ import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.helper.BrowserDetector;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
-import com.openexchange.drive.client.windows.service.Constants;
+import com.openexchange.drive.client.windows.service.BrandingService;
 import com.openexchange.drive.client.windows.service.DriveUpdateService;
-import com.openexchange.drive.client.windows.service.internal.Services;
 import com.openexchange.drive.client.windows.service.internal.Utils;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
@@ -118,9 +115,7 @@ public class DownloadServlet extends OXServlet {
                 fileName = fileName.substring(1, fileName.length());
             }
             
-            ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
-            ConfigView configView = configFactory.getView(session.getUserId(), session.getContextId());
-            String branding = configView.get(Constants.BRANDING_CONF, String.class);
+            String branding = BrandingService.getBranding(session);
 
             if (provider.contains(branding, fileName)) {
                 // The updater itself shall be downloaded
@@ -152,11 +147,7 @@ public class DownloadServlet extends OXServlet {
                 return;
             }
 
-            ConfigViewFactory confViewFactory = Services.getService(ConfigViewFactory.class);
-            ConfigView view = confViewFactory.getView(session.getUserId(), session.getContextId());
-
-            if ((!Utils.hasPermissions(ServerSessionAdapter.valueOf(session).getUserConfiguration(), updateService.getNecessaryPermission())) ||
-                (!view.get(Constants.BRANDING_CONF, String.class).equals(branding))) {
+            if (!Utils.hasPermissions(ServerSessionAdapter.valueOf(session).getUserConfiguration(), updateService.getNecessaryPermission())) {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }

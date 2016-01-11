@@ -49,10 +49,12 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
@@ -79,9 +81,12 @@ public class CheckNameAction extends AbstractFileAction {
         }
         if (FilenameValidationUtils.isInvalidFileName(name)) {
             String invalid = FilenameValidationUtils.checkCharacters(name);
+            if (Strings.isEmpty(invalid)) {
+                invalid = FilenameValidationUtils.checkName(name);
+            }
             throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(invalid);
         }
-        return new AJAXRequestResult();
+        return new AJAXRequestResult(new JSONObject());
     }
 
 }

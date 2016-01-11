@@ -49,19 +49,20 @@
 
 package com.openexchange.onboarding.notification.mail;
 
+import static com.openexchange.notification.FullNameBuilder.buildFullName;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.notification.mail.MailData;
-import com.openexchange.notification.mail.MailData.Builder;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.notification.OnboardingNotificationStrings;
 import com.openexchange.onboarding.osgi.Services;
@@ -69,6 +70,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.serverconfig.ServerConfig;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 
@@ -81,7 +83,8 @@ import com.openexchange.user.UserService;
  */
 public class OnboardingProfileCreatedNotificationMail {
 
-    private static final String PROFILE_CREATED = "profile_created";
+    private static final String VARIABLE_SALUTATION = "salutation";
+    private static final String VARIABLE_CONTENT = "content";
 
     /**
      * Creates a new {@link MailData} instance ready to be used to create an appropriate notification mail for delivering a profile via E-Mail.
@@ -93,9 +96,33 @@ public class OnboardingProfileCreatedNotificationMail {
      * @throws OXException If {@code MailData} instance cannot be returned
      */
     public static MailData createProfileNotificationMail(String mailAddress, String hostName, Session session) throws OXException {
-        Map<String, String> varsTranslations = new HashMap<String, String>(2);
-        varsTranslations.put(PROFILE_CREATED, OnboardingNotificationStrings.PROFILE_CREATED);
-        return createNotificationMail(mailAddress, hostName, session, "notify.onboarding.profile.mail.html.tmpl", OnboardingNotificationStrings.PROFILE_CREATED, varsTranslations);
+        Map<String, Object> vars = new HashMap<String, Object>(4);
+
+        // Get translator
+        TranslatorFactory factory = Services.getService(TranslatorFactory.class);
+        if (null == factory) {
+            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
+        }
+        User user = getUser(session);
+        Translator translator = factory.translatorFor(user.getLocale());
+
+        // Salutation
+        {
+            String translated = translator.translate(OnboardingNotificationStrings.SALUTATION);
+            translated = String.format(translated, buildFullName(user, translator));
+            vars.put(VARIABLE_SALUTATION, translated);
+        }
+
+        // E-Mail content
+        {
+            String translated = translator.translate(OnboardingNotificationStrings.CONTENT);
+            vars.put(VARIABLE_CONTENT, translated);
+        }
+
+        // E-Mail subject
+        String subject = translator.translate(OnboardingNotificationStrings.SUBJECT);
+
+        return createNotificationMail(mailAddress, hostName, session, "notify.onboarding.profile.mail.html.tmpl", subject, vars);
     }
 
     /**
@@ -106,18 +133,13 @@ public class OnboardingProfileCreatedNotificationMail {
      * @param hostName The associated host name
      * @param session The session providing user data
      * @param templateFileName The file name of the HTML template
-     * @param subjectTranslation The translation string for the mail's subject
-     * @param varsTranslations The variables to insert along-side with their translations
+     * @param subject The string for the mail's subject
+     * @param vars The variables to insert
      * @return A new {@code MailData} instance
      * @throws OXException If {@code MailData} instance cannot be returned
      */
-    public static MailData createNotificationMail(String mailAddress, String hostName, Session session, String templateFileName, String subjectTranslation, Map<String, String> varsTranslations) throws OXException {
-        InternetAddress recipient = null;
-        try {
-            recipient = new InternetAddress(mailAddress);
-        } catch (AddressException e) {
-            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        }
+    private static MailData createNotificationMail(String mailAddress, String hostName, Session session, String templateFileName, String subject, Map<String, Object> vars) throws OXException {
+        // Acquire needed services
         ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
         if (null == serverConfigService) {
             throw ServiceExceptionCode.absentService(ServerConfigService.class);
@@ -126,47 +148,36 @@ public class OnboardingProfileCreatedNotificationMail {
         if (null == contextService) {
             throw ServiceExceptionCode.absentService(ContextService.class);
         }
-        Context ctx = contextService.getContext(session.getContextId());
-        ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
+
+        // Build MailData instance
+        try {
+            InternetAddress recipient = new QuotedInternetAddress(mailAddress);
+            Context ctx = contextService.getContext(session.getContextId());
+            ServerConfig serverConfig = serverConfigService.getServerConfig(null == hostName ? "" : hostName, session.getUserId(), session.getContextId());
+
+            return MailData.newBuilder()
+                .setRecipient(recipient)
+                .setSubject(subject)
+                .setHtmlTemplate(templateFileName)
+                .setTemplateVars((null == vars) ? Collections.<String, Object> emptyMap() : vars)
+                .setMailConfig(serverConfig.getNotificationMailConfig())
+                .setContext(ctx)
+                .build();
+        } catch (AddressException e) {
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static User getUser(Session session) throws OXException {
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser();
+        }
 
         UserService userService = Services.getService(UserService.class);
         if (null == userService) {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
-        TranslatorFactory factory = Services.getService(TranslatorFactory.class);
-        if (null == factory) {
-            throw ServiceExceptionCode.absentService(TranslatorFactory.class);
-        }
-        Translator translator = factory.translatorFor(userService.getUser(session.getUserId(), session.getContextId()).getLocale());
-
-        String subject = translator.translate(null == subjectTranslation ? OnboardingNotificationStrings.DEFAULT : subjectTranslation);
-
-        Builder builder;
-        if (null == varsTranslations || varsTranslations.isEmpty()) {
-            builder = MailData.newBuilder()
-                .setRecipient(recipient)
-                .setSubject(subject)
-                .setHtmlTemplate(templateFileName)
-                .setTemplateVars(Collections.<String, Object> emptyMap())
-                .setMailConfig(serverConfig.getNotificationMailConfig())
-                .setContext(ctx);
-        } else {
-            Map<String, Object> vars = new HashMap<String, Object>(varsTranslations.size());
-            for (Entry<String, String> varsTranslation : varsTranslations.entrySet()) {
-                String translation = translator.translate(varsTranslation.getValue());
-                vars.put(varsTranslation.getKey(), translation);
-            }
-
-            builder = MailData.newBuilder()
-                .setRecipient(recipient)
-                .setSubject(subject)
-                .setHtmlTemplate("notify.onboarding.profile.mail.html.tmpl")
-                .setTemplateVars(vars)
-                .setMailConfig(serverConfig.getNotificationMailConfig())
-                .setContext(ctx);
-        }
-
-        return builder.build();
+        return userService.getUser(session.getUserId(), session.getContextId());
     }
 
 }

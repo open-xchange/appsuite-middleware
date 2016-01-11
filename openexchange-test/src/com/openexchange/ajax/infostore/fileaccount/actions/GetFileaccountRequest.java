@@ -65,7 +65,9 @@ public class GetFileaccountRequest extends AbstractFileaccountRequest<GetFileacc
     /**
      * Initializes a new {@link GetFileaccountRequest}.
      */
-    public GetFileaccountRequest() {
+    public GetFileaccountRequest(String filestorageId, String filestorageService) {
+        this.filestorageId = filestorageId;
+        this.filestorageService = filestorageService;
     }
 
     @Override

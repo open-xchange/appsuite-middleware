@@ -263,7 +263,7 @@ public abstract class IMAPFolderWorker extends MailMessageStorageLong {
         } catch (final MessagingException e) {
             if (recoverFromServerbug) {
                 Exception exception = e.getNextException();
-                if ((exception instanceof com.sun.mail.iap.CommandFailedException) && (imapServerInfo != null && imapServerInfo.getGreeting() != null && Strings.asciiLowerCase(imapServerInfo.getGreeting()).indexOf("dovecot") >= 0)) {
+                if ((exception instanceof com.sun.mail.iap.CommandFailedException)) {
                     String message = Strings.asciiLowerCase(exception.getMessage());
                     if ((null != message) && (message.indexOf("[serverbug]") >= 0) && (message.indexOf("reopen the virtual mailbox") >= 0)) {
                         // Retry to open the virtual mailbox

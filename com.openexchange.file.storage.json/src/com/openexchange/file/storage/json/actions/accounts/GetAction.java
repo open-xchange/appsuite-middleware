@@ -49,12 +49,17 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
@@ -92,8 +97,26 @@ public class GetAction extends AbstractFileStorageAccountAction {
         String id = request.getParameter(FileStorageAccountConstants.ID);
         FileStorageAccount account = fsService.getAccountManager().getAccount(id, session);
 
-        FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
-        return new AJAXRequestResult(writer.write(account, rootFolder));
+        FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
+        FileStorageFolder rootFolder = access.getRootFolder();
+        //check filestorage capabilities
+        Set<String> caps = new HashSet<String>();
+        if (access instanceof CapabilityAware) {
+
+            if (((CapabilityAware) access).supports(FileStorageCapability.FILE_VERSIONS)) {
+                caps.add(FileStorageCapability.FILE_VERSIONS.name());
+            }
+            if (((CapabilityAware) access).supports(FileStorageCapability.EXTENDED_METADATA)) {
+                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+            }
+            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+            }
+            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
+                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+            }
+        }
+        return new AJAXRequestResult(writer.write(account, rootFolder, caps));
     }
 
 }
