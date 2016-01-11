@@ -105,6 +105,21 @@ drivewindowsclientinstall:
     # The translatable description
     description_t10e: "To use Drive on your device, simply download OX Drive Windows Client"
 
+### Installer for windows eM-Client
+################################################################################
+
+emclientinstall:
+    enabled: true
+    type: link
+    providers: [emclient]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    icon: emclient.png
+    # The translatable display name
+    displayName_t10e: "eM-Client"
+    # The translatable description
+    description_t10e: "To use eM-Client on your device, simply download and install"
+
 
 ### OX Mail App
 ################################################################################

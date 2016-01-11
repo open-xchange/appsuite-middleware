@@ -109,7 +109,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
 
         switch (scenario.getType()) {
             case LINK:
-                return doExecuteLink(request, session);
+                return doExecuteLink(session);
             case MANUAL:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case PLIST:
@@ -119,15 +119,15 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
         }
     }
 
-    private Result doExecuteLink(OnboardingRequest request, Session session) throws OXException {
-        return linkResult(request, session);
+    private Result doExecuteLink(Session session) throws OXException {
+        return linkResult(session);
     }
 
-    private Result linkResult(OnboardingRequest request, Session session) throws OXException {
-        return new LinkResult(new Link(getDownloadLink(request, session), LinkType.COMMON));
+    private Result linkResult(Session session) throws OXException {
+        return new LinkResult(new Link(getDownloadLink(session), LinkType.COMMON));
     }
 
-    private String getDownloadLink(OnboardingRequest request, Session session) throws OXException {
+    private String getDownloadLink(Session session) throws OXException {
 
         String url = OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session);
         return url;
