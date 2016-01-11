@@ -809,12 +809,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
 
     protected String save(final File document, final InputStream data, final long sequenceNumber, final List<Field> modifiedColumns, boolean ignoreWarnings, final FileAccessDelegation<SaveResult> saveDelegation) throws OXException {
 
-        if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
-            String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
-            if (Strings.isEmpty(illegalCharacters)) {
-                illegalCharacters = FilenameValidationUtils.checkName(document.getFileName());
+        if (Strings.isNotEmpty(document.getFileName())) {
+            if (FilenameValidationUtils.isInvalidFileName(document.getFileName())) {
+                String illegalCharacters = FilenameValidationUtils.checkCharacters(document.getFileName());
+                if (Strings.isEmpty(illegalCharacters)) {
+                    illegalCharacters = FilenameValidationUtils.checkName(document.getFileName());
+                }
+                throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
             }
-            throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
         }
 
         if (FileStorageFileAccess.NEW == document.getId()) {
