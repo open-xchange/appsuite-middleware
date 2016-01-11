@@ -81,6 +81,7 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
 
     private final ServiceLookup services;
     private final Pattern pattern;
+    private final Pattern indention;
     private final File genericDir;
 
     /**
@@ -92,6 +93,7 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
         super();
         this.services = services;
         pattern = Pattern.compile("(^|\\s)\\w+_t10e\\s*\\:\\s*\"((?:\\\\\"|[^\"])+)\"");
+        indention = Pattern.compile("(\r?\n)(\t| {2,})+([\\p{L} ])");
         genericDir = new File("/opt/open-xchange/etc");
     }
 
@@ -105,7 +107,7 @@ public class I18NYamlParserImpl implements I18NYamlParserService {
 
             Set<String> literals = new LinkedHashSet<String>(16, 0.9F);
             do {
-                literals.add(m.group(2));
+                literals.add(indention.matcher(m.group(2)).replaceAll("$1$3"));
             } while (m.find());
             return literals;
         } catch (FileNotFoundException e) {
