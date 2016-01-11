@@ -947,7 +947,7 @@ public final class MessageParser {
             if (length == 0) {
                 return EMPTY_ADDRS;
             }
-            return parseAdressArray(jAddresses, length);
+            return parseAdressArray(jAddresses, length, false);
         } catch (JSONException e) {
             LOG.error("", e);
             /*
@@ -956,7 +956,7 @@ public final class MessageParser {
             return parseAddressList(jo.getString(key), true, failOnError);
         }
     }
-
+    
     /**
      * Expects the specified JSON array to be an array of arrays. Each inner array conforms to pattern:
      *
@@ -965,18 +965,19 @@ public final class MessageParser {
      * </pre>
      *
      * @param jsonArray The JSON array
+     * @param strict boolean flag to enable/disable strict RFC822 parsing  
      * @return Parsed address list combined in a {@link String} object
      * @throws JSONException If a JSON error occurs
      * @throws AddressException If constructing an address fails
      */
-    private static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length) throws JSONException, AddressException {
+    public static InternetAddress[] parseAdressArray(JSONArray jsonArray, int length, boolean strict) throws JSONException, AddressException {
         List<InternetAddress> addresses = new ArrayList<InternetAddress>(length);
         for (int i = 0; i < length; i++) {
             JSONArray persAndAddr = jsonArray.getJSONArray(i);
             int pLen = persAndAddr.length();
             if (pLen != 0) {
                 if (1 == pLen) {
-                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0)));
+                    addresses.add(new QuotedInternetAddress(persAndAddr.getString(0), strict));
                 } else {
                     String personal = persAndAddr.getString(0);
                     boolean hasPersonal = (personal != null && !"null".equals(personal));
@@ -987,7 +988,7 @@ public final class MessageParser {
                             // Cannot occur
                         }
                     } else {
-                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1)));
+                        addresses.add(new QuotedInternetAddress(persAndAddr.getString(1), strict));
                     }
                 }
             }
