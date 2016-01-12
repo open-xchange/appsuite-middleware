@@ -122,7 +122,13 @@ public abstract class AbstractCLI<R, C> {
             System.err.println("Unable to parse command line: " + e.getMessage());
             printHelp(options);
         } catch (final RuntimeException e) {
-            System.err.println("Problem in runtime: " + e.getMessage());
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
+            System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } catch (final Error e) {
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
+            System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
         } finally {
             if (error) {
                 System.exit(1);
