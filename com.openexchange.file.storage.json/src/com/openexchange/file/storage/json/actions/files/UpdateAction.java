@@ -82,6 +82,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
     @Action(method = RequestMethod.POST, name = "update", description = "Update an infoitem via POST", parameters = {
         @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
         @Parameter(name = "id", description = "Object ID of the updated infoitem."),
+        @Parameter(name = "offset", optional = true, description = "Optionally sets the start offset in bytes where to append the data to the document, must be equal to the actual document's length."),
         @Parameter(name = "timestamp", description = "Timestamp of the updated infoitem. If the infoitem was modified after the specified timestamp, then the update must fail."),
         @Parameter(name = "json", description = "Infoitem object as described in Common object data and Detailed infoitem data. The field id is not included."),
         @Parameter(name = "file", description = "File metadata as per <input type=\"file\" />")

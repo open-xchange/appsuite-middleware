@@ -5,6 +5,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 import com.openexchange.ajax.infostore.fileaccount.test.FilestorageAccountTest;
 import com.openexchange.ajax.infostore.test.AnotherCreateAndDeleteInfostoreTest;
+import com.openexchange.ajax.infostore.test.AppendDocumentTest;
 import com.openexchange.ajax.infostore.test.Bug27722Test;
 import com.openexchange.ajax.infostore.test.Bug32004Test;
 import com.openexchange.ajax.infostore.test.Bug40142Test;
@@ -46,6 +47,7 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(CreateFileWithIllegalCharactersTest.class);
         tests.addTestSuite(CheckNameActionTest.class);
         tests.addTestSuite(FilestorageAccountTest.class);
+        tests.addTestSuite(AppendDocumentTest.class);
         return tests;
     }
 }
