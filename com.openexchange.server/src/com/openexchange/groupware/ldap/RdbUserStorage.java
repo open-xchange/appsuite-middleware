@@ -199,24 +199,7 @@ public class RdbUserStorage extends UserStorage {
     public int createUser(final Connection con, final Context context, final User user) throws OXException {
         PreparedStatement stmt = null;
         try {
-            final int userId = IDGenerator.getId(context, com.openexchange.groupware.Types.PRINCIPAL, con);
-
-            // Check for individual file storage
-            if (user.getFilestoreId() > 0 && user.getFileStorageOwner() <= 0) {
-                // This user is supposed to have his own file storage
-                stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,?,0)");
-                stmt.setInt(1, context.getContextId());
-                stmt.setInt(2, userId);
-                try {
-                    stmt.executeUpdate();
-                } catch (SQLException e) {
-                    if (!Databases.isPrimaryKeyConflictInMySQL(e)) {
-                        throw e;
-                    }
-                    // All fine... Seems that it already exists
-                }
-                closeSQLStuff(stmt);
-            }
+            int userId = IDGenerator.getId(context, com.openexchange.groupware.Types.PRINCIPAL, con);
 
             // Insert user...
             stmt = con.prepareStatement(INSERT_USER);

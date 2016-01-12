@@ -54,6 +54,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Map;
+import com.openexchange.database.DatabaseService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
@@ -76,18 +78,19 @@ import com.openexchange.user.copy.internal.context.ContextLoadTask;
  */
 public class UserCopyTask implements CopyUserTaskService {
 
-    private final UserService service;
-
-    private final static String USER_EXISTS = "SELECT 1 FROM login2user WHERE cid = ? AND uid = ?";
-
+    private final UserService userService;
+    private final DatabaseService databaseService;
 
     /**
      * Initializes a new {@link UserCopyTask}.
-     * @param service
+     *
+     * @param userService The user service
+     * @param databaseService The database service
      */
-    public UserCopyTask(final UserService service) {
+    public UserCopyTask(final UserService userService, DatabaseService databaseService) {
         super();
-        this.service = service;
+        this.userService = userService;
+        this.databaseService = databaseService;
     }
 
     /**
@@ -121,9 +124,12 @@ public class UserCopyTask implements CopyUserTaskService {
         final Connection srcCon = tools.getSourceConnection();
         final Connection dstCon = tools.getDestinationConnection();
 
-        final UserMapping mapping = new UserMapping();
+        boolean error = true;
+        boolean filestoreUsageEntryCreated = false;
+        int dstUsrId = 0;
         try {
-            User srcUser = service.getUser(srcCon, srcUsrId.intValue(), srcCtx);
+            UserMapping mapping = new UserMapping();
+            User srcUser = userService.getUser(srcCon, srcUsrId.intValue(), srcCtx);
             if (userExistsInDestinationCtx(dstCtx, srcUser, dstCon)) {
                 throw UserCopyExceptionCodes.USER_ALREADY_EXISTS.create(srcUser.getLoginInfo(), Integer.valueOf(dstCtx.getContextId()));
             }
@@ -134,8 +140,16 @@ public class UserCopyTask implements CopyUserTaskService {
                 throw UserCopyExceptionCodes.FILE_STORAGE_CONFLICT.create(fileStorageOwner, srcCtx.getContextId());
             }
 
-            final int dstUsrId = service.createUser(dstCon, dstCtx, srcUser);
-            final User dstUser = service.getUser(dstCon, dstUsrId, dstCtx);
+            dstUsrId = userService.createUser(dstCon, dstCtx, srcUser);
+            User dstUser = userService.getUser(dstCon, dstUsrId, dstCtx);
+
+            // Check for individual file storage
+            if (srcUser.getFilestoreId() > 0 && srcUser.getFileStorageOwner() <= 0) {
+                // Ensure appropriate entry in 'filestore_usage' table using a separate connection to avoid deadlock later on
+                // caused by "SELECT ... FOR UPDATE" in 'DBQuotaFileStorage.incUsage()'
+                ensureFilestoreUsageEntry(dstUsrId, dstCtx);
+                filestoreUsageEntryCreated = true;
+            }
 
             /*
              * user configuration
@@ -150,11 +164,16 @@ public class UserCopyTask implements CopyUserTaskService {
             }
 
             mapping.addMapping(srcUser.getId(), srcUser, dstUsrId, dstUser);
+            error = false;
+            return mapping;
         } catch (final OXException e) {
             throw UserCopyExceptionCodes.USER_SERVICE_PROBLEM.create(e);
+        } finally {
+            if (error && filestoreUsageEntryCreated) {
+                // Drop previously created entry
+                dropFilestoreUsageEntry(dstUsrId, dstCtx);
+            }
         }
-
-        return mapping;
     }
 
     /**
@@ -171,7 +190,7 @@ public class UserCopyTask implements CopyUserTaskService {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = dstCon.prepareStatement(USER_EXISTS);
+            stmt = dstCon.prepareStatement("SELECT 1 FROM login2user WHERE cid = ? AND uid = ?");
             stmt.setInt(1, dstCtxId);
             stmt.setString(2, srcUserName);
             rs = stmt.executeQuery();
@@ -180,6 +199,83 @@ public class UserCopyTask implements CopyUserTaskService {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private void ensureFilestoreUsageEntry(int userId, Context context) throws OXException {
+        if (userId <= 0) {
+            return;
+        }
+
+        Connection con = databaseService.getWritable(context);
+        boolean modified = false;
+        try {
+            modified = ensureFilestoreUsageEntry0(userId, context, con);
+        } finally {
+            if (modified) {
+                databaseService.backWritable(context, con);
+            } else {
+                databaseService.backWritableAfterReading(context, con);
+            }
+        }
+    }
+
+    private boolean ensureFilestoreUsageEntry0(int userId, Context context, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("INSERT INTO filestore_usage (cid,user,used) VALUES (?,?,0)");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            try {
+                stmt.executeUpdate();
+                return true;
+            } catch (SQLException e) {
+                if (!Databases.isPrimaryKeyConflictInMySQL(e)) {
+                    throw e;
+                }
+                // All fine... Seems that it already exists
+                return false;
+            }
+        } catch (SQLException e) {
+            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private void dropFilestoreUsageEntry(int userId, Context context) throws OXException {
+        if (userId <= 0) {
+            return;
+        }
+
+        Connection con = databaseService.getWritable(context);
+        boolean modified = false;
+        try {
+            modified = dropFilestoreUsageEntry0(userId, context, con);
+        } finally {
+            if (modified) {
+                databaseService.backWritable(context, con);
+            } else {
+                databaseService.backWritableAfterReading(context, con);
+            }
+        }
+    }
+
+    private boolean dropFilestoreUsageEntry0(int userId, Context context, Connection con) throws OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("DELETE FROM filestore_usage WHERE cid=? AND user=?");
+            stmt.setInt(1, context.getContextId());
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
+        } finally {
+            Databases.closeSQLStuff(stmt);
         }
     }
 
