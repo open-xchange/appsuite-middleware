@@ -153,6 +153,27 @@ public class ImageTransformationUtility {
     }
 
     /**
+     * Gets either a buffered or byte-array backed {@link InputStream} for specified stream, which is known to return <code>true</code> for {@link InputStream#markSupported() markSupported()}.
+     *
+     * @param in The stream
+     * @return A mark-supporting input stream
+     */
+    public static InputStream markSupportingInputStreamFor(InputStream in) {
+        return Utility.markSupportingInputStreamFor(in);
+    }
+
+    /**
+     * Reads the magic number & resets specified image input stream.
+     *
+     * @param inputStream The input stream
+     * @return The magic number or <code>-1</code> if stream is <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static int readMagicNumber(BufferedInputStream inputStream) throws IOException {
+        return Utility.readMagicNumber(inputStream);
+    }
+
+    /**
      * Extracts image information from the supplied metadata.
      *
      * @param metadata The metadata to extract the image information

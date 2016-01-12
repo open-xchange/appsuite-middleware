@@ -56,7 +56,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -69,8 +69,9 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.ImageOutputStream;
-import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.psd.PsdMetadataReader;
 import com.drew.metadata.Metadata;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
@@ -198,6 +199,11 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private static IOException createResolutionExceededIOException(long maxResolution, int resolution) {
         return new ImageTransformationDeniedIOException(new StringBuilder("Image transformation denied. Resolution is too high. (current=").append(resolution).append(", max=").append(maxResolution).append(')').toString());
     }
+
+    private static final int JPEG_FILE_MAGIC_NUMBER = 0xFFD8;
+    private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;  // "MM"
+    private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;     // "II"
+    private static final int PSD_MAGIC_NUMBER = 0x3842;            // "8B" note that the full magic number is 8BPS
 
     // ------------------------------------------------------------------------------------------------------------------------------ //
 
@@ -562,45 +568,17 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @throws IOException
      */
     private BufferedImage readAndExtractMetadataFromStream(InputStream inputStream, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        ThresholdFileHolder sink = null;
+        ThresholdFileHolder sink = new ThresholdFileHolder();
         try {
-            sink = new ThresholdFileHolder();
             sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR) : inputStream);
 
-            try {
-                metadata = ImageMetadataReader.readMetadata(ImageTransformationUtility.bufferedInputStreamFor(getFileStream(sink)), false);
-            } catch (ImageProcessingException e) {
-                LOG.debug("error getting metadata for {}", formatName, e);
-            }
-
-            if (maxResolution > 0) {
-                ImageInformation imageInformation = getImageInformation(metadata);
-                if (null != imageInformation) {
-                    int resolution = imageInformation.height * imageInformation.width;
-                    if (resolution > maxResolution) {
-                        throw createResolutionExceededIOException(maxResolution, resolution);
-                    }
-                }
-            }
-
-            File tempFile = sink.getTempFile();
-            if (null == tempFile) {
-                // Everything held in memory - don't care
-                return imageIoRead(getFileStream(sink), signaler);
-            }
-
-            BufferedImage bufferedImage = imageIORead(tempFile, signaler);
-            sink = null; // Avoid preliminary closing in 'finally' clause
-            return bufferedImage;
+            return readAndExtractMetadataFromFile0(sink, formatName, maxResolution, signaler);
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
                 throw (IOException) cause;
             }
-            throw new IOException("error accessing managed file", e);
-        } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream for {}", formatName, e);
-            return null;
+            throw new IOException("Error accessing file holder", null == cause ? e : cause);
         } finally {
             Streams.close(sink);
         }
@@ -618,15 +596,62 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @throws IOException
      */
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        try {
-            if (maxSize > 0 && imageFile.getLength() > maxSize) {
-                throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
-            }
+        if (maxSize > 0 && imageFile.getLength() > maxSize) {
+            throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
+        }
 
-            try {
-                metadata = ImageMetadataReader.readMetadata(ImageTransformationUtility.bufferedInputStreamFor(getFileStream(imageFile)), false);
-            } catch (ImageProcessingException e) {
-                LOG.debug("error getting metadata for {}", formatName, e);
+        return readAndExtractMetadataFromFile0(imageFile, formatName, maxResolution, signaler);
+    }
+
+    /**
+     * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract meta-data information.
+     *
+     * @param imageFile The image file to read from
+     * @param formatName The format name
+     * @param maxSize The max. size for an image or less than/equal to 0 (zero) for no size limitation
+     * @param signaler The optional signaler or <code>null</code>
+     * @return The buffered image
+     * @throws IOException
+     */
+    private BufferedImage readAndExtractMetadataFromFile0(IFileHolder imageFile, String formatName, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
+        BufferedInputStream bufferedStream = ImageTransformationUtility.bufferedInputStreamFor(getFileStream(imageFile));
+        try {
+            // Reads the magic number & resets the stream
+            int magicNumber = ImageTransformationUtility.readMagicNumber(bufferedStream);
+
+            // Read image metadata
+            {
+                boolean reset = false;
+                try {
+                    if ((magicNumber & JPEG_FILE_MAGIC_NUMBER) == JPEG_FILE_MAGIC_NUMBER) {
+                        // This covers all JPEG files
+                        bufferedStream.mark(65536); // 64K mark limit
+                        reset = true;
+                        metadata = JpegMetadataReader.readMetadata(bufferedStream, false);
+                    } else if (magicNumber == INTEL_TIFF_MAGIC_NUMBER || magicNumber == MOTOROLA_TIFF_MAGIC_NUMBER) {
+                        // This covers all TIFF and camera RAW files
+                        // Do not read meta-data from TIFF images using 'com.drew.imaging' package as it is very inefficient
+                    } else if (magicNumber == PSD_MAGIC_NUMBER) {
+                        // This covers PSD files, which only need 26 bytes for extracting metadata
+                        bufferedStream.mark(32);
+                        reset = true;
+                        metadata = PsdMetadataReader.readMetadata(bufferedStream, false);
+                    }
+                } catch (ImageProcessingException e) {
+                    LOG.debug("Error getting metadata for {}", formatName, e);
+                } finally {
+                    // Try to reset stream; otherwise re-instantiate
+                    if (reset) {
+                        try {
+                            bufferedStream.reset();
+                        } catch (IOException e) {
+                            // The mark has been invalidated or stream has been closed
+                            LOG.debug("Error resetting image stream", e);
+                            Streams.close(bufferedStream);
+                            bufferedStream = ImageTransformationUtility.bufferedInputStreamFor(getFileStream(imageFile));
+                        }
+                    }
+                }
             }
 
             if (maxResolution > 0) {
@@ -639,17 +664,12 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 }
             }
 
-            File tempFile = imageFile instanceof ThresholdFileHolder ? ((ThresholdFileHolder) imageFile).getTempFile() : null;
-            if (null == tempFile) {
-                // Everything held in memory - don't care
-                return imageIoRead(getFileStream(imageFile), signaler);
-            }
-
-            // Read from file
-            return imageIORead(tempFile, signaler);
+            return imageIoRead(bufferedStream, signaler);
         } catch (IllegalArgumentException e) {
-            LOG.debug("error reading image from stream for {}", formatName, e);
+            LOG.debug("Error reading image for {}", formatName, e);
             return null;
+        } finally {
+            Streams.close(bufferedStream);
         }
     }
 
@@ -664,19 +684,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
     private BufferedImage imageIoRead(InputStream in, ImageTransformationSignaler signaler) throws IOException {
         onImageRead(signaler);
         return ImageIO.read(in);
-    }
-
-    /**
-     * Returns a {@link BufferedImage} as the result of decoding a supplied file.
-     *
-     * @param file The file to read from
-     * @param signaler The optional signaler or <code>null</code>
-     * @return The resulting {@code BufferedImage} instance
-     * @throws IOException If an I/O error occurs
-     */
-    private BufferedImage imageIORead(File file, ImageTransformationSignaler signaler) throws IOException {
-        onImageRead(signaler);
-        return ImageIO.read(file);
     }
 
     private static void onImageRead(ImageTransformationSignaler signaler) {
