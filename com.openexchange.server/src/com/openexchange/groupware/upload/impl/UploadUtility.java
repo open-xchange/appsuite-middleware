@@ -279,8 +279,9 @@ public final class UploadUtility {
         // Parse the upload request
         FileItemIterator iter;
         try {
-            // Get file upload
-            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
+            // Get file upload...
+            // ... and add some "extra space" as Apache Fileupload considers the maximum allowed size of a complete request (incl. form fields)
+            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize > 0 ? maxOverallSize + 1024 : maxOverallSize);
             // Check request's character encoding
             if (null == req.getCharacterEncoding()) {
                 String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
