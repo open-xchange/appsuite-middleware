@@ -24,5 +24,11 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Export-Package: com.openexchange.i18n.yaml
+Export-Package: com.openexchange.i18n.yaml,
+ org.fedorahosted.tennera.jgettext,
+ org.fedorahosted.tennera.jgettext.catalog.parse,
+ org.fedorahosted.tennera.jgettext.catalog.util,
+ org.fedorahosted.tennera.jgettext.util
 Bundle-Activator: com.openexchange.i18n.yaml.osgi.I18NYamlParserActivator
+Bundle-ClassPath: .,
+ lib/jgettext-0.14.jar
