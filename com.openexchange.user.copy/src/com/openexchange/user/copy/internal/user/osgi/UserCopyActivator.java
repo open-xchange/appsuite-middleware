@@ -52,34 +52,40 @@ package com.openexchange.user.copy.internal.user.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.user.UserService;
 
 
 /**
  * {@link UserCopyActivator}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class UserCopyActivator implements BundleActivator {
 
-    private ServiceTracker<UserService, UserService> tracker;
-
+    private volatile ServiceTracker<Object, Object> tracker;
 
     /**
-     * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
+     * Initializes a new {@link UserCopyActivator}.
      */
+    public UserCopyActivator() {
+        super();
+    }
+
     @Override
     public void start(final BundleContext context) throws Exception {
-        tracker = new ServiceTracker<UserService, UserService>(context, UserService.class, new UserCopyTaskRegisterer(context));
+        UserCopyTaskRegisterer registerer = new UserCopyTaskRegisterer(context);
+        ServiceTracker<Object, Object> tracker = new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer);
+        this.tracker = tracker;
         tracker.open();
     }
 
-    /**
-     * @see org.osgi.framework.BundleActivator#stop(org.osgi.framework.BundleContext)
-     */
     @Override
     public void stop(final BundleContext context) throws Exception {
-        tracker.close();
+        ServiceTracker<Object, Object> tracker = this.tracker;
+        if (null != tracker) {
+            this.tracker = null;
+            tracker.close();
+        }
     }
 
 }
