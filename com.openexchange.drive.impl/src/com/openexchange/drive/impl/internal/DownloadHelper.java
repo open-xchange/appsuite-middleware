@@ -63,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 
 /**
@@ -117,10 +118,11 @@ public class DownloadHelper {
                 if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(file)) {
                     String fileMD5Sum = ((DriveMetadata) file).getFileMD5Sum();
                     if (false == fileVersion.getChecksum().equals(fileMD5Sum)) {
-                        // stored checksum no longer valid
+                        // stored checksum no longer valid, invalidate any affected checksums
                         session.trace("Checksum " + fileVersion.getChecksum() + " different from actual checksum " + fileMD5Sum +
                             " of .drive-meta file, invalidating stored checksums.");
                         session.getChecksumStore().removeFileChecksums(DriveUtils.getFileID(file));
+                        session.getChecksumStore().removeDirectoryChecksum(new FolderID(file.getFolderId()));
                         throw DriveExceptionCodes.FILEVERSION_NOT_FOUND.create(fileVersion.getName(), fileVersion.getChecksum(), path);
                     }
                 }
