@@ -51,6 +51,7 @@ package com.openexchange.tools.images;
 
 import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import javax.imageio.ImageIO;
@@ -63,6 +64,8 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.java.ByteArrayBufferedInputStream;
+import com.openexchange.java.FastBufferedInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
@@ -208,7 +211,47 @@ public class ImageTransformationUtility {
         if ((in instanceof BufferedInputStream)) {
             return (BufferedInputStream) in;
         }
+        if ((in instanceof ByteArrayInputStream)) {
+            return new ByteArrayBufferedInputStream((ByteArrayInputStream) in);
+        }
+        return new FastBufferedInputStream(in, 65536);
+    }
+
+    /**
+     * Gets either a buffered or byte-array backed {@link InputStream} for specified stream, which is known to return <code>true</code> for {@link InputStream#markSupported() markSupported()}.
+     *
+     * @param in The stream
+     * @return A mark-supporting input stream
+     */
+    public static InputStream markSupportingInputStreamFor(InputStream in) {
+        if (null == in) {
+            return null;
+        }
+        if ((in instanceof BufferedInputStream)) {
+            return in;
+        }
+        if ((in instanceof ByteArrayInputStream)) {
+            return in;
+        }
         return new BufferedInputStream(in, 65536);
+    }
+
+    /**
+     * Reads the magic number & resets specified image input stream.
+     *
+     * @param inputStream The input stream
+     * @return The magic number or <code>-1</code> if stream is <code>null</code>
+     * @throws IOException If an I/O error occurs
+     */
+    public static int readMagicNumber(BufferedInputStream inputStream) throws IOException {
+        if (null == inputStream) {
+            return -1;
+        }
+
+        inputStream.mark(2);
+        int magicNumber = inputStream.read() << 8 | inputStream.read();
+        inputStream.reset();
+        return magicNumber;
     }
 
     /**
