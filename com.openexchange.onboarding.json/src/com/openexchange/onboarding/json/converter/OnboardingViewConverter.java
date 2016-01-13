@@ -184,19 +184,18 @@ public class OnboardingViewConverter implements ResultConverter {
                 } else {
                     JSONArray jCompositeIds = new JSONArray(compositeIds.size());
                     for (CompositeId compositeId : compositeIds) {
-
-                        // Remember associated scenario
-                        if (scenarioIds.add(compositeId.getScenarioId())) {
-                            Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
-                            boolean available = onboardingService.isAvailableFor(compositeId.getScenarioId(), session);
-                            jScenarios.put(toJson(scenario, available, session));
-                        }
-
-                        // Add appropriate scenario-action-association entry
+                        // Check for an appropriate scenario-action-association entry
                         JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, session);
                         if (null != jScenario2ActionEntry) {
                             // Add to device's list of supported scenarios
                             jCompositeIds.put(compositeId.toString());
+
+                            // Remember associated scenario
+                            if (scenarioIds.add(compositeId.getScenarioId())) {
+                                Scenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), session);
+                                boolean available = onboardingService.isAvailableFor(compositeId.getScenarioId(), session);
+                                jScenarios.put(toJson(scenario, available, session));
+                            }
 
                             // Add to scenario-to-action mapping
                             jScenario2Action.put(jScenario2ActionEntry);
