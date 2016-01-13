@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-01-13 09:42+0100\n"
+"POT-Creation-Date: 2016-01-13 11:39+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,17 +75,12 @@ msgstr ""
 msgid "Updater for Windows Clients"
 msgstr ""
 
-# When executing the downloaded file, an installation wizard 
-# will be launched. Follow the instructions and install the 
-# updater. Installs latest versions of Windows® client software. 
-# The Updater automatically informs about new updates. You can 
-# download the updates from within the Updater.
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
 msgid ""
-"When executing the downloaded file, an installation wizard \n"
-"will be launched. Follow the instructions and install the \n"
-"updater. Installs latest versions of Windows® client software. \n"
-"The Updater automatically informs about new updates. You can \n"
-"download the updates from within the Updater."
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
 msgstr ""
 
 # Exchange ActiveSync
