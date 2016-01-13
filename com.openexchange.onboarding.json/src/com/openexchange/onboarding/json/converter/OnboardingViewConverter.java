@@ -219,7 +219,7 @@ public class OnboardingViewConverter implements ResultConverter {
         DeviceAwareScenario scenario = onboardingService.getScenario(compositeId.getScenarioId(), compositeId.getDevice(), session);
 
         JSONArray jActionIds = new JSONArray(10);
-        collectActions(scenario, null, jActionIds, actionCollector, requestData, onboardingService, session);
+        collectActions(scenario, compositeId.getScenarioId(), jActionIds, actionCollector, requestData, onboardingService, session);
         if (jActionIds.length() > 0) {
             JSONObject jScenario2ActionEntry = new JSONObject(6);
             jScenario2ActionEntry.put("id", compositeId.toString());
