@@ -135,7 +135,7 @@ public abstract class AbstractShareBasedLoginRequestHandler extends AbstractLogi
          * @param httpRequest
          * @param enhancement The session enhancement, or <code>null</code> if not applicable
          */
-        private ShareLoginClosure(GuestInfo guest, ShareTarget target, ShareTargetPath targetPath, LoginConfiguration conf, HttpServletRequest httpRequest) {
+        ShareLoginClosure(GuestInfo guest, ShareTarget target, ShareTargetPath targetPath, LoginConfiguration conf, HttpServletRequest httpRequest) {
             this.guest = guest;
             this.target = target;
             this.conf = conf;

@@ -134,6 +134,14 @@ public final class LoginPerformer {
         return doLogin(request, new HashMap<String, Object>(1));
     }
 
+    /**
+     * Performs the login for specified login request passing arbitrary properties.
+     *
+     * @param request The login request
+     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
+     * @return The login providing login information
+     * @throws LoginException If login fails
+     */
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
@@ -154,7 +162,7 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @param properties The properties to decorate
+     * @param properties The properties to decorate; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
      * @param loginMethod The actual login method that performs authentication
      * @return The login providing login information
      * @throws OXException If login fails

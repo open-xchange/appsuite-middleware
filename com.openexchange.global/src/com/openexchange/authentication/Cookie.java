@@ -50,19 +50,23 @@
 package com.openexchange.authentication;
 
 /**
- * An interface which will represent a cookie from an HTTP request
+ * An interface, which represents a cookie from an HTTP request.
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.com">Dennis Sieben</a>
  */
 public interface Cookie {
 
     /**
-     * @return the name of the cookie.
+     * Gets the name of the cookie.
+     *
+     * @return The name of the cookie.
      */
     String getName();
 
     /**
-     * @return the cookies value.
+     * Gets the value of the cookie.
+     *
+     * @return The cookies value.
      */
     String getValue();
 

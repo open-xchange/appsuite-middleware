@@ -51,7 +51,6 @@ package com.openexchange.authentication.service;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.security.auth.login.LoginException;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationService;
 import com.openexchange.authentication.BasicAuthenticationService;
@@ -60,7 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 
 /**
- * Provides a static method for the login servlet to do the authentication.
+ * Provides the static methods to do the authentication.
  *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
@@ -69,19 +68,21 @@ public final class Authentication {
     private static final AtomicReference<AuthenticationService> SERVICE_REF = new AtomicReference<AuthenticationService>();
     private static final AtomicReference<BasicAuthenticationService> BASIC_SERVICE_REF = new AtomicReference<BasicAuthenticationService>();
 
+    /**
+     * Prevent initialization.
+     */
     private Authentication() {
         super();
     }
 
     /**
      * Performs a login using an authentication service.
+     *
      * @param login entered login.
      * @param pass entered password.
      * @param properties The optional properties
-     * @return a string array with two elements in which the first contains the login info for the context and the second contains the
-     * login info for the user.
-     * @throws OXException if something with the login info is wrong.
-     * @throws OXException if the authentication service is not available.
+     * @return The resolved login information for the context as well as for the user
+     * @throws OXException If something with the login info is wrong or needed service is absent
      */
     public static Authenticated login(final String login, final String pass, final Map<String, Object> properties) throws OXException {
         final AuthenticationService auth = SERVICE_REF.get();
@@ -105,13 +106,13 @@ public final class Authentication {
     }
 
     /**
-     * Performs an autologin using an authentication service.
+     * Performs an auto-login using an authentication service.
+     *
      * @param login entered login.
      * @param pass entered password.
      * @param properties The optional properties
-     * @return a string array with two elements in which the first contains the login info for the context and the second contains the
-     * login info for the user.
-     * @throws LoginException if something with the login info is wrong.
+     * @return The resolved login information for the context as well as for the user
+     * @throws OXException If something with the login info is wrong or needed service is absent
      */
     public static Authenticated autologin(final String login, final String pass, final Map<String, Object> properties) throws OXException {
         final AuthenticationService auth = SERVICE_REF.get();

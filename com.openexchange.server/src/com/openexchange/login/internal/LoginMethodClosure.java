@@ -53,7 +53,7 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 
 /**
- * Closure interface for the two different login methods.
+ * Closure interface for the different login methods.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
