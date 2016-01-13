@@ -47,25 +47,56 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.server.osgi;
 
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.exception.OXException;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
+import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 
 /**
- * Closure interface for the different login methods.
+ * {@link LoginListenerCustomizer} - Registers/unregisters a login handler in/from {@link LoginListenerRegistryImpl}.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface LoginMethodClosure {
+public class LoginListenerCustomizer implements ServiceTrackerCustomizer<LoginListener, LoginListener> {
+
+    private final BundleContext context;
 
     /**
-     * Performs a login using currently available authentication service.
+     * Initializes a new {@link LoginListenerCustomizer}.
      *
-     * @param loginResult The current login result used to pass login request information; such as headers
-     * @return The resolved login information for the context as well as for the user; even <code>null</code> for auto-login if <code>LoginExceptionCodes.NOT_SUPPORTED</code> happens
-     * @throws OXException If login attempt fails
+     * @param context The bundle context
      */
-    Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException;
+    public LoginListenerCustomizer(final BundleContext context) {
+        super();
+        this.context = context;
+    }
+
+    @Override
+    public LoginListener addingService(ServiceReference<LoginListener> serviceReference) {
+        LoginListener listener = context.getService(serviceReference);
+        if (LoginListenerRegistryImpl.getInstance().addLoginListener(listener)) {
+            return listener;
+        }
+        // Nothing to track
+        context.ungetService(serviceReference);
+        return null;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<LoginListener> serviceReference, LoginListener listener) {
+        // Nothing to do
+    }
+
+    @Override
+    public void removedService(ServiceReference<LoginListener> serviceReference, LoginListener listener) {
+        if (null != listener) {
+            LoginListenerRegistryImpl.getInstance().removeLoginListener(listener);
+            context.ungetService(serviceReference);
+        }
+    }
 
 }

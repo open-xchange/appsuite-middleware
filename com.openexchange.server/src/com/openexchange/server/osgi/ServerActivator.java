@@ -172,6 +172,7 @@ import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
@@ -531,6 +532,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Login handler
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
+        // Login listener
+        track(LoginListener.class, new LoginListenerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
@@ -629,9 +632,7 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        registerService(
-            UserConfigurationService.class,
-            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+        registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));

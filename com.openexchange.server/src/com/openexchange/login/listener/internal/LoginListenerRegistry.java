@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,25 +47,24 @@
  *
  */
 
-package com.openexchange.login.internal;
+package com.openexchange.login.listener.internal;
 
-import com.openexchange.authentication.Authenticated;
-import com.openexchange.exception.OXException;
+import java.util.List;
+import com.openexchange.login.listener.LoginListener;
 
 /**
- * Closure interface for the different login methods.
+ * {@link LoginListenerRegistry} - A registry for login listeners.
  *
- * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public interface LoginMethodClosure {
+public interface LoginListenerRegistry {
 
     /**
-     * Performs a login using currently available authentication service.
+     * Gets a read-only list containing the login listeners in this registry.
      *
-     * @param loginResult The current login result used to pass login request information; such as headers
-     * @return The resolved login information for the context as well as for the user; even <code>null</code> for auto-login if <code>LoginExceptionCodes.NOT_SUPPORTED</code> happens
-     * @throws OXException If login attempt fails
+     * @return A read-only list containing the login listeners in this registry.
      */
-    Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException;
+    List<LoginListener> getLoginListeners();
 
 }
