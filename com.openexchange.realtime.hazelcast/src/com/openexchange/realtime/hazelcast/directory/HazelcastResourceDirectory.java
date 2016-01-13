@@ -59,6 +59,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+
 import com.google.common.base.Optional;
 import com.hazelcast.core.EntryEvent;
 import com.hazelcast.core.HazelcastInstance;
@@ -518,9 +519,10 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
             }
 
             private void touch(MultiMap<PortableID, PortableID> idMapping, IMap<PortableID, PortableResource> resourceMapping, PortableID portableID) {
-                idMapping.get(portableID.toGeneralForm());
-                PortableResource portableResource = resourceMapping.get(portableID);
-                if (portableResource == null) {
+                Set<PortableID> idSet = new HashSet<PortableID>();
+                idSet.add(portableID);
+                Map<PortableID, PortableResource> portableResource = resourceMapping.getAll(idSet);
+                if ((portableResource == null) || (portableResource.isEmpty())) {
                     LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", portableID);
                 } else {
                     LOG.debug("Touched ID: {}", portableID);
