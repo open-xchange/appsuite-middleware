@@ -210,11 +210,7 @@ oxupdaterinstall:
     alternatives: []
     icon: oxupdater.png
     displayName_t10e: "Updater for Windows Clients"
-    description_t10e: "When executing the downloaded file, an installation wizard 
-                      will be launched. Follow the instructions and install the 
-                      updater. Installs latest versions of Windows® client software. 
-                      The Updater automatically informs about new updates. You can 
-                      download the updates from within the Updater."
+    description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
 
 
 ### Exchange ActiveSync
