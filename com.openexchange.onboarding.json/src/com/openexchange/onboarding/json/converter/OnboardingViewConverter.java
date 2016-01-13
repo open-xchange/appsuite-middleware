@@ -171,7 +171,7 @@ public class OnboardingViewConverter implements ResultConverter {
                 Device device = deviceEntry.getKey();
                 List<CompositeId> compositeIds = deviceEntry.getValue();
 
-                JSONObject jDevice = new JSONObject(4);
+                JSONObject jDevice = new JSONObject(8);
                 jDevice.put("id", device.getId());
                 jDevice.put("enabled", device.isEnabled(session));
                 jDevice.put("platform", device.getPlatform().getId());
@@ -184,8 +184,6 @@ public class OnboardingViewConverter implements ResultConverter {
                 } else {
                     JSONArray jCompositeIds = new JSONArray(compositeIds.size());
                     for (CompositeId compositeId : compositeIds) {
-                        // Add to device's list of supported scenarios
-                        jCompositeIds.put(compositeId.toString());
 
                         // Remember associated scenario
                         if (scenarioIds.add(compositeId.getScenarioId())) {
@@ -197,6 +195,10 @@ public class OnboardingViewConverter implements ResultConverter {
                         // Add appropriate scenario-action-association entry
                         JSONObject jScenario2ActionEntry = createScenario2ActionEntry(compositeId, actionCollector, requestData, onboardingService, session);
                         if (null != jScenario2ActionEntry) {
+                            // Add to device's list of supported scenarios
+                            jCompositeIds.put(compositeId.toString());
+
+                            // Add to scenario-to-action mapping
                             jScenario2Action.put(jScenario2ActionEntry);
                         }
                     }
