@@ -49,37 +49,34 @@
 
 package com.openexchange.authentication.imap.osgi;
 
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceRegistration;
 import com.openexchange.authentication.AuthenticationService;
+import com.openexchange.authentication.imap.impl.IMAPAuthentication;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.context.ContextService;
+import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.user.UserService;
 
-public class Activator implements BundleActivator {
-
-    private static transient final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Activator.class);
+/**
+ * Activator for <code>com.openexchange.authentication.imap</code> bundle.
+ */
+public class IMAPAuthenticationActivator extends HousekeepingActivator {
 
     /**
-     * Reference to the service registration.
+     * Initializes a new {@link IMAPAuthenticationActivator}.
      */
-    private ServiceRegistration<AuthenticationService> registration;
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void start(final BundleContext context) throws Exception {
-        LOG.info("starting bundle: com.openexchange.authentication.imap");
-
-//        registration = context.registerService(AuthenticationService.class,new IMAPAuthentication(), null);
+    public IMAPAuthenticationActivator() {
+        super();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void stop(final BundleContext context) throws Exception {
-        LOG.info("stopping bundle: com.openexchange.authentication.imap");
-
-        registration.unregister();
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigurationService.class, ContextService.class, UserService.class, MailAccountStorageService.class };
     }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(AuthenticationService.class, new IMAPAuthentication(this));
+    }
+
 }

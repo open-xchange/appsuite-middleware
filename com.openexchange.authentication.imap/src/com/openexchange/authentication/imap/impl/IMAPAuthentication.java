@@ -90,20 +90,20 @@ public class IMAPAuthentication implements AuthenticationService {
         IMAP_TIMEOUT("IMAP_TIMEOUT"),
         IMAP_CONNECTIONTIMEOUT("IMAP_CONNECTIONTIMEOUT"),
         USE_FULL_LOGIN_INFO("USE_FULL_LOGIN_INFO"),
+        USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP("USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP"),
         IMAP_SERVER("IMAP_SERVER"),
         IMAP_PORT("IMAP_PORT"),
         USE_MULTIPLE("USE_MULTIPLE"),
         IMAP_USE_SECURE("IMAP_USE_SECURE"),
         IMAPAUTHENC("com.openexchange.authentication.imap.imapAuthEnc");
 
+        /** The name of the property */
         public final String name;
 
         private PropertyNames(final String name) {
             this.name = name;
         }
     }
-
-    private final static String IMAP_AUTH_PROPERTY_FILE = "imapauth.properties";
 
     /**
      * The string for <code>ISO-8859-1</code> character encoding.
@@ -123,7 +123,7 @@ public class IMAPAuthentication implements AuthenticationService {
         super();
         this.services = services;
 
-        // Initialize configuration
+        // Check whether to cache failed authentication attempts to quit subsequent tries in a fast manner
         ConfigurationService configService = services.getService(ConfigurationService.class);
         int failureCacheExpirySeconds = configService.getIntProperty("com.openexchange.authentication.imap.failureCacheExpirySeconds", 0);
         if (failureCacheExpirySeconds > 0) {
@@ -131,44 +131,38 @@ public class IMAPAuthentication implements AuthenticationService {
         } else {
             failures = null;
         }
-        props = configService.getFile(IMAP_AUTH_PROPERTY_FILE);
+
+        // Initialize configuration properties
+        props = configService.getFile("imapauth.properties");
     }
 
     @Override
     public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
-        String host = "localhost";
-        Integer port = Integer.valueOf(143);
-        boolean useFullLogin = true;
-        String user = null;
-        String connectiontimeout = "4000";
-        String imaptimeout = "4000";
-        Cache<FailureKey, AuthenticationFailedException> failures = this.failures;
-        FailureKey failureKey = null;
-
-        Store imapconnection = null;
         try {
-            final String[] splitted = split(loginInfo.getUsername());
+            SplitResult splitResult = split(loginInfo.getUsername());
 
-            final String uid = splitted[1];
+            String localPart = splitResult.localPart;
             String password = loginInfo.getPassword();
-            if ("".equals(uid.trim()) || "".equals(password.trim())) {
+            if ("".equals(localPart.trim()) || "".equals(password.trim())) {
                 throw LoginExceptionCodes.INVALID_CREDENTIALS.create();
             }
 
             if (props.get(PropertyNames.IMAPAUTHENC.name) != null) {
-                final String authenc = (String) props.get(PropertyNames.IMAPAUTHENC.name);
+                String authenc = (String) props.get(PropertyNames.IMAPAUTHENC.name);
                 try {
                     password = new String(password.getBytes(authenc), CHARENC_ISO8859);
-                } catch (final UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     LOG.error("", e);
                     throw LoginExceptionCodes.COMMUNICATION.create(e);
                 }
             }
 
+            String imaptimeout = "4000";
             if (props.get(PropertyNames.IMAP_TIMEOUT.name) != null) {
                 imaptimeout = (String) props.get(PropertyNames.IMAP_TIMEOUT.name);
             }
 
+            String connectiontimeout = "4000";
             if (props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name) != null) {
                 connectiontimeout = (String) props.get(PropertyNames.IMAP_CONNECTIONTIMEOUT.name);
             }
@@ -177,14 +171,22 @@ public class IMAPAuthentication implements AuthenticationService {
             imapprops.put("mail.imap.connectiontimeout", connectiontimeout);
             imapprops.put("mail.imap.timeout", imaptimeout);
 
+            boolean useFullLogin = true;
             if (props.get(PropertyNames.USE_FULL_LOGIN_INFO.name) != null) {
-                useFullLogin = Boolean.parseBoolean((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO.name));
+                useFullLogin = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO.name)).trim());
             }
 
+            boolean useFullLoginForUserLookup = false;
+            if (props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name) != null) {
+                useFullLoginForUserLookup = Boolean.parseBoolean(((String) props.get(PropertyNames.USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP.name)).trim());
+            }
+
+            String host = "localhost";
             if (props.get(PropertyNames.IMAP_SERVER.name) != null) {
                 host = IDNA.toASCII((String) props.get(PropertyNames.IMAP_SERVER.name));
             }
 
+            Integer port = Integer.valueOf(143);
             if (props.get(PropertyNames.IMAP_PORT.name) != null) {
                 port = Integer.valueOf((String) props.get(PropertyNames.IMAP_PORT.name));
             }
@@ -192,29 +194,38 @@ public class IMAPAuthentication implements AuthenticationService {
             LOG.debug("Using imap server: {}", host);
             LOG.debug("Using imap port: {}", port);
             LOG.debug("Using full login info: {}", useFullLogin);
+            LOG.debug("Using full login info for user look-up: {}", useFullLoginForUserLookup);
 
-            // set imap username
-            user = useFullLogin ? new StringBuilder(uid).append('@').append(splitted[0]).toString() : uid;
+            // Set IMAP login
+            String imapLogin = useFullLogin ? splitResult.fullLoginInfo : localPart;
 
-            // multiple imap server support
-            // Added by cutmasta
-            boolean USE_IMAPS = false;
+            // Set user/context info
+            String userInfo = useFullLoginForUserLookup ? splitResult.fullLoginInfo : localPart;
+            String contextInfo = splitResult.domainPart;
+
+            // Support for multiple IMAP servers
+            boolean secure = false;
             if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.USE_MULTIPLE.name))) {
-	            ContextService contextService = services.getService(ContextService.class);
-	            int ctxId = contextService.getContextId(splitted[0]);
-	            if (ContextStorage.NOT_FOUND == ctxId) {
-	                throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(splitted[0]);
-	            }
-	            Context ctx = contextService.getContext(ctxId);
+                int ctxId;
+                Context ctx;
+                {
+                    ContextService contextService = services.getService(ContextService.class);
+                    ctxId = contextService.getContextId(contextInfo);
+                    if (ContextStorage.NOT_FOUND == ctxId) {
+                        throw INVALID_CREDENTIALS_MISSING_CONTEXT_MAPPING.create(contextInfo);
+                    }
+                    ctx = contextService.getContext(ctxId);
+                }
 
-	            UserService userService = services.getService(UserService.class);
 	            int userId;
-	            try {
-	                userId = userService.getUserId(uid, ctx);
-	            } catch (final OXException e) {
-	                throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
+	            {
+	                UserService userService = services.getService(UserService.class);
+	                try {
+	                    userId = userService.getUserId(userInfo, ctx);
+	                } catch (final OXException e) {
+	                    throw INVALID_CREDENTIALS_MISSING_USER_MAPPING.create(loginInfo.getUsername());
+	                }
 	            }
-	            // final User user2 = userService.getUser(userId, ctx);
 
 	            /*
 	             * Load primary account and check its protocol to be IMAP
@@ -232,10 +243,10 @@ public class IMAPAuthentication implements AuthenticationService {
 	             */
 	            final LoginSource loginSource = MailProperties.getInstance().getLoginSource();
 	            if (LoginSource.USER_IMAPLOGIN.equals(loginSource)) {
-	                user = defaultMailAccount.getLogin();
+	                imapLogin = defaultMailAccount.getLogin();
 	            }
 	            if (LoginSource.PRIMARY_EMAIL.equals(loginSource)) {
-	                user = defaultMailAccount.getPrimaryAddress();
+	                imapLogin = defaultMailAccount.getPrimaryAddress();
 	            }
 
 	            /*
@@ -243,19 +254,19 @@ public class IMAPAuthentication implements AuthenticationService {
 	             */
 	            host = IDNA.toASCII(defaultMailAccount.getMailServer());
 	            port = Integer.valueOf(defaultMailAccount.getMailPort());
-	            USE_IMAPS = defaultMailAccount.isMailSecure();
-	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (USE_IMAPS ? "imaps" : "imap"), host, port, userId, ctxId);
+	            secure = defaultMailAccount.isMailSecure();
+	            LOG.debug("Parsed IMAP Infos: {} {} {}  ({}@{})", (secure ? "imaps" : "imap"), host, port, userId, ctxId);
 
 
             } else {
                 // ## ssl feature for single defined imap server
                 // added by cutmasta
                 if ("true".equalsIgnoreCase(props.getProperty(PropertyNames.IMAP_USE_SECURE.name))) {
-                    USE_IMAPS = true;
+                    secure = true;
                 }
             }
 
-            failureKey = new FailureKey(host, port.intValue(), user, password);
+            FailureKey failureKey = new FailureKey(host, port.intValue(), imapLogin, password);
             {
                 AuthenticationFailedException authenticationFailed = null == failures ? null : failures.getIfPresent(failureKey);
                 if (null != authenticationFailed) {
@@ -265,7 +276,7 @@ public class IMAPAuthentication implements AuthenticationService {
 
             final String socketFactoryClass = "com.openexchange.tools.ssl.TrustAllSSLSocketFactory";
             final String sPort = port.toString();
-            if (USE_IMAPS) {
+            if (secure) {
                 /*
                  * Enables the use of the STARTTLS command.
                  */
@@ -336,51 +347,55 @@ public class IMAPAuthentication implements AuthenticationService {
                 // Security.setProperty("ssl.SocketFactory.provider", socketFactoryClass);
             }
 
-            Session session = Session.getInstance(imapprops, null);
-            session.setDebug(false);
+            Store imapconnection = null;
+            try {
+                Session session = Session.getInstance(imapprops, null);
+                session.setDebug(false);
 
-            imapconnection = session.getStore("imap");
-            // try to connect with the credentials set above
-            imapconnection.connect(host, port.intValue(), user, password);
-            LOG.info("Imap authentication for user {} successful on host {}:{}", user, host, port);
+                imapconnection = session.getStore("imap");
+                // try to connect with the credentials set above
+                imapconnection.connect(host, port.intValue(), imapLogin, password);
+                LOG.info("Imap authentication for user {} successful on host {}:{}", imapLogin, host, port);
+            } catch (NoSuchProviderException e) {
+                LOG.error("Error setup initial imap envorinment!", e);
+                throw LoginExceptionCodes.COMMUNICATION.create(e);
+            } catch (AuthenticationFailedException e) {
+                Cache<FailureKey, AuthenticationFailedException> failures = this.failures;
+                if (null != failures) {
+                    failures.put(failureKey, e);
+                }
+                LOG.info("Authentication error on host {}:{} for user {}", host, port, imapLogin, e);
+                LOG.debug("Debug imap authentication", e);
+                throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
+            } catch (MessagingException e) {
+                LOG.info("Messaging error on host {}:{} for user {}", host, port, imapLogin, e);
+                LOG.debug("Debug imap error", e);
+                throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            } finally {
+                if (imapconnection != null) {
+                    try {
+                        imapconnection.close();
+                    } catch (Exception e) {
+                        LOG.error("Error closing imap connection!", e);
+                        throw LoginExceptionCodes.COMMUNICATION.create(e);
+                    }
+                }
+            }
 
             /*
              * Set the context of the user, If full login was configured, we use the domain part as the context name/mapping entry. If NO
              * full login was configured, we assume that only 1 context is in the system which is named "defaultcontext".
              */
             if (useFullLogin) {
-                LOG.debug("Using domain: {} as context name", splitted[0]);
-            } else {
-                LOG.debug("Using \"defaultcontext\" as context name");
-                splitted[0] = "defaultcontext";
+                LOG.debug("Using domain: {} as context name", splitResult.domainPart);
+                return new AuthenticatedImpl(userInfo, contextInfo);
             }
-            return new AuthenticatedImpl(splitted);
+
+            LOG.debug("Using \"defaultcontext\" as context name");
+            return new AuthenticatedImpl(userInfo, "defaultcontext");
         } catch (ConfigurationException e) {
             LOG.error("Error reading auth plugin config!", e);
             throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (NoSuchProviderException e) {
-            LOG.error("Error setup initial imap envorinment!", e);
-            throw LoginExceptionCodes.COMMUNICATION.create(e);
-        } catch (AuthenticationFailedException e) {
-            if (null != failures) {
-                failures.put(failureKey, e);
-            }
-            LOG.info("Authentication error on host {}:{} for user {}", host, port, user, e);
-            LOG.debug("Debug imap authentication", e);
-            throw LoginExceptionCodes.INVALID_CREDENTIALS.create(e);
-        } catch (MessagingException e) {
-            LOG.info("Messaging error on host {}:{} for user {}", host, port, user, e);
-            LOG.debug("Debug imap error", e);
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
-        } finally {
-            if (imapconnection != null) {
-                try {
-                    imapconnection.close();
-                } catch (final MessagingException e) {
-                    LOG.error("Error closing imap connection!", e);
-                    throw LoginExceptionCodes.COMMUNICATION.create(e);
-                }
-            }
         }
     }
 
@@ -392,27 +407,41 @@ public class IMAPAuthentication implements AuthenticationService {
     /**
      * Splits user name and context.
      *
-     * @param loginInfo combined information separated by an @ sign.
-     * @return a string array with context and user name (in this order).
-     */
-    private String[] split(final String loginInfo) {
-        return split(loginInfo, '@');
-    }
-
-    /**
-     * Splits user name and context.
-     *
-     * @param loginInfo combined information separated by an @ sign.
-     * @param separator for splitting user name and context.
-     * @return a string array with context and user name (in this order).
+     * @param loginInfo The composite information separated by an <code>'@'</code> sign
+     * @return The split login info
      * @throws LoginException if no separator is found.
      */
-    private String[] split(String loginInfo, char separator) {
-        int pos = loginInfo.lastIndexOf(separator);
-        return pos > 0 ? new String[] { loginInfo.substring(pos + 1), loginInfo.substring(0, pos) } : new String[] { "defaultcontext", loginInfo };
+    private SplitResult split(String loginInfo) {
+        int pos = loginInfo.lastIndexOf('@');
+        if (pos <= 0) {
+            return new SplitResult(loginInfo, loginInfo, "defaultcontext");
+        }
+
+        // Split by '@' character
+        return new SplitResult(loginInfo, loginInfo.substring(0, pos), loginInfo.substring(pos + 1));
     }
 
     // ------------------------------------------------ Helper classes ------------------------------------------------
+
+    private static final class SplitResult {
+
+        /** The local part; e.g. <code>"jane@somewhere.com"</code> */
+        final String fullLoginInfo;
+
+        /** The local part; e.g. <code>"jane"</code> from <code>"jane@somewhere.com"</code> */
+        final String localPart;
+
+        /** The domain part; e.g. <code>"somewhere.com"</code> from <code>"jane@somewhere.com"</code> */
+        final String domainPart;
+
+        SplitResult(String fullLoginInfo, String localPart, String domainPart) {
+            super();
+            this.fullLoginInfo = fullLoginInfo;
+            this.localPart = localPart;
+            this.domainPart = domainPart;
+        }
+
+    }
 
     private static final class FailureKey {
 
@@ -483,21 +512,23 @@ public class IMAPAuthentication implements AuthenticationService {
 
     private static final class AuthenticatedImpl implements Authenticated {
 
-        private final String[] splitted;
+        private final String contextInfo;
+        private final String userInfo;
 
-        AuthenticatedImpl(String[] splitted) {
+        AuthenticatedImpl(String userInfo, String contextInfo) {
             super();
-            this.splitted = splitted;
+            this.userInfo = userInfo;
+            this.contextInfo = contextInfo;
         }
 
         @Override
         public String getContextInfo() {
-            return splitted[0];
+            return contextInfo;
         }
 
         @Override
         public String getUserInfo() {
-            return splitted[1];
+            return userInfo;
         }
     }
 
