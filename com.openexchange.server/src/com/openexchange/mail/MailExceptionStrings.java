@@ -204,6 +204,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // A part's content could not be read from a message; e.g. an I/O error occurred
     public static final String UNREADBALE_PART_CONTENT_MSG = "The mail part could not be read";
 
-    // The body of the message is too big
-    public static final String BODY_TOO_BIG_MSG = "The mail body is too big.";
+    // The content/body of the message is too big
+    public static final String CONTENT_TOO_BIG_MSG = "The content of the mail is too big.";
+
 }
