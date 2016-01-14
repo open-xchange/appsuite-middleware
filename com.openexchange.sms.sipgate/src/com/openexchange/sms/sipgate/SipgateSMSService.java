@@ -122,11 +122,11 @@ public class SipgateSMSService implements SMSService {
     }
 
     @Override
-    public void sendMessage(String[] recipients, String message, Locale locale) throws OXException {
+    public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
             for (int i = 0; i < recipients.length; i++) {
-                phoneNumbers.put(i, checkAndFormatPhoneNumber(recipients[i], locale));
+                phoneNumbers.put(i, checkAndFormatPhoneNumber(recipients[i], locale[i]));
             }
             JSONObject jsonObject = new JSONObject(3);
             jsonObject.put("TOS", "text");
