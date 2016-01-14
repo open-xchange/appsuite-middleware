@@ -52,7 +52,9 @@ package com.openexchange.mail.json.actions;
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.utils.DateUtils.getDateRFC822;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -67,6 +69,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.parser.ContentHandler;
+import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.BodyDescriptor;
+import org.apache.james.mime4j.stream.Field;
+import org.apache.james.mime4j.stream.MimeConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -82,6 +90,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -181,16 +190,30 @@ public final class ImportAction extends AbstractMailAction {
                         do {
                             UploadFile uploadFile = iter.next();
                             File tmpFile = uploadFile.getTmpFile();
+                            boolean first = true;
                             if (null != tmpFile) {
-                                MimeMessage message = newMimeMessagePreservingReceivedDate(tmpFile, preserveReceivedDate);
-                                message.removeHeader("x-original-headers");
-                                String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                                if (isEmpty(fromAddr)) {
-                                    // Add from address
-                                    message.setFrom(defaultSendAddr);
-                                }
-                                while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
-                                    keepgoing = !future.isDone();
+                                try {
+                                    // Validate content
+                                    validateRfc822Message(tmpFile);
+                                    first = false;
+
+                                    // Parse & add to queue
+                                    MimeMessage message = newMimeMessagePreservingReceivedDate(tmpFile, preserveReceivedDate);
+                                    message.removeHeader("x-original-headers");
+                                    String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+                                    if (isEmpty(fromAddr)) {
+                                        // Add from address
+                                        message.setFrom(defaultSendAddr);
+                                    }
+                                    while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
+                                        keepgoing = !future.isDone();
+                                    }
+                                } catch (OXException e) {
+                                    if (first && !iter.hasNext()) {
+                                        throw e;
+                                    }
+                                    // Otherwise add to warnings
+                                    warnings.add(e);
                                 }
                             }
                         } while (keepgoing && iter.hasNext());
@@ -292,6 +315,26 @@ public final class ImportAction extends AbstractMailAction {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void validateRfc822Message(File rfc822File) throws IOException, OXException {
+        MimeConfig config = new MimeConfig();
+        config.setMaxLineLen(-1);
+        config.setMaxHeaderLen(-1);
+        config.setMaxHeaderCount(250);
+        config.setStrictParsing(true);
+
+        MimeStreamParser parser = new MimeStreamParser(config);
+        parser.setContentHandler(DO_NOTHING_HANDLER);
+
+        InputStream in = new FileInputStream(rfc822File);
+        try {
+            parser.parse(in);
+        } catch (MimeException e) {
+            throw MailExceptionCode.INVALID_MESSAGE.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
         }
     }
 
@@ -428,5 +471,73 @@ public final class ImportAction extends AbstractMailAction {
         }
         return tmp;
     }
+
+    private static final ContentHandler DO_NOTHING_HANDLER = new ContentHandler() {
+
+        @Override
+        public void startMessage() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endMessage() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void startBodyPart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endBodyPart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void startHeader() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void field(Field rawField) throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endHeader() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void preamble(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void epilogue(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void startMultipart(BodyDescriptor bd) throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endMultipart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void body(BodyDescriptor bd, InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void raw(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+    };
 
 }
