@@ -76,8 +76,16 @@ public class SipgateSMSActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("starting bundle: \"com.openexchange.sms.sipgate\"");
         SMSService service = new SipgateSMSService(this);
         registerService(SMSService.class, service);
+    }
+    
+    @Override
+    protected void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("stopping bundle: \"com.openexchange.sms.sipgate\"");
+        unregisterServices();
+        super.stopBundle();
     }
 
 }

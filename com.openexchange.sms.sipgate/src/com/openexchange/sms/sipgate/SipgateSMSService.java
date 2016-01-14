@@ -49,19 +49,28 @@
 
 package com.openexchange.sms.sipgate;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-import java.util.Vector;
-import org.apache.xmlrpc.XmlRpcException;
-import org.apache.xmlrpc.client.XmlRpcClient;
-import org.apache.xmlrpc.client.XmlRpcClientConfigImpl;
-import org.apache.xmlrpc.common.TypeFactory;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Locale;
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.HttpMethod;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthPolicy;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.httpclient.params.HttpClientParams;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSUtils;
 
 /**
  * {@link SipgateSMSService}
@@ -69,10 +78,11 @@ import com.openexchange.sms.SMSService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SipgateSMSService implements SMSService, Reloadable {
+public class SipgateSMSService implements SMSService {
+    
+    private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
 
-    private final ServiceLookup services;
-    private final XmlRpcClient client;
+    private final HttpClient client;
 
     /**
      * Initializes a new {@link SipgateSMSService}.
@@ -81,75 +91,92 @@ public class SipgateSMSService implements SMSService, Reloadable {
      */
     public SipgateSMSService(ServiceLookup services) throws OXException {
         super();
-        this.services = services;
         ConfigurationService configService = services.getService(ConfigurationService.class);
-        XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
-        try {
-            config.setServerURL(new URL("https://api.sipgate.net/my/xmlrpcfacade/"));
-        } catch (MalformedURLException e) {
-            // will not happen
-        }
-        config.setBasicUserName(sipgateUsername);
-        config.setBasicPassword(sipgatePassword);
-        XmlRpcClient client = new XmlRpcClient();
-        TypeFactory typeFactory = new SipgateTypeFactory(client);
-        client.setTypeFactory(typeFactory);
-        client.setConfig(config);
+        HttpClientParams params = new HttpClientParams();
+        params.setAuthenticationPreemptive(true);
+        params.setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, AuthPolicy.BASIC);
+        Credentials credentials = new UsernamePasswordCredentials(sipgateUsername, sipgatePassword);
+        HttpClient client = new HttpClient(params);
+        client.getState().setCredentials(new AuthScope("api.sipgate.net", 443), credentials);
         this.client = client;
-
     }
 
     @Override
-    public void sendMessage(String recipient, String message) throws OXException {
+    public void sendMessage(String recipient, String message, Locale locale) throws OXException {
+        String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
+        JSONObject jsonObject = new JSONObject(3);
         try {
-            Vector<Object> params = new Vector<>();
-            params.addElement("sip:" + recipient + "@sipgate.net");
-            params.addElement("text");
-            params.addElement(message);
-            Object resp = client.execute("samurai.SessionInitiate", params);
-        } catch (XmlRpcException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            jsonObject.put("TOS", "text");
+            jsonObject.put("Content", message);
+            jsonObject.put("RemoteUri", parsedNumber);
+            String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
+            HttpMethod method = getHttpMethod("samurai.SessionInitiate", encoded);
+            execute(method);
+        } catch (JSONException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         }
     }
 
     @Override
-    public void sendMessage(String[] recipients, String message) throws OXException {
-        String[] recipient = new String[recipients.length];
-        for (int i = 0; i < recipients.length; i++) {
-            recipient[i] = "sip:" + recipients[i] + "@sipgate.net";
-        }
+    public void sendMessage(String[] recipients, String message, Locale locale) throws OXException {
+        JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
-            Object resp = client.execute("samurai.SessionInitiateMulti", new Object[] { "localhost", recipient, "text", message });
-        } catch (XmlRpcException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            for (int i = 0; i < recipients.length; i++) {
+                phoneNumbers.put(i, checkAndFormatPhoneNumber(recipients[i], locale));
+            }
+            JSONObject jsonObject = new JSONObject(3);
+            jsonObject.put("TOS", "text");
+            jsonObject.put("Content", message);
+            jsonObject.put("RemoteUri", phoneNumbers);
+            String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
+            HttpMethod method = getHttpMethod("samurai.SessionInitiateMulti", encoded);
+            execute(method);
+        } catch (JSONException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         }
 
     }
-
-    @Override
-    public void reloadConfiguration(ConfigurationService configService) {
-        XmlRpcClientConfigImpl config = new XmlRpcClientConfigImpl();
-        String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
-        String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
+    
+    private HttpMethod getHttpMethod(String method, String parameters) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(URL).append(method).append("/").append(parameters);
+        return new GetMethod(sb.toString());
+    }
+    
+    private String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
+        String parsedNumber = SMSUtils.parsePhoneNumber(phoneNumber, locale);
+        StringBuilder sb = new StringBuilder(30);
+        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
+        return sb.toString();
+    }
+    
+    private void execute(HttpMethod method) throws OXException {
         try {
-            config.setServerURL(new URL("https://api.sipgate.net/my/xmlrpcfacade/"));
-        } catch (MalformedURLException e) {
-            // will not happen
+            int statusCode = client.executeMethod(method);
+            if (HttpStatus.SC_OK == statusCode) {
+                String response = method.getResponseBodyAsString();
+                JSONObject resp = new JSONObject(response);
+                if (resp.hasAndNotNull("error")) {
+                    String errorMessage = resp.getString("error");
+                    throw SipgateSMSExceptionCode.NOT_SENT.create(errorMessage);
+                }
+            }
+        } catch (IOException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != method && method.hasBeenUsed()) {
+                method.releaseConnection();
+            }
         }
-        config.setBasicUserName(sipgateUsername);
-        config.setBasicPassword(sipgatePassword);
-        client.setConfig(config);
-
+        
     }
-
-    @Override
-    public Map<String, String[]> getConfigFileNames() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
+    
 }
