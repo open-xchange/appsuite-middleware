@@ -49,6 +49,7 @@
 
 package com.openexchange.sms;
 
+import java.util.Locale;
 import com.openexchange.exception.OXException;
 
 /**
@@ -59,8 +60,24 @@ import com.openexchange.exception.OXException;
  */
 public interface SMSService {
 
-    public void sendMessage(String recipient, String message) throws OXException;
+    /**
+     * Send a SMS message to a recipient
+     * 
+     * @param recipient Phone number to send the message
+     * @param message The message
+     * @param locale Locale of recipient's phone number to parse into correct format
+     * @throws OXException
+     */
+    public void sendMessage(String recipient, String message, Locale locale) throws OXException;
 
-    public void sendMessage(String[] recipients, String message) throws OXException;
+    /**
+     * Send a SMS message to recipients
+     * 
+     * @param recipients Phone numbers to send the message
+     * @param message The message
+     * @param locale Locales of recipients' phone numbers to parse into correct format
+     * @throws OXException
+     */
+    public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
 
 }

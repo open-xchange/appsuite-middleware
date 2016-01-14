@@ -5,5 +5,9 @@ Bundle-SymbolicName: com.openexchange.sms
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.exception
-Export-Package: com.openexchange.sms
+Import-Package: com.openexchange.exception,
+ com.openexchange.i18n
+Export-Package: com.google.i18n.phonenumbers,
+ com.openexchange.sms
+Bundle-ClassPath: lib/libphonenumber-7.2.3.jar,
+ .
