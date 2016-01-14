@@ -8731,6 +8731,11 @@ msgstr ""
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr ""
 
+#. Could not parse phone number %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
+msgid "Could not parse phone number %1$s"
+msgstr ""
+
 #. *
 #. * No recipient(s) has been defined for new message
 #.
