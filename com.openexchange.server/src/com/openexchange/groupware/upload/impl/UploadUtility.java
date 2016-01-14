@@ -449,25 +449,9 @@ public final class UploadUtility {
         // Create temporary file
         File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
         tmpFile.deleteOnExit();
-        {
-            ScheduledTimerTask timerTask = TIMER_TASK_REFERENCE.get();
-            if (null == timerTask) {
-                synchronized (UploadUtility.class) {
-                    timerTask = TIMER_TASK_REFERENCE.get();
-                    if (null == timerTask) {
-                        try {
-                            UploadEvicter evicter = new UploadEvicter(PREFIX, LOG);
-                            TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                            long delay = 300000; // 5 minutes
-                            timerTask = timerService.scheduleWithFixedDelay(evicter, 3000, delay);
-                            TIMER_TASK_REFERENCE.set(timerTask);
-                        } catch (Exception e) {
-                            LOG.warn("Failed to initialze {}", UploadEvicter.class.getSimpleName(), e);
-                        }
-                    }
-                }
-            }
-        }
+
+        // Start upload evicter (if not yet done)
+        startUploadEvicterIfNotYetDone();
 
         // Write to temporary file
         InputStream in = null;
@@ -521,6 +505,26 @@ public final class UploadUtility {
         retval.setSize(size);
         retval.setTmpFile(tmpFile);
         return retval;
+    }
+
+    private static void startUploadEvicterIfNotYetDone() {
+        ScheduledTimerTask timerTask = TIMER_TASK_REFERENCE.get();
+        if (null == timerTask) {
+            synchronized (UploadUtility.class) {
+                timerTask = TIMER_TASK_REFERENCE.get();
+                if (null == timerTask) {
+                    try {
+                        UploadEvicter evicter = new UploadEvicter(PREFIX, LOG);
+                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        long delay = 300000; // 5 minutes
+                        timerTask = timerService.scheduleWithFixedDelay(evicter, 3000, delay);
+                        TIMER_TASK_REFERENCE.set(timerTask);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to initialze {}", UploadEvicter.class.getSimpleName(), e);
+                    }
+                }
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------
