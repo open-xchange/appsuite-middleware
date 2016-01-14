@@ -2266,7 +2266,7 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage newMimeMessage(InputStream is, Date optReceivedDate) throws OXException {
+    public static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate) throws OXException {
         InputStream msgSrc = is;
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
@@ -2277,7 +2277,13 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                    }
+                };
             } else {
                 tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
             }
@@ -2377,7 +2383,7 @@ public final class MimeMessageUtility {
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
-    public static MimeMessage cloneMessage(MimeMessage original, Date optReceivedDate) throws OXException {
+    public static MimeMessage cloneMessage(MimeMessage original, final Date optReceivedDate) throws OXException {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {
@@ -2386,7 +2392,13 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                    }
+                };
             } else {
                 tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
             }
@@ -2637,7 +2649,7 @@ public final class MimeMessageUtility {
      * @throws MessagingException If a messaging error occurs
      * @throws IOException If an I/O error occurs
      */
-    public static MimeMessage mimeMessageFrom(Message msg) throws MessagingException, IOException {
+    public static MimeMessage mimeMessageFrom(final Message msg) throws MessagingException, IOException {
         ThresholdFileHolder sink = null;
         boolean closeSink = true;
         try {
@@ -2646,7 +2658,13 @@ public final class MimeMessageUtility {
             File tempFile = sink.getTempFile();
             MimeMessage tmp;
             if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream());
+                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        return msg.getReceivedDate();
+                    }
+                };
             } else {
                 FileBackedMimeMessage fbm = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, msg.getReceivedDate());
                 tmp = fbm;
