@@ -525,7 +525,22 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Sending the message denied.
      */
     SEND_DENIED("Sending the message denied.", MailExceptionStrings.SEND_DENIED, CATEGORY_PERMISSION_DENIED, 96),
-
+    /**
+     * Default folder %1$s must not be updated
+     */
+    NO_DEFAULT_FOLDER_UPDATE("Default folder %1$s must not be updated", MailExceptionStrings.NO_DEFAULT_FOLDER_UPDATE_MSG, CATEGORY_PERMISSION_DENIED, 97),
+    /**
+     * Default folder %1$s must not be renamed
+     */
+    NO_DEFAULT_FOLDER_RENAME("Default folder %1$s must not be renamed", MailExceptionStrings.NO_DEFAULT_FOLDER_RENAME_MSG, CATEGORY_PERMISSION_DENIED, 98),
+    /**
+     * Default folder %1$s must not be deleted
+     */
+    NO_DEFAULT_FOLDER_DELETE("Default folder %1$s must not be deleted", MailExceptionStrings.NO_DEFAULT_FOLDER_DELETE_MSG, CATEGORY_PERMISSION_DENIED, 99),
+    /**
+     * Archive folder does not allow subfolders.
+     */
+    ARCHIVE_SUBFOLDER_NOT_ALLOWED("Archive folder does not allow subfolders.", MailExceptionStrings.ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG, CATEGORY_PERMISSION_DENIED, 100);
 
     ;
 
