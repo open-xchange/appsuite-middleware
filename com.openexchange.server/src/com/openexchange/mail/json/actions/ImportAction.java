@@ -53,7 +53,6 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.utils.DateUtils.getDateRFC822;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -72,7 +71,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fields.DataFields;
 import com.openexchange.ajax.fields.FolderChildFields;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -84,7 +82,6 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.importexport.MailImportResult;
 import com.openexchange.groupware.upload.UploadFile;
-import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -95,7 +92,6 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
-import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -183,21 +179,19 @@ public final class ImportAction extends AbstractMailAction {
                     if (keepgoing && iter.hasNext()) {
                         future = service.submit(task);
                         do {
-                            InputStream is = iter.next().openStream();
-                            MimeMessage message;
-                            try {
-                                message = preserveReceivedDate ? newMimeMessagePreservingReceivedDate(is) : MimeMessageUtility.newMimeMessage(is, null);
+                            UploadFile uploadFile = iter.next();
+                            File tmpFile = uploadFile.getTmpFile();
+                            if (null != tmpFile) {
+                                MimeMessage message = newMimeMessagePreservingReceivedDate(tmpFile, preserveReceivedDate);
                                 message.removeHeader("x-original-headers");
-                            } finally {
-                                Streams.close(is);
-                            }
-                            String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                            if (isEmpty(fromAddr)) {
-                                // Add from address
-                                message.setFrom(defaultSendAddr);
-                            }
-                            while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
-                                keepgoing = !future.isDone();
+                                String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+                                if (isEmpty(fromAddr)) {
+                                    // Add from address
+                                    message.setFrom(defaultSendAddr);
+                                }
+                                while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
+                                    keepgoing = !future.isDone();
+                                }
                             }
                         } while (keepgoing && iter.hasNext());
                     }
@@ -393,94 +387,46 @@ public final class ImportAction extends AbstractMailAction {
         }
     }
 
-    private MimeMessage newMimeMessagePreservingReceivedDate(InputStream is) throws OXException, MessagingException, IOException {
-        InputStream msgSrc = is;
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        boolean closeSink = true;
-        try {
-            sink.write(msgSrc);
-            msgSrc = null; // Already closed here
+    private MimeMessage newMimeMessagePreservingReceivedDate(File tempFile, boolean preserveReceivedDate) throws MessagingException, IOException {
+        MimeMessage tmp;
+        if (preserveReceivedDate) {
+            tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null) {
 
-            File tempFile = sink.getTempFile();
-            MimeMessage tmp;
-            if (null == tempFile) {
-                tmp = new MimeMessage(MimeDefaultSession.getDefaultSession(), sink.getStream()) {
+                private boolean notParsed = true;
+                private Date receivedDate = null;
 
-                    private boolean notParsed = true;
-                    private Date receivedDate = null;
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        if (notParsed) {
-                            notParsed = false;
-                            String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
-                            if (null != receivedHdrs) {
-                                long lastReceived = Long.MIN_VALUE;
-                                for (int i = 0; i < receivedHdrs.length; i++) {
-                                    String hdr = unfold(receivedHdrs[i]);
-                                    int pos;
-                                    if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
-                                        try {
-                                            lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
-                                        } catch (Exception e) {
-                                            continue;
-                                        }
+                @Override
+                public Date getReceivedDate() throws MessagingException {
+                    if (notParsed) {
+                        notParsed = false;
+                        String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
+                        if (null != receivedHdrs) {
+                            long lastReceived = Long.MIN_VALUE;
+                            for (int i = 0; i < receivedHdrs.length; i++) {
+                                String hdr = unfold(receivedHdrs[i]);
+                                int pos;
+                                if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
+                                    try {
+                                        lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
+                                    } catch (Exception e) {
+                                        continue;
                                     }
                                 }
+                            }
 
-                                if (lastReceived > 0L) {
-                                    receivedDate = new Date(lastReceived);
-                                }
+                            if (lastReceived > 0L) {
+                                receivedDate = new Date(lastReceived);
                             }
                         }
-
-                        return receivedDate;
                     }
-                };
-            } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null) {
 
-                    private boolean notParsed = true;
-                    private Date receivedDate = null;
-
-                    @Override
-                    public Date getReceivedDate() throws MessagingException {
-                        if (notParsed) {
-                            notParsed = false;
-                            String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
-                            if (null != receivedHdrs) {
-                                long lastReceived = Long.MIN_VALUE;
-                                for (int i = 0; i < receivedHdrs.length; i++) {
-                                    String hdr = unfold(receivedHdrs[i]);
-                                    int pos;
-                                    if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
-                                        try {
-                                            lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
-                                        } catch (Exception e) {
-                                            continue;
-                                        }
-                                    }
-                                }
-
-                                if (lastReceived > 0L) {
-                                    receivedDate = new Date(lastReceived);
-                                }
-                            }
-                        }
-
-                        return receivedDate;
-                    }
-                };
-            }
-
-            closeSink = false;
-            return tmp;
-        } finally {
-            if (closeSink) {
-                Streams.close(sink);
-            }
-            Streams.close(msgSrc);
+                    return receivedDate;
+                }
+            };
+        } else {
+            tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null);
         }
+        return tmp;
     }
 
 }
