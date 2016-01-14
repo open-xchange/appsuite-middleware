@@ -56,10 +56,12 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -139,10 +141,11 @@ public class RdbAliasStorage implements UserAliasStorage {
         PreparedStatement stmt = null;
         try {
             int index = 0;
-            stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)");
+            stmt = con.prepareStatement("INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)");
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
+            stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
