@@ -161,7 +161,7 @@ public final class MailMessageParser {
             try {
                 return readContent(mailPart, contentType, mailId, folder);
             } catch (MaxBytesExceededIOException e) {
-                throw MailExceptionCode.BODY_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
+                throw MailExceptionCode.CONTENT_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
             } catch (IOException e) {
                 throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
             }
@@ -339,7 +339,7 @@ public final class MailMessageParser {
         } catch (MaxBytesExceededIOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
-            throw MailExceptionCode.BODY_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
+            throw MailExceptionCode.CONTENT_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
         } catch (final IOException e) {
             final String mailId = mail.getMailId();
             final String folder = mail.getFolder();
