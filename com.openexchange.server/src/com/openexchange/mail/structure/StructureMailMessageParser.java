@@ -966,15 +966,15 @@ public final class StructureMailMessageParser {
         final String charset = getCharset(mailPart, contentType);
         try {
             if (contentType.startsWith("text/htm")) {
-                final String html = MessageUtility.readMailPart(mailPart, charset);
+                final String html = MessageUtility.readMailPart(mailPart, charset, false, -1);
                 return MessageUtility.simpleHtmlDuplicateRemoval(html);
             }
-            return MessageUtility.readMailPart(mailPart, charset);
+            return MessageUtility.readMailPart(mailPart, charset, false, -1);
         } catch (final java.io.CharConversionException e) {
             // Obviously charset was wrong or bogus implementation of character conversion
             final String fallback = "US-ASCII";
             LOG.warn("Character conversion exception while reading content with charset \"{}\". Using fallback charset \"{}\" instead.", charset, fallback, e);
-            return MessageUtility.readMailPart(mailPart, fallback);
+            return MessageUtility.readMailPart(mailPart, fallback, false, -1);
         }
     }
 

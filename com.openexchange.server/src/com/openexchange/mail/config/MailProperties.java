@@ -140,6 +140,8 @@ public final class MailProperties implements IMailProperties {
 
     private int attachDisplaySize;
 
+    private int bodyDisplaySize;
+
     private boolean userFlagsEnabled;
 
     private boolean allowNestedDefaultFolderOnAltNamespace;
@@ -268,6 +270,7 @@ public final class MailProperties implements IMailProperties {
         masterPassword = null;
         mailFetchLimit = 0;
         attachDisplaySize = 0;
+        bodyDisplaySize = 10485760; // 10 MB
         userFlagsEnabled = false;
         allowNestedDefaultFolderOnAltNamespace = false;
         defaultMimeCharset = null;
@@ -391,6 +394,18 @@ public final class MailProperties implements IMailProperties {
                 mailFetchLimit = 1000;
                 logBuilder.append("\tMail Fetch Limit: Non parseable value \"").append(mailFetchLimitStr).append(fallbackPrefix).append(
                     mailFetchLimit).append('\n');
+            }
+        }
+
+        {
+            final String bodyDisplaySizeStr = configuration.getProperty("com.openexchange.mail.bodyDisplaySizeLimit", "10485760").trim();
+            try {
+                bodyDisplaySize = Integer.parseInt(bodyDisplaySizeStr);
+                logBuilder.append("\tBody Display Size Limit: ").append(bodyDisplaySize).append('\n');
+            } catch (final NumberFormatException e) {
+                bodyDisplaySize = 10485760;
+                logBuilder.append("\tBody Display Size Limit: Non parseable value \"").append(bodyDisplaySizeStr).append(
+                    fallbackPrefix).append(bodyDisplaySize).append('\n');
             }
         }
 
@@ -789,6 +804,15 @@ public final class MailProperties implements IMailProperties {
     @Override
     public int getAttachDisplaySize() {
         return attachDisplaySize;
+    }
+
+    /**
+     * Gets the max. allowed size (in bytes) for body for being displayed.
+     *
+     * @return The max. allowed size (in bytes) for body for being displayed
+     */
+    public int getBodyDisplaySize() {
+        return bodyDisplaySize;
     }
 
     /**
