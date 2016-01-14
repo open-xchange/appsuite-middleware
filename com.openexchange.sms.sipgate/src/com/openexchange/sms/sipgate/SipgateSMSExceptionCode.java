@@ -65,7 +65,9 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
     
     NOT_SENT("Message could not be sent: %1$s", Category.CATEGORY_ERROR, 1),
     
-    UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 2)
+    UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 2),
+    
+    HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 3),
     ;
 
     public static final String PREFIX = "SIPGATE";

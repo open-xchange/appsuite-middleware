@@ -166,6 +166,8 @@ public class SipgateSMSService implements SMSService {
                     String errorMessage = resp.getString("error");
                     throw SipgateSMSExceptionCode.NOT_SENT.create(errorMessage);
                 }
+            } else {
+                throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
             }
         } catch (IOException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
