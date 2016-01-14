@@ -110,6 +110,7 @@ import com.openexchange.mail.mime.dataobjects.MimeMailPart;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.utils.MaxBytesExceededIOException;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.mail.uuencode.UUEncodedMultiPart;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
@@ -170,6 +171,8 @@ public final class MailMessageParser {
         public String getContent() throws OXException {
             try {
                 return readContent(mailPart, contentType, mailId, folder);
+            } catch (MaxBytesExceededIOException e) {
+                throw MailExceptionCode.BODY_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
             } catch (IOException e) {
                 throw MailExceptionCode.UNREADBALE_PART_CONTENT.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
             }
@@ -344,6 +347,10 @@ public final class MailMessageParser {
             } else {
                 parseMailContent(mail, handler, prefix, 1);
             }
+        } catch (MaxBytesExceededIOException e) {
+            final String mailId = mail.getMailId();
+            final String folder = mail.getFolder();
+            throw MailExceptionCode.BODY_TOO_BIG.create(e, null == mailId ? "" : mailId, null == folder ? "" : folder);
         } catch (final IOException e) {
             if ("No content".equals(e.getMessage())) {
                 /*-
