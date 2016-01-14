@@ -197,4 +197,14 @@ public final class MailExceptionStrings implements LocalizableStrings {
     public static final String NO_DEFAULT_FOLDER_DELETE_MSG = "Default folder must not be deleted";
 
     public static final String ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG = "Archive folder does not allow subfolders.";
+
+    // The user tries to import a file as a RFC822 message, that is not valid
+    public static final String INVALID_MESSAGE_MSG = "No valid file";
+
+    // A part's content could not be read from a message; e.g. an I/O error occurred
+    public static final String UNREADBALE_PART_CONTENT_MSG = "The mail part could not be read";
+
+    // The content/body of the message is too big
+    public static final String CONTENT_TOO_BIG_MSG = "The content of the mail is too big.";
+
 }
