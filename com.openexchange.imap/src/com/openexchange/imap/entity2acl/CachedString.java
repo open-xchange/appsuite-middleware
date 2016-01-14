@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,45 @@
  *
  */
 
-package com.openexchange.user.copy.internal.user.osgi;
-
-import org.osgi.framework.BundleActivator;
-import org.osgi.framework.BundleContext;
-import org.osgi.util.tracker.ServiceTracker;
+package com.openexchange.imap.entity2acl;
 
 
 /**
- * {@link UserCopyActivator}
+ * {@link CachedString}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class UserCopyActivator implements BundleActivator {
+class CachedString {
 
-    private volatile ServiceTracker<Object, Object> tracker;
+    /** The special wrapper for absence */
+    static final CachedString NIL = new CachedString(null);
 
     /**
-     * Initializes a new {@link UserCopyActivator}.
+     * Creates a wrapper for specified string.
+     *
+     * @param string The string to wrap
+     * @return The wrapper instance
      */
-    public UserCopyActivator() {
+    static CachedString wrapperFor(String string) {
+        return null == string ? NIL : new CachedString(string);
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
+    /** The wrapped string */
+    final String string;
+
+    /**
+     * Initializes a new {@link CachedString}.
+     */
+    private CachedString(String string) {
         super();
+        this.string = string;
     }
 
     @Override
-    public void start(final BundleContext context) throws Exception {
-        UserCopyTaskRegisterer registerer = new UserCopyTaskRegisterer(context);
-        ServiceTracker<Object, Object> tracker = new ServiceTracker<Object, Object>(context, registerer.getFilter(), registerer);
-        this.tracker = tracker;
-        tracker.open();
+    public String toString() {
+        return null == string ? "NIL" : string;
     }
-
-    @Override
-    public void stop(final BundleContext context) throws Exception {
-        ServiceTracker<Object, Object> tracker = this.tracker;
-        if (null != tracker) {
-            this.tracker = null;
-            tracker.close();
-        }
-    }
-
 }

@@ -56,14 +56,15 @@ import gnu.trove.set.hash.TIntHashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.idn.IDNA;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
-import com.javacodegeeks.concurrent.LRUPolicy;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.exception.OXException;
@@ -405,19 +406,19 @@ public abstract class MailConfig {
 
     private static final class UserID {
 
-        private final int contextId;
-        private final String pattern;
-        private final String serverUrl;
+        final Context context;
+        final String pattern;
+        final String serverUrl;
         private final int hash;
 
-        protected UserID(final String pattern, final String serverUrl, final int contextId) {
+        protected UserID(final String pattern, final String serverUrl, final Context context) {
             super();
             this.pattern = pattern;
             this.serverUrl = serverUrl;
-            this.contextId = contextId;
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + contextId;
+            this.context = context;
+
+            int prime = 31;
+            int result = prime * 1 + ((context == null) ? 0 : context.getContextId());
             result = prime * result + ((pattern == null) ? 0 : pattern.hashCode());
             result = prime * result + ((serverUrl == null) ? 0 : serverUrl.hashCode());
             hash = result;
@@ -437,7 +438,11 @@ public abstract class MailConfig {
                 return false;
             }
             final UserID other = (UserID) obj;
-            if (contextId != other.contextId) {
+            if (context == null) {
+                if (other.context != null) {
+                    return false;
+                }
+            } else if (other.context == null || context.getContextId() != other.context.getContextId()) {
                 return false;
             }
             if (pattern == null) {
@@ -458,7 +463,14 @@ public abstract class MailConfig {
         }
     }
 
-    private static final ConcurrentMap<UserID, Future<int[]>> USER_ID_CACHE = new ConcurrentLinkedHashMap<UserID, Future<int[]>>(8192, 0.75F, 16, 65536 << 1, new LRUPolicy());
+    private static final LoadingCache<UserID, int[]> USER_ID_CACHE = CacheBuilder.newBuilder().concurrencyLevel(4).maximumSize(65536 << 1).initialCapacity(8192).expireAfterAccess(30, TimeUnit.MINUTES).build(new CacheLoader<UserID, int[]>() {
+
+        @Override
+        public int[] load(UserID userID) throws Exception {
+            MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
+            return forDefaultAccount(userID.pattern, userID.serverUrl, userID.context, storageService);
+        }
+    });
 
     /**
      * Resolves the user IDs by specified pattern dependent on configuration's setting for mail login source.
@@ -470,41 +482,24 @@ public abstract class MailConfig {
      * @throws OXException If resolving user by specified pattern fails
      */
     public static int[] getUserIDsByMailLogin(final String pattern, final boolean isDefaultAccount, final String serverUrl, final Context ctx) throws OXException {
-        final MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         if (isDefaultAccount) {
-            final UserID userID = new UserID(pattern, serverUrl, ctx.getContextId());
-            Future<int[]> f = USER_ID_CACHE.get(userID);
-            if (null == f) {
-                final FutureTask<int[]> ft = new FutureTask<int[]>(new Callable<int[]>() {
-
-                    @Override
-                    public int[] call() throws OXException {
-                        return forDefaultAccount(pattern, serverUrl, ctx, storageService);
-                    }
-                });
-                f = USER_ID_CACHE.putIfAbsent(userID, ft);
-                if (null == f) {
-                    f = ft;
-                    ft.run();
-                }
-            }
+            UserID userID = new UserID(pattern, serverUrl, ctx);
             boolean remove = true;
             try {
-                final int[] retval = f.get();
+                int[] retval = USER_ID_CACHE.get(userID);
                 remove = false;
                 return retval;
-            } catch (final InterruptedException e) {
-                Thread.currentThread().interrupt();
-                throw MailExceptionCode.INTERRUPT_ERROR.create(e, e.getMessage());
             } catch (final ExecutionException e) {
                 ThreadPools.launderThrowable(e, OXException.class);
             } finally {
                 if (remove) {
-                    USER_ID_CACHE.remove(userID);
+                    USER_ID_CACHE.invalidate(userID);
                 }
             }
         }
-        // Find user name by user's imap login
+
+        // Find user name by user's IMAP login
+        MailAccountStorageService storageService = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class, true);
         final MailAccount[] accounts = storageService.resolveLogin(pattern, serverUrl, ctx.getContextId());
         final int[] retval = new int[accounts.length];
         for (int i = 0; i < retval.length; i++) {

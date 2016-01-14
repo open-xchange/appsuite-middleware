@@ -1539,7 +1539,17 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
             user.setFax_other(tmp);
         }
 
-        Integer itg = soapUser.getFolderTree();
+        Integer itg = soapUser.getFilestoreId();
+        if (itg != null) {
+            user.setFilestoreId(itg);
+        }
+
+        tmp = soapUser.getFilestoreName();
+        if (tmp != null) {
+            user.setFilestore_name(tmp);
+        }
+
+        itg = soapUser.getFolderTree();
         if (itg != null) {
             user.setFolderTree(itg);
         }
@@ -1667,6 +1677,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         tmp = soapUser.getMaritalStatus();
         if (tmp != null) {
             user.setMarital_status(tmp);
+        }
+
+        Long lng = soapUser.getMaxQuota();
+        if (null != lng) {
+            user.setMaxQuota(lng);
         }
 
         tmp = soapUser.getMiddleName();
@@ -1949,6 +1964,11 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         tmp = soapUser.getUrl();
         if (tmp != null) {
             user.setUrl(tmp);
+        }
+
+        lng = soapUser.getUsedQuota();
+        if (null != lng) {
+            user.setUsedQuota(lng);
         }
 
         tmp = soapUser.getUserfield01();

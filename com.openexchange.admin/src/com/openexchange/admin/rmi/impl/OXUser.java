@@ -143,7 +143,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         this.context = context;
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
-        allowChangingQuotaIfNoFileStorageSet = Boolean.parseBoolean(prop.getProp("ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET", "false").trim());
+        allowChangingQuotaIfNoFileStorageSet = Boolean.parseBoolean(prop.getUserProp("ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET", "false").trim());
         LOGGER.info("Class loaded: {}", this.getClass().getName());
         basicauth = new BasicAuthenticator(this.context);
         try {

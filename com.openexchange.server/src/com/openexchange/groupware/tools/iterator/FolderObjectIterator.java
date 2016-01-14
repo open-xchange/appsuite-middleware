@@ -54,6 +54,7 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.set.TIntSet;
 import gnu.trove.set.hash.TIntHashSet;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -67,6 +68,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import org.json.JSONException;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.configuration.ServerConfig;
@@ -75,11 +77,13 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.oxfolder.OXFolderUtility;
 import com.openexchange.tools.oxfolder.permissionLoader.PermissionLoaderService;
 
 /**
@@ -175,7 +179,7 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
 
     private static final String[] selectFields = {
         "fuid", "parent", "fname", "module", "type", "creating_date", "created_from", "changing_date", "changed_from", "permission_flag",
-        "subfolder_flag", "default_flag" };
+        "subfolder_flag", "default_flag", "meta" };
 
     /**
      * Gets all necessary fields in right order to be used in an SQL <i>SELECT</i> statement needed to create instances of
@@ -515,6 +519,16 @@ public class FolderObjectIterator implements SearchIterator<FolderObject> {
             defaultFolder = 0;
         }
         fo.setDefaultFolder(defaultFolder > 0);
+        InputStream jsonBlobStream = rs.getBinaryStream(13);
+        if (!rs.wasNull() && null != jsonBlobStream) {
+            try {
+                fo.setMeta(OXFolderUtility.deserializeMeta(jsonBlobStream));
+            } catch (JSONException e) {
+                throw new SQLException(e);
+            } finally {
+                Streams.close(jsonBlobStream);
+            }
+        }
         return fo;
     }
 

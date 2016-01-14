@@ -63,13 +63,17 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
 
+/**
+ * {@link LocalFileStorage} - A storage backed by a local path/directory.
+ */
 public class LocalFileStorage extends DefaultFileStorage {
+
+    /** TRhe logger constant */
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalFileStorage.class);
 
     /**
      * Default number of files or directories per directory.
@@ -102,14 +106,14 @@ public class LocalFileStorage extends DefaultFileStorage {
     private final transient int depth = DEFAULT_DEPTH;
 
     /**
-     * Whether the path to this filestorage has already been created
+     * Whether the path to this file storage has already been created
      */
-	private boolean alreadyInitialized;
+	private volatile boolean alreadyInitialized;
 
     /**
-     * Default buffer size.
+     * Default buffer size (64K).
      */
-    private static final int DEFAULT_BUFSIZE = 1024;
+    private static final int DEFAULT_BUFSIZE = 65536;
 
     /**
      * Name of the lock file.
@@ -132,13 +136,6 @@ public class LocalFileStorage extends DefaultFileStorage {
         tmp.add(STATEFILENAME);
         SPECIAL_FILENAMES = Collections.unmodifiableSet(tmp);
     }
-
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(LocalFileStorage.class);
-
-    /**
-     * This lock is used to avoid threads from creating a filestore dir simultaneously.
-     */
-    private static final Lock LOCK = new ReentrantLock();
 
     /**
      * Constructor with more detailed parameters. This file storage can store entries ^ depth files.
@@ -585,41 +582,41 @@ public class LocalFileStorage extends DefaultFileStorage {
      * @return true if File or Folder exists
      * @throws OXException
      */
-    protected boolean exists(final String name) {
+    protected boolean exists(String name) {
         return new File(storage, name).exists();
     }
 
     /**
-     * Saves the Inputfile in the Storage
+     * Saves the <code>InputStream</code> to the Storage
      *
-     * @param name Name of the Inputfile
-     * @param input The Inputfile
-     * @throws OXException
+     * @param name The name of the file in which InputStream content is supposed to be saved
+     * @param input The <code>InputStream</code> providing the content to save
+     * @throws OXException If saving content fails
      */
-    protected void save(final String name, final InputStream input) throws OXException {
-        final File file = new File(storage, name);
-        final File parentDir = file.getParentFile();
+    protected void save(String name, InputStream input) throws OXException {
+        File file = new File(storage, name);
 
-        if (!parentDir.exists()) {
-            try {
-                LOCK.lock();
-                if (!parentDir.exists() && !mkdirs(parentDir)) {
-                    throw FileStorageCodes.CREATE_DIR_FAILED.create(parentDir.getAbsolutePath());
+        // Ensure existence of parent directories
+        {
+            File parentDir = file.getParentFile();
+            if (!parentDir.exists()) {
+                synchronized (this) {
+                    if (!mkdirs(parentDir)) {
+                        throw FileStorageCodes.CREATE_DIR_FAILED.create(parentDir.getAbsolutePath());
+                    }
                 }
-            } finally {
-                LOCK.unlock();
             }
         }
 
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
-            final byte[] buf = new byte[DEFAULT_BUFSIZE];
-            int len = input.read(buf);
-            while (len > 0) {
-                fos.write(buf, 0, len);
-                len = input.read(buf);
+            int len = DEFAULT_BUFSIZE;
+            byte[] buf = new byte[len];
+            for (int read; (read = input.read(buf, 0, len)) > 0;) {
+                fos.write(buf, 0, read);
             }
+            fos.flush();
         } catch (final IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } finally {
@@ -627,16 +624,24 @@ public class LocalFileStorage extends DefaultFileStorage {
         }
     }
 
-    protected void lock(final long timeout) throws OXException {
+    /**
+     * Locks this file storage; waiting if necessary for at most the given time-out to acquire the lock.
+     *
+     * @param timeoutMillis The maximum time to wait
+     * @throws OXException If lock attempt fails
+     */
+    protected void lock(long timeoutMillis) throws OXException {
         ensureStorageExists();
-        final File lock = new File(storage, LOCK_FILENAME);
-        final long maxLifeTime = 100 * timeout;
-        final long lastModified = lock.lastModified();
+
+        File lock = new File(storage, LOCK_FILENAME);
+        long maxLifeTime = 100 * timeoutMillis;
+        long lastModified = lock.lastModified();
         if (lastModified > 0 && lastModified + maxLifeTime < System.currentTimeMillis()) {
             unlock();
             LOG.error("Deleting a very old stale lock file here {}. Assuming it has not been removed by a crashed/restarted application.", lock.getAbsolutePath());
         }
-        final long failTime = System.currentTimeMillis() + timeout;
+
+        long failTime = System.currentTimeMillis() + timeoutMillis;
         boolean created = false;
         IOException ioe = null;
         do {
@@ -658,6 +663,8 @@ public class LocalFileStorage extends DefaultFileStorage {
                 }
             }
         } while (!created && System.currentTimeMillis() < failTime);
+
+        // Check if orderly created
         if (!created) {
             throw null == ioe ? FileStorageCodes.LOCK.create(lock.getAbsolutePath()) : FileStorageCodes.LOCK.create(ioe, lock.getAbsolutePath());
         }
@@ -821,39 +828,44 @@ public class LocalFileStorage extends DefaultFileStorage {
         if (directory.exists()) {
             return true;
         }
-        final File parent = directory.getParentFile();
+
+        File parent = directory.getParentFile();
         if (!mkdirs(parent)) {
             return false;
         }
-        return directory.mkdir();
+
+        if (directory.mkdir()) {
+            // Successfully created
+            return true;
+        }
+
+        // Only return false is directory does no exist although attempted to be created
+        return directory.exists();
     }
 
-    private void initialize() throws OXException{
-    	if(alreadyInitialized) {
+    private void initialize() throws OXException {
+        if (alreadyInitialized) {
             return;
         }
 
-        try {
-            LOCK.lock();
-            if (!storage.exists() && !mkdirs(storage)) {
+        synchronized (this) {
+            if (!mkdirs(storage)) {
                 throw FileStorageCodes.CREATE_DIR_FAILED.create(storage.getAbsolutePath());
             }
-        } finally {
-            LOCK.unlock();
         }
 
         lock(LOCK_TIMEOUT);
         try {
             if (!exists(STATEFILENAME)) {
-                LOG.info("Repairing.");
+                LOG.info("Repairing {}", new File(storage, STATEFILENAME).getPath());
                 final State state = repairState();
                 saveState(state);
             }
         } finally {
             unlock();
         }
+
         alreadyInitialized = true;
-
-
     }
+
 }

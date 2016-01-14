@@ -50,8 +50,11 @@
 package com.openexchange.imap.entity2acl;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.Services;
@@ -106,29 +109,41 @@ public class DovecotEntity2ACL extends Entity2ACL {
 
     private static final String ALIAS_ANYONE = "anyone";
 
-    private static final String SHARED_PREFIX = "#shared";
+    // ------------------------------------------------------------------------------------------------------------------------------
 
-    private static final String getSharedFolderOwner(final String sharedFolderName, final char delim) {
-        if (!sharedFolderName.startsWith(SHARED_PREFIX, 0)) {
-            return null;
-        }
-        final String quotedDelim = Pattern.quote(String.valueOf(delim));
-        final String abstractPattern = new StringBuilder().append(SHARED_PREFIX).append(quotedDelim).append("([\\p{L}&&[^").append(
-            quotedDelim).append("]]+)").append(quotedDelim).append("\\p{L}+").toString();
-        final Matcher m = Pattern.compile(abstractPattern, Pattern.CASE_INSENSITIVE).matcher(sharedFolderName);
-        if (m.matches()) {
-            return m.group(1).replaceAll("\\s+", String.valueOf(delim));
-        }
-        return null;
-    }
-
-    // session-user, fullname & delimiter
+    private final Cache<String, CachedString> cacheSharedOwners;
 
     /**
      * Default constructor
      */
     private DovecotEntity2ACL() {
         super();
+        cacheSharedOwners = CacheBuilder.newBuilder().maximumSize(50000).expireAfterAccess(30, TimeUnit.MINUTES).build();
+    }
+
+    private final String getSharedFolderOwner(final String sharedFolderName, final char delim, String otherUserNamespace) {
+        if (null == otherUserNamespace || !sharedFolderName.startsWith(otherUserNamespace, 0)) {
+            return null;
+        }
+
+        CachedString wrapper = cacheSharedOwners.getIfPresent(sharedFolderName);
+        if (null == wrapper) {
+            String quotedDelim = Pattern.quote(String.valueOf(delim));
+            // E.g. "Shared\\Q/\\E((?:\\\\\\Q/\\E|[^\\Q/\\E])+)\\Q/\\E\.+"
+            StringBuilder abstractPattern = new StringBuilder().append(otherUserNamespace).append(quotedDelim);
+            abstractPattern.append("((?:\\\\").append(quotedDelim).append("|[^").append(quotedDelim).append("])+)");
+            abstractPattern.append(quotedDelim).append(".+");
+            Pattern pattern = Pattern.compile(abstractPattern.toString(), Pattern.CASE_INSENSITIVE);
+            Matcher m = pattern.matcher(sharedFolderName);
+            if (m.matches()) {
+                wrapper = CachedString.wrapperFor(m.group(1).replaceAll("\\s+", String.valueOf(delim)));
+            } else {
+                wrapper = CachedString.NIL;
+            }
+            cacheSharedOwners.put(sharedFolderName, wrapper);
+        }
+
+        return wrapper.string;
     }
 
     @Override
@@ -143,7 +158,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
         final int accountId = ((Integer) args[0]).intValue();
         final String serverUrl = args[1].toString();
         final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
+        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue(), (String) args[5]);
         if (null == sharedOwner) {
             /*
              * A non-shared folder
@@ -204,7 +219,7 @@ public class DovecotEntity2ACL extends Entity2ACL {
         final int accountId = ((Integer) args[0]).intValue();
         final String serverUrl = args[1].toString();
         final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue());
+        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue(), (String) args[5]);
         if (null == sharedOwner) {
             /*
              * A non-shared folder
