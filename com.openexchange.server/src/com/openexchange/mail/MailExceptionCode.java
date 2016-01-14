@@ -546,9 +546,9 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      */
     INVALID_MESSAGE("Invalid message data: %1$s", MailExceptionStrings.INVALID_MESSAGE_MSG, CATEGORY_USER_INPUT, 101),
     /**
-     * The message body is too big from message %1$s in mail folder %2$s
+     * The message content is too big from message %1$s in mail folder %2$s
      */
-    BODY_TOO_BIG("The message body is too big from message %1$s in mail folder %2$s", MailExceptionStrings.BODY_TOO_BIG_MSG, CATEGORY_ERROR, 102),
+    CONTENT_TOO_BIG("The message content is too big from message %1$s in mail folder %2$s", MailExceptionStrings.CONTENT_TOO_BIG_MSG, CATEGORY_ERROR, 102),
     ;
 
     private static String PREFIX = "MSG";
