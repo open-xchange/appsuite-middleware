@@ -198,4 +198,12 @@ public final class MailExceptionStrings implements LocalizableStrings {
 
     public static final String ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG = "Archive folder does not allow subfolders.";
 
+    // The user tries to import a file as a RFC822 message, that is not valid
+    public static final String INVALID_MESSAGE_MSG = "No valid file";
+
+    // A part's content could not be read from a message; e.g. an I/O error occurred
+    public static final String UNREADBALE_PART_CONTENT_MSG = "The mail part could not be read";
+
+    // The body of the message is too big
+    public static final String BODY_TOO_BIG_MSG = "The mail body is too big.";
 }
