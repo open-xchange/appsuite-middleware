@@ -61,9 +61,11 @@ import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.mail.json.parser.MessageParser;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
@@ -162,14 +164,34 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String fromFieldName = VacationActionFields.FROM.getFieldname();
             if (object.has(fromFieldName)) {
-                String from = object.getString(fromFieldName);
-                try {
-                     new QuotedInternetAddress(from, true);
-                } catch (AddressException e) {
-                    throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
+                String from = "";
+                Object obj = object.get(fromFieldName);
+                boolean strict = true;
+                if (obj instanceof JSONArray) {
+                    // Create the object with the array of arrays as it is expected to be form the MessageParser.parseAddressKey
+                    try {
+                        InternetAddress[] fromArr = MessageParser.parseAdressArray(new JSONArray().put(obj), 1, strict);
+                        if (fromArr.length > 0) {
+                            from = fromArr[0].toString();
+                        }
+                    } catch (AddressException e) {
+                        throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
+                    }
+                } else if (obj instanceof String) {
+                    // Get string
+                    String fromStr = object.getString(fromFieldName);
+                    try {
+                        new QuotedInternetAddress(fromStr, strict);
+                        from = fromStr;
+                    } catch (AddressException e) {
+                        throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
+                    }
                 }
-                arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
-                arrayList.add(stringToList(from));
+                
+                if (!Strings.isEmpty(from)) {
+                    arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
+                    arrayList.add(stringToList(from));
+                }
             }
             final String text = object.getString(VacationActionFields.TEXT.getFieldname());
             if (null == text) {
