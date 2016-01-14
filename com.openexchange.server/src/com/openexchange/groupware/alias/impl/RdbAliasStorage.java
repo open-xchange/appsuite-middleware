@@ -55,10 +55,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 
 /**
@@ -71,7 +73,7 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RdbAliasStorage.class);
 
-    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
+    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
 
     private static final String READ_ALIASES = "SELECT alias FROM user_alias WHERE cid=? AND user=?";
 
@@ -133,7 +135,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     @Override
     public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         boolean useExistingConnection = true;
-        if(con == null) {
+        if (con == null) {
             con = Database.get(contextId, true);
             useExistingConnection = false;
         }
@@ -144,13 +146,14 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, contextId);
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
+            stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
             return stmt.execute();
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
             // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
+            if (!useExistingConnection) {
                 Database.back(contextId, false, con);
             }
         }
@@ -159,7 +162,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean useExistingConnection = true;
-        if(con == null) {
+        if (con == null) {
             con = Database.get(contextId, true);
             useExistingConnection = false;
         }
@@ -177,7 +180,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } finally {
             DBUtils.closeSQLStuff(stmt);
             // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
+            if (!useExistingConnection) {
                 Database.back(contextId, false, con);
             }
         }
@@ -186,7 +189,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     @Override
     public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
         boolean useExistingConnection = true;
-        if(con == null) {
+        if (con == null) {
             con = Database.get(contextId, true);
             useExistingConnection = false;
         }
@@ -203,7 +206,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } finally {
             DBUtils.closeSQLStuff(stmt);
             // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
+            if (!useExistingConnection) {
                 Database.back(contextId, false, con);
             }
         }
@@ -212,7 +215,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     @Override
     public boolean deleteAliase(Connection con, int contextId, int userId) throws OXException {
         boolean useExistingConnection = true;
-        if(con == null) {
+        if (con == null) {
             con = Database.get(contextId, true);
             useExistingConnection = false;
         }
@@ -228,7 +231,7 @@ public class RdbAliasStorage implements UserAliasStorage {
         } finally {
             DBUtils.closeSQLStuff(stmt);
             // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
+            if (!useExistingConnection) {
                 Database.back(contextId, false, con);
             }
         }
