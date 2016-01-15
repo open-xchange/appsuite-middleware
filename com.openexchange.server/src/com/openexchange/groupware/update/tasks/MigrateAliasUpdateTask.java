@@ -126,8 +126,7 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
-                final byte[] uuid = UUIDs.toByteArray(alias.getUuid());
-                stmt.setBytes(++index, uuid);
+                stmt.setBytes(++index, UUIDs.toByteArray(alias.getUuid()));
                 stmt.addBatch();
             }
             int[] updateCounts = stmt.executeBatch();

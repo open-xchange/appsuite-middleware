@@ -60,7 +60,6 @@ import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpd
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
-import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
 import com.openexchange.groupware.update.tasks.AddUUIDForUserAttributeTable;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicContextAttributesTask;
 import com.openexchange.groupware.update.tasks.AllowTextInValuesOfDynamicUserAttributesTask;
@@ -95,6 +94,7 @@ import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForDListTablesV2;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUpdateTaskTable;
 import com.openexchange.groupware.update.tasks.MakeUUIDPrimaryForUserAttributeTable;
+import com.openexchange.groupware.update.tasks.MigrateUUIDsForUserAliasTable;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddPrimaryKeyUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgContactsLinkageAddUuidUpdateTask;
 import com.openexchange.groupware.update.tasks.PrgDatesMembersPrimaryKeyUpdateTask;

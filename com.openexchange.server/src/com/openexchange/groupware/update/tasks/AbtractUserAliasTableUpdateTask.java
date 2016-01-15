@@ -75,6 +75,14 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
+
+    /**
+     * Returns all the aliases that are stored in the 'user_attribute' table
+     * 
+     * @param conn The Connection
+     * @return A {@link Set} with all the aliases
+     * @throws SQLException If an SQL error is occurred
+     */
     protected Set<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -102,6 +110,9 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         return aliases;
     }
 
+    /**
+     * Private {@link Alias} DAO class
+     */
     class Alias {
 
         private final int cid;
@@ -110,33 +121,62 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         private final int hash;
         private final UUID uuid;
 
-        Alias(int cid, int userId, String alias, UUID uuid) {
+        /**
+         * Initialises a new {@link Alias}.
+         * 
+         * @param cid The context identifier
+         * @param userId The user identifier
+         * @param alias The alias
+         * @param uuid The UUID
+         */
+        Alias(final int cid, final int userId, final String alias, final UUID uuid) {
             this.cid = cid;
             this.userId = userId;
             this.alias = alias;
             this.uuid = uuid;
 
-            int prime = 31;
-            int result = prime * 1 + cid;
-            result = prime * result + userId;
+            final int prime = 31;
+            int result = 1;
             result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-            this.hash = result;
+            result = prime * result + cid;
+            result = prime * result + userId;
+            result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+            hash = result;
         }
 
+        /**
+         * Gets the cid
+         *
+         * @return The cid
+         */
         public int getCid() {
             return cid;
         }
 
+        /**
+         * Gets the userId
+         *
+         * @return The userId
+         */
         public int getUserId() {
             return userId;
         }
 
+        /**
+         * Gets the alias
+         *
+         * @return The alias
+         */
         public String getAlias() {
             return alias;
         }
 
-        @Override
-        public int hashCode() {
+        /**
+         * Gets the hash
+         *
+         * @return The hash
+         */
+        public int getHash() {
             return hash;
         }
 
@@ -149,19 +189,34 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             return uuid;
         }
 
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#hashCode()
+         */
         @Override
-        public boolean equals(Object obj) {
+        public int hashCode() {
+            return hash;
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.lang.Object#equals(java.lang.Object)
+         */
+        @Override
+        public boolean equals(final Object obj) {
             if (this == obj) {
                 return true;
             }
-            if (!(obj instanceof Alias)) {
+            if (obj == null) {
                 return false;
             }
-            Alias other = (Alias) obj;
-            if (cid != other.cid) {
+            if (getClass() != obj.getClass()) {
                 return false;
             }
-            if (userId != other.userId) {
+            final Alias other = (Alias) obj;
+            if (!getOuterType().equals(other.getOuterType())) {
                 return false;
             }
             if (alias == null) {
@@ -171,8 +226,26 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             } else if (!alias.equals(other.alias)) {
                 return false;
             }
+            if (cid != other.cid) {
+                return false;
+            }
+            if (userId != other.userId) {
+                return false;
+            }
+            if (uuid == null) {
+                if (other.uuid != null) {
+                    return false;
+                }
+            } else if (!uuid.equals(other.uuid)) {
+                return false;
+            }
             return true;
         }
+
+        private AbtractUserAliasTableUpdateTask getOuterType() {
+            return AbtractUserAliasTableUpdateTask.this;
+        }
+
     }
 
 }

@@ -144,6 +144,15 @@ public class CachingAliasStorage implements UserAliasStorage {
     }
 
     @Override
+    public boolean createAlias(Connection con, int contextId, int userId, String alias, byte[] uuidBinary) throws OXException {
+        boolean success = delegate.createAlias(con, contextId, userId, alias, uuidBinary);
+        if (success) {
+            invalidateAliases(contextId, userId);
+        }
+        return success;
+    }
+
+    @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);
         if (success) {
@@ -170,10 +179,8 @@ public class CachingAliasStorage implements UserAliasStorage {
         return success;
     }
 
-
     @Override
     public List<Integer> getUserIdsByAliasDomain(int contextId, String domain) throws OXException {
         return delegate.getUserIdsByAliasDomain(contextId, domain);
     }
-
 }

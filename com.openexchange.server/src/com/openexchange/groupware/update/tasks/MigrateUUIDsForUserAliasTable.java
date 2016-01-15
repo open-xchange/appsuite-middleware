@@ -93,16 +93,18 @@ public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTa
             if (!Tools.columnExists(connection, "user_alias", "uuid")) {
                 // Create the 'uuid' column
                 Tools.addColumns(connection, "user_alias", new Column("uuid", "BINARY(16) DEFAULT NULL"));
-                // Get the aliases
-                Set<Alias> aliases = getAllAliasesInUserAttributes(connection);
-                // Migrate the UUIDs
-                if (!aliases.isEmpty()) {
-                    migrateUUIDs(connection, aliases);
-                }
-                // Generate random UUIDs for those aliases that have none
-                insertUUIDs(connection);
             }
+            // Get the aliases
+            Set<Alias> aliases = getAllAliasesInUserAttributes(connection);
+            // Migrate the UUIDs
+            if (!aliases.isEmpty()) {
+                migrateUUIDs(connection, aliases);
+            }
+            // Generate random UUIDs for those aliases that have none
+            insertUUIDs(connection);
+            // Commit changes
             connection.commit();
+
         } catch (SQLException e) {
             DBUtils.rollback(connection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
@@ -110,6 +112,7 @@ public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTa
             DBUtils.autocommit(connection);
             Database.backNoTimeout(contextId, true, connection);
         }
+
     }
 
     /*
@@ -123,7 +126,7 @@ public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTa
     }
 
     /**
-     * Insert a UUID to the 'uuid' column
+     * Insert random UUIDs to the 'uuid' column of the 'user_alias' table for all aliases that have none
      * 
      * @param connection The writable connection
      * @throws SQLException If an SQL error occurs
@@ -146,7 +149,7 @@ public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTa
     }
 
     /**
-     * Migrate the existing UUIDs from the 'user_attribute' table to the 'user_alias' table
+     * Migrate the existing UUIDs from the 'user_attribute' table to the 'user_alias' table only if not previously migrated
      * 
      * @param connection The writable connection
      * @param aliases The set of a
@@ -155,7 +158,7 @@ public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTa
     private void migrateUUIDs(Connection connection, Set<Alias> aliases) throws SQLException {
         PreparedStatement preparedStatment = null;
         try {
-            preparedStatment = connection.prepareStatement("UPDATE user_alias SET uuid = ? WHERE cid = ? AND user = ? AND alias = ?");
+            preparedStatment = connection.prepareStatement("UPDATE user_alias SET uuid = ? WHERE cid = ? AND user = ? AND alias = ? AND uuid IS NULL");
             for (Alias alias : aliases) {
                 addBatch(preparedStatment, alias.getCid(), alias.getUserId(), alias.getAlias(), UUIDs.toByteArray(alias.getUuid()));
             }
