@@ -62,6 +62,7 @@ import org.junit.Test;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.caldav.CalDAVTest;
 import com.openexchange.dav.caldav.ICalResource;
+import com.openexchange.dav.caldav.UserAgents;
 import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.groupware.calendar.TimeTools;
 import com.openexchange.groupware.container.Appointment;
@@ -73,6 +74,11 @@ import com.openexchange.groupware.container.Appointment;
  * @since v7.8.1
  */
 public class AlarmTestEMClient extends CalDAVTest {
+
+    @Override
+    protected String getDefaultUserAgent() {
+        return UserAgents.EM_CLIENT_6_0;
+    }
 
     @Test
     public void testAcknowledgeReminder() throws Exception {
