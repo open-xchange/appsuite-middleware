@@ -709,7 +709,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                         stmt.executeUpdate();
                         stmt.close();
 
-                        aliasStorage.createAlias(con, contextId, userId, elem);
+                        aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
                     }
                 }
             } else if (usrdata.isAliasesset()) {
@@ -1634,7 +1634,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                             stmt.executeUpdate();
                             stmt.close();
 
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail);
+                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail, uuidBinary);
                         }
                     }
                 }

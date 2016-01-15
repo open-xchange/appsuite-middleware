@@ -57,9 +57,7 @@ import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.UUID;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
-import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link AbtractUserAliasTableUpdateTask}
@@ -80,7 +78,7 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         ResultSet rs = null;
         Set<Alias> aliases = new LinkedHashSet<Alias>();
         try {
-            stmt = conn.prepareStatement("SELECT cid, id, value, uuid FROM user_attribute WHERE name='alias'");
+            stmt = conn.prepareStatement("SELECT cid, id, value FROM user_attribute WHERE name='alias'");
             rs = stmt.executeQuery();
             if (!rs.next()) {
                 return Collections.emptySet();
@@ -92,9 +90,7 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
                 int cid = rs.getInt(++index);
                 int uid = rs.getInt(++index);
                 String alias = rs.getString(++index);
-                byte[] bytes = rs.getBytes(++index);
-                UUID uuid = UUIDs.toUUID(bytes);
-                aliases.add(new Alias(cid, uid, alias, uuid));
+                aliases.add(new Alias(cid, uid, alias));
             } while (rs.next());
         } finally {
             closeSQLStuff(stmt);
@@ -108,13 +104,11 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         private final int userId;
         private final String alias;
         private final int hash;
-        private final UUID uuid;
 
-        Alias(int cid, int userId, String alias, UUID uuid) {
+        Alias(int cid, int userId, String alias) {
             this.cid = cid;
             this.userId = userId;
             this.alias = alias;
-            this.uuid = uuid;
 
             int prime = 31;
             int result = prime * 1 + cid;
@@ -138,15 +132,6 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         @Override
         public int hashCode() {
             return hash;
-        }
-
-        /**
-         * Gets the uuid
-         *
-         * @return The uuid
-         */
-        public UUID getUuid() {
-            return uuid;
         }
 
         @Override

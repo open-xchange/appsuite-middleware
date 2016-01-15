@@ -61,7 +61,6 @@ import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -79,11 +78,10 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
         + "`cid` INT4 UNSIGNED NOT NULL, "
         + "`user` INT4 UNSIGNED NOT NULL, "
         + "`alias` VARCHAR(255) NOT NULL, "
-        + "`uuid` BINARY(16) DEFAULT NULL,"
-        + "PRIMARY KEY (`cid`, `user`, `alias`, `uuid`) "
+        + "PRIMARY KEY (`cid`, `user`, `alias`) "
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias, uuid) VALUES(?, ?, ?, ?)";
+    private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -132,8 +130,6 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
-                final byte[] uuid = UUIDs.toByteArray(alias.getUuid());
-                stmt.setBytes(++index, uuid);
                 stmt.addBatch();
             }
             int[] updateCounts = stmt.executeBatch();
