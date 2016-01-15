@@ -368,7 +368,7 @@ public final class MessageUtility {
     }
 
     private static final int BUFSIZE_8K = 8192; // 8K
-    private static final int BUFSIZE_64K = 65536; // 64K
+    private static final int BUFSIZE_20K = 20480; // 20K
 
     /**
      * The unknown character: <code>'&#65533;'</code>
@@ -595,30 +595,35 @@ public final class MessageUtility {
         }
     }
 
-    private static String readStream0(InputStream inStream, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
-        if (null == inStream) {
+    private static String readStream0(InputStream input, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
+        if (null == input) {
             return STR_EMPTY;
         }
 
-        InputStream in = Streams.getNonEmpty(inStream);
-        if (null == in) {
+        // Check first byte
+        int check = input.read();
+        if (check < 0) {
+            Streams.close(input);
             return STR_EMPTY;
         }
+
         try {
             byte[] buf = new byte[BUFSIZE_8K];
-            ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFSIZE_64K);
+            ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFSIZE_20K);
+            tmp.write(check);
 
             if (maxSize > 0) {
                 long size = 0;
-                for (int read; (read = inStream.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     size += read;
                     if (size > maxSize) {
                         throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
                     }
                     tmp.write(buf, 0, read);
                 }
+                int i = 9;
             } else {
-                for (int read; (read = inStream.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     tmp.write(buf, 0, read);
                 }
             }
@@ -648,7 +653,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            Streams.close(inStream);
+            Streams.close(input);
         }
     }
 
@@ -756,17 +761,21 @@ public final class MessageUtility {
             return new byte[0];
         }
 
-        InputStream in = Streams.getNonEmpty(input);
-        if (null == in) {
+        // Check first byte
+        int check = input.read();
+        if (check < 0) {
+            Streams.close(input);
             return new byte[0];
         }
+
         try {
             byte[] buf = new byte[BUFSIZE_8K];
-            ByteArrayOutputStream out = Streams.newByteArrayOutputStream(BUFSIZE_64K);
+            ByteArrayOutputStream out = Streams.newByteArrayOutputStream(BUFSIZE_20K);
+            out.write(check);
 
             if (maxSize > 0) {
                 long size = 0;
-                for (int len; (len = in.read(buf, 0, buf.length)) > 0;) {
+                for (int len; (len = input.read(buf, 0, buf.length)) > 0;) {
                     size += len;
                     if (size > maxSize) {
                         throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
@@ -774,7 +783,7 @@ public final class MessageUtility {
                     out.write(buf, 0, len);
                 }
             } else {
-                for (int len; (len = in.read(buf, 0, buf.length)) > 0;) {
+                for (int len; (len = input.read(buf, 0, buf.length)) > 0;) {
                     out.write(buf, 0, len);
                 }
             }
@@ -790,7 +799,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            Streams.close(in);
+            Streams.close(input);
         }
     }
 

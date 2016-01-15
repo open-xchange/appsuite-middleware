@@ -80,14 +80,6 @@ public class TestTool {
                 ctxId = getRandomContextId();
             }
         }
-        try {
-            // wait to ensure the context is available for further operations
-            // FIXME when master-slave setup for configdb is available remove the line below
-            Thread.sleep(2000L);
-        } catch (InterruptedException e) {
-            // should not happen
-        }
-
         return ctx;
     }
 

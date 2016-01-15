@@ -1025,6 +1025,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         String fullName = argument.getFullname();
         boolean mergeWithSent = includeSent && !mailAccess.getFolderStorage().getSentFolder().equals(fullName);
         final MailFields mailFields = new MailFields(MailField.getFields(fields));
+        mailFields.add(MailField.FOLDER_ID);
         mailFields.add(MailField.toField(MailListField.getField(sortCol)));
         // Check message storage
         final IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
@@ -1091,7 +1092,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         {
             MailSortField sortField = MailSortField.getField(sortCol);
             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.getOrderDirection(order), getUserLocale());
+            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, OrderDirection.getOrderDirection(order), folder, getUserLocale());
             Collections.sort(list, listComparator);
         }
         // Check for index range
@@ -1131,19 +1132,20 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         return ThreadPools.getThreadPool().submit(task, CallerRunsBehavior.<ThreadableMapping> getInstance());
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, Locale locale) {
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String folder, Locale locale) {
         final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
         Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
             public int compare(List<MailMessage> o1, List<MailMessage> o2) {
+                MailMessage msg1 = lookUpFirstBelongingToFolder(folder, o1);
+                MailMessage msg2 = lookUpFirstBelongingToFolder(folder, o2);
+
                 int result = comparator.compare(o1.get(0), o2.get(0));
                 if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
                     return result;
                 }
                 // Zero as comparison result AND primarily sorted by received-date
-                MailMessage msg1 = o1.get(0);
-                MailMessage msg2 = o2.get(0);
                 String inReplyTo1 = msg1.getInReplyTo();
                 String inReplyTo2 = msg2.getInReplyTo();
                 if (null == inReplyTo1) {
@@ -1152,6 +1154,15 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                     result = null == inReplyTo2 ? 1 : 0;
                 }
                 return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
+            }
+
+            private MailMessage lookUpFirstBelongingToFolder(String folder, List<MailMessage> mails) {
+                for (MailMessage mail : mails) {
+                    if (folder.equals(mail.getFolder())) {
+                        return mail;
+                    }
+                }
+                return mails.get(0);
             }
         };
         return listComparator;

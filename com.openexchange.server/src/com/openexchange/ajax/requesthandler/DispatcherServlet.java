@@ -500,6 +500,12 @@ public class DispatcherServlet extends SessionServlet {
     @Override
     protected void handleOXException(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (AjaxExceptionCodes.MISSING_PARAMETER.equals(e)) {
+            // E.g. "Accept: application/json, text/javascript, ..."
+            if (isJsonResponseExpected(req, true)) {
+                writeJsCallbackOrHandle(e, req, resp);
+                return;
+            }
+
             sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
             logException(e, LogLevel.DEBUG, HttpServletResponse.SC_BAD_REQUEST);
             return;
@@ -536,6 +542,10 @@ public class DispatcherServlet extends SessionServlet {
             }
         }
 
+        writeJsCallbackOrHandle(e, req, resp);
+    }
+
+    private void writeJsCallbackOrHandle(OXException e, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         if (APIResponseRenderer.expectsJsCallback(req)) {
             writeErrorAsJsCallback(e, req, resp);
         } else {
@@ -631,24 +641,6 @@ public class DispatcherServlet extends SessionServlet {
                 break;
         }
         httpServletResponse.sendError(result.getHttpStatusCode());
-    }
-
-    protected void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
-        // Check if HTTP response is committed
-        if (httpResponse.isCommitted()) {
-            // Status code and headers already written. Nothing can be done anymore...
-            return;
-        }
-
-        // Try to write error page
-        try {
-            httpResponse.setStatus(statusCode);
-            writeErrorPage(statusCode, statusMsg, httpResponse);
-        } catch (Exception x) {
-            // Ignore
-            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
-            flushSafe(httpResponse);
-        }
     }
 
     protected void logException(@Nullable Exception e) {

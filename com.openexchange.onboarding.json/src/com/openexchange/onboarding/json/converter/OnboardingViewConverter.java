@@ -236,7 +236,7 @@ public class OnboardingViewConverter implements ResultConverter {
     private void collectActions(DeviceAwareScenario scenario, String scenarioAppendix, JSONArray jActionIds, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
         List<OnboardingAction> actions = scenario.getActions();
         for (OnboardingAction action : actions) {
-            boolean added = true;
+            String actionId = null; // <--- Set to a valid, non-null identifier in case action has been successfully added
             switch (action) {
                 case SMS:
                     // Generic action
@@ -250,6 +250,7 @@ public class OnboardingViewConverter implements ResultConverter {
                         if (!actionCollector.usedIds.containsKey(action.getId())) {
                             actionCollector.addAction(action.getId(), new JSONObject(2).put("id", action.getId()));
                         }
+                        actionId = action.getId();
                     }
                     break;
                 case DISPLAY:
@@ -262,9 +263,10 @@ public class OnboardingViewConverter implements ResultConverter {
                                 jAction.put("id", compositeActionId);
                                 jAction.put("data", result.getObject());
                                 actionCollector.addAction(compositeActionId, jAction);
+                                actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
                             } catch (OXException e) {
                                 LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
-                                added = false;
+                                actionId = null;
                             }
                         }
                     }
@@ -284,9 +286,10 @@ public class OnboardingViewConverter implements ResultConverter {
                                 ResultObject result = onboardingService.execute(createOnboardingRequest(scenario, requestData, action), session);
                                 jAction.put(scenario.getDevice().getId(), result.getObject());
                             }
+                            actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
                         } catch (OXException e) {
                             LOGGER.warn("Failed to retrieve link for action '{}' and will therefore be ignored.", compositeActionId, e);
-                            added = false;
+                            actionId = null;
                         }
                     }
                     break;
@@ -295,8 +298,7 @@ public class OnboardingViewConverter implements ResultConverter {
 
             }
 
-            if (added) {
-                String actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
+            if (null != actionId) {
                 jActionIds.put(actionId);
             }
         }
