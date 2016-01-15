@@ -250,7 +250,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * handle private comments & reminders
              */
             handlePrivateComments(appointmentToSave);
-            ReminderObject nextReminder = handleReminders(originalAppointment, appointmentToSave);
+            ReminderObject nextReminder = handleReminders(originalAppointment, appointmentToSave, exceptionsToSave);
             /*
              * update appointment
              */
@@ -313,7 +313,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 }
                 CalendarDataObject originalException = getMatchingException(originalExceptions, exceptionToSave.getRecurrenceDatePosition());
                 handlePrivateComments(exceptionToSave);
-                ReminderObject nextExceptionReminder = handleReminders(originalException, exceptionToSave);
+                ReminderObject nextExceptionReminder = handleReminders(originalException, exceptionToSave, null);
                 if (null != originalException) {
                     /*
                      * prepare exception update
@@ -428,7 +428,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 Patches.Incoming.addUserParticipantIfEmpty(factory.getSession().getUserId(), appointmentToSave);
             }
             handlePrivateComments(appointmentToSave);
-            ReminderObject nextReminder = handleReminders(null, appointmentToSave);
+            ReminderObject nextReminder = handleReminders(null, appointmentToSave, null);
             Appointment[] hardConflicts = getAppointmentInterface().insertAppointmentObject(appointmentToSave);
             if (null != hardConflicts && 0 < hardConflicts.length) {
                 throw new PreconditionException(
@@ -571,8 +571,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                         }
                         break;
                     case IOS_CALENDAR:
+                    case MAC_CALENDAR:
                         /*
-                         * iOS calendar prefers a relative snooze time duration in the trigger
+                         * Apple clients prefer a relative snooze time duration in the trigger of appointment series
                          */
                         if (appointment.isMaster()) {
                             calendar.setTime(regularReminder.getDate());
@@ -932,7 +933,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
      *                           <code>com.openexchange.data.conversion.ical.alarm.acknowledged</code> property
      * @return The next reminder to store, or <code>null</code> if no further actions are required
      */
-    private ReminderObject handleReminders(CalendarDataObject originalAppointment, CalendarDataObject updatedAppointment) throws OXException {
+    private ReminderObject handleReminders(CalendarDataObject originalAppointment, CalendarDataObject updatedAppointment, List<CalendarDataObject> exceptionsToSave) throws OXException {
         if (false == updatedAppointment.containsAlarm()) {
             return null;
         }
@@ -944,6 +945,38 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
         updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.alarm.snooze");
         updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.alarm.relativeSnooze");
+        /*
+         * check & adjust a snoozed alarm in a series occurrence in the Mac OS client's way
+         */
+        if (recurring && CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()) &&
+            null != exceptionsToSave && 1 == exceptionsToSave.size() && null != exceptionsToSave.get(0)) {
+            CalendarDataObject exceptionToSave = exceptionsToSave.get(0);
+            Date exceptionAcknowledgedDate = exceptionToSave.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
+            Date exceptionSnoozeDate = exceptionToSave.getProperty("com.openexchange.data.conversion.ical.alarm.snooze");
+            if (null != exceptionAcknowledgedDate && null != exceptionSnoozeDate && null != exceptionToSave.getStartDate() && null != exceptionToSave.getEndDate()) {
+                AppointmentDiff diff = AppointmentDiff.compare(appointmentToSave, exceptionToSave,
+                    Appointment.RECURRENCE_DATE_POSITION, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_POSITION,
+                    Appointment.RECURRENCE_START, Appointment.RECURRENCE_COUNT, Appointment.START_DATE, Appointment.END_DATE);
+                if (diff.getUpdates().isEmpty()) {
+                    RecurringResultsInterface recurringResults = factory.getCalendarUtilities().calculateRecurringIgnoringExceptions(
+                        originalAppointment, exceptionToSave.getStartDate().getTime(), exceptionToSave.getEndDate().getTime(), 0);
+                    for (int i = 0; i < recurringResults.size(); i++) {
+                        RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
+                        if (null != recurringResult && recurringResult.getStart() == exceptionToSave.getStartDate().getTime() &&
+                            recurringResult.getEnd() == exceptionToSave.getEndDate().getTime()) {
+                            /*
+                             * found new exception matching the original timeslot, containing an acknowledged & snoozed alarm =>
+                             * take over properties to series master for further processing & ignore change new exception
+                             */
+                            acknowledgedDate = exceptionAcknowledgedDate;
+                            snoozeDate = exceptionSnoozeDate;
+                            exceptionsToSave.clear();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
         /*
          * take over snoozed alarm if valid
          */
