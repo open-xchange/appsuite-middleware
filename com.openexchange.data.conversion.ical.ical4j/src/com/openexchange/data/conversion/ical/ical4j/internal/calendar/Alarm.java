@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.UUID;
 import net.fortuna.ical4j.model.ComponentList;
+import net.fortuna.ical4j.model.DateTime;
 import net.fortuna.ical4j.model.Dur;
 import net.fortuna.ical4j.model.Parameter;
 import net.fortuna.ical4j.model.Property;
@@ -107,6 +108,21 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
 
     private void emitAppointmentAlarm(Appointment appointment, VEvent component, List<ConversionWarning> warnings) {
         if (false == appointment.containsAlarm() || -1 == appointment.getAlarm()) {
+            if (Boolean.TRUE.equals(appointment.getProperty("com.openexchange.data.conversion.ical.alarm.emptyDefaultAlarm"))) {
+                /*
+                 * insert a dummy alarm to prevent Apple clients from adding it's own default alarms
+                 */
+                DateTime trigger = new DateTime(true);
+                trigger.setTime(197168145658L); // 19760401T005545Z
+                VAlarm vAlarm = new VAlarm(trigger);
+                String uid = UUID.randomUUID().toString().toUpperCase();
+                vAlarm.getProperties().add(new XProperty("X-WR-ALARMUID", uid));
+                vAlarm.getProperties().add(new XProperty("UID", uid));
+                vAlarm.getProperties().add(new XProperty("X-APPLE-LOCAL-DEFAULT-ALARM", "TRUE"));
+                vAlarm.getProperties().add(new XProperty("ACTION", "NONE"));
+                vAlarm.getProperties().add(new XProperty("X-APPLE-DEFAULT-ALARM", "TRUE"));
+                component.getAlarms().add(vAlarm);
+            }
             return;
         }
         /*

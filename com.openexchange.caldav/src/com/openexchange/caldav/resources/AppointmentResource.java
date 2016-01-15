@@ -533,7 +533,15 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
 
     private void applyReminderProperties(CalendarDataObject appointment) throws OXException {
         ReminderObject reminder = optReminder(appointment);
-        if (null != reminder) {
+        if (null == reminder) {
+            /*
+             * insert a dummy alarm to prevent Apple clients from adding their own default alarms
+             */
+            if (SharedType.getInstance().equals(parent.getFolder().getType()) &&
+                (CalDAVAgent.IOS_CALENDAR.equals(factory.getState().getUserAgent()) || CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()))) {
+                appointment.setProperty("com.openexchange.data.conversion.ical.alarm.emptyDefaultAlarm", Boolean.TRUE);
+            }
+        } else {
             /*
              * set last acknowledged date one minute prior next trigger time
              */
