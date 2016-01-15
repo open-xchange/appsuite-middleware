@@ -621,6 +621,7 @@ public final class MessageUtility {
                     }
                     tmp.write(buf, 0, read);
                 }
+                int i = 9;
             } else {
                 for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     tmp.write(buf, 0, read);
