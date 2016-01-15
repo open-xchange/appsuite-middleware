@@ -236,7 +236,7 @@ public class OnboardingViewConverter implements ResultConverter {
     private void collectActions(DeviceAwareScenario scenario, String scenarioAppendix, JSONArray jActionIds, ActionCollector actionCollector, AJAXRequestData requestData, OnboardingService onboardingService, Session session) throws OXException, JSONException {
         List<OnboardingAction> actions = scenario.getActions();
         for (OnboardingAction action : actions) {
-            String actionId = null;
+            String actionId = null; // <--- Set to a valid, non-null identifier in case action has been successfully added
             switch (action) {
                 case SMS:
                     // Generic action
