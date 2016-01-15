@@ -189,8 +189,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost:143";
 
-    private static final String ALIAS = "alias";
-
     public OXUserMySQLStorage() {
         super();
     }
@@ -795,7 +793,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        aliasStorage.createAlias(con, contextId, userId, elem);
+                        byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
+                        aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
                     }
                 }
             } else if (usrdata.isAliasesset()) {
@@ -1914,7 +1913,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     while (itr.hasNext()) {
                         final String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            userAlias.createAlias(con, contextId, userId, tmp_mail);
+                            byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
+                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail, uuidBinary);
                         }
                     }
                 }
