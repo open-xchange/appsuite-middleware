@@ -8731,6 +8731,12 @@ msgstr ""
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr ""
 
+#. Message is too long (%1$s characters). Maximum length is %2$s characters.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.sipgate/src/com/openexchange/sms/sipgate/SipgateSMSExceptionMessages.java:64
+msgid ""
+"Message is too long (%1$s characters). Maximum length is %2$s characters."
+msgstr ""
+
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
 msgid "Could not parse phone number %1$s"
