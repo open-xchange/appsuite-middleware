@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.transport;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import javax.mail.Address;
@@ -195,6 +196,17 @@ public abstract class MailTransport {
     public abstract MailMessage sendRawMessage(byte[] asciiBytes, Address[] allRecipients) throws OXException;
 
     /**
+     * Sends specified message's raw bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
+     * treated as an rfc822 MIME message.
+     *
+     * @param stream The stream providing message's raw bytes
+     * @param allRecipients An array of {@link Address addresses} to send this message to; may be <code>null</code> to extract recipients
+     *            from message headers TO, CC, BCC, and NEWSGROUPS.
+     * @throws OXException If sending fails
+     */
+    public abstract void sendRawMessage(InputStream stream, Address[] allRecipients) throws OXException;
+
+    /**
      * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
      * treated as an rfc822 MIME message. Some of the defined properties might only be supported by certain transport implementations.<br>
      * <br>
@@ -208,6 +220,22 @@ public abstract class MailTransport {
      */
     public MailMessage sendRawMessage(byte[] asciiBytes, SendRawProperties properties) throws OXException {
         return sendRawMessage(asciiBytes, properties.getRecipients());
+    }
+
+    /**
+     * Sends specified message's raw ascii bytes. The given bytes are interpreted dependent on implementation, but in most cases it's
+     * treated as an rfc822 MIME message. Some of the defined properties might only be supported by certain transport implementations.<br>
+     * <br>
+     * <i>Per default this methods delegates to {@link #sendRawMessage(InputStream, Address[])}, ignoring any properties but the recipients.
+     * Any transport implementation must override this method explicitly if it wants to support further properties.</i>
+     *
+     * @param stream The stream providing message's raw bytes
+     * @param properties The properties to define how the message shall be sent
+     * @return The sent mail message
+     * @throws OXException If sending fails
+     */
+    public void sendRawMessage(InputStream stream, SendRawProperties properties) throws OXException {
+        sendRawMessage(stream, properties.getRecipients());
     }
 
     /**
@@ -251,7 +279,7 @@ public abstract class MailTransport {
 
     public static final class SendRawProperties {
 
-        private List<InternetAddress> recipients = new ArrayList<InternetAddress>(4);
+        private final List<InternetAddress> recipients = new ArrayList<InternetAddress>(4);
 
         private InternetAddress sender;
 
