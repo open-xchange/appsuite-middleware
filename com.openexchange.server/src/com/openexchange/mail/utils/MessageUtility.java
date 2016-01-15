@@ -595,12 +595,12 @@ public final class MessageUtility {
         }
     }
 
-    private static String readStream0(InputStream inStream, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
-        if (null == inStream) {
+    private static String readStream0(InputStream input, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
+        if (null == input) {
             return STR_EMPTY;
         }
 
-        InputStream in = Streams.getNonEmpty(inStream);
+        InputStream in = Streams.getNonEmpty(input);
         if (null == in) {
             return STR_EMPTY;
         }
@@ -610,7 +610,7 @@ public final class MessageUtility {
 
             if (maxSize > 0) {
                 long size = 0;
-                for (int read; (read = inStream.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                for (int read; (read = in.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     size += read;
                     if (size > maxSize) {
                         throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
@@ -618,7 +618,7 @@ public final class MessageUtility {
                     tmp.write(buf, 0, read);
                 }
             } else {
-                for (int read; (read = inStream.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                for (int read; (read = in.read(buf, 0, BUFSIZE_8K)) > 0;) {
                     tmp.write(buf, 0, read);
                 }
             }
@@ -648,7 +648,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            Streams.close(inStream);
+            Streams.close(in);
         }
     }
 
