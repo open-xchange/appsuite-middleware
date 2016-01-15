@@ -106,6 +106,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Java7ConcurrentLinkedQueue;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.util.MsisdnCheck;
@@ -723,6 +724,64 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
     }
 
     @Override
+    public void sendRawMessage(InputStream stream, SendRawProperties properties) throws OXException {
+        if (properties.isSanitizeHeaders()) {
+            // Cannot sanitize stream...
+            try {
+                sendRawMessage(Streams.stream2bytes(stream), properties);
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+            return;
+        }
+
+        final SMTPConfig smtpConfig = getTransportConfig();
+        try {
+            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), stream);
+            InternetAddress sender = properties.getSender();
+            if (sender != null) {
+                smtpMessage.setEnvelopeFrom(sender.getAddress());
+            }
+            /*
+             * Check recipients
+             */
+            Address[] recipients = properties.getRecipients();
+            if (recipients == null) {
+                recipients = smtpMessage.getAllRecipients();
+            }
+            if (properties.isValidateAddressHeaders()) {
+                processAddressHeader(smtpMessage);
+            }
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(smtpMessage, true);
+            } else {
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(smtpMessage, true);
+                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        } finally {
+            Streams.close(stream);
+        }
+    }
+
+
+    @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig0();
         // There is an issue in the OSGi framework preventing the MailCap
@@ -768,6 +827,21 @@ public final class SMTPTransport extends MailTransport implements MimeSupport {
             // Thread.currentThread().setContextClassLoader(tcl);
         }
     }
+
+    @Override
+    public void sendRawMessage(InputStream stream, Address[] allRecipients) throws OXException {
+        SMTPConfig smtpConfig = getTransportConfig();
+        final SMTPMessage smtpMessage;
+        try {
+            smtpMessage = new SMTPMessage(getSMTPSession(), stream);
+            smtpMessage.removeHeader("x-original-headers");
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        }
+
+        sendMimeMessage(smtpMessage, allRecipients);
+    }
+
 
     @Override
     public void sendMimeMessage(MimeMessage mimeMessage, Address[] allRecipients) throws OXException {
