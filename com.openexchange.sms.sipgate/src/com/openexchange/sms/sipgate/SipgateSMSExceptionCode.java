@@ -68,6 +68,8 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
     UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 2),
     
     HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 3),
+    
+    MESSAGE_TOO_LONG("Message is too long (%1$s characters). Maximum size is %2$s characters.", Category.CATEGORY_USER_INPUT, 4),
     ;
 
     public static final String PREFIX = "SIPGATE";

@@ -81,6 +81,7 @@ import com.openexchange.sms.SMSUtils;
 public class SipgateSMSService implements SMSService {
     
     private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
+    private static final int MAX_MESSAGE_LENGTH = 160;
 
     private final HttpClient client;
 
@@ -105,6 +106,9 @@ public class SipgateSMSService implements SMSService {
 
     @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
+        if (message.length() > MAX_MESSAGE_LENGTH) {
+            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+        }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
         JSONObject jsonObject = new JSONObject(3);
         try {
@@ -123,6 +127,9 @@ public class SipgateSMSService implements SMSService {
 
     @Override
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
+        if (message.length() > MAX_MESSAGE_LENGTH) {
+            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+        }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
             for (int i = 0; i < recipients.length; i++) {
