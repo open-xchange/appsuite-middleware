@@ -163,7 +163,14 @@ public enum LoginExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The password is incorrect.
      */
-    INVALID_GUEST_PASSWORD("Invalid credentials.", LoginExceptionMessages.INVALID_GUEST_PASSWORD_MSG, Category.CATEGORY_USER_INPUT, 25);
+    INVALID_GUEST_PASSWORD("Invalid credentials.", LoginExceptionMessages.INVALID_GUEST_PASSWORD_MSG, Category.CATEGORY_USER_INPUT, 25),
+    /**
+     * Thrown in case login attempts is denied by server or any 3rd party component that controls login flow.
+     * <p>
+     * Login denied
+     */
+    LOGIN_DENIED("Login denied.", LoginExceptionMessages.LOGIN_DENIED_MSG, Category.CATEGORY_PERMISSION_DENIED, 26),
+    ;
 
 
     private final String message;

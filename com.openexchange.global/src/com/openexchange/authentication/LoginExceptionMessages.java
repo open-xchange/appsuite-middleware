@@ -112,6 +112,9 @@ public final class LoginExceptionMessages implements LocalizableStrings {
     // The password is incorrect.
     public static final String INVALID_GUEST_PASSWORD_MSG = "The password is incorrect.";
 
+    // Login denied
+    public static final String LOGIN_DENIED_MSG = "Login denied.";
+
     private LoginExceptionMessages() {
         super();
     }
