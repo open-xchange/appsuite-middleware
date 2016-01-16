@@ -226,7 +226,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 }
 
                 // Check whether we are supposed to wrap the message
-                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false);
+                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false); // <-- Call with 'false' as default to not change existing behavior
 
                 if (null != targetSpamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
@@ -279,7 +279,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 }
 
                 // Check whether we are supposed to wrap the message
-                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false); // <-- Call with 'false' as default to not change existing
+                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false); // <-- Call with 'false' as default to not change existing behavior
 
                 if (null != targetHamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
