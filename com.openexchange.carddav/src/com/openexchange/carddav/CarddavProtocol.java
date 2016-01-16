@@ -70,7 +70,9 @@ public class CarddavProtocol extends DAVProtocol {
     public static final Namespace CARD_NS = Namespace.getNamespace("CARD", "urn:ietf:params:xml:ns:carddav");
     public static final String ADDRESSBOOK = "<CARD:addressbook />";
 
-    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CARD_NS);
+    public static final Namespace ME_NS = Namespace.getNamespace("MM", "http://me.com/_namespace/");
+
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CARD_NS, ME_NS);
 
     @Override
     public List<Namespace> getAdditionalNamespaces() {

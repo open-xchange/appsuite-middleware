@@ -49,19 +49,31 @@
 
 package com.openexchange.carddav.resources;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
+import com.openexchange.carddav.mixins.BulkRequests;
 import com.openexchange.carddav.mixins.MaxImageSize;
 import com.openexchange.carddav.mixins.MaxResourceSize;
 import com.openexchange.carddav.mixins.SupportedAddressData;
 import com.openexchange.carddav.mixins.SupportedReportSet;
 import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
@@ -90,6 +102,8 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
     protected final GroupwareCarddavFactory factory;
 
+    private Boolean isStoreOriginalVCard;
+
     /**
      * Initializes a new {@link CardDAVCollection}.
      *
@@ -100,7 +114,142 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
     public CardDAVCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
-        includeProperties(new SupportedReportSet(), new MaxResourceSize(factory), new MaxImageSize(factory), new SupportedAddressData());
+        includeProperties(new SupportedReportSet(), new MaxResourceSize(factory), new MaxImageSize(factory), new SupportedAddressData(), new BulkRequests(factory));
+    }
+
+    /**
+     * Parses and imports all vCards from the supplied input stream.
+     *
+     * @param inputStream The input stream to parse and import from
+     * @return The import results
+     */
+    public List<BulkImportResult> bulkImport(InputStream inputStream) throws OXException {
+        List<BulkImportResult> importResults = new ArrayList<BulkImportResult>();
+        VCardService vCardService = factory.requireService(VCardService.class);
+        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(isStoreOriginalVCard())
+            .setImportAttachments(true).setRemoveAttachmentsFromKeptVCard(true);
+        SearchIterator<VCardImport> searchIterator = null;
+        try {
+            searchIterator = vCardService.importVCards(inputStream, parameters);
+            while (searchIterator.hasNext()) {
+                importResults.add(bulkImport(searchIterator.next()));
+            }
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return importResults;
+    }
+
+    private BulkImportResult bulkImport(VCardImport vCardImport) throws OXException {
+        BulkImportResult importResult = new BulkImportResult();
+        if (null == vCardImport || null == vCardImport.getContact()) {
+            importResult.setError(new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN));
+        } else {
+            Contact contact = vCardImport.getContact();
+            importResult.setUid(contact.getUid());
+            WebdavPath url = constructPathForChildResource(contact);
+            importResult.setHref(url);
+            try {
+                checkMaxResourceSize(vCardImport);
+                checkUidConflict(contact.getUid());
+                ContactResource.fromImport(factory, this, url, vCardImport).create();
+            } catch (PreconditionException e) {
+                importResult.setError(e);
+            } catch (WebdavProtocolException e) {
+                importResult.setError(new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN));
+            }
+        }
+        return importResult;
+    }
+
+    /**
+     * Checks the vCard import's size against the maximum allowed vCard size.
+     *
+     * @param vCardImport The vCard import to check
+     * @throws PreconditionException <code>(CARDDAV:max-resource-size)</code> if the maximum size is exceeded
+     */
+    private void checkMaxResourceSize(VCardImport vCardImport) throws PreconditionException {
+        long maxSize = factory.getState().getMaxVCardSize();
+        if (0 < maxSize) {
+            IFileHolder vCard = vCardImport.getVCard();
+            if (null != vCard && maxSize < vCard.getLength()) {
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
+        }
+    }
+
+    /**
+     * Checks for an existing resource in this collection conflicting with a specific UID.
+     *
+     * @param uid The UID to check
+     * @throws OXException If the check fails
+     * @throws PreconditionException <code>(CARDDAV:no-uid-conflict)</code> if the UID conflicts with an existing resource
+     */
+    private void checkUidConflict(String uid) throws OXException, PreconditionException {
+        /*
+         * prepare search term
+         */
+        List<UserizedFolder> folders = getFolders();
+        if (0 == folders.size()) {
+            return;
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        if (1 == folders.size()) {
+            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+            term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            term.addOperand(new ConstantOperand<String>(folders.get(0).getID()));
+            searchTerm.addSearchTerm(term);
+        } else {
+            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (UserizedFolder folder : folders) {
+                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                term.addOperand(new ConstantOperand<String>(folder.getID()));
+                orTerm.addSearchTerm(term);
+            }
+            searchTerm.addSearchTerm(orTerm);
+        }
+        SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
+        uidTerm.addOperand(new ConstantOperand<String>(uid));
+        searchTerm.addSearchTerm(uidTerm);
+        /*
+         * lookup conflicting contacts
+         */
+        ContactField[] fields = new ContactField[] { ContactField.FILENAME, ContactField.UID };
+        SearchIterator<Contact> iterator = null;
+        try {
+            iterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, fields, SortOptions.EMPTY);
+            if (iterator.hasNext()) {
+                Contact contact = iterator.next();
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "no-uid-conflict", constructPathForChildResource(contact), HttpServletResponse.SC_FORBIDDEN);
+            }
+        } finally {
+            SearchIterators.close(iterator);
+        }
+    }
+
+    /**
+     * Gets a value indicating whether the underlying storage supports storing the original vCard or not.
+     *
+     * @return <code>true</code> if storing the original vCard is possible, <code>false</code>, otherwise
+     */
+    public boolean isStoreOriginalVCard() {
+        if (null == isStoreOriginalVCard) {
+            VCardStorageService vCardStorageService = factory.getVCardStorageService(factory.getSession().getContextId());
+            if (null != vCardStorageService) {
+                try {
+                    isStoreOriginalVCard = Boolean.valueOf(
+                        factory.requireService(ContactService.class).supports(factory.getSession(), folder.getID(), ContactField.VCARD_ID));
+                } catch (OXException e) {
+                    LOG.warn("Error checking if storing the vCard ID is supported, assuming \"false\".", e);
+                    isStoreOriginalVCard = Boolean.FALSE;
+                }
+            } else {
+                isStoreOriginalVCard = Boolean.FALSE;
+            }
+        }
+        return isStoreOriginalVCard.booleanValue();
     }
 
     /**

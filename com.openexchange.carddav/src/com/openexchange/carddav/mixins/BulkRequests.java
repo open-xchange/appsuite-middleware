@@ -47,50 +47,41 @@
  *
  */
 
-package com.openexchange.carddav.action;
+package com.openexchange.carddav.mixins;
 
-import javax.servlet.http.HttpServletResponse;
+import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.dav.DAVProtocol;
-import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.actions.PUTAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CardDAVPUTAction}
+ * {@link BulkRequests}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class CardDAVPUTAction extends PUTAction {
+public class BulkRequests extends SingleXMLPropertyMixin {
 
-    private final GroupwareCarddavFactory factory;
+	private final GroupwareCarddavFactory factory;
 
     /**
-     * Initializes a new {@link CardDAVPUTAction}.
+     * Initializes a new {@link BulkRequests}.
      *
-     * @param factory The underlying factory
+     * @param factory A reference to the CardDAV factory
      */
-    public CardDAVPUTAction(GroupwareCarddavFactory factory) {
-        super(factory.getProtocol());
+    public BulkRequests(GroupwareCarddavFactory factory) {
+        super(CarddavProtocol.ME_NS.getURI(), "bulk-requests");
         this.factory = factory;
     }
 
     @Override
-    protected WebdavProtocolException getSizeExceeded(WebdavRequest request) {
-        return new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", HttpServletResponse.SC_FORBIDDEN);
-    }
-
-    @Override
-    protected long getMaxSize() {
-        long maxVCardSize = factory.getState().getMaxVCardSize();
+    protected String getValue() {
         long maxUploadSize = factory.getState().getMaxUploadSize();
-        return Math.min(maxVCardSize, maxUploadSize);
-    }
-
-    @Override
-    protected boolean includeResponseETag() {
-        return false;
+        return new StringBuilder()
+            .append("<MM:simple>")
+                .append("<MM:max-resources/>")
+                .append(0 >= maxUploadSize ? "<MM:max-bytes/>" : "<MM:max-bytes>" + maxUploadSize + "</MM:max-bytes>")
+            .append("</MM:simple>")
+        .toString();
     }
 
 }

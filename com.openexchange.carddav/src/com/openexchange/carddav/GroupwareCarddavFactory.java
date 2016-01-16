@@ -283,6 +283,7 @@ public class GroupwareCarddavFactory extends DAVFactory {
         private String treeID = null;
         private Date overallLastModified = null;
         private Long maxVCardSize = null;
+        private Long maxUploadSize = null;
 
         /**
          * Initializes a new {@link State}.
@@ -682,6 +683,24 @@ public class GroupwareCarddavFactory extends DAVFactory {
                 }
             }
             return maxVCardSize.longValue();
+        }
+
+        /**
+         * Gets the maximum (overall) upload size per request.
+         *
+         * @return The maximum upload size, or <code>0</code> if not restricted
+         */
+        public long getMaxUploadSize() {
+            if (null == maxUploadSize) {
+                Long defaultValue = Long.valueOf(104857600);
+                try {
+                    maxUploadSize = factory.optConfigValue("MAX_UPLOAD_SIZE", Long.class, defaultValue);
+                } catch (OXException e) {
+                    LOG.warn("error reading value for \"MAX_UPLOAD_SIZE\", falling back to {}.", defaultValue, e);
+                    maxUploadSize = defaultValue;
+                }
+            }
+            return maxUploadSize.longValue();
         }
 
         /**

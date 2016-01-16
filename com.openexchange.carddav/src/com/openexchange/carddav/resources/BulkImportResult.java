@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,50 +47,82 @@
  *
  */
 
-package com.openexchange.carddav.action;
+package com.openexchange.carddav.resources;
 
-import javax.servlet.http.HttpServletResponse;
-import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.actions.PUTAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
- * {@link CardDAVPUTAction}
+ * {@link BulkImportResult}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.1
  */
-public class CardDAVPUTAction extends PUTAction {
+public class BulkImportResult {
 
-    private final GroupwareCarddavFactory factory;
+    private PreconditionException error;
+    private String uid;
+    private WebdavPath href;
 
     /**
-     * Initializes a new {@link CardDAVPUTAction}.
-     *
-     * @param factory The underlying factory
+     * Initializes a new {@link BulkImportResult}.
      */
-    public CardDAVPUTAction(GroupwareCarddavFactory factory) {
-        super(factory.getProtocol());
-        this.factory = factory;
+    public BulkImportResult() {
+        super();
     }
 
-    @Override
-    protected WebdavProtocolException getSizeExceeded(WebdavRequest request) {
-        return new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", HttpServletResponse.SC_FORBIDDEN);
+    /**
+     * Gets the error
+     *
+     * @return The error
+     */
+    public PreconditionException getError() {
+        return error;
     }
 
-    @Override
-    protected long getMaxSize() {
-        long maxVCardSize = factory.getState().getMaxVCardSize();
-        long maxUploadSize = factory.getState().getMaxUploadSize();
-        return Math.min(maxVCardSize, maxUploadSize);
+    /**
+     * Sets the error
+     *
+     * @param error The error to set
+     */
+    public void setError(PreconditionException error) {
+        this.error = error;
     }
 
-    @Override
-    protected boolean includeResponseETag() {
-        return false;
+    /**
+     * Gets the uid
+     *
+     * @return The uid
+     */
+    public String getUid() {
+        return uid;
+    }
+
+    /**
+     * Sets the uid
+     *
+     * @param uid The uid to set
+     */
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    /**
+     * Gets the href
+     *
+     * @return The href
+     */
+    public WebdavPath getHref() {
+        return href;
+    }
+
+    /**
+     * Sets the href
+     *
+     * @param href The href to set
+     */
+    public void setHref(WebdavPath href) {
+        this.href = href;
     }
 
 }

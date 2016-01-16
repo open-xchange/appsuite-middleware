@@ -66,11 +66,9 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
-import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.tools.mappings.MappedIncorrectString;
 import com.openexchange.groupware.tools.mappings.MappedTruncation;
@@ -101,6 +99,7 @@ public class ContactResource extends CommonResource<Contact> {
     private static final int MAX_RETRIES = 3;
 
     private final GroupwareCarddavFactory factory;
+    private final CardDAVCollection parent;
     private VCardImport vCardImport;
     private VCardExport vCardExport;
 
@@ -112,10 +111,26 @@ public class ContactResource extends CommonResource<Contact> {
      * @param object An existing groupware object represented by this resource, or <code>null</code> if a placeholder resource should be created
      * @param url The resource url
      */
-    public ContactResource(GroupwareCarddavFactory factory, CommonFolderCollection<Contact> parent, Contact object, WebdavPath url) throws OXException {
+    public ContactResource(GroupwareCarddavFactory factory, CardDAVCollection parent, Contact object, WebdavPath url) throws OXException {
         super(parent, object, url);
         this.object = object;
+        this.parent = parent;
         this.factory = factory;
+    }
+
+    /**
+     * Creates a new contact resource from a vCard import.
+     *
+     * @param factory The CardDAV factory
+     * @param parent The parent folder collection
+     * @param url The target resource URL
+     * @param vCardImport The vCard import to apply
+     * @return The new contact resource
+     */
+    static ContactResource fromImport(GroupwareCarddavFactory factory, CardDAVCollection parent, WebdavPath url, VCardImport vCardImport) throws OXException {
+        ContactResource contactResource = new ContactResource(factory, parent, null, url);
+        contactResource.vCardImport = vCardImport;
+        return contactResource;
     }
 
     @Override
@@ -337,7 +352,7 @@ public class ContactResource extends CommonResource<Contact> {
     @Override
     protected void deserialize(InputStream inputStream) throws OXException, IOException {
         VCardService vCardService = factory.requireService(VCardService.class);
-        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(isStoreOriginalVCard())
+        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(parent.isStoreOriginalVCard())
             .setImportAttachments(true).setRemoveAttachmentsFromKeptVCard(true);
         if (false == exists()) {
             /*
@@ -416,24 +431,6 @@ public class ContactResource extends CommonResource<Contact> {
                 }
             }
         }
-    }
-
-    /**
-     * Gets a value indicating whether the underlying storage supports storing the original vCard or not.
-     *
-     * @return <code>true</code> if storing the original vCard is possible, <code>false</code>, otherwise
-     */
-    private boolean isStoreOriginalVCard() {
-        VCardStorageService vCardStorageService = factory.getVCardStorageService(factory.getSession().getContextId());
-        if (vCardStorageService != null) {
-            String folderID = String.valueOf(null == object ? parentFolderID : object.getParentFolderID());
-            try {
-                return factory.requireService(ContactService.class).supports(factory.getSession(), folderID, ContactField.VCARD_ID);
-            } catch (OXException e) {
-                LOG.warn("Error checking if storing the vCard ID is supported, assuming \"false\".", e);
-            }
-        }
-        return false;
     }
 
     /**
