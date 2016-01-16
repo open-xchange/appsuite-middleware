@@ -56,9 +56,7 @@ import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
-import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 import javax.mail.util.SharedFileInputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -151,7 +149,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         }
     }
 
-    private void getAndTransport(String mailId, InternetAddress targetAddress, InternetAddress senderAddress, boolean wrap, final String fullName, final Session session, MailAccess<?, ?> mailAccess) throws OXException {
+    private void getAndTransport(String mailId, InternetAddress targetAddress, InternetAddress senderAddress, boolean wrap, String fullName, final Session session, MailAccess<?, ?> mailAccess) throws OXException {
         ThresholdFileHolder sink = writeMessage(mailAccess.getMessageStorage().getMessage(fullName, mailId, false));
         if (null != sink) {
             try {
@@ -164,26 +162,22 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
                 // Wrap if demanded
                 if (wrap) {
-                    MimeMessage toSend = new MimeMessage(MimeDefaultSession.getDefaultSession());
-                    MimeMultipart multipart = new MimeMultipart();
-
-                    MimeBodyPart bodyPart = new MimeBodyPart();
+                    MimeMessage transportMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
                     {
                         File tempFile = sink.getTempFile();
                         if (null == tempFile) {
-                            bodyPart.setDataHandler(new DataHandler(new ByteArrayDataSource(sink.toByteArray(), "message/rfc822")));
+                            transportMessage.setDataHandler(new DataHandler(new ByteArrayDataSource(sink.toByteArray(), "message/rfc822")));
                         } else {
-                            bodyPart.setDataHandler(new DataHandler(new FileHolderDataSource(sink, "message/rfc822")));
+                            transportMessage.setDataHandler(new DataHandler(new FileHolderDataSource(sink, "message/rfc822")));
                         }
                     }
-                    bodyPart.setHeader("Content-Type", "message/rfc822");
-                    bodyPart.setHeader("Content-Disposition", "inline");
+                    transportMessage.setHeader("Return-Path", senderAddress.getAddress());
+                    transportMessage.setHeader("Content-Type", "message/rfc822");
+                    transportMessage.setHeader("Content-Disposition", "attachment; filename=\"" + mailId + ".eml\"");
 
-                    multipart.addBodyPart(bodyPart);
-                    toSend.setContent(multipart);
-                    toSend.saveChanges();
+                    transportMessage.saveChanges();
 
-                    ThresholdFileHolder tmp = writeMessage(toSend);
+                    ThresholdFileHolder tmp = writeMessage(transportMessage);
                     Streams.close(sink);
                     sink = tmp;
                 }
@@ -212,7 +206,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleSpam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleSpam(int accountId, String fullName, String[] mailIDs, boolean move, Session session) throws OXException {
         ConfigurationService configuration = services.getService(ConfigurationService.class);
         String sTargetSpamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetSpamEmailAddress", "").trim();
 
@@ -265,7 +259,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     }
 
     @Override
-    public void handleHam(final int accountId, final String fullName, final String[] mailIDs, final boolean move, final Session session) throws OXException {
+    public void handleHam(int accountId, String fullName, String[] mailIDs, boolean move, Session session) throws OXException {
         ConfigurationService configuration = services.getService(ConfigurationService.class);
         String sTargetHamEmailAddress = configuration.getProperty("com.openexchange.spamhandler.cloudmark.targetHamEmailAddress", "").trim();
 
@@ -285,7 +279,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
                 }
 
                 // Check whether we are supposed to wrap the message
-                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false);
+                boolean wrap = configuration.getBoolProperty("com.openexchange.spamhandler.cloudmark.wrapMessage", false); // <-- Call with 'false' as default to not change existing
 
                 if (null != targetHamAddress) {
                     InternetAddress senderAddress = getSenderAddress(session);
