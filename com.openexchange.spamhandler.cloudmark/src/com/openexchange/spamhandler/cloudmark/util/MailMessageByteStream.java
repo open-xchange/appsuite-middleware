@@ -59,7 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
  * {@link MailMessageByteStream}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class MailMessageByteStream implements ByteStream {
 

@@ -63,7 +63,7 @@ import com.openexchange.mail.mime.MimeMailException;
  * {@link MessageByteStream}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class MessageByteStream implements ByteStream {
 
