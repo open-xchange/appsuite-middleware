@@ -52,7 +52,6 @@ package com.openexchange.spamhandler.cloudmark;
 import java.io.File;
 import java.io.IOException;
 import javax.activation.DataHandler;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -66,7 +65,6 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.datasource.FileHolderDataSource;
@@ -77,6 +75,9 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.spamhandler.SpamHandler;
+import com.openexchange.spamhandler.cloudmark.util.ByteStream;
+import com.openexchange.spamhandler.cloudmark.util.MailMessageByteStream;
+import com.openexchange.spamhandler.cloudmark.util.MessageByteStream;
 
 /**
  * Cloudmark spam handler
@@ -89,6 +90,8 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CloudmarkSpamHandler.class);
 
     private static final String NAME = "CloudmarkSpamHandler";
+
+
 
     // -------------------------------------------------------------------------------------------
 
@@ -107,39 +110,17 @@ public final class CloudmarkSpamHandler extends SpamHandler {
         return NAME;
     }
 
-    private ThresholdFileHolder writeMessage(MailMessage original) throws OXException {
-        if (null == original) {
+    private ThresholdFileHolder writeMessage(ByteStream byteStream) throws OXException {
+        if (null == byteStream) {
             return null;
         }
-        ThresholdFileHolder sink = new ThresholdFileHolder();
-        boolean closeSink = true;
-        try {
-            original.writeTo(sink.asOutputStream());
-            closeSink = false;
-            return sink;
-        } catch (RuntimeException e) {
-            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (closeSink) {
-                Streams.close(sink);
-            }
-        }
-    }
 
-    private ThresholdFileHolder writeMessage(Message original) throws OXException {
-        if (null == original) {
-            return null;
-        }
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
         try {
-            original.writeTo(sink.asOutputStream());
+            byteStream.writeTo(sink.asOutputStream());
             closeSink = false;
             return sink;
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e);
-        } catch (IOException e) {
-            throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
@@ -150,7 +131,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
     }
 
     private void getAndTransport(String mailId, InternetAddress targetAddress, InternetAddress senderAddress, boolean wrap, String fullName, final Session session, MailAccess<?, ?> mailAccess) throws OXException {
-        ThresholdFileHolder sink = writeMessage(mailAccess.getMessageStorage().getMessage(fullName, mailId, false));
+        ThresholdFileHolder sink = writeMessage(MailMessageByteStream.newInstanceFrom(mailAccess.getMessageStorage().getMessage(fullName, mailId, false)));
         if (null != sink) {
             try {
                 // Initialize send properties
@@ -177,7 +158,7 @@ public final class CloudmarkSpamHandler extends SpamHandler {
 
                     transportMessage.saveChanges();
 
-                    ThresholdFileHolder tmp = writeMessage(transportMessage);
+                    ThresholdFileHolder tmp = writeMessage(new MessageByteStream(transportMessage));
                     Streams.close(sink);
                     sink = tmp;
                 }
