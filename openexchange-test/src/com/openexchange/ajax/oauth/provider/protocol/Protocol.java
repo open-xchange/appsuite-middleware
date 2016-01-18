@@ -105,7 +105,7 @@ public class Protocol {
             .setSessionId(sessionId);
         POSTRequest authRequest = getAuthForm.execute(client).preparePOSTRequest();
         POSTResponse authResponse = authRequest.submit(client);
-        assertNotEquals(authResponse.getStatusCode(), 500);
+        assertEquals(302, authResponse.getStatusCode());
         
         URI redirectLocation = authResponse.getRedirectLocation();
         assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.toString().startsWith(params.getRedirectURI()));
