@@ -321,8 +321,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         }
         LOGGER.debug(ctx.toString());
 
-        Context backup_ctx = null; // used for invalidating old login mappings in the cache
-
+        Set<String> loginMappings = null; // used for invalidating old login mappings in the cache
         try {
             if (!tool.existsContext(ctx)) {
                 throw new NoSuchContextException();
@@ -351,8 +350,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
                 }
             }
 
-            final OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            backup_ctx = oxcox.getData(ctx);
+            OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
+            loginMappings = oxcox.getLoginMappings(ctx);
             oxcox.change(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
@@ -368,9 +367,8 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
         try {
             final ContextStorage cs = ContextStorage.getInstance();
             cs.invalidateContext(ctx.getId().intValue());
-            final Set<String> loginMappings = backup_ctx.getLoginMappings();
             if (loginMappings != null && !loginMappings.isEmpty()) {
-                for (final String loginMapping : loginMappings) {
+                for (String loginMapping : loginMappings) {
                     cs.invalidateLoginInfo(loginMapping);
                 }
             }
