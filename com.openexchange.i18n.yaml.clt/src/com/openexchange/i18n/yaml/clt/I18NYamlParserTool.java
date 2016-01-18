@@ -234,7 +234,7 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
             }
 
             if (outputFile.isFile() && !cmd.hasOption('f')) {
-                System.out.println("Output path name does already exist. Use -f,--force option to overwrite.");
+                System.out.println("Output file \"" + outputFile.getPath() + "\" does already exist. Use -f,--force option to overwrite.");
                 if (null != options) {
                     printHelp(options);
                 }
