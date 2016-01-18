@@ -77,6 +77,26 @@ public interface Entity {
     boolean isEnabled(Session session) throws OXException;
 
     /**
+     * Checks if this entity is enabled.
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If enabled flag cannot be returned
+     */
+    boolean isEnabled(int userId, int contextId) throws OXException;
+
+    /**
+     * Gets the display name appropriate for the specified user and context
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The display name
+     * @throws OXException If display name cannot be returned
+     */
+    String getDisplayName(int userId, int contextId) throws OXException;
+
+    /**
      * Gets the display name appropriate for the specified session
      *
      * @param session The session to use

@@ -63,17 +63,16 @@ import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
-import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.onboarding.plist.PlistResult;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.user.UserService;
 
 /**
  * {@link EASOnboardingProvider}
@@ -82,7 +81,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class EASOnboardingProvider implements OnboardingProvider {
+public class EASOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
@@ -106,6 +105,11 @@ public class EASOnboardingProvider implements OnboardingProvider {
     @Override
     public boolean isAvailable(Session session) throws OXException {
         return OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), session);
+    }
+
+    @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        return OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), userId, contextId);
     }
 
     @Override
@@ -166,43 +170,22 @@ public class EASOnboardingProvider implements OnboardingProvider {
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Scenario scenario = request.getScenario();
 
-        // Get the PListDict to contribute to
-        PListDict pListDict;
-        if (null == previousResult) {
-            pListDict = new PListDict();
-            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
-            pListDict.setPayloadType("Configuration");
-            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
-            pListDict.setPayloadVersion(1);
-            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
-        } else {
-            pListDict = ((PlistResult) previousResult).getPListDict();
+        PListDict old = null;
+        if (previousResult != null) {
+            old = ((PlistResult) previousResult).getPListDict();
         }
-
-        // Generate payload content dictionary
-        PListDict payloadContent = new PListDict();
-        payloadContent.setPayloadType("com.apple.eas.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
-        payloadContent.setPayloadIdentifier("com.open-xchange.eas");
-        payloadContent.addStringValue("UserName", session.getLogin());
-        payloadContent.addStringValue("EmailAddress", getPrimaryEMailAddress(session));
-        String easUrl = getEASUrl(request, false, session);
-        payloadContent.addStringValue("Host", easUrl);
-        payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
-        payloadContent.setPayloadVersion(1);
-
-        // Add payload content dictionary to top-level dictionary
-        pListDict.addPayloadContent(payloadContent);
-
-        // Return result
+        PListDict pListDict = getPlist(old, session.getUserId(), session.getContextId(), request.getScenario(), request);
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     private String getEASUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
+        return getEASUrl(request, generateIfAbsent, session.getUserId(), session.getContextId());
+    }
+
+    private String getEASUrl(OnboardingRequest request, boolean generateIfAbsent, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ConfigView view = viewFactory.getView(userId, contextId);
         String propertyName = "com.openexchange.onboarding.eas.url";
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
@@ -220,9 +203,42 @@ public class EASOnboardingProvider implements OnboardingProvider {
         return value;
     }
 
-    private String getPrimaryEMailAddress(Session session) throws OXException {
-        UserService userService = services.getService(UserService.class);
-        return userService.getUser(session.getUserId(), session.getContextId()).getMail();
+    @Override
+    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+        return getPlist(null, userId, contextId, scenario, req);
+    }
+
+    @Override
+    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+        // Get the PListDict to contribute to
+        PListDict pListDict;
+        if (null == previousPListDict) {
+            pListDict = new PListDict();
+            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), userId, contextId).toString());
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
+        } else {
+            pListDict = previousPListDict;
+        }
+
+        // Generate payload content dictionary
+        PListDict payloadContent = new PListDict();
+        payloadContent.setPayloadType("com.apple.eas.account");
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
+        payloadContent.setPayloadIdentifier("com.open-xchange.eas");
+        String mail = OnboardingUtility.getUserMail(userId, contextId);
+        payloadContent.addStringValue("UserName", mail);
+        payloadContent.addStringValue("EmailAddress", mail);
+        String easUrl = getEASUrl(req, false, userId, contextId);
+        payloadContent.addStringValue("Host", easUrl);
+        payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
+        payloadContent.setPayloadVersion(1);
+
+        // Add payload content dictionary to top-level dictionary
+        pListDict.addPayloadContent(payloadContent);
+        return pListDict;
     }
 
 }

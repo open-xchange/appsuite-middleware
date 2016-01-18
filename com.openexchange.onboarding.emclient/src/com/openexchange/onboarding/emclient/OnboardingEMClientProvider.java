@@ -139,9 +139,23 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
         return emClientCapability && hasURL(session);
     }
 
+    @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        boolean emClientCapability = OnboardingUtility.hasCapability("emclient", userId, contextId);
+        return emClientCapability && hasURL(userId, contextId);
+    }
+
     private boolean hasURL(Session session) {
         try {
             return isEmpty(OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session));
+        } catch (OXException e) {
+            return false;
+        }
+    }
+
+    private boolean hasURL(int userId, int contextId) {
+        try {
+            return isEmpty(OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, userId, contextId));
         } catch (OXException e) {
             return false;
         }

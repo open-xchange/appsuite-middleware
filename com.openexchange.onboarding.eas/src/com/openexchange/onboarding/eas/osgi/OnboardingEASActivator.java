@@ -54,8 +54,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.eas.EASOnboardingProvider;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
-
 
 /**
  * {@link OnboardingEASActivator}
@@ -74,7 +72,7 @@ public class OnboardingEASActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, UserService.class };
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
     }
 
     @Override

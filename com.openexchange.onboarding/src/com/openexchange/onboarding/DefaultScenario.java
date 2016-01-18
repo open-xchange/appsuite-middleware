@@ -140,6 +140,16 @@ public class DefaultScenario implements Scenario {
     }
 
     @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        return OnboardingUtility.isScenarioEnabled(id, userId, contextId);
+    }
+
+    @Override
+    public String getDisplayName(int userId, int contextId) throws OXException {
+        return OnboardingUtility.getTranslationFor(i18nDisplayName, userId, contextId);
+    }
+
+    @Override
     public String getDisplayName(Session session) throws OXException {
         return OnboardingUtility.getTranslationFor(i18nDisplayName, session);
     }
@@ -171,6 +181,11 @@ public class DefaultScenario implements Scenario {
 
     @Override
     public List<OnboardingProvider> getProviders(Session session) {
+        return Collections.unmodifiableList(providers);
+    }
+
+    @Override
+    public List<OnboardingProvider> getProviders(int userId, int contextId) {
         return Collections.unmodifiableList(providers);
     }
 

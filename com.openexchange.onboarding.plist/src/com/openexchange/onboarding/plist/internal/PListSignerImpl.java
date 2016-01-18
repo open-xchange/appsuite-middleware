@@ -98,11 +98,16 @@ public final class PListSignerImpl implements PListSigner {
 
     @Override
     public IFileHolder signPList(IFileHolder toSign, Session session) throws OXException {
+        return signPList(toSign, session.getUserId(), session.getContextId());
+    }
+
+    @Override
+    public IFileHolder signPList(IFileHolder toSign, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         if (null == viewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ConfigView view = viewFactory.getView(userId, contextId);
         ConfigurationService configService = Services.getService(ConfigurationService.class);
         if (null == configService) {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);

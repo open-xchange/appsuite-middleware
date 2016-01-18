@@ -166,6 +166,11 @@ public class OnboardingStrings implements LocalizableStrings {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
+    // SMS successfully sent
+    public static final String RESULT_SMS_SENT = "SMS successfully sent";
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
     // Used when rendering a form in which the user is supposed to enter an E-Mail address
     public static final String FORM_EMAIL = "E-Mail address";
 

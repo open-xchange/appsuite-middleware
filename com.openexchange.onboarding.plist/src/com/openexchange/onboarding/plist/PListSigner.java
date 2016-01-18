@@ -71,4 +71,15 @@ public interface PListSigner {
      */
     IFileHolder signPList(IFileHolder toSign, Session session) throws OXException;
 
+    /**
+     * Signs specified PLIST content.
+     *
+     * @param toSign The PLIST content to sign
+     * @param userId The user id
+     * @param contextId The contextId
+     * @return The signed PLIST content
+     * @throws OXException If signing PLIST content fails
+     */
+    IFileHolder signPList(IFileHolder toSign, int userId, int contextId) throws OXException;
+
 }

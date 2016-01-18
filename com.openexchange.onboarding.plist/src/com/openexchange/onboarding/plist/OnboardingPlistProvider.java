@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,63 +47,46 @@
  *
  */
 
-package com.openexchange.onboarding;
+package com.openexchange.onboarding.plist;
 
-import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
+import com.openexchange.onboarding.OnboardingProvider;
+import com.openexchange.onboarding.OnboardingRequest;
+import com.openexchange.onboarding.Scenario;
+import com.openexchange.plist.PListDict;
+
 
 /**
- * {@link OnboardingProvider} - Represents an on-boarding provider suitable for configuring/integrating a client for communicating with the
- * Open-Xchange Middleware.
+ * {@link OnboardingPlistProvider}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public interface OnboardingProvider {
+public interface OnboardingPlistProvider extends OnboardingProvider {
 
     /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
-
-    /**
-     * Gets the supported devices.
-     *
-     * @return The supported devices
-     */
-    Set<Device> getSupportedDevices();
-
-    /**
-     * Executes specified on-boarding scenario according to given action.
-     *
-     * @param request The on-boarding request
-     * @param previousResult The optional previous result or <code>null</code>
-     * @param session The session
-     * @return The execution result
-     * @throws OXException If execution fails
-     */
-    Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException;
-
-    /**
-     * Checks if this provider is enabled for session-associated user.
-     *
-     * @param session The session
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If availability cannot be checked
-     */
-    boolean isAvailable(Session session) throws OXException;
-
-    /**
-     * Checks if this provider is enabled for given user.
-     *
+     * Retrieves the plist for the given user and scenario.
+     * 
      * @param userId The user id
      * @param contextId The context id
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If availability cannot be checked
+     * @param scenario The scenario
+     * @param req The request
+     * @return The scenario and user specific plist
+     * @throws OXException
      */
-    boolean isAvailable(int userId, int contextId) throws OXException;
+    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException;
+
+    /**
+     * Retrieves the plist for the given user and scenario.
+     * 
+     * @param previousPListDict A previous plist result
+     * @param userId The user id
+     * @param contextId The context id
+     * @param scenario The scenario
+     * @param req The request
+     * @return The scenario and user specific plist
+     * @throws OXException
+     */
+    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException;
 
 }

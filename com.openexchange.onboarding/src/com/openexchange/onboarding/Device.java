@@ -130,6 +130,11 @@ public enum Device implements Entity {
         return OnboardingUtility.getBoolValue(enabledProperty, true, session);
     }
 
+    @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        return OnboardingUtility.getBoolValue(enabledProperty, true, userId, contextId);
+    }
+
     /**
      * Gets the platform associated with this entity
      *
@@ -169,6 +174,11 @@ public enum Device implements Entity {
     @Override
     public String getDisplayName(Session session) throws OXException {
         return OnboardingUtility.getTranslationFromProperty(displayNameProperty, defaultDisplayName, true, session);
+    }
+
+    @Override
+    public String getDisplayName(int userId, int contextId) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(displayNameProperty, defaultDisplayName, true, userId, contextId);
     }
 
     @Override
@@ -220,13 +230,35 @@ public enum Device implements Entity {
             OnboardingAction action = iter.next();
             switch (action) {
                 case SMS:
-                    // TODO: Check for SMS provider, by now there is none...
-                    if (true) {
-                        iter.remove();
-                    }
+                    // TODO: Check for SMS support
+                    break;
+                default:
+                    // Nothing to do...
+                    break;
+            }
+        }
+        return actions;
+    }
+
+    /**
+     * Gets the available action for given device and type for session-associated user.
+     *
+     * @param device The device
+     * @param type The type
+     * @param session The session
+     * @return The available actions
+     * @throws OXException If actions cannot be returned
+     */
+    public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
+        List<OnboardingAction> actions = new ArrayList<>(getStaticActionsFor(device, type));
+        for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
+            OnboardingAction action = iter.next();
+            switch (action) {
+                case SMS:
+                    // TODO: Check for SMS support
                     break;
                 case EMAIL:
-                    if (!OnboardingUtility.hasNoReplyTransport(session)) {
+                    if (!OnboardingUtility.hasNoReplyTransport(contextId)) {
                         iter.remove();
                     }
                     break;

@@ -62,13 +62,13 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
-import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.onboarding.plist.PlistResult;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
@@ -80,7 +80,7 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class CalDAVOnboardingProvider implements OnboardingProvider {
+public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
@@ -104,6 +104,11 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
     @Override
     public boolean isAvailable(Session session) throws OXException {
         return OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session);
+    }
+    
+    @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        return OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), userId, contextId);
     }
 
     @Override
@@ -164,44 +169,18 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Scenario scenario = request.getScenario();
 
-        // Get the PListDict to contribute to
-        PListDict pListDict;
-        if (null == previousResult) {
-            pListDict = new PListDict();
-            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
-            pListDict.setPayloadType("Configuration");
-            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
-            pListDict.setPayloadVersion(1);
-            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
-        } else {
-            pListDict = ((PlistResult) previousResult).getPListDict();
-        }
-
-        // Generate payload content dictionary
-        PListDict payloadContent = new PListDict();
-        payloadContent.setPayloadType("com.apple.caldav.account");
-        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
-        payloadContent.setPayloadIdentifier("com.open-xchange.caldav");
-        payloadContent.setPayloadVersion(1);
-        payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
-        payloadContent.addStringValue("CalDAVUsername", session.getLogin());
-        String calDAVUrl = getCalDAVUrl(request, false, session);
-        payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
-        payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
-        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, session));
-
-        // Add payload content dictionary to top-level dictionary
-        pListDict.addPayloadContent(payloadContent);
-
-        // Return result
+        PListDict pListDict = getPlist(session.getUserId(), session.getContextId(), request.getScenario(), request);
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     private String getCalDAVUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
+        return getCalDAVUrl(request, generateIfAbsent, session.getUserId(), session.getContextId());
+    }
+
+    private String getCalDAVUrl(OnboardingRequest request, boolean generateIfAbsent, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ConfigView view = viewFactory.getView(userId, contextId);
         String propertyName = "com.openexchange.onboarding.caldav.url";
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
@@ -219,4 +198,42 @@ public class CalDAVOnboardingProvider implements OnboardingProvider {
         return value;
     }
 
+    @Override
+    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+        return getPlist(null, userId, contextId, scenario, req);
+    }
+
+    @Override
+    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+
+        // Get the PListDict to contribute to
+        PListDict pListDict;
+        if (null == previousPListDict) {
+            pListDict = new PListDict();
+            pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
+            pListDict.setPayloadType("Configuration");
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), userId, contextId).toString());
+            pListDict.setPayloadVersion(1);
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
+        } else {
+            pListDict = previousPListDict;
+        }
+
+        // Generate payload content dictionary
+        PListDict payloadContent = new PListDict();
+        payloadContent.setPayloadType("com.apple.caldav.account");
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
+        payloadContent.setPayloadIdentifier("com.open-xchange.caldav");
+        payloadContent.setPayloadVersion(1);
+        payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
+        payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserMail(userId, contextId));
+        String calDAVUrl = getCalDAVUrl(req, false, userId, contextId);
+        payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
+        payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
+        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, userId, contextId));
+
+        // Add payload content dictionary to top-level dictionary
+        pListDict.addPayloadContent(payloadContent);
+        return pListDict;
+    }
 }

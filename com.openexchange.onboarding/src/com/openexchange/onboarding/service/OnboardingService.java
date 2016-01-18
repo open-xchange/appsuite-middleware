@@ -136,6 +136,18 @@ public interface OnboardingService {
     DeviceAwareScenario getScenario(String scenarioId, Device device, Session session) throws OXException;
 
     /**
+     * Gets the device-aware scenario by specified identifier
+     *
+     * @param scenarioId The scenario identifier
+     * @param device The associated device
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The device-aware scenario
+     * @throws OXException If scenario cannot be returned
+     */
+    DeviceAwareScenario getScenario(String scenarioId, Device device, int userId, int contextId) throws OXException;
+
+    /**
      * Gets the device-aware scenarios for specified device.
      *
      * @param device The device

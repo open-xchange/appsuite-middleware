@@ -105,6 +105,11 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     }
 
     @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        return OnboardingUtility.hasCapability("drive", userId, contextId);
+    }
+
+    @Override
     public Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Device device = request.getDevice();
         if (!supportedDevices.contains(device)) {

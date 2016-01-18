@@ -53,7 +53,6 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.Link;
 import com.openexchange.onboarding.LinkResult;
@@ -95,6 +94,11 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public boolean isAvailable(Session session) throws OXException {
+        return true;
+    }
+
+    @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
         return true;
     }
 

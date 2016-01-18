@@ -248,6 +248,26 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    public DeviceAwareScenario getScenario(String scenarioId, Device device, int userId, int contextId) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        Map<String, ConfiguredScenario> configuredScenarios = configuredScenariosReference.get();
+        Scenario scenario = getScenario(scenarioId, configuredScenarios, userId, contextId);
+        if (null == scenario || !scenario.isEnabled(userId, contextId)) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
+        boolean enabled = true;
+        for (Iterator<OnboardingProvider> it = scenario.getProviders(userId, contextId).iterator(); enabled && it.hasNext();) {
+            OnboardingProvider provider = it.next();
+            enabled &= provider.isAvailable(userId, contextId);
+        }
+        return new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), userId, contextId));
+    }
+
+    @Override
     public List<DeviceAwareScenario> getScenariosFor(Device device, Session session) throws OXException {
         List<String> availableScenarios = device.getScenarios(session);
         if (null == availableScenarios || availableScenarios.isEmpty()) {
@@ -295,6 +315,23 @@ public class OnboardingServiceImpl implements OnboardingService {
         return getScenario(configuredScenario, configuredScenarios, true, session);
     }
 
+    private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios, int userId, int contextId) throws OXException {
+        if (null == scenarioId) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create("null");
+        }
+
+        ConfiguredScenario configuredScenario = configuredScenarios.get(scenarioId);
+        if (null == configuredScenario) {
+            throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
+        }
+
+        if (!configuredScenario.isEnabled()) {
+            throw OnboardingExceptionCodes.DISABLED_SCENARIO.create(scenarioId);
+        }
+
+        return getScenario(configuredScenario, configuredScenarios, true, userId, contextId);
+    }
+
     private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence, Session session) throws OXException {
         // Resolve link (if any)
         Link link;
@@ -337,6 +374,48 @@ public class OnboardingServiceImpl implements OnboardingService {
         return scenario;
     }
 
+    private Scenario getScenario(ConfiguredScenario configuredScenario, Map<String, ConfiguredScenario> configuredScenarios, boolean errorOnProviderAbsence, int userId, int contextId) throws OXException {
+        // Resolve link (if any)
+        Link link;
+        {
+            ConfiguredLink configuredLink = configuredScenario.getLink();
+            link = resolveLink(configuredLink, userId, contextId);
+        }
+
+        // Create scenario instance
+        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
+
+        // Iterate & check its providers
+        for (String providerId : configuredScenario.getProviderIds()) {
+            OnboardingProvider provider = providers.get(providerId);
+            if (null == provider) {
+                if (errorOnProviderAbsence) {
+                    throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
+                }
+                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
+                return null;
+            }
+            scenario.addProvider(getProvider(providerId));
+        }
+
+        // Iterate & load its alternatives
+        for (String alternativeId : configuredScenario.getAlternativeIds()) {
+            ConfiguredScenario alternativeConfiguredScenario = configuredScenarios.get(alternativeId);
+            if (null == alternativeConfiguredScenario) {
+                LOG.warn("Alternative scenario '{}' does not exist in configured scenarios for '{}'", alternativeId, configuredScenario.getId());
+            } else if (!alternativeConfiguredScenario.isEnabled()) {
+                LOG.warn("Alternative scenario '{}' is not enabled in configured scenarios for '{}'", alternativeId, configuredScenario.getId());
+            } else {
+                Scenario alternative = getScenario(alternativeConfiguredScenario, configuredScenarios, false, userId, contextId);
+                if (null != alternative) {
+                    scenario.addAlternative(alternative);
+                }
+            }
+        }
+
+        return scenario;
+    }
+
     private Link resolveLink(ConfiguredLink configuredLink, Session session) throws OXException {
         if (null == configuredLink) {
             return null;
@@ -348,6 +427,25 @@ public class OnboardingServiceImpl implements OnboardingService {
 
         // Look up the actual link by retrieving the denoted property
         String url = OnboardingUtility.getValueFromProperty(configuredLink.getUrl(), null, session);
+        if (null == url) {
+            // Property not defined
+            LOG.warn("No such property providing the link: {}", configuredLink.getUrl());
+            return null;
+        }
+        return new Link(url, configuredLink.getType());
+    }
+
+    private Link resolveLink(ConfiguredLink configuredLink, int userId, int contextId) throws OXException {
+        if (null == configuredLink) {
+            return null;
+        }
+
+        if (false == configuredLink.isProperty()) {
+            return new Link(configuredLink.getUrl(), configuredLink.getType());
+        }
+
+        // Look up the actual link by retrieving the denoted property
+        String url = OnboardingUtility.getValueFromProperty(configuredLink.getUrl(), null, userId, contextId);
         if (null == url) {
             // Property not defined
             LOG.warn("No such property providing the link: {}", configuredLink.getUrl());

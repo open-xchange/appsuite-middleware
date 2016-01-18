@@ -49,11 +49,16 @@
 
 package com.openexchange.onboarding.plist.osgi;
 
+import org.osgi.service.http.HttpService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.onboarding.plist.PListSigner;
 import com.openexchange.onboarding.plist.internal.PListSignerImpl;
+import com.openexchange.onboarding.plist.servlet.PListDownloadServlet;
+import com.openexchange.onboarding.service.OnboardingService;
+import com.openexchange.onboarding.sms.SMSLinkProvider;
 import com.openexchange.osgi.HousekeepingActivator;
 
 
@@ -65,6 +70,8 @@ import com.openexchange.osgi.HousekeepingActivator;
  */
 public class OnboardingPlistActivator extends HousekeepingActivator {
 
+    private String downloadServletAlias;
+
     /**
      * Initializes a new {@link OnboardingPlistActivator}.
      */
@@ -74,7 +81,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class };
+        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class, SMSLinkProvider.class, DispatcherPrefixService.class, HttpService.class, OnboardingService.class };
     }
 
     @Override
@@ -83,10 +90,22 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
         PListSignerImpl signerImpl = new PListSignerImpl();
         addService(PListSigner.class, signerImpl);
         registerService(PListSigner.class, signerImpl);
+
+        //register plist download servlet
+        PListDownloadServlet downloadServlet = new PListDownloadServlet(this);
+        String prefix = getService(DispatcherPrefixService.class).getPrefix();
+        downloadServletAlias = prefix + PListDownloadServlet.SERVLET_PATH;
+        getService(HttpService.class).registerServlet(downloadServletAlias, downloadServlet, null, null);
     }
 
     @Override
     protected void stopBundle() throws Exception {
+        HttpService httpService = getService(HttpService.class);
+        if (httpService != null) {
+            if (downloadServletAlias != null) {
+                httpService.unregister(downloadServletAlias);
+            }
+        }
         super.stopBundle();
         removeService(PListSigner.class);
         Services.setServiceLookup(null);

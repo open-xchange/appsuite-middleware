@@ -104,6 +104,11 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        return OnboardingUtility.hasCapability("mobile_mail_app", userId, contextId);
+    }
+
+    @Override
     public String getId() {
         return identifier;
     }

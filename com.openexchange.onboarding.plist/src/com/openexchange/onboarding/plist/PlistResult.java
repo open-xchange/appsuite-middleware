@@ -77,6 +77,8 @@ import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.SimpleResultObject;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.osgi.Services;
+import com.openexchange.onboarding.sms.SMSLinkProvider;
+import com.openexchange.onboarding.sms.SMSOnboardingStrings;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.session.Session;
@@ -122,8 +124,7 @@ public class PlistResult implements Result {
             case EMAIL:
                 return sendEmailResult(request, session);
             case SMS:
-                // Currently not supported
-                throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(action.getId());
+                return generateSMSResult(request, session);
             default:
                 throw OnboardingExceptionCodes.UNSUPPORTED_ACTION.create(action.getId());
         }
@@ -223,6 +224,36 @@ public class PlistResult implements Result {
         ThresholdFileHolder tfh = new ThresholdFileHolder(signed);
         signed.close();
         return tfh;
+    }
+
+    // --------------------------------------------- SMS utils --------------------------------------------------------------
+
+    private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
+        String untranslatedText;
+        switch (request.getScenario().getId()) {
+            case "mailsync":
+                untranslatedText = SMSOnboardingStrings.MAIL_MESSAGE;
+                break;
+            case "davsync":
+                untranslatedText = SMSOnboardingStrings.DAV_MESSAGE;
+                break;
+            case "eassync":
+                untranslatedText = SMSOnboardingStrings.EAS_MESSAGE;
+                break;
+            default:
+                untranslatedText = SMSOnboardingStrings.DEFAULT_MESSAGE;
+        }
+        String text = OnboardingUtility.getTranslationFor(untranslatedText, session);
+        //get url
+        SMSLinkProvider smsLinkProvider = Services.getService(SMSLinkProvider.class);
+        String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
+        text = text + link;
+
+        // TODO sent sms
+        System.out.println(text);
+
+        ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
+        return resultObject;
     }
 
 }

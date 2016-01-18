@@ -105,8 +105,18 @@ public enum Platform implements Entity {
     }
 
     @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        return OnboardingUtility.getBoolValue(enabledProperty, true, userId, contextId);
+    }
+
+    @Override
     public String getDisplayName(Session session) throws OXException {
         return OnboardingUtility.getTranslationFromProperty(displayNameProperty, defaultDisplayName, true, session);
+    }
+
+    @Override
+    public String getDisplayName(int userId, int contextId) throws OXException {
+        return OnboardingUtility.getTranslationFromProperty(displayNameProperty, defaultDisplayName, true, userId, contextId);
     }
 
     @Override

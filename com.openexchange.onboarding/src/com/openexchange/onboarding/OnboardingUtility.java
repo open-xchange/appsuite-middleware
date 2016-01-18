@@ -106,7 +106,19 @@ public class OnboardingUtility {
      * @return The crafted UUID
      */
     public static UUID craftUUIDFrom(String identifier, Session session) {
-        return new UUID(longFor(identifier.hashCode(), "open-xchange".hashCode()), longFor(session.getUserId(), session.getContextId()));
+        return craftUUIDFrom(identifier, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Crafts a UUID for specified scenario for given user.
+     *
+     * @param identifier The identifier to craft from
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The crafted UUID
+     */
+    public static UUID craftUUIDFrom(String identifier, int userId, int contextId) {
+        return new UUID(longFor(identifier.hashCode(), "open-xchange".hashCode()), longFor(userId, contextId));
     }
 
     private static long longFor(int x, int y) {
@@ -186,6 +198,19 @@ public class OnboardingUtility {
     }
 
     /**
+     * Checks if specified permission is set for given user.
+     *
+     * @param permission The permission to check
+     * @param userId The user id
+     * @param contextId The context id
+     * @return <code>true</code> if permission is set; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean hasPermission(Permission permission, int userId, int contextId) throws OXException {
+        return null == permission ? false : hasCapability(permission.getCapabilityName(), userId, contextId);
+    }
+
+    /**
      * Checks if specified capability is set for session-associated user.
      *
      * @param capability The capability to check
@@ -204,6 +229,20 @@ public class OnboardingUtility {
 
         CapabilityService service = Services.getService(CapabilityService.class);
         return null == capability ? false : service.getCapabilities(serverSession).contains(capability);
+    }
+
+    /**
+     * Checks if specified capability is set for given user.
+     *
+     * @param capability The capability to check
+     * @param userId The user id
+     * @param contextId The context id
+     * @return <code>true</code> if capability is set; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean hasCapability(String capability, int userId, int contextId) throws OXException {
+        CapabilityService service = Services.getService(CapabilityService.class);
+        return null == capability ? false : service.getCapabilities(userId, contextId).contains(capability);
     }
 
     /**
@@ -236,6 +275,34 @@ public class OnboardingUtility {
     }
 
     /**
+     * Checks if specified scenario is enabled for given user.
+     *
+     * @param scenarioId The scenario identifier to check
+     * @param userId The user id
+     * @param contextId The context id
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public static boolean isScenarioEnabled(String scenarioId, int userId, int contextId) throws OXException {
+        if (Strings.isEmpty(scenarioId)) {
+            return false;
+        }
+
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+        ComposedConfigProperty<String> property = view.property("com.openexchange.onboarding.enabledScenarios", String.class);
+        if (null == property || !property.isDefined()) {
+            // Nothing enabled...
+            return false;
+        }
+
+        String[] ids = Strings.splitByComma(Strings.asciiLowerCase(property.get()));
+        Set<String> set = new HashSet<String>(ids.length, 0.9F);
+        set.addAll(Arrays.asList(ids));
+        return set.contains(Strings.asciiLowerCase(scenarioId));
+    }
+
+    /**
      * Gets the locale for session-associated user.
      *
      * @param session The session
@@ -252,6 +319,19 @@ public class OnboardingUtility {
         }
         UserService service = Services.getService(UserService.class);
         return service.getUser(session.getUserId(), session.getContextId()).getLocale();
+    }
+
+    /**
+     * Gets the locale for given user.
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The locale
+     * @throws OXException If locale cannot be returned
+     */
+    public static Locale getLocaleFor(int userId, int contextId) throws OXException {
+        UserService service = Services.getService(UserService.class);
+        return service.getUser(userId, contextId).getLocale();
     }
 
     /**
@@ -278,6 +358,28 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the value for specified <code>boolean</code> property.
+     *
+     * @param propertyName The name of the <code>boolean</code> property
+     * @param defaultValue The default <code>boolean</code> value
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The <code>boolean</code> value or <code>defaultValue</code> (if absent)
+     * @throws OXException If <code>boolean</code> value cannot be returned
+     */
+    public static boolean getBoolValue(String propertyName, boolean defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        ComposedConfigProperty<Boolean> property = view.property(propertyName, boolean.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        return property.get().booleanValue();
+    }
+
+    /**
      * Gets the translation for specified i18n string
      *
      * @param i18nString The i18n string to translate
@@ -287,6 +389,19 @@ public class OnboardingUtility {
      */
     public static String getTranslationFor(String i18nString, Session session) throws OXException {
         return null == i18nString ? null : StringHelper.valueOf(getLocaleFor(session)).getString(i18nString);
+    }
+
+    /**
+     * Gets the translation for specified i18n string
+     *
+     * @param i18nString The i18n string to translate
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The translated string
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getTranslationFor(String i18nString, int userId, int contextId) throws OXException {
+        return null == i18nString ? null : StringHelper.valueOf(getLocaleFor(userId, contextId)).getString(i18nString);
     }
 
     /**
@@ -344,6 +459,33 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the translation for referenced i18n string; returns translation for default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param translateDefaultValue Whether specified default value is supposed to be translated
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The translated string or <code>defaultValue</code>
+     * @throws OXException If translated string cannot be returned
+     */
+    public static String getTranslationFromProperty(String propertyName, String defaultValue, boolean translateDefaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(userId, contextId)).getString(defaultValue) : defaultValue;
+        }
+
+        String i18nString = property.get();
+        if (Strings.isEmpty(i18nString)) {
+            return translateDefaultValue ? StringHelper.valueOf(getLocaleFor(userId, contextId)).getString(defaultValue) : defaultValue;
+        }
+        return StringHelper.valueOf(getLocaleFor(userId, contextId)).getString(i18nString);
+    }
+
+    /**
      * Gets the value for specified property; returns default value if such a property does not exist.
      *
      * @param propertyName The property name for the i18n string to translate
@@ -357,6 +499,29 @@ public class OnboardingUtility {
         Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        String value = property.get();
+        return Strings.isEmpty(value) ? defaultValue : value;
+    }
+
+    /**
+     * Gets the value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     */
+    public static String getValueFromProperty(String propertyName, String defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
 
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
@@ -396,6 +561,33 @@ public class OnboardingUtility {
     }
 
     /**
+     * Gets the integer value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The integer value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     */
+    public static Integer getIntFromProperty(String propertyName, Integer defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        try {
+            String value = property.get();
+            return Strings.isEmpty(value) ? defaultValue : Integer.valueOf(value.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    /**
      * Gets the boolean value for specified property; returns default value if such a property does not exist.
      *
      * @param propertyName The property name for the i18n string to translate
@@ -409,6 +601,29 @@ public class OnboardingUtility {
         Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            return defaultValue;
+        }
+
+        String value = property.get();
+        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+    }
+
+    /**
+     * Gets the boolean value for specified property; returns default value if such a property does not exist.
+     *
+     * @param propertyName The property name for the i18n string to translate
+     * @param defaultValue The default value to return
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The boolean value or <code>defaultValue</code>
+     * @throws OXException If value cannot be returned
+     */
+    public static Boolean getBoolFromProperty(String propertyName, Boolean defaultValue, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
 
         ComposedConfigProperty<String> property = view.property(propertyName, String.class);
         if (null == property || !property.isDefined()) {
@@ -613,4 +828,19 @@ public class OnboardingUtility {
         return url;
     }
 
+    /**
+     * Retrieves the primary mail address of a user.
+     * 
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The users primary mail address.
+     * @throws OXException
+     */
+    public static String getUserMail(int userId, int contextId) throws OXException {
+        UserService userService = Services.getService(UserService.class);
+        if (userService == null) {
+            throw new OXException(new Exception("UserService unavailable!!"));
+        }
+        return userService.getUser(userId, contextId).getMail();
+    }
 }

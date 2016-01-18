@@ -104,6 +104,11 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        return OnboardingUtility.hasCapability("drive", userId, contextId);
+    }
+
+    @Override
     public String getId() {
         return identifier;
     }

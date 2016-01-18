@@ -127,13 +127,29 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     }
 
     @Override
+    public boolean isEnabled(int userId, int contextId) throws OXException {
+        // Return pre-computed flag
+        return enabled;
+    }
+
+    @Override
     public List<OnboardingProvider> getProviders(Session session) {
         return scenario.getProviders(session);
     }
 
     @Override
+    public List<OnboardingProvider> getProviders(int userId, int contextId) {
+        return scenario.getProviders(userId, contextId);
+    }
+
+    @Override
     public String getDisplayName(Session session) throws OXException {
         return scenario.getDisplayName(session);
+    }
+
+    @Override
+    public String getDisplayName(int userId, int contextId) throws OXException {
+        return scenario.getDisplayName(userId, contextId);
     }
 
     @Override

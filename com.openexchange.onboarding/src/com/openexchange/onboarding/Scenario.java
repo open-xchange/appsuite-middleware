@@ -83,6 +83,15 @@ public interface Scenario extends Entity {
     List<OnboardingProvider> getProviders(Session session);
 
     /**
+     * Gets the associated on-boarding providers.
+     *
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The provider list
+     */
+    List<OnboardingProvider> getProviders(int userId, int contextId);
+
+    /**
      * Gets the alternative scenarios.
      *
      * @return The alternative scenarios

@@ -66,18 +66,17 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.onboarding.Device;
 import com.openexchange.onboarding.DisplayResult;
-import com.openexchange.onboarding.OnboardingProvider;
 import com.openexchange.onboarding.OnboardingExceptionCodes;
 import com.openexchange.onboarding.OnboardingRequest;
 import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.Result;
 import com.openexchange.onboarding.ResultReply;
 import com.openexchange.onboarding.Scenario;
+import com.openexchange.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.onboarding.plist.PlistResult;
 import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.tools.session.ServerSession;
 import com.openexchange.user.UserService;
 
 /**
@@ -87,7 +86,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class MailOnboardingProvider implements OnboardingProvider {
+public class MailOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
@@ -114,6 +113,20 @@ public class MailOnboardingProvider implements OnboardingProvider {
             return false;
         }
         MailAccount mailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(session.getUserId(), session.getContextId());
+        return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
+    }
+
+    @Override
+    public boolean isAvailable(int userId, int contextId) throws OXException {
+        if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), userId, contextId)) {
+            return false;
+        }
+        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
+        if(service==null){
+            throw new OXException(new Exception("MailAccountStorageService is unavailable!"));
+        }
+        
+        MailAccount mailAccount = service.getDefaultMailAccount(userId, contextId);
         return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
     }
 
@@ -156,7 +169,6 @@ public class MailOnboardingProvider implements OnboardingProvider {
         Configuration imapConfiguration;
         {
             MailConfig imapConfig = services.getService(MailService.class).getMailConfig(session, MailAccount.DEFAULT_ID);
-            MailConfig.getConfig(imapConfig, session, 0);
             String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.mail.imap.host", null, session);
             if (null == imapServer) {
                 imapServer = imapConfig.getServer();
@@ -194,6 +206,58 @@ public class MailOnboardingProvider implements OnboardingProvider {
             String smtpLogin = smtpConfig.getLogin();
             String smtpPassword = smtpConfig.getPassword();
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, smtpPassword);
+        }
+
+        // Return configurations
+        return new Configurations(imapConfiguration, smtpConfiguration);
+    }
+
+    private Configurations getEffectiveConfigurations(int userId, int contextId) throws OXException {
+
+        MailAccountStorageService mailAccountStorageService = services.getService(MailAccountStorageService.class);
+        if (mailAccountStorageService == null) {
+            throw new OXException();
+        }
+
+        // IMAP
+        Configuration imapConfiguration;
+        {
+            MailAccount mailAcc = mailAccountStorageService.getDefaultMailAccount(userId, contextId);
+            String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.mail.imap.host", null, userId, contextId);
+            if (null == imapServer) {
+                imapServer = mailAcc.getMailServer();
+            }
+            Integer imapPort = OnboardingUtility.getIntFromProperty("com.openexchange.onboarding.mail.imap.port", null, userId, contextId);
+            if (null == imapPort) {
+                imapPort = Integer.valueOf(mailAcc.getMailPort());
+            }
+            Boolean imapSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.onboarding.mail.imap.secure", null, userId, contextId);
+            if (null == imapSecure) {
+                imapSecure = Boolean.valueOf(mailAcc.isMailSecure());
+            }
+            String imapLogin = mailAcc.getLogin();
+            imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, null);
+        }
+
+        // SMTP
+        Configuration smtpConfiguration;
+        {
+            MailAccount transportAcc = mailAccountStorageService.getTransportAccountForID(MailAccount.DEFAULT_ID, userId, contextId);
+
+            String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.onboarding.mail.smtp.host", null, userId, contextId);
+            if (null == smtpServer) {
+                smtpServer = transportAcc.getMailServer();
+            }
+            Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.onboarding.mail.smtp.port", null, userId, contextId);
+            if (null == smtpPort) {
+                smtpPort = Integer.valueOf(transportAcc.getMailPort());
+            }
+            Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.onboarding.mail.smtp.secure", null, userId, contextId);
+            if (null == smtpSecure) {
+                smtpSecure = Boolean.valueOf(transportAcc.isMailSecure());
+            }
+            String smtpLogin = transportAcc.getLogin();
+            smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, null);
         }
 
         // Return configurations
@@ -239,58 +303,69 @@ public class MailOnboardingProvider implements OnboardingProvider {
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
-    private UserSettingMail getUserSettingMail(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUserSettingMail();
-        }
+    private UserSettingMail getUserSettingMail(int userId, int contextId) throws OXException {
 
-        return UserSettingMailStorage.getInstance().getUserSettingMail(session);
+        return UserSettingMailStorage.getInstance().getUserSettingMail(userId, contextId);
     }
 
-    private User getUser(Session session) throws OXException {
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser();
+    private User getUser(int userId, int contextId) throws OXException {
+        UserService service = services.getService(UserService.class);
+        if (service == null) {
+            throw new OXException(new Exception("UserService not available!"));
         }
-
-        return services.getService(UserService.class).getUser(session.getUserId(), session.getContextId());
+        return service.getUser(userId, contextId);
     }
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Scenario scenario = request.getScenario();
 
-        Configurations configurations = getEffectiveConfigurations(session);
+        PListDict old = null;
+        if (previousResult != null) {
+            old = ((PlistResult) previousResult).getPListDict();
+        }
+        return new PlistResult(getPlist(old, session.getUserId(), session.getContextId(), scenario, request), ResultReply.NEUTRAL);
+    }
+
+    @Override
+    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+        return getPlist(null, userId, contextId, scenario, req);
+    }
+
+    @Override
+    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+        Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
-        if (null == previousResult) {
+        if (null == previousPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
-            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), session).toString());
+            pListDict.setPayloadUUID(OnboardingUtility.craftUUIDFrom(scenario.getId(), userId, contextId).toString());
             pListDict.setPayloadVersion(1);
-            pListDict.setPayloadDisplayName(scenario.getDisplayName(session));
+            pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
         } else {
-            pListDict = ((PlistResult) previousResult).getPListDict();
+            pListDict = previousPListDict;
         }
 
         // Generate content
         PListDict payloadContent = new PListDict();
         payloadContent.setPayloadType("com.apple.mail.managed");
-        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, session).toString());
+        payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.mail");
         payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
-        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(MailOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, session));
+        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(MailOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, userId, contextId));
 
         // The full user name for the account. This is the user name in sent messages, etc.
-        payloadContent.addStringValue("EmailAccountName", getUser(session).getDisplayName());
+        payloadContent.addStringValue("EmailAccountName", getUser(userId, contextId).getDisplayName());
 
         // Allowed values are EmailTypePOP and EmailTypeIMAP. Defines the protocol to be used for that account.
         payloadContent.addStringValue("EmailAccountType", "EmailTypeIMAP");
 
         // Designates the full email address for the account. If not present in the payload, the device prompts for this string during profile installation.
-        payloadContent.addStringValue("EmailAddress", getUserSettingMail(session).getSendAddr());
+        payloadContent.addStringValue("EmailAddress", getUserSettingMail(userId, contextId).getSendAddr());
 
 
         // Designates the authentication scheme for incoming mail. Allowed values are EmailAuthPassword and EmailAuthNone.
@@ -364,9 +439,7 @@ public class MailOnboardingProvider implements OnboardingProvider {
 
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);
-
-        // Return result
-        return new PlistResult(pListDict, ResultReply.NEUTRAL);
+        return pListDict;
     }
 
 }
