@@ -52,6 +52,8 @@ package com.openexchange.onboarding.plist;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
@@ -82,6 +84,7 @@ import com.openexchange.onboarding.sms.SMSOnboardingStrings;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.session.Session;
+import com.openexchange.sms.SMSService;
 
 /**
  * {@link PlistResult} - A plist result.
@@ -93,6 +96,11 @@ public class PlistResult implements Result {
 
     private final PListDict pListDict;
     private final ResultReply reply;
+
+    private static final String SMS_KEY = "sms";
+    private static final String SMS_CODE_KEY = "code";
+
+    private static final Logger LOG = LoggerFactory.getLogger(PlistResult.class);
 
     /**
      * Initializes a new {@link PlistResult}.
@@ -249,8 +257,21 @@ public class PlistResult implements Result {
         String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
         text = text + link;
 
-        // TODO sent sms
-        System.out.println(text);
+        SMSService smsService = Services.getService(SMSService.class);
+        if (smsService == null) {
+            LOG.error("SMSService is unavailable!");
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("SMSService is unavailable!");
+        }
+        Map<String, Object> input = request.getInput();
+        if (input == null) {
+            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(SMS_KEY);
+        }
+        String number = (String) input.get(SMS_KEY);
+        String code = (String) input.get(SMS_CODE_KEY);
+        if (number == null || code == null) {
+            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(number == null ? SMS_KEY : SMS_CODE_KEY);
+        }
+        smsService.sendMessage(number, text, code);
 
         ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         return resultObject;

@@ -833,13 +833,14 @@ public class OnboardingUtility {
      * 
      * @param userId The user id
      * @param contextId The context id
-     * @return The users primary mail address.
+     * @return The users primary mail address or null if the user can't be retrieved.
      * @throws OXException
      */
     public static String getUserMail(int userId, int contextId) throws OXException {
         UserService userService = Services.getService(UserService.class);
         if (userService == null) {
-            throw new OXException(new Exception("UserService unavailable!!"));
+            LOG.error("UserService is unavailable!");
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService is unavailable");
         }
         return userService.getUser(userId, contextId).getMail();
     }

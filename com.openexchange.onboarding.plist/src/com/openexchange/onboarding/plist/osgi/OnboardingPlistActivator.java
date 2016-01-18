@@ -60,6 +60,7 @@ import com.openexchange.onboarding.plist.servlet.PListDownloadServlet;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.onboarding.sms.SMSLinkProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sms.SMSService;
 
 
 /**
@@ -81,7 +82,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class, SMSLinkProvider.class, DispatcherPrefixService.class, HttpService.class, OnboardingService.class };
+        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class, SMSLinkProvider.class, DispatcherPrefixService.class, HttpService.class, OnboardingService.class, SMSService.class };
     }
 
     @Override
