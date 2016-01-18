@@ -387,6 +387,10 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     protected static boolean checkCSS(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final String cssPrefix, final boolean removeIfAbsent, final boolean internallyInvoked) {
+        if (cssBuilder.isEmpty()) {
+            return false;
+        }
+
         // Schedule separate task to monitor duration
         // User StringBuffer-based invocation to honor concurrency
         final Stringer cssBld = new StringBufferStringer(new StringBuffer(cssBuilder.toString()));
@@ -479,11 +483,11 @@ public final class CSSMatcher {
             final int start = m.start() + off;
             cssElemsBuffer.append(css.substring(off, start));
             final String prefix;
-            if (cssElemsBuffer.length() > 0) {
-                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+            if (cssElemsBuffer.isEmpty()) {
                 prefix = cssElemsBuffer.toString();
             } else {
-                prefix = "";
+                modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
+                prefix = cssElemsBuffer.toString();
             }
             cssElemsBuffer.setLength(0);
             // Check block part
@@ -500,7 +504,7 @@ public final class CSSMatcher {
         }
         cssElemsBuffer.append(css.substring(off, css.length()));
 
-        if (cssElemsBuffer.length() > 0) {
+        if (false == cssElemsBuffer.isEmpty()) {
             modified |= checkCSSElements(cssElemsBuffer, styleMap, removeIfAbsent);
             final String tail = cssElemsBuffer.toString();
             cssElemsBuffer.setLength(0);
@@ -796,7 +800,7 @@ public final class CSSMatcher {
         mr.appendTail(cssBuilder);
     }
 
-    private static final Pattern PATTERN_POSITION_FIXED = Pattern.compile("(position\\s*:\\s*fixed)");
+    private static final Pattern PATTERN_POSITION_FIXED = Pattern.compile("position\\s*:\\s*fixed");
 
     /**
      * Fix for 36024: Replaces all occurrences of position:fixed by display:fixed to prevent defacing the appsuite ui
@@ -806,16 +810,19 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("position") < 0) {
             return false;
         }
-        final Matcher m = PATTERN_POSITION_FIXED.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
-        final StringBuffer sb = new StringBuffer(cssBuilder.length());
-        final Thread thread = Thread.currentThread();
+
+        Matcher m = PATTERN_POSITION_FIXED.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
+        StringBuffer sb = new StringBuffer(cssBuilder.length());
+        Thread thread = Thread.currentThread();
+        boolean modified = false;
         while (!thread.isInterrupted() && m.find()) {
             m.appendReplacement(sb, "display: block");
+            modified = true;
         }
         m.appendTail(sb);
         cssBuilder.setLength(0);
         cssBuilder.append(sb);
-        return true;
+        return modified;
     }
 
     private static final Pattern PATTERN_INLINE_DATA = Pattern.compile("url\\(data:[^,]+,.+?\\)");
@@ -825,16 +832,19 @@ public final class CSSMatcher {
         if (cssBuilder.indexOf("data") < 0) {
             return false;
         }
-        final Matcher m = PATTERN_INLINE_DATA.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
-        final StringBuffer sb = new StringBuffer(cssBuilder.length());
-        final Thread thread = Thread.currentThread();
+
+        Matcher m = PATTERN_INLINE_DATA.matcher(InterruptibleCharSequence.valueOf(cssBuilder.toString()));
+        StringBuffer sb = new StringBuffer(cssBuilder.length());
+        Thread thread = Thread.currentThread();
+        boolean modified = false;
         while (!thread.isInterrupted() && m.find()) {
             m.appendReplacement(sb, "");
+            modified = true;
         }
         m.appendTail(sb);
         cssBuilder.setLength(0);
         cssBuilder.append(sb);
-        return true;
+        return modified;
     }
 
     private static final Pattern PATTERN_HTML_ENTITIES = Pattern.compile("&([^;\\W]+);");
@@ -895,14 +905,14 @@ public final class CSSMatcher {
      * @return <code>true</code> if modified; otherwise <code>false</code>
      */
     protected static boolean checkCSSElements(final Stringer cssBuilder, final Map<String, Set<String>> styleMap, final boolean removeIfAbsent) {
-        if ((null == styleMap) || (cssBuilder == null) || (cssBuilder.length() <= 0)) {
+        if ((null == styleMap) || (cssBuilder == null) || cssBuilder.isEmpty()) {
             return false;
         }
         boolean modified = false;
         correctRGBFunc(cssBuilder);
         // replaceHtmlEntities(cssBuilder);
         modified = dropInlineData(cssBuilder);
-        modified = replacePositionFixedWithDisplayBlock(cssBuilder);
+        modified |= replacePositionFixedWithDisplayBlock(cssBuilder);
 
         /*
          * Feed matcher with buffer's content and reset
