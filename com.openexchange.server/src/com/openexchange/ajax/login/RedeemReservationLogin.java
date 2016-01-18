@@ -51,8 +51,6 @@ package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -171,7 +169,7 @@ public class RedeemReservationLogin implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(generateRedirectURL(session, user.getPreferredLanguage(), uiWebPath, conf.getHttpAuthAutoLogin()));
+        resp.sendRedirect(generateRedirectURL(session, uiWebPath, conf.getHttpAuthAutoLogin()));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration) throws OXException {
@@ -196,17 +194,12 @@ public class RedeemReservationLogin implements LoginRequestHandler {
         });
     }
 
-    private static String generateRedirectURL(Session session, String language, String uiWebPath, String shouldStore) {
+    private static String generateRedirectURL(Session session, String uiWebPath, String shouldStore) {
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-
-        // App Suite UI requires some additional values.
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
-        retval = LoginTools.addFragmentParameter(retval, "language", language);
         if (shouldStore != null) {
             retval = LoginTools.addFragmentParameter(retval, "store", shouldStore);
         }
