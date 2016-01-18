@@ -81,7 +81,7 @@ import com.openexchange.sms.SMSUtils;
 public class SipgateSMSService implements SMSService {
 
     private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
-    private static final int MAX_MESSAGE_LENGTH = 160;
+    private final int MAX_MESSAGE_LENGTH;
 
     private final HttpClient client;
 
@@ -90,11 +90,12 @@ public class SipgateSMSService implements SMSService {
      *
      * @throws OXException
      */
-    public SipgateSMSService(ServiceLookup services) throws OXException {
+    public SipgateSMSService(ServiceLookup services) {
         super();
         ConfigurationService configService = services.getService(ConfigurationService.class);
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
+        MAX_MESSAGE_LENGTH = configService.getIntProperty("com.openexchange.sms.sipgate.maxlength=0", 0);
         HttpClientParams params = new HttpClientParams();
         params.setAuthenticationPreemptive(true);
         params.setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, AuthPolicy.BASIC);
@@ -106,7 +107,7 @@ public class SipgateSMSService implements SMSService {
 
     @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
-        if (message.length() > MAX_MESSAGE_LENGTH) {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
             throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
@@ -133,7 +134,7 @@ public class SipgateSMSService implements SMSService {
 
     @Override
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
-        if (message.length() > MAX_MESSAGE_LENGTH) {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
             throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
@@ -199,7 +200,6 @@ public class SipgateSMSService implements SMSService {
                 method.releaseConnection();
             }
         }
-
     }
 
 }
