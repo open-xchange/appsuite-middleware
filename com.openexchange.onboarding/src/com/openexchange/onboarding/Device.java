@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -221,7 +220,7 @@ public enum Device implements Entity {
             OnboardingAction action = iter.next();
             switch (action) {
                 case EMAIL:
-                    if (!OnboardingUtility.hasPermission(Permission.WEBMAIL, session)) {
+                    if (!OnboardingUtility.hasNoReplyTransport(session)) {
                         iter.remove();
                     }
                     break;
