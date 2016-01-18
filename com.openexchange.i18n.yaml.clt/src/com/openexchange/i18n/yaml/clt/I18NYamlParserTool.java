@@ -58,6 +58,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.fedorahosted.tennera.jgettext.Catalog;
+import org.fedorahosted.tennera.jgettext.HeaderUtil;
 import org.fedorahosted.tennera.jgettext.Message;
 import org.fedorahosted.tennera.jgettext.PoWriter;
 import com.openexchange.cli.AbstractCLI;
@@ -92,6 +93,7 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
         options.addOption(new Option("y", "yamlfile", true, "The name of the YAML file to parse; either a fully qualified path name or only the name to look it up in default directory \"/opt/open-xchange/etc\""));
         options.addOption(new Option("o", "output", true, "The path name for the .pot output file; e.g. \"/tmp/yamlstrings.pot\""));
         options.addOption(new Option("f", "force", false, "Whether to force .pot creation. That is to overwrite the denoted path name in case it does already exist."));
+        options.addOption(new Option("d", "date", false, "Whether to set the \"POT-Creation-Date\" in the headers section of the .pot file; e.g. \"POT-Creation-Date: 2015-10-18 06:46+0100\\n\""));
     }
 
     @Override
@@ -130,6 +132,39 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
             catalog.addMessage(message);
         }
 
+        // Generate & add header
+        Message header = HeaderUtil.generateDefaultHeader();
+        catalog.addMessage(header);
+
+        // Check whether to keep or drop the "POT-Creation-Date" header line
+        boolean keepCreationDate = cmd.hasOption('d');
+        if (false == keepCreationDate) {
+            /*-
+             * "msgstr" is something like:
+             *
+             * Project-Id-Version: PACKAGE VERSION
+             * Report-Msgid-Bugs-To:
+             * POT-Creation-Date: 2016-01-18 06:46+0100  <------ This line is supposed to be dropped
+             * PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE
+             * Last-Translator: FULL NAME <EMAIL@ADDRESS>
+             * Language-Team: LANGUAGE <LL@li.org>
+             * MIME-Version: 1.0
+             * Content-Type: text/plain; charset=UTF-8
+             * Content-Transfer-Encoding: 8bit
+             */
+            String msgstr = header.getMsgstr();
+            int start = msgstr.indexOf("POT-Creation-Date:");
+            if (start >= 0) {
+                int end = msgstr.indexOf("PO-Revision-Date", start + 1);
+                if (end > 0) {
+                    StringBuilder newMsgStr = new StringBuilder(msgstr.length());
+                    newMsgStr.append(msgstr.substring(0, start));
+                    newMsgStr.append(msgstr.substring(end));
+                    header.setMsgstr(newMsgStr.toString());
+                }
+            }
+        }
+
         // Write .pot catalog to denoted output
         File outputFile = new File(cmd.getOptionValue('o'));
         saveCat(catalog, outputFile);
@@ -142,7 +177,7 @@ public class I18NYamlParserTool extends AbstractCLI<Void, Void> {
         BufferedWriter out = new BufferedWriter(new FileWriter(poFile));
         try {
             PoWriter writer = new PoWriter();
-            writer.setGenerateHeader(true);
+            writer.setGenerateHeader(false);
             writer.write(cat, out);
         } finally {
             Streams.close(out);
