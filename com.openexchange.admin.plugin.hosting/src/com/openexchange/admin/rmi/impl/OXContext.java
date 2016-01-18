@@ -351,7 +351,13 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             }
 
             OXContextStorageInterface oxcox = OXContextStorageInterface.getInstance();
-            loginMappings = oxcox.getLoginMappings(ctx);
+
+            // Check if login-mappings are supposed to be changed
+            if (null != ctx.getLoginMappings()) {
+                // Load old ones for invalidation purpose
+                loginMappings = oxcox.getLoginMappings(ctx);
+            }
+
             oxcox.change(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
