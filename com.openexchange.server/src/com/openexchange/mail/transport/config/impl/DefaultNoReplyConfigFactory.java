@@ -62,8 +62,6 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
-import com.openexchange.server.ServiceLookup;
-
 
 /**
  * {@link DefaultNoReplyConfigFactory}
@@ -73,11 +71,13 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
 
-    private final ServiceLookup services;
+    private final ContextService contextService;
+    private final ConfigViewFactory configViewFactory;
 
-    public DefaultNoReplyConfigFactory(ServiceLookup services) {
+    public DefaultNoReplyConfigFactory(ContextService contextService, ConfigViewFactory configViewFactory) {
         super();
-        this.services = services;
+        this.contextService = contextService;
+        this.configViewFactory = configViewFactory;
     }
 
     @Override
@@ -103,14 +103,9 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
          * The user-sensitive UserPermissionBits instance is needed in order to retrieve the applicable "specification" (the set of tags that do apply).
          *
          */
-
-        int contextAdminId;
-        {
-            ContextService contextService = services.getService(ContextService.class);
-            contextAdminId = contextService.getContext(contextId).getMailadmin();
-        }
-        ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
-        ConfigView view = factory.getView(contextAdminId, contextId);
+        
+        int contextAdminId = contextService.getContext(contextId).getMailadmin();
+        ConfigView view = configViewFactory.getView(contextAdminId, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
 
         {
