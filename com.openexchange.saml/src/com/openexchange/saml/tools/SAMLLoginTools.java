@@ -50,8 +50,6 @@
 package com.openexchange.saml.tools;
 
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
-import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import java.util.Map;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -105,20 +103,14 @@ public class SAMLLoginTools {
      * Generates the relative redirect location to enter the web frontend directly with a session.
      *
      * @param session The session
-     * @param language The language parameter or <code>null</code> to omit it
      * @param uiWebPath The path to use
      */
-    public static String buildFrontendRedirectLocation(Session session, String language, String uiWebPath) {
+    public static String buildFrontendRedirectLocation(Session session, String uiWebPath) {
         String retval = uiWebPath;
 
         // Prevent HTTP response splitting.
         retval = retval.replaceAll("[\n\r]", "");
         retval = LoginTools.addFragmentParameter(retval, PARAMETER_SESSION, session.getSessionID());
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER, session.getLogin());
-        retval = LoginTools.addFragmentParameter(retval, PARAMETER_USER_ID, Integer.toString(session.getUserId()));
-        if (language != null) {
-            retval = LoginTools.addFragmentParameter(retval, "language", language);
-        }
         return retval;
     }
 
@@ -127,11 +119,10 @@ public class SAMLLoginTools {
      *
      * @param httpRequest The servlet request
      * @param session The session
-     * @param language The language parameter or <code>null</code> to omit it
      * @param uiWebPath The path to use
      * @param hostnameService The {@link HostnameService} if available
      */
-    public static String buildAbsoluteFrontendRedirectLocation(HttpServletRequest httpRequest, Session session, String language, String uiWebPath, HostnameService hostnameService) {
+    public static String buildAbsoluteFrontendRedirectLocation(HttpServletRequest httpRequest, Session session, String uiWebPath, HostnameService hostnameService) {
         URIBuilder location = new URIBuilder().setScheme(Tools.considerSecure(httpRequest) ? "https" : "http");
         String hostname = null;
         if (hostnameService != null) {
@@ -143,14 +134,7 @@ public class SAMLLoginTools {
 
         location.setHost(hostname).setPath(uiWebPath);
 
-        StringBuilder fragment = new StringBuilder();
-        fragment.append(AJAXUtility.encodeUrl(PARAMETER_SESSION)).append("=").append(AJAXUtility.encodeUrl(session.getSessionID())).append('&');
-        fragment.append(AJAXUtility.encodeUrl(PARAMETER_USER)).append("=").append(AJAXUtility.encodeUrl(session.getLogin())).append('&');
-        fragment.append(AJAXUtility.encodeUrl(PARAMETER_USER_ID)).append("=").append(AJAXUtility.encodeUrl(Integer.toString(session.getUserId())));
-        if (language != null) {
-            fragment.append('&').append(AJAXUtility.encodeUrl("language")).append("=").append(AJAXUtility.encodeUrl(language));
-        }
-
+        StringBuilder fragment = new StringBuilder(AJAXUtility.encodeUrl(PARAMETER_SESSION)).append("=").append(AJAXUtility.encodeUrl(session.getSessionID()));
         location.setFragment(fragment.toString());
         return location.toString();
     }
