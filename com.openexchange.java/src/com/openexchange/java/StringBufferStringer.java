@@ -72,7 +72,7 @@ public final class StringBufferStringer implements Stringer {
     public boolean isEmpty() {
         int length = sb.length();
         boolean empty = true;
-        for (int i = 0; i < length; i++) {
+        for (int i = length; empty && i-- > 0;) {
             empty = Strings.isWhitespace(sb.charAt(i));
         }
         return empty;
