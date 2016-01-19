@@ -60,6 +60,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.net.URIDefaults;
 
@@ -176,6 +177,11 @@ final class SanitizingStorageService implements MailAccountStorageService {
     @Override
     public void updateMailAccount(final MailAccountDescription mailAccount, final Set<Attribute> attributes, final int user, final int cid, final Session session, final Connection con, final boolean changePrimary) throws OXException {
         storageService.updateMailAccount(mailAccount, attributes, user, cid, session, con, changePrimary);
+    }
+
+    @Override
+    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        storageService.updateMailAccount(mailAccount, attributes, userId, contextId, updateProperties);
     }
 
     @Override

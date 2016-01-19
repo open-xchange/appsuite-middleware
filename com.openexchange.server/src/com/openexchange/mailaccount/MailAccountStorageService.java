@@ -198,9 +198,9 @@ public interface MailAccountStorageService {
     MailAccount getDefaultMailAccount(int userId, int contextId) throws OXException;
 
     /**
-     * Updates mail account's value taken from specified mail account.
+     * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
-     * @param mailAccount The mail account containing the values to update.
+     * @param mailAccount TThe {@code MailAccountDescription} instance to read from
      * @param attributes The attributes to update
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -210,9 +210,9 @@ public interface MailAccountStorageService {
     void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session) throws OXException;
 
     /**
-     * Updates mail account's value taken from specified mail account.
+     * Updates mail account's value taken specified {@code MailAccountDescription} instance.
      *
-     * @param mailAccount The mail account containing the values to update.
+     * @param mailAccount The {@code MailAccountDescription} instance to read from
      * @param attributes The attributes to update
      * @param userId The user identifier
      * @param contextId The context identifier
@@ -222,6 +222,18 @@ public interface MailAccountStorageService {
      * @throws OXException If the mail account cannot be updated
      */
     void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int cid, Session session, Connection con, boolean changePrimary) throws OXException;
+
+    /**
+     * Updates mail account's value taken from specified {@code MailAccountDescription} instance.
+     *
+     * @param mailAccount The {@code MailAccountDescription} instance to read from
+     * @param attributes The attributes to update
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param updateProperties Additional update properties
+     * @throws OXException If the mail account cannot be updated
+     */
+    void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException;
 
     /**
      * Updates mail account's value taken from specified mail account.
