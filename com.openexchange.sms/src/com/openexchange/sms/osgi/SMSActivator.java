@@ -47,44 +47,43 @@
  *
  */
 
-package com.openexchange.sms.sipgate.osgi;
+package com.openexchange.sms.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.PhoneNumberParserService;
-import com.openexchange.sms.SMSService;
-import com.openexchange.sms.sipgate.SipgateSMSService;
+import com.openexchange.sms.impl.PhoneNumberParserServiceImpl;
 
 /**
- * {@link SipgateSMSActivator}
+ * {@link SMSActivator}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SipgateSMSActivator extends HousekeepingActivator {
+public class SMSActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link SipgateSMSActivator}.
+     * Initializes a new {@link SMSActivator}.
      */
-    public SipgateSMSActivator() {
+    public SMSActivator() {
         super();
     }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PhoneNumberParserService.class };
+        return new Class<?>[] { ConfigurationService.class };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("starting bundle: \"com.openexchange.sms.sipgate\"");
-        SMSService service = new SipgateSMSService(this);
-        registerService(SMSService.class, service);
+    public void startBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SMSActivator.class).info("starting bundle: \"com.openexchange.sms\"");
+        PhoneNumberParserService parser = new PhoneNumberParserServiceImpl(this);
+        registerService(PhoneNumberParserService.class, parser);
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("stopping bundle: \"com.openexchange.sms.sipgate\"");
+    public void stopBundle() throws Exception {
+        org.slf4j.LoggerFactory.getLogger(SMSActivator.class).info("stopping bundle: \"com.openexchange.sms\"");
         unregisterServices();
         super.stopBundle();
     }

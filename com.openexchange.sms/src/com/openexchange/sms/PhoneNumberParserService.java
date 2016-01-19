@@ -47,46 +47,19 @@
  *
  */
 
-package com.openexchange.sms.sipgate.osgi;
+package com.openexchange.sms;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sms.PhoneNumberParserService;
-import com.openexchange.sms.SMSService;
-import com.openexchange.sms.sipgate.SipgateSMSService;
+import java.util.Locale;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SipgateSMSActivator}
+ * {@link PhoneNumberParserService}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SipgateSMSActivator extends HousekeepingActivator {
+public interface PhoneNumberParserService {
 
-    /**
-     * Initializes a new {@link SipgateSMSActivator}.
-     */
-    public SipgateSMSActivator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, PhoneNumberParserService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("starting bundle: \"com.openexchange.sms.sipgate\"");
-        SMSService service = new SipgateSMSService(this);
-        registerService(SMSService.class, service);
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("stopping bundle: \"com.openexchange.sms.sipgate\"");
-        unregisterServices();
-        super.stopBundle();
-    }
+    String parsePhoneNumber(String phoneNumber, Locale locale) throws OXException;
 
 }
