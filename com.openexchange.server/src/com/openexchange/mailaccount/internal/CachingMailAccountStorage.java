@@ -81,6 +81,7 @@ import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -515,12 +516,21 @@ final class CachingMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session, Connection con, boolean changePrimary) throws OXException {
+        UpdateProperties updateProperties = new UpdateProperties.Builder().setChangePrimary(changePrimary).setChangeProtocol(false).setCon(con).setSession(session).build();
+        updateMailAccount(mailAccount, attributes, userId, contextId, updateProperties);
+    }
+
+    @Override
+    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        Connection con = updateProperties == null ? null : updateProperties.getCon();
+        Session session = updateProperties == null ? null : updateProperties.getSession();
+
         if (null != session) {
             session.setParameter("com.openexchange.mailaccount.unifiedMailEnabled", null);
         }
         dropSessionParameter(userId, contextId);
 
-        delegate.updateMailAccount(mailAccount, attributes, userId, contextId, session, con, changePrimary);
+        delegate.updateMailAccount(mailAccount, attributes, userId, contextId, updateProperties);
         invalidateMailAccount(mailAccount.getId(), userId, contextId);
 
         if (null != con) {
