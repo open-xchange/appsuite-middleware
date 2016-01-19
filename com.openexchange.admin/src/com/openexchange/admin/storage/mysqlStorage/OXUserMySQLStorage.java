@@ -125,6 +125,7 @@ import com.openexchange.mailaccount.Attribute;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
+import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.spamhandler.SpamHandler;
 import com.openexchange.tools.net.URIDefaults;
@@ -1261,7 +1262,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
         }
         try {
             if (!changed.isEmpty()) {
-                mass.updateMailAccount(account, changed, userId, contextId, null, con, true);
+                UpdateProperties updateProperties = new UpdateProperties.Builder().setChangePrimary(true).setChangeProtocol(true).setCon(con).setSession(null).build();
+                mass.updateMailAccount(account, changed, userId, contextId, updateProperties);
             }
         } catch (final OXException e) {
             log.error("Problem storing the primary mail account.", e);
