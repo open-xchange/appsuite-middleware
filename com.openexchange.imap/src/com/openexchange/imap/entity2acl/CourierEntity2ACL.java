@@ -58,6 +58,7 @@ import com.google.common.cache.CacheBuilder;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.imap.services.Services;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -146,24 +147,36 @@ public class CourierEntity2ACL extends Entity2ACL {
         return wrapper.string;
     }
 
+    private boolean equalsOrStartsWith(String fullName, String publicNamespace, char separator) {
+        if (Strings.isEmpty(publicNamespace)) {
+            return false;
+        }
+
+        return (fullName.equals(publicNamespace) || fullName.startsWith(new StringBuilder(32).append(publicNamespace).append(separator).toString()));
+    }
+
     @Override
     public String getACLName(final int userId, final Context ctx, final Entity2ACLArgs entity2AclArgs) throws OXException {
         if (userId == OCLPermission.ALL_GROUPS_AND_USERS) {
             return ALIAS_ANYONE;
         }
-        final Object[] args = entity2AclArgs.getArguments(IMAPServer.COURIER);
+
+        Object[] args = entity2AclArgs.getArguments(IMAPServer.COURIER);
         if (args == null || args.length == 0) {
             throw Entity2ACLExceptionCode.MISSING_ARG.create();
         }
-        final int accountId = ((Integer) args[0]).intValue();
-        final String serverurl = args[1].toString();
-        final int sessionUser = ((Integer) args[2]).intValue();
-        final String sharedOwner = getSharedFolderOwner((String) args[3], ((Character) args[4]).charValue(), (String) args[5]);
+
+        int accountId = ((Integer) args[0]).intValue();
+        String serverurl = args[1].toString();
+        int sessionUser = ((Integer) args[2]).intValue();
+        String fullName = (String) args[3];
+        char separator = ((Character) args[4]).charValue();
+        String sharedOwner = getSharedFolderOwner(fullName, separator, (String) args[5]);
         if (null == sharedOwner) {
             /*
              * A non-shared folder
              */
-            if (sessionUser == userId) {
+            if ((sessionUser == userId) && !equalsOrStartsWith(fullName, (String) args[6], separator)) {
                 /*
                  * Logged-in user is equal to given user
                  */
