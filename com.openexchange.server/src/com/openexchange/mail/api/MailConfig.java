@@ -655,7 +655,7 @@ public abstract class MailConfig {
      * @param login The login
      * @return The sane login
      */
-    protected static final String saneLogin(final String login) {
+    public static final String saneLogin(final String login) {
         final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
         if (!(null == service ? true : service.getBoolProperty("com.openexchange.mail.saneLogin", true))) {
             return login;

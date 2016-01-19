@@ -54,10 +54,13 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.mail.api.MailConfig;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -88,6 +91,7 @@ import com.openexchange.user.UserService;
  */
 public class MailOnboardingProvider implements OnboardingPlistProvider {
 
+    private static final Logger LOG = LoggerFactory.getLogger(MailOnboardingProvider.class);
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
@@ -123,7 +127,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         }
         MailAccountStorageService service = services.getService(MailAccountStorageService.class);
         if(service==null){
-            throw new OXException(new Exception("MailAccountStorageService is unavailable!"));
+            LOG.error("MailAccountStorageService is not available!");
+            return false;
         }
         
         MailAccount mailAccount = service.getDefaultMailAccount(userId, contextId);
@@ -218,6 +223,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         if (mailAccountStorageService == null) {
             throw new OXException();
         }
+        String userLogin = OnboardingUtility.getUserLogin(userId, contextId);
+        String userLoginInfo = getUser(userId, contextId).getLoginInfo();
 
         // IMAP
         Configuration imapConfiguration;
@@ -235,7 +242,8 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == imapSecure) {
                 imapSecure = Boolean.valueOf(mailAcc.isMailSecure());
             }
-            String imapLogin = mailAcc.getLogin();
+
+            String imapLogin = getMailLogin(mailAcc, userLogin, userLoginInfo);
             imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, null);
         }
 
@@ -256,12 +264,22 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             if (null == smtpSecure) {
                 smtpSecure = Boolean.valueOf(transportAcc.isMailSecure());
             }
-            String smtpLogin = transportAcc.getLogin();
+            String smtpLogin = getMailLogin(transportAcc, userLogin, userLoginInfo);
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, null);
         }
 
         // Return configurations
         return new Configurations(imapConfiguration, smtpConfiguration);
+    }
+
+    private String getMailLogin(MailAccount mailAccount, String slogin, String userLoginInfo) throws OXException {
+        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
+        // Assign login
+        if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
+            return MailConfig.saneLogin(slogin);
+        } else {
+            return MailConfig.getMailLogin(mailAccount, userLoginInfo);
+        }
     }
 
     private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
@@ -311,7 +329,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     private User getUser(int userId, int contextId) throws OXException {
         UserService service = services.getService(UserService.class);
         if (service == null) {
-            throw new OXException(new Exception("UserService not available!"));
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService not available");
         }
         return service.getUser(userId, contextId);
     }
