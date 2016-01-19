@@ -226,7 +226,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadIdentifier("com.open-xchange.caldav");
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
-        payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserMail(userId, contextId));
+        payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
         String calDAVUrl = getCalDAVUrl(req, false, userId, contextId);
         payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
         payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));

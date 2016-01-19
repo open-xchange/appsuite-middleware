@@ -225,7 +225,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadIdentifier("com.open-xchange.carddav");
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
-        payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserMail(userId, contextId));
+        payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
         String cardDAVUrl = getCardDAVUrl(req, false, userId, contextId);
         payloadContent.addStringValue("CardDAVHostName", cardDAVUrl);
         payloadContent.addBooleanValue("CardDAVUseSSL", cardDAVUrl.startsWith("https://"));

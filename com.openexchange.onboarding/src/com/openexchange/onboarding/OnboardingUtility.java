@@ -833,7 +833,7 @@ public class OnboardingUtility {
      * 
      * @param userId The user id
      * @param contextId The context id
-     * @return The users primary mail address or null if the user can't be retrieved.
+     * @return The users primary mail address
      * @throws OXException
      */
     public static String getUserMail(int userId, int contextId) throws OXException {
@@ -843,5 +843,28 @@ public class OnboardingUtility {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService is unavailable");
         }
         return userService.getUser(userId, contextId).getMail();
+    }
+
+    /**
+     * Retrieves the primary mail address of a user.
+     * 
+     * @param userId The user id
+     * @param contextId The context id
+     * @return The users login name
+     * @throws OXException
+     */
+    public static String getUserLogin(int userId, int contextId) throws OXException {
+        UserService userService = Services.getService(UserService.class);
+        if (userService == null) {
+            LOG.error("UserService is unavailable!");
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("UserService is unavailable");
+        }
+        Map<String, Set<String>> attributes = userService.getUser(userId, contextId).getAttributes();
+        if (!attributes.containsKey("loginnamerecorder/user_login")) {
+            LOG.warn("No login user attribute for user %s in context %s.", userId, contextId);
+            return null;
+        }
+        Set<String> logins = attributes.get("loginnamerecorder/user_login");
+        return logins.iterator().next();
     }
 }

@@ -228,9 +228,8 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadType("com.apple.eas.account");
         payloadContent.setPayloadUUID(OnboardingUtility.craftUUIDFrom(identifier, userId, contextId).toString());
         payloadContent.setPayloadIdentifier("com.open-xchange.eas");
-        String mail = OnboardingUtility.getUserMail(userId, contextId);
-        payloadContent.addStringValue("UserName", mail);
-        payloadContent.addStringValue("EmailAddress", mail);
+        payloadContent.addStringValue("UserName", OnboardingUtility.getUserLogin(userId, contextId));
+        payloadContent.addStringValue("EmailAddress", OnboardingUtility.getUserMail(userId, contextId));
         String easUrl = getEASUrl(req, false, userId, contextId);
         payloadContent.addStringValue("Host", easUrl);
         payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
