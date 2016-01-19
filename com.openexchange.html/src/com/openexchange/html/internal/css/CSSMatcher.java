@@ -930,9 +930,9 @@ public final class CSSMatcher {
         while (!thread.isInterrupted() && m.find()) {
             final String elementName = m.group(1);
             if (null != elementName) {
-                if (styleMap.containsKey(toLowerCase(elementName))) {
+                Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
+                if (null != allowedValuesSet) {
                     elemBuilder.append(elementName).append(':').append(' ');
-                    final Set<String> allowedValuesSet = styleMap.get(toLowerCase(elementName));
                     final String elementValues = m.group(2);
                     boolean hasValues = false;
                     if (matches(elementValues, allowedValuesSet)) {
