@@ -136,5 +136,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.realtime.json"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.onboarding"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
