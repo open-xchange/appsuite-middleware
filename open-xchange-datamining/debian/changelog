@@ -1,3 +1,9 @@
+open-xchange-datamining (7.6.2-46) stable; urgency=medium
+
+  * Build for patch 2016-01-25 (3029)
+
+ -- Karsten Will <karsten.will@open-xchange.com>  Wed, 20 Jan 2016 15:13:37 +0100
+
 open-xchange-datamining (7.6.2-45) stable; urgency=medium
 
   * Build for patch 2016-01-13 (2980)
