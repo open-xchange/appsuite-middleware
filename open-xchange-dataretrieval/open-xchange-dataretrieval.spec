@@ -1,3 +1,4 @@
+%define __jar_repack %{nil}
 Name:          open-xchange-dataretrieval
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks

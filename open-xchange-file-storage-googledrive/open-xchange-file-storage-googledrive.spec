@@ -1,3 +1,4 @@
+%define __jar_repack %{nil}
 
 Name:           open-xchange-file-storage-googledrive
 BuildArch:      noarch

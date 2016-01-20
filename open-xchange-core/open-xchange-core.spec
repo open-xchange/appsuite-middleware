@@ -1,4 +1,5 @@
-%define        configfiles     configfiles.list
+%define configfiles configfiles.list
+%define __jar_repack %{nil}
 
 Name:          open-xchange-core
 BuildArch:     noarch
