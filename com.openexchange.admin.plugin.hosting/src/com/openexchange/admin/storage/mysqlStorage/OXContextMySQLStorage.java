@@ -128,8 +128,6 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.FileStorage2EntitiesResolver;
-import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.delete.DeleteEvent;
 import com.openexchange.groupware.delete.DeleteRegistry;
@@ -2606,13 +2604,22 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             PreparedStatement prep = null;
             try {
-
                 prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
                 prep.setLong(1, quota_max_temp);
                 prep.setInt(2, ctx.getId().intValue());
                 prep.executeUpdate();
-                prep.close();
 
+                int result = prep.executeUpdate();
+                if (result == 1) {
+                    try {
+                        Cache cache = AdminServiceRegistry.getInstance().getService(CacheService.class).getCache("QuotaFileStorages");
+                        if (cache != null) {
+                            cache.invalidateGroup(Integer.toString(ctx.getId()));
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Unable to invalidate QuotaFilestorages cache");
+                    }
+                }
             } finally {
                 try {
                     if (prep != null) {
