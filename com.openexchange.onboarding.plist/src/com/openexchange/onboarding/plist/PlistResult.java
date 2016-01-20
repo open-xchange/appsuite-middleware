@@ -56,6 +56,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
@@ -80,6 +82,7 @@ import com.openexchange.onboarding.SimpleResultObject;
 import com.openexchange.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.onboarding.plist.osgi.Services;
 import com.openexchange.onboarding.sms.SMSLinkProvider;
+import com.openexchange.onboarding.sms.SMSOnboardingExceptionCodes;
 import com.openexchange.onboarding.sms.SMSOnboardingStrings;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
@@ -99,6 +102,9 @@ public class PlistResult implements Result {
 
     private static final String SMS_KEY = "sms";
     private static final String SMS_CODE_KEY = "code";
+
+    private static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.onboarding.sms.ratelimit";
+    private static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.onboarding.sms.lastSendTimestamp";
 
     private static final Logger LOG = LoggerFactory.getLogger(PlistResult.class);
 
@@ -237,6 +243,9 @@ public class PlistResult implements Result {
     // --------------------------------------------- SMS utils --------------------------------------------------------------
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
+        Long ratelimit = getSMSRateLimit(session);
+        checkSMSRateLimit(session, ratelimit);
+
         String untranslatedText;
         switch (request.getScenario().getId()) {
             case "mailsync":
@@ -272,9 +281,36 @@ public class PlistResult implements Result {
             throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(number == null ? SMS_KEY : SMS_CODE_KEY);
         }
         smsService.sendMessage(number, text, code);
+        setRateLimitTime(ratelimit, session);
 
         ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         return resultObject;
     }
+
+    private Long getSMSRateLimit(Session session) throws OXException {
+        ConfigViewFactory confFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = confFactory.getView(session.getUserId(), session.getContextId());
+        Long ratelimit = view.get(SMS_RATE_LIMIT_PROPERTY, Long.class);
+        return ratelimit;
+    }
+
+    private void checkSMSRateLimit(Session session, Long ratelimit) throws OXException {
+
+        if (ratelimit > 0) {
+            Long lastSMSSend = (Long) session.getParameter(SMS_LAST_SEND_TIMESTAMP);
+
+            if (lastSMSSend != null && lastSMSSend + ratelimit > System.currentTimeMillis()) {
+                throw SMSOnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(ratelimit / 1000);
+            }
+
+        }
+    }
+
+    private void setRateLimitTime(Long rateLimit, Session session) {
+        if (rateLimit > 0) {
+            session.setParameter(SMS_LAST_SEND_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+        }
+    }
+
 
 }
