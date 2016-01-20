@@ -425,6 +425,15 @@ public class OXException extends Exception implements OXExceptionConstants {
     }
 
     /**
+     * Sets the code
+     *
+     * @param code The code to set
+     */
+    public void setCode(int code) {
+        this.code = code;
+    }
+
+    /**
      * Gets the numeric code.
      *
      * @return The code
