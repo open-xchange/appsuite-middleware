@@ -47,24 +47,46 @@
  *
  */
 
-package com.openexchange.sms;
+package com.openexchange.sms.impl;
 
+import java.util.List;
 import java.util.Locale;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.sms.PhoneNumberParserService;
+import com.openexchange.sms.SMSExceptionCode;
 
 
 /**
- * {@link SMSUtils}
+ * {@link PhoneNumberParserServiceImpl}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SMSUtils {
-    
-    public static String parsePhoneNumber(String phoneNumber, Locale locale) throws OXException {
+public class PhoneNumberParserServiceImpl implements PhoneNumberParserService {
+
+    private final ServiceLookup services;
+
+    public PhoneNumberParserServiceImpl(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public String parsePhoneNumber(String phoneNumber, Locale locale) throws OXException {
+        ConfigurationService configService = services.getService(ConfigurationService.class);
+        if (null == configService) {
+            throw ServiceExceptionCode.absentService(ConfigurationService.class);
+        }
+        List<String> supportedCountries = configService.getProperty("com.openexchange.sms.countries", "", ",");
+        if (null != supportedCountries && !supportedCountries.isEmpty() && !supportedCountries.contains(locale.getCountry())) {
+            throw SMSExceptionCode.UNKNOWN_COUNTRY.create(locale.getCountry());
+        }
         PhoneNumber number;
         try {
             number = PhoneNumberUtil.getInstance().parse(phoneNumber, locale.getCountry());

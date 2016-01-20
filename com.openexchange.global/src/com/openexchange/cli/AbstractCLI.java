@@ -125,9 +125,9 @@ public abstract class AbstractCLI<R, C> {
             String message = e.getMessage();
             String clazzName = e.getClass().getName();
             System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
-        } catch (final Error e) {
-            String message = e.getMessage();
-            String clazzName = e.getClass().getName();
+        } catch (final Throwable t) {
+            String message = t.getMessage();
+            String clazzName = t.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
         } finally {
             if (error) {

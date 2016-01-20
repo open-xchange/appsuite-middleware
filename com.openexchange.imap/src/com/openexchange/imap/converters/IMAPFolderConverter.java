@@ -107,6 +107,7 @@ public final class IMAPFolderConverter {
         private final String fullname;
         private final char separator;
         private final String otherUserNamespace;
+        private final String publicNamespace;
 
         /**
          * Initializes a new {@link Entity2ACLArgsImpl}.
@@ -118,7 +119,7 @@ public final class IMAPFolderConverter {
          * @param separator The separator character
          * @param otherUserNamespaces The namespace for other users
          */
-        Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces) {
+        Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces, String[] publicNamespaces) {
             super();
             this.accountId = accountId;
             this.serverUrl = serverUrl;
@@ -126,11 +127,12 @@ public final class IMAPFolderConverter {
             this.fullname = fullname;
             this.separator = separator;
             this.otherUserNamespace = null == otherUserNamespaces || otherUserNamespaces.length == 0 ? null : otherUserNamespaces[0];
+            this.publicNamespace = null == publicNamespaces || publicNamespaces.length == 0 ? null : publicNamespaces[0];
         }
 
         @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
-            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace);
+            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace, publicNamespace);
         }
     }
 
@@ -178,7 +180,8 @@ public final class IMAPFolderConverter {
                 session.getUserId(),
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
-                NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
+                NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()),
+                NamespaceFoldersCache.getSharedNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -709,7 +712,7 @@ public final class IMAPFolderConverter {
             }
             throw MimeMailException.handleMessagingException(e);
         }
-        Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator(), NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
+        Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator(), NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()), NamespaceFoldersCache.getSharedNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();

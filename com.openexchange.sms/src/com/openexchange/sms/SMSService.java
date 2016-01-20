@@ -62,7 +62,7 @@ public interface SMSService {
 
     /**
      * Send a SMS message to a recipient
-     * 
+     *
      * @param recipient Phone number to send the message
      * @param message The message
      * @param locale Locale of recipient's phone number to parse into correct format
@@ -71,13 +71,33 @@ public interface SMSService {
     public void sendMessage(String recipient, String message, Locale locale) throws OXException;
 
     /**
+     * Send a SMS message to a recipient
+     *
+     * @param recipient Phone number to send the message
+     * @param message The message
+     * @param languageTag Language tag of recipient's phone number to parse into correct format
+     * @throws OXException
+     */
+    public void sendMessage(String recipient, String message, String languageTag) throws OXException;
+
+    /**
      * Send a SMS message to recipients
-     * 
+     *
      * @param recipients Phone numbers to send the message
      * @param message The message
      * @param locale Locales of recipients' phone numbers to parse into correct format
      * @throws OXException
      */
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
+
+    /**
+     * Send a SMS message to recipients
+     *
+     * @param recipients Phone numbers to send the message
+     * @param message The message
+     * @param languageTags Language tags of recipients' phone numbers to parse into correct format
+     * @throws OXException
+     */
+    public void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException;
 
 }

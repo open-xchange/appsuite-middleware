@@ -1,4 +1,5 @@
-%define        configfiles     configfiles.list
+%define configfiles configfiles.list
+%define __jar_repack %{nil}
 
 Name:          open-xchange-core
 BuildArch:     noarch
@@ -1286,6 +1287,20 @@ if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev
 !com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask
 EOF
 fi
+
+# SoftwareChange_Request-2990
+TMPFILE=$(mktemp)
+rm -f $TMPFILE
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
+<configuration>
+    <logger name="com.hazelcast.internal.monitors" level="INFO"/>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+ox_add_property com.openexchange.hazelcast.healthMonitorLevel silent /opt/open-xchange/etc/hazelcast.properties
 
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"

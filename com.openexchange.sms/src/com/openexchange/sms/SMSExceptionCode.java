@@ -63,10 +63,12 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.1
  */
 public enum SMSExceptionCode implements DisplayableOXExceptionCode {
-    
-    PARSING_ERROR("Could not parse phone number %1$s", Category.CATEGORY_USER_INPUT, 1, SMSExceptionMessages.PARSING_ERROR_MSG)
+
+    PARSING_ERROR("Could not parse phone number %1$s", Category.CATEGORY_USER_INPUT, 1, SMSExceptionMessages.PARSING_ERROR_MSG),
+
+    UNKNOWN_COUNTRY("Unknown country tag: %1$s", Category.CATEGORY_USER_INPUT, 2, SMSExceptionMessages.UNKNOWN_COUNTRY_MSG)
     ;
-    
+
     public static final String PREFIX = "SMS";
 
     private final Category category;
@@ -82,7 +84,7 @@ public enum SMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SMSExceptionCode}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -93,7 +95,7 @@ public enum SMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SMSExceptionCode}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -141,7 +143,7 @@ public enum SMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

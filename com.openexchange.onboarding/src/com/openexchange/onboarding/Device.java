@@ -55,7 +55,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
@@ -220,14 +219,14 @@ public enum Device implements Entity {
         for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
             OnboardingAction action = iter.next();
             switch (action) {
-                case EMAIL:
-                    if (!OnboardingUtility.hasPermission(Permission.WEBMAIL, session)) {
-                        iter.remove();
-                    }
-                    break;
                 case SMS:
                     // TODO: Check for SMS provider, by now there is none...
                     if (true) {
+                        iter.remove();
+                    }
+                    break;
+                case EMAIL:
+                    if (!OnboardingUtility.hasNoReplyTransport(session)) {
                         iter.remove();
                     }
                     break;
@@ -279,7 +278,7 @@ public enum Device implements Entity {
                         case MANUAL:
                             return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL);
+                            return Arrays.asList(OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -292,7 +291,7 @@ public enum Device implements Entity {
                         case MANUAL:
                             return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL, OnboardingAction.SMS);
+                            return Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }

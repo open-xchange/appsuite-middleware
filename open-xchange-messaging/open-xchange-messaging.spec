@@ -1,3 +1,4 @@
+%define __jar_repack %{nil}
 %define        configfiles     configfiles.list
 
 Name:           open-xchange-messaging

@@ -78,7 +78,6 @@ import com.openexchange.sessiond.SessionFilter;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.tools.servlet.http.Cookies;
 import com.openexchange.tools.servlet.http.Tools;
-import com.openexchange.user.UserService;
 
 
 /**
@@ -197,8 +196,7 @@ public class InitService extends SAMLServlet {
                             if (Strings.isEmpty(uiWebPath)) {
                                 uiWebPath = loginConfiguration.getUiWebPath();
                             }
-                            String language = services.getService(UserService.class).getUser(session.getUserId(), session.getContextId()).getPreferredLanguage();
-                            return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, language, uiWebPath, services.getOptionalService(HostnameService.class));
+                            return SAMLLoginTools.buildAbsoluteFrontendRedirectLocation(httpRequest, session, uiWebPath, services.getOptionalService(HostnameService.class));
                         } catch (OXException e) {
                             LOG.debug("Ignoring SAML auto-login attempt due to failed IP or secret check", e);
                         }

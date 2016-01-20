@@ -74,7 +74,6 @@ public class DeleteAction extends AbstractWriteAction {
     public AJAXRequestResult handle(InfostoreRequest request) throws OXException {
         request.requireBody().require(Param.TIMESTAMP);
         boolean hardDelete = "true".equals(request.getParameter("hardDelete"));
-        hardDelete = true;
         IDBasedFileAccess fileAccess = request.getFileAccess();
         List<String> conflicting = fileAccess.removeDocument(request.getIds(), request.getTimestamp(), hardDelete);
         return result(conflicting, request);

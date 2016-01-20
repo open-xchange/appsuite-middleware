@@ -8747,6 +8747,11 @@ msgstr ""
 msgid "Could not parse phone number %1$s"
 msgstr ""
 
+#. Unknown country tag: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:67
+msgid "Unknown country tag: %1$s"
+msgstr ""
+
 #. *
 #. * No recipient(s) has been defined for new message
 #.

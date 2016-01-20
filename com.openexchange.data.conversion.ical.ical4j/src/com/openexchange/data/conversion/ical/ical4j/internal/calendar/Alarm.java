@@ -113,7 +113,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                  * insert a dummy alarm to prevent Apple clients from adding it's own default alarms
                  */
                 DateTime trigger = new DateTime(true);
-                trigger.setTime(197168145658L); // 19760401T005545Z
+                trigger.setTime(197168145000L); // 19760401T005545Z
                 VAlarm vAlarm = new VAlarm(trigger);
                 String uid = UUID.randomUUID().toString().toUpperCase();
                 vAlarm.getProperties().add(new XProperty("X-WR-ALARMUID", uid));

@@ -72,6 +72,8 @@ import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.transport.TransportProvider;
+import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.onboarding.osgi.Services;
 import com.openexchange.session.Session;
@@ -140,6 +142,33 @@ public class OnboardingUtility {
         String scenarioId = compositeId.substring(off);
 
         return new CompositeId(device, scenarioId);
+    }
+
+    /**
+     * Checks availability of the "no reply" transport for specified session's context.
+     *
+     * @param session The session denoting the context
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public static boolean hasNoReplyTransport(Session session) {
+        return null != session && hasNoReplyTransport(session.getContextId());
+    }
+
+    /**
+     * Checks availability of the "no reply" transport for specified context.
+     *
+     * @param contextId The context identifier
+     * @return <code>true</code> if available; otherwise <code>false</code>
+     */
+    public static boolean hasNoReplyTransport(int contextId) {
+        TransportProvider transportProvider = TransportProviderRegistry.getTransportProvider("smtp");
+        try {
+            transportProvider.createNewNoReplyTransport(contextId);
+            return true;
+        } catch (OXException e) {
+            LOG.debug("\"no reply\" transport is not available for context {}", contextId, e);
+            return false;
+        }
     }
 
     /**

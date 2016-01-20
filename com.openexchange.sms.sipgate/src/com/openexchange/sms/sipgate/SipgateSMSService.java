@@ -69,8 +69,8 @@ import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSService;
-import com.openexchange.sms.SMSUtils;
 
 /**
  * {@link SipgateSMSService}
@@ -79,22 +79,25 @@ import com.openexchange.sms.SMSUtils;
  * @since v7.8.1
  */
 public class SipgateSMSService implements SMSService {
-    
+
     private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
-    private static final int MAX_MESSAGE_LENGTH = 160;
+    private final int MAX_MESSAGE_LENGTH;
 
     private final HttpClient client;
+    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link SipgateSMSService}.
      *
      * @throws OXException
      */
-    public SipgateSMSService(ServiceLookup services) throws OXException {
+    public SipgateSMSService(ServiceLookup services) {
         super();
+        this.services = services;
         ConfigurationService configService = services.getService(ConfigurationService.class);
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
+        MAX_MESSAGE_LENGTH = configService.getIntProperty("com.openexchange.sms.sipgate.maxlength", 0);
         HttpClientParams params = new HttpClientParams();
         params.setAuthenticationPreemptive(true);
         params.setParameter(AuthPolicy.AUTH_SCHEME_PRIORITY, AuthPolicy.BASIC);
@@ -106,7 +109,7 @@ public class SipgateSMSService implements SMSService {
 
     @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
-        if (message.length() > MAX_MESSAGE_LENGTH) {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
             throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
@@ -126,8 +129,14 @@ public class SipgateSMSService implements SMSService {
     }
 
     @Override
+    public void sendMessage(String recipient, String message, String languageTag) throws OXException {
+        Locale locale = new Locale("none", languageTag.toUpperCase());
+        sendMessage(recipient, message, locale);
+    }
+
+    @Override
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
-        if (message.length() > MAX_MESSAGE_LENGTH) {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
             throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
@@ -147,22 +156,31 @@ public class SipgateSMSService implements SMSService {
         } catch (UnsupportedEncodingException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         }
-
     }
-    
+
+    @Override
+    public void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException {
+        Locale[] locale = new Locale[languageTags.length];
+        for (int i = 0; i < languageTags.length; i++) {
+            locale[i] = new Locale("none", languageTags[i].toUpperCase());
+        }
+        sendMessage(recipients, message, locale);
+    }
+
     private HttpMethod getHttpMethod(String method, String parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL).append(method).append("/").append(parameters);
         return new GetMethod(sb.toString());
     }
-    
+
     private String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
-        String parsedNumber = SMSUtils.parsePhoneNumber(phoneNumber, locale);
+        PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
+        String parsedNumber = parser.parsePhoneNumber(phoneNumber, locale);
         StringBuilder sb = new StringBuilder(30);
         sb.append("sip:").append(parsedNumber).append("@sipgate.net");
         return sb.toString();
     }
-    
+
     private void execute(HttpMethod method) throws OXException {
         try {
             int statusCode = client.executeMethod(method);
@@ -185,7 +203,6 @@ public class SipgateSMSService implements SMSService {
                 method.releaseConnection();
             }
         }
-        
     }
-    
+
 }

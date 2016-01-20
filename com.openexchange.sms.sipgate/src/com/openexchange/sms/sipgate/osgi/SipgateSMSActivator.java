@@ -51,6 +51,7 @@ package com.openexchange.sms.sipgate.osgi;
 
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSService;
 import com.openexchange.sms.sipgate.SipgateSMSService;
 
@@ -71,7 +72,7 @@ public class SipgateSMSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { ConfigurationService.class, PhoneNumberParserService.class };
     }
 
     @Override
@@ -80,7 +81,7 @@ public class SipgateSMSActivator extends HousekeepingActivator {
         SMSService service = new SipgateSMSService(this);
         registerService(SMSService.class, service);
     }
-    
+
     @Override
     protected void stopBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(SipgateSMSActivator.class).info("stopping bundle: \"com.openexchange.sms.sipgate\"");

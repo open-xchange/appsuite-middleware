@@ -59,10 +59,13 @@ import com.openexchange.i18n.LocalizableStrings;
  * @since v7.8.1
  */
 public class SMSExceptionMessages implements LocalizableStrings {
-    
+
     // Could not parse phone number %1$s
     public final static String PARSING_ERROR_MSG = "Could not parse phone number %1$s";
-    
+
+    // Unknown country tag: %1$s
+    public final static String UNKNOWN_COUNTRY_MSG = "Unknown country tag: %1$s";
+
     private SMSExceptionMessages() {
         super();
     }
