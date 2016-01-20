@@ -2661,7 +2661,17 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep = configdb_con.prepareStatement("UPDATE context SET quota_max=? WHERE cid=?");
                 prep.setLong(1, quota_max_temp);
                 prep.setInt(2, ctx.getId().intValue());
-                prep.executeUpdate();
+                int result = prep.executeUpdate();
+                if (result == 1) {
+                    try {
+                        Cache cache = AdminServiceRegistry.getInstance().getService(CacheService.class).getCache("QuotaFileStorages");
+                        if (cache != null) {
+                            cache.invalidateGroup(Integer.toString(ctx.getId()));
+                        }
+                    } catch (OXException e) {
+                        LOG.warn("Unable to invalidate QuotaFilestorages cache");
+                    }
+                }
             } finally {
                 Databases.closeSQLStuff(prep);
             }
