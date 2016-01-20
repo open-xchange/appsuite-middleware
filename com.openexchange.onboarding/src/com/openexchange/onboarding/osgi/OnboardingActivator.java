@@ -52,14 +52,17 @@ package com.openexchange.onboarding.osgi;
 import java.rmi.Remote;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
+import com.openexchange.exception.OXException;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.onboarding.OnboardingUtility;
 import com.openexchange.onboarding.internal.OnboardingConfig;
 import com.openexchange.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.onboarding.rmi.RemoteOnboardingService;
@@ -67,6 +70,9 @@ import com.openexchange.onboarding.rmi.impl.RemoteOnboardingServiceImpl;
 import com.openexchange.onboarding.service.OnboardingService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
 import com.openexchange.user.UserService;
 
@@ -107,6 +113,31 @@ public class OnboardingActivator extends HousekeepingActivator {
         OnboardingProviderTracker providerTracker = new OnboardingProviderTracker(context, serviceImpl);
         rememberTracker(providerTracker);
         openTrackers();
+
+        // Capability stuff
+        {
+            final String sCapability = "client-onboarding";
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, sCapability);
+            registerService(CapabilityChecker.class, new CapabilityChecker() {
+                @Override
+                public boolean isEnabled(String capability, Session ses) throws OXException {
+                    if (sCapability.equals(capability)) {
+                        ServerSession session = ServerSessionAdapter.valueOf(ses);
+                        if (session.isAnonymous() || session.getUser().isGuest()) {
+                            return false;
+                        }
+
+                        Boolean bool = OnboardingUtility.getBoolFromProperty("com.openexchange.onboarding.enabled", Boolean.TRUE, session);
+                        return bool.booleanValue();
+                    }
+
+                    return true;
+                }
+            }, properties);
+
+            getService(CapabilityService.class).declareCapability(sCapability);
+        }
 
         // Register services
         registerService(OnboardingService.class, serviceImpl);
