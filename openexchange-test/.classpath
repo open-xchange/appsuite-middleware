@@ -135,7 +135,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.share.notification"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.oauth.provider.rmi"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.realtime.json"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.onboarding"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.client.onboarding"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms"/>
 	<classpathentry kind="lib" path="lib/xmlwise-1_2.jar"/>
 	<classpathentry kind="output" path="build"/>

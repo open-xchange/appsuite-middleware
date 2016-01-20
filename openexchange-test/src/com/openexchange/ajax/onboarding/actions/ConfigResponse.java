@@ -57,9 +57,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.Platform;
-import com.openexchange.onboarding.Scenario;
+import com.openexchange.client.onboarding.Device;
+import com.openexchange.client.onboarding.Platform;
+import com.openexchange.client.onboarding.Scenario;
 
 
 /**

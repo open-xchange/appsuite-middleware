@@ -54,8 +54,8 @@ import java.util.List;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ConfigRequest;
 import com.openexchange.ajax.onboarding.actions.ConfigResponse;
-import com.openexchange.onboarding.Device;
-import com.openexchange.onboarding.Platform;
+import com.openexchange.client.onboarding.Device;
+import com.openexchange.client.onboarding.Platform;
 
 
 /**

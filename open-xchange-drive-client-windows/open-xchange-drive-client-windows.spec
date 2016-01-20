@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-onboarding >= @OXVERSION@
+BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 0
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -24,7 +24,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       New updater for windows drive clients
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@, open-xchange-onboarding >= @OXVERSION@
+Requires:      open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
 
 %description
 This package offers windows drive clients the possibility to update themselves without the use of the ox-updater.
