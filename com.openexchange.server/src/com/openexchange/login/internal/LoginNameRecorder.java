@@ -54,7 +54,6 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
-import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.user.UserService;
 
 /**
@@ -65,12 +64,16 @@ import com.openexchange.user.UserService;
  */
 public class LoginNameRecorder implements LoginHandlerService {
 
-    private UserService userService = null;
-    public final static String LOGIN_ATTRIBUTE_NAME = LoginNameRecorder.class.getSimpleName().toLowerCase() + "/user_login";
+    private final static String LOGIN_ATTRIBUTE_NAME = LoginNameRecorder.class.getSimpleName().toLowerCase() + "/user_login";
 
-    public LoginNameRecorder() {
+    private final UserService userService;
+
+    /**
+     * Initializes a new {@link LoginNameRecorder}.
+     */
+    public LoginNameRecorder(UserService userService) {
         super();
-
+        this.userService = userService;
     }
 
     @Override
@@ -81,17 +84,13 @@ public class LoginNameRecorder implements LoginHandlerService {
             return;
         }
 
-        if (userService == null) {
-            userService = ServerServiceRegistry.getInstance().getService(UserService.class);
-        }
         try {
             userService.setAttribute(LOGIN_ATTRIBUTE_NAME, loginValue, login.getUser().getId(), ctx);
         } catch (OXException ex) {
-            if (ex.getCode() == UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getNumber() && ex.getPrefix().equalsIgnoreCase(UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getPrefix())) {
-                //do nothing
-            } else {
+            if (ex.getCode() != UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getNumber() || !ex.getPrefix().equalsIgnoreCase(UserExceptionCode.CONCURRENT_ATTRIBUTES_UPDATE.getPrefix())) {
                 throw ex;
             }
+            // Do nothing
         }
     }
 
