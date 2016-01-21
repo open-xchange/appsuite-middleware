@@ -1313,6 +1313,9 @@ ox_add_property com.openexchange.contact.search.fields "ADDRESS_FIELDS, EMAIL_FI
 # SoftwareChange_Request-3034
 ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-3054
+ox_add_property com.openexchange.mail.forwardUnquoted false /opt/open-xchange/etc/mail.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
