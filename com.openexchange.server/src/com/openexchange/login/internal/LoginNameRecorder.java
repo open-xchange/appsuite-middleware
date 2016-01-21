@@ -57,7 +57,7 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.user.UserService;
 
 /**
- * The {@link LoginNameRecorder} stores the users login name as an user attribute.
+ * The {@link LoginNameRecorder} stores the user's login name as an user attribute.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
