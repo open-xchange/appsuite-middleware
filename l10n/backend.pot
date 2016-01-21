@@ -897,32 +897,6 @@ msgstr ""
 msgid "Your IMAP settings"
 msgstr ""
 
-#. Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingExceptionMessages.java:63
-msgid ""
-"Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingExceptionMessages.java:65
-msgid "An internal error occurred: %1$s"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingStrings.java:69
-msgid "To set up your mail account, download the following file: "
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingStrings.java:71
-msgid "To set up your account, download the following file: "
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingStrings.java:73
-msgid "To set up your dav account, download the following file: "
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.sms/src/com/openexchange/client/onboarding/sms/SMSOnboardingStrings.java:75
-msgid "To set up your eas account, download the following file: "
-msgstr ""
-
 #. Your selection is not supported.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:70
 msgid "Your selection is not supported."
@@ -941,6 +915,17 @@ msgstr ""
 #. Execution failed. Please choose another option.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:79
 msgid "Execution failed. Please choose another option."
+msgstr ""
+
+#. Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:82
+msgid ""
+"Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
+msgstr ""
+
+#. The download link is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:85
+msgid "The download link is invalid."
 msgstr ""
 
 #. The display name for Apple platform
@@ -1095,6 +1080,22 @@ msgstr ""
 #. Used when rendering a form in which the user is supposed to enter a phone number address
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:178
 msgid "Phone number"
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
+msgid "To set up your mail account, download the following file: "
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
+msgid "To set up your account, download the following file: "
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
+msgid "To set up your dav account, download the following file: "
+msgstr ""
+
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
+msgid "To set up your eas account, download the following file: "
 msgstr ""
 
 #. The user salutation; e.g. "Dear John Doe,"
