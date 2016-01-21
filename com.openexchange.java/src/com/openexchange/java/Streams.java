@@ -484,7 +484,7 @@ public class Streams {
      *
      * @param closeables The {@link Closeable} instances
      */
-    public static void close(final Collection<Closeable> closeables) {
+    public static void close(final Collection<? extends Closeable> closeables) {
         if (null != closeables) {
             for (final Closeable toClose : closeables) {
                 if (null != toClose) {
