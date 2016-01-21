@@ -102,12 +102,16 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("\\"));
     }
 
-    public void testReservedName() throws Exception {
-        CheckNameRequest req = new CheckNameRequest("COM1", false);
-        CheckNameResponse resp = client.execute(req);
-        assertTrue(resp.hasError());
-        assertEquals(FileStorageExceptionCodes.RESERVED_NAME.getNumber(), resp.getException().getCode());
-        assertTrue(resp.getErrorMessage().contains("COM1"));
+    public void testReservedNames() throws Exception {
+        String[] RESERVED_NAMES = new String[] {"COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "CON", "NUL",
+                                                "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "AUX", "PRN" };
+        for (String name : RESERVED_NAMES) {
+            CheckNameRequest req = new CheckNameRequest(name, false);
+            CheckNameResponse resp = client.execute(req);
+            assertTrue(resp.hasError());
+            assertEquals(FileStorageExceptionCodes.RESERVED_NAME.getNumber(), resp.getException().getCode());
+            assertTrue(resp.getErrorMessage().contains(name));
+        }
     }
 
     public void testOnlyDotsInName() throws Exception {
