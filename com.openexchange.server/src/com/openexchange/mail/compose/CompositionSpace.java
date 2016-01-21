@@ -52,7 +52,9 @@ package com.openexchange.mail.compose;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
+import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.PutIfAbsent;
 import com.openexchange.session.Session;
@@ -233,6 +235,22 @@ public class CompositionSpace {
         return id;
     }
 
+    private boolean isMarkedAsReplyOrForward0(MailPath toCheck, boolean considerReply, boolean considerForward) {
+        if (considerReply && areEqual(toCheck, this.replyFor)) {
+            return true;
+        }
+
+        if (considerForward) {
+            for (MailPath forwardFor : forwardsFor) {
+                if (areEqual(toCheck, forwardFor)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Checks if specified mail path is already referenced by either as <code>replyFor</code> or <code>forwardsFor</code>.
      *
@@ -244,17 +262,35 @@ public class CompositionSpace {
             return false;
         }
 
-        if (toCheck.equals(this.replyFor)) {
-            return true;
+        return isMarkedAsReplyOrForward0(toCheck, true, true);
+    }
+
+    /**
+     * Checks if specified mail path is already referenced as <code>replyFor</code>.
+     *
+     * @param toCheck The mail path to check
+     * @return <code>true</code> if mail path is referenced by <code>replyFor</code>; otherwise <code>false</code>
+     */
+    public boolean isMarkedAsReply(MailPath toCheck) {
+        if (null == toCheck) {
+            return false;
         }
 
-        for (MailPath forwardFor : forwardsFor) {
-            if (toCheck.equals(forwardFor)) {
-                return true;
-            }
+        return isMarkedAsReplyOrForward0(toCheck, true, false);
+    }
+
+    /**
+     * Checks if specified mail path is already referenced as <code>forwardsFor</code>.
+     *
+     * @param toCheck The mail path to check
+     * @return <code>true</code> if mail path is referenced as <code>replyFor</code>/<code>forwardsFor</code>; otherwise <code>false</code>
+     */
+    public boolean isMarkedAsForward(MailPath toCheck) {
+        if (null == toCheck) {
+            return false;
         }
 
-        return false;
+        return isMarkedAsReplyOrForward0(toCheck, false, true);
     }
 
     /**
@@ -331,6 +367,50 @@ public class CompositionSpace {
     public void addCleanUp(MailPath mailPath) {
         cleanUps.offer(mailPath);
         lastAccessed = System.currentTimeMillis();
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------------
+
+    private boolean areEqual(MailPath mailPath, MailPath other) {
+        if (null == mailPath) {
+            return false;
+        }
+
+        if (mailPath.equals(other)) {
+            return true;
+        }
+
+        int unifiedMailId = getUnifiedMailId();
+
+        MailPath extractedPath = CompositionSpaces.optUnifiedInboxUID(mailPath, unifiedMailId);
+        if (null != extractedPath && extractedPath.equals(other)) {
+            return true;
+        }
+
+        MailPath extractedOther = null == other ? null : CompositionSpaces.optUnifiedInboxUID(other, unifiedMailId);
+        if (null != extractedOther) {
+            if (mailPath.equals(extractedOther) || (null != extractedPath && extractedPath.equals(extractedOther))) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private int getUnifiedMailId() {
+        int unifiedMailId = -1;
+        {
+            UnifiedInboxManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+            if (null != uim) {
+                try {
+                    unifiedMailId = uim.getUnifiedINBOXAccountID(session);
+                } catch (OXException e) {
+                    // Failed...
+                    unifiedMailId = -1;
+                }
+            }
+        }
+        return unifiedMailId;
     }
 
 }
