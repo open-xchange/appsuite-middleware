@@ -130,7 +130,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     private String getDownloadLink(Session session) throws OXException {
 
         String url = OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session);
-        if (url == null || url.isEmpty())
+        if (isEmpty(url))
         {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(URL_CONFIGURATION);
         }
