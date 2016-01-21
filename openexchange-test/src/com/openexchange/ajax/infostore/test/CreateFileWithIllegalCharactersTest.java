@@ -115,9 +115,48 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
             assertNotNull(resp);
             assertTrue(resp.hasError());
             OXException e = resp.getException();
-            assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), e.getCode());
+            assertEquals(FileStorageExceptionCodes.RESERVED_NAME.getNumber(), e.getCode());
             assertTrue(e.getMessage().contains(name));
         }
+    }
+
+    public void testCreateFilenameEndsWithWithespace() throws Exception {
+        File file = new DefaultFile();
+        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFileName("test ");
+        NewInfostoreRequest req = new NewInfostoreRequest(file);
+        NewInfostoreResponse resp = client.execute(req);
+        assertNotNull(resp);
+        assertTrue(resp.hasError());
+        OXException e = resp.getException();
+        assertEquals(FileStorageExceptionCodes.WHITESPACE_END.getNumber(), e.getCode());
+        assertTrue(e.getMessage().contains("whitespace"));
+    }
+
+    public void testCreateFilenameEndsWithDot() throws Exception {
+        File file = new DefaultFile();
+        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFileName("test.");
+        NewInfostoreRequest req = new NewInfostoreRequest(file);
+        NewInfostoreResponse resp = client.execute(req);
+        assertNotNull(resp);
+        assertTrue(resp.hasError());
+        OXException e = resp.getException();
+        assertEquals(FileStorageExceptionCodes.WHITESPACE_END.getNumber(), e.getCode());
+        assertTrue(e.getMessage().contains("dot"));
+    }
+
+    public void testCreateReservedFolderName() throws Exception {
+        File file = new DefaultFile();
+        file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
+        file.setFileName("..");
+        NewInfostoreRequest req = new NewInfostoreRequest(file);
+        NewInfostoreResponse resp = client.execute(req);
+        assertNotNull(resp);
+        assertTrue(resp.hasError());
+        OXException e = resp.getException();
+        assertEquals(FileStorageExceptionCodes.ONLY_DOTS_NAME.getNumber(), e.getCode());
+        assertTrue(e.getMessage().contains(".."));
     }
 
 }

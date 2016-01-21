@@ -52,6 +52,7 @@ package com.openexchange.file.storage.composition;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.java.Strings;
 
 /**
@@ -87,9 +88,11 @@ public final class FilenameValidationUtils {
 
     public static final Pattern RESERVED_NAME_PATTERN = Pattern.compile("(CON)|(PRN)|(AUX)|(NUL)|(COM[1-9])|(LPT[1-9])", Pattern.CASE_INSENSITIVE);
 
-    public static final Pattern OTHER_ILLEGAL_PATTERN = Pattern.compile("(^\\.$)|(^\\.\\.$)|(.*\\.$)");
+    public static final Pattern ONLY_DOTS_PATTERN = Pattern.compile("(^\\.$)|(^\\.\\.$)");
 
-    public static String checkCharacters(String filename) {
+    public static final Pattern OTHER_ILLEGAL_PATTERN = Pattern.compile("(.*\\.$)|(.*\\s$)");
+
+    public static void checkCharacters(String filename) throws OXException {
         StringBuilder sb = new StringBuilder();
         Matcher matcher = ILLEGAL_CHARACTER_PATTERN.matcher(filename);
         while (matcher.find()) {
@@ -100,20 +103,23 @@ public final class FilenameValidationUtils {
         }
         if (sb.length() > 0) {
             sb.deleteCharAt(sb.length() - 1);
+            throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(sb.toString());
         }
-        return sb.toString();
     }
 
-    public static String checkName(String filename) {
+    public static void checkName(String filename) throws OXException {
         Matcher matcher = RESERVED_NAME_PATTERN.matcher(filename);
         if (matcher.find()) {
-            return matcher.group();
+            throw FileStorageExceptionCodes.RESERVED_NAME.create(matcher.group());
+        }
+        Matcher dots = ONLY_DOTS_PATTERN.matcher(filename);
+        if (dots.find()) {
+            throw FileStorageExceptionCodes.ONLY_DOTS_NAME.create();
         }
         Matcher other = OTHER_ILLEGAL_PATTERN.matcher(filename);
         if (other.find()) {
-            return other.group();
+            throw FileStorageExceptionCodes.WHITESPACE_END.create();
         }
-        return null;
     }
 
     /**

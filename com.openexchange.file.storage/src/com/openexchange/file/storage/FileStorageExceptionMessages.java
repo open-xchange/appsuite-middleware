@@ -168,6 +168,15 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // File name contains not allowed characters: \"%1$s\"
     public static final String ILLEGAL_CHARACTERS_MSG = "File name contains illegal characters: \"%1$s\"";
 
+    // File name is a reserved name: \"%1$s\"
+    public static final String RESERVED_NAME_MSG = "File name is a reserved name: \"%1$s\"";
+
+    // File name must not be \".\" or \"..\".
+    public static final String ONLY_DOTS_MSG = "File name must not be \".\" or \"..\".";
+
+    // File name must not end with a dot or whitespace.
+    public static final String WHITESPACE_END_MSG = "File name must not end with a dot or whitespace.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

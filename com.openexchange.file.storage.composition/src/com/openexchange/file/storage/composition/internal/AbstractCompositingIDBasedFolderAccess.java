@@ -149,13 +149,8 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
     public String createFolder(FileStorageFolder toCreate) throws OXException {
 
         if (Strings.isNotEmpty(toCreate.getName())) {
-            if (FilenameValidationUtils.isInvalidFolderName(toCreate.getName())) {
-                String illegalCharacters = FilenameValidationUtils.checkCharacters(toCreate.getName());
-                if (Strings.isEmpty(illegalCharacters)) {
-                    illegalCharacters = FilenameValidationUtils.checkName(toCreate.getName());
-                }
-                throw FileStorageExceptionCodes.ILLEGAL_CHARACTERS.create(illegalCharacters);
-            }
+            FilenameValidationUtils.checkCharacters(toCreate.getName());
+            FilenameValidationUtils.checkName(toCreate.getName());
         }
 
         FolderID parentFolderID = new FolderID(toCreate.getParentId());

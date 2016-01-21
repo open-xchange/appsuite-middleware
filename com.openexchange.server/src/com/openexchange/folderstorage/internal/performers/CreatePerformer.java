@@ -139,13 +139,8 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
     public String doCreate(final Folder toCreate) throws OXException {
 
         if (Strings.isNotEmpty(toCreate.getName())) {
-            if (FilenameValidationUtils.isInvalidFileName(toCreate.getName())) {
-                String illegalCharacters = FilenameValidationUtils.checkCharacters(toCreate.getName());
-                if (Strings.isEmpty(illegalCharacters)) {
-                    illegalCharacters = FilenameValidationUtils.checkName(toCreate.getName());
-                }
-                throw FolderExceptionErrorMessage.ILLEGAL_CHARACTERS.create(illegalCharacters);
-            }
+            FilenameValidationUtils.checkCharacters(toCreate.getName());
+            FilenameValidationUtils.checkName(toCreate.getName());
         }
 
         final String parentId = toCreate.getParentID();

@@ -51,6 +51,7 @@ package com.openexchange.ajax.infostore.test;
 
 import com.openexchange.ajax.infostore.actions.CheckNameRequest;
 import com.openexchange.ajax.infostore.actions.CheckNameResponse;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 
 /**
@@ -79,22 +80,58 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         super.tearDown();
     }
 
-    public void testCheckNameAction() throws Exception {
-        CheckNameRequest req1 = new CheckNameRequest("thisShouldNotFail", false);
-        CheckNameResponse resp1 = client.execute(req1);
-        assertFalse(resp1.hasError());
+    public void testValidFilename() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("thisShouldNotFail", false);
+        CheckNameResponse resp = client.execute(req);
+        assertFalse(resp.hasError());
+    }
 
-        CheckNameRequest req2 = new CheckNameRequest("withInvalidCharacters?", false);
-        CheckNameResponse resp2 = client.execute(req2);
-        assertTrue(resp2.hasError());
-        assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp2.getException().getCode());
-        assertTrue(resp2.getErrorMessage().contains("?"));
+    public void testInvalidCharacter() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("withInvalidCharacters<>:/?*\"\\", false);
+        CheckNameResponse resp = client.execute(req);
+        assertTrue(resp.hasError());
+        assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp.getException().getCode());
+        OXException e = resp.getException();
+        assertTrue(e.getMessage().contains("<"));
+        assertTrue(e.getMessage().contains(">"));
+        assertTrue(e.getMessage().contains(":"));
+        assertTrue(e.getMessage().contains("/"));
+        assertTrue(e.getMessage().contains("?"));
+        assertTrue(e.getMessage().contains("*"));
+        assertTrue(e.getMessage().contains("\""));
+        assertTrue(e.getMessage().contains("\\"));
+    }
 
-        CheckNameRequest req3 = new CheckNameRequest("COM1", false); // withReservedName
-        CheckNameResponse resp3 = client.execute(req3);
-        assertTrue(resp3.hasError());
-        assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp3.getException().getCode());
-        assertTrue(resp3.getErrorMessage().contains("COM1"));
+    public void testReservedName() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("COM1", false);
+        CheckNameResponse resp = client.execute(req);
+        assertTrue(resp.hasError());
+        assertEquals(FileStorageExceptionCodes.RESERVED_NAME.getNumber(), resp.getException().getCode());
+        assertTrue(resp.getErrorMessage().contains("COM1"));
+    }
+
+    public void testOnlyDotsInName() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("..", false);
+        CheckNameResponse resp = client.execute(req);
+        assertTrue(resp.hasError());
+        assertEquals(FileStorageExceptionCodes.ONLY_DOTS_NAME.getNumber(), resp.getException().getCode());
+        assertTrue(resp.getErrorMessage().contains(".."));
+    }
+
+    public void testEndsWithWithespace() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("willFailToo ", false);
+        CheckNameResponse resp = client.execute(req);
+        assertTrue(resp.hasError());
+        assertEquals(FileStorageExceptionCodes.WHITESPACE_END.getNumber(), resp.getException().getCode());
+        assertTrue(resp.getErrorMessage().contains("whitespace"));
+    }
+
+    public void testEndsWithDot() throws Exception {
+        CheckNameRequest req = new CheckNameRequest("willFailToo.", false);
+        CheckNameResponse resp = client.execute(req);
+        assertTrue(resp.hasError());
+        assertEquals(FileStorageExceptionCodes.WHITESPACE_END.getNumber(), resp.getException().getCode());
+        assertTrue(resp.getErrorMessage().contains("whitespace"));
     }
 
 }
