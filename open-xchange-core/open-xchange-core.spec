@@ -1217,6 +1217,9 @@ if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
     ox_set_property com.openexchange.capability.archive_emails true $PFILE
 fi
 
+# SoftwareChange_Request-3034
+ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
