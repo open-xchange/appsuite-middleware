@@ -93,6 +93,7 @@ PROCS='
     listbundles;
     listconfigdiff;
     listservices;
+    logconf -ll;
     mount;
     netstat -putane;
     ox_java_vm_limits;
