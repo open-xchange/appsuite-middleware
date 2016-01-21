@@ -224,7 +224,14 @@ public class OnboardingViewConverter implements ResultConverter {
         if (jActionIds.length() > 0) {
             JSONObject jScenario2ActionEntry = new JSONObject(6);
             jScenario2ActionEntry.put("id", compositeId.toString());
-            jScenario2ActionEntry.put("enabled", scenario.isEnabled(session));
+
+            boolean enabled = scenario.isEnabled(session);
+            jScenario2ActionEntry.put("enabled", enabled);
+            if (!enabled) {
+                JSONArray jMissingCaps = new JSONArray(4);
+                // TODO:
+                jScenario2ActionEntry.put("missing_capabilities", jMissingCaps);
+            }
 
             jScenario2ActionEntry.put("actions", jActionIds);
             return jScenario2ActionEntry;
