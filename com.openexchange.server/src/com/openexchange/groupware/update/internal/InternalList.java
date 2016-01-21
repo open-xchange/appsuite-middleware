@@ -768,7 +768,7 @@ public final class InternalList {
 
         // Migrates the user aliases from the user_attribute table to the user_alias table; but does not delete the entries in the user_attribute table.
         list.add(new com.openexchange.groupware.update.tasks.MigrateAliasUpdateTask());
-
+        
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
 }

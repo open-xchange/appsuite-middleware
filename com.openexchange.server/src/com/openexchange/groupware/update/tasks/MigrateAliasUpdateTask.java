@@ -52,19 +52,15 @@ package com.openexchange.groupware.update.tasks;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -74,7 +70,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
-public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
+public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
 
     private static final String NEW_TABLE_NAME = "user_alias";
 
@@ -84,8 +80,6 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         + "`alias` VARCHAR(255) NOT NULL, "
         + "PRIMARY KEY (`cid`, `user`, `alias`) "
         + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-    private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name FROM user_attribute WHERE name='alias'";
 
     private static final String INSERT_ALIAS_IN_NEW_TABLE = "INSERT INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
 
@@ -99,7 +93,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
                 createTable(conn);
             }
 
-            List<Alias> aliase = getAllAliasesInUserAttributes(conn);
+            Set<Alias> aliase = getAllAliasesInUserAttributes(conn);
             if (aliase != null && false == aliase.isEmpty()) {
                 insertAliases(conn, aliase);
             }
@@ -126,34 +120,7 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    private List<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            stmt = conn.prepareStatement(SELECT_OLD_ALIAS_ENTRIES);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptyList();
-            }
-
-            List<Alias> aliases = new LinkedList<Alias>();
-            int index;
-            do {
-                index = 0;
-                int cid = rs.getInt(++index);
-                int uid = rs.getInt(++index);
-                String alias = rs.getString(++index);
-                aliases.add(new Alias(cid, uid, alias));
-            } while (rs.next());
-
-            return aliases;
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
-    private int insertAliases(Connection conn, List<Alias> aliases) throws SQLException {
+    private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = conn.prepareStatement(INSERT_ALIAS_IN_NEW_TABLE);
@@ -185,30 +152,5 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BLOCKING);
-    }
-
-    private class Alias {
-
-        private final int cid;
-        private final int userId;
-        private final String alias;
-
-        public Alias(int cid, int userId, String alias) {
-            this.cid = cid;
-            this.userId = userId;
-            this.alias = alias;
-        }
-
-        public int getCid() {
-            return cid;
-        }
-
-        public int getUserId() {
-            return userId;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
     }
 }
