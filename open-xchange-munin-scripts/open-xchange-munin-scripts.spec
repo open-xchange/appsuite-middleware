@@ -13,7 +13,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:	   @OXVERSION@
-%define        ox_release 16
+%define        ox_release 17
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GNU General Public License (GPL)
@@ -76,6 +76,8 @@ exit 0
 %config(noreplace) /etc/munin/plugin-conf.d/*
 
 %changelog
+* Fri Jan 15 2016 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2016-01-15 (3028)
 * Wed Jan 13 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-01-13 (2982)
 * Tue Jan 12 2016 Carsten Hoeger <choeger@open-xchange.com>

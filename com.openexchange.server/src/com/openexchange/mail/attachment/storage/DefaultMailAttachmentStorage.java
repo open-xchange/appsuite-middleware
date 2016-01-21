@@ -275,10 +275,16 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
         file.setFileMIMEType(attachment.getContentType().getBaseType());
         file.setTitle(name);
         file.setFileSize(attachment.getSize());
+        List<Field> modifiedColumns = new ArrayList<Field>();
+        modifiedColumns.add(Field.FILENAME);
+        modifiedColumns.add(Field.FILE_SIZE);
+        modifiedColumns.add(Field.FILE_MIMETYPE);
+        modifiedColumns.add(Field.TITLE);
         if (null != storeProps) {
             String description = (String) storeProps.get("description");
             if (null != description) {
                 file.setDescription(description);
+                modifiedColumns.add(Field.DESCRIPTION);
             } else if (publishStore) {
                 // Description
                 Locale locale = (Locale) storeProps.get("externalLocale");
@@ -301,6 +307,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                     desc = desc.replaceFirst("#TO#", com.openexchange.java.Strings.quoteReplacement(to == null || to.length == 0 ? "" : com.openexchange.java.Strings.quoteReplacement(MimeProcessingUtility.addrs2String(to))));
                 }
                 file.setDescription(desc);
+                modifiedColumns.add(Field.DESCRIPTION);
             }
         }
         /*
@@ -323,7 +330,7 @@ public class DefaultMailAttachmentStorage implements MailAttachmentStorage {
                 fileAccess.startTransaction();
                 rollbackNeeded = true;
                 try {
-                    fileAccess.saveDocument(file, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, null, false, true);
+                    fileAccess.saveDocument(file, in, FileStorageFileAccess.UNDEFINED_SEQUENCE_NUMBER, modifiedColumns, false, true);
                     fileAccess.commit();
                     rollbackNeeded = false;
                     retry = false;
