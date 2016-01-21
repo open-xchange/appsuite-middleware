@@ -292,15 +292,17 @@ public final class NewAction extends AbstractMailAction {
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
 
                 // Adjust send type if needed
-                if (ComposeType.DRAFT.equals(sendType) || ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(sendType)) {
-                    for (ComposedMailMessage composedMail : composedMails) {
-                        MailPath msgref = composedMail.getMsgref();
-                        if (null != msgref) {
-                            CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                            if (space.isMarkedAsReply(msgref)) {
-                                sendType = ComposeType.REPLY;
-                            } else if (space.isMarkedAsForward(msgref)) {
-                                sendType = ComposeType.FORWARD;
+                if (null != csid) {
+                    if (ComposeType.DRAFT.equals(sendType) || ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(sendType)) {
+                        for (ComposedMailMessage composedMail : composedMails) {
+                            MailPath msgref = composedMail.getMsgref();
+                            if (null != msgref) {
+                                CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                                if (space.isMarkedAsReply(msgref)) {
+                                    sendType = ComposeType.REPLY;
+                                } else if (space.isMarkedAsForward(msgref)) {
+                                    sendType = ComposeType.FORWARD;
+                                }
                             }
                         }
                     }
