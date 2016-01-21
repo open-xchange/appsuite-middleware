@@ -329,7 +329,7 @@ public final class CompositionSpaces {
                 if (null != draftEditsFor && !draftEditsFor.isEmpty()) {
                     for (final MailPath mailPath : draftEditsFor) {
                         // Only delete draft-edit if not already referenced by either replyFor or forwardsFor.
-                        if (!space.isMarkedAsReplyOrForward(mailPath) && !space.isMarkedAsReplyOrForward(optUnifiedInboxUID(mailPath, unifiedMailId))) {
+                        if (!space.isMarkedAsReplyOrForward(mailPath)) {
                             if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
                                 new SafeAction<Void>() {
 
@@ -367,8 +367,15 @@ public final class CompositionSpaces {
         }
     }
 
-    private static MailPath optUnifiedInboxUID(MailPath mailPath, int unifiedMailId) {
-        if (unifiedMailId <= 0 || mailPath.getAccountId() != unifiedMailId) {
+    /**
+     * Extracts possible bested mail path
+     *
+     * @param mailPath The mail path to examine
+     * @param unifiedMailId The unified mail account identifier
+     * @return The extracted path or <code>null</code>
+     */
+    public static MailPath optUnifiedInboxUID(MailPath mailPath, int unifiedMailId) {
+        if (unifiedMailId <= 0 || null == mailPath || mailPath.getAccountId() != unifiedMailId) {
             return null;
         }
 
