@@ -174,10 +174,16 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
     }
 
     @Override
-    public String[] getParameter(String url) {
+    public String[] getParameter(String url) throws OXException{
+        if(null==url || url.isEmpty()){
+            throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
+        }
         String[] result = new String[5];
         for (int x = 4; x >= 0; x--) {
             int index = url.lastIndexOf(SLASH);
+            if (index == -1 || index == url.length() - 1) {
+                throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
+            }
             result[x] = url.substring(index + 1, url.length());
             url = url.substring(0, index);
         }

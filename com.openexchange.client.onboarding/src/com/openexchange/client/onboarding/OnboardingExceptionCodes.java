@@ -143,6 +143,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
      */
     SENT_QUOTA_EXCEEDED("Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.", OnboardingExceptionMessages.SENT_QUOTA_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 20),
+    /**
+     * The download link is invalid.
+     */
+    INVALID_DOWNLOAD_LINK("The download link is invalid.", OnboardingExceptionMessages.INVALID_DOWNLOAD_LINK_MSG, Category.CATEGORY_USER_INPUT, 21),
     ;
 
     /** The error code prefix for on-boarding module */

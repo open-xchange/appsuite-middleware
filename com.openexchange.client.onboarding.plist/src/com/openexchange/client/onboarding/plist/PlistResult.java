@@ -289,7 +289,7 @@ public class PlistResult implements Result {
     private Long getSMSRateLimit(Session session) throws OXException {
         ConfigViewFactory confFactory = Services.getService(ConfigViewFactory.class);
         ConfigView view = confFactory.getView(session.getUserId(), session.getContextId());
-        Long ratelimit = view.get(SMS_RATE_LIMIT_PROPERTY, Long.class);
+        Long ratelimit = view.opt(SMS_RATE_LIMIT_PROPERTY, Long.class, new Long(0l));
         return ratelimit;
     }
 

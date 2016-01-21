@@ -60,10 +60,38 @@ import com.openexchange.groupware.notify.hostname.HostData;
  */
 public interface DownloadLinkProvider {
 
+    /**
+     * Retrieves a user specific download link to a plist file.
+     * 
+     * @param hostData The data of the host
+     * @param userId The user id
+     * @param contextId The context id
+     * @param scenario The name of the scenario
+     * @param device The name of the device
+     * @return The download link
+     * @throws OXException
+     */
     public String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException;
 
+    /**
+     * Validate the challenge of a download link
+     * 
+     * @param userId The user id of the request
+     * @param contextId The context id of the request
+     * @param scenario The scenario of the request
+     * @param device The device of the request
+     * @param challenge The challenge of the request
+     * @return true if the challenge is valid, false otherwise
+     * @throws OXException
+     */
     public boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException;
 
-    public String[] getParameter(String url);
+    /**
+     * Extract the parameters of a link.
+     * 
+     * @param url The url of the request
+     * @return A string array with the structure: [userid, contextid, device, scenario, challenge]
+     */
+    public String[] getParameter(String url) throws OXException;
 
 }

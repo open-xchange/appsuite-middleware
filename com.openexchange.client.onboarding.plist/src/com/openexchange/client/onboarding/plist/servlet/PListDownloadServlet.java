@@ -129,7 +129,13 @@ public class PListDownloadServlet extends WebDavServlet {
             }
 
             DownloadLinkProvider smsLinkProvider = lookup.getService(DownloadLinkProvider.class);
-            String[] arguments = smsLinkProvider.getParameter(req.getPathInfo());
+            String[] arguments;
+            try {
+                arguments = smsLinkProvider.getParameter(req.getPathInfo());
+            } catch (OXException ex) {
+                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
+                return;
+            }
             String scenarioId = arguments[3];
             Device device = Device.deviceFor(arguments[2]);
             int userId;
