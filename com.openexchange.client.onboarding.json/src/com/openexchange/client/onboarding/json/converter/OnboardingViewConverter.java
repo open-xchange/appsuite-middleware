@@ -268,6 +268,8 @@ public class OnboardingViewConverter implements ResultConverter {
                                 LOGGER.warn("Failed to retrieve data for action '{}' and will therefore be ignored.", compositeActionId, e);
                                 actionId = null;
                             }
+                        } else {
+                            actionId = null == scenarioAppendix ? action.getId() : new StringBuilder(action.getId()).append('/').append(scenarioAppendix).toString();
                         }
                     }
                     break;
