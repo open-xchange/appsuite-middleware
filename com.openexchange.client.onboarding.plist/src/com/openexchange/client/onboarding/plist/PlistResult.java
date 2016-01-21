@@ -66,11 +66,10 @@ import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultObject;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.SimpleResultObject;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.download.DownloadOnboardingStrings;
 import com.openexchange.client.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.client.onboarding.plist.osgi.Services;
-import com.openexchange.client.onboarding.sms.SMSLinkProvider;
-import com.openexchange.client.onboarding.sms.SMSOnboardingExceptionCodes;
-import com.openexchange.client.onboarding.sms.SMSOnboardingStrings;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -249,20 +248,20 @@ public class PlistResult implements Result {
         String untranslatedText;
         switch (request.getScenario().getId()) {
             case "mailsync":
-                untranslatedText = SMSOnboardingStrings.MAIL_MESSAGE;
+                untranslatedText = DownloadOnboardingStrings.MAIL_MESSAGE;
                 break;
             case "davsync":
-                untranslatedText = SMSOnboardingStrings.DAV_MESSAGE;
+                untranslatedText = DownloadOnboardingStrings.DAV_MESSAGE;
                 break;
             case "eassync":
-                untranslatedText = SMSOnboardingStrings.EAS_MESSAGE;
+                untranslatedText = DownloadOnboardingStrings.EAS_MESSAGE;
                 break;
             default:
-                untranslatedText = SMSOnboardingStrings.DEFAULT_MESSAGE;
+                untranslatedText = DownloadOnboardingStrings.DEFAULT_MESSAGE;
         }
         String text = OnboardingUtility.getTranslationFor(untranslatedText, session);
         //get url
-        SMSLinkProvider smsLinkProvider = Services.getService(SMSLinkProvider.class);
+        DownloadLinkProvider smsLinkProvider = Services.getService(DownloadLinkProvider.class);
         String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
         text = text + link;
 
@@ -300,7 +299,7 @@ public class PlistResult implements Result {
             Long lastSMSSend = (Long) session.getParameter(SMS_LAST_SEND_TIMESTAMP);
 
             if (lastSMSSend != null && lastSMSSend + ratelimit > System.currentTimeMillis()) {
-                throw SMSOnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(ratelimit / 1000);
+                throw OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(ratelimit / 1000);
             }
 
         }

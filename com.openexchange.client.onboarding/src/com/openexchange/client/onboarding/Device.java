@@ -54,9 +54,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
+import com.openexchange.sms.SMSService;
 
 /**
  * {@link Device} - An enumeration for available on-boarding devices.
@@ -225,19 +228,7 @@ public enum Device implements Entity {
      * @throws OXException If actions cannot be returned
      */
     public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, Session session) throws OXException {
-        List<OnboardingAction> actions = new ArrayList<>(getStaticActionsFor(device, type));
-        for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
-            OnboardingAction action = iter.next();
-            switch (action) {
-                case SMS:
-                    // TODO: Check for SMS support
-                    break;
-                default:
-                    // Nothing to do...
-                    break;
-            }
-        }
-        return actions;
+        return getActionsFor(device, type, session.getUserId(), session.getContextId());
     }
 
     /**
@@ -255,7 +246,10 @@ public enum Device implements Entity {
             OnboardingAction action = iter.next();
             switch (action) {
                 case SMS:
-                    // TODO: Check for SMS support
+                    // Check availability of needed services
+                    if (null == Services.optService(SMSService.class) || null == Services.optService(DownloadLinkProvider.class)) {
+                        iter.remove();
+                    }
                     break;
                 case EMAIL:
                     if (!OnboardingUtility.hasNoReplyTransport(contextId)) {

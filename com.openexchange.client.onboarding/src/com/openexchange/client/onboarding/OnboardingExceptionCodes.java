@@ -139,6 +139,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * No such type for identifier %1$s in scenario %2$s
      */
     NO_SUCH_TYPE("No such type for identifier %1$s in scenario %2$s", null, Category.CATEGORY_CONFIGURATION, 19),
+    /**
+     * Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
+     */
+    SENT_QUOTA_EXCEEDED("Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.", OnboardingExceptionMessages.SENT_QUOTA_EXCEEDED_MSG, Category.CATEGORY_USER_INPUT, 20),
     ;
 
     /** The error code prefix for on-boarding module */

@@ -50,17 +50,19 @@
 package com.openexchange.client.onboarding.plist.osgi;
 
 import org.osgi.service.http.HttpService;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.plist.PListSigner;
+import com.openexchange.client.onboarding.plist.download.PlistLinkProviderImpl;
 import com.openexchange.client.onboarding.plist.internal.PListSignerImpl;
 import com.openexchange.client.onboarding.plist.servlet.PListDownloadServlet;
 import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.client.onboarding.sms.SMSLinkProvider;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.SMSService;
+import com.openexchange.user.UserService;
 
 
 /**
@@ -82,17 +84,27 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class, SMSLinkProvider.class, DispatcherPrefixService.class, HttpService.class, OnboardingService.class, SMSService.class };
+        return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class,
+                                DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+
+        // Track services needed for SMS transport
+        trackService(SMSService.class);
+        trackService(DownloadLinkProvider.class);
+        openTrackers();
+
         PListSignerImpl signerImpl = new PListSignerImpl();
         addService(PListSigner.class, signerImpl);
         registerService(PListSigner.class, signerImpl);
 
-        //register plist download servlet
+        // Register PLIST link provider
+        registerService(DownloadLinkProvider.class, new PlistLinkProviderImpl(this));
+
+        // Register plist download servlet
         PListDownloadServlet downloadServlet = new PListDownloadServlet(this);
         String prefix = getService(DispatcherPrefixService.class).getPrefix();
         downloadServletAlias = prefix + PListDownloadServlet.SERVLET_PATH;

@@ -67,10 +67,10 @@ import com.openexchange.client.onboarding.OnboardingAction;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PListSigner;
 import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.client.onboarding.sms.SMSLinkProvider;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.plist.PListDict;
@@ -128,7 +128,7 @@ public class PListDownloadServlet extends WebDavServlet {
                 fileName = fileName.substring(1, fileName.length());
             }
 
-            SMSLinkProvider smsLinkProvider = lookup.getService(SMSLinkProvider.class);
+            DownloadLinkProvider smsLinkProvider = lookup.getService(DownloadLinkProvider.class);
             String[] arguments = smsLinkProvider.getParameter(req.getPathInfo());
             String scenarioId = arguments[3];
             Device device = Device.deviceFor(arguments[2]);

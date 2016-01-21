@@ -55,6 +55,7 @@ import java.util.Hashtable;
 import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.client.onboarding.OnboardingUtility;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.internal.OnboardingConfig;
 import com.openexchange.client.onboarding.internal.OnboardingServiceImpl;
 import com.openexchange.client.onboarding.rmi.RemoteOnboardingService;
@@ -71,6 +72,7 @@ import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
+import com.openexchange.sms.SMSService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
@@ -108,6 +110,10 @@ public class OnboardingActivator extends HousekeepingActivator {
         this.registry = serviceImpl;
         serviceImpl.setConfiguredScenarios(OnboardingConfig.parseScenarios(getService(ConfigurationService.class)));
         addService(OnboardingService.class, serviceImpl);
+
+        // Track services needed for SMS transport
+        trackService(SMSService.class);
+        trackService(DownloadLinkProvider.class);
 
         // Initialize & open provider tracker
         OnboardingProviderTracker providerTracker = new OnboardingProviderTracker(context, serviceImpl);

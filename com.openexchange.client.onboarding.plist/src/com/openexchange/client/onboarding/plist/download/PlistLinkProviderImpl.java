@@ -47,15 +47,15 @@
  *
  */
 
-package com.openexchange.client.onboarding.sms.internal;
+package com.openexchange.client.onboarding.plist.download;
 
 import java.io.UnsupportedEncodingException;
 import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Base64;
-import com.openexchange.client.onboarding.sms.SMSLinkProvider;
-import com.openexchange.client.onboarding.sms.SMSOnboardingExceptionCodes;
+import com.openexchange.client.onboarding.OnboardingExceptionCodes;
+import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -64,25 +64,25 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
 /**
- * {@link SMSLinkProviderImpl}
+ * {@link PlistLinkProviderImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class SMSLinkProviderImpl implements SMSLinkProvider {
+public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
     ServiceLookup services;
     private static final String USER_SECRET_ATTRIBUTE = "user_sms_link_secret";
     private static final String SERVLET_PATH = "plist";
     private static final String SLASH = "/";
 
-    public SMSLinkProviderImpl(ServiceLookup services) {
+    public PlistLinkProviderImpl(ServiceLookup services) {
         this.services = services;
     }
 
     /**
      * Retrieves the users sms-link-secret or creates one if none is available.
-     * 
+     *
      * @param userId
      * @param contextId
      * @return
@@ -103,7 +103,7 @@ public class SMSLinkProviderImpl implements SMSLinkProvider {
 
     /**
      * Retrieves the users sms-link-secret.
-     * 
+     *
      * @param userId
      * @param contextId
      * @return
@@ -134,7 +134,7 @@ public class SMSLinkProviderImpl implements SMSLinkProvider {
             sha1hash = md.digest();
             return convertToHex(sha1hash);
         } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
-            throw SMSOnboardingExceptionCodes.INTERNAL_ERROR.create(e.getMessage());
+            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }
 

@@ -47,31 +47,23 @@
  *
  */
 
-package com.openexchange.client.onboarding.sms;
+package com.openexchange.client.onboarding.download;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 
 /**
- * {@link SMSOnboardingStrings}
+ * {@link DownloadLinkProvider}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class SMSOnboardingStrings implements LocalizableStrings {
+public interface DownloadLinkProvider {
 
-    /**
-     * Initializes a new {@link MailOnboardingStrings}.
-     */
-    private SMSOnboardingStrings() {
-        super();
-    }
+    public String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException;
 
-    public static final String MAIL_MESSAGE = "To set up your mail account, download the following file: ";
+    public boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException;
 
-    public static final String DEFAULT_MESSAGE = "To set up your account, download the following file: ";
-
-    public static final String DAV_MESSAGE = "To set up your dav account, download the following file: ";
-
-    public static final String EAS_MESSAGE = "To set up your eas account, download the following file: ";
+    public String[] getParameter(String url);
 
 }

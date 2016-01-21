@@ -78,4 +78,7 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     // Execution failed. Please choose another option.
     public static final String EXECUTION_FAILED_MSG = "Execution failed. Please choose another option.";
 
+    // Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
+    public final static String SENT_QUOTA_EXCEEDED_MSG = "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.";
+
 }
