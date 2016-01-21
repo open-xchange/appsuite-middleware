@@ -1268,6 +1268,9 @@ if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev
 EOF
 fi
 
+# SoftwareChange_Request-3034
+ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
+
 PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
 for FILE in "${PROTECT[@]}"
 do
