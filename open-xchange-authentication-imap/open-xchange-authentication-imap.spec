@@ -51,6 +51,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %post
 . /opt/open-xchange/lib/oxfunctions.sh
 ox_move_config_file /opt/open-xchange/etc/groupware /opt/open-xchange/etc imapauth.properties
+if [ ${1:-0} -eq 2 ]; then
+    # only when updating
+
+    # prevent bash from expanding, see bug 13316
+    GLOBIGNORE='*'
+
+    # SoftwareChange_Request-3025
+    ox_add_property USE_FULL_LOGIN_INFO_FOR_USER_LOOKUP false /opt/open-xchange/etc/imapauth.properties
+fi
 
 %clean
 %{__rm} -rf %{buildroot}
