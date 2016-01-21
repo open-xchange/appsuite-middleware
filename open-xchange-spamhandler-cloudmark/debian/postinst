@@ -18,6 +18,7 @@ set -e
 # the debian-policy package
 
 . /opt/open-xchange/lib/oxfunctions.sh
+
 postFix() {
     local version=${1%-*}
     version=${version//[-.]/}
@@ -26,10 +27,13 @@ postFix() {
     GLOBIGNORE='*'
 
     # SoftwareChange_Request-1452
-    pfile=/opt/open-xchange/etc/spamhandler_cloudmark.properties
-    if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $pfile; then
-       ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $pfile
+    PFILE=/opt/open-xchange/etc/spamhandler_cloudmark.properties
+    if ! ox_exists_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress $PFILE; then
+       ox_set_property com.openexchange.spamhandler.cloudmark.targetHamEmailAddress "" $PFILE
     fi
+
+    # SoftwareChange_Request-3039
+    ox_add_property com.openexchange.spamhandler.cloudmark.wrapMessage true $PFILE
 }
 
 case "$1" in
