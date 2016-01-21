@@ -110,10 +110,10 @@ public class GetAction extends AbstractFileStorageAccountAction {
                 caps.add(FileStorageCapability.EXTENDED_METADATA.name());
             }
             if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
             }
             if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
-                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+                caps.add(FileStorageCapability.LOCKS.name());
             }
         }
         return new AJAXRequestResult(writer.write(account, rootFolder, caps));
