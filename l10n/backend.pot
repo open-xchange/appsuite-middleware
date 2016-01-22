@@ -1001,7 +1001,7 @@ msgstr ""
 #. ----------------------------------------------------------------------------------------------------------------------
 #. The display name for an Apple Mac
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:122
-msgid "Apple Mac"
+msgid "Mac"
 msgstr ""
 
 #. The description for an Apple Mac
@@ -1011,7 +1011,7 @@ msgstr ""
 
 #. The display name for an Apple iPad
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:129
-msgid "Apple iPad"
+msgid "iPad"
 msgstr ""
 
 #. The description for an Apple iPad
@@ -1021,7 +1021,7 @@ msgstr ""
 
 #. The display name for an Apple iPhone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:136
-msgid "Apple iPhone"
+msgid "iPhone"
 msgstr ""
 
 #. The description for an Apple iPhone
@@ -1031,7 +1031,7 @@ msgstr ""
 
 #. The display name for an Android/Google tablet
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:143
-msgid "Android tablet"
+msgid "Tablet"
 msgstr ""
 
 #. The description for an Android/Google tablet
@@ -1041,7 +1041,7 @@ msgstr ""
 
 #. The display name for an Android/Google phone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:150
-msgid "Android phone"
+msgid "Smartphone"
 msgstr ""
 
 #. The description for an Android/Google phone
@@ -1051,7 +1051,7 @@ msgstr ""
 
 #. The display name for a Windows Desktop
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:157
-msgid "Windows Desktop"
+msgid "Desktop"
 msgstr ""
 
 #. The description for a Windows Desktop
