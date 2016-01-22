@@ -378,6 +378,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     }
 
     private IDMailMessage handleMessage(final int seqNum) {
+        if (seqNum < 0) {
+            return null;
+        }
         try {
             return handleMessage(imapFolder.getMessage(seqNum));
         } catch (final Exception e) {
@@ -387,6 +390,9 @@ public final class MailMessageFetchIMAPCommand extends AbstractIMAPCommand<MailM
     }
 
     private IDMailMessage handleMessage(final long uid) {
+        if (uid < 0) {
+            return null;
+        }
         try {
             return handleMessage(imapFolder.getMessageByUID(uid));
         } catch (final Exception e) {
