@@ -1,3 +1,9 @@
+open-xchange-authentication-imap (7.6.2-47) stable; urgency=medium
+
+  * Build for patch 2016-01-25 (3052)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Fri, 22 Jan 2016 11:28:57 +0100
+
 open-xchange-authentication-imap (7.6.2-46) stable; urgency=medium
 
   * Build for patch 2016-01-25 (3029)
