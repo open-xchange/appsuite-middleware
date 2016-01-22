@@ -154,6 +154,8 @@ public class MimeMailException extends OXException {
     private static final String STR_EMPTY = "";
 
     private static final String ERR_TMP = "temporary error, please try again later";
+    
+    private static final String ERR_TMP_FLR = "temporary failure";
 
     private static final String ERR_AUTH_FAILED = "bad authentication failed";
 
@@ -297,7 +299,10 @@ public class MimeMailException extends OXException {
                 if ((smtpInfo.retCode == 552) || (toLowerCase(smtpInfo.message, "").indexOf(ERR_MSG_TOO_LARGE) > -1)) {
                     return MimeMailExceptionCode.MESSAGE_TOO_LARGE_EXT.create(sendFailedError, smtpInfo.toString());
                 }
-
+                // 452 - 452 4.1.0 ... temporary failure
+                if ((sendFailedError.getReturnCode() == 452) && (toLowerCase(sendFailedError.getMessage(), "").indexOf(ERR_TMP_FLR) > -1)) {
+                    return MimeMailExceptionCode.TEMPORARY_FAILURE.create(sendFailedError, getSmtpInfo(sendFailedError));
+                }
                 Address[] addrs = sendFailedError.getInvalidAddresses();
                 if (null == addrs || addrs.length == 0) {
                     // No invalid addresses available

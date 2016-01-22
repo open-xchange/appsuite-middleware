@@ -186,5 +186,9 @@ public class MimeMailExceptionMessage implements LocalizableStrings {
 
     // Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.
     public static final String TRANSPORT_INVALID_CREDENTIALS_MSG_DISPLAY = "Wrong or missing login data to access mail transport server %1$s. Please check associated account's settings/credentials.";
+    /**
+     * The message could not be sent due to a mail server temporary failure. Please try again later.
+     */
+    public static final String TEMPORARY_FAILURE = "The message could not be sent due to a mail server temporary failure. Please try again later.";
 
 }
