@@ -71,11 +71,14 @@ import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.OnboardingAction;
+import com.openexchange.client.onboarding.OnboardingSMSConstants;
 import com.openexchange.client.onboarding.Platform;
 import com.openexchange.client.onboarding.ResultObject;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.client.onboarding.service.OnboardingView;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Charsets;
 import com.openexchange.server.ServiceExceptionCode;
@@ -251,9 +254,18 @@ public class OnboardingViewConverter implements ResultConverter {
         for (OnboardingAction action : actions) {
             String actionId = null; // <--- Set to a valid, non-null identifier in case action has been successfully added
             switch (action) {
-                case SMS:
-                    // Generic action
-                    // fall-through
+                case SMS: {
+                    if (!actionCollector.usedIds.containsKey(action.getId())) {
+                        JSONObject smsAction = new JSONObject(2);
+                        smsAction.put("id", action.getId());
+                        ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
+                        ConfigView view = configViewFactory.getView(session.getUserId(), session.getContextId());
+                        smsAction.put("default", view.opt(OnboardingSMSConstants.SMS_DEFAULT_COUNTRY, String.class, "DE").toUpperCase());
+                        actionCollector.addAction(action.getId(), smsAction);
+                    }
+                    actionId = action.getId();
+                }
+                    break;
                 case DOWNLOAD:
                     // Generic action
                     // fall-through

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,45 +47,21 @@
  *
  */
 
-package com.openexchange.client.onboarding.json.osgi;
+package com.openexchange.client.onboarding;
 
-import org.slf4j.Logger;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
-import com.openexchange.capabilities.CapabilityService;
-import com.openexchange.client.onboarding.json.OnboardingActionFactory;
-import com.openexchange.client.onboarding.json.converter.OnboardingViewConverter;
-import com.openexchange.client.onboarding.json.converter.ScenarioConverter;
-import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
- * {@link OnboardingJsonActivator}
+ * {@link OnboardingSMSConstants}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class OnboardingJsonActivator extends AJAXModuleActivator {
+public class OnboardingSMSConstants {
 
-    /**
-     * Initializes a new {@link OnboardingJsonActivator}.
-     */
-    public OnboardingJsonActivator() {
-        super();
-    }
+    public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingService.class, ConfigViewFactory.class };
-    }
+    public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
 
-    @Override
-    protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(OnboardingJsonActivator.class);
-        logger.info("Starting bundle: \"com.openexchange.client.onboarding.json\"");
-
-        registerService(ResultConverter.class, new OnboardingViewConverter(this));
-        registerService(ResultConverter.class, new ScenarioConverter(this));
-        registerModule(new OnboardingActionFactory(this), "onboarding");
-    }
+    public static final String SMS_DEFAULT_COUNTRY = "com.openexchange.client.onboarding.sms.defaultCountry";
 
 }
