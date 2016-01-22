@@ -187,6 +187,23 @@ driveappinstall:
     description_t10e: "To use Drive on your device, simply download OX Drive App"
 
 
+### Sync App
+################################################################################
+
+syncappinstall:
+    # Disbled by default
+    enabled: false
+    type: link
+    providers: [syncapp]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    icon: syncapp.png
+    # The translatable display name
+    displayName_t10e: "Sync App"
+    # The translatable description
+    description_t10e: "To use Drive on your device, simply download the App"
+
+
 ### CalDAV & CardDAV Sync
 ################################################################################
 

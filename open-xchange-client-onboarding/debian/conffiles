@@ -7,4 +7,5 @@ opt/open-xchange/etc/client-onboarding-genericapp.properties
 opt/open-xchange/etc/client-onboarding-mail.properties
 opt/open-xchange/etc/client-onboarding-mailapp.properties
 opt/open-xchange/etc/client-onboarding-emclient.properties
+opt/open-xchange/etc/client-onboarding-syncapp.properties
 opt/open-xchange/etc/scenarios.yml
