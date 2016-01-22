@@ -513,7 +513,8 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                     if (null != action && Action.DISPLAY.getValue().equalsIgnoreCase(action.getValue())) {
                         vAlarms.add(alarm);
                     }
-                    warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));
+                } else {
+                    warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));                    
                 }
             }
         }
