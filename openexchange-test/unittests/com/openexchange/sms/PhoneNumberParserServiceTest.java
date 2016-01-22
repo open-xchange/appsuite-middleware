@@ -64,7 +64,7 @@ public class PhoneNumberParserServiceTest extends TestCase {
 
     private final String EXPECTED = "491234567890";
 
-    private final String[] TO_PARSE = new String[] { "00491234567890", "01234567890", "+491234567890", "004901234567890", "+4901234567890", "4901234567890" };
+    private final String[] TO_PARSE = new String[] { "00491234567890", "01234567890", "+491234567890", "004901234567890", "+4901234567890", "4901234567890", "0049 123 4567890", "0123/4567890" };
 
     public void testParsePhoneNumbers() throws Exception {
         PhoneNumberParserService service = TestServiceRegistry.getInstance().getService(PhoneNumberParserService.class);
