@@ -162,6 +162,7 @@ public final class PListSignerImpl implements PListSigner {
             sink = new ThresholdFileHolder();
             sink.setContentType(input.getContentType());
             sink.setDisposition(input.getDisposition());
+            sink.setName(input.getName());
             ASN1OutputStream aOut = new ASN1OutputStream(sink.asOutputStream());
             aOut.writeObject(contentInfo);
             aOut.flush();
