@@ -342,7 +342,7 @@ public final class SessionUtility {
         if (!ctx.isEnabled()) {
             sessiondService.removeSession(sessionId);
             LOG.info("The context {} associated with session is locked.", Integer.toString(ctx.getContextId()));
-            throw SessionExceptionCodes.CONTEXT_LOCKED.create(Integer.toString(ctx.getContextId()), ctx.getName());
+            throw SessionExceptionCodes.CONTEXT_LOCKED.create(Integer.valueOf(ctx.getContextId()), ctx.getName());
         }
         checkIP(session, req.getRemoteAddr());
     }
