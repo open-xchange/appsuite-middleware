@@ -47,6 +47,14 @@ msgstr ""
 msgid "To use Drive on your device, simply download OX Drive App"
 msgstr ""
 
+# Sync App
+msgid "Sync App"
+msgstr ""
+
+# To use Drive on your device, simply download the App
+msgid "To use Drive on your device, simply download the App"
+msgstr ""
+
 # Calendar + Contacts
 msgid "Calendar + Contacts"
 msgstr ""
