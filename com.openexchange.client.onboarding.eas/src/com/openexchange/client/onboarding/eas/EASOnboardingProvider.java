@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -93,7 +94,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     public EASOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "eas";
+        identifier = BuiltInProvider.EAS.getId();
         supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10));
     }
 

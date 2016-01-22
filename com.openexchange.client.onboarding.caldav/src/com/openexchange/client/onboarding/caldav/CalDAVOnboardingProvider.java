@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -92,7 +93,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
     public CalDAVOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "caldav";
+        identifier = BuiltInProvider.CALDAV.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
     }
 
@@ -105,7 +106,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
     public boolean isAvailable(Session session) throws OXException {
         return OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session);
     }
-    
+
     @Override
     public boolean isAvailable(int userId, int contextId) throws OXException {
         return OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), userId, contextId);

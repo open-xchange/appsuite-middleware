@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.drive.client.windows;
 
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -85,7 +86,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     public DriveWindowsClientOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "drivewindowsclient";
+        identifier = BuiltInProvider.DRIVE_WINDOWS_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
     }
 

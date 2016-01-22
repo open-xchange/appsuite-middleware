@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -102,7 +103,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     public MailOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "mail";
+        identifier = BuiltInProvider.MAIL.getId();
         supportedDevices = EnumSet.allOf(Device.class);
     }
 
@@ -130,7 +131,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             LOG.error("MailAccountStorageService is not available!");
             return false;
         }
-        
+
         MailAccount mailAccount = service.getDefaultMailAccount(userId, contextId);
         return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
     }

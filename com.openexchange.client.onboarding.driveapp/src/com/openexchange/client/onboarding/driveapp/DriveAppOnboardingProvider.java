@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding.driveapp;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -89,7 +90,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     public DriveAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "driveapp";
+        identifier = BuiltInProvider.DRIVE_APP.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
     }
 

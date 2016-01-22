@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,31 +47,72 @@
  *
  */
 
-package com.openexchange.client.onboarding.download;
-
-import com.openexchange.i18n.LocalizableStrings;
+package com.openexchange.client.onboarding;
 
 /**
- * {@link DownloadOnboardingStrings}
+ * {@link BuiltInProvider} - An enumeration of identifiers for built-in providers.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DownloadOnboardingStrings implements LocalizableStrings {
+public enum BuiltInProvider {
 
     /**
-     * Initializes a new {@link MailOnboardingStrings}.
+     * The generic app provider
      */
-    private DownloadOnboardingStrings() {
-        super();
+    GENERIC_APP("app"),
+    /**
+     * The CalDAV provider
+     */
+    CALDAV("caldav"),
+    /**
+     * The CardDAV provider
+     */
+    CARDDAV("carddav"),
+    /**
+     * The Drive Windows Client provider
+     */
+    DRIVE_WINDOWS_CLIENT("drivewindowsclient"),
+    /**
+     * The OX Drive App provider
+     */
+    DRIVE_APP("driveapp"),
+    /**
+     * The OX Mail App provider
+     */
+    MAIL_APP("mailapp"),
+    /**
+     * The Microsoft Active Sync provider
+     */
+    EAS("eas"),
+    /**
+     * The eM Clent provider
+     */
+    EM_CLIENT("emclient"),
+    /**
+     * The mail (IMAP/SMTP) provider
+     */
+    MAIL("mail"),
+    /**
+     * The legacy OX Updater provider
+     */
+    UPDATER("oxupdater"),
+
+    ;
+
+    private final String id;
+
+    private BuiltInProvider(String id) {
+        this.id = id;
     }
 
-    public static final String MAIL_MESSAGE = "To set up your mail account, download the following file: ";
-
-    public static final String DEFAULT_MESSAGE = "To set up your account, download the following file: ";
-
-    public static final String DAV_MESSAGE = "To set up your CalDAV/CardDAV account, download the following file: ";
-
-    public static final String EAS_MESSAGE = "To set up your EAS account, download the following file: ";
+    /**
+     * Gets the identifier
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return id;
+    }
 
 }

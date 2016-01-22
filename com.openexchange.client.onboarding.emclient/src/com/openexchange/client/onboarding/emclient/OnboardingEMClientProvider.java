@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.emclient;
 
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -81,7 +82,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
      */
     public OnboardingEMClientProvider() {
         super();
-        identifier = "emclient";
+        identifier = BuiltInProvider.EM_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
     }
 

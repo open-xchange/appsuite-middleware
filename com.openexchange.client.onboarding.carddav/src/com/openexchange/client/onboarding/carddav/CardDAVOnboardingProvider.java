@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -93,7 +94,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
     public CardDAVOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "carddav";
+        identifier = BuiltInProvider.CARDDAV.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
     }
 
