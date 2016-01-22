@@ -79,8 +79,8 @@ public interface Entity {
     /**
      * Checks if this entity is enabled.
      *
-     * @param userId The user id
-     * @param contextId The context id
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @throws OXException If enabled flag cannot be returned
      */
@@ -89,8 +89,8 @@ public interface Entity {
     /**
      * Gets the display name appropriate for the specified user and context
      *
-     * @param userId The user id
-     * @param contextId The context id
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return The display name
      * @throws OXException If display name cannot be returned
      */

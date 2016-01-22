@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,61 +49,19 @@
 
 package com.openexchange.client.onboarding;
 
-import java.util.Set;
-import com.openexchange.exception.OXException;
-import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingProvider} - Represents an on-boarding provider suitable for configuring/integrating a client for communicating with the
- * Open-Xchange Middleware.
+ * {@link OnboardingSMSConstants}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public interface OnboardingProvider {
+public class OnboardingSMSConstants {
 
-    /**
-     * Gets the identifier.
-     *
-     * @return The identifier
-     */
-    String getId();
+    public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
 
-    /**
-     * Gets the supported devices.
-     *
-     * @return The supported devices
-     */
-    Set<Device> getSupportedDevices();
+    public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
 
-    /**
-     * Executes specified on-boarding scenario according to given action.
-     *
-     * @param request The on-boarding request
-     * @param previousResult The optional previous result or <code>null</code>
-     * @param session The session
-     * @return The execution result
-     * @throws OXException If execution fails
-     */
-    Result execute(OnboardingRequest request, Result previousResult, Session session) throws OXException;
-
-    /**
-     * Checks if this provider is enabled for session-associated user.
-     *
-     * @param session The session
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If availability cannot be checked
-     */
-    AvailabilityResult isAvailable(Session session) throws OXException;
-
-    /**
-     * Checks if this provider is enabled for given user.
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @return <code>true</code> if enabled; otherwise <code>false</code>
-     * @throws OXException If availability cannot be checked
-     */
-    AvailabilityResult isAvailable(int userId, int contextId) throws OXException;
+    public static final String SMS_DEFAULT_COUNTRY = "com.openexchange.client.onboarding.sms.defaultCountry";
 
 }

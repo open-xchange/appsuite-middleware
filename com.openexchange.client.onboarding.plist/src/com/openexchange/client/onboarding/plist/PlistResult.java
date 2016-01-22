@@ -51,15 +51,17 @@ package com.openexchange.client.onboarding.plist;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.CommonInput;
 import com.openexchange.client.onboarding.OnboardingAction;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
+import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingSMSConstants;
 import com.openexchange.client.onboarding.OnboardingStrings;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
@@ -70,6 +72,7 @@ import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadOnboardingStrings;
 import com.openexchange.client.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.client.onboarding.plist.osgi.Services;
+import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -85,6 +88,7 @@ import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sms.SMSService;
 
@@ -101,11 +105,6 @@ public class PlistResult implements Result {
 
     private static final String SMS_KEY = "sms";
     private static final String SMS_CODE_KEY = "code";
-
-    private static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
-    private static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
-
-    private static final Logger LOG = LoggerFactory.getLogger(PlistResult.class);
 
     /**
      * Initializes a new {@link PlistResult}.
@@ -242,23 +241,23 @@ public class PlistResult implements Result {
     // --------------------------------------------- SMS utils --------------------------------------------------------------
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
-        Long ratelimit = getSMSRateLimit(session);
+        long ratelimit = getSMSRateLimit(session);
         checkSMSRateLimit(session, ratelimit);
 
         String untranslatedText;
-        switch (request.getScenario().getId()) {
-            case "mailsync":
+        {
+            List<OnboardingProvider> providers = request.getScenario().getProviders(session);
+            if (seemsLikeMail(providers)) {
                 untranslatedText = DownloadOnboardingStrings.MAIL_MESSAGE;
-                break;
-            case "davsync":
+            } else if (seemsLikeDav(providers)) {
                 untranslatedText = DownloadOnboardingStrings.DAV_MESSAGE;
-                break;
-            case "eassync":
+            } else if (seemsLikeEas(providers)) {
                 untranslatedText = DownloadOnboardingStrings.EAS_MESSAGE;
-                break;
-            default:
+            } else {
                 untranslatedText = DownloadOnboardingStrings.DEFAULT_MESSAGE;
+            }
         }
+
         String text = OnboardingUtility.getTranslationFor(untranslatedText, session);
         //get url
         DownloadLinkProvider smsLinkProvider = Services.getService(DownloadLinkProvider.class);
@@ -267,8 +266,7 @@ public class PlistResult implements Result {
 
         SMSService smsService = Services.getService(SMSService.class);
         if (smsService == null) {
-            LOG.error("SMSService is unavailable!");
-            throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create("SMSService is unavailable!");
+            throw ServiceExceptionCode.absentService(SMSService.class);
         }
         Map<String, Object> input = request.getInput();
         if (input == null) {
@@ -286,30 +284,75 @@ public class PlistResult implements Result {
         return resultObject;
     }
 
-    private Long getSMSRateLimit(Session session) throws OXException {
-        ConfigViewFactory confFactory = Services.getService(ConfigViewFactory.class);
-        ConfigView view = confFactory.getView(session.getUserId(), session.getContextId());
-        Long ratelimit = view.opt(SMS_RATE_LIMIT_PROPERTY, Long.class, new Long(0l));
-        return ratelimit;
+    private boolean seemsLikeDav(List<OnboardingProvider> providers) {
+        if (null == providers) {
+            return false;
+        }
+
+        for (OnboardingProvider onboardingProvider : providers) {
+            String id = onboardingProvider.getId();
+            if (BuiltInProvider.CALDAV.getId().equals(id) || BuiltInProvider.CARDDAV.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    private void checkSMSRateLimit(Session session, Long ratelimit) throws OXException {
+    private boolean seemsLikeMail(List<OnboardingProvider> providers) {
+        if (null == providers) {
+            return false;
+        }
 
+        for (OnboardingProvider onboardingProvider : providers) {
+            String id = onboardingProvider.getId();
+            if (BuiltInProvider.MAIL.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean seemsLikeEas(List<OnboardingProvider> providers) {
+        if (null == providers) {
+            return false;
+        }
+
+        for (OnboardingProvider onboardingProvider : providers) {
+            String id = onboardingProvider.getId();
+            if (BuiltInProvider.EAS.getId().equals(id)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private long getSMSRateLimit(Session session) throws OXException {
+        ConfigViewFactory confFactory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = confFactory.getView(session.getUserId(), session.getContextId());
+
+        ComposedConfigProperty<Long> property = view.property(OnboardingSMSConstants.SMS_RATE_LIMIT_PROPERTY, Long.class);
+        if (null == property || !property.isDefined()) {
+            return -1L;
+        }
+
+        return property.get().longValue();
+    }
+
+    private void checkSMSRateLimit(Session session, long ratelimit) throws OXException {
         if (ratelimit > 0) {
-            Long lastSMSSend = (Long) session.getParameter(SMS_LAST_SEND_TIMESTAMP);
+            Long lastSMSSend = (Long) session.getParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP);
 
-            if (lastSMSSend != null && lastSMSSend + ratelimit > System.currentTimeMillis()) {
-                throw OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(ratelimit / 1000);
+            if ((lastSMSSend != null) && ((lastSMSSend.longValue() + ratelimit) > System.currentTimeMillis())) {
+                throw OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(Long.valueOf(ratelimit / 1000));
             }
 
         }
     }
 
-    private void setRateLimitTime(Long rateLimit, Session session) {
+    private void setRateLimitTime(long rateLimit, Session session) {
         if (rateLimit > 0) {
-            session.setParameter(SMS_LAST_SEND_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
+            session.setParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP, Long.valueOf(System.currentTimeMillis()));
         }
     }
-
 
 }

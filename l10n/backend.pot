@@ -1001,7 +1001,7 @@ msgstr ""
 #. ----------------------------------------------------------------------------------------------------------------------
 #. The display name for an Apple Mac
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:122
-msgid "Apple Mac"
+msgid "Mac"
 msgstr ""
 
 #. The description for an Apple Mac
@@ -1011,7 +1011,7 @@ msgstr ""
 
 #. The display name for an Apple iPad
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:129
-msgid "Apple iPad"
+msgid "iPad"
 msgstr ""
 
 #. The description for an Apple iPad
@@ -1021,7 +1021,7 @@ msgstr ""
 
 #. The display name for an Apple iPhone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:136
-msgid "Apple iPhone"
+msgid "iPhone"
 msgstr ""
 
 #. The description for an Apple iPhone
@@ -1031,7 +1031,7 @@ msgstr ""
 
 #. The display name for an Android/Google tablet
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:143
-msgid "Android tablet"
+msgid "Tablet"
 msgstr ""
 
 #. The description for an Android/Google tablet
@@ -1041,7 +1041,7 @@ msgstr ""
 
 #. The display name for an Android/Google phone
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:150
-msgid "Android phone"
+msgid "Smartphone"
 msgstr ""
 
 #. The description for an Android/Google phone
@@ -1051,7 +1051,7 @@ msgstr ""
 
 #. The display name for a Windows Desktop
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:157
-msgid "Windows Desktop"
+msgid "Desktop"
 msgstr ""
 
 #. The description for a Windows Desktop
@@ -1091,11 +1091,11 @@ msgid "To set up your account, download the following file: "
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
-msgid "To set up your dav account, download the following file: "
+msgid "To set up your CalDAV/CardDAV account, download the following file: "
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
-msgid "To set up your eas account, download the following file: "
+msgid "To set up your EAS account, download the following file: "
 msgstr ""
 
 #. The user salutation; e.g. "Dear John Doe,"
@@ -7620,6 +7620,15 @@ msgstr ""
 msgid ""
 "Wrong or missing login data to access mail transport server %1$s. Please "
 "check associated account's settings/credentials."
+msgstr ""
+
+#. *
+#. * The message could not be sent due to a mail server temporary failure. Please try again later.
+#.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:192
+msgid ""
+"The message could not be sent due to a mail server temporary failure. Please "
+"try again later."
 msgstr ""
 
 #. Cannot find mail account for user "%2$s".

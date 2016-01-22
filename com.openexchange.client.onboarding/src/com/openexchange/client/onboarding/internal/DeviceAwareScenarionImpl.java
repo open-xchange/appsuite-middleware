@@ -49,6 +49,8 @@
 
 package com.openexchange.client.onboarding.internal;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.Device;
@@ -76,14 +78,16 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     private final Device device;
     private final CompositeId compositeId;
     private final List<OnboardingAction> actions;
+    private final Collection<String> missingCapabilities;
 
     /**
      * Initializes a new {@link DeviceAwareScenarionImpl}.
      */
-    public DeviceAwareScenarionImpl(Scenario scenario, boolean enabled, Device device, List<OnboardingAction> actions) {
+    public DeviceAwareScenarionImpl(Scenario scenario, boolean enabled, Collection<String> missingCapabilities, Device device, List<OnboardingAction> actions) {
         super();
         this.id = new StringBuilder(32).append(device.getId()).append('/').append(scenario.getId()).toString();
         this.enabled = enabled;
+        this.missingCapabilities = missingCapabilities;
         this.scenario = scenario;
         this.device = device;
         this.actions = actions;
@@ -118,6 +122,11 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     @Override
     public Link getLink() {
         return scenario.getLink();
+    }
+
+    @Override
+    public Collection<String> getMissingCapabilities(Session session) {
+        return null == missingCapabilities ? Collections.<String> emptyList() : Collections.<String> unmodifiableCollection(missingCapabilities);
     }
 
     @Override

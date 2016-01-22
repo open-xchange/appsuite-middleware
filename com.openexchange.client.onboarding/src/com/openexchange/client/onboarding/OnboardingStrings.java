@@ -119,42 +119,42 @@ public class OnboardingStrings implements LocalizableStrings {
     // ----------------------------------------------------------------------------------------------------------------------
 
     // The display name for an Apple Mac
-    public static final String DEVICE_APPLE_MAC_DISPLAY_NAME = "Apple Mac";
+    public static final String DEVICE_APPLE_MAC_DISPLAY_NAME = "Mac";
 
     // The description for an Apple Mac
     public static final String DEVICE_APPLE_MAC_DESCRIPTION = "The device for an Apple Mac";
 
 
     // The display name for an Apple iPad
-    public static final String DEVICE_APPLE_IPAD_DISPLAY_NAME = "Apple iPad";
+    public static final String DEVICE_APPLE_IPAD_DISPLAY_NAME = "iPad";
 
     // The description for an Apple iPad
     public static final String DEVICE_APPLE_IPAD_DESCRIPTION = "The device for an Apple iPad";
 
 
     // The display name for an Apple iPhone
-    public static final String DEVICE_APPLE_IPHONE_DISPLAY_NAME = "Apple iPhone";
+    public static final String DEVICE_APPLE_IPHONE_DISPLAY_NAME = "iPhone";
 
     // The description for an Apple iPhone
     public static final String DEVICE_APPLE_IPHONE_DESCRIPTION = "The device for an Apple iPhone";
 
 
     // The display name for an Android/Google tablet
-    public static final String DEVICE_ANDROID_TABLET_DISPLAY_NAME = "Android tablet";
+    public static final String DEVICE_ANDROID_TABLET_DISPLAY_NAME = "Tablet";
 
     // The description for an Android/Google tablet
     public static final String DEVICE_ANDROID_TABLET_DESCRIPTION = "The device for an Android/Google tablet";
 
 
     // The display name for an Android/Google phone
-    public static final String DEVICE_ANDROID_PHONE_DISPLAY_NAME = "Android phone";
+    public static final String DEVICE_ANDROID_PHONE_DISPLAY_NAME = "Smartphone";
 
     // The description for an Android/Google phone
     public static final String DEVICE_ANDROID_PHONE_DESCRIPTION = "The device for an Android/Google phone";
 
 
     // The display name for a Windows Desktop
-    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Windows Desktop";
+    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Desktop";
 
     // The description for a Windows Desktop
     public static final String DEVICE_WINDOWS_DESKTOP_DESCRIPTION = "The device for a Windows Desktop";

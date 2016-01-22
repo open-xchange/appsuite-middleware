@@ -54,12 +54,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultScenario;
 import com.openexchange.client.onboarding.Device;
@@ -220,7 +223,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             if (null == provider) {
                 LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
                 return false;
-            } else if (!provider.isAvailable(session)) {
+            } else if (!provider.isAvailable(session).isAvailable()) {
                 return false;
             }
         }
@@ -239,12 +242,17 @@ public class OnboardingServiceImpl implements OnboardingService {
             throw OnboardingExceptionCodes.NO_SUCH_SCENARIO.create(scenarioId);
         }
 
+
         boolean enabled = true;
+        Set<String> missingCapabilities = new LinkedHashSet<String>(4);
         for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
             OnboardingProvider provider = it.next();
-            enabled &= provider.isAvailable(session);
+            AvailabilityResult result = provider.isAvailable(session);
+            enabled &= result.isAvailable();
+            missingCapabilities.addAll(result.getMissingCapabilities());
         }
-        return new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), session));
+
+        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), session));
     }
 
     @Override
@@ -260,11 +268,14 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         boolean enabled = true;
+        Set<String> missingCapabilities = new LinkedHashSet<String>(4);
         for (Iterator<OnboardingProvider> it = scenario.getProviders(userId, contextId).iterator(); enabled && it.hasNext();) {
             OnboardingProvider provider = it.next();
-            enabled &= provider.isAvailable(userId, contextId);
+            AvailabilityResult result = provider.isAvailable(userId, contextId);
+            enabled &= result.isAvailable();
+            missingCapabilities.addAll(result.getMissingCapabilities());
         }
-        return new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), userId, contextId));
+        return new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), userId, contextId));
     }
 
     @Override
@@ -287,11 +298,14 @@ public class OnboardingServiceImpl implements OnboardingService {
                 Scenario scenario = getScenario(configuredScenario, configuredScenarios, false, session);
                 if (null != scenario && scenario.isEnabled(session)) {
                     boolean enabled = true;
+                    Set<String> missingCapabilities = new LinkedHashSet<String>(4);
                     for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
                         OnboardingProvider provider = it.next();
-                        enabled &= provider.isAvailable(session);
+                        AvailabilityResult result = provider.isAvailable(session);
+                        enabled &= result.isAvailable();
+                        missingCapabilities.addAll(result.getMissingCapabilities());
                     }
-                    scenarios.add(new DeviceAwareScenarionImpl(scenario, enabled, device, Device.getActionsFor(device, scenario.getType(), session)));
+                    scenarios.add(new DeviceAwareScenarionImpl(scenario, enabled, missingCapabilities, device, Device.getActionsFor(device, scenario.getType(), session)));
                 }
             }
         }

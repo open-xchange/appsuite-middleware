@@ -49,7 +49,9 @@
 
 package com.openexchange.client.onboarding;
 
+import java.util.Collection;
 import java.util.List;
+import com.openexchange.session.Session;
 
 /**
  * {@link DeviceAwareScenario} - An on-boarding scenario parameterized with a certain device.
@@ -79,5 +81,13 @@ public interface DeviceAwareScenario extends Scenario {
      * @return The composite identifier
      */
     CompositeId getCompositeId();
+
+    /**
+     * Gets the list of missing capabilities, which are required in order to apply this scenario.
+     *
+     * @param session The session providing user information
+     * @return The list of missing capabilities or an empty list if all are satisfied
+     */
+    Collection<String> getMissingCapabilities(Session session);
 
 }

@@ -51,6 +51,8 @@ package com.openexchange.client.onboarding.drive.client.windows;
 
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -85,7 +87,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     public DriveWindowsClientOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "drivewindowsclient";
+        identifier = BuiltInProvider.DRIVE_WINDOWS_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
     }
 
@@ -100,13 +102,15 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability("drive", session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("drive", session);
+        return new AvailabilityResult(available, "drive");
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return OnboardingUtility.hasCapability("drive", userId, contextId);
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("drive", userId, contextId);
+        return new AvailabilityResult(available, "drive");
     }
 
     @Override

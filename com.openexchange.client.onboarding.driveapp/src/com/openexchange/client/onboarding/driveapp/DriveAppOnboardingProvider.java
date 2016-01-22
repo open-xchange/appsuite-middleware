@@ -52,6 +52,8 @@ package com.openexchange.client.onboarding.driveapp;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -89,7 +91,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     public DriveAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "driveapp";
+        identifier = BuiltInProvider.DRIVE_APP.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
     }
 
@@ -99,13 +101,15 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability("drive", session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("drive", session);
+        return new AvailabilityResult(available, "drive");
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return OnboardingUtility.hasCapability("drive", userId, contextId);
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("drive", userId, contextId);
+        return new AvailabilityResult(available, "drive");
     }
 
     @Override

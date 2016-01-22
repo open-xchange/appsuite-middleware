@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,71 +49,74 @@
 
 package com.openexchange.client.onboarding;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * {@link DefaultDeviceAwareScenario} - The default entity implementation.
+ * {@link AvailabilityResult} - The availability result.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class DefaultDeviceAwareScenario extends DefaultScenario implements DeviceAwareScenario {
+public class AvailabilityResult {
+
+    private static final AvailabilityResult AVAILABLE = new AvailabilityResult(true, Collections.<String> emptyList());
 
     /**
-     * Creates a new {@code DefaultScenario} instance
+     * Gets the result that signals availability.
      *
-     * @param id The scenario identifier
-     * @param type The associated type
-     * @param link The optional link
-     * @param icon The icon
-     * @param i18nDisplayName The translatable display name
-     * @param i18nDescription The translatable description
-     * @param device The associated device
-     * @return The new {@code DefaultScenario} instance
+     * @return The result that signals availability
      */
-    public static DefaultDeviceAwareScenario newInstance(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        return new DefaultDeviceAwareScenario(id, type, link, icon, i18nDisplayName, i18nDescription, device);
+    public static AvailabilityResult available() {
+        return AVAILABLE;
     }
 
-    // ----------------------------------------------------------------------------------------------------------------------------------
+    // --------------------------------------------------------------------------------------------------------------
 
-    private final Device device;
-    private final List<OnboardingAction> actions;
-    private final CompositeId compositeId;
+    private final boolean available;
+    private final List<String> missingCapabilities;
 
-    private DefaultDeviceAwareScenario(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription, Device device) {
-        super(new StringBuilder(32).append(device.getId()).append('/').append(id).toString(), type, link, icon, i18nDisplayName, i18nDescription);
-        this.device = device;
-        actions = new ArrayList<>(4);
-        compositeId = new CompositeId(device, id);
+    /**
+     * Initializes a new {@link AvailabilityResult}.
+     *
+     * @param available The availability flag
+     * @param missingCapabilities The missing capabilities
+     */
+    public AvailabilityResult(boolean available, List<String> missingCapabilities) {
+        super();
+        this.available = available;
+        this.missingCapabilities = missingCapabilities;
     }
 
     /**
-     * Adds specified action
+     * Initializes a new {@link AvailabilityResult}.
      *
-     * @param action The action
+     * @param available The availability flag
+     * @param missingCapabilities The missing capabilities
      */
-    public void addAction(OnboardingAction action) {
-        if (null != action) {
-            this.actions.add(action);
-        }
+    public AvailabilityResult(boolean available, String... missingCapabilities) {
+        super();
+        this.available = available;
+        this.missingCapabilities = null == missingCapabilities || missingCapabilities.length == 0 ? Collections.<String> emptyList() : Arrays.asList(missingCapabilities);
     }
 
-    @Override
-    public CompositeId getCompositeId() {
-        return compositeId;
+    /**
+     * Gets the availability flag
+     *
+     * @return <code>true</code> if available (permission-/capability-wise); otherwise <code>false</code>
+     */
+    public boolean isAvailable() {
+        return available;
     }
 
-    @Override
-    public Device getDevice() {
-        return device;
-    }
-
-    @Override
-    public List<OnboardingAction> getActions() {
-        return Collections.unmodifiableList(actions);
+    /**
+     * Gets the missing capabilities
+     *
+     * @return The missing capabilities
+     */
+    public List<String> getMissingCapabilities() {
+        return null == missingCapabilities ? Collections.<String> emptyList() : missingCapabilities;
     }
 
 }

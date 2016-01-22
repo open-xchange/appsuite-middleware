@@ -401,8 +401,17 @@ public class S3FileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
+        long fileSize = getFileSize(name);
+        if (offset > fileSize || -1 != length && length > fileSize - offset) {
+            throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
+        }
         String key = addPrefix(name);
-        GetObjectRequest request = new GetObjectRequest(bucketName, key).withRange(offset, offset + length - 1);
+        GetObjectRequest request = new GetObjectRequest(bucketName, key);
+        if (-1 != length) {
+            request.setRange(offset, offset + length - 1);
+        } else {
+            request.setRange(offset, fileSize - 1);
+        }
         try {
             return amazonS3.getObject(request).getObjectContent();
         } catch (AmazonClientException e) {

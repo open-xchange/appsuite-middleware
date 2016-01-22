@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.client.onboarding.app;
+package com.openexchange.client.onboarding.syncapp;
 
 import java.util.Collections;
 import java.util.EnumSet;
@@ -57,38 +57,43 @@ import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
+import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
 /**
- * {@link GenericAppOnboardingProvider}
+ * {@link SyncAppOnboardingProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class GenericAppOnboardingProvider implements OnboardingProvider {
+public class SyncAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
-    private final AvailabilityResult availabilityResult;
 
     /**
-     * Initializes a new {@link GenericAppOnboardingProvider}.
+     * Initializes a new {@link SyncAppOnboardingProvider}.
      */
-    public GenericAppOnboardingProvider(ServiceLookup services) {
+    public SyncAppOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = BuiltInProvider.GENERIC_APP.getId();
-        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
-        availabilityResult = AvailabilityResult.available();
+        identifier = BuiltInProvider.SYNC_APP.getId();
+        supportedDevices = EnumSet.of(Device.ANDROID_PHONE, Device.ANDROID_TABLET);
     }
 
     @Override
@@ -98,12 +103,14 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public AvailabilityResult isAvailable(Session session) throws OXException {
-        return availabilityResult;
+        boolean available = OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), session);
+        return new AvailabilityResult(available, Permission.CALDAV.getCapabilityName());
     }
 
     @Override
     public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
-        return availabilityResult;
+        boolean available = OnboardingUtility.hasCapability(Permission.CALDAV.getCapabilityName(), userId, contextId);
+        return new AvailabilityResult(available, Permission.CALDAV.getCapabilityName());
     }
 
     @Override
@@ -130,14 +137,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
 
         switch(scenario.getType()) {
             case LINK:
-                {
-                    // Return the link from associated scenario
-                    Link link = request.getScenario().getLink();
-                    if (null == link) {
-                        throw OnboardingExceptionCodes.MISSING_PROPERTY.create("link");
-                    }
-                    return new LinkResult(link);
-                }
+                return doExecuteLink(request, session);
             case MANUAL:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
             case PLIST:
@@ -145,6 +145,45 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
             default:
                 throw OnboardingExceptionCodes.UNSUPPORTED_TYPE.create(identifier, scenario.getType().getId());
         }
+    }
+
+    private Result doExecuteLink(OnboardingRequest request, Session session) throws OXException {
+        return linkResult(request, session);
+    }
+
+    private Result linkResult(OnboardingRequest request, Session session) throws OXException {
+        return new LinkResult(getAppStoreLink(request, session));
+    }
+
+    private Link getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+
+        LinkType linkType;
+        String propertyName;
+        {
+            Device device = request.getDevice();
+            switch (device.getPlatform()) {
+                case ANDROID_GOOGLE:
+                    propertyName = "com.openexchange.client.onboarding.syncapp.store.google.playstore";
+                    linkType = LinkType.GOOGLE_PLAY_STORE;
+                    break;
+                default:
+                    throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());
+            }
+        }
+
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        String value = property.get();
+        if (Strings.isEmpty(value)) {
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        return new Link(value, linkType);
     }
 
 }

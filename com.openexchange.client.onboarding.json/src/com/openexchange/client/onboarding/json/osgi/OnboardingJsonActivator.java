@@ -57,6 +57,7 @@ import com.openexchange.client.onboarding.json.OnboardingActionFactory;
 import com.openexchange.client.onboarding.json.converter.OnboardingViewConverter;
 import com.openexchange.client.onboarding.json.converter.ScenarioConverter;
 import com.openexchange.client.onboarding.service.OnboardingService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 
 /**
  * {@link OnboardingJsonActivator}
@@ -74,7 +75,7 @@ public class OnboardingJsonActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { CapabilityService.class, OnboardingService.class };
+        return new Class<?>[] { CapabilityService.class, OnboardingService.class, ConfigViewFactory.class };
     }
 
     @Override

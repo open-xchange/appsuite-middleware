@@ -70,8 +70,8 @@ public class DownloadOnboardingStrings implements LocalizableStrings {
 
     public static final String DEFAULT_MESSAGE = "To set up your account, download the following file: ";
 
-    public static final String DAV_MESSAGE = "To set up your dav account, download the following file: ";
+    public static final String DAV_MESSAGE = "To set up your CalDAV/CardDAV account, download the following file: ";
 
-    public static final String EAS_MESSAGE = "To set up your eas account, download the following file: ";
+    public static final String EAS_MESSAGE = "To set up your EAS account, download the following file: ";
 
 }

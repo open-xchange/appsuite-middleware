@@ -54,6 +54,8 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -93,7 +95,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     public EASOnboardingProvider(ServiceLookup services) {
         super();
         this.services = services;
-        identifier = "eas";
+        identifier = BuiltInProvider.EAS.getId();
         supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10));
     }
 
@@ -103,13 +105,15 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), session);
+        return new AvailabilityResult(available, Permission.ACTIVE_SYNC.getCapabilityName());
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), userId, contextId);
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability(Permission.ACTIVE_SYNC.getCapabilityName(), userId, contextId);
+        return new AvailabilityResult(available, Permission.ACTIVE_SYNC.getCapabilityName());
     }
 
     @Override

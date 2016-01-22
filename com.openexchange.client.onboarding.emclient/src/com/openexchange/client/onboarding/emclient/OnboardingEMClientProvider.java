@@ -51,6 +51,8 @@ package com.openexchange.client.onboarding.emclient;
 
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
 import com.openexchange.client.onboarding.LinkResult;
@@ -62,6 +64,7 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -81,7 +84,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
      */
     public OnboardingEMClientProvider() {
         super();
-        identifier = "emclient";
+        identifier = BuiltInProvider.EM_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
     }
 
@@ -128,48 +131,23 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     }
 
     private String getDownloadLink(Session session) throws OXException {
-
         String url = OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session);
-        if (isEmpty(url))
-        {
+        if (Strings.isEmpty(url)) {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(URL_CONFIGURATION);
         }
         return url;
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        boolean emClientCapability = OnboardingUtility.hasCapability("emclient", session);
-        return emClientCapability && hasURL(session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("emclient", session);
+        return new AvailabilityResult(available, "emclient");
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        boolean emClientCapability = OnboardingUtility.hasCapability("emclient", userId, contextId);
-        return emClientCapability && hasURL(userId, contextId);
-    }
-
-    private boolean hasURL(Session session) {
-        try {
-            return isEmpty(OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session));
-        } catch (OXException e) {
-            return false;
-        }
-    }
-
-    private boolean hasURL(int userId, int contextId) {
-        try {
-            return isEmpty(OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, userId, contextId));
-        } catch (OXException e) {
-            return false;
-        }
-    }
-
-    private boolean isEmpty(String str) {
-        if (str == null) {
-            return true;
-        }
-        return str.isEmpty();
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("emclient", userId, contextId);
+        return new AvailabilityResult(available, "emclient");
     }
 
 }

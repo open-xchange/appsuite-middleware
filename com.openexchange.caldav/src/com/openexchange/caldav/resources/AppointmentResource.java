@@ -58,8 +58,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -537,8 +539,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             /*
              * insert a dummy alarm to prevent Apple clients from adding their own default alarms
              */
-            if (SharedType.getInstance().equals(parent.getFolder().getType()) &&
-                (CalDAVAgent.IOS_CALENDAR.equals(factory.getState().getUserAgent()) || CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()))) {
+            if (CalDAVAgent.IOS_CALENDAR.equals(factory.getState().getUserAgent()) || CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent())) {
                 appointment.setProperty("com.openexchange.data.conversion.ical.alarm.emptyDefaultAlarm", Boolean.TRUE);
             }
         } else {
@@ -939,6 +940,7 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
      * @param originalAppointment The original appointment, or <code>null</code> if there is none
      * @param updatedAppointment The updated appointment, possibly holding the
      *                           <code>com.openexchange.data.conversion.ical.alarm.acknowledged</code> property
+     * @param exceptionsToSave The (possibly updated) exceptions as indicated by the client
      * @return The next reminder to store, or <code>null</code> if no further actions are required
      */
     private ReminderObject handleReminders(CalendarDataObject originalAppointment, CalendarDataObject updatedAppointment, List<CalendarDataObject> exceptionsToSave) throws OXException {
@@ -954,31 +956,26 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.alarm.snooze");
         updatedAppointment.removeProperty("com.openexchange.data.conversion.ical.alarm.relativeSnooze");
         /*
-         * check & adjust a snoozed alarm in a series occurrence in the Mac OS client's way
+         * detect and adjust an exception creation for a snoozed alarm in a recurring appointment as performed by the Mac OS client
          */
-        if (recurring && CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()) &&
-            null != exceptionsToSave && 1 == exceptionsToSave.size() && null != exceptionsToSave.get(0)) {
-            CalendarDataObject exceptionToSave = exceptionsToSave.get(0);
-            Date exceptionAcknowledgedDate = exceptionToSave.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
-            Date exceptionSnoozeDate = exceptionToSave.getProperty("com.openexchange.data.conversion.ical.alarm.snooze");
-            if (null != exceptionAcknowledgedDate && null != exceptionSnoozeDate && null != exceptionToSave.getStartDate() && null != exceptionToSave.getEndDate()) {
-                AppointmentDiff diff = AppointmentDiff.compare(appointmentToSave, exceptionToSave,
-                    Appointment.RECURRENCE_DATE_POSITION, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_POSITION,
-                    Appointment.RECURRENCE_START, Appointment.RECURRENCE_COUNT, Appointment.START_DATE, Appointment.END_DATE);
-                if (diff.getUpdates().isEmpty()) {
-                    RecurringResultsInterface recurringResults = factory.getCalendarUtilities().calculateRecurringIgnoringExceptions(
-                        originalAppointment, exceptionToSave.getStartDate().getTime(), exceptionToSave.getEndDate().getTime(), 0);
-                    for (int i = 0; i < recurringResults.size(); i++) {
-                        RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
-                        if (null != recurringResult && recurringResult.getStart() == exceptionToSave.getStartDate().getTime() &&
-                            recurringResult.getEnd() == exceptionToSave.getEndDate().getTime()) {
-                            /*
-                             * found new exception matching the original timeslot, containing an acknowledged & snoozed alarm =>
-                             * take over properties to series master for further processing & ignore change new exception
-                             */
+        if (recurring && null != originalAppointment && CalDAVAgent.MAC_CALENDAR.equals(factory.getState().getUserAgent()) &&
+            null != exceptionsToSave && 0 < exceptionsToSave.size()) {
+            List<CalendarDataObject> newExceptions = getNewExceptions(originalAppointment, exceptionsToSave);
+            if (1 == newExceptions.size()) {
+                CalendarDataObject newException = newExceptions.get(0);
+                Date exceptionAcknowledgedDate = newException.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
+                Date exceptionSnoozeDate = newException.getProperty("com.openexchange.data.conversion.ical.alarm.snooze");
+                if (null != exceptionAcknowledgedDate && null != exceptionSnoozeDate && considerUnchanged(originalAppointment, newException)) {
+                    /*
+                     * found new exception matching the original timeslot, containing an acknowledged & snoozed alarm =>
+                     * take over properties to series master for further processing & ignore new change exception
+                     */
+                    for (Iterator<CalendarDataObject> iterator = exceptionsToSave.iterator(); iterator.hasNext();) {
+                        if (newException == iterator.next()) {
+                            // beware of using exceptionsToSave.remove(newException) here, see Appointment.equals() implementation
+                            iterator.remove();
                             acknowledgedDate = exceptionAcknowledgedDate;
                             snoozeDate = exceptionSnoozeDate;
-                            exceptionsToSave.clear();
                             break;
                         }
                     }
@@ -1046,6 +1043,66 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             return calculateNextReminder(null != originalAppointment ? originalAppointment : updatedAppointment, acknowledgedDate, existingReminder);
         }
         return null;
+    }
+
+    /**
+     * Extracts those change exceptions that are considered as "new", i.e. change exceptions that do not already exist based on the change exception dates of the original recurring appointment master.
+     *
+     * @param originalAppointment The original recurring appointment master
+     * @param exceptionsToSave The (possibly updated) exceptions as indicated by the client
+     * @return The new exceptions, or an empty list if there are none
+     */
+    private static List<CalendarDataObject> getNewExceptions(CalendarDataObject originalAppointment, List<CalendarDataObject> exceptionsToSave) {
+        if (null == exceptionsToSave || 0 == exceptionsToSave.size()) {
+            return Collections.emptyList();
+        }
+        if (null == originalAppointment || null == originalAppointment.getChangeException() || 0 == originalAppointment.getChangeException().length) {
+            return new ArrayList<CalendarDataObject>(exceptionsToSave);
+        }
+        List<CalendarDataObject> newExceptions = new ArrayList<CalendarDataObject>(exceptionsToSave.size());
+        for (CalendarDataObject updatedException : exceptionsToSave) {
+            boolean found = false;
+            for (Date recurrenceDatePosition : originalAppointment.getChangeException()) {
+                if (recurrenceDatePosition.equals(updatedException.getRecurrenceDatePosition())) {
+                    found = true;
+                    break;
+                }
+            }
+            if (false == found) {
+                newExceptions.add(updatedException);
+            }
+        }
+        return newExceptions;
+    }
+
+    /**
+     * Gets a value indicating whether a new change exception is considered as a "real" change compared to the original recurring
+     * appointment master or not.
+     *
+     * @param originalAppointment The original recurring appointment master
+     * @param newException The new exception to check
+     * @return <code>true</code> if the exception can be considered unchanged, <code>false</code>, otherwise
+     */
+    private boolean considerUnchanged(CalendarDataObject originalAppointment, CalendarDataObject newException) throws OXException {
+        AppointmentDiff diff = AppointmentDiff.compare(originalAppointment, newException,
+            Appointment.RECURRENCE_DATE_POSITION, Appointment.RECURRENCE_ID, Appointment.RECURRENCE_TYPE, Appointment.RECURRENCE_POSITION,
+            Appointment.RECURRENCE_START, Appointment.RECURRENCE_COUNT, Appointment.START_DATE, Appointment.END_DATE,
+            Appointment.CREATION_DATE, Appointment.LAST_MODIFIED, Appointment.LAST_MODIFIED_UTC, Appointment.CREATED_BY, Appointment.MODIFIED_BY);
+        if (diff.getUpdates().isEmpty() && null != newException.getStartDate() && null != newException.getEndDate()) {
+            RecurringResultsInterface recurringResults = factory.getCalendarUtilities().calculateRecurringIgnoringExceptions(
+                originalAppointment, newException.getStartDate().getTime(), newException.getEndDate().getTime(), 0);
+            for (int i = 0; i < recurringResults.size(); i++) {
+                RecurringResultInterface recurringResult = recurringResults.getRecurringResult(i);
+                if (null != recurringResult && recurringResult.getStart() == newException.getStartDate().getTime() &&
+                    recurringResult.getEnd() == newException.getEndDate().getTime()) {
+                    /*
+                     * new exception matches the original recurrence timeslot, consider as unchanged
+                     */
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /**
