@@ -85,8 +85,8 @@ public interface Scenario extends Entity {
     /**
      * Gets the associated on-boarding providers.
      *
-     * @param userId The user id
-     * @param contextId The context id
+     * @param userId The user ididentifier
+     * @param contextId The context identifier
      * @return The provider list
      */
     List<OnboardingProvider> getProviders(int userId, int contextId);

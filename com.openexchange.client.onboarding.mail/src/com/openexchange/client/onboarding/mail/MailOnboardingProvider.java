@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
@@ -79,6 +80,7 @@ import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.plist.PListDict;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.user.UserService;
@@ -113,27 +115,33 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
+    public AvailabilityResult isAvailable(Session session) throws OXException {
         if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), session)) {
-            return false;
+            return new AvailabilityResult(false, Permission.WEBMAIL.getCapabilityName());
         }
-        MailAccount mailAccount = services.getService(MailAccountStorageService.class).getDefaultMailAccount(session.getUserId(), session.getContextId());
-        return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
+
+        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
+        if (service==null){
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
+        MailAccount mailAccount = service.getDefaultMailAccount(session.getUserId(), session.getContextId());
+        boolean available = (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
+        return new AvailabilityResult(available);
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
         if (!OnboardingUtility.hasCapability(Permission.WEBMAIL.getCapabilityName(), userId, contextId)) {
-            return false;
-        }
-        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
-        if(service==null){
-            LOG.error("MailAccountStorageService is not available!");
-            return false;
+            return new AvailabilityResult(false, Permission.WEBMAIL.getCapabilityName());
         }
 
+        MailAccountStorageService service = services.getService(MailAccountStorageService.class);
+        if (service==null){
+            throw ServiceExceptionCode.absentService(MailAccountStorageService.class);
+        }
         MailAccount mailAccount = service.getDefaultMailAccount(userId, contextId);
-        return (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
+        boolean available = (mailAccount.getMailProtocol().startsWith("imap") && mailAccount.getTransportProtocol().startsWith("smtp"));
+        return new AvailabilityResult(available);
     }
 
     @Override

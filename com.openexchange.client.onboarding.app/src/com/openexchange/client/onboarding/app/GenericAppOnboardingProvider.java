@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding.app;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
@@ -77,6 +78,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
+    private final AvailabilityResult availabilityResult;
 
     /**
      * Initializes a new {@link GenericAppOnboardingProvider}.
@@ -86,6 +88,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = BuiltInProvider.GENERIC_APP.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        availabilityResult = AvailabilityResult.available();
     }
 
     @Override
@@ -94,13 +97,13 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return true;
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        return availabilityResult;
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return true;
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        return availabilityResult;
     }
 
     @Override

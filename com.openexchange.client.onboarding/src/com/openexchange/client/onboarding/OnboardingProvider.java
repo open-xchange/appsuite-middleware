@@ -94,16 +94,16 @@ public interface OnboardingProvider {
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @throws OXException If availability cannot be checked
      */
-    boolean isAvailable(Session session) throws OXException;
+    AvailabilityResult isAvailable(Session session) throws OXException;
 
     /**
      * Checks if this provider is enabled for given user.
      *
-     * @param userId The user id
-     * @param contextId The context id
+     * @param userId The user identifier
+     * @param contextId The context identifier
      * @return <code>true</code> if enabled; otherwise <code>false</code>
      * @throws OXException If availability cannot be checked
      */
-    boolean isAvailable(int userId, int contextId) throws OXException;
+    AvailabilityResult isAvailable(int userId, int contextId) throws OXException;
 
 }

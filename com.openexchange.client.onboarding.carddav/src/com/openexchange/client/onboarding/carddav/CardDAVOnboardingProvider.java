@@ -54,6 +54,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
@@ -104,13 +105,15 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), session);
+        return new AvailabilityResult(available, Permission.CARDDAV.getCapabilityName());
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), userId, contextId);
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability(Permission.CARDDAV.getCapabilityName(), userId, contextId);
+        return new AvailabilityResult(available, Permission.CARDDAV.getCapabilityName());
     }
 
     @Override

@@ -52,6 +52,7 @@ package com.openexchange.client.onboarding.mailapp;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
+import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.Link;
@@ -100,13 +101,15 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
-    public boolean isAvailable(Session session) throws OXException {
-        return OnboardingUtility.hasCapability("mobile_mail_app", session);
+    public AvailabilityResult isAvailable(Session session) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("mobile_mail_app", session);
+        return new AvailabilityResult(available, "mobile_mail_app");
     }
 
     @Override
-    public boolean isAvailable(int userId, int contextId) throws OXException {
-        return OnboardingUtility.hasCapability("mobile_mail_app", userId, contextId);
+    public AvailabilityResult isAvailable(int userId, int contextId) throws OXException {
+        boolean available = OnboardingUtility.hasCapability("mobile_mail_app", userId, contextId);
+        return new AvailabilityResult(available, "mobile_mail_app");
     }
 
     @Override

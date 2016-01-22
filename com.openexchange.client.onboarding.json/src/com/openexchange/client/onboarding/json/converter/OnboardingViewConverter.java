@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.json.converter;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -228,9 +229,14 @@ public class OnboardingViewConverter implements ResultConverter {
             boolean enabled = scenario.isEnabled(session);
             jScenario2ActionEntry.put("enabled", enabled);
             if (!enabled) {
-                JSONArray jMissingCaps = new JSONArray(4);
-                // TODO:
-                jScenario2ActionEntry.put("missing_capabilities", jMissingCaps);
+                Collection<String> missingCapabilities = scenario.getMissingCapabilities(session);
+                if (null != missingCapabilities && !missingCapabilities.isEmpty()) {
+                    JSONArray jMissingCaps = new JSONArray(missingCapabilities.size());
+                    for (String missingCapability : missingCapabilities) {
+                        jMissingCaps.put(missingCapability);
+                    }
+                    jScenario2ActionEntry.put("missing_capabilities", jMissingCaps);
+                }
             }
 
             jScenario2ActionEntry.put("actions", jActionIds);
