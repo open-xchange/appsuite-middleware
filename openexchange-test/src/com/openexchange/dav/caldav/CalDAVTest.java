@@ -342,10 +342,12 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     protected Appointment getAppointment(String folderID, String uid) throws OXException {
         Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(100000000000000L),
-            new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.UID });
+            new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.FOLDER_ID, Appointment.UID });
         for (Appointment appointment : appointments) {
             if (uid.equals(appointment.getUid())) {
-                return testManager.get(appointment);
+                if (0 >= appointment.getRecurrenceID() || appointment.getRecurrenceID() == appointment.getObjectID()) {
+                    return testManager.get(appointment);
+                }
             }
         }
         return null;
