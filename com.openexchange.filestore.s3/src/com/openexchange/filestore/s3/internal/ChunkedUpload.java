@@ -143,7 +143,7 @@ public class ChunkedUpload implements Closeable {
             byte[] digest = digestStream.getMessageDigest().digest();
             return new UploadChunk(fileHolder, digest);
         } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e);
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         }
     }
 
