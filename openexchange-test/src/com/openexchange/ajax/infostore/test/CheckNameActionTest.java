@@ -113,6 +113,15 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
             assertTrue(resp.getErrorMessage().contains(name));
         }
     }
+    
+    public void testMatchOnlyExactReservedNames() throws Exception {
+        String[] RESERVED_NAMES = new String[] {"COM", "CON1", "NULL", "LPT12", "AUXQWERT", "PRN2" };
+        for (String name : RESERVED_NAMES) {
+            CheckNameRequest req = new CheckNameRequest(name, false);
+            CheckNameResponse resp = client.execute(req);
+            assertFalse(resp.hasError());
+        }
+    }
 
     public void testOnlyDotsInName() throws Exception {
         CheckNameRequest req = new CheckNameRequest("..", false);

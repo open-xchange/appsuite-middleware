@@ -86,7 +86,7 @@ public final class FilenameValidationUtils {
 
     public static final Pattern ILLEGAL_CHARACTER_PATTERN = Pattern.compile("(<)|(>)|(:)|(\\/)|(\\?)|(\\*)|(\\\")|(\\\\)");
 
-    public static final Pattern RESERVED_NAME_PATTERN = Pattern.compile("(CON)|(PRN)|(AUX)|(NUL)|(COM[1-9])|(LPT[1-9])", Pattern.CASE_INSENSITIVE);
+    public static final Pattern RESERVED_NAME_PATTERN = Pattern.compile("(^CON$)|(^PRN$)|(^AUX$)|(^NUL$)|(^COM[1-9]$)|(^LPT[1-9]$)", Pattern.CASE_INSENSITIVE);
 
     public static final Pattern ONLY_DOTS_PATTERN = Pattern.compile("(^\\.$)|(^\\.\\.$)");
 
