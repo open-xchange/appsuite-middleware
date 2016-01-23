@@ -1,3 +1,9 @@
+open-xchange-freebusy-ews (7.8.0-18) stable; urgency=medium
+
+  * Build for patch 2016-02-05 (3058)
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Sat, 23 Jan 2016 12:19:00 +0100
+
 open-xchange-freebusy-ews (7.8.0-17) stable; urgency=medium
 
   * Build for patch 2016-01-15 (3028)
