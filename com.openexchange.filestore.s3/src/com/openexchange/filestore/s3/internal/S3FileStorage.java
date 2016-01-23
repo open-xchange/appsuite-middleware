@@ -62,7 +62,9 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
+import javax.servlet.http.HttpServletResponse;
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.Request;
 import com.amazonaws.handlers.RequestHandler;
 import com.amazonaws.services.s3.AmazonS3Client;
@@ -415,6 +417,10 @@ public class S3FileStorage implements FileStorage {
         try {
             return amazonS3.getObject(request).getObjectContent();
         } catch (AmazonClientException e) {
+            if (AmazonServiceException.class.isInstance(e) &&
+                HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE == ((AmazonServiceException) e).getStatusCode()) {
+                throw FileStorageCodes.INVALID_RANGE.create(e, offset, length, name, fileSize);
+            }
             throw wrap(e, key);
         }
     }

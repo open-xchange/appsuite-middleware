@@ -159,8 +159,8 @@ public class DownloadAction extends AbstractDriveAction {
             FileStorageExceptionCodes.NOT_FOUND.equals(e) || FileStorageExceptionCodes.FILE_VERSION_NOT_FOUND.equals(e) ||
             "DROPBOX-0005".equals(e.getErrorCode()) || "GOOGLE_DRIVE-0005".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_NOT_FOUND;
-        } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-018".equals(e.getErrorCode())
-            || "FLS-019".equals(e.getErrorCode()) || "FLS-020".equals(e.getErrorCode())) {
+        } else if (DriveExceptionCodes.INVALID_FILE_OFFSET.equals(e) || "FLS-0018".equals(e.getErrorCode())
+            || "FLS-0019".equals(e.getErrorCode()) || "FLS-0020".equals(e.getErrorCode())) {
             status = HttpServletResponse.SC_REQUESTED_RANGE_NOT_SATISFIABLE;
         } else if (DriveExceptionCodes.SERVER_BUSY.equals(e)) {
             status = HttpServletResponse.SC_SERVICE_UNAVAILABLE;
