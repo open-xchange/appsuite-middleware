@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,80 +47,38 @@
  *
  */
 
-package com.openexchange.client.onboarding;
+package com.openexchange.client.onboarding.drivemac.osgi;
+
+import com.openexchange.client.onboarding.OnboardingProvider;
+import com.openexchange.client.onboarding.drivemac.DriveMacOnboardingProvider;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+
 
 /**
- * {@link BuiltInProvider} - An enumeration of identifiers for built-in providers.
+ * {@link DriveMacOnboardingActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public enum BuiltInProvider {
+public class DriveMacOnboardingActivator extends HousekeepingActivator {
 
     /**
-     * The generic app provider
+     * Initializes a new {@link DriveMacOnboardingActivator}.
      */
-    GENERIC_APP("app"),
-    /**
-     * The CalDAV provider
-     */
-    CALDAV("caldav"),
-    /**
-     * The CardDAV provider
-     */
-    CARDDAV("carddav"),
-    /**
-     * The Drive Windows Client provider
-     */
-    DRIVE_WINDOWS_CLIENT("drivewindowsclient"),
-    /**
-     * The OX Drive for Mac provider
-     */
-    DRIVE_MAC("drivemac"),
-    /**
-     * The OX Drive App provider
-     */
-    DRIVE_APP("driveapp"),
-    /**
-     * The OX Mail App provider
-     */
-    MAIL_APP("mailapp"),
-    /**
-     * The Microsoft Active Sync provider
-     */
-    EAS("eas"),
-    /**
-     * The eM Clent provider
-     */
-    EM_CLIENT("emclient"),
-    /**
-     * The mail (IMAP/SMTP) provider
-     */
-    MAIL("mail"),
-    /**
-     * The legacy OX Updater provider
-     */
-    UPDATER("oxupdater"),
-    /**
-     * The Sync App for Android provider
-     */
-    SYNC_APP("syncapp"),
-
-    ;
-
-    private final String id;
-
-    private BuiltInProvider(String id) {
-        this.id = id;
+    public DriveMacOnboardingActivator() {
+        super();
     }
 
-    /**
-     * Gets the identifier
-     *
-     * @return The identifier
-     */
-    public String getId() {
-        return id;
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(OnboardingProvider.class, new DriveMacOnboardingProvider(this));
     }
 
 }

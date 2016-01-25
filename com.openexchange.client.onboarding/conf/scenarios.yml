@@ -153,6 +153,23 @@ emclientinstall:
     description_t10e: "To use eM-Client on your device, simply download and install"
 
 
+### OX Drive for Mac
+################################################################################
+
+drivemacinstall:
+    # Disabled by default
+    enabled: false
+    type: link
+    providers: [drivemac]
+    alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    icon: drivemac.png
+    # The translatable display name
+    displayName_t10e: "OX Drive"
+    # The translatable description
+    description_t10e: "To use Drive on your Mac, simply download OX Drive"
+
+
 ### OX Mail App
 ################################################################################
 
