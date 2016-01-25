@@ -174,35 +174,6 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public boolean createAlias(Connection con, int contextId, int userId, String alias, byte[] uuidBinary) throws OXException {
-        boolean useExistingConnection = true;
-        if (con == null) {
-            con = Database.get(contextId, true);
-            useExistingConnection = false;
-        }
-        PreparedStatement stmt = null;
-        try {
-            int index = 0;
-
-            stmt = con.prepareStatement(CREATE_ALIAS_WITH_UUID);
-            stmt.setInt(++index, contextId);
-            stmt.setInt(++index, userId);
-            stmt.setString(++index, alias);
-            stmt.setBytes(++index, uuidBinary);
-            
-            return stmt.execute();
-        } catch (SQLException e) {
-            throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            DBUtils.closeSQLStuff(stmt);
-            // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
-                Database.back(contextId, false, con);
-            }
-        }
-    }
-
-    @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean useExistingConnection = true;
         if(con == null) {

@@ -109,19 +109,6 @@ public interface UserAliasStorage {
     boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException;
 
     /**
-     * Creates an alias.
-     *
-     * @param con A write connection object to use or <code>null</code> to obtain a new database write connection.
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @param alias The alias to create
-     * @param uuid The alias UUID in binary format (see {@link  UUIDs#toByteArray})
-     * @return <code>true</code> on successful creation; otherwise <code>false</code>
-     * @throws OXException If an SQL error happened
-     */
-    boolean createAlias(Connection con, int contextId, int userId, String alias, byte[] uuidBinary) throws OXException;
-
-    /**
      * Updates the alias
      *
      * @param con A write connection object to use or <code>null</code> to obtain a new database write connection.
