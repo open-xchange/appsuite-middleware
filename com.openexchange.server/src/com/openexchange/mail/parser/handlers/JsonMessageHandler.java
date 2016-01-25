@@ -54,11 +54,13 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -223,6 +225,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final MailPath originalMailPath;
     private final JSONObject jsonObject;
     private JSONArray attachmentsArr;
+    private List<JSONObject> tmpAttachmentList;
     private JSONArray nestedMsgsArr;
     private boolean isAlternative;
     private String altId;
@@ -417,6 +420,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
         return attachmentsArr;
     }
+    
+    private List<JSONObject> getTmpAttachmentsArr() throws JSONException {
+        if (tmpAttachmentList == null) {
+            tmpAttachmentList = new ArrayList<JSONObject>();
+        }
+        return tmpAttachmentList;
+    }
 
     private JSONArray getNestedMsgsArr() throws JSONException {
         if (nestedMsgsArr == null) {
@@ -568,6 +578,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             // } else {
             // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
             // }
+            if(isAlternative){
+                getTmpAttachmentsArr().add(jsonObject);
+                return true;
+            } 
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
@@ -1188,6 +1202,17 @@ public final class JsonMessageHandler implements MailMessageHandler {
              * No text present
              */
             asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
+            
+            //Append other attachments (see Bug #43573)
+            if (tmpAttachmentList != null && !tmpAttachmentList.isEmpty()) {
+                try {
+                    for (JSONObject attachment : tmpAttachmentList) {
+                        getAttachmentsArr().put(attachment);
+                    }
+                } catch (final JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
         }
         try {
             String headersKey = HEADERS;
