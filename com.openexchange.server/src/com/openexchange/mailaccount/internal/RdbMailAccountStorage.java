@@ -114,6 +114,7 @@ import com.openexchange.mailaccount.MailAccountExceptionCodes;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.TransportAuth;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.UpdateProperties;
 import com.openexchange.mailaccount.json.fields.GetSwitch;
 import com.openexchange.mailaccount.json.fields.MailAccountGetSwitch;
 import com.openexchange.mailaccount.json.fields.SetSwitch;
@@ -1267,10 +1268,22 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
 
     @Override
     public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, Session session, Connection con, boolean changePrimary) throws OXException {
+        UpdateProperties updateProperties = new UpdateProperties.Builder().setChangePrimary(changePrimary).setChangeProtocol(false).setCon(con).setSession(session).build();
+        updateMailAccount(mailAccount, attributes, userId, contextId, updateProperties);
+    }
+
+    @Override
+    public void updateMailAccount(MailAccountDescription mailAccount, Set<Attribute> attributes, int userId, int contextId, UpdateProperties updateProperties) throws OXException {
+        Connection con = updateProperties == null ? null : updateProperties.getCon();
+        Session session = updateProperties == null ? null : updateProperties.getSession();
+        boolean changePrimary = updateProperties == null ? false : updateProperties.isChangePrimary();
+        boolean changeProtocol = updateProperties == null ? false : updateProperties.isChangeProtocol();
+
         if (null == con) {
             updateMailAccount(mailAccount, attributes, userId, contextId, session, changePrimary);
             return;
         }
+
         dropPOP3StorageFolders(userId, contextId);
         if (attributes.contains(Attribute.NAME_LITERAL)) {
             // Check name
@@ -1381,23 +1394,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), userId, contextId, con);
 
                     // Check protocol mismatch
-                    final String newProtocol = mailAccount.getMailProtocol();
-                    if (null != newProtocol) {
-                        final String oldProtocol = storageVersion.getMailProtocol();
-                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
-                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                    if (false == changeProtocol) {
+                        String newProtocol = mailAccount.getMailProtocol();
+                        if (null != newProtocol) {
+                            String oldProtocol = storageVersion.getMailProtocol();
+                            if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                                throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                            }
                         }
                     }
                 } else if (attributes.contains(Attribute.MAIL_URL_LITERAL)) {
                     checkDuplicateMailAccount(mailAccount, new TIntHashSet(new int[] {mailAccount.getId()}), userId, contextId, con);
 
                     // Check protocol mismatch
-                    final String newProtocol = mailAccount.getMailProtocol();
-                    if (null != newProtocol) {
-                        storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
-                        final String oldProtocol = storageVersion.getMailProtocol();
-                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
-                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                    if (false == changeProtocol) {
+                        String newProtocol = mailAccount.getMailProtocol();
+                        if (null != newProtocol) {
+                            storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                            String oldProtocol = storageVersion.getMailProtocol();
+                            if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                                throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                            }
                         }
                     }
                 }
@@ -1418,23 +1435,27 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                     }
 
                     // Check protocol mismatch
-                    final String newProtocol = mailAccount.getTransportProtocol();
-                    if (null != newProtocol) {
-                        final String oldProtocol = storageVersion.getTransportProtocol();
-                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
-                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                    if (false == changeProtocol) {
+                        String newProtocol = mailAccount.getTransportProtocol();
+                        if (null != newProtocol) {
+                            String oldProtocol = storageVersion.getTransportProtocol();
+                            if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                                throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                            }
                         }
                     }
                 } else if (attributes.contains(Attribute.TRANSPORT_URL_LITERAL)) {
                     // Check protocol mismatch
-                    final String newProtocol = mailAccount.getTransportProtocol();
-                    if (null != newProtocol) {
-                        if (null == storageVersion) {
-                            storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
-                        }
-                        final String oldProtocol = storageVersion.getTransportProtocol();
-                        if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
-                            throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                    if (false == changeProtocol) {
+                        String newProtocol = mailAccount.getTransportProtocol();
+                        if (null != newProtocol) {
+                            if (null == storageVersion) {
+                                storageVersion = getMailAccount(mailAccount.getId(), userId, contextId, con);
+                            }
+                            String oldProtocol = storageVersion.getTransportProtocol();
+                            if (!newProtocol.equalsIgnoreCase(oldProtocol)) {
+                                throw MailAccountExceptionCodes.PROTOCOL_CHANGE.create(oldProtocol, newProtocol, I(userId), I(contextId));
+                            }
                         }
                     }
                 }
@@ -2448,7 +2469,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             try {
                 addr = InetAddress.getByName(IDNA.toASCII(server));
             } catch (final UnknownHostException e) {
-                LOG.warn("", e);
+                LOG.warn("Unable to resolve host name '{}' to an IP address", server, e);
                 addr = null;
             }
             final int port = mailAccount.getMailPort();
