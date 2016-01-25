@@ -1,9 +1,3 @@
-open-xchange-oauth-provider (7.8.0-18) stable; urgency=medium
-
-  * Build for patch 2016-01-25 (3031)
-
- -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 19 Jan 2016 17:46:02 +0100
-
 open-xchange-oauth-provider (7.8.0-17) stable; urgency=medium
 
   * Build for patch 2016-01-15 (3028)
