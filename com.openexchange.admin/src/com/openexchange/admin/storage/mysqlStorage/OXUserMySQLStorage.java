@@ -795,8 +795,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
                 for (final String elem : alias) {
                     if (elem != null && elem.trim().length() > 0) {
-                        byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                        aliasStorage.createAlias(con, contextId, userId, elem, uuidBinary);
+                        aliasStorage.createAlias(con, contextId, userId, elem);
                     }
                 }
             } else if (usrdata.isAliasesset()) {
@@ -1915,8 +1914,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     while (itr.hasNext()) {
                         final String tmp_mail = itr.next().toString().trim();
                         if (tmp_mail.length() > 0) {
-                            byte[] uuidBinary = UUIDs.toByteArray(UUID.randomUUID());
-                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail, uuidBinary);
+                            userAlias.createAlias(con, ctx.getId(), userId, tmp_mail);
                         }
                     }
                 }
