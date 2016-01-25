@@ -56,8 +56,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
+import com.openexchange.ajax.login.LoginConfiguration;
+import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.state.AuthnRequestInfo;
 import com.openexchange.saml.state.StateManagement;
@@ -117,6 +122,13 @@ public abstract class AbstractSAMLBackend implements SAMLBackend {
      */
     protected ValidationStrategy doGetValidationStrategy(SAMLConfig config, StateManagement stateManagement) {
         return new StrictValidationStrategy(config, getCredentialProvider(), stateManagement);
+    }
+
+    @Override
+    public LoginRequest prepareLoginRequest(HttpServletRequest httpRequest, LoginConfiguration loginConfiguration, User user, Context context) throws OXException {
+        String login = user.getLoginInfo() + '@' + context.getLoginInfo()[0];
+        String defaultClient = loginConfiguration.getDefaultClient();
+        return LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
     }
 
     /**
