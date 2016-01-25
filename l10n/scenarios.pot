@@ -31,6 +31,14 @@ msgstr ""
 msgid "To use eM-Client on your device, simply download and install"
 msgstr ""
 
+# OX Drive
+msgid "OX Drive"
+msgstr ""
+
+# To use Drive on your Mac, simply download OX Drive
+msgid "To use Drive on your Mac, simply download OX Drive"
+msgstr ""
+
 # OX Mail App
 msgid "OX Mail App"
 msgstr ""
