@@ -132,9 +132,9 @@ drivewindowsclientinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: drivewindowsclient.png
     # The translatable display name
-    displayName_t10e: "OX Drive Windows Client"
+    displayName_t10e: "Drive Application"
     # The translatable description
-    description_t10e: "To use Drive on your device, simply download OX Drive Windows Client"
+    description_t10e: "Synchronize your files with our Drive application."
 
 
 ### Installer for Windows eM-Client
@@ -148,9 +148,9 @@ emclientinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: emclient.png
     # The translatable display name
-    displayName_t10e: "eM-Client"
+    displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
-    description_t10e: "To use eM-Client on your device, simply download and install"
+    description_t10e: "To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application."
 
 
 ### OX Drive for Mac
@@ -165,9 +165,9 @@ drivemacinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: drivemac.png
     # The translatable display name
-    displayName_t10e: "OX Drive"
+    displayName_t10e: "Drive Application"
     # The translatable description
-    description_t10e: "To use Drive on your Mac, simply download OX Drive"
+    description_t10e: "Synchronize your files with our Drive application."
 
 
 ### OX Mail App
@@ -182,9 +182,9 @@ mailappinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: mailapp.png
     # The translatable display name
-    displayName_t10e: "OX Mail App"
+    displayName_t10e: "Mail App"
     # The translatable description
-    description_t10e: "To use Mail on your device, simply download OX Mail App"
+    description_t10e: "Synchronize your Mail with our Mail App."
 
 
 ### OX Drive App
@@ -199,9 +199,9 @@ driveappinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: driveapp.png
     # The translatable display name
-    displayName_t10e: "OX Drive App"
+    displayName_t10e: "Drive App"
     # The translatable description
-    description_t10e: "To use Drive on your device, simply download OX Drive App"
+    description_t10e: "Synchronize your files with our Drive App."
 
 
 ### Sync App
@@ -216,9 +216,9 @@ syncappinstall:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: syncapp.png
     # The translatable display name
-    displayName_t10e: "Sync App"
+    displayName_t10e: "Calendar + Address Book"
     # The translatable description
-    description_t10e: "To use Drive on your device, simply download the App"
+    description_t10e: "Synchronize your Calendar and Address Book data with your device."
 
 
 ### CalDAV & CardDAV Sync
@@ -232,9 +232,9 @@ davsync:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
-    displayName_t10e: "Calendar + Contacts"
+    displayName_t10e: "Calendar + Address Book"
     # The translatable description
-    description_t10e: "Synchronize your data via Calendar and Addressbook natively on your device"
+    description_t10e: "Synchronize your Calendar and Address Book data with your device."
 
 #davsync_mybrand:
 #    enabled: true
@@ -256,9 +256,9 @@ davmanual:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: davsync.png
     # The translatable display name
-    displayName_t10e: "Calendar + Contacts"
+    displayName_t10e: "Calendar + Address Book"
     # The translatable description
-    description_t10e: "To manually setup your Calendar & Addressbook accounts, please use the following information"
+    description_t10e: "To manually setup your Calendar and Address Book accounts, please use the following information."
 
 
 ### OX Updater
@@ -268,13 +268,15 @@ davmanual:
 # and the associated permissions are granted to the users, which are supposed to download the file
 
 oxupdaterinstall:
-    # Disabled by default
-    enabled: false
+    enabled: true
     type: link
     providers: [oxupdater]
     alternatives: []
+    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: oxupdater.png
+    # The translatable display name
     displayName_t10e: "Updater for Windows Clients"
+    # The translatable description
     description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
 
 
@@ -290,9 +292,9 @@ eassync:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: eassync.png
     # The translatable display name
-    displayName_t10e: "Exchange ActiveSync"
+    displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
-    description_t10e: "Synchronize your emails, contacts, calendar, and tasks"
+    description_t10e: "Synchronize your Mail, Calendar and Address Book data with your device."
 
 easmanual:
     # Disbled by default
@@ -303,9 +305,9 @@ easmanual:
     # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
     icon: eassync.png
     # The translatable display name
-    displayName_t10e: "Exchange ActiveSync"
+    displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
-    description_t10e: "Synchronize your emails, contacts, calendar, and tasks"
+    description_t10e: "To manually setup your Mail, Calendar and Address Book accounts, please use the following information."
 
 
 ### IMAP/SMTP
@@ -321,7 +323,7 @@ mailsync:
     # The translatable display name
     displayName_t10e: "eMail"
     # The translatable description
-    description_t10e: "Use your Apple Mail App to manage your mailbox"
+    description_t10e: "Synchronize your Mail with Apple Mail App."
 
 mailmanual:
     enabled: true
@@ -333,5 +335,5 @@ mailmanual:
     # The translatable display name
     displayName_t10e: "eMail"
     # The translatable description
-    description_t10e: "To manually setup your eMail client, please use the following information"
+    description_t10e: "To manually setup your Mail account, please use the following information"
 
