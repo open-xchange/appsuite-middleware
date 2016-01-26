@@ -71,7 +71,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
-public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
+public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
