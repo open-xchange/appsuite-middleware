@@ -1,3 +1,9 @@
+open-xchange-meta (7.8.0-21) stable; urgency=medium
+
+  * Build for patch 2016-01-19 (3062)
+
+ -- Carsten Hoeger <choeger@open-xchange.com>  Tue, 26 Jan 2016 10:53:01 +0100
+
 open-xchange-meta (7.8.0-20) stable; urgency=medium
 
   * Build for patch 2016-01-25 (3031)
