@@ -70,6 +70,8 @@ import com.openexchange.admin.diff.util.ConfigurationFileSearch;
  */
 public class PropertyHandler extends AbstractFileHandler {
 
+    private static final String KEY_REGEX = ".*consumerKey.*|.*apiKey.*|.*secretKey.*|.*consumerSecret.*|.*apiSecret.*|.*password.*|.*login$";
+
     private volatile static PropertyHandler instance;
 
     private final List<String> criticalProperties = new ArrayList<String>(Arrays.asList(new String[] {
@@ -188,7 +190,7 @@ public class PropertyHandler extends AbstractFileHandler {
      * @return - the given string if not included in the criticalProperties List or ******** if it is critical
      */
     protected String obscure(String key, String propertyValue) {
-        if (key.toLowerCase().matches(".*consumerKey.*|.*apiKey.*|.*secretKey.*|.*consumerSecret.*|.*apiSecret.*|.*password.*".toLowerCase())) {
+        if (key.toLowerCase().matches(KEY_REGEX.toLowerCase())) {
             propertyValue = OBSCURED_PROPERTY;
         } else if (criticalProperties.contains(key)) {
             propertyValue = OBSCURED_PROPERTY;

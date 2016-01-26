@@ -76,4 +76,42 @@ public final class InfostoreFacades {
         return (null == available || available.available());
     }
 
+    /**
+     * Performs a safe rollback for each {@link InfostoreFacade} instance
+     *
+     * @param infostoreFacades The instances to be rolled-back
+     */
+    public static void rollback(InfostoreFacade... infostoreFacades) {
+        if (null != infostoreFacades) {
+            for (InfostoreFacade infostoreFacade : infostoreFacades) {
+                if (null != infostoreFacade) {
+                    try {
+                        infostoreFacade.rollback();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Performs a safe finish for each {@link InfostoreFacade} instance
+     *
+     * @param infostoreFacades The instances to be finished
+     */
+    public static void finish(InfostoreFacade... infostoreFacades) {
+        if (null != infostoreFacades) {
+            for (InfostoreFacade infostoreFacade : infostoreFacades) {
+                if (null != infostoreFacade) {
+                    try {
+                        infostoreFacade.finish();
+                    } catch (Exception e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+    }
+
 }

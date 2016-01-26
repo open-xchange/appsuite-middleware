@@ -105,7 +105,7 @@ public class SyncTracker {
     /**
      * The maximum number of tracked sync results in the history.
      */
-    private static final int MAX_HISTORY_SIZE = 50;
+    private static final int MAX_HISTORY_SIZE = 200;
 
     /**
      * The maximum number of actions to be stored per history entry; others will be compacted implicitly.

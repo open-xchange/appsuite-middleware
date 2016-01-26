@@ -1,3 +1,9 @@
+open-xchange-publish (7.8.0-20) stable; urgency=medium
+
+  * Build for patch 2016-01-25 (3031)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 25 Jan 2016 10:21:03 +0100
+
 open-xchange-publish (7.8.0-19) stable; urgency=medium
 
   * Build for patch 2016-02-05 (3058)

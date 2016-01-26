@@ -164,4 +164,13 @@ public interface AdministrativeFileStorageFileAccess {
      */
     TimedResult<File> getDocuments(String folderId, int userId, List<Field> fields, Field sort, SortDirection order, Range range) throws OXException;
 
+    /**
+     * Updates a files sequence number
+     *
+     * @param folderId The folder identifier
+     * @param id The file whose sequence number should be updated
+     * @throws OXException If operation fails
+     */
+    void touch(String folderId, String id) throws OXException;
+
 }

@@ -68,6 +68,7 @@ import com.openexchange.share.groupware.TargetProxy;
 public abstract class AbstractTargetProxy implements TargetProxy {
 
     private boolean modified = false;
+    private boolean touched = false;
 
     @Override
     public boolean wasModified() {
@@ -76,6 +77,16 @@ public abstract class AbstractTargetProxy implements TargetProxy {
 
     protected void setModified() {
         modified = true;
+    }
+
+    @Override
+    public void touch() {
+        touched = true;
+    }
+
+    @Override
+    public boolean wasTouched() {
+        return touched;
     }
 
     protected static interface PermissionConverter<T> {
