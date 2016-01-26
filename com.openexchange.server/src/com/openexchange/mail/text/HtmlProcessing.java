@@ -913,6 +913,10 @@ public final class HtmlProcessing {
         return i;
     }
 
+    private static final Pattern BACKGROUND_CSS_PATTERN = Pattern.compile(
+        "(background|background-image\\s*:\\s*)url\\(cid:([^\\s>\\)]*)\\)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static final Pattern BACKGROUND_PATTERN = Pattern.compile(
         "(<[a-zA-Z]+[^>]*?)(?:(?:background=cid:([^\\s>]*))|(?:background=\"cid:([^\"]*)\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -963,6 +967,7 @@ public final class HtmlProcessing {
     public static String filterInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
         String ret = filterImgInlineImages(content, session, msgUID, generator);
         ret = filterBackgroundInlineImages(ret, session, msgUID, generator);
+        ret = filterBackgroundCssInlineImages(ret, session, msgUID, generator);
         return ret;
     }
 
@@ -990,6 +995,35 @@ public final class HtmlProcessing {
             }
         }
         return tmp;
+    }
+
+    private static String filterBackgroundCssInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
+        String reval = content;
+        try {
+            final Matcher imgMatcher = BACKGROUND_CSS_PATTERN.matcher(reval);
+            final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
+            final StringBuilder sb = new StringBuilder(reval.length());
+            if (imgMatcher.find()) {
+                final StringBuilder linkBuilder = new StringBuilder(256);
+                // Replace inline images with Content-ID
+                do {
+                    // Extract Content-ID
+                    String cid = imgMatcher.group(2);
+
+                    // Compose corresponding image data
+                    linkBuilder.setLength(0);
+                    linkBuilder.append(imgMatcher.group(1)).append("url(");
+                    linkBuilder.append(generator.getPlainImageUri(cid, msgUID, session));
+                    linkBuilder.append(")");
+                    imgReplacer.appendLiteralReplacement(sb, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
+                } while (imgMatcher.find());
+            }
+            imgReplacer.appendTail(sb);
+            reval = sb.toString();
+        } catch (final Exception e) {
+            LOG.warn("Unable to filter cid background images: {}", e.getMessage());
+        }
+        return reval;
     }
 
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
