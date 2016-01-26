@@ -60,7 +60,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.OnboardingAction;
@@ -76,7 +75,6 @@ import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.encoding.Helper;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.webdav.WebDavServlet;
 
@@ -128,10 +126,10 @@ public class PListDownloadServlet extends WebDavServlet {
                 fileName = fileName.substring(1, fileName.length());
             }
 
-            DownloadLinkProvider smsLinkProvider = lookup.getService(DownloadLinkProvider.class);
+            DownloadLinkProvider downloadLinkProvider = lookup.getService(DownloadLinkProvider.class);
             String[] arguments;
             try {
-                arguments = smsLinkProvider.getParameter(req.getPathInfo());
+                arguments = downloadLinkProvider.getParameter(req.getPathInfo());
             } catch (OXException ex) {
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
@@ -150,7 +148,7 @@ public class PListDownloadServlet extends WebDavServlet {
             }
 
             try {
-                if (!smsLinkProvider.validateChallenge(userId, contextId, scenarioId, device.getId(), arguments[4])) {
+                if (!downloadLinkProvider.validateChallenge(userId, contextId, scenarioId, device.getId(), arguments[4])) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
@@ -233,11 +231,14 @@ public class PListDownloadServlet extends WebDavServlet {
                 return;
             }
 
-            BrowserDetector detector = BrowserDetector.detectorFor(req.getHeader(Tools.HEADER_AGENT));
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/octet-stream");
             resp.setContentLength(fileSize);
-            resp.setHeader("Content-disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(fileName, "UTF-8", detector.isMSIE())) + "\"");
+            try {
+                resp.setHeader("Content-disposition", "attachment; filename=\"" + scenario.getDisplayName(userId, contextId) + ".mobileconfig\"");
+            } catch (OXException e) {
+                resp.setHeader("Content-disposition", "attachment; filename=\"" + scenarioId + ".mobileconfig\"");
+            }
             Tools.removeCachingHeader(resp);
 
             OutputStream out = resp.getOutputStream();
