@@ -16,7 +16,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -65,6 +65,8 @@ ox_update_permissions /opt/open-xchange/etc/reportclient.properties root:open-xc
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jan 26 2016 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.8.1 release
 * Tue Oct 20 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-10-26 (2813)
 * Mon Oct 19 2015 Carsten Hoeger <choeger@open-xchange.com>

@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -61,6 +61,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/oauth-provider.properties
 
 %changelog
+* Tue Jan 26 2016 Steffen Templin <steffen.templin@open-xchange.com>
+First candidate for 7.8.1 release
 * Mon Oct 19 2015 Steffen Templin <steffen.templin@open-xchange.com>
 Build for patch 2015-10-26 (2812)
 * Thu Oct 08 2015 Steffen Templin <steffen.templin@open-xchange.com>

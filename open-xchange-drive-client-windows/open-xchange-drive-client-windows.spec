@@ -15,7 +15,7 @@ BuildRequires: java-devel >= 1.7.0
 %endif
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 1
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -57,5 +57,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 /opt/open-xchange/templates/*
 
 %changelog
+* Tue Jan 26 2016 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+First candidate for 7.8.1 release
 * Tue Nov 10 2015 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Initial release
