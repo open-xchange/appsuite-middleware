@@ -177,7 +177,9 @@ public abstract class OXContextCommonImpl extends OXCommonImpl {
             }
 
             final Context retval = createmaincall(ret, admin_user, db, access, auth, schemaSelectStrategy);
-
+            if (retval.getName() == null) {
+                retval.setName(String.valueOf(retval.getId()));
+            }
             return retval;
         } catch (final ContextExistsException e) {
             LOGGER.error("", e);

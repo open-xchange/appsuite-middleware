@@ -75,10 +75,9 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-
     /**
      * Returns all the aliases that are stored in the 'user_attribute' table
-     * 
+     *
      * @param conn The Connection
      * @return A {@link Set} with all the aliases
      * @throws SQLException If an SQL error is occurred
@@ -122,8 +121,8 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         private final UUID uuid;
 
         /**
-         * Initialises a new {@link Alias}.
-         * 
+         * Initializes a new {@link Alias}.
+         *
          * @param cid The context identifier
          * @param userId The user identifier
          * @param alias The alias
@@ -189,21 +188,11 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             return uuid;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#hashCode()
-         */
         @Override
         public int hashCode() {
             return hash;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#equals(java.lang.Object)
-         */
         @Override
         public boolean equals(final Object obj) {
             if (this == obj) {
@@ -245,7 +234,6 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
         private AbtractUserAliasTableUpdateTask getOuterType() {
             return AbtractUserAliasTableUpdateTask.this;
         }
-
     }
 
 }

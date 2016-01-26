@@ -63,7 +63,6 @@ import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.alias.UserAliasStorageExceptionCodes;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.tools.update.Tools;
 
 /**
  * {@link RdbAliasStorage}
@@ -74,6 +73,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class RdbAliasStorage implements UserAliasStorage {
 
+    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
+
     private static final String CREATE_ALIAS_WITH_UUID = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
 
     private static final String READ_ALIASES = "SELECT alias FROM user_alias WHERE cid=? AND user=?";
@@ -83,7 +84,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     private static final String DELETE_ALIAS = "DELETE FROM user_alias WHERE cid=? AND user=? AND alias=?";
 
     private static final String DELETE_ALL_ALIASES = "DELETE FROM user_alias WHERE cid=? AND user=?";
-    
+
     /**
      * Initialises a new {@link RdbAliasStorage}.
      */
@@ -158,7 +159,7 @@ public class RdbAliasStorage implements UserAliasStorage {
             stmt.setInt(++index, userId);
             stmt.setString(++index, alias);
             stmt.setBytes(++index, UUIDs.toByteArray(UUID.randomUUID()));
-            
+
             return stmt.executeUpdate() == 1;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());

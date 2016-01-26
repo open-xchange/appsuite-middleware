@@ -142,7 +142,7 @@ public class CachingAliasStorage implements UserAliasStorage {
         }
         return success;
     }
-
+    
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);

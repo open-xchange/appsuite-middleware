@@ -189,8 +189,6 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
 
     private static final String DEFAULT_IMAP_SERVER_CREATE = "imap://localhost:143";
 
-    private static final String ALIAS = "alias";
-
     public OXUserMySQLStorage() {
         super();
     }

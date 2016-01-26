@@ -127,6 +127,8 @@ public final class CSSMatcher {
 
     private static final Pattern PAT_u;
 
+    private static final Pattern PAT_u_cid;
+
     private static final Pattern PAT_t;
 
     private static final Pattern PATTERN_IS_PATTERN;
@@ -163,6 +165,8 @@ public final class CSSMatcher {
         final String strTIME = RegexUtility.group(RegexUtility.concat(strNUMBER, strTIME_UNITS), GroupType.NON_CAPTURING);
 
         final String strURL = "url\\(\"?[\\p{ASCII}\\p{L}]+\"?\\)";
+
+        final String strURLCid = "url\\(\"?cid:[\\p{ASCII}\\p{L}]+\"?\\)";
 
         final String strCOLOR_KEYWORD = RegexUtility.group(
             "aqua|black|blue|fuchsia|gray|green|lime|maroon|navy|olive|purple|red|silver|teal|white|yellow",
@@ -206,9 +210,11 @@ public final class CSSMatcher {
 
         PAT_u = Pattern.compile(strURL, Pattern.CASE_INSENSITIVE);
 
+        PAT_u_cid = Pattern.compile(strURLCid, Pattern.CASE_INSENSITIVE);
+
         PAT_t = Pattern.compile(strTIME, Pattern.CASE_INSENSITIVE);
 
-        PATTERN_IS_PATTERN = Pattern.compile("[unNcd*t]+");
+        PATTERN_IS_PATTERN = Pattern.compile("[uinNcd*t]+");
 
         PATTERN_COLOR_RGB = Pattern.compile(strCOLOR_RGB_FUNC, Pattern.CASE_INSENSITIVE);
     }
@@ -277,6 +283,8 @@ public final class CSSMatcher {
         // d: delete
         // t: time
         switch (pattern) {
+        case 'i':
+            return PAT_u_cid.matcher(value).matches();
         case 'u':
             return PAT_u.matcher(value).matches();
         case 'n':

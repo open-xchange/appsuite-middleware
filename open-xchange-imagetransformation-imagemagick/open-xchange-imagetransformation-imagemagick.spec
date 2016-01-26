@@ -56,5 +56,7 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jan 26 2016 Thorben Betten <thorben.betten@open-xchange.com>
+First candidate for 7.8.1 release
 * Fri Dec 18 2015 Thorben Betten <thorben.betten@open-xchange.com>
 Initial release

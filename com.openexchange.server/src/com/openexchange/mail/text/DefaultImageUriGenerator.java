@@ -118,4 +118,28 @@ public class DefaultImageUriGenerator implements ImageUriGenerator {
         }
     }
 
+    @Override
+    public String getPlainImageUri(String imageIdentifier, MailPath mailPath, Session session) throws OXException {
+        // Check mail identifier
+        String mailId = mailPath.getMailID();
+        if (mailId.indexOf('%') >= 0) {
+            int unifiedINBOXAccountID = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+            if (unifiedINBOXAccountID < 0 || mailPath.getAccountId() != unifiedINBOXAccountID) {
+                String tmp = AJAXUtility.decodeUrl(mailId, null);
+                if (tmp.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+                    // Expect mail path; e.g. "default0/INBOX/123"
+                    try {
+                        mailId = new MailPath(tmp).getMailID();
+                    } catch (OXException e) {
+                        // Ignore
+                    }
+                }
+            }
+        }
+
+        ImageLocation imageLocation = new ImageLocation.Builder(imageIdentifier).folder(prepareFullname(mailPath.getAccountId(), mailPath.getFolder())).id(mailId).optImageHost(HtmlProcessing.imageHost()).build();
+        InlineImageDataSource imgSource = InlineImageDataSource.getInstance();
+        return imgSource.generateUrl(imageLocation, session);
+    }
+
 }

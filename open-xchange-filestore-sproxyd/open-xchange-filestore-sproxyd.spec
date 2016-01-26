@@ -67,6 +67,8 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
+* Tue Jan 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.1 release
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-26 (2812)
 * Thu Oct 08 2015 Marcus Klein <marcus.klein@open-xchange.com>

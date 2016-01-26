@@ -83,9 +83,9 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
                 createTable(conn);
             }
 
-            Set<Alias> aliase = getAllAliasesInUserAttributes(conn);
-            if (aliase != null && false == aliase.isEmpty()) {
-                insertAliases(conn, aliase);
+            Set<Alias> aliases = getAllAliasesInUserAttributes(conn);
+            if (aliases != null && false == aliases.isEmpty()) {
+                insertAliases(conn, aliases);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -115,7 +115,7 @@ public class MigrateAliasUpdateTask extends AbtractUserAliasTableUpdateTask {
             closeSQLStuff(stmt);
         }
     }
-
+    
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
