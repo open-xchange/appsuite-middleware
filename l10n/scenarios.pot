@@ -15,61 +15,46 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-# OX Drive Windows Client
-msgid "OX Drive Windows Client"
+# Drive Application
+msgid "Drive Application"
 msgstr ""
 
-# To use Drive on your device, simply download OX Drive Windows Client
-msgid "To use Drive on your device, simply download OX Drive Windows Client"
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
 msgstr ""
 
-# eM-Client
-msgid "eM-Client"
+# Email + Calendar + Address Book
+msgid "Email + Calendar + Address Book"
 msgstr ""
 
-# To use eM-Client on your device, simply download and install
-msgid "To use eM-Client on your device, simply download and install"
-msgstr ""
-
-# OX Drive
-msgid "OX Drive"
-msgstr ""
-
-# To use Drive on your Mac, simply download OX Drive
-msgid "To use Drive on your Mac, simply download OX Drive"
-msgstr ""
-
-# OX Mail App
-msgid "OX Mail App"
-msgstr ""
-
-# To use Mail on your device, simply download OX Mail App
-msgid "To use Mail on your device, simply download OX Mail App"
-msgstr ""
-
-# OX Drive App
-msgid "OX Drive App"
-msgstr ""
-
-# To use Drive on your device, simply download OX Drive App
-msgid "To use Drive on your device, simply download OX Drive App"
-msgstr ""
-
-# Sync App
-msgid "Sync App"
-msgstr ""
-
-# To use Drive on your device, simply download the App
-msgid "To use Drive on your device, simply download the App"
-msgstr ""
-
-# Calendar + Contacts
-msgid "Calendar + Contacts"
-msgstr ""
-
-# Synchronize your data via Calendar and Addressbook natively on your device
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
 msgid ""
-"Synchronize your data via Calendar and Addressbook natively on your device"
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+
+# Mail App
+msgid "Mail App"
+msgstr ""
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr ""
+
+# Drive App
+msgid "Drive App"
+msgstr ""
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr ""
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr ""
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
 msgstr ""
 
 # OX Sync
@@ -80,10 +65,10 @@ msgstr ""
 msgid "Synchronize all your appointments and contacts"
 msgstr ""
 
-# To manually setup your Calendar & Addressbook accounts, please use the following information
+# To manually setup your Calendar and Address Book accounts, please use the following information.
 msgid ""
-"To manually setup your Calendar & Addressbook accounts, please use the "
-"following information"
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
 msgstr ""
 
 # Updater for Windows Clients
@@ -98,23 +83,26 @@ msgid ""
 "updates. You can download the updates from within the Updater."
 msgstr ""
 
-# Exchange ActiveSync
-msgid "Exchange ActiveSync"
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid ""
+"Synchronize your Mail, Calendar and Address Book data with your device."
 msgstr ""
 
-# Synchronize your emails, contacts, calendar, and tasks
-msgid "Synchronize your emails, contacts, calendar, and tasks"
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
 msgstr ""
 
 # eMail
 msgid "eMail"
 msgstr ""
 
-# Use your Apple Mail App to manage your mailbox
-msgid "Use your Apple Mail App to manage your mailbox"
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
 msgstr ""
 
-# To manually setup your eMail client, please use the following information
+# To manually setup your Mail account, please use the following information
 msgid ""
-"To manually setup your eMail client, please use the following information"
+"To manually setup your Mail account, please use the following information"
 msgstr ""
