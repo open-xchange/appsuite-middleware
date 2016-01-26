@@ -190,7 +190,7 @@ public abstract class DefaultFileStorage implements FileStorage {
     public long getFileSize(String name) throws OXException {
         File file = file(name);
         if (false == file.exists()) {
-            throw FileStorageCodes.FILE_NOT_FOUND.create(name);
+            throw FileStorageCodes.FILE_NOT_FOUND.create(new FileNotFoundException(file.getPath()), name);
         }
         return file.length();
     }
