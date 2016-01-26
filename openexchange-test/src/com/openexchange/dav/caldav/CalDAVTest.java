@@ -84,6 +84,7 @@ import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
 import com.openexchange.dav.WebDAVTest;
+import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -577,5 +578,13 @@ public abstract class CalDAVTest extends WebDAVTest {
         return folder;
     }
 
+    protected static void assertDummyAlarm(Component component) {
+        List<Component> vAlarms = component.getVAlarms();
+        Assert.assertEquals("Expected exactly one VAlarm.", 1, vAlarms.size());
+        Component vAlarm = vAlarms.get(0);
+        Assert.assertEquals("Expected dummy trigger.", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
+        Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
+        Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+    }
 
 }
