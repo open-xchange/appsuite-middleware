@@ -87,11 +87,8 @@ import ch.qos.logback.core.status.StatusManager;
 public class Activator implements BundleActivator, Reloadable {
 
     protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
-
     protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
-
     private static final String CONFIGFILE = "logback.xml";
-
     private static final String[] PROPERTIES = new String[] { "all properties in file" };
 
     /** The logger */
@@ -136,24 +133,19 @@ public class Activator implements BundleActivator, Reloadable {
             }
         }
 
-        // Initialization stuff for JUL/JCL bridges
+        // Initialisation stuff for JUL/JCL bridges
         configureJavaUtilLogging();
         overrideLoggerLevels(loggerContext);
         installJulLevelChangePropagator(loggerContext);
 
         // The ranking-aware turbo filter list - itself acting as a turbo filter
-        final RankingAwareTurboFilterList rankingAwareTurboFilterList = new RankingAwareTurboFilterList();
-        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
-        loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+        initialiseRankingAwareTurboFilterList(loggerContext);
 
+        // Register services
         final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
-
         registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList, serviceImpl);
-
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
-
         registerIncludeStackTraceService(serviceImpl, context);
-
         reloadable = context.registerService(Reloadable.class, this, null);
     }
 
@@ -255,6 +247,17 @@ public class Activator implements BundleActivator, Reloadable {
     }
 
     /**
+     * Initialise the {@link RankingAwareTurboFilterList} and register itself acting as a turbo filter
+     * 
+     * @param loggerContext The {@link LoggerContext}
+     */
+    private void initialiseRankingAwareTurboFilterList(LoggerContext loggerContext) {
+        final RankingAwareTurboFilterList rankingAwareTurboFilterList = new RankingAwareTurboFilterList();
+        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+        loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+    }
+
+    /**
      * Register the LoggingConfigurationMBean
      */
     protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
@@ -270,6 +273,13 @@ public class Activator implements BundleActivator, Reloadable {
         LOGGER.info("LoggingConfigurationMBean successfully registered.");
     }
 
+    /**
+     * Register the exception category filter
+     * 
+     * @param context The bundle context
+     * @param turboFilterList The ranking aware turbo filter list
+     * @param serviceImpl The include stack trace service
+     */
     protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
         exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
         final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
@@ -277,6 +287,12 @@ public class Activator implements BundleActivator, Reloadable {
         tracker.open();
     }
 
+    /**
+     * Register the include stacktrace service
+     * 
+     * @param serviceImpl The implementation
+     * @param context The bundle context
+     */
     protected void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
         includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
     }
@@ -300,6 +316,13 @@ public class Activator implements BundleActivator, Reloadable {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(loggerContext);
             configurator.doConfigure(url);
+
+            // Re-initialise the RankingAwareTurboFilterList
+            initialiseRankingAwareTurboFilterList(loggerContext);
+
+            // Set the lists to their respective services
+            logbackConfigurationMBeanRegisterer.setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
+            exceptionCategoryFilterRegisterer.setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
         } catch (JoranException e) {
             LOGGER.error("Error reloading logback configuration: {}", e);
         } finally {
