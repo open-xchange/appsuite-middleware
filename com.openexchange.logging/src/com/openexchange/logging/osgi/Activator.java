@@ -51,33 +51,25 @@ package com.openexchange.logging.osgi;
 
 import java.util.Collection;
 import java.util.List;
-import javax.management.ObjectName;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
+import com.openexchange.ajax.response.IncludeStackTraceService;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
+import com.openexchange.logging.LogConfigReloadable;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
+import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.turbo.TurboFilter;
-import com.openexchange.ajax.response.IncludeStackTraceService;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppenderMBean;
-import com.openexchange.logging.LogConfigReloadable;
-import com.openexchange.logging.filter.RankingAwareTurboFilterList;
-import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
-import com.openexchange.logging.mbean.LogbackConfiguration;
-import com.openexchange.logging.mbean.LogbackConfigurationMBean;
-import com.openexchange.management.ManagementService;
 
 /**
  * {@link Activator}
@@ -241,10 +233,7 @@ public class Activator implements BundleActivator {
 
                 if (level == null || level.isGreaterOrEqual(Level.WARN)) {
                     lLogger.setLevel(Level.INFO);
-                    LOGGER.info(
-                        "Configured log level {} for class {} is too coarse. It is changed to INFO!",
-                        level,
-                        className);
+                    LOGGER.info("Configured log level {} for class {} is too coarse. It is changed to INFO!", level, className);
                 }
             } else {
                 LOGGER.warn("Not able to check (and set) the log level to INFO for class: {}", className);
@@ -257,63 +246,7 @@ public class Activator implements BundleActivator {
      */
     protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
         try {
-            final ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
-
-                private volatile ObjectName logbackConfObjName;
-                private volatile LogbackConfiguration logbackConfiguration;
-
-                @Override
-                public synchronized ManagementService addingService(ServiceReference<ManagementService> reference) {
-                    ManagementService managementService = context.getService(reference);
-                    try {
-                        final ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
-                        this.logbackConfObjName = logbackConfObjName;
-                        // Register MBean
-                        final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, turboFilterList, serviceImpl);
-                        this.logbackConfiguration = logbackConfiguration;
-                        managementService.registerMBean(logbackConfObjName, logbackConfiguration);
-
-                        // Register Logstash Appender MBean
-                        {
-                            boolean logstash = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
-                            if (logstash) {
-                                final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
-                                managementService.registerMBean(logstashConfName, LogstashSocketAppender.getInstance());
-                            }
-                        }
-                        return managementService;
-                    } catch (final Exception e) {
-                        LOGGER.error("Could not register LogbackConfigurationMBean", e);
-                    }
-                    context.ungetService(reference);
-                    return null;
-                }
-
-                @Override
-                public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                    // Nothing
-                }
-
-                @Override
-                public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                    if (service != null) {
-                        try {
-                            final ObjectName logbackConfObjName = this.logbackConfObjName;
-                            if (logbackConfObjName != null) {
-                                service.unregisterMBean(logbackConfObjName);
-                                LOGGER.info("LoggingConfigurationMBean successfully unregistered.");
-                            }
-                            final LogbackConfiguration logbackConfiguration = this.logbackConfiguration;
-                            if (null != logbackConfiguration) {
-                                logbackConfiguration.dispose();
-                                this.logbackConfiguration = null;
-                            }
-                        } catch (OXException e) {
-                            LOGGER.warn("Could not unregister LogbackConfigurationMBean", e);
-                        }
-                    }
-                }
-            });
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl));
             this.managementTracker = tracker;
             tracker.open();
         } catch (final Exception e) {
