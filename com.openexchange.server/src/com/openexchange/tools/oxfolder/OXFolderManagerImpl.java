@@ -179,6 +179,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      */
     private static final int OPTION_OVERRIDE_CREATED_BY = 2;
 
+    /**
+     * Signals a move to trash through a delete.
+     */
+    private static final int OPTION_TRASHING = 4;
+
     private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
     private final Connection readCon;
@@ -564,23 +569,62 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
         }
-        final boolean performMove = fo.containsParentFolderID();
+
+        boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         int oldParentId = originalFolder.getParentFolderID();
-        Map<Integer, Integer> folderId2OldOwner = null;
         FolderObject storageObject = originalFolder.clone();
+
+        int optionz = options;
+        if (((optionz & OPTION_TRASHING) <= 0) && performMove) {
+            int newParentFolderID = fo.getParentFolderID();
+            if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
+                    // Move to trash
+                    int folderId = fo.getObjectID();
+                    String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
+                    try {
+                        while (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderId, newParentFolderID, name, storageObject.getModule(), readCon, ctx)) {
+                            name = incrementSequenceNumber(name);
+                        }
+                    } catch (SQLException e) {
+                        throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                    }
+                    /*
+                     * remove any folder-dependent entities
+                     */
+                    deleteDependentEntities(writeCon, storageObject, true);
+                    /*
+                     * perform move to trash
+                     */
+                    fo.setFolderName(name);
+                    fo.setPermissions(getFolderFromMaster(newParentFolderID).getPermissions());
+                    // when deleting a folder, the permissions should always be inherited from the parent trash folder
+                    // in order to do so, "created by" is overridden intentionally here to not violate permission restrictions,
+                    // and to prevent synthetic system permissions to get inserted implicitly
+                    optionz |= user.getId() != storageObject.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE;
+                }
+            }
+        }
+
+        Map<Integer, Integer> folderId2OldOwner = null;
         try {
             if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-                final int newParentFolderID = fo.getParentFolderID();
+                int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                     // Reload storage's folder for following update
                     storageObject = getFolderFromMaster(fo.getObjectID());
+                } else {
+                    // Check if permissions of a trash folder are supposed to be changed
+                    if (fo.containsPermissions()) {
+                        checkTrashFolderPermissionChange(fo, storageObject);
+                    }
                 }
-                update(fo, options, storageObject, lastModified, handDown);
+                update(fo, optionz, storageObject, lastModified, handDown);
             } else if (fo.containsFolderName()) {
-                final int newParentFolderID = fo.getParentFolderID();
+                int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     // Perform move
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
@@ -661,6 +705,28 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     DBPool.closeWriterAfterReading(ctx, wc);
                     wc = null;
                 }
+            }
+        }
+    }
+
+    private void checkTrashFolderPermissionChange(final FolderObject fo, FolderObject storageObject) throws OXException {
+        FolderObject trashFolder = getTrashFolder(storageObject.getModule());
+        if (null != trashFolder) {
+            boolean belowTrash;
+            int trashFolderID = trashFolder.getObjectID();
+            if (storageObject.getObjectID() == trashFolderID || storageObject.getParentFolderID() == trashFolderID) {
+                belowTrash = true;
+            } else {
+                OXFolderAccess folderAccess = getOXFolderAccess();
+                FolderObject p = storageObject;
+                while (p.getParentFolderID() != trashFolderID && FolderObject.MIN_FOLDER_ID < p.getParentFolderID()) {
+                    p = folderAccess.getFolderObject(p.getParentFolderID());
+                }
+                belowTrash = p.getParentFolderID() == trashFolderID;
+            }
+
+            if (belowTrash && !OXFolderUtility.equalPermissions(fo.getNonSystemPermissionsAsArray(), storageObject.getNonSystemPermissionsAsArray())) {
+                throw OXFolderExceptionCode.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
         }
     }
@@ -841,28 +907,6 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), lastModified);
         }
 
-        OXFolderAccess folderAccess = getOXFolderAccess();
-        if (containsPermissions) {
-            FolderObject trashFolder = getTrashFolder(storageObj.getModule());
-            if (null != trashFolder) {
-                boolean belowTrash;
-                int trashFolderID = trashFolder.getObjectID();
-                if (storageObj.getObjectID() == trashFolderID || storageObj.getParentFolderID() == trashFolderID) {
-                    belowTrash = true;
-                } else {
-                    FolderObject p = storageObj;
-                    while (p.getParentFolderID() != trashFolderID && FolderObject.MIN_FOLDER_ID < p.getParentFolderID()) {
-                        p = folderAccess.getFolderObject(p.getParentFolderID());
-                    }
-                    belowTrash = p.getParentFolderID() == trashFolderID;
-                }
-
-                if (belowTrash && !OXFolderUtility.equalPermissions(fo.getNonSystemPermissionsAsArray(), storageObj.getNonSystemPermissionsAsArray())) {
-                    throw OXFolderExceptionCode.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
-                }
-            }
-        }
-
         boolean rename = false;
         if (fo.containsFolderName() && !storageObj.getFolderName().equals(fo.getFolderName())) {
             rename = true;
@@ -877,6 +921,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (fo.getType() == FolderObject.PRIVATE && fo.getPermissions().size() > 1) {
             final TIntSet diff = OXFolderUtility.getShareUsers(rename ? null : storageObj.getPermissions(), fo.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
+                OXFolderAccess folderAccess = getOXFolderAccess();
                 final FolderObject[] allSharedFolders;
                 try {
                     /*
@@ -982,29 +1027,37 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    private int getFolderOwnerFromMaster(final int folderId) throws OXException {
-        return getFolderFromMaster(folderId).getCreatedBy();
+    private int getFolderTypeFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).getType();
     }
 
-    private boolean hasSubfoldersFromMaster(final int folderId) throws OXException {
-        return getFolderFromMaster(folderId).hasSubfolders();
+    private int getFolderOwnerFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).getCreatedBy();
     }
 
-    protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
+    private boolean hasSubfoldersFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).hasSubfolders();
+    }
+
+    protected FolderObject getFolderFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false);
     }
 
-    private FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
+    private FolderObject getFolderFromMaster(int folderId, boolean withSubfolders) throws OXException {
+        return getFolderFromMaster(folderId, true, withSubfolders);
+    }
+
+    private FolderObject getFolderFromMaster(int folderId, boolean loadPermissions, boolean withSubfolders) throws OXException {
         // Use writable connection to ensure to fetch from master database
         Connection wc = writeCon;
         if (wc != null) {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, loadPermissions, withSubfolders);
         }
 
         // Fetch new writable connection
         wc = DBPool.pickupWriteable(ctx);
         try {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, loadPermissions, withSubfolders);
         } finally {
             DBPool.closeWriterAfterReading(ctx, wc);
         }
@@ -1503,7 +1556,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     // when deleting a folder, the permissions should always be inherited from the parent trash folder
                     // in order to do so, "created by" is overridden intentionally here to not violate permission restrictions,
                     // and to prevent synthetic system permissions to get inserted implicitly
-                    int options = user.getId() != folder.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE;
+                    int options = OPTION_TRASHING;
+                    options |= (user.getId() != folder.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE);
                     return updateFolder(toUpdate, false, true, lastModified, options);
                 }
             }
