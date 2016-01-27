@@ -56,8 +56,8 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.logging.mbean.ExceptionCategoryFilter;
-import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
+import com.openexchange.logging.filter.ExceptionCategoryFilter;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 
 /**
  * {@link ExceptionCategoryFilterRegisterer}
