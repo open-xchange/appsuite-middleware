@@ -70,7 +70,7 @@ import com.openexchange.tools.update.Tools;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class MigrateUUIDsForUserAliasTable extends AbtractUserAliasTableUpdateTask {
+public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateTask {
 
     /**
      * Initialises a new {@link MigrateUUIDsForUserAliasTable}.

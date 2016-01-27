@@ -62,16 +62,16 @@ import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link AbtractUserAliasTableUpdateTask}
+ * {@link AbstractUserAliasTableUpdateTask}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
+abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
 
     /**
-     * Initialises a new {@link AbtractUserAliasTableUpdateTask}.
+     * Initialises a new {@link AbstractUserAliasTableUpdateTask}.
      */
-    public AbtractUserAliasTableUpdateTask() {
+    public AbstractUserAliasTableUpdateTask() {
         super();
     }
 
@@ -231,8 +231,8 @@ abstract class AbtractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             return true;
         }
 
-        private AbtractUserAliasTableUpdateTask getOuterType() {
-            return AbtractUserAliasTableUpdateTask.this;
+        private AbstractUserAliasTableUpdateTask getOuterType() {
+            return AbstractUserAliasTableUpdateTask.this;
         }
     }
 
