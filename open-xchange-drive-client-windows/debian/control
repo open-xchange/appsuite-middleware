@@ -10,5 +10,7 @@ Package: open-xchange-drive-client-windows
 Architecture: all
 Pre-Depends: open-xchange-core (>= @OXVERSION@), open-xchange-client-onboarding (>= @OXVERSION@)
 Depends: ${misc:Depends},open-xchange-admin (>=@OXVERSION@)
+Breaks: open-xchange-updater-drive (<< 7.8.1)
+Replaces: open-xchange-updater-drive (<< 7.8.1)
 Description: New updater for windows drive clients
  This package offers windows drive clients the possibility to update themselves without the use of the ox-updater.
