@@ -928,6 +928,11 @@ msgstr ""
 msgid "The download link is invalid."
 msgstr ""
 
+#. The download link is invalid.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:88
+msgid "The phone number %1$s is invalid."
+msgstr ""
+
 #. The display name for Apple platform
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:71
 msgid "Apple"
