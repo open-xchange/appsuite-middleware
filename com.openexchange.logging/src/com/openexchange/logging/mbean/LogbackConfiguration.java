@@ -109,14 +109,16 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     private final Map<String, String[]> methodParameterDescriptions;
 
-    private TurboFilterCache turboFilterCache;
+    private final TurboFilterCache turboFilterCache;
 
-    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
 
     private final IncludeStackTraceServiceImpl traceServiceImpl;
 
+    private final MDCEnablerTurboFilter mdcEnablerTurboFilter;
+
     /**
-     * Initializes a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
+     * Initialises a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
      *
      * @throws NotCompliantMBeanException
      */
@@ -126,7 +128,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
         this.traceServiceImpl = traceServiceImpl;
 
-        // Initialize members
+        // Initialise members
         configurator = new JoranConfigurator();
         dynamicallyModifiedLoggers = new HashMap<String, Level>();
         methodDescriptions = new HashMap<String, String>();
@@ -134,7 +136,12 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         methodParameterDescriptions = new HashMap<String, String[]>();
 
         // Set the ranking aware turbo filter and initialise the turbo filter cache
-        setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
+        turboFilterCache = new TurboFilterCache();
+        mdcEnablerTurboFilter = new MDCEnablerTurboFilter();
+        
+        // Add turbo filter cache to list
+        rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
+        rankingAwareTurboFilterList.addTurboFilter(mdcEnablerTurboFilter);
 
         configurator.setContext(loggerContext);
 
@@ -410,24 +417,6 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
             loggers.add(getLoggerNameAndLevel(loggerContext.getLogger(keys.next())));
         }
         return loggers;
-    }
-
-    /**
-     * Sets the {@link RankingAwareTurboFilterList} and initialises the {@link TurboFilterCache}. Copies all existing filters
-     * to the new turbo filter list.
-     * 
-     * @param rankingAwareTurboFilterList the {@link RankingAwareTurboFilterList} to set
-     */
-    public void setRankingAwareTurboFilterList(RankingAwareTurboFilterList rankingAwareTurboFilterList) {
-        // The ranking-aware turbo filter list - itself acting as a turbo filter
-        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
-        loggerContext.addTurboFilter(rankingAwareTurboFilterList);
-
-        // Initialize & add turbo filter cache to list
-        final TurboFilterCache turboFilterCache = new TurboFilterCache();
-        this.turboFilterCache = turboFilterCache;
-        rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
-        rankingAwareTurboFilterList.addTurboFilter(new MDCEnablerTurboFilter());
     }
 
     @Override

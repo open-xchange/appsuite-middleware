@@ -132,15 +132,4 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
                 break;
         }
     }
-
-    /**
-     * Set the ranking aware turbo filter list
-     * 
-     * @param rankingAwareTurboFilterList the ranking aware turbo filter list
-     */
-    public void setRankingAwareTurboFilterList(RankingAwareTurboFilterList rankingAwareTurboFilterList) {
-        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
-        rankingAwareTurboFilterList.addTurboFilter(exceptionCategoryFilter);
-    }
-
 }

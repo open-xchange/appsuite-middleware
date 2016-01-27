@@ -144,14 +144,4 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
             }
         }
     }
-
-    /**
-     * Set the ranking aware turbo filter list
-     * 
-     * @param rankingAwareTurboFilterList the ranking aware turbo filter list
-     */
-    public void setRankingAwareTurboFilterList(RankingAwareTurboFilterList rankingAwareTurboFilterList) {
-        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
-        logbackConfiguration.setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
-    }
 }

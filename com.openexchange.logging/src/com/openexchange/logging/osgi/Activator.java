@@ -102,9 +102,6 @@ public class Activator implements BundleActivator, Reloadable {
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
     private ServiceRegistration<Reloadable> reloadable;
 
-    private ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer;
-    private LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer;
-
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
      * This bundle must start as early as possible to configure the java.util.logging bridge.
@@ -262,7 +259,7 @@ public class Activator implements BundleActivator, Reloadable {
      */
     protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
         try {
-            logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
+            LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
             ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logbackConfigurationMBeanRegisterer);
             this.managementTracker = tracker;
             tracker.open();
@@ -281,7 +278,7 @@ public class Activator implements BundleActivator, Reloadable {
      * @param serviceImpl The include stack trace service
      */
     protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
-        exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
+        ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
         final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
         configurationTracker = tracker;
         tracker.open();
@@ -317,12 +314,8 @@ public class Activator implements BundleActivator, Reloadable {
             configurator.setContext(loggerContext);
             configurator.doConfigure(url);
 
-            // Re-initialise the RankingAwareTurboFilterList
-            initialiseRankingAwareTurboFilterList(loggerContext);
-
-            // Set the lists to their respective services
-            logbackConfigurationMBeanRegisterer.setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
-            exceptionCategoryFilterRegisterer.setRankingAwareTurboFilterList(rankingAwareTurboFilterList);
+            // Restore the ranking aware turbo filer list to the logger context
+            loggerContext.addTurboFilter(rankingAwareTurboFilterList);
         } catch (JoranException e) {
             LOGGER.error("Error reloading logback configuration: {}", e);
         } finally {
