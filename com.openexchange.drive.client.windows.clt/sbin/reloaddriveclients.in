@@ -65,10 +65,10 @@ ox_set_JAVA_BIN
 BNAME=$(basename $0)
 ACTION=
 case "${BNAME}" in
-    "listbrandings")
+    "listdriveclients")
     ACTION="ListBrandings"
     ;;
-    "reloadbrandings")
+    "reloaddriveclientss")
     ACTION="ReloadBrandings"
     ;;
 esac
