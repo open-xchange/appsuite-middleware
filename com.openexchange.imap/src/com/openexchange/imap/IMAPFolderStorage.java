@@ -2798,12 +2798,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 /*
                  * MYRIGHTS command failed for given mailbox
                  */
-                if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(
-                    moveFullname,
-                    imapStore,
-                    true,
-                    session,
-                    accountId)) {
+                if (!imapConfig.getImapCapabilities().hasNamespace() || !NamespaceFoldersCache.containedInPersonalNamespaces(moveFullname, imapStore, true, session, accountId)) {
                     /*
                      * No namespace support or given parent is NOT covered by user's personal namespaces.
                      */
@@ -2825,16 +2820,38 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         Set<String> oldFullNames = new HashSet<String>(8);
         Map<String, Boolean> subscriptions = new HashMap<String, Boolean>(8);
         gatherFolderInfo(toMove, moveFullname.length(), newFolder.getFullName(), subscriptions, oldFullNames, entityNames, new StringBuilder(32));
-        /*
-         * Perform RENAME
+        /*-
+         * Check if move operation may be executed through a RENAME command
+         * (requires target and destination reside in the same namespace)
          */
-        if (!toMove.renameTo(newFolder)) {
-            throw IMAPException.create(
-                IMAPException.Code.FOLDER_CREATION_FAILED,
-                imapConfig,
-                session,
-                newFolder.getFullName(),
-                destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFullName);
+        if (isSameNamespace(toMove.getFullName(), newFolder.getFullName())) {
+            /*
+             * Perform RENAME
+             */
+            if (!toMove.renameTo(newFolder)) {
+                throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, newFolder.getFullName(), destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFullName);
+            }
+        } else {
+            /*
+             * Perform CREATE for each folder in line, copy its messages and DELETE afterwards
+             */
+            LinkedList<IMAPFolder> createdOnes = new LinkedList<IMAPFolder>();
+            LinkedList<IMAPFolder> copiedOnes = new LinkedList<IMAPFolder>();
+            boolean error = true;
+            try {
+                doRecursiveCopy(toMove, newFolder, getSeparator(toMove.getSeparator()), copiedOnes, createdOnes);
+                error = false;
+
+                for (IMAPFolder iapf : copiedOnes) {
+                    deleteFolderSafe(iapf);
+                }
+            } finally {
+                if (error) {
+                    for (IMAPFolder iapf : createdOnes) {
+                        deleteFolderSafe(iapf);
+                    }
+                }
+            }
         }
         /*
          * Apply original subscription status
@@ -2871,6 +2888,74 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
         dropListLsubCachesForOther(entityNames);
 
         return newFolder;
+    }
+
+    private void doRecursiveCopy(IMAPFolder toCopy, IMAPFolder newFolder, char separator, LinkedList<IMAPFolder> copiedOnes, LinkedList<IMAPFolder> createdOnes) throws MessagingException, OXException {
+        if (!newFolder.create(toCopy.getType())) {
+            Folder destFolder = newFolder.getParent();
+            throw IMAPException.create(IMAPException.Code.FOLDER_CREATION_FAILED, imapConfig, session, newFolder.getFullName(), destFolder instanceof DefaultFolder ? DEFAULT_FOLDER_ID : destFolder.getFullName());
+        }
+
+        // Remember as created
+        createdOnes.addFirst(newFolder);
+
+        // Align ACLs (if not moved to trash)
+        if (false == isSubfolderOf(newFolder.getFullName(), getTrashFolder(), separator)) {
+            ACL[] acls = getACLSafe(toCopy);
+            if (null != acls) {
+                Entity2ACL entity2ACL = getEntity2ACL();
+
+                for (ACL acl : acls) {
+                    String name = acl.getName();
+                    Entity2ACLArgs args = IMAPFolderConverter.getEntity2AclArgs(session, toCopy, imapConfig);
+                    try {
+                        int entityId = entity2ACL.getEntityID(name, ctx, args).getId();
+
+                        args = IMAPFolderConverter.getEntity2AclArgs(session, newFolder, imapConfig);
+                        name = entity2ACL.getACLName(entityId, ctx, args);
+
+                        ACL newAcl = new ACL(name, acl.getRights());
+                        newFolder.addACL(newAcl);
+                    } catch (OXException e) {
+                        if (!Entity2ACLExceptionCode.RESOLVE_USER_FAILED.equals(e)) {
+                            throw e;
+                        }
+
+                        // Take over as-is
+                        newFolder.addACL(acl);
+                    }
+                }
+            }
+        }
+
+        // Copy all messages
+        if (toCopy.getMessageCount() > 0) {
+            toCopy.open(Folder.READ_ONLY);
+            try {
+                new CopyIMAPCommand(toCopy, newFolder.getFullName()).doCommand();
+            } finally {
+                toCopy.close(false);
+            }
+        }
+
+        // Remember as copied
+        copiedOnes.addFirst(toCopy);
+
+        // Check for subfolders
+        for (Folder subfolder : toCopy.list()) {
+            IMAPFolder newSubfolder = (IMAPFolder) imapStore.getFolder(newFolder.getFullName() + separator + subfolder.getName());
+            doRecursiveCopy((IMAPFolder) subfolder, newSubfolder, separator, copiedOnes, createdOnes);
+        }
+    }
+
+    private void deleteFolderSafe(final IMAPFolder imapFolder) {
+        if (null != imapFolder) {
+            try {
+                imapFolder.delete(false);
+            } catch (Exception x) {
+                LOG.error("Temporary created folder could not be deleted: {}", imapFolder.getFullName(), x);
+            }
+        }
     }
 
     private void gatherFolderInfo(final IMAPFolder folder, final int oldPathLen, final String newPath, final Map<String, Boolean> subscriptions, final Set<String> oldFullNames, final Set<String> entityNames, final StringBuilder sb) throws MessagingException {
@@ -3330,6 +3415,22 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return true;
         }
         return fullName.charAt(length) == separator;
+    }
+
+    private boolean isSameNamespace(String fullName1, String fullName2) throws MessagingException {
+        if (NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName1, imapStore, true, session, accountId)) {
+            return NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName2, imapStore, true, session, accountId);
+        } else if (NamespaceFoldersCache.startsWithAnyOfUserNamespaces(fullName2, imapStore, true, session, accountId)) {
+            return false;
+        }
+
+        if (NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName1, imapStore, true, session, accountId)) {
+            return NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName2, imapStore, true, session, accountId);
+        } else if (NamespaceFoldersCache.startsWithAnyOfSharedNamespaces(fullName2, imapStore, true, session, accountId)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
