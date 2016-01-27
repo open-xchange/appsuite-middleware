@@ -59,7 +59,24 @@ import com.openexchange.exception.OXException;
  * @since v7.8.1
  */
 public interface PhoneNumberParserService {
+    
+    /**
+     * Parse phone number for SMS service. Number must be in international format (e. g. +491234567890)
+     * 
+     * @param phoneNumber
+     * @return
+     * @throws OXException
+     */
+    String parsePhoneNumber(String phoneNumber) throws OXException;
 
+    /**
+     * Parse phone number for SMS service in notation identified by locale.
+     * 
+     * @param phoneNumber
+     * @param locale
+     * @return
+     * @throws OXException
+     */
     String parsePhoneNumber(String phoneNumber, Locale locale) throws OXException;
 
 }

@@ -54,7 +54,6 @@ import java.util.Locale;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -70,26 +69,25 @@ import com.openexchange.sms.SMSExceptionCode;
  */
 public class PhoneNumberParserServiceImpl implements PhoneNumberParserService {
 
-    private final ServiceLookup services;
-
-    public PhoneNumberParserServiceImpl(ServiceLookup services) {
+    public PhoneNumberParserServiceImpl() {
         super();
-        this.services = services;
+    }
+    
+    @Override
+    public String parsePhoneNumber(String phoneNumber) throws OXException {
+        return parsePhoneNumber(phoneNumber, null);
     }
 
     @Override
     public String parsePhoneNumber(String phoneNumber, Locale locale) throws OXException {
-        ConfigurationService configService = services.getService(ConfigurationService.class);
-        if (null == configService) {
-            throw ServiceExceptionCode.absentService(ConfigurationService.class);
-        }
-        List<String> supportedCountries = configService.getProperty("com.openexchange.sms.countries", "", ",");
-        if (null != supportedCountries && !supportedCountries.isEmpty() && !supportedCountries.contains(locale.getCountry())) {
-            throw SMSExceptionCode.UNKNOWN_COUNTRY.create(locale.getCountry());
-        }
+        PhoneNumberUtil parser = PhoneNumberUtil.getInstance();
         PhoneNumber number;
         try {
-            number = PhoneNumberUtil.getInstance().parse(phoneNumber, locale.getCountry());
+            if (null != locale) {
+                number = parser.parse(phoneNumber, locale.getCountry());
+            } else {
+                number = parser.parse(phoneNumber, null);
+            }
             StringBuilder sb = new StringBuilder(15);
             sb.append(number.getCountryCode()).append(number.getNationalNumber());
             return sb.toString();

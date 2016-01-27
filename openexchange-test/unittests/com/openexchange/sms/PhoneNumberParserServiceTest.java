@@ -69,7 +69,7 @@ public class PhoneNumberParserServiceTest extends TestCase {
     public void testParsePhoneNumbers() throws Exception {
         PhoneNumberParserService service = TestServiceRegistry.getInstance().getService(PhoneNumberParserService.class);
         for (String number : TO_PARSE) {
-            String parsed = service.parsePhoneNumber(number, Locale.GERMANY);
+            String parsed = service.parsePhoneNumber(number, Locale.US);
             assertEquals("Could not parse " + number, EXPECTED, parsed);
         }
     }
