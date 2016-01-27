@@ -666,7 +666,7 @@ public class StatisticTools extends AbstractJMXTools {
          */
         StringBuilder sb = new StringBuilder();
         for (String type : new String[] { "HazelcastInstance", "HazelcastInstance.Node", "HazelcastInstance.EventService",
-            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager", "HazelcastInstance.PartitionServiceMBean" }) {
+            "HazelcastInstance.ClientEngine", "HazelcastInstance.ConnectionManager" }) {
             for (ObjectInstance mbean : mbc.queryMBeans(new ObjectName("com.hazelcast:type=" + type + ",*"), null)) {
                 ObjectName objectName = mbean.getObjectName();
                 MBeanInfo beanInfo = mbc.getMBeanInfo(objectName);
