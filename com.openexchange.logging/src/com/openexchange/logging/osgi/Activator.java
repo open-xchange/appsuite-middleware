@@ -49,8 +49,11 @@
 
 package com.openexchange.logging.osgi;
 
+import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
@@ -61,15 +64,19 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.logging.LogConfigReloadable;
 import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.management.ManagementService;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.turbo.TurboFilter;
+import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.status.StatusListenerAsList;
+import ch.qos.logback.core.status.StatusManager;
 
 /**
  * {@link Activator}
@@ -77,11 +84,15 @@ import ch.qos.logback.classic.turbo.TurboFilter;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, Reloadable {
 
     protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
 
     protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
+
+    private static final String CONFIGFILE = "logback.xml";
+
+    private static final String[] PROPERTIES = new String[] { "all properties in file" };
 
     /** The logger */
     protected static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
@@ -92,8 +103,10 @@ public class Activator implements BundleActivator {
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
-
     private ServiceRegistration<Reloadable> reloadable;
+
+    private ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer;
+    private LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer;
 
     /*
      * Do not implement HousekeepingActivator, track services if you need them!
@@ -141,7 +154,7 @@ public class Activator implements BundleActivator {
 
         registerIncludeStackTraceService(serviceImpl, context);
 
-        reloadable = context.registerService(Reloadable.class, new LogConfigReloadable(), null);
+        reloadable = context.registerService(Reloadable.class, this, null);
     }
 
     @Override
@@ -246,7 +259,8 @@ public class Activator implements BundleActivator {
      */
     protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
         try {
-            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl));
+            logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logbackConfigurationMBeanRegisterer);
             this.managementTracker = tracker;
             tracker.open();
         } catch (final Exception e) {
@@ -257,13 +271,52 @@ public class Activator implements BundleActivator {
     }
 
     protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
-        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl));
+        exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
+        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
         configurationTracker = tracker;
         tracker.open();
     }
 
     protected void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
         includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ContextInitializer ci = new ContextInitializer(loggerContext);
+        URL url = ci.findURLOfDefaultConfigurationFile(true);
+        StatusListenerAsList statusListenerAsList = new StatusListenerAsList();
+        StatusManager sm = loggerContext.getStatusManager();
+        loggerContext.reset();
+        // after a reset the statusListenerAsList gets removed as a listener
+        sm.add(statusListenerAsList);
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerContext);
+            configurator.doConfigure(url);
+        } catch (JoranException e) {
+            LOGGER.error("Error reloading logback configuration: {}", e);
+        } finally {
+            sm.remove(statusListenerAsList);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getConfigfileNames()
+     */
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }

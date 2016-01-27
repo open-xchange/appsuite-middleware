@@ -144,4 +144,8 @@ public class LogbackConfigurationMBeanRegisterer implements ServiceTrackerCustom
             }
         }
     }
+    
+    public void setRankingAwareTurboFilterList(RankingAwareTurboFilterList rankingAwareTurboFilterList) {
+        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+    }
 }
