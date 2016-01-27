@@ -147,6 +147,10 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
      * The download link is invalid.
      */
     INVALID_DOWNLOAD_LINK("The download link is invalid.", OnboardingExceptionMessages.INVALID_DOWNLOAD_LINK_MSG, Category.CATEGORY_USER_INPUT, 21),
+    /**
+     * The phone number %1$s is invalid.
+     */
+    INVALID_PHONE_NUMBER("The phone number %1$s is invalid.", OnboardingExceptionMessages.INVALID_PHONE_NUMBER_MSG, Category.CATEGORY_USER_INPUT, 22),
     ;
 
     /** The error code prefix for on-boarding module */
