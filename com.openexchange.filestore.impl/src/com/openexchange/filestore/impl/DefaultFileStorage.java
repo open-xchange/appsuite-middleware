@@ -206,7 +206,7 @@ public abstract class DefaultFileStorage implements FileStorage {
         EnhancedRandomAccessFile eraf = eraf(name, true);
         boolean error = true;
         try {
-            if (offset > eraf.length() || -1 != length && length > eraf.length() - offset) {
+            if (offset >= eraf.length() || -1 != length && length > eraf.length() - offset) {
                 throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, eraf.length());
             }
             RandomAccessFileInputStream in = new RandomAccessFileInputStream(eraf, offset, length);
