@@ -51,7 +51,6 @@ package com.openexchange.drive.impl.comparison;
 
 import java.util.ArrayList;
 import java.util.List;
-import com.openexchange.drive.DriveVersion;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 
 
@@ -61,7 +60,7 @@ import com.openexchange.drive.impl.internal.PathNormalizer;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @param <T>
  */
-public class MappingProblems<T extends DriveVersion> {
+public class MappingProblems<T> {
 
     private List<T> caseConflictingClientVersions;
     private List<T> unicodeConflictingClientVersions;
@@ -73,6 +72,18 @@ public class MappingProblems<T extends DriveVersion> {
      */
     public MappingProblems() {
         super();
+    }
+
+    /**
+     * Gets a value indicating whether there are recorded mapping problems or not.
+     *
+     * @return <code>true</code> if there are no conflicting version, <code>false</code>, otherwise
+     */
+    public boolean isEmpty() {
+        return (null == caseConflictingClientVersions || 0 == caseConflictingClientVersions.size()) &&
+            (null == unicodeConflictingClientVersions || 0 == unicodeConflictingClientVersions.size()) &&
+            (null == caseConflictingServerVersions || 0 == caseConflictingServerVersions.size()) &&
+            (null == unicodeConflictingServerVersions || 0 == unicodeConflictingServerVersions.size());
     }
 
     /**
@@ -191,19 +202,19 @@ public class MappingProblems<T extends DriveVersion> {
 
     @Override
     public String toString() {
-        StringBuilder StringBuilder = new StringBuilder();
-        appendVersions(StringBuilder, caseConflictingClientVersions, "Case conflicting client versions");
-        appendVersions(StringBuilder, unicodeConflictingClientVersions, "Unicode conflicting client versions");
-        appendVersions(StringBuilder, caseConflictingServerVersions, "Case conflicting server versions");
-        appendVersions(StringBuilder, unicodeConflictingServerVersions, "Unicode conflicting server versions");
-        return StringBuilder.toString();
+        StringBuilder stringBuilder = new StringBuilder();
+        appendVersions(stringBuilder, caseConflictingClientVersions, "Case conflicting client versions");
+        appendVersions(stringBuilder, unicodeConflictingClientVersions, "Unicode conflicting client versions");
+        appendVersions(stringBuilder, caseConflictingServerVersions, "Case conflicting server versions");
+        appendVersions(stringBuilder, unicodeConflictingServerVersions, "Unicode conflicting server versions");
+        return stringBuilder.toString();
     }
 
-    private void appendVersions(StringBuilder StringBuilder, List<T> versions, String header) {
+    private void appendVersions(StringBuilder stringBuilder, List<T> versions, String header) {
         if (null != versions && 0 < versions.size()) {
-            StringBuilder.append('\n').append(header).append(":\n");
+            stringBuilder.append('\n').append(header).append(":\n");
             for (T version : versions) {
-                StringBuilder.append("  ").append(version).append('\n');
+                stringBuilder.append("  ").append(version).append('\n');
             }
         }
     }

@@ -58,11 +58,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
+import com.openexchange.drive.impl.comparison.MappingProblems;
 import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.exception.OXException;
@@ -257,7 +259,26 @@ public class ChecksumProvider {
             }
         } else {
             Set<File> files = new TreeSet<File>(FILENAME_COMPARATOR);
-            files.addAll(filesInFolder);
+            {
+                MappingProblems<File> mappingProblems = new MappingProblems<File>();
+                Map<String, File> filesByName = new TreeMap<String, File>(String.CASE_INSENSITIVE_ORDER);
+                for (File file : filesInFolder) {
+                    String normalizedKey = PathNormalizer.normalize(file.getFileName());
+                    File existingFile = filesByName.get(normalizedKey);
+                    if (null != existingFile) {
+                        /*
+                         * case / normalization conflict - choose file to use
+                         */
+                        String existingKey = PathNormalizer.normalize(existingFile.getFileName());
+                        file = mappingProblems.chooseServerVersion(existingFile, existingKey, file, normalizedKey);
+                    }
+                    filesByName.put(normalizedKey, file);
+                }
+                if (null != trace && false == mappingProblems.isEmpty()) {
+                    trace.append(mappingProblems);
+                }
+                files.addAll(filesByName.values());
+            }
             MD md5 = session.newMD5();
             List<FileChecksum> knownChecksums = session.getChecksumStore().getFileChecksums(folderID);
             List<FileChecksum> newChecksums = new ArrayList<FileChecksum>();
