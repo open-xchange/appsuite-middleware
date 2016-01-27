@@ -351,7 +351,12 @@ public class OnboardingViewConverter implements ResultConverter {
             jObject.put(key, JSONObject.NULL);
         } else {
             if (value instanceof Icon) {
-                jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+                byte[] binaryData = ((Icon) value).getData();
+                if (binaryData == null || binaryData.length == 0) {
+                    jObject.put(key, JSONObject.NULL);
+                } else {
+                    jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(binaryData, false)));
+                }
             } else {
                 jObject.put(key, value);
             }
