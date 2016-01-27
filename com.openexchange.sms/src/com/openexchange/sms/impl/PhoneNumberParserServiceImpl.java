@@ -49,14 +49,11 @@
 
 package com.openexchange.sms.impl;
 
-import java.util.List;
 import java.util.Locale;
 import com.google.i18n.phonenumbers.NumberParseException;
 import com.google.i18n.phonenumbers.PhoneNumberUtil;
 import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSExceptionCode;
 
@@ -72,7 +69,7 @@ public class PhoneNumberParserServiceImpl implements PhoneNumberParserService {
     public PhoneNumberParserServiceImpl() {
         super();
     }
-    
+
     @Override
     public String parsePhoneNumber(String phoneNumber) throws OXException {
         return parsePhoneNumber(phoneNumber, null);

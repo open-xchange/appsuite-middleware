@@ -1068,7 +1068,7 @@ public final class Init {
 
     public static void startAndInjectPhoneNumberParserService() throws OXException {
         if (null == TestServiceRegistry.getInstance().getService(PhoneNumberParserService.class)) {
-            PhoneNumberParserService service = new PhoneNumberParserServiceImpl(LOOKUP);
+            PhoneNumberParserService service = new PhoneNumberParserServiceImpl();
             services.put(PhoneNumberParserService.class, service);
             TestServiceRegistry.getInstance().addService(PhoneNumberParserService.class, service);
         }
