@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,43 +47,46 @@
  *
  */
 
-package com.openexchange.logging.mbean;
+package com.openexchange.logging.filter;
 
-import org.slf4j.MDC;
-import org.slf4j.Marker;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.core.spi.FilterReply;
-import com.openexchange.marker.OXThreadMarker;
-
+import ch.qos.logback.classic.turbo.TurboFilter;
 
 /**
- * {@link MDCEnablerTurboFilter} - Checks if logging thread shall be MDC-aware or not.
+ * {@link ExtendedTurboFilter} - extends {@link TurboFilter} by {@link #getRanking()}.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.4.2
  */
-public class MDCEnablerTurboFilter extends ExtendedTurboFilter {
+public abstract class ExtendedTurboFilter extends TurboFilter implements Comparable<ExtendedTurboFilter> {
+
+    /** The default ranking <code>0</code> (zero) */
+    public static final int DEFAULT_RANKING = 0;
 
     /**
-     * Initializes a new {@link MDCEnablerTurboFilter}.
+     * Initializes a new {@link ExtendedTurboFilter}.
      */
-    public MDCEnablerTurboFilter() {
+    protected ExtendedTurboFilter() {
         super();
     }
 
-    @Override
+    /**
+     * Gets the ranking of this filter.
+     * <p>
+     * The ranking is used to determine the <i>natural order</i> of filters.
+     * <p>
+     * A filter with a ranking of <code>Integer.MAX_VALUE</code> is very likely to be returned as the dominating filter, whereas a filter
+     * with a ranking of <code>Integer.MIN_VALUE</code> is very unlikely to become effective.
+     *
+     * @return The ranking
+     */
     public int getRanking() {
-        // Ensure examination is performed at first
-        return 100;
+        return DEFAULT_RANKING;
     }
 
     @Override
-    public FilterReply decide(final Marker marker, final Logger logger, final Level level, final String format, final Object[] params, final Throwable t) {
-        if (!(Thread.currentThread() instanceof OXThreadMarker)) {
-            MDC.clear();
-        }
-        return FilterReply.NEUTRAL;
+    public int compareTo(final ExtendedTurboFilter o) {
+        final int thisVal = this.getRanking();
+        final int anotherVal = o.getRanking();
+        return (thisVal < anotherVal ? 1 : (thisVal == anotherVal ? 0 : -1)); // Highest first
     }
 
 }

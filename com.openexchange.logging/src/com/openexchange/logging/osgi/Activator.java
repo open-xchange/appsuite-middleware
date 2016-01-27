@@ -73,10 +73,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppenderMBean;
 import com.openexchange.logging.LogConfigReloadable;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
 import com.openexchange.logging.mbean.LogbackConfiguration;
 import com.openexchange.logging.mbean.LogbackConfigurationMBean;
-import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 import com.openexchange.management.ManagementService;
 
 /**

@@ -73,6 +73,11 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterReply;
 import com.openexchange.log.LogProperties.Name;
 import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
+import com.openexchange.logging.filter.ExceptionCategoryFilter;
+import com.openexchange.logging.filter.ExtendedMDCFilter;
+import com.openexchange.logging.filter.MDCEnablerTurboFilter;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.filter.TurboFilterCache;
 import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
 import com.openexchange.management.MBeanMethodAnnotation;
 

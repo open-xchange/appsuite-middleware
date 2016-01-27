@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.logging.mbean;
+package com.openexchange.logging.filter;
 
 import java.util.ArrayList;
 import java.util.List;
