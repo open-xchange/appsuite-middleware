@@ -125,7 +125,7 @@ public class RemoteOnboardingServiceImpl implements RemoteOnboardingService {
                 Set<OnboardingType> types = provider.getSupportedTypes();
                 List<String> sTypes = new ArrayList<String>(types.size());
                 for (OnboardingType type : types) {
-                    sDevices.add(type.getId());
+                    sTypes.add(type.getId());
                 }
                 Collections.sort(sTypes, comparator);
                 typesMap.put(provider.getId(), sTypes);
