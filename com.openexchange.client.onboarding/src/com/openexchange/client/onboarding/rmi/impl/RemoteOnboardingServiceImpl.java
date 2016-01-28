@@ -155,6 +155,10 @@ public class RemoteOnboardingServiceImpl implements RemoteOnboardingService {
 
     private String toCsl(List<String> strings) {
         int size = strings.size();
+        if (size == 0) {
+            return "";
+        }
+
         StringBuilder sb = new StringBuilder(size << 2);
         sb.append(strings.get(0));
         for (int i = 1; i < size; i++) {
