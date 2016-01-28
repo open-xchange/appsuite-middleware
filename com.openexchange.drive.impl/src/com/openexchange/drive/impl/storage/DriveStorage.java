@@ -882,10 +882,24 @@ public class DriveStorage {
      * @return The folders, each one mapped to its corresponding relative path
      */
     public Map<String, FileStorageFolder> getFolders(int limit) throws OXException {
+        return getFolders(limit, -1);
+    }
+
+    /**
+     * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
+     * implicitly.
+     *
+     * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
+     * @param maxDepth The maximum subtree depth folders to add, or <code>-1</code> for no limitations
+     * @return The folders, each one mapped to its corresponding relative path
+     */
+    public Map<String, FileStorageFolder> getFolders(int limit, int maxDepth) throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
         folders.put(ROOT_PATH, rootFolder);
-        addSubfolders(folders, rootFolder, ROOT_PATH, true, limit);
+        if (0 != maxDepth) {
+            addSubfolders(folders, rootFolder, ROOT_PATH, true, limit, maxDepth);
+        }
         return folders;
     }
 
@@ -1004,6 +1018,21 @@ public class DriveStorage {
      * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
      */
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive, int limit) throws OXException {
+        addSubfolders(folders, parent, path, recursive, limit, -1);
+    }
+
+    /**
+     * Adds all found subfolders of the supplied parent folder. The "temp" folder, as well as the trash folder(s) including all subfolders
+     * are ignored implicitly.
+     *
+     * @param folders The map to add the subfolders
+     * @param parent The parent folder
+     * @param path The path of the parent folder
+     * @param recursive <code>true</code> to add the subfolders recursively, <code>false</code> to only add the direct subfolders
+     * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
+     * @param maxDepth The maximum subtree depth folders to add, or <code>-1</code> for no limitations
+     */
+    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive, int limit, int maxDepth) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
             String name = PathNormalizer.normalize(subfolder.getName());
@@ -1011,8 +1040,8 @@ public class DriveStorage {
             knownFolders.remember(subPath, subfolder);
             if (false == isExcludedSubfolder(subfolder, subPath) && (-1 == limit || limit > folders.size())) {
                 folders.put(subPath, subfolder);
-                if (recursive) {
-                    addSubfolders(folders, subfolder, subPath, true, limit);
+                if (recursive && (-1 == maxDepth || maxDepth > DriveUtils.split(subPath).size())) {
+                    addSubfolders(folders, subfolder, subPath, true, limit, maxDepth);
                 }
             }
         }
