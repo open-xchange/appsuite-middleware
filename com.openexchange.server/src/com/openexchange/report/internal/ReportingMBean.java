@@ -80,15 +80,12 @@ import javax.management.openmbean.TabularData;
 import javax.management.openmbean.TabularDataSupport;
 import javax.management.openmbean.TabularType;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.Constants;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
-import com.openexchange.user.UserService;
 
 /**
  * {@link ReportingMBean}
@@ -146,12 +143,8 @@ public class ReportingMBean implements DynamicMBean {
         if (attribute == null) {
             throw new RuntimeOperationsException(new IllegalArgumentException("Attribute name cannot be null"), "Cannot call getAttributeInfo with null attribute name");
         }
-        final ContextService contextService;
-        final UserService userService;
         final ConfigurationService configurationService;
         try {
-            contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
-            userService = ServerServiceRegistry.getInstance().getService(UserService.class, true);
             configurationService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class, true);
         } catch (final OXException e) {
             LOG.error("", e);
@@ -159,7 +152,7 @@ public class ReportingMBean implements DynamicMBean {
             throw new MBeanException(wrapMe, e.getMessage());
         }
         if ("Total".equals(attribute)) {
-            return generateTotalTabular(contextService, userService);
+            return generateTotalTabular();
         } else if ("Macs".equals(attribute)) {
             return generateMacsTabular();
         } else if ("Detail".equals(attribute)) {
@@ -274,26 +267,27 @@ public class ReportingMBean implements DynamicMBean {
         }
     }
 
-    private TabularDataSupport generateTotalTabular(final ContextService contextService, final UserService userService) throws MBeanException {
+    private TabularDataSupport generateTotalTabular() throws MBeanException {
         final TabularDataSupport total = new TabularDataSupport(totalType);
+
         try {
             int nrctx = 0;
             int nruser = 0;
             int nrguests = 0;
             int nrlinks = 0;
-            List<Integer> allContextIds = contextService.getAllContextIds();
 
             int userCount = 0;
             int guestCount = 0;
             int linkCount = 0;
-            for (Integer contextId : allContextIds) {
-                Context context = contextService.getContext(contextId);
-                User[] user = userService.getUser(context);
-                userCount += user.length;
 
-                User[] guest = userService.getUser(context, true, true);
-                for (User guestUser : guest) {
-                    if (guestUser.getMail().isEmpty()) {
+            List<Integer> allContextIds = Tools.getAllContextIds();
+            for (Integer contextId : allContextIds) {
+                User[] users = Tools.getUser(contextId);
+
+                for (User user : users) {
+                    if (!user.isGuest()) {
+                        userCount++;
+                    } else if (user.getMail().isEmpty()) {
                         linkCount++;
                     } else {
                         guestCount++;

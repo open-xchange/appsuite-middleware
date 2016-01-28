@@ -49,19 +49,136 @@
 
 package com.openexchange.report.internal;
 
+import static com.openexchange.java.Autoboxing.I;
+import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.getIN;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.impl.ContextExceptionCodes;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.ldap.UserExceptionCode;
+import com.openexchange.groupware.ldap.UserImpl;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
-
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class Tools {
+
+    public static List<Integer> getAllContextIds() throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+
+        final List<Integer> retval = new ArrayList<Integer>();
+        final Connection readConnection = dbService.getReadOnly();
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = readConnection.prepareStatement("SELECT cid FROM context");
+            result = stmt.executeQuery();
+            while (result.next()) {
+                retval.add(Integer.valueOf(result.getInt(1)));
+            }
+        } catch (final SQLException e) {
+            throw ContextExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+            dbService.backReadOnly(readConnection);
+        }
+        return retval;
+    }
+
+    public static User[] getUser(int contextId) throws OXException {
+        final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
+        Connection readOnly = dbService.getReadOnly(contextId);
+
+        final TIntObjectMap<UserImpl> users = new TIntObjectHashMap<UserImpl>();
+        int[] userIds = null;
+        try {
+            userIds = listAllUser(contextId, readOnly);
+
+            final int length = userIds.length;
+            if (0 == length) {
+                return new User[0];
+            }
+            for (int i = 0; i < userIds.length; i += IN_LIMIT) {
+                PreparedStatement stmt = null;
+                ResultSet result = null;
+                try {
+                    final int[] currentUserIds = Arrays.extract(userIds, i, IN_LIMIT);
+                    stmt = readOnly.prepareStatement(getIN("SELECT id,mailEnabled,mail,guestCreatedBy FROM user WHERE user.cid=? AND id IN (", currentUserIds.length));
+                    int pos = 1;
+                    stmt.setInt(pos++, contextId);
+                    for (final int userId : currentUserIds) {
+                        stmt.setInt(pos++, userId);
+                    }
+                    result = stmt.executeQuery();
+                    while (result.next()) {
+                        final UserImpl user = new UserImpl();
+                        pos = 1;
+                        user.setId(result.getInt(pos++));
+                        user.setMailEnabled(result.getBoolean(pos++));
+                        user.setMail(result.getString(pos++));
+                        // 'guestCreatedBy'
+                        user.setCreatedBy(result.getInt(pos++));
+
+                        users.put(user.getId(), user);
+                    }
+                } finally {
+                    closeSQLStuff(result, stmt);
+                }
+            }
+        } catch (final SQLException e) {
+            throw UserExceptionCode.LOAD_FAILED.create(e, e.getMessage());
+        } finally {
+            dbService.backReadOnly(contextId, readOnly);
+        }
+        for (final int userId : userIds) {
+            if (!users.containsKey(userId)) {
+                throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), contextId);
+            }
+        }
+        final User[] retval = new User[users.size()];
+        for (int i = 0; i < userIds.length; i++) {
+            retval[i] = users.get(userIds[i]);
+        }
+        return retval;
+    }
+
+    private static int[] listAllUser(int contextID, Connection con) throws OXException {
+        StringBuilder stringBuilder = new StringBuilder("SELECT id FROM user WHERE cid=?");
+        String sql = stringBuilder.toString();
+        final int[] users;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement(sql);
+            stmt.setInt(1, contextID);
+            result = stmt.executeQuery();
+            final TIntList tmp = new TIntArrayList();
+            while (result.next()) {
+                tmp.add(result.getInt(1));
+            }
+            users = tmp.toArray();
+        } catch (final SQLException e) {
+            throw UserExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+        return users;
+    }
 
     public static final Map<String, Integer> getAllSchemata(final org.slf4j.Logger logger) throws SQLException, OXException {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
