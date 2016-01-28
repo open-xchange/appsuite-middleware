@@ -196,8 +196,9 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
                 }
                 break;
             case repair:
-                if (!source.equals(Source.all)) {
+                if (source.equals(Source.all)) {
                     operationName = "repairAllFiles";
+                } else {
                     params.add(sourceId);
                 }
                 params.add(policyString);
