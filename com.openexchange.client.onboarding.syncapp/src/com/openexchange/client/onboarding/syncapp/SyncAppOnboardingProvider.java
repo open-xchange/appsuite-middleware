@@ -100,6 +100,11 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Provides a link to the Sync App in Google Play Store.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

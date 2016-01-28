@@ -99,6 +99,11 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Provides links to the Drive App in Apple App Store and Google Play Store.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

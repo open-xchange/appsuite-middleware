@@ -102,6 +102,11 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Configures CalDAV.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

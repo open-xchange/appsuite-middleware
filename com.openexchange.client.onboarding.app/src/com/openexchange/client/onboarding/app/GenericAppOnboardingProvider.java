@@ -95,6 +95,11 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Provides links to arbitrary locations in commercial stores or executables.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

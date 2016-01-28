@@ -99,6 +99,11 @@ public class DriveMacOnboardingProvider implements OnboardingProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Provides a link to the Drive Mac App in Apple App Store.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

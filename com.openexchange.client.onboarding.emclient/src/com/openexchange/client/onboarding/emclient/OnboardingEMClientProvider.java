@@ -91,6 +91,11 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Provides a link to the installer for the eM Client.";
+    }
+
+    @Override
     public String getId() {
         return identifier;
     }

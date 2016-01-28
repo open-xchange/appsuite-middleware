@@ -103,6 +103,11 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Configures Microsoft ActiveSync (EAS).";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }

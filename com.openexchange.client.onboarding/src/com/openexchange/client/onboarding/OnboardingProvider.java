@@ -70,6 +70,13 @@ public interface OnboardingProvider {
     String getId();
 
     /**
+     * Gets this provider's description
+     *
+     * @return The description
+     */
+    String getDescription();
+
+    /**
      * Gets the supported devices.
      *
      * @return The supported devices

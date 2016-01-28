@@ -103,6 +103,11 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
     }
 
     @Override
+    public String getDescription() {
+        return "Configures CardDAV.";
+    }
+
+    @Override
     public String toString() {
         return getClass().getSimpleName();
     }
