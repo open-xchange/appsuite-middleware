@@ -96,7 +96,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
 
     @Override
     public String getDescription() {
-        return "Provide a link to the installer for Drive Windows Client.";
+        return "Provides a link for the Drive Windows Client.";
     }
 
     @Override

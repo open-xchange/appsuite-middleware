@@ -110,27 +110,35 @@ public class RemoteOnboardingServiceImpl implements RemoteOnboardingService {
             Collection<OnboardingProvider> providers = service.getAllProviders();
 
             // Build up mapping
+            Map<String, String> descMap = new HashMap<String, String>(providers.size());
             Map<String, List<String>> devicesMap = new HashMap<String, List<String>>(providers.size());
             Map<String, List<String>> typesMap = new HashMap<String, List<String>>(providers.size());
             List<String> ids = new ArrayList<String>(providers.size());
             for (OnboardingProvider provider : providers) {
-                Set<Device> devices = provider.getSupportedDevices();
-                List<String> sDevices = new ArrayList<String>(devices.size());
-                for (Device device : devices) {
-                    sDevices.add(device.getId());
-                }
-                Collections.sort(sDevices, comparator);
-                devicesMap.put(provider.getId(), sDevices);
+                String id = provider.getId();
+                ids.add(id);
 
-                Set<OnboardingType> types = provider.getSupportedTypes();
-                List<String> sTypes = new ArrayList<String>(types.size());
-                for (OnboardingType type : types) {
-                    sTypes.add(type.getId());
-                }
-                Collections.sort(sTypes, comparator);
-                typesMap.put(provider.getId(), sTypes);
+                descMap.put(id, provider.getDescription());
 
-                ids.add(provider.getId());
+                {
+                    Set<Device> devices = provider.getSupportedDevices();
+                    List<String> sDevices = new ArrayList<String>(devices.size());
+                    for (Device device : devices) {
+                        sDevices.add(device.getId());
+                    }
+                    Collections.sort(sDevices, comparator);
+                    devicesMap.put(id, sDevices);
+                }
+
+                {
+                    Set<OnboardingType> types = provider.getSupportedTypes();
+                    List<String> sTypes = new ArrayList<String>(types.size());
+                    for (OnboardingType type : types) {
+                        sTypes.add(type.getId());
+                    }
+                    Collections.sort(sTypes, comparator);
+                    typesMap.put(id, sTypes);
+                }
             }
 
             // Sort identifiers
@@ -139,9 +147,7 @@ public class RemoteOnboardingServiceImpl implements RemoteOnboardingService {
             // Compile data
             List<List<String>> data = new ArrayList<List<String>>(ids.size());
             for (String id : ids) {
-                List<String> devices = devicesMap.get(id);
-                List<String> types = typesMap.get(id);
-                data.add(Arrays.asList(id, toCsl(types), toCsl(devices)));
+                data.add(Arrays.asList(id, descMap.get(id), toCsl(typesMap.get(id)), toCsl(devicesMap.get(id))));
             }
 
             // Return the sorted identifiers

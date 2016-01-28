@@ -92,7 +92,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
 
     @Override
     public String getDescription() {
-        return "Provides a link to the installer for the eM Client.";
+        return "Provides a link for the eM Client.";
     }
 
     @Override

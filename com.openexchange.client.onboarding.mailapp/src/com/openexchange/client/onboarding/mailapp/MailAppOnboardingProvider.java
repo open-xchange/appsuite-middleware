@@ -100,7 +100,7 @@ public class MailAppOnboardingProvider implements OnboardingProvider {
 
     @Override
     public String getDescription() {
-        return "Provides links to the Mail App in Apple App Store and Google Play Store.";
+        return "Provides links for the Mail App.";
     }
 
     @Override

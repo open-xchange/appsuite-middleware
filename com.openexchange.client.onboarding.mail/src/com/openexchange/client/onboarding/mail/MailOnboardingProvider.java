@@ -111,7 +111,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
     @Override
     public String getDescription() {
-        return "Configures IMAP/SMTP to connect to the primary mail account";
+        return "Configures IMAP/SMTP.";
     }
 
     @Override
