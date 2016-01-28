@@ -320,6 +320,7 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
         if (null != trigger) {
             Long reminderMinutes = new Long((appointment.getStartDate().getTime() - trigger.getTime()) / (1000 * 60));
             appointment.setAlarm(reminderMinutes.intValue());
+            appointment.setAlarmFlag(true);
         } else {
             appointment.setAlarm(-1);
         }
@@ -512,9 +513,9 @@ public class Alarm<T extends CalendarComponent, U extends CalendarObject> extend
                     Action action = alarm.getAction();
                     if (null != action && Action.DISPLAY.getValue().equalsIgnoreCase(action.getValue())) {
                         vAlarms.add(alarm);
+                    } else {
+                        warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));                    
                     }
-                } else {
-                    warnings.add(new ConversionWarning(index, "Can only convert DISPLAY alarms with triggers"));                    
                 }
             }
         }
