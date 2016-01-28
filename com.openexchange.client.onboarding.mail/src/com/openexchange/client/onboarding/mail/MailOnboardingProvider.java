@@ -54,14 +54,13 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
@@ -94,10 +93,10 @@ import com.openexchange.user.UserService;
  */
 public class MailOnboardingProvider implements OnboardingPlistProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MailOnboardingProvider.class);
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link MailOnboardingProvider}.
@@ -107,6 +106,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         this.services = services;
         identifier = BuiltInProvider.MAIL.getId();
         supportedDevices = EnumSet.allOf(Device.class);
+        supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
     }
 
     @Override
@@ -147,6 +147,11 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override

@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
@@ -87,7 +88,8 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link CardDAVOnboardingProvider}.
@@ -97,6 +99,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         this.services = services;
         identifier = BuiltInProvider.CARDDAV.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
+        supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
     }
 
     @Override
@@ -119,6 +122,11 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override

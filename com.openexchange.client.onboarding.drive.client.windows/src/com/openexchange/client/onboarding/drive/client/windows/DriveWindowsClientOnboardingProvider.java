@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
@@ -80,6 +81,7 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
     private final ServiceLookup services;
     private final String identifier;
     private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link DriveWindowsClientOnboardingProvider}.
@@ -89,11 +91,17 @@ public class DriveWindowsClientOnboardingProvider implements OnboardingProvider 
         this.services = services;
         identifier = BuiltInProvider.DRIVE_WINDOWS_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
+        supportedTypes = EnumSet.of(OnboardingType.LINK);
     }
 
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override

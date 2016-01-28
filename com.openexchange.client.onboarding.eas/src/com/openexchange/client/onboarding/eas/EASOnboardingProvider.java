@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
@@ -87,7 +88,8 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link EASOnboardingProvider}.
@@ -96,7 +98,8 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         super();
         this.services = services;
         identifier = BuiltInProvider.EAS.getId();
-        supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10));
+        supportedDevices = EnumSet.complementOf(EnumSet.of(Device.WINDOWS_DESKTOP_8_10, Device.APPLE_MAC));
+        supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
     }
 
     @Override
@@ -119,6 +122,11 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override
