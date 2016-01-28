@@ -63,39 +63,37 @@ public enum Platform implements Entity {
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "platform_icon_apple.png"),
+    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "fa-apple"),
     /**
      * The Android/Google platform for Android devices
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "platform_icon_android.png"),
+    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "fa-android"),
     /**
      * The Windows platform for Windows Desktop applications.
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "platform_icon_windows.png"),
+    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "fa-windows"),
     ;
 
     private final String id;
+    private final FontAwesomeIcon icon;
 
     private final String enabledProperty;
     private final String displayNameProperty;
-    private final String iconProperty;
     private final String descriptionProperty;
 
     private final String defaultDisplayName;
-    private final String defaultIcon;
     private final String defaultDescription;
 
-    private Platform(String id, String defaultDisplayName, String defaultDescription, String defaultIcon) {
+    private Platform(String id, String defaultDisplayName, String defaultDescription, String fontAwesomeName) {
         this.id = id;
+        icon = new FontAwesomeIcon(fontAwesomeName);
 
         String prefix = "com.openexchange.client.onboarding." + id;
         enabledProperty = prefix + ".enabled";
         displayNameProperty = prefix + ".displayName";
-        iconProperty = prefix + ".icon";
         descriptionProperty = prefix + ".description";
 
         this.defaultDisplayName = defaultDisplayName;
-        this.defaultIcon = defaultIcon;
         this.defaultDescription = defaultDescription;
     }
 
@@ -126,7 +124,7 @@ public enum Platform implements Entity {
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(iconProperty, defaultIcon, session);
+        return icon;
     }
 
     @Override

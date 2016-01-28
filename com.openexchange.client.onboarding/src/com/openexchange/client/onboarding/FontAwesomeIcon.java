@@ -49,75 +49,53 @@
 
 package com.openexchange.client.onboarding;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import org.slf4j.Logger;
-import com.openexchange.java.Streams;
-
 /**
- * Template-based implementation of an {@link Icon}.
+ * <a href="https://fortawesome.github.io/Font-Awesome/">Font Awesome</a> implementation of an {@link Icon}, based on a byte array.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TemplateIcon implements Icon {
+public class FontAwesomeIcon implements Icon {
 
-    private static final long serialVersionUID = 7821572419974173720L;
+    private static final long serialVersionUID = 8201486116083192771L;
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateIcon.class);
-
-    private final String mimeType;
-    private final File file;
+    private final String[] names;
 
     /**
-     * Initializes a new {@link TemplateIcon}.
+     * Initializes a new {@link FontAwesomeIcon}.
      */
-    public TemplateIcon(String name) {
-        this(name, null);
+    public FontAwesomeIcon(String... names) {
+        super();
+        this.names = names;
     }
 
     /**
-     * Initializes a new {@link TemplateIcon}.
+     * Gets the names for the <a href="https://fortawesome.github.io/Font-Awesome/">Font Awesome</a> images.
+     *
+     * @return The names
      */
-    public TemplateIcon(String name, String mimeType) {
-        super();
-        FileInfo fileInfo = OnboardingUtility.getTemplateFileInfo(name);
-        this.file = fileInfo.getFile();
-        this.mimeType = null == mimeType ? fileInfo.getMimeType() : mimeType;
+    public String[] getNames() {
+        return names;
     }
 
     @Override
     public String getMimeType() {
-        return mimeType;
+        return "image/svg+xml";
     }
 
     @Override
     public long getSize() {
-        return file.length();
+        return -1L;
     }
 
     @Override
     public byte[] getData() {
-        if (false == file.exists()) {
-            LOG.debug("Icon image {} does not exist.", file.getPath());
-            return new byte[0];
-        }
-
-        try {
-            return Streams.stream2bytes(new FileInputStream(file));
-        } catch (java.io.FileNotFoundException e) {
-            LOG.debug("Icon image {} does not exist.", file.getPath());
-            return new byte[0];
-        } catch (IOException e) {
-            LOG.debug("Could not load icon image {}.", file.getPath(), e);
-            return new byte[0];
-        }
+        return null;
     }
 
     @Override
     public IconType getType() {
-        return IconType.RAW;
+        return IconType.FONT_AWESOME;
     }
 
 }

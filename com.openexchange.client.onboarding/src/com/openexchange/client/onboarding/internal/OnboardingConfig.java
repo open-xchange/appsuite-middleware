@@ -58,6 +58,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import com.openexchange.client.onboarding.DefaultIcon;
+import com.openexchange.client.onboarding.FontAwesomeIcon;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -161,7 +162,7 @@ public class OnboardingConfig {
                         if (!Strings.isEmpty(sType)) {
                             linkType = LinkType.typeFor(sType);
                             if (null == linkType) {
-                                throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                                throw OnboardingExceptionCodes.INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION.create(sType, id);
                             }
                         }
                     }
@@ -211,7 +212,11 @@ public class OnboardingConfig {
                     icon = null;
                 } else {
                     iconValue = iconValue.trim();
-                    if (PATTERN_FILENAME.matcher(iconValue).matches()) {
+                    if (Strings.asciiLowerCase(iconValue).startsWith("fa-")) {
+                        // Assume Font-Awesome names
+                        String[] names = Strings.splitByComma(iconValue);
+                        icon = new FontAwesomeIcon(names);
+                    } else if (PATTERN_FILENAME.matcher(iconValue).matches()) {
                         // Assume a file name
                         icon = new TemplateIcon(iconValue);
                     } else {

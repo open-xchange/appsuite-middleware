@@ -164,8 +164,8 @@ public class DriveMacOnboardingProvider implements OnboardingProvider {
             Device device = request.getDevice();
             switch (device.getPlatform()) {
                 case APPLE:
-                    propertyName = "com.openexchange.client.onboarding.drivemac.store.apple.appstore";
-                    linkType = LinkType.APPLE_APP_STORE;
+                    propertyName = "com.openexchange.client.onboarding.drivemac.store.apple.macappstore";
+                    linkType = LinkType.APPLE_MAC_STORE;
                     break;
                 default:
                     throw OnboardingExceptionCodes.UNSUPPORTED_DEVICE.create(identifier, device.getId());

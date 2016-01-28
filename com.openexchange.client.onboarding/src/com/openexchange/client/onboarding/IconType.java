@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,75 +49,57 @@
 
 package com.openexchange.client.onboarding;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import org.slf4j.Logger;
-import com.openexchange.java.Streams;
 
 /**
- * Template-based implementation of an {@link Icon}.
+ * {@link IconType} - Represents an icon type.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class TemplateIcon implements Icon {
-
-    private static final long serialVersionUID = 7821572419974173720L;
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(TemplateIcon.class);
-
-    private final String mimeType;
-    private final File file;
+public enum IconType {
 
     /**
-     * Initializes a new {@link TemplateIcon}.
+     * Icon provides raw byte content.
      */
-    public TemplateIcon(String name) {
-        this(name, null);
+    RAW("raw"),
+    /**
+     * <a href="https://fortawesome.github.io/Font-Awesome/">Font Awesome</a>; scalable vector icons.
+     */
+    FONT_AWESOME(""),
+    ;
+
+    private final String id;
+
+    private IconType(String id) {
+        this.id = id;
     }
 
     /**
-     * Initializes a new {@link TemplateIcon}.
+     * Gets the identifier
+     *
+     * @return The identifier
      */
-    public TemplateIcon(String name, String mimeType) {
-        super();
-        FileInfo fileInfo = OnboardingUtility.getTemplateFileInfo(name);
-        this.file = fileInfo.getFile();
-        this.mimeType = null == mimeType ? fileInfo.getMimeType() : mimeType;
+    public String getId() {
+        return id;
     }
 
-    @Override
-    public String getMimeType() {
-        return mimeType;
-    }
-
-    @Override
-    public long getSize() {
-        return file.length();
-    }
-
-    @Override
-    public byte[] getData() {
-        if (false == file.exists()) {
-            LOG.debug("Icon image {} does not exist.", file.getPath());
-            return new byte[0];
+    /**
+     * Gets the icon type for specified identifier
+     *
+     * @param id The identifier to look-up
+     * @return The associated icon type or <code>null</code>
+     */
+    public static IconType typeFor(String id) {
+        if (null == id) {
+            return null;
         }
 
-        try {
-            return Streams.stream2bytes(new FileInputStream(file));
-        } catch (java.io.FileNotFoundException e) {
-            LOG.debug("Icon image {} does not exist.", file.getPath());
-            return new byte[0];
-        } catch (IOException e) {
-            LOG.debug("Could not load icon image {}.", file.getPath(), e);
-            return new byte[0];
+        for (IconType type : values()) {
+            if (id.equals(type.getId())) {
+                return type;
+            }
         }
-    }
-
-    @Override
-    public IconType getType() {
-        return IconType.RAW;
+        return null;
     }
 
 }

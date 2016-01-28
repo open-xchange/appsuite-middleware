@@ -9,15 +9,15 @@
 #       String. The type of the scenario. Currently known:
 #       "plist" for generating a plist configuration file for iOS and OSX devices,
 #       "manual" for a description for the user for manual set-up
-#       "link" for a link/URL to either Apple App Store or Google Play Store
+#       "link" for a link/URL to either Apple App Store, Apple Mac App Store or Google Play Store
 #
 #     link: <link>
-#       Object. The link and type routing to the app in either Apple App Store or Google Play Store. ONLY VALID IN CASE "type" IS SET TO "link"!
+#       Object. The link and type routing to the app in either Apple App Store, Apple Mac App Store or Google Play Store. ONLY VALID IN CASE "type" IS SET TO "link"!
 #         url: <url>
 #         String: The URL of the link. For specifying a property that provides the actual link, please use special "property" scheme; e.g. "property://com.openexchange.client.onboarding.app.mylink"
 #
 #         type: <appstore|playstore>
-#         String: Optional. Denotes to what store the URL points to (if it is not a common download link not pointing to a commercial store. Supported values are "appstore" and "playstore"
+#         String: Optional. Denotes to what store the URL points to (if it is not a common download link not pointing to a commercial store. Supported values are "appstore", "macappstore" and "playstore"
 #
 #     providers: <provider-identifiers>
 #       Array of strings. A list of providers that are supposed to "contribute" to this scenario.
@@ -80,7 +80,7 @@ myappleappinstall:
         type: appstore
     providers: [app]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    # The comma-separated Font Awesome names
     ## icon: <icon>
     # The translatable display name
     ## displayName_t10e: <the display name>
@@ -97,7 +97,7 @@ mygoogleappinstall:
         type: playstore
     providers: [app]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    # The comma-separated Font Awesome names
     ## icon: <icon>
     # The translatable display name
     ## displayName_t10e: <the display name>
@@ -113,7 +113,7 @@ myplainappinstall:
         url: http://my.host.invalid/path/to/the/installer
     providers: [app]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+    # The comma-separated Font Awesome names
     ## icon: <icon>
     # The translatable display name
     ## displayName_t10e: <the display name>
@@ -129,8 +129,8 @@ drivewindowsclientinstall:
     type: link
     providers: [drivewindowsclient]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: drivewindowsclient.png
+    # The comma-separated Font Awesome names
+    icon: fa-cloud
     # The translatable display name
     displayName_t10e: "Drive Application"
     # The translatable description
@@ -145,8 +145,8 @@ emclientinstall:
     type: link
     providers: [emclient]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: emclient.png
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
     displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
@@ -162,8 +162,8 @@ drivemacinstall:
     type: link
     providers: [drivemac]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: drivemac.png
+    # The comma-separated Font Awesome names
+    icon: fa-cloud
     # The translatable display name
     displayName_t10e: "Drive Application"
     # The translatable description
@@ -179,8 +179,8 @@ mailappinstall:
     type: link
     providers: [mailapp]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: mailapp.png
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
     # The translatable display name
     displayName_t10e: "Mail App"
     # The translatable description
@@ -196,8 +196,8 @@ driveappinstall:
     type: link
     providers: [driveapp]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: driveapp.png
+    # The comma-separated Font Awesome names
+    icon: fa-cloud
     # The translatable display name
     displayName_t10e: "Drive App"
     # The translatable description
@@ -213,8 +213,8 @@ syncappinstall:
     type: link
     providers: [syncapp]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: syncapp.png
+    # The comma-separated Font Awesome names
+    icon: "fa-calendar, fa-users"
     # The translatable display name
     displayName_t10e: "Calendar + Address Book"
     # The translatable description
@@ -229,8 +229,8 @@ davsync:
     type: plist
     providers: [carddav, caldav]
     alternatives: [davmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: davsync.png
+    # The comma-separated Font Awesome names
+    icon: "fa-calendar, fa-users"
     # The translatable display name
     displayName_t10e: "Calendar + Address Book"
     # The translatable description
@@ -241,7 +241,7 @@ davsync:
 #    type: plist
 #    providers: [carddav, caldav]
 #    alternatives: [davmanual]
-#    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
+#    # The comma-separated Font Awesome names
 #    icon: <base64>
 #    # The translatable display name
 #    displayName_t10e: "OX Sync"
@@ -253,8 +253,8 @@ davmanual:
     type: manual
     providers: [carddav, caldav]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: davsync.png
+    # The comma-separated Font Awesome names
+    icon: fa-wrench
     # The translatable display name
     displayName_t10e: "Calendar + Address Book"
     # The translatable description
@@ -272,8 +272,8 @@ oxupdaterinstall:
     type: link
     providers: [oxupdater]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: oxupdater.png
+    # The comma-separated Font Awesome names
+    icon: fa-desktop
     # The translatable display name
     displayName_t10e: "Updater for Windows Clients"
     # The translatable description
@@ -289,8 +289,8 @@ eassync:
     type: plist
     providers: [eas]
     alternatives: [easmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: eassync.png
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
     displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
@@ -302,8 +302,8 @@ easmanual:
     type: manual
     providers: [eas]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: eassync.png
+    # The comma-separated Font Awesome names
+    icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
     displayName_t10e: "Email + Calendar + Address Book"
     # The translatable description
@@ -318,8 +318,8 @@ mailsync:
     type: plist
     providers: [mail]
     alternatives: [mailmanual]
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: mailsync.png
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
     # The translatable display name
     displayName_t10e: "eMail"
     # The translatable description
@@ -330,8 +330,8 @@ mailmanual:
     type: manual
     providers: [mail]
     alternatives: []
-    # The name of the image file located in '/opt/open-xchange/templates' directory or base64-encoded image binary
-    icon: mailsync.png
+    # The comma-separated Font Awesome names
+    icon: fa-envelope-o
     # The translatable display name
     displayName_t10e: "eMail"
     # The translatable description
