@@ -141,7 +141,7 @@ public class RemoteOnboardingServiceImpl implements RemoteOnboardingService {
             for (String id : ids) {
                 List<String> devices = devicesMap.get(id);
                 List<String> types = typesMap.get(id);
-                data.add(Arrays.asList(id, toCsl(devices), toCsl(types)));
+                data.add(Arrays.asList(id, toCsl(types), toCsl(devices)));
             }
 
             // Return the sorted identifiers
