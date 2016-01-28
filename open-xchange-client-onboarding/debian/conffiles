@@ -4,6 +4,7 @@ opt/open-xchange/etc/client-onboarding-carddav.properties
 opt/open-xchange/etc/client-onboarding-drivemac.properties
 opt/open-xchange/etc/client-onboarding-driveapp.properties
 opt/open-xchange/etc/client-onboarding-eas.properties
+opt/open-xchange/etc/client-onboarding-genericapp.properties
 opt/open-xchange/etc/client-onboarding-mail.properties
 opt/open-xchange/etc/client-onboarding-mailapp.properties
 opt/open-xchange/etc/client-onboarding-emclient.properties
