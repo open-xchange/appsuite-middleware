@@ -129,7 +129,7 @@ public class POParser {
         }
         
         List<String> strings = new LinkedList<String>();
-        while (tokens.lookahead(POToken.MSGSTR)) {
+        do {
             tokens.consume(POToken.MSGSTR);
             StringBuilder string = new StringBuilder();
             collectTexts(tokens, string);
@@ -137,7 +137,7 @@ public class POParser {
             if (!Strings.isEmpty(s)) {
                 strings.add(s);
             }
-        }
+        } while (tokens.lookahead(POToken.MSGSTR));
         
         if (!strings.isEmpty()) {
             translations.setContextTranslationPlural(context, key.toString(), keyPlural, strings);
