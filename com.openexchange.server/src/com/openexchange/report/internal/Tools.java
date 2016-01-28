@@ -49,7 +49,6 @@
 
 package com.openexchange.report.internal;
 
-import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.IN_LIMIT;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.getIN;
@@ -73,8 +72,6 @@ import com.openexchange.tools.arrays.Arrays;
 import com.openexchange.tools.sql.DBUtils;
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 
 public class Tools {
 
@@ -104,16 +101,15 @@ public class Tools {
         final DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class);
         Connection readOnly = dbService.getReadOnly(contextId);
 
-        final TIntObjectMap<UserImpl> users = new TIntObjectHashMap<UserImpl>();
-        int[] userIds = null;
+        final List<User> users = new ArrayList<User>();
         try {
-            userIds = listAllUser(contextId, readOnly);
+            int[] userIds = listAllUser(contextId, readOnly);
 
             final int length = userIds.length;
             if (0 == length) {
                 return new User[0];
             }
-            for (int i = 0; i < userIds.length; i += IN_LIMIT) {
+            for (int i = 0; i < length; i += IN_LIMIT) {
                 PreparedStatement stmt = null;
                 ResultSet result = null;
                 try {
@@ -134,7 +130,7 @@ public class Tools {
                         // 'guestCreatedBy'
                         user.setCreatedBy(result.getInt(pos++));
 
-                        users.put(user.getId(), user);
+                        users.add(user);
                     }
                 } finally {
                     closeSQLStuff(result, stmt);
@@ -145,16 +141,7 @@ public class Tools {
         } finally {
             dbService.backReadOnly(contextId, readOnly);
         }
-        for (final int userId : userIds) {
-            if (!users.containsKey(userId)) {
-                throw UserExceptionCode.USER_NOT_FOUND.create(I(userId), contextId);
-            }
-        }
-        final User[] retval = new User[users.size()];
-        for (int i = 0; i < userIds.length; i++) {
-            retval[i] = users.get(userIds[i]);
-        }
-        return retval;
+        return users.toArray(new User[users.size()]);
     }
 
     private static int[] listAllUser(int contextID, Connection con) throws OXException {
