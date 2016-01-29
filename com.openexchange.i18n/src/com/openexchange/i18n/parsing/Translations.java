@@ -65,7 +65,7 @@ import com.openexchange.java.Strings;
 public class Translations {
 
     private Map<String, Translation> simpleTranslations; // Key -> [form1, form2, ...]
-    private Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...]) 
+    private Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...])
     private Locale locale;
 
     public Translations() {
@@ -103,7 +103,7 @@ public class Translations {
     }
 
     public void setTranslation(String key, String value) {
-        if (key == null || Strings.isEmpty(key)) {
+        if (key == null) {
             return;
         }
 
@@ -113,7 +113,7 @@ public class Translations {
     }
 
     public void setTranslationPlural(String key, String keyPlural, List<String> values) {
-        if (key == null || Strings.isEmpty(key) || values == null || values.isEmpty()) {
+        if (key == null || values == null || values.isEmpty()) {
             return;
         }
 
@@ -149,7 +149,7 @@ public class Translations {
     }
 
     public void setContextTranslationPlural(String context, String key, String keyPlural, List<String> values) {
-        if (key == null || Strings.isEmpty(key) || values == null || values.isEmpty()) {
+        if (key == null || values == null || values.isEmpty()) {
             return;
         }
 
