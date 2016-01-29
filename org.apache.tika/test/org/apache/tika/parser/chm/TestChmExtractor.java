@@ -21,19 +21,20 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
 import org.apache.tika.parser.chm.accessor.ChmDirectoryListingSet;
 import org.apache.tika.parser.chm.accessor.DirectoryListingEntry;
 import org.apache.tika.parser.chm.core.ChmExtractor;
+import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Assert;
 
 public class TestChmExtractor extends TestCase {
     private ChmExtractor chmExtractor = null;
 
+    @Override
     public void setUp() throws Exception {
         chmExtractor = new ChmExtractor(
                 new ByteArrayInputStream(TestParameters.chmData));
@@ -51,7 +52,7 @@ public class TestChmExtractor extends TestCase {
 
     public void testExtractChmEntry() throws TikaException{
         ChmDirectoryListingSet entries = chmExtractor.getChmDirList();
-        byte[][] localFile;
+        byte[] localFile;
         int count = 0;
         for (Iterator<DirectoryListingEntry> it = entries
                 .getDirectoryListingEntryList().iterator(); it.hasNext();) {
@@ -72,18 +73,20 @@ public class TestChmExtractor extends TestCase {
             InputStream stream =
                     TestChmBlockInfo.class.getResourceAsStream(fileName);
             try {
-                CHMDocumentInformation chmDocInfo = CHMDocumentInformation.load(stream);
-                Metadata md = new Metadata();
-                String text = chmDocInfo.getText();
-                chmDocInfo.getCHMDocInformation(md);
-                assertEquals(TestParameters.VP_CHM_MIME_TYPE, md.toString().trim());
-                assertTrue(text.length() > 0);
+                ChmParser parser = new ChmParser();
+                BodyContentHandler handler = new BodyContentHandler();
+                Metadata meta = new Metadata();
+                ParseContext context = new ParseContext();
+                parser.parse(stream, handler, meta, context);
+                assertEquals(TestParameters.VP_CHM_MIME_TYPE, meta.toString().trim());
+                assertTrue(handler.toString().length() > 0);
             } finally {
                 stream.close();
             }
         }
     }
 
+    @Override
     public void tearDown() throws Exception {
     }
 

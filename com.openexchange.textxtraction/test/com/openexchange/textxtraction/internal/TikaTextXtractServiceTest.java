@@ -143,12 +143,14 @@ public class TikaTextXtractServiceTest {
         CompositeParser compositeParser = (CompositeParser) wrappedParser.values().iterator().next();
         Map<MediaType, Parser> parserMap = compositeParser.getParsers();
         Set<Parser> allParsers = new HashSet<Parser>(parserMap.values());
-        Assert.assertEquals("Wrong number of parsers.", TikaTextXtractService.PARSERS.size(), allParsers.size());
+        Assert.assertTrue("Not enough parsers.", TikaTextXtractService.PARSERS.size() <= allParsers.size());
 
+        HashSet<String> tmpSet = new HashSet<String>(TikaTextXtractService.PARSERS);
         for (Parser parser : allParsers) {
             String className = parser.getClass().getName();
-            Assert.assertTrue("Missing parser " + className, TikaTextXtractService.PARSERS.contains(className));
+            tmpSet.remove(className);
         }
+        Assert.assertTrue("Missing the following parsers: " + tmpSet.toString(), tmpSet.isEmpty());
     }
 
     @Test

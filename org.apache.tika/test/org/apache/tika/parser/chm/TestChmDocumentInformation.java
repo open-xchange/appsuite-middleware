@@ -19,33 +19,37 @@ package org.apache.tika.parser.chm;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-
-import junit.framework.Assert;
 import junit.framework.TestCase;
-
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.sax.BodyContentHandler;
+import org.junit.Assert;
 
 public class TestChmDocumentInformation extends TestCase {
-    private CHMDocumentInformation chmDoc = null;
 
+    //    private CHMDocumentInformation chmDoc = null;
+    private Metadata meta;
+    private BodyContentHandler handler;
+
+    @Override
     public void setUp() throws Exception {
-        chmDoc = CHMDocumentInformation.load(
-                new ByteArrayInputStream(TestParameters.chmData));
+        ChmParser parser = new ChmParser();
+        handler = new BodyContentHandler();
+        meta = new Metadata();
+        ParseContext context = new ParseContext();
+        parser.parse(new ByteArrayInputStream(TestParameters.chmData), handler, meta, context);
     }
 
     public void testGetCHMDocInformation() throws TikaException, IOException {
-        Metadata md = new Metadata();
-        chmDoc.getCHMDocInformation(md);
-        Assert.assertEquals(TestParameters.VP_CHM_MIME_TYPE, md.toString()
-                .trim());
+        Assert.assertEquals(TestParameters.VP_CHM_MIME_TYPE, meta.toString().trim());
     }
 
     public void testGetText() throws TikaException {
-        Assert.assertTrue(chmDoc.getText().contains(
-                "The TCard method accepts only numeric arguments"));
+        Assert.assertTrue(handler.toString().contains("The TCard method accepts only numeric arguments"));
     }
 
+    @Override
     public void tearDown() throws Exception {
     }
 
