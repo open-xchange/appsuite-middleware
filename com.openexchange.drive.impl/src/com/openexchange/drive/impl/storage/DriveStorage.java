@@ -594,12 +594,9 @@ public class DriveStorage {
                 session.getServerSession().getUserId(), session.getServerSession().getContextId());
         }
         List<File> files = new ArrayList<File>();
-        if (session.getDriveSession().useDriveMeta()) {
-            files.add(new DriveMetadata(session, folder));
-        }
-        if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
-            return files;
-        }
+        /*
+         * prepare appropriate file filter
+         */
         FileNameFilter filter;
         if (all) {
             filter = FileNameFilter.ACCEPT_ALL;
@@ -615,6 +612,21 @@ public class DriveStorage {
                         false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
             };
+        }
+        /*
+         * include .drive-meta as needed
+         */
+        if (session.getDriveSession().useDriveMeta()) {
+            File driveMetaFile = new DriveMetadata(session, folder);
+            if (filter.accept(driveMetaFile)) {
+                files.add(driveMetaFile);
+            }
+        }
+        /*
+         * add (possibly filtered) directory contents
+         */
+        if (null == folder.getOwnPermission() || FileStoragePermission.READ_OWN_OBJECTS > folder.getOwnPermission().getReadPermission()) {
+            return files;
         }
         files.addAll(filter.findAll(searchDocuments(folderID, pattern, null != fields ? fields : DriveConstants.FILE_FIELDS)));
         return files;
