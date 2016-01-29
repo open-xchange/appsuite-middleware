@@ -25,16 +25,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 import junit.framework.TestCase;
+
 import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.sax.BodyContentHandler;
 
 public class TestChmExtraction extends TestCase {
 
     private List<String> files = new ArrayList<String>();
 
-    @Override
     public void setUp() {
         files.add("/test-documents/testChm.chm");
         files.add("/test-documents/testChm3.chm");
@@ -45,21 +44,21 @@ public class TestChmExtraction extends TestCase {
                 .newFixedThreadPool(TestParameters.NTHREADS);
         for (int i = 0; i < TestParameters.NTHREADS; i++) {
             executor.execute(new Runnable() {
-                @Override
                 public void run() {
                     Lock mutex = new ReentrantLock();
                     for (String fileName : files) {
                         InputStream stream = null;
                         try {
                             stream = TestChmExtraction.class.getResourceAsStream(fileName);
-                            ChmParser parser = new ChmParser();
-                            BodyContentHandler handler = new BodyContentHandler();
-                            Metadata meta = new Metadata();
-                            ParseContext context = new ParseContext();
-                            parser.parse(stream, handler, meta, context);
+
+                            CHMDocumentInformation chmDocInfo = CHMDocumentInformation
+                                    .load(stream);
+                            Metadata md = new Metadata();
                             mutex.lock();
-                            assertEquals(TestParameters.VP_CHM_MIME_TYPE, meta.toString().trim());
-                            assertTrue(handler.toString().length() > 0);
+                            String text = chmDocInfo.getText();
+                            chmDocInfo.getCHMDocInformation(md);
+                            assertEquals(TestParameters.VP_CHM_MIME_TYPE, md.toString().trim());
+                            assertTrue(text.length() > 0);
                         } catch (Exception e) {
                             e.printStackTrace();
                         } finally {
