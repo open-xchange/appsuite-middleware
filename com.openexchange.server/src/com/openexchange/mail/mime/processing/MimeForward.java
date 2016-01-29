@@ -459,9 +459,11 @@ public final class MimeForward extends AbstractMimeProcessing {
              * Add appropriate text part prefixed with forward text
              */
             {
-                final ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
+                ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
-                final MimeBodyPart textPart = new MimeBodyPart();
+                contentType.setParameter("nature", "virtual");
+
+                MimeBodyPart textPart = new MimeBodyPart();
                 String txt = usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false);
                 MessageUtility.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain", textPart);
                 // textPart.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain");
