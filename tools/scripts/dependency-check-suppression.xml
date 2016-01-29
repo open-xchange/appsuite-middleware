@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+   <suppress>
+      <notes><![CDATA[
+      file name: mysql-connector-java-5.1.30-bin.jar
+      ]]></notes>
+      <sha1>50aa5073896609b6b8c5e484c7671449daccf94c</sha1>
+      <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
+   </suppress>
+</suppressions>
