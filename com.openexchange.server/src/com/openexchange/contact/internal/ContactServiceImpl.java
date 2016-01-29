@@ -1022,8 +1022,11 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-            (null != folderIDs && 0 < folderIDs.size()) ? folderIDs : Tools.getSearchFolders(contextID, userID, true));
+        List<String> searchFolders = null != folderIDs && 0 < folderIDs.size() ? folderIDs : Tools.getSearchFolders(contextID, userID, true);
+        if (null == searchFolders || 0 == searchFolders.size()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, searchFolders);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options

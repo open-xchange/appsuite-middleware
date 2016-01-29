@@ -135,7 +135,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
 
     @Override
     public boolean isValidFor(ServerSession session) throws OXException {
-        return session.getUserConfiguration().hasCalendar() && session.getUserConfiguration().hasContact();
+        return session.getUserConfiguration().hasCalendar();
     }
 
     @Override
@@ -368,6 +368,8 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
     }
 
     private List<FacetValue> getParticipantValues(AutocompleteRequest autocompleteRequest, ServerSession session) throws OXException {
+
+
         /*
          * search matching contacts (and users, implicitly)
          */
