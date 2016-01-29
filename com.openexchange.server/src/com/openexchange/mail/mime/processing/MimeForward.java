@@ -363,12 +363,12 @@ public final class MimeForward extends AbstractMimeProcessing {
                 if (null == firstSeenText) {
                     firstSeenText = "";
                     contentType.setPrimaryType("text").setSubType("plain");
-                    contentType.setParameter("nature", "virtual");
                 } else if (isHtml) {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                     contentType.setCharsetParameter("UTF-8");
                     firstSeenText = replaceMetaEquiv(firstSeenText, contentType);
                 }
+                contentType.setParameter("nature", "virtual");
                 /*
                  * Add appropriate text part prefixed with forward text
                  */
