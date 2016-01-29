@@ -52,11 +52,16 @@ package com.openexchange.admin.storage.mysqlStorage;
 final class FilestoreUsage {
 
     private int ctxCount;
-
     private long usage;
 
     FilestoreUsage() {
         super();
+    }
+
+    FilestoreUsage(int ctxCount, long usage) {
+        super();
+        this.ctxCount = ctxCount;
+        this.usage = usage;
     }
 
     final void addContextUsage(final long ctxUsage) {
