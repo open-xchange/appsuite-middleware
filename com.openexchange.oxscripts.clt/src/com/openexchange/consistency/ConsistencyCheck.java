@@ -248,14 +248,18 @@ public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
      */
     @SuppressWarnings("unchecked")
     private void printResult(Object result) {
-        if (result != null && result instanceof List) {
-            Map<MBeanEntity, List<String>> results = new HashMap<MBeanEntity, List<String>>();
-            results.put(new MBeanEntity(Integer.valueOf(sourceId)), (List<String>) result);
-            printMap(results);
-        } else if (result != null && result instanceof Map) {
-            printMap((Map<MBeanEntity, List<String>>) result);
+        if (result == null) {
+            System.out.println("Operation complete.");
         } else {
-            System.out.println("Cannot print result object. Here's the stringified version: \n" + result.toString());
+            if (result != null && result instanceof List) {
+                Map<MBeanEntity, List<String>> results = new HashMap<MBeanEntity, List<String>>();
+                results.put(new MBeanEntity(Integer.valueOf(sourceId)), (List<String>) result);
+                printMap(results);
+            } else if (result != null && result instanceof Map) {
+                printMap((Map<MBeanEntity, List<String>>) result);
+            } else {
+                System.out.println("Cannot print result object. Here's the stringified version: \n" + result.toString());
+            }
         }
     }
 
