@@ -9,9 +9,9 @@
    </suppress>
    <suppress>
       <notes><![CDATA[
-      file name: mysql-connector-java-5.1.30-bin.jar
+      file name: mysql-connector-java-5.1.30-source.jar
       ]]></notes>
-      <sha1>50aa5073896609b6b8c5e484c7671449daccf94c</sha1>
-       <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
+      <sha1>8b9def1f464b690257582c2dd423ed62b5300b1b</sha1>
+      <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
    </suppress>
 </suppressions>
