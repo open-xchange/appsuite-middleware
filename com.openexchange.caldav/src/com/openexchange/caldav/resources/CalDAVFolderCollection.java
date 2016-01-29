@@ -115,7 +115,7 @@ import com.openexchange.xml.jdom.JDOMParser;
 public abstract class CalDAVFolderCollection<T extends CalendarObject> extends CommonFolderCollection<T> implements FilteringResource {
 
     protected static final int NO_ORDER = -1;
-    private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
+    protected static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
 
     protected final GroupwareCaldavFactory factory;
     protected final int folderID;

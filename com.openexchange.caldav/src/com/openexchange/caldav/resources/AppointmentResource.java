@@ -658,27 +658,40 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     @Override
-    protected void deserialize(final InputStream body) throws OXException, IOException {
-        final List<CalendarDataObject> appointments = this.parse(body);
+    protected void deserialize(InputStream body) throws OXException, IOException {
+        List<CalendarDataObject> appointments = parse(body);
         if (null != appointments && 0 < appointments.size()) {
-            this.deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
-            this.exceptionsToSave = new ArrayList<CalendarDataObject>();
-            for (final CalendarDataObject cdo : appointments) {
+            /*
+             * skip any X-MOZ-FAKED-MASTER appointments
+             */
+            for (Iterator<CalendarDataObject> iterator = appointments.iterator(); iterator.hasNext();) {
+                CalendarDataObject appointment = iterator.next();
+                if (Boolean.TRUE.equals(appointment.getProperty("com.openexchange.data.conversion.ical.recurrence.mozFakedMaster"))) {
+                    LOG.debug("Skipping appointment marked with \"X-MOZ-FAKED-MASTER\": {}", appointment);
+                    iterator.remove();
+                }
+            }
+            /*
+             * parse appointment & exceptions
+             */
+            deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
+            exceptionsToSave = new ArrayList<CalendarDataObject>();
+            for (CalendarDataObject cdo : appointments) {
                 cdo.setContext(factory.getContext());
                 cdo.removeLastModified();
                 cdo.setIgnoreConflicts(true);
-                if (null != this.object) {
-                    cdo.setParentFolderID(this.object.getParentFolderID());
+                if (null != object) {
+                    cdo.setParentFolderID(object.getParentFolderID());
                     cdo.removeUid();
                 } else {
-                    cdo.setParentFolderID(this.parentFolderID);
+                    cdo.setParentFolderID(parentFolderID);
                 }
                 if (1 == appointments.size() || looksLikeMaster(cdo)) {
                     if (null != object) {
                         cdo.setObjectID(object.getObjectID());
                     }
-                    this.appointmentToSave = cdo;
-                    createNewDeleteExceptions(this.object, appointmentToSave);
+                    appointmentToSave = cdo;
+                    createNewDeleteExceptions(object, appointmentToSave);
                 } else {
                     factory.getCalendarUtilities().removeRecurringType(cdo);
                     if (null != object) {
@@ -687,15 +700,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     exceptionsToSave.add(cdo);
                 }
             }
-            /*
-             * store filename when different from uid
-             */
-            final String resourceName = super.extractResourceName();
-            if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
-                appointmentToSave.setFilename(resourceName);
-            }
-        } else {
+        }
+        if (null == appointmentToSave) {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-calendar-component", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        /*
+         * store filename when different from uid
+         */
+        String resourceName = extractResourceName();
+        if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
+            appointmentToSave.setFilename(resourceName);
         }
     }
 
