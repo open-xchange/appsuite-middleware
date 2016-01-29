@@ -77,7 +77,7 @@ import com.openexchange.java.Strings;
  */
 public class OnboardingConfig {
 
-    private static final String CONFIGFILE_SCENARIOS = "scenarios.yml";
+    private static final String CONFIGFILE_SCENARIOS = "client-onboarding-scenarios.yml";
 
     /**
      * Initializes a new {@link OnboardingConfig}.
