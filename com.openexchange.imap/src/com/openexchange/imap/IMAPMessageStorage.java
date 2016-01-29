@@ -204,12 +204,6 @@ import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.ReadableMime;
 import gnu.trove.list.TLongList;
 import gnu.trove.list.array.TLongArrayList;
-import gnu.trove.map.TLongIntMap;
-import gnu.trove.map.TLongObjectMap;
-import gnu.trove.map.hash.TLongObjectHashMap;
-import net.htmlparser.jericho.Renderer;
-import net.htmlparser.jericho.Segment;
-import net.htmlparser.jericho.Source;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
@@ -4524,9 +4518,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return list;
     }
 
-<<<<<<< HEAD
-    private static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
-=======
     private static long[] filterNegativeElements(long[] uids) {
         if (null == uids) {
             return null;
@@ -4565,7 +4556,6 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
      * @return The checked fetch profile
      */
     protected static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
->>>>>>> 874f9fc... Fix for bug 43556: Deal with negative UIDs
         if (null == fetchProfile || IMAPProperties.getInstance().allowFetchSingleHeaders()) {
             return fetchProfile;
         }
