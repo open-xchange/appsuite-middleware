@@ -429,7 +429,7 @@ public final class OXFolderUtility {
      */
     public static void checkPermissionsAgainstSessionUserConfig(FolderObject folder, UserPermissionBits permissionBits, Context context) throws OXException {
         List<OCLPermission> permissions = folder.getPermissions();
-        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() && (FolderObject.PRIVATE == folder.getType() || FolderObject.PUBLIC == folder.getType() && FolderObject.INFOSTORE == folder.getModule())) {
+        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() && (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
             /*
              * forbid any non-empty additional permission
              */
@@ -443,7 +443,7 @@ public final class OXFolderUtility {
             }
         }
     }
-
+    
     private static boolean isEmptyPermission(final OCLPermission oclPerm) {
         return (!oclPerm.isFolderAdmin() && oclPerm.getFolderPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getReadPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getWritePermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
     }
