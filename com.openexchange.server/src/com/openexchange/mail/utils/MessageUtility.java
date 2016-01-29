@@ -708,7 +708,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        final String lc = com.openexchange.java.Strings.toLowerCase(charset);
+        final String lc = com.openexchange.java.Strings.asciiLowerCase(charset);
         if (!lc.startsWith("big", 0)) {
             return false;
         }
@@ -728,7 +728,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return GB2312.equals(com.openexchange.java.Strings.toLowerCase(charset));
+        return GB2312.equals(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
     private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
@@ -743,7 +743,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return SHIFT_JIS.contains(com.openexchange.java.Strings.toLowerCase(charset));
+        return SHIFT_JIS.contains(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
     /**
@@ -1072,7 +1072,7 @@ public final class MessageUtility {
         final String st = null == subtype ? "plain" : subtype;
         final String objectMimeType = new StringBuilder(32).append("text/").append(st).append("; charset=").append(
             MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
-        final DataContentHandler dch = dchFor(com.openexchange.java.Strings.toLowerCase(st));
+        final DataContentHandler dch = dchFor(com.openexchange.java.Strings.asciiLowerCase(st));
         if (null == dch) {
             // No object DCH for MIME type
             try {
@@ -1118,17 +1118,4 @@ public final class MessageUtility {
         }
     }
 
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
-    }
 }
