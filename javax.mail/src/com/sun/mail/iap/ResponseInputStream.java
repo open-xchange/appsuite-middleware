@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -64,6 +64,8 @@ public class ResponseInputStream {
 
     /**
      * Constructor.
+     *
+     * @param	in	the InputStream to wrap
      */
     public ResponseInputStream(InputStream in) {
 	bin = new BufferedInputStream(in, bufsize);
@@ -71,7 +73,9 @@ public class ResponseInputStream {
 
     /**
      * Read a Response from the InputStream.
-     * @return ByteArray that contains the Response
+     *
+     * @return		ByteArray that contains the Response
+     * @exception	IOException	for I/O errors
      */
     public ByteArray readResponse() throws IOException {
 	return readResponse(null);
@@ -79,7 +83,10 @@ public class ResponseInputStream {
 
     /**
      * Read a Response from the InputStream.
-     * @return ByteArray that contains the Response
+     *
+     * @param	ba	the ByteArray in which to store the response, or null
+     * @return		ByteArray that contains the Response
+     * @exception	IOException	for I/O errors
      */
     public ByteArray readResponse(ByteArray byteArray) throws IOException {
     ByteArray ba = null == byteArray ? new ByteArray(new byte[2048], 0, 2048) : byteArray;
@@ -147,6 +154,9 @@ public class ResponseInputStream {
 		int actual;
 		while (count > 0) {
 		    actual = bin.read(buffer, idx, count);
+		    if (actual < 0) {
+			    throw new IOException("Connection dropped by server?");
+			}
 		    count -= actual;
 		    idx += actual;
 		}
@@ -155,5 +165,16 @@ public class ResponseInputStream {
 	}
 	ba.setCount(idx);
 	return ba;
+    }
+
+    /**
+     * How much buffered data do we have?
+     *
+     * @return	number of bytes available
+     * @exception	IOException	if the stream has been closed
+     * @since	JavaMail 1.5.4
+     */
+    public int available() throws IOException {
+	return bin.available();
     }
 }

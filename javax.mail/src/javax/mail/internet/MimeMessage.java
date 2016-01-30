@@ -1858,10 +1858,11 @@ public class MimeMessage extends Message implements MimePart {
 
 	// Else, the content is untouched, so we can just output it
 	// First, write out the header
-	Enumeration hdrLines = getNonMatchingHeaderLines(ignoreList);
+	@SuppressWarnings("unchecked")
+	Enumeration<String> hdrLines = getNonMatchingHeaderLines(ignoreList);
 	LineOutputStream los = new LineOutputStream(os);
 	while (hdrLines.hasMoreElements())
-	    los.writeln((String)hdrLines.nextElement());
+	    los.writeln(hdrLines.nextElement());
 
 	// The CRLF separator between header and content
 	los.writeln();

@@ -110,6 +110,6 @@ public final class ModifiedSinceTerm extends SearchTerm {
      * Compute a hashCode for this object.
      */
     public int hashCode() {
-	return (int)modseq + super.hashCode();
+	return (int)modseq;
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -80,14 +80,6 @@ public abstract class Authenticator {
     private String requestingPrompt;
     private String requestingUserName;
 
-    private void reset() {
-	requestingSite = null;
-	requestingPort = -1;
-	requestingProtocol = null;
-	requestingPrompt = null;
-	requestingUserName = null;
-    }
-
     /**
      * Ask the authenticator for a password.
      * <p>
@@ -101,11 +93,9 @@ public abstract class Authenticator {
      *
      * @return The username/password, or null if one can't be gotten.
      */
-    final PasswordAuthentication requestPasswordAuthentication(
+    final synchronized PasswordAuthentication requestPasswordAuthentication(
 				InetAddress addr, int port, String protocol,
 				String prompt, String defaultUserName) {
-
-	reset();
 	requestingSite = addr;
 	requestingPort = port;
 	requestingProtocol = protocol;

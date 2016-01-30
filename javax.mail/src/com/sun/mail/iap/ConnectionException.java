@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -58,6 +58,7 @@ public class ConnectionException extends ProtocolException {
 
     /**
      * Constructs an ConnectionException with the specified detail message.
+     *
      * @param s		the detail message
      */
     public ConnectionException(String s) {
@@ -66,15 +67,19 @@ public class ConnectionException extends ProtocolException {
 
     /**
      * Constructs an ConnectionException with the specified detail message.
+     *
      * @param s     the detail message
+     * @param   c   the cause
      */
-    public ConnectionException(String s, Throwable cause) {
-    super(s, cause);
+    public ConnectionException(String s, Throwable c) {
+    super(s, c);
     }
 
     /**
      * Constructs an ConnectionException with the specified Response.
-     * @param r		the Response
+     *
+     * @param	p	the Protocol object
+     * @param	r	the Response
      */
     public ConnectionException(Protocol p, Response r) {
 	super(r);
@@ -83,10 +88,13 @@ public class ConnectionException extends ProtocolException {
 
     /**
      * Constructs an ConnectionException with the specified Response.
-     * @param r     the Response
+     *
+     * @param   p   the Protocol object
+     * @param   r   the Response
+     * @param   c   the cause
      */
-    public ConnectionException(Protocol p, Response r, Throwable cause) {
-    super(r, cause);
+    public ConnectionException(Protocol p, Response r, Throwable c) {
+    super(r.toString(), c);
     this.p = p;
     }
 

@@ -1,8 +1,8 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2009-2014 Oracle and/or its affiliates. All rights reserved.
- * Copyright (c) 2009-2014 Jason Mehrens. All rights reserved.
+ * Copyright (c) 2009-2015 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009-2015 Jason Mehrens. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,7 +40,7 @@
  */
 package com.sun.mail.util.logging;
 
-import java.io.ObjectStreamException;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -49,7 +49,6 @@ import java.security.PrivilegedAction;
 import java.util.*;
 import java.util.logging.*;
 import java.util.logging.Formatter;
-import javax.mail.Authenticator;
 
 /**
  * An adapter class to allow the Mail API to access the LogManager properties.
@@ -80,25 +79,252 @@ final class LogManagerProperties extends Properties {
      */
     private static final long serialVersionUID = -2239983349056806252L;
     /**
-     * Caches the LogManager so we only read the config once.
-     */
-    private static final LogManager LOG_MANAGER = LogManager.getLogManager();
-    /**
      * Caches the read only reflection class names string array. Declared
      * volatile for safe publishing only. The VO_VOLATILE_REFERENCE_TO_ARRAY
      * warning is a false positive.
      */
     @SuppressWarnings("VolatileArrayField")
     private static volatile String[] REFLECT_NAMES;
+    /**
+     * Caches the LogManager or Properties so we only read the configuration
+     * once.
+     */
+    private static final Object LOG_MANAGER = loadLogManager();
 
     /**
-     * Gets the LogManger for the running JVM.
+     * Get the LogManager or loads a Properties object to use as the LogManager.
      *
-     * @return the LogManager.
-     * @since JavaMail 1.4.5
+     * @return the LogManager or a loaded Properties object.
+     * @since JavaMail 1.5.3
      */
-    static LogManager getLogManager() {
-        return LOG_MANAGER;
+    private static Object loadLogManager() {
+        Object m;
+        try {
+            m = LogManager.getLogManager();
+        } catch (final LinkageError restricted) {
+            m = readConfiguration();
+        } catch (final RuntimeException unexpected) {
+            m = readConfiguration();
+        }
+        return m;
+    }
+
+    /**
+     * Create a properties object from the default logging configuration file.
+     * Since the LogManager is not available in restricted environments, only
+     * the default configuration is applicable.
+     *
+     * @return a properties object loaded with the default configuration.
+     * @since JavaMail 1.5.3
+     */
+    private static Properties readConfiguration() {
+        /**
+         * Load the properties file so the default settings are available when
+         * user code creates a logging object. The class loader for the
+         * restricted LogManager can't access these classes to attach them to a
+         * logger or handler on startup. Creating logging objects at this point
+         * is both useless and risky.
+         */
+        final Properties props = new Properties();
+        try {
+            String n = System.getProperty("java.util.logging.config.file");
+            if (n != null) {
+                final File f = new File(n).getCanonicalFile();
+                final InputStream in = new FileInputStream(f);
+                try {
+                    props.load(in);
+                } finally {
+                    in.close();
+                }
+            }
+        } catch (final RuntimeException permissionsOrMalformed) {
+        } catch (final Exception ioe) {
+        } catch (final LinkageError unexpected) {
+        }
+        return props;
+    }
+
+    /**
+     * Gets LogManger property for the running JVM. If the LogManager doesn't
+     * exist then the default LogManger properties are used.
+     *
+     * @param name the property name.
+     * @return the LogManager.
+     * @throws NullPointerException if the given name is null.
+     * @since JavaMail 1.5.3
+     */
+    static String fromLogManager(final String name) {
+        if (name == null) {
+            throw new NullPointerException();
+        }
+
+        final Object m = LOG_MANAGER;
+        try {
+            if (m instanceof Properties) {
+                return ((Properties) m).getProperty(name);
+            }
+        } catch (final RuntimeException unexpected) {
+        }
+
+        if (m != null) {
+            try {
+                if (m instanceof LogManager) {
+                    return ((LogManager) m).getProperty(name);
+                }
+            } catch (final LinkageError restricted) {
+            } catch (final RuntimeException unexpected) {
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Check that the current context is trusted to modify the logging
+     * configuration. This requires LoggingPermission("control").
+     * @throws SecurityException  if a security manager exists and the caller
+     * does not have {@code LoggingPermission("control")}.
+     * @since JavaMail 1.5.3
+     */
+    static void checkLogManagerAccess() {
+        boolean checked = false;
+        final Object m = LOG_MANAGER;
+        if (m != null) {
+            try {
+                if (m instanceof LogManager) {
+                    checked = true;
+                    ((LogManager) m).checkAccess();
+                }
+            } catch (final SecurityException notAllowed) {
+                if (checked) {
+                    throw notAllowed;
+                }
+            } catch (final LinkageError restricted) {
+            } catch (final RuntimeException unexpected) {
+            }
+        }
+
+        if (!checked) {
+            checkLoggingAccess();
+        }
+    }
+
+    /**
+     * Check that the current context is trusted to modify the logging
+     * configuration when the LogManager is not present. This requires
+     * LoggingPermission("control").
+     * @throws SecurityException  if a security manager exists and the caller
+     * does not have {@code LoggingPermission("control")}.
+     * @since JavaMail 1.5.3
+     */
+    private static void checkLoggingAccess() {
+        /**
+         * Some environments selectively enforce logging permissions by allowing
+         * access to loggers but not allowing access to handlers. This is an
+         * indirect way of checking for LoggingPermission when the LogManager is
+         * not present. The root logger will lazy create handlers so the global
+         * logger is used instead as it is a known named logger with well
+         * defined behavior. If the global logger is a subclass then fallback to
+         * using the SecurityManager.
+         */
+        boolean checked = false;
+        final Logger global = Logger.getLogger("global");
+        try {
+            if (Logger.class == global.getClass()) {
+                global.removeHandler((Handler) null);
+                checked = true;
+            }
+        } catch (final NullPointerException unexpected) {
+        }
+
+        if (!checked) {
+            final SecurityManager sm = System.getSecurityManager();
+            if (sm != null) {
+                sm.checkPermission(new LoggingPermission("control", null));
+            }
+        }
+    }
+
+    /**
+     * Determines if access to the {@code java.util.logging.LogManager} class is
+     * restricted by the class loader.
+     *
+     * @return true if a LogManager is present.
+     * @since JavaMail 1.5.3
+     */
+    static boolean hasLogManager() {
+        final Object m = LOG_MANAGER;
+        return m != null && !(m instanceof Properties);
+    }
+
+    /**
+     * Gets the local host name from the given service.
+     *
+     * @param s the service to examine.
+     * @return the local host name or null.
+     * @throws IllegalAccessException if the method is inaccessible.
+     * @throws InvocationTargetException if the method throws an exception.
+     * @throws LinkageError if the linkage fails.
+     * @throws NullPointerException if the given service is null.
+     * @throws ExceptionInInitializerError if the static initializer fails.
+     * @throws Exception if there is a problem.
+     * @throws NoSuchMethodException if the given service does not have a method
+     * to get the local host name as a string.
+     * @throws SecurityException if unable to inspect properties of object.
+     * @since JavaMail 1.5.3
+     */
+    static String getLocalHost(final Object s) throws Exception {
+        try {
+            final Method m = s.getClass().getMethod("getLocalHost");
+            if (!Modifier.isStatic(m.getModifiers())
+                    && m.getReturnType() == String.class) {
+                return (String) m.invoke(s);
+            } else {
+                throw new NoSuchMethodException(m.toString());
+            }
+        } catch (final ExceptionInInitializerError EIIE) {
+            throw wrapOrThrow(EIIE);
+        } catch (final InvocationTargetException ite) {
+            throw paramOrError(ite);
+        }
+    }
+
+    /**
+     * Used to parse an ISO-8601 duration format of {@code PnDTnHnMn.nS}.
+     *
+     * @param value an ISO-8601 duration character sequence.
+     * @return the number of milliseconds parsed from the duration.
+     * @throws ClassNotFoundException if the java.time classes are not present.
+     * @throws IllegalAccessException if the method is inaccessible.
+     * @throws InvocationTargetException if the method throws an exception.
+     * @throws LinkageError if the linkage fails.
+     * @throws NullPointerException if the given duration is null.
+     * @throws ExceptionInInitializerError if the static initializer fails.
+     * @throws Exception if there is a problem.
+     * @throws NoSuchMethodException if the correct time methods are missing.
+     * @throws SecurityException if reflective access to the java.time classes
+     * are not allowed.
+     * @since JavaMail 1.5.5
+     */
+    static long parseDurationToMillis(final CharSequence value) throws Exception {
+        try {
+            final Class<?> k = findClass("java.time.Duration");
+            final Method parse = k.getMethod("parse", CharSequence.class);
+            if (!k.isAssignableFrom(parse.getReturnType())
+                    || !Modifier.isStatic(parse.getModifiers())) {
+               throw new NoSuchMethodException(parse.toString());
+            }
+
+            final Method toMillis = k.getMethod("toMillis");
+            if (!Long.TYPE.isAssignableFrom(toMillis.getReturnType())
+                    || Modifier.isStatic(toMillis.getModifiers())) {
+                throw new NoSuchMethodException(toMillis.toString());
+            }
+            return (Long) toMillis.invoke(parse.invoke(null, value));
+        } catch (final ExceptionInInitializerError EIIE) {
+            throw wrapOrThrow(EIIE);
+        } catch (final InvocationTargetException ite) {
+            throw paramOrError(ite);
+        }
     }
 
     /**
@@ -212,7 +438,7 @@ final class LogManagerProperties extends Properties {
      * @throws NullPointerException if the given comparator is null.
      * @since JavaMail 1.5.0
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ThrowableResultIgnored"})
     static <T> Comparator<T> reverseOrder(final Comparator<T> c) {
         if (c == null) {
             throw new NullPointerException();
@@ -238,7 +464,7 @@ final class LogManagerProperties extends Properties {
         } catch (final IllegalAccessException ignore) {
         } catch (final RuntimeException ignore) {
         } catch (final InvocationTargetException ite) {
-            paramOrError(ite); //Ignore invocation bugs.
+            paramOrError(ite); //Ignore invocation bugs (returned values).
         }
 
         if (reverse == null) {
@@ -269,27 +495,6 @@ final class LogManagerProperties extends Properties {
     }
 
     /**
-     * Creates a new authenticator from the given class name.
-     *
-     * @param name the fully qualified class name.
-     * @return a new authenticator.
-     * @throws ClassCastException if class name does not match the type.
-     * @throws ClassNotFoundException if the class name was not found.
-     * @throws IllegalAccessException if the constructor is inaccessible.
-     * @throws InstantiationException if the given class name is abstract.
-     * @throws InvocationTargetException if the constructor throws an exception.
-     * @throws LinkageError if the linkage fails.
-     * @throws ExceptionInInitializerError if the static initializer fails.
-     * @throws Exception to match the error method of the ErrorManager.
-     * @throws NoSuchMethodException if the class name does not have a no
-     * argument constructor.
-     * @since JavaMail 1.4.5
-     */
-    static Authenticator newAuthenticator(String name) throws Exception {
-        return newObjectFrom(name, Authenticator.class);
-    }
-
-    /**
      * Determines if the given class name identifies a utility class.
      *
      * @param name the fully qualified class name.
@@ -305,9 +510,9 @@ final class LogManagerProperties extends Properties {
     static boolean isStaticUtilityClass(String name) throws Exception {
         final Class<?> c = findClass(name);
         final Class<?> obj = Object.class;
-        Method[] methods = c.getMethods();
+        Method[] methods;
         boolean util;
-        if (c != obj && methods.length != 0) {
+        if (c != obj && (methods = c.getMethods()).length != 0) {
             util = true;
             for (Method m : methods) {
                 if (m.getDeclaringClass() != obj
@@ -337,8 +542,8 @@ final class LogManagerProperties extends Properties {
      * @since JavaMail 1.5.2
      */
     static boolean isReflectionClass(String name) throws Exception {
-        String[] names;
-        if ((names = REFLECT_NAMES) == null) { //Benign data race.
+        String[] names = REFLECT_NAMES;
+        if (names == null) { //Benign data race.
             REFLECT_NAMES = names = reflectionClassNames();
         }
 
@@ -408,7 +613,7 @@ final class LogManagerProperties extends Properties {
      * argument constructor.
      * @since JavaMail 1.4.5
      */
-    private static <T> T newObjectFrom(String name, Class<T> type) throws Exception {
+    static <T> T newObjectFrom(String name, Class<T> type) throws Exception {
         try {
             final Class<?> clazz = LogManagerProperties.findClass(name);
             //This check avoids additional side effects when the name parameter
@@ -560,14 +765,10 @@ final class LogManagerProperties extends Properties {
      */
     LogManagerProperties(final Properties parent, final String prefix) {
         super(parent);
-        parent.isEmpty(); //null check, happens-before
-        if (prefix == null) {
+        if (parent == null || prefix == null) {
             throw new NullPointerException();
         }
         this.prefix = prefix;
-
-        //'defaults' is not decalared final.
-        super.isEmpty(); //happens-before.
     }
 
     /**
@@ -585,8 +786,8 @@ final class LogManagerProperties extends Properties {
     }
 
     /**
-     * Searches defaults, then searches the log manager by the prefix property,
-     * and then by the key itself.
+     * Searches defaults, then searches the log manager if available or the
+     * system properties by the prefix property, and then by the key itself.
      *
      * @param key a non null key.
      * @return the value for that key.
@@ -595,13 +796,12 @@ final class LogManagerProperties extends Properties {
     public synchronized String getProperty(final String key) {
         String value = defaults.getProperty(key);
         if (value == null) {
-            final LogManager manager = getLogManager();
             if (key.length() > 0) {
-                value = manager.getProperty(prefix + '.' + key);
+                value = fromLogManager(prefix + '.' + key);
             }
 
             if (value == null) {
-                value = manager.getProperty(key);
+                value = fromLogManager(key);
             }
 
             /**
@@ -637,19 +837,30 @@ final class LogManagerProperties extends Properties {
 
     /**
      * Required to work with PropUtil. Calls getProperty directly if the given
-     * key is a string. Otherwise, performs a normal get operation.
+     * key is a string. Otherwise, performs a get operation on the defaults
+     * followed by the normal hash table get.
      *
      * @param key any key.
      * @return the value for the key or null.
      * @since JavaMail 1.4.5
      */
     @Override
-    public Object get(final Object key) {
+    public synchronized Object get(final Object key) {
+        Object value;
         if (key instanceof String) {
-            return this.getProperty((String) key);
+            value = getProperty((String) key);
         } else {
-            return super.get(key);
+            value = null;
         }
+
+        //Search for non-string value.
+        if (value == null) {
+            value = defaults.get(key);
+            if (value == null && !defaults.containsKey(key)) {
+                value = super.get(key);
+            }
+        }
+        return value;
     }
 
     /**
@@ -662,9 +873,13 @@ final class LogManagerProperties extends Properties {
      */
     @Override
     public synchronized Object put(final Object key, final Object value) {
-        final Object def = preWrite(key);
-        final Object man = super.put(key, value);
-        return man == null ? def : man;
+        if (key instanceof String && value instanceof String) {
+            final Object def = preWrite(key);
+            final Object man = super.put(key, value);
+            return man == null ? def : man;
+        } else {
+            return super.put(key, value);
+        }
     }
 
     /**
@@ -688,12 +903,13 @@ final class LogManagerProperties extends Properties {
      * @since JavaMail 1.4.5
      */
     @Override
-    public boolean containsKey(final Object key) {
-        if (key instanceof String) {
-            return this.getProperty((String) key) != null;
-        } else {
-            return super.containsKey(key);
+    public synchronized boolean containsKey(final Object key) {
+        boolean found = key instanceof String
+                && getProperty((String) key) != null;
+        if (!found) {
+            found = defaults.containsKey(key) || super.containsKey(key);
         }
+        return found;
     }
 
     /**
@@ -767,13 +983,7 @@ final class LogManagerProperties extends Properties {
      */
     private Object preWrite(final Object key) {
         assert Thread.holdsLock(this);
-        Object value;
-        if (key instanceof String && !super.containsKey(key)) {
-            value = this.getProperty((String) key); //fetch and cache.
-        } else {
-            value = null;
-        }
-        return value;
+        return get(key);
     }
 
     /**

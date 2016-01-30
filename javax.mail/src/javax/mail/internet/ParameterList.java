@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -50,7 +50,7 @@ import com.sun.mail.util.ASCIIUtility;
  * The <code>mail.mime.encodeparameters</code> and
  * <code>mail.mime.decodeparameters</code> System properties
  * control whether encoded parameters, as specified by 
- * <a href="http://www.ietf.org/rfc/rfc2231.txt">RFC 2231</a>,
+ * <a href="http://www.ietf.org/rfc/rfc2231.txt" target="_top">RFC 2231</a>,
  * are supported.  By default, such encoded parameters <b>are</b>
  * supported. <p>
  *
@@ -79,7 +79,8 @@ public class ParameterList {
      * The map of name, value pairs.
      * The value object is either a String, for unencoded
      * values, or a Value object, for encoded values,
-     * or a MultiValue object, for multi-segment parameters.
+     * or a MultiValue object, for multi-segment parameters,
+     * or a LiteralValue object for strings that should not be encoded.
      *
      * We use a LinkedHashMap so that parameters are (as much as
      * possible) kept in the original order.  Note however that
@@ -151,6 +152,9 @@ public class ParameterList {
 	PropUtil.getBooleanSystemProperty("mail.mime.windowsfilenames", false);
     private static final boolean parametersStrict = 
 	PropUtil.getBooleanSystemProperty("mail.mime.parameters.strict", true);
+    private static final boolean splitLongParameters = 
+	PropUtil.getBooleanSystemProperty(
+	    "mail.mime.splitlongparameters", true);
 
 
     /**
@@ -167,11 +171,13 @@ public class ParameterList {
 	String value;
 	String charset;
 	String encodedValue;
-
-    Value() {
-        super();
     }
 
+    /**
+     * A struct to hold a literal value that shouldn't be further encoded.
+     */
+    private static class LiteralValue {
+	String value;
     }
 
     /**
@@ -182,21 +188,19 @@ public class ParameterList {
      * Until then the value field contains an empty string as a placeholder.
      */
     private static class MultiValue extends ArrayList<Object> {
+	// keep lint happy
+	private static final long serialVersionUID = 699561094618751023L;
+
 	String value;
-
-	MultiValue() {
-	    super();
-	}
-
     }
 
     /**
      * Map the LinkedHashMap's keySet iterator to an Enumeration.
      */
-    private static class ParamEnum<E> implements Enumeration<E> {
-	private Iterator<E> it;
+    private static class ParamEnum implements Enumeration<String> {
+	private Iterator<String> it;
 
-	ParamEnum(Iterator<E> it) {
+	ParamEnum(Iterator<String> it) {
 	    this.it = it;
 	}
 
@@ -204,7 +208,7 @@ public class ParameterList {
 	    return it.hasNext();
 	}
 
-	public E nextElement() {
+	public String nextElement() {
 	    return it.next();
 	}
     }
@@ -479,8 +483,12 @@ public class ParameterList {
 		    } catch (UnsupportedEncodingException uex) {
 			if (decodeParametersStrict)
 			    throw new ParseException(uex.toString());
-			// convert as if ASCII
-			mv.value = bos.toString(0);
+			// convert as if iso-8859-1
+			try {
+			    mv.value = bos.toString("iso-8859-1");
+			} catch (UnsupportedEncodingException ex) {
+			    // should never happen
+			}
 		    }
 		    list.put(name, mv);
 		}
@@ -544,6 +552,8 @@ public class ParameterList {
 	Object v = list.get(name.trim().toLowerCase(Locale.ENGLISH));
 	if (v instanceof MultiValue)
 	    value = ((MultiValue)v).value;
+	else if (v instanceof LiteralValue)
+	    value = ((LiteralValue)v).value;
 	else if (v instanceof Value)
 	    value = ((Value)v).value;
 	else
@@ -596,6 +606,20 @@ public class ParameterList {
     }
 
     /**
+     * Package-private method to set a literal value that won't be
+     * further encoded.  Used to set the filename parameter when
+     * "mail.mime.encodefilename" is true.
+     *
+     * @param	name 	name of the parameter.
+     * @param	value	value of the parameter.
+     */
+    void setLiteral(String name, String value) {
+	LiteralValue lv = new LiteralValue();
+	lv.value = value;
+	list.put(name, lv);
+    }
+
+    /**
      * Removes the specified parameter from this ParameterList.
      * This method does nothing if the parameter is not present.
      *
@@ -612,7 +636,7 @@ public class ParameterList {
      * @return Enumeration of all parameter names in this list.
      */
     public Enumeration<String> getNames() {
-	return new ParamEnum<String>(list.keySet().iterator());
+	return new ParamEnum(list.keySet().iterator());
     }
 
     /**
@@ -641,25 +665,68 @@ public class ParameterList {
      */  
     public String toString(int used) {
         ToStringBuffer sb = new ToStringBuffer(used);
-        Iterator<String> e = list.keySet().iterator();
+        Iterator<Map.Entry<String, Object>> e = list.entrySet().iterator();
  
         while (e.hasNext()) {
-            String name = e.next();
-	    Object v = list.get(name);
+	    Map.Entry<String, Object> ent = e.next();
+	    String name = ent.getKey();
+	    String value;
+	    Object v = ent.getValue();
 	    if (v instanceof MultiValue) {
 		MultiValue vv = (MultiValue)v;
-		String ns = name + "*";
+		name += "*";
 		for (int i = 0; i < vv.size(); i++) {
 		    Object va = vv.get(i);
-		    if (va instanceof Value)
-			sb.addNV(ns + i + "*", ((Value)va).encodedValue);
-		    else
-			sb.addNV(ns + i, (String)va);
+		    String ns;
+		    if (va instanceof Value) {
+			ns = name + i + "*";
+			value = ((Value)va).encodedValue;
+		    } else {
+			ns = name + i;
+			value = (String)va;
+		    }
+		    sb.addNV(ns, quote(value));
 		}
-	    } else if (v instanceof Value)
-		sb.addNV(name + "*", ((Value)v).encodedValue);
-	    else
-		sb.addNV(name, (String)v);
+	    } else if (v instanceof LiteralValue) {
+		value = ((LiteralValue)v).value;
+		sb.addNV(name, quote(value));
+	    } else if (v instanceof Value) {
+		/*
+		 * XXX - We could split the encoded value into multiple
+		 * segments if it's too long, but that's more difficult.
+		 */
+		name += "*";
+		value = ((Value)v).encodedValue;
+		sb.addNV(name, quote(value));
+	    } else {
+		value = (String)v;
+		/*
+		 * If this value is "long", split it into a multi-segment
+		 * parameter.  Only do this if we've enabled RFC2231 style
+		 * encoded parameters.
+		 *
+		 * Note that we check the length before quoting the value.
+		 * Quoting might make the string longer, although typically
+		 * not much, so we allow a little slop in the calculation.
+		 * In the worst case, a 60 character string will turn into
+		 * 122 characters when quoted, which is long but not
+		 * outrageous.
+		 */
+		if (value.length() > 60 &&
+				splitLongParameters && encodeParameters) {
+		    int seg = 0;
+		    name += "*";
+		    while (value.length() > 60) {
+			sb.addNV(name + seg, quote(value.substring(0, 60)));
+			value = value.substring(60);
+			seg++;
+		    }
+		    if (value.length() > 0)
+			sb.addNV(name + seg, quote(value));
+		} else {
+		    sb.addNV(name, quote(value));
+		}
+	    }
         }
         return sb.toString();
     }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -69,7 +69,13 @@ public class DigestMD5 {
     /**
      * Return client's authentication response to server's challenge.
      *
+     * @param	host	the host name
+     * @param	user	the user name
+     * @param	passwd	the user's password
+     * @param	realm	the security realm
+     * @param	serverChallenge	the challenge from the server
      * @return byte array with client's response
+     * @exception	IOException	for I/O errors
      */
     public byte[] authClient(String host, String user, String passwd,
 				String realm, String serverChallenge)
@@ -96,16 +102,16 @@ public class DigestMD5 {
 	logger.fine("Begin authentication ...");
 
 	// Code based on http://www.ietf.org/rfc/rfc2831.txt
-	Hashtable map = tokenize(serverChallenge);
+	Map<String, String> map = tokenize(serverChallenge);
 
 	if (realm == null) {
-	    String text = (String)map.get("realm");
+	    String text = map.get("realm");
 	    realm = text != null ? new StringTokenizer(text, ",").nextToken()
 				 : host;
 	}
 
 	// server challenge random value
-	String nonce = (String)map.get("nonce");
+	String nonce = map.get("nonce");
 
 	random.nextBytes(bytes);
 	b64os.write(bytes);
@@ -147,15 +153,17 @@ public class DigestMD5 {
      * Allow the client to authenticate the server based on its
      * response.
      *
+     * @param	serverResponse	the response that was received from the server
      * @return	true if server is authenticated
+     * @exception	IOException	for character conversion failures
      */
     public boolean authServer(String serverResponse) throws IOException {
-	Hashtable map = tokenize(serverResponse);
+	Map<String, String> map = tokenize(serverResponse);
 	// DIGEST-MD5 computation, server response (order critical)
 	md5.update(ASCIIUtility.getBytes(":" + uri));
 	md5.update(ASCIIUtility.getBytes(clientResponse + toHex(md5.digest())));
 	String text = toHex(md5.digest());
-	if (!text.equals((String)map.get("rspauth"))) {
+	if (!text.equals(map.get("rspauth"))) {
 	    if (logger.isLoggable(Level.FINE))
 		logger.fine("Expected => rspauth=" + text);
 	    return false;	// server NOT authenticated by client !!!
@@ -166,10 +174,12 @@ public class DigestMD5 {
     /**
      * Tokenize a response from the server.
      *
-     * @return	Hashtable containing key/value pairs from server
+     * @return	Map containing key/value pairs from server
      */
-    private Hashtable tokenize(String serverResponse) throws IOException {
-	Hashtable map	= new Hashtable();
+    @SuppressWarnings("fallthrough")
+    private Map<String, String> tokenize(String serverResponse)
+	    throws IOException {
+	Map<String, String> map	= new HashMap<String, String>();
 	byte[] bytes = serverResponse.getBytes("iso-8859-1");	// really ASCII?
 	String key = null;
 	int ttype;

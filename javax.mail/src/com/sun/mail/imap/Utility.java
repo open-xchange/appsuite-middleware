@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,15 @@
 
 package com.sun.mail.imap;
 
-import java.util.Vector;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import javax.mail.*;
 
-import com.sun.mail.util.*;
 import com.sun.mail.imap.protocol.MessageSet;
 import com.sun.mail.imap.protocol.UIDSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Holder for some static utility methods.
@@ -69,10 +71,13 @@ public final class Utility {
      * ASSERT: Since this method uses and returns message sequence
      * numbers, you should use this method only when holding the
      * messageCacheLock.
+     *
+     * @param	msgs	the messages
+     * @param	cond	the condition to check
+     * @return		the MessageSet array
      */
-    public static 
-    MessageSet[] toMessageSet(Message[] msgs, Condition cond) {
-	java.util.List<MessageSet> v = new java.util.ArrayList<MessageSet>(1);
+    public static MessageSet[] toMessageSet(Message[] msgs, Condition cond) {
+	List<MessageSet> v = new ArrayList<MessageSet>(1);
 	int current, next;
 
 	IMAPMessage msg;
@@ -122,13 +127,50 @@ public final class Utility {
 	    return v.toArray(new MessageSet[v.size()]);
 	}
     }
+    /**
+     * Sort (a copy of) the given array of messages and then
+     * run thru the sorted array of messages, apply the given
+     * Condition on each message and generate sets of contiguous 
+     * sequence-numbers for the successful messages. If a message 
+     * in the given array is found to be expunged, it is ignored.
+     *
+     * ASSERT: Since this method uses and returns message sequence
+     * numbers, you should use this method only when holding the
+     * messageCacheLock.
+     *
+     * @param	msgs	the messages
+     * @param	cond	the condition to check
+     * @return		the MessageSet array
+     * @since JavaMail 1.5.4
+     */
+    public static MessageSet[] toMessageSetSorted(Message[] msgs,
+							    Condition cond) {
+	/*
+	 * XXX - This is quick and dirty.  A more efficient strategy would be
+	 * to generate an array of message numbers by applying the condition
+	 * (with zero indicating the message doesn't satisfy the condition),
+	 * sort it, and then convert it to a MessageSet skipping all the zeroes.
+	 */
+	msgs = msgs.clone();
+	Arrays.sort(msgs,
+	    new Comparator<Message>() {
+		//@Override
+		public int compare(Message msg1, Message msg2) {
+		    return msg1.getMessageNumber() - msg2.getMessageNumber();
+		}
+	    });
+	return toMessageSet(msgs, cond);
+    }
 
     /**
      * Return UIDSets for the messages.  Note that the UIDs
      * must have already been fetched for the messages.
+     *
+     * @param	msgs	the messages
+     * @return		the UIDSet array
      */
     public static UIDSet[] toUIDSet(Message[] msgs) {
-	Vector v = new Vector(1);
+	List<UIDSet> v = new ArrayList<UIDSet>(1);
 	long current, next;
 
 	IMAPMessage msg;
@@ -162,15 +204,13 @@ public final class Utility {
 		}
 	    }
 	    set.end = current;
-	    v.addElement(set);
+	    v.add(set);
 	}
 
 	if (v.isEmpty()) // No valid messages
 	    return null;
 	else {
-	    UIDSet[] sets = new UIDSet[v.size()];
-	    v.copyInto(sets);
-	    return sets;
+	    return v.toArray(new UIDSet[v.size()]);
 	}
     }
 
@@ -180,6 +220,8 @@ public final class Utility {
      * is not included in the public javadocs, thus "hiding"
      * this method.
      *
+     * @param	rd	the ResyncData
+     * @return		the UIDSet array
      * @since	JavaMail 1.5.1
      */
     public static UIDSet[] getResyncUIDSet(ResyncData rd) {

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -61,7 +61,7 @@ public class MimeUtil {
 	    String cth = System.getProperty("mail.mime.contenttypehandler");
 	    if (cth != null) {
 		ClassLoader cl = getContextClassLoader();
-		Class clsHandler = null;
+		Class<?> clsHandler = null;
 		if (cl != null) {
 		    try {
 			clsHandler = Class.forName(cth, false, cl);
@@ -70,7 +70,7 @@ public class MimeUtil {
 		if (clsHandler == null)
 		    clsHandler = Class.forName(cth);
 		meth = clsHandler.getMethod("cleanContentType",
-				new Class[] { MimePart.class, String.class });
+			new Class<?>[] { MimePart.class, String.class });
 	    }
 	} catch (ClassNotFoundException ex) {
 	    // ignore it
@@ -90,6 +90,10 @@ public class MimeUtil {
     /**
      * If a Content-Type handler has been specified,
      * call it to clean up the Content-Type value.
+     *
+     * @param	mp	the MimePart
+     * @param	contentType	the Content-Type value
+     * @return		the cleaned Content-Type value
      */
     public static String cleanContentType(MimePart mp, String contentType) {
 	if (cleanContentType != null) {
@@ -109,9 +113,9 @@ public class MimeUtil {
      * Thread.getContextClassLoader method.
      */
     private static ClassLoader getContextClassLoader() {
-	return (ClassLoader)
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
+	return
+	AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+	    public ClassLoader run() {
 		ClassLoader cl = null;
 		try {
 		    cl = Thread.currentThread().getContextClassLoader();
