@@ -1287,19 +1287,17 @@ public abstract class Folder {
      */
     public Message[] search(SearchTerm term, Message[] msgs)
 				throws MessagingException {
-	Vector matchedMsgs = new Vector();
+	java.util.List<Message> matchedMsgs = new java.util.ArrayList<Message>();
 
 	// Run thru the given messages
-	for (int i = 0; i < msgs.length; i++) {
+	for (Message msg : msgs) {
 	    try {
-		if (msgs[i].match(term)) // matched
-		    matchedMsgs.addElement(msgs[i]); // add it
+		if (msg.match(term)) // matched
+		    matchedMsgs.add(msg); // add it
 	    } catch(MessageRemovedException mrex) { }
 	}
 
-	Message[] m = new Message[matchedMsgs.size()];
-	matchedMsgs.copyInto(m);
-	return m;
+	return matchedMsgs.toArray(new Message[matchedMsgs.size()]);
     }
 
     /*
@@ -1324,7 +1322,7 @@ public abstract class Folder {
      */
 
     // Vector of connection listeners.
-    private volatile Vector connectionListeners = null;
+    private volatile Vector<ConnectionListener> connectionListeners = null;
 
     /**
      * Add a listener for Connection events on this Folder. <p>
@@ -1338,7 +1336,7 @@ public abstract class Folder {
     public synchronized void
     addConnectionListener(ConnectionListener l) { 
    	if (connectionListeners == null) 
-	    connectionListeners = new Vector();
+	    connectionListeners = new Vector<ConnectionListener>();
 	connectionListeners.addElement(l);
     }
 
@@ -1391,7 +1389,7 @@ public abstract class Folder {
     }
 
     // Vector of folder listeners
-    private volatile Vector folderListeners = null;
+    private volatile Vector<FolderListener> folderListeners = null;
 
     /**
      * Add a listener for Folder events on this Folder. <p>
@@ -1404,7 +1402,7 @@ public abstract class Folder {
      */
     public synchronized void addFolderListener(FolderListener l) { 
    	if (folderListeners == null)
-	    folderListeners = new Vector();
+	    folderListeners = new Vector<FolderListener>();
 	folderListeners.addElement(l);
     }
 
@@ -1526,7 +1524,7 @@ public abstract class Folder {
     }
 
     // Vector of MessageCount listeners
-    private volatile Vector messageCountListeners = null;
+    private volatile Vector<MessageCountListener> messageCountListeners = null;
 
     /**
      * Add a listener for MessageCount events on this Folder. <p>
@@ -1539,7 +1537,7 @@ public abstract class Folder {
      */
     public synchronized void addMessageCountListener(MessageCountListener l) { 
    	if (messageCountListeners == null)
-	    messageCountListeners = new Vector();
+	    messageCountListeners = new Vector<MessageCountListener>();
 	messageCountListeners.addElement(l);
     }
 
@@ -1614,7 +1612,8 @@ public abstract class Folder {
     }
 
     // Vector of MessageChanged listeners.
-    private volatile Vector messageChangedListeners = null;
+    private volatile Vector<MessageChangedListener> messageChangedListeners
+	    = null;
 
     /**
      * Add a listener for MessageChanged events on this Folder. <p>
@@ -1628,7 +1627,7 @@ public abstract class Folder {
     public synchronized void
 			addMessageChangedListener(MessageChangedListener l) { 
    	if (messageChangedListeners == null)
-	    messageChangedListeners = new Vector();
+	    messageChangedListeners = new Vector<MessageChangedListener>();
 	messageChangedListeners.addElement(l);
     }
 
@@ -1671,7 +1670,9 @@ public abstract class Folder {
     /*
      * Add the event and vector of listeners to the queue to be delivered.
      */
-    private void queueEvent(MailEvent event, Vector vector) {
+    @SuppressWarnings("unchecked")
+    private void queueEvent(MailEvent event,
+	    Vector<? extends java.util.EventListener> vector) {
 	/*
          * Copy the vector in order to freeze the state of the set
          * of EventListeners the event should be delivered to prior
@@ -1680,13 +1681,16 @@ public abstract class Folder {
          * of this event will not take effect until after the event is
          * delivered.
          */
-	Vector v = (Vector)vector.clone();
+	Vector<? extends java.util.EventListener> v = (Vector)vector.clone();
 	q.enqueue(event, v);
     }
 
     protected void finalize() throws Throwable {
-	super.finalize();
-	q.terminateQueue();
+	try {
+	    q.terminateQueue();
+	} finally {
+	    super.finalize();
+	}
     }
 
     /**

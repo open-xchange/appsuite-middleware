@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2012 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -67,7 +67,7 @@ public class TraceOutputStream extends FilterOutputStream {
     public TraceOutputStream(OutputStream out, MailLogger logger) {
 	super(out);
 	this.trace = logger.isLoggable(Level.FINEST);
-    this.traceOut = this.trace ? new LogOutputStream(logger) : null;
+	this.traceOut = new LogOutputStream(logger);;
     }
 
     /**
@@ -84,6 +84,8 @@ public class TraceOutputStream extends FilterOutputStream {
 
     /**
      * Set the trace mode.
+     *
+     * @param	trace	the trace mode
      */
     public void setTrace(boolean trace) {
 	this.trace = trace;
@@ -101,6 +103,9 @@ public class TraceOutputStream extends FilterOutputStream {
      * Writes the specified <code>byte</code> to this output stream.
      * Writes out the byte into the trace stream if the trace mode
      * is <code>true</code>
+     *
+     * @param	b	the byte to write
+     * @exception	IOException	for I/O errors
      */
     public void write(int b) throws IOException {
 	if (trace) {
@@ -116,6 +121,11 @@ public class TraceOutputStream extends FilterOutputStream {
      * Writes <code>b.length</code> bytes to this output stream.
      * Writes out the bytes into the trace stream if the trace
      * mode is <code>true</code>
+     *
+     * @param	b	bytes to write
+     * @param	off	offset in array
+     * @param	len	number of bytes to write
+     * @exception	IOException	for I/O errors
      */
     public void write(byte b[], int off, int len) throws IOException {
 	if (trace) {

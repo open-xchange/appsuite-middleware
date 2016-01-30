@@ -59,6 +59,8 @@ public class Response {
     protected int type = 0;
     protected String tag = null;
     protected Exception byeException = null;
+    /** @since JavaMail 1.5.4 */
+    protected Exception ex;
 
     private static final int increment = 100;
 
@@ -100,10 +102,13 @@ public class Response {
 	parse();
     }
 
-   /**
-    * Read a new Response from the given Protocol
-    * @param	p	the Protocol object
-    */
+    /**
+     * Read a new Response from the given Protocol
+     *
+     * @param	p	the Protocol object
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
+     */
     public Response(Protocol p) throws IOException, ProtocolException {
 	// read one response into 'buffer'
 	ByteArray ba = p.getResponseBuffer();
@@ -116,6 +121,8 @@ public class Response {
 
     /**
      * Copy constructor.
+     *
+     * @param	r	the Response to copy
      */
     public Response(Response r) {
 	index = r.index;
@@ -128,12 +135,16 @@ public class Response {
     /**
      * Return a Response object that looks like a BYE protocol response.
      * Include the details of the exception in the response string.
+     *
+     * @param	ex	the exception
+     * @return		the synthetic Response object
      */
     public static Response byeResponse(Exception ex) {
 	String err = "* BYE JavaMail Exception: " + ex.toString();
 	err = err.replace('\r', ' ').replace('\n', ' ');
 	Response r = new Response(err).setByeException(ex);
 	r.type |= SYNTHETIC;
+	r.ex = ex;
 	return r;
     }
 
@@ -211,7 +222,8 @@ public class Response {
 
     /**
      * Return the next byte from this Statement.
-     * @return the next byte.
+     *
+     * @return the next byte
      */
     public byte readByte() {
 	if (index < size)
@@ -223,6 +235,7 @@ public class Response {
     /**
      * Extract an ATOM, starting at the current position. Updates
      * the internal index to beyond the Atom.
+     *
      * @return an Atom
      */
     public String readAtom() {
@@ -252,6 +265,9 @@ public class Response {
      * Read a string as an arbitrary sequence of characters,
      * stopping at the delimiter  Used to read part of a
      * response code inside [].
+     *
+     * @param	delim	the delimiter character
+     * @return		the string
      */
     public String readString(char delim) {
 	skipSpaces();
@@ -277,25 +293,26 @@ public class Response {
     private String[] readStringList(boolean atom) {
 	skipSpaces();
 
-	if (buffer[index] != '(') // not what we expected
+	if (buffer[index] != '(') { // not what we expected
 	    return null;
+	}
 	index++; // skip '('
 
-	List<String> v = new LinkedList<String>();
-	do {
-	    v.add(atom ? readAtomString() : readString());
-	} while (buffer[index++] != ')');
+	List<String> result = new LinkedList<String>();
+	skipSpaces();
+	if (peekByte() != ')') {
+	    do {
+		result.add(atom ? readAtomString() : readString());
+	    } while (index < size && buffer[index++] != ')');
+	} else
+	    index++;	// skip ')'
 
-	int size = v.size();
-	if (size > 0) {
-	    return v.toArray(new String[size]);
-	} else  // empty list
-	    return null;
+	return result.toArray(new String[result.size()]);
     }
 
     /**
      * Extract an integer, starting at the current position. Updates the
-     * internal index to beyond the number. Returns -1 if  a number was
+     * internal index to beyond the number. Returns -1 if  a number was 
      * not found.
      *
      * @return  a number
@@ -414,7 +431,7 @@ public class Response {
 
 	// Skip leading spaces
 	skipSpaces();
-
+	
 	b = buffer[index];
 	if (b == '"') { // QuotedString
 	    index++; // skip the quote
@@ -425,7 +442,7 @@ public class Response {
 		if (b == '\\') // skip escaped byte
 		    index++;
 		if (index != copyto) { // only copy if we need to
-		    // Beware: this is a destructive copy. I'm
+		    // Beware: this is a destructive copy. I'm 
 		    // pretty sure this is OK, but ... ;>
 		    buffer[copyto] = buffer[index];
 		}
@@ -518,6 +535,7 @@ public class Response {
 
     /**
      * Return the tag, if this is a tagged statement.
+     *
      * @return tag of this tagged statement
      */
     public String getTag() {
@@ -527,10 +545,22 @@ public class Response {
     /**
      * Return the rest of the response as a string, usually used to
      * return the arbitrary message text after a NO response.
+     *
+     * @return	the rest of the response
      */
     public String getRest() {
 	skipSpaces();
 	return ASCIIUtility.toString(buffer, index, size);
+    }
+
+    /**
+     * Return the exception for a synthetic BYE response.
+     *
+     * @return	the exception
+     * @since	JavaMail 1.5.4
+     */
+    public Exception getException() {
+	return ex;
     }
 
     /**

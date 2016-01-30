@@ -184,13 +184,16 @@ public final class Session {
 
     private final Properties props;
     private final Authenticator authenticator;
-    private final Hashtable authTable = new Hashtable();
+    private final Hashtable<URLName, PasswordAuthentication> authTable
+	    = new Hashtable<URLName, PasswordAuthentication>();
     private boolean debug = false;
     private PrintStream out;			// debug output stream
     private MailLogger logger;
-    private final Vector providers = new Vector();
-    private final Hashtable providersByProtocol = new Hashtable();
-    private final Hashtable providersByClassName = new Hashtable();
+    private final Vector<Provider> providers = new Vector<Provider>();
+    private final Hashtable<String, Provider> providersByProtocol
+	    = new Hashtable<String, Provider>();
+    private final Hashtable<String, Provider> providersByClassName
+	    = new Hashtable<String, Provider>();
     private final Properties addressMap = new Properties();
 						// maps type to protocol
     // the queue of events to be delivered, if mail.event.scope===session
@@ -208,10 +211,10 @@ public final class Session {
 	    debug = true;
 
 	initLogger();
-	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.2");
+	logger.log(Level.CONFIG, "JavaMail version {0}", "1.5.5");
 
 	// get the Class associated with the Authenticator
-	Class cl;
+	Class<?> cl;
 	if (authenticator != null)
 	    cl = authenticator.getClass();
 	else
@@ -380,7 +383,7 @@ public final class Session {
 	this.debug = debug;
 	initLogger();
 	logger.log(Level.CONFIG, "setDebug: JavaMail version {0}",
-	    "1.5.2");
+				    "1.5.5");
     }
 
     /**
@@ -465,14 +468,14 @@ public final class Session {
 				   ".class property exists and points to " + 
 				   _className);
 	    }
-	    _provider = (Provider)providersByClassName.get(_className);
+	    _provider = providersByClassName.get(_className);
 	} 
 
 	if (_provider != null) {
 	    return _provider;
 	} else {
 	    // returning currently default protocol in providersByProtocol
-	    _provider = (Provider)providersByProtocol.get(protocol);
+	    _provider = providersByProtocol.get(protocol);
 	}
 
 	if (_provider == null) {
@@ -587,12 +590,8 @@ public final class Session {
 	if (provider == null || provider.getType() != Provider.Type.STORE ) {
 	    throw new NoSuchProviderException("invalid provider");
 	}
-		
-	try {
-	    return (Store) getService(provider, url);
-	} catch (ClassCastException cce) {
-	    throw new NoSuchProviderException("incorrect class");
-	}
+
+	return getService(provider, url, Store.class);
     }
 
     /**
@@ -738,11 +737,7 @@ public final class Session {
 	    throw new NoSuchProviderException("invalid provider");
 	}
 
-	try {
-	    return (Transport) getService(provider, url);
-	} catch (ClassCastException cce) {
-	    throw new NoSuchProviderException("incorrect class");
-	}
+	return getService(provider, url, Transport.class);
     }
 
     /**
@@ -752,12 +747,14 @@ public final class Session {
      *
      * @param provider	which provider to use
      * @param url	which URLName to use (can be null)
+     * @param type	the service type (class)
      * @exception	NoSuchProviderException	thrown when the class cannot be
      *			found or when it does not have the correct constructor
      *			(Session, URLName), or if it is not derived from
      *			Service.
      */
-    private Object getService(Provider provider, URLName url)
+    private <T extends Service> T getService(Provider provider, URLName url,
+					Class<T> type)
 					throws NoSuchProviderException {
 	// need a provider and url
 	if (provider == null) {
@@ -780,7 +777,7 @@ public final class Session {
 	    cl = this.getClass().getClassLoader();
 
 	// now load the class
-	Class serviceClass = null;
+	Class<?> serviceClass = null;
 	try {
 	    // First try the "application's" class loader.
 	    ClassLoader ccl = getContextClassLoader();
@@ -791,15 +788,22 @@ public final class Session {
 		} catch (ClassNotFoundException ex) {
 		    // ignore it
 		}
-	    if (serviceClass == null)
+	    if (serviceClass == null || !type.isAssignableFrom(serviceClass))
 		serviceClass =
 		    Class.forName(provider.getClassName(), false, cl);
+            
+	    if (!type.isAssignableFrom(serviceClass))
+		throw new ClassCastException(
+				type.getName() + " " + serviceClass.getName());
 	} catch (Exception ex1) {
 	    // That didn't work, now try the "system" class loader.
 	    // (Need both of these because JDK 1.1 class loaders
 	    // may not delegate to their parent class loader.)
 	    try {
 		serviceClass = Class.forName(provider.getClassName());
+		if (!type.isAssignableFrom(serviceClass))
+		    throw new ClassCastException(
+				type.getName() + " " + serviceClass.getName());
 	    } catch (Exception ex) {
 		// Nothing worked, give up.
 		logger.log(Level.FINE, "Exception loading provider", ex);
@@ -809,8 +813,8 @@ public final class Session {
 
 	// construct an instance of the class
 	try {
-	    Class[] c = {javax.mail.Session.class, javax.mail.URLName.class};
-	    Constructor cons = serviceClass.getConstructor(c);
+	    Class<?>[] c = {javax.mail.Session.class, javax.mail.URLName.class};
+	    Constructor<?> cons = serviceClass.getConstructor(c);
 
 	    Object[] o = {this, url};
 	    service = cons.newInstance(o);
@@ -820,7 +824,7 @@ public final class Session {
 	    throw new NoSuchProviderException(provider.getProtocol());
 	}
 
-	return service;
+	return type.cast(service);
     }
 
     /**
@@ -850,7 +854,7 @@ public final class Session {
      * @return	the PasswordAuthentication corresponding to the URLName
      */
     public PasswordAuthentication getPasswordAuthentication(URLName url) {
-	return (PasswordAuthentication)authTable.get(url);
+	return authTable.get(url);
     }
 
     /**
@@ -908,7 +912,7 @@ public final class Session {
     /**
      * Load the protocol providers config files.
      */
-    private void loadProviders(Class cl) {
+    private void loadProviders(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
 	    public void load(InputStream is) throws IOException {
 		loadProvidersFromStream(is);
@@ -936,22 +940,22 @@ public final class Session {
 	    // failed to load any providers, initialize with our defaults
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imap", "com.sun.mail.imap.IMAPStore",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"imaps", "com.sun.mail.imap.IMAPSSLStore",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3", "com.sun.mail.pop3.POP3Store",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	    addProvider(new Provider(Provider.Type.STORE,
 			"pop3s", "com.sun.mail.pop3.POP3SSLStore",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtp", "com.sun.mail.smtp.SMTPTransport",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	    addProvider(new Provider(Provider.Type.TRANSPORT,
 			"smtps", "com.sun.mail.smtp.SMTPSSLTransport",
-			"Oracle", "1.5.2"));
+			"Oracle", "1.5.5"));
 	}
 
 	if (logger.isLoggable(Level.CONFIG)) {
@@ -1036,7 +1040,7 @@ public final class Session {
 
     // load maps in reverse order of preference so that the preferred
     // map is loaded last since its entries will override the previous ones
-    private void loadAddressMap(Class cl) {
+    private void loadAddressMap(Class<?> cl) {
 	StreamLoader loader = new StreamLoader() {
 	    public void load(InputStream is) throws IOException {
 		addressMap.load(is);
@@ -1112,7 +1116,7 @@ public final class Session {
     /**
      * Load from the named resource.
      */
-    private void loadResource(String name, Class cl, StreamLoader loader) {
+    private void loadResource(String name, Class<?> cl, StreamLoader loader) {
 	InputStream clis = null;
 	try {
 	    clis = getResourceAsStream(cl, name);
@@ -1203,48 +1207,44 @@ public final class Session {
      */
 
     static ClassLoader getContextClassLoader() {
-	return (ClassLoader)
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
-		ClassLoader cl = null;
-		try {
-		    cl = Thread.currentThread().getContextClassLoader();
-		} catch (SecurityException ex) { }
-		return cl;
-	    }
-	});
+	return AccessController.doPrivileged(
+		new PrivilegedAction<ClassLoader>() {
+		    public ClassLoader run() {
+			ClassLoader cl = null;
+			try {
+			    cl = Thread.currentThread().getContextClassLoader();
+			} catch (SecurityException ex) {
+			}
+			return cl;
+		    }
+		}
+	);
     }
 
-    private static InputStream getResourceAsStream(final Class c,
+    private static InputStream getResourceAsStream(final Class<?> c,
 				final String name) throws IOException {
 	try {
-	    return (InputStream)
-		AccessController.doPrivileged(new PrivilegedExceptionAction() {
-		    public Object run() throws IOException {
-			return c.getResourceAsStream(name);
+	    return AccessController.doPrivileged(
+		    new PrivilegedExceptionAction<InputStream>() {
+			public InputStream run() throws IOException {
+			    return c.getResourceAsStream(name);
+			}
 		    }
-		});
+	    );
 	} catch (PrivilegedActionException e) {
 	    throw (IOException)e.getException();
 	}
     }
 
     private static URL[] getResources(final ClassLoader cl, final String name) {
-	return (URL[])
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
+	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    public URL[] run() {
 		URL[] ret = null;
 		try {
-		    Vector v = new Vector();
-		    Enumeration e = cl.getResources(name);
-		    while (e != null && e.hasMoreElements()) {
-			URL url = (URL)e.nextElement();
-			if (url != null)
-			    v.addElement(url);
-		    }
-		    if (v.size() > 0) {
+		    java.util.List<URL> v = java.util.Collections.list(cl.getResources(name));
+		    if (!v.isEmpty()) {
 			ret = new URL[v.size()];
-			v.copyInto(ret);
+			v.toArray(ret);
 		    }
 		} catch (IOException ioex) {
 		} catch (SecurityException ex) { }
@@ -1254,21 +1254,15 @@ public final class Session {
     }
 
     private static URL[] getSystemResources(final String name) {
-	return (URL[])
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
+	return AccessController.doPrivileged(new PrivilegedAction<URL[]>() {
+	    public URL[] run() {
 		URL[] ret = null;
 		try {
-		    Vector v = new Vector();
-		    Enumeration e = ClassLoader.getSystemResources(name);
-		    while (e != null && e.hasMoreElements()) {
-			URL url = (URL)e.nextElement();
-			if (url != null)
-			    v.addElement(url);
-		    }
-		    if (v.size() > 0) {
+		    java.util.List<URL> v = java.util.Collections.list(
+			    ClassLoader.getSystemResources(name));
+		    if (!v.isEmpty()) {
 			ret = new URL[v.size()];
-			v.copyInto(ret);
+			v.toArray(ret);
 		    }
 		} catch (IOException ioex) {
 		} catch (SecurityException ex) { }
@@ -1279,12 +1273,13 @@ public final class Session {
 
     private static InputStream openStream(final URL url) throws IOException {
 	try {
-	    return (InputStream)
-		AccessController.doPrivileged(new PrivilegedExceptionAction() {
-		    public Object run() throws IOException {
-			return url.openStream();
+	    return AccessController.doPrivileged(
+		    new PrivilegedExceptionAction<InputStream>() {
+			public InputStream run() throws IOException {
+			    return url.openStream();
+			}
 		    }
-		});
+	    );
 	} catch (PrivilegedActionException e) {
 	    throw (IOException)e.getException();
 	}

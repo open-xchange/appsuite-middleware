@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -47,12 +47,11 @@ import javax.activation.ActivationDataFlavor;
  *
  */
 public class text_html extends text_plain {
-    private static ActivationDataFlavor myDF = new ActivationDataFlavor(
-	java.lang.String.class,
-	"text/html",
-	"HTML String");
+    private static ActivationDataFlavor[] myDF = {
+	new ActivationDataFlavor(String.class, "text/html", "HTML String")
+    };
 
-    protected ActivationDataFlavor getDF() {
+    protected ActivationDataFlavor[] getDataFlavors() {
 	return myDF;
     }
 }

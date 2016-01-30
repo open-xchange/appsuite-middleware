@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,14 +40,17 @@
 
 package com.sun.mail.imap.protocol;
 
-import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Date;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.MailDateFormat;
+import javax.mail.internet.MimeUtility;
 import com.sun.mail.iap.*;
+import com.sun.mail.util.PropUtil;
 
 /**
  * The ENEVELOPE item of an IMAP FETCH response.
@@ -74,9 +77,15 @@ public class ENVELOPE implements Item {
     public final String messageId;
 
     // Used to parse dates
-    private static MailDateFormat mailDateFormat = new MailDateFormat();
+    private static final MailDateFormat mailDateFormat = new MailDateFormat();
+
+    // special debugging output to debug parsing errors
+    private static final boolean parseDebug =
+	PropUtil.getBooleanSystemProperty("mail.imap.parse.debug", false);
     
     public ENVELOPE(FetchResponse r) throws ParsingException {
+	if (parseDebug)
+	    System.out.println("parse ENVELOPE");
 	msgno = r.getNumber();
 
 	r.skipSpaces();
@@ -84,34 +93,50 @@ public class ENVELOPE implements Item {
 	if (r.readByte() != '(')
 	    throw new ParsingException("ENVELOPE parse error");
 	
-	{
-	Date date = null;
 	String s = r.readString();
 	if (s != null) {
+	    Date d;
 	    try {
-	    synchronized (mailDateFormat) {
-		date = mailDateFormat.parse(s);
-	    }
+            synchronized (mailDateFormat) {
+                d = mailDateFormat.parse(s);
+            }
 	    } catch (ParseException pex) {
-	    } catch (RuntimeException pex) {
-		// We need to be *very* tolerant about bogus dates (and
-		// there's lots of 'em around), so we ignore any 
-		// exception (including RuntimeExceptions) and just let 
-		// date be null.
+	        d = null;
 	    }
+	    this.date = d;
+	} else {
+	    this.date = null;
 	}
-	this.date = date;
-	}
+	if (parseDebug)
+	    System.out.println("  Date: " + date);
 
 	subject = r.readString();
+	if (parseDebug)
+	    System.out.println("  Subject: " + subject);
+	if (parseDebug)
+	    System.out.println("  From addresses:");
 	from = parseAddressList(r);
+	if (parseDebug)
+	    System.out.println("  Sender addresses:");
 	sender = parseAddressList(r);
+	if (parseDebug)
+	    System.out.println("  Reply-To addresses:");
 	replyTo = parseAddressList(r);
+	if (parseDebug)
+	    System.out.println("  To addresses:");
 	to = parseAddressList(r);
+	if (parseDebug)
+	    System.out.println("  Cc addresses:");
 	cc = parseAddressList(r);
+	if (parseDebug)
+	    System.out.println("  Bcc addresses:");
 	bcc = parseAddressList(r);
 	inReplyTo = r.readString();
+	if (parseDebug)
+	    System.out.println("  In-Reply-To: " + inReplyTo);
 	messageId = r.readString();
+	if (parseDebug)
+	    System.out.println("  Message-ID: " + messageId);
 
 	if (r.readByte() != ')')
 	    throw new ParsingException("ENVELOPE parse error");
@@ -137,6 +162,8 @@ public class ENVELOPE implements Item {
 
 	    do {
 		IMAPAddress a = new IMAPAddress(r);
+		if (parseDebug)
+		    System.out.println("    Address: " + a);
 		// if we see an end-of-group address at the top, ignore it
 		if (!a.isEndOfGroup())
 		    v.add(a);
@@ -187,7 +214,7 @@ class IMAPAddress extends InternetAddress {
 	    // Accumulate a group list.  The members of the group
 	    // are accumulated in a List and the corresponding string
 	    // representation of the group is accumulated in a StringBuffer.
-	    StringBuilder sb = new StringBuilder();
+	    StringBuffer sb = new StringBuffer();
 	    sb.append(groupname).append(':');
 	    List<InternetAddress> v = new ArrayList<InternetAddress>();
 	    while (r.peekByte() != ')') {
@@ -224,6 +251,6 @@ class IMAPAddress extends InternetAddress {
     public InternetAddress[] getGroup(boolean strict) throws AddressException {
 	if (grouplist == null)
 	    return null;
-	return (InternetAddress[])grouplist.clone();
+	return grouplist.clone();
     }
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -88,7 +88,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      *
      * @since JavaMail 1.4.6
      */
-    protected Map items;		// Map<String,Object>
+    protected Map<String, Object> items;		// Map<String,Object>
 
     private Date receivedDate;		// INTERNALDATE
     private int size = -1;		// RFC822.SIZE
@@ -124,7 +124,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      *
      * Could this somehow be included in the InternetHeaders object ??
      */
-    private Hashtable loadedHeaders = new Hashtable(1);
+    private Hashtable<String, String> loadedHeaders
+	    = new Hashtable<String, String>(1);
 
     // This is our Envelope
     static final String EnvelopeCmd = "ENVELOPE INTERNALDATE RFC822.SIZE";
@@ -512,12 +513,12 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
     }
 
     /**
-     * Get the recieved date (INTERNALDATE)
+     * Get the received date (INTERNALDATE).
      */
     public Date getReceivedDate() throws MessagingException {
 	checkExpunged();
-	// XXX - have to go to the server for this
-	loadEnvelope();
+	if (receivedDate == null)
+	    loadEnvelope(); // have to go to the server for this
 	if (receivedDate == null)
 	    return null;
 	else
@@ -561,7 +562,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    return super.getContentLanguage();
     	loadBODYSTRUCTURE();
     	if (bs.language != null)
-	    return (String[])(bs.language).clone();
+	    return bs.language.clone();
     	else
 	    return null;
     }
@@ -1170,8 +1171,9 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	private boolean needHeaders = false;
 	private boolean needSize = false;
 	private boolean needMessage = false;
+	private boolean needRDate = false;
 	private String[] hdrs = null;
-	private Set need = new HashSet();	// Set<FetchItem>
+	private Set<FetchItem> need = new HashSet<FetchItem>();
 
 	/**
 	 * Create a FetchProfileCondition to determine if we need to fetch
@@ -1180,6 +1182,7 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	 * @param	fp	the FetchProfile
 	 * @param	fitems	the FETCH items
 	 */
+	@SuppressWarnings("deprecation")	// for FetchProfile.Item.SIZE
 	public FetchProfileCondition(FetchProfile fp, FetchItem[] fitems) {
 	    if (fp.contains(FetchProfile.Item.ENVELOPE))
 		needEnvelope = true;
@@ -1197,6 +1200,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		needSize = true;
 	    if (fp.contains(IMAPFolder.FetchProfileItem.MESSAGE))
 		needMessage = true;
+	    if (fp.contains(IMAPFolder.FetchProfileItem.INTERNALDATE))
+		needRDate = true;
 	    hdrs = fp.getHeaderNames();
 	    for (int i = 0; i < fitems.length; i++) {
 		if (fp.contains(fitems[i].getFetchProfileItem()))
@@ -1224,15 +1229,17 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		return true;
 	    if (needMessage && !m.bodyLoaded)		// no message body
 		return true;
+	    if (needRDate && m.receivedDate == null)	// no received date
+		return true;
 
 	    // Is the desired header present ?
 	    for (int i = 0; i < hdrs.length; i++) {
 		if (!m.isHeaderLoaded(hdrs[i]))
 		    return true; // Nope, return
 	    }
-	    Iterator it = need.iterator();
+	    Iterator<FetchItem> it = need.iterator();
 	    while (it.hasNext()) {
-		FetchItem fitem = (FetchItem)it.next();
+		FetchItem fitem = it.next();
 		if (m.items == null || m.items.get(fitem.getName()) == null)
 		    return true;
 	    }
@@ -1266,6 +1273,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    receivedDate = ((INTERNALDATE)item).getDate();
 	else if (item instanceof RFC822SIZE)
 	    size = ((RFC822SIZE)item).size;
+	else if (item instanceof MODSEQ)
+	    modseq = ((MODSEQ)item).modseq;
 
 	// Check for the BODYSTRUCTURE item
 	else if (item instanceof BODYSTRUCTURE)
@@ -1276,7 +1285,8 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    uid = u.uid; // set uid
 	    // add entry into uid table
 	    if (((IMAPFolder)folder).uidTable == null)
-		((IMAPFolder)folder).uidTable = new Hashtable();
+		((IMAPFolder) folder).uidTable
+			= new Hashtable<Long, IMAPMessage>();
 	    ((IMAPFolder)folder).uidTable.put(Long.valueOf(u.uid), this);
 	} else if (item instanceof X_REAL_UID) {
         X_REAL_UID xRealUid = (X_REAL_UID) item;
@@ -1348,9 +1358,10 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 		     * object, because InternetHeaders is not thread
 		     * safe.
 		     */
-		    Enumeration e = h.getAllHeaders();
+		    @SuppressWarnings("unchecked")
+		    Enumeration<Header> e = h.getAllHeaders();
 		    while (e.hasMoreElements()) {
-			Header he = (Header)e.nextElement();
+			Header he = e.nextElement();
 			if (!isHeaderLoaded(he.getName()))
 			    headers.addHeader(
 					he.getName(), he.getValue());
@@ -1380,15 +1391,15 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
      * ASSERT: Must hold the messageCacheLock.
      *
      * @param	extensionItems	the Map to add fetch items to
-     * @exception	MessagingException for failures
      * @since JavaMail 1.4.6
      */
-    protected void handleExtensionFetchItems(Map extensionItems)
-				throws MessagingException {
+    protected void handleExtensionFetchItems(
+	    Map<String, Object> extensionItems) {
+	if (extensionItems == null || extensionItems.isEmpty())
+	    return;
 	if (items == null)
-	    items = extensionItems;
-	else
-	    items.putAll(extensionItems);
+	    items = new HashMap<String, Object>();
+	items.putAll(extensionItems);
     }
 
     /**
@@ -1426,9 +1437,12 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 			continue;
 
 		    FetchResponse f = (FetchResponse)r[i];
-		    Object o = f.getExtensionItems().get(fitem.getName());
-		    if (o != null)
-			robj = o;
+		    handleExtensionFetchItems(f.getExtensionItems());
+		    if (items != null) {
+			Object o = items.get(fitem.getName());
+			if (o != null)
+			    robj = o;
+		    }
 		}
 
 		// ((IMAPFolder)folder).handleResponses(r);
@@ -1443,6 +1457,16 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    return robj;
 
 	} // Release MessageCacheLock
+    }
+
+    /**
+     * Return the data associated with the FetchItem.
+     * If the data hasn't been fetched, do noting.
+     * Returns null if there is no data for the FetchItem.
+     *
+     */
+    public synchronized Object getItem(String fitemName) {
+    return items == null ? null : items.get(fitemName);
     }
 
     /**
@@ -1463,18 +1487,6 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 	    item = fetchItem(fitem);
 	return item;
     }
-    
-    /**
-     * Return the data associated with the FetchItem.
-     * If the data hasn't been fetched, call the fetchItem
-     * method to fetch it.  Returns null if there is no
-     * data for the FetchItem.
-     *
-     * @since JavaMail 1.4.6
-     */
-    public synchronized Object getItem(String fitemName) {
-    return items == null ? null : items.get(fitemName);
-    }
 
     /*
      * Load the Envelope for this message.
@@ -1492,58 +1504,31 @@ public class IMAPMessage extends MimeMessage implements ReadableMime {
 
 		checkExpunged(); // Insure that this message is not expunged
 
-		long uid = getUID();
-		if (uid < 0) {
-		    int seqnum = getSequenceNumber();
-	        r = p.fetch(seqnum, EnvelopeCmd);
+		int seqnum = getSequenceNumber();
+		r = p.fetch(seqnum, EnvelopeCmd);
 
-	        for (int i = 0; i < r.length; i++) {
-	            // If this response is NOT a FetchResponse or if it does
-	            // not match our seqnum, skip.
-	            if (r[i] == null ||
-	            !(r[i] instanceof FetchResponse) ||
-	            ((FetchResponse)r[i]).getNumber() != seqnum)
-	            continue;
+		for (int i = 0; i < r.length; i++) {
+		    // If this response is NOT a FetchResponse or if it does
+		    // not match our seqnum, skip.
+		    if (r[i] == null ||
+			!(r[i] instanceof FetchResponse) ||
+			((FetchResponse)r[i]).getNumber() != seqnum)
+			continue;
 
-	            FetchResponse f = (FetchResponse)r[i];
-	            
-	            // Look for the Envelope items.
-	            int count = f.getItemCount();
-	            for (int j = 0; j < count; j++) {
-	            Item item = f.getItem(j);
-	            
-	            if (item instanceof ENVELOPE)
-	                envelope = (ENVELOPE)item;
-	            else if (item instanceof INTERNALDATE)
-	                receivedDate = ((INTERNALDATE)item).getDate();
-	            else if (item instanceof RFC822SIZE)
-	                size = ((RFC822SIZE)item).size;
-	            }
-	        }
-		} else {
-	        r = p.fetch(uid, EnvelopeCmd);
-
-	        for (int i = 0; i < r.length; i++) {
-	            // If this response is NOT a FetchResponse or if it does
-	            // not match our seqnum, skip.
-	            if (r[i] == null || !(r[i] instanceof FetchResponse))
-	                continue;
-
-	            FetchResponse f = (FetchResponse)r[i];
-	            
-	            // Look for the Envelope items.
-	            int count = f.getItemCount();
-	            for (int j = 0; j < count; j++) {
-	            Item item = f.getItem(j);
-	            
-	            if (item instanceof ENVELOPE)
-	                envelope = (ENVELOPE)item;
-	            else if (item instanceof INTERNALDATE)
-	                receivedDate = ((INTERNALDATE)item).getDate();
-	            else if (item instanceof RFC822SIZE)
-	                size = ((RFC822SIZE)item).size;
-	            }
-	        }
+		    FetchResponse f = (FetchResponse)r[i];
+		    
+		    // Look for the Envelope items.
+		    int count = f.getItemCount();
+		    for (int j = 0; j < count; j++) {
+			Item item = f.getItem(j);
+			
+			if (item instanceof ENVELOPE)
+			    envelope = (ENVELOPE)item;
+			else if (item instanceof INTERNALDATE)
+			    receivedDate = ((INTERNALDATE)item).getDate();
+			else if (item instanceof RFC822SIZE)
+			    size = ((RFC822SIZE)item).size;
+		    }
 		}
 
 		// ((IMAPFolder)folder).handleResponses(r);
