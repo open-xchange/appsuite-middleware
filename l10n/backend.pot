@@ -1088,19 +1088,10 @@ msgid "Phone number"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:69
-msgid "To set up your mail account, download the following file: "
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:71
-msgid "To set up your account, download the following file: "
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:73
-msgid "To set up your CalDAV/CardDAV account, download the following file: "
-msgstr ""
-
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/download/DownloadOnboardingStrings.java:75
-msgid "To set up your EAS account, download the following file: "
+msgid "To set up your device, click following link: "
 msgstr ""
 
 #. The user salutation; e.g. "Dear John Doe,"
@@ -1112,17 +1103,12 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:71
 msgid ""
 "to automatically configure your device, please download & install the "
-"configuration profile, which is attached to this E-Mail."
+"attached configuration profile."
 msgstr ""
 
 #. The subject of the E-Mail providing the profile attachment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:74
-msgid "Your configuration profile"
-msgstr ""
-
-#. Your on-boarding information.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:77
-msgid "Your onboarding information."
+msgid "Your device configuration"
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.storage.ldap/src/com/openexchange/contact/storage/ldap/LdapExceptionMessages.java:64
