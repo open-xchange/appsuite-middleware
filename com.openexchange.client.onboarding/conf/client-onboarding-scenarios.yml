@@ -275,9 +275,9 @@ oxupdaterinstall:
     # The comma-separated Font Awesome names
     icon: fa-desktop
     # The translatable display name
-    displayName_t10e: "Updater for Windows Clients"
+    displayName_t10e: "Connector for Microsoft Outlook®"
     # The translatable description
-    description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
+    description_t10e: "Synchronization of Emails, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
 
 
 ### Exchange ActiveSync
