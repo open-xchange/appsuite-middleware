@@ -831,6 +831,33 @@ public class JSONArray extends AbstractJSONValue {
     }
 
     /**
+     * Inserts an object value at the specified position in this JSONArray. Shifts the object value currently at that position (if any) and
+     * any subsequent object values to the right (adds one to their indices).
+     * <p>
+     * If the index is greater than the length of the JSONArray, then null elements will be added as necessary to pad it out.
+     *
+     * @param index The index at which the specified object value is to be inserted
+     * @param value The value to put into the array. The value should be a Boolean, Double, Integer, JSONArray, JSONObject, Long, or String,
+     *            or the JSONObject.NULL object.
+     * @return this.
+     * @throws JSONException If the index is negative or if the the value is an invalid number.
+     */
+    public JSONArray add(final int index, final Object value) throws JSONException {
+        if (index < 0) {
+            throw new JSONException("JSONArray[" + index + "] not found.");
+        }
+        if (index < length()) {
+            this.myArrayList.add(index, value);
+        } else {
+            while (index != length()) {
+                put(JSONObject.NULL);
+            }
+            put(value);
+        }
+        return this;
+    }
+
+    /**
      * Removes the element at the specified position in this JSONArray.
      * <p>
      * Shifts any subsequent elements to the left (subtracts one from their indices).

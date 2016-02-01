@@ -230,7 +230,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final int accountId;
     private final MailPath mailPath;
     private final JSONObject jsonObject;
-    private List<JSONObject> tmpAttachmentList;
     private JSONArray attachmentsArr;
     private JSONArray nestedMsgsArr;
     private boolean isAlternative;
@@ -404,13 +403,6 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
         return attachmentsArr;
     }
-    
-    private List<JSONObject> getTmpAttachmentsArr() throws JSONException {
-        if (tmpAttachmentList == null) {
-            tmpAttachmentList = new ArrayList<JSONObject>();
-        }
-        return tmpAttachmentList;
-    }
 
     private JSONArray getNestedMsgsArr() throws JSONException {
         if (nestedMsgsArr == null) {
@@ -561,11 +553,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             // }
             // } else {
             // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            // }
-            if(isAlternative){
-                getTmpAttachmentsArr().add(jsonObject);
-                return true;
-            } 
+            // } 
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
@@ -1173,23 +1161,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
+        
+        /*
+         * Check if we did not append any text so far
+         */
         if (!textAppended && plainText != null) {
             /*
-             * No text present
+             * Append the plain text...
              */
-            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
-            
-            //Append other attachments (see Bug #43573)
-            if (tmpAttachmentList != null && !tmpAttachmentList.isEmpty()) {
-                try {
-                    for (JSONObject attachment : tmpAttachmentList) {
-                        getAttachmentsArr().put(attachment);
-                    }
-                } catch (final JSONException e) {
-                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
+            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content), true);
+
         }
+        
         try {
             final String headersKey = HEADERS;
             if (!jsonObject.hasAndNotNull(headersKey)) {
@@ -1539,7 +1522,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     }
 
-    private void asRawContent(final String id, final String baseContentType, final HtmlSanitizeResult sanitizeResult) throws OXException {
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult) throws OXException {
+        asRawContent(id, baseContentType, sanitizeResult, false);
+    }
+
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult, boolean asFirstAttachment) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(ID, id);
@@ -1550,7 +1537,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT, sanitizeResult.getContent());
             final MultipartInfo mpInfo = multiparts.peek();
             jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
-            getAttachmentsArr().put(jsonObject);
+
+            if (asFirstAttachment) {
+                JSONArray jAttachments = getAttachmentsArr();
+                if (jAttachments.isEmpty()) {
+                    getAttachmentsArr().put(jsonObject);
+                } else {
+                    jAttachments.add(0, jsonObject);
+                }
+            } else {
+                getAttachmentsArr().put(jsonObject);
+            }
+
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
