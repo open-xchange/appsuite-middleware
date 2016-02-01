@@ -1025,12 +1025,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
         }
         /*
-         * if not yet acknowledged, take over reminder minutes if different from original
+         * if not yet acknowledged, just take over reminder minutes
          */
         if (null == acknowledgedDate) {
-            if (null != originalAppointment && originalAppointment.getAlarm() == updatedAppointment.getAlarm()) {
-                updatedAppointment.removeAlarm();
-            }
             return null;
         }
         /*
