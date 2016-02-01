@@ -1101,9 +1101,6 @@ public class DriveStorage {
         newFolder.setName(name);
         newFolder.setParentId(parent.getId());
         newFolder.setSubscribed(parent.isSubscribed());
-        for (FileStoragePermission permission : parent.getPermissions()) {
-            newFolder.addPermission(permission);
-        }
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "mkdir " + combine(getPath(parent.getId()), name));
         }
