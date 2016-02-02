@@ -1041,11 +1041,24 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             calendar.setTime(updatedAppointment.getStartDate());
             calendar.add(Calendar.MINUTE, -1 * updatedAppointment.getAlarm());
             Date trigger = calendar.getTime();
-            /*
-             * assume alarm is acknowledged, if acknowledged date is after trigger, and alarm is not updated concurrently
-             */
-            if (false == acknowledgedDate.before(trigger) && (null == originalAppointment || originalAppointment.getAlarm() == updatedAppointment.getAlarm())) {
-                updatedAppointment.setAlarm(-1);
+            if (null != existingReminder) {
+                /*
+                 * assume alarm is acknowledged, if acknowledged date is after trigger, and different from server-inserted acknowledged guardian
+                 */
+                calendar.setTime(existingReminder.getDate());
+                calendar.add(Calendar.MINUTE, -1);
+                Date acknowledgedGuardian = calendar.getTime();
+                if (false == acknowledgedDate.before(trigger) && false == acknowledgedGuardian.equals(acknowledgedDate)) {
+                    updatedAppointment.setAlarm(-1);
+                }
+            } else {
+                /*
+                 * assume alarm is acknowledged, if acknowledged date is after trigger, and alarm- and related start-date not updated concurrently
+                 */
+                if (false == acknowledgedDate.before(trigger) && (null == originalAppointment ||
+                    (originalAppointment.getAlarm() == updatedAppointment.getAlarm() && originalAppointment.getStartDate().equals(updatedAppointment.getStartDate())))) {
+                    updatedAppointment.setAlarm(-1);
+                }
             }
         } else {
             /*
