@@ -70,12 +70,13 @@ public class DefaultScenario implements Scenario {
      * @param type The associated type
      * @param link The optional link
      * @param icon The icon
+     * @param capabilities The optional capabilities
      * @param i18nDisplayName The translatable display name
      * @param i18nDescription The translatable description
      * @return The new  {@code DefaultScenario} instance
      */
-    public static DefaultScenario newInstance(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription) {
-        return new DefaultScenario(id, type, link, icon, i18nDisplayName, i18nDescription);
+    public static DefaultScenario newInstance(String id, OnboardingType type, Link link, Icon icon, List<String> capabilities, String i18nDisplayName, String i18nDescription) {
+        return new DefaultScenario(id, type, link, icon, capabilities, i18nDisplayName, i18nDescription);
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------------
@@ -88,6 +89,7 @@ public class DefaultScenario implements Scenario {
     private final Icon icon;
     private final String i18nDisplayName;
     private final String i18nDescription;
+    private final List<String> capabilities;
 
     /**
      * Initializes a new {@link DefaultScenario}.
@@ -96,16 +98,18 @@ public class DefaultScenario implements Scenario {
      * @param type The associated type
      * @param link The optional link
      * @param icon The icon
+     * @param capabilities The optional capabilities
      * @param i18nDisplayName The translatable display name
      * @param i18nDescription The translatable description
      */
-    protected DefaultScenario(String id, OnboardingType type, Link link, Icon icon, String i18nDisplayName, String i18nDescription) {
+    protected DefaultScenario(String id, OnboardingType type, Link link, Icon icon, List<String> capabilities, String i18nDisplayName, String i18nDescription) {
         super();
         this.id = id;
         this.type = type;
         this.link = link;
         this.providers = new ArrayList<OnboardingProvider>(4);
         this.alternatives = new ArrayList<Scenario>(2);
+        this.capabilities = capabilities;
 
         this.icon = icon;
         this.i18nDisplayName = i18nDisplayName;
@@ -177,6 +181,16 @@ public class DefaultScenario implements Scenario {
     @Override
     public OnboardingType getType() {
         return type;
+    }
+
+    @Override
+    public List<String> getCapabilities(Session session) {
+        return capabilities;
+    }
+
+    @Override
+    public List<String> getCapabilities(int userId, int contextId) {
+        return capabilities;
     }
 
     @Override

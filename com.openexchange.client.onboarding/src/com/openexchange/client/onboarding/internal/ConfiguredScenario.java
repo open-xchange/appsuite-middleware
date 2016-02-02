@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.internal;
 
+import java.util.Collections;
 import java.util.List;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.OnboardingType;
@@ -70,11 +71,12 @@ public class ConfiguredScenario {
     private final Icon icon;
     private final String displayName;
     private final String description;
+    private final List<String> capabilities;
 
     /**
      * Initializes a new {@link ConfiguredScenario}.
      */
-    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, ConfiguredLink link, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description) {
+    public ConfiguredScenario(String id, boolean enabled, OnboardingType type, ConfiguredLink link, List<String> providerIds, List<String> alternativeIds, String displayName, Icon icon, String description, List<String> capabilities) {
         super();
         this.id = id;
         this.enabled = enabled;
@@ -85,6 +87,16 @@ public class ConfiguredScenario {
         this.icon = icon;
         this.displayName = displayName;
         this.description = description;
+        this.capabilities = null == capabilities ? Collections.<String> emptyList() : Collections.<String> unmodifiableList(capabilities);
+    }
+
+    /**
+     * Gets the capabilities
+     *
+     * @return The capabilities
+     */
+    public List<String> getCapabilities() {
+        return capabilities;
     }
 
     /**

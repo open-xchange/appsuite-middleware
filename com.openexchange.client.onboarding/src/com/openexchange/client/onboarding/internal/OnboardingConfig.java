@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -184,6 +185,18 @@ public class OnboardingConfig {
                 }
             }
 
+            // Associated static capabilities
+            List<String> capabilities = Collections.emptyList();
+            if (OnboardingType.LINK == type) {
+                String sCapabilities = (String) values.get("capabilities");
+                if (!Strings.isEmpty(sCapabilities) && !"null".equalsIgnoreCase(sCapabilities)) {
+                    String[] saCpabilities = Strings.splitByComma(sCapabilities);
+                    if (null != saCpabilities && saCpabilities.length > 0) {
+                        capabilities = Arrays.asList(saCpabilities);
+                    }
+                }
+            }
+
             // Associated providers
             List<String> providerIds;
             {
@@ -232,7 +245,7 @@ public class OnboardingConfig {
             String displayName = (String) values.get("displayName_t10e");
             String description = (String) values.get("description_t10e");
 
-            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, link, providerIds, alternativeIds, displayName, icon, description));
+            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, link, providerIds, alternativeIds, displayName, icon, description, capabilities));
         }
         return scenarios;
     }
