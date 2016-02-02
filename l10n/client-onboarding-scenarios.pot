@@ -33,20 +33,20 @@ msgid ""
 "and install our desktop application."
 msgstr ""
 
-# Mail App
-msgid "Mail App"
-msgstr ""
-
-# Synchronize your Mail with our Mail App.
-msgid "Synchronize your Mail with our Mail App."
-msgstr ""
-
 # Drive App
 msgid "Drive App"
 msgstr ""
 
 # Synchronize your files with our Drive App.
 msgid "Synchronize your files with our Drive App."
+msgstr ""
+
+# Mail App
+msgid "Mail App"
+msgstr ""
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
 msgstr ""
 
 # Calendar + Address Book
