@@ -58,8 +58,8 @@ import com.openexchange.exception.OXException;
 import com.openexchange.framework.request.RequestContextHolder;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
@@ -214,12 +214,12 @@ public class DAVServlet extends OXServlet {
      * @return <code>true</code> if permissions are sufficient, <code>false</code>, otherwise
      */
     protected boolean checkPermission(HttpServletRequest request, ServerSession session) {
-        OAuthGrant oAuthGrant = (OAuthGrant) request.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
-        if (null == oAuthGrant) {
+        OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
+        if (null == oAuthAccess) {
             // basic authentication took place
             return true;
         }
-        Scope scope = oAuthGrant.getScope();
+        Scope scope = oAuthAccess.getScope();
         return scope.has("caldav") || scope.has("carddav");
     }
 

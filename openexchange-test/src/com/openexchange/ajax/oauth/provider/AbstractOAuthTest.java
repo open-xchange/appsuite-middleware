@@ -63,10 +63,10 @@ import com.openexchange.configuration.AJAXConfig.Property;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 /**

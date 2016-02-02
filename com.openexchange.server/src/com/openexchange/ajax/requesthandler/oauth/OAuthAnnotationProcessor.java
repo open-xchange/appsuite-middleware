@@ -58,10 +58,10 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AbstractAJAXActionAnnotationProcessor;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -82,8 +82,8 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
 
     @Override
     protected void doProcess(OAuthAction annotation, AJAXActionService action, AJAXRequestData requestData, ServerSession session) throws OXException {
-        OAuthGrant grant = requestData.getProperty(OAuthConstants.PARAM_OAUTH_GRANT);
-        if (grant == null) {
+        OAuthAccess oAuthAccess = requestData.getProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
+        if (oAuthAccess == null) {
             return;
         }
 
@@ -96,7 +96,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
                 if (method.isAnnotationPresent(OAuthScopeCheck.class)) {
                     if (hasScopeCheckSignature(method)) {
                         try {
-                            if ((boolean) method.invoke(action, requestData, session, grant)) {
+                            if ((boolean) method.invoke(action, requestData, session, oAuthAccess)) {
                                 return;
                             }
                         } catch (InvocationTargetException e) {
@@ -118,7 +118,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
 
             throw new OAuthInsufficientScopeException();
         } else {
-            if (!grant.getScope().has(requiredScope)) {
+            if (!oAuthAccess.getScope().has(requiredScope)) {
                 throw new OAuthInsufficientScopeException(requiredScope);
             }
         }
@@ -130,7 +130,7 @@ public class OAuthAnnotationProcessor extends AbstractAJAXActionAnnotationProces
             if (parameterTypes.length == 3) {
                 return parameterTypes[0].isAssignableFrom(AJAXRequestData.class) &&
                        parameterTypes[1].isAssignableFrom(ServerSession.class) &&
-                       parameterTypes[2].isAssignableFrom(OAuthGrant.class);
+                       parameterTypes[2].isAssignableFrom(OAuthAccess.class);
             }
         }
 

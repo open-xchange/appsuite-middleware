@@ -49,11 +49,21 @@
 
 package com.openexchange.oauth.provider.json.osgi;
 
+import org.osgi.framework.ServiceReference;
 import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.i18n.TranslatorFactory;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.oauth.provider.json.OAuthProviderActionFactory;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
+import com.openexchange.osgi.SimpleRegistryListener;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 
 /**
@@ -66,12 +76,41 @@ public class OAuthProviderJSONActivator extends AJAXModuleActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { OAuthProviderService.class, TranslatorFactory.class, ManagedFileManagement.class };
+        return new Class<?>[] { TranslatorFactory.class, ManagedFileManagement.class, CapabilityService.class, OAuthResourceService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        registerModule(new OAuthProviderActionFactory(this), "oauth/grants");
+        final ServiceLookup services = this;
+        track(GrantManagement.class, new SimpleRegistryListener<GrantManagement>() {
+            @Override
+            public void added(ServiceReference<GrantManagement> ref, GrantManagement service) {
+                addService(GrantManagement.class, service);
+                getService(CapabilityService.class).declareCapability("oauth-grants");
+                registerService(CapabilityChecker.class, new CapabilityChecker() {
+
+                    @Override
+                    public boolean isEnabled(String capability, Session session) throws OXException {
+                        if ("oauth-grants".equals(capability)) {
+                            ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+                            if (serverSession.isAnonymous() || serverSession.getUser().isGuest()) {
+                                return false;
+                            }
+                            return getService(OAuthResourceService.class).isProviderEnabled(session.getContextId(), session.getUserId());
+                        }
+
+                        return true;
+                    }
+                });
+                registerModule(new OAuthProviderActionFactory(services), "oauth/grants");
+            }
+
+            @Override
+            public void removed(ServiceReference<GrantManagement> ref, GrantManagement service) {
+                getService(CapabilityService.class).undeclareCapability("oauth-grants");
+            }
+        });
+        openTrackers();
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,21 +49,23 @@
 
 package com.openexchange.oauth.provider.impl;
 
-import java.util.Date;
-import java.util.regex.Pattern;
+import static com.openexchange.osgi.Tools.requireService;
+import javax.servlet.http.HttpServletRequest;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.spi.AuthorizationException;
+import com.openexchange.oauth.provider.authorizationserver.spi.OAuthAuthorizationService;
+import com.openexchange.oauth.provider.authorizationserver.spi.ValidationResponse;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.oauth.provider.impl.grant.OAuthGrantImpl;
-import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
-import com.openexchange.oauth.provider.impl.grant.StoredGrant;
-import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+
 
 /**
  * {@link OAuthResourceServiceImpl}
@@ -73,57 +75,71 @@ import com.openexchange.oauth.provider.tools.UserizedToken;
  */
 public class OAuthResourceServiceImpl implements OAuthResourceService {
 
-    /*
-     * From https://tools.ietf.org/html/rfc6750#section-2.1:
-     * The syntax for Bearer credentials is as follows:
-     * b64token = 1*( ALPHA / DIGIT / "-" / "." / "_" / "~" / "+" / "/" ) *"="
-     * credentials = "Bearer" 1*SP b64token
-     */
-    private static final Pattern TOKEN_PATTERN = Pattern.compile("[\\x41-\\x5a\\x61-\\x7a\\x30-\\x39-._~+/]+=*");
+    private final OAuthAuthorizationService authService;
 
-    private final ClientManagement clientManagement;
+    private final ServiceLookup serviceLookup;
 
-    private final OAuthGrantStorage grantStorage;
+    private final SessionProvider sessionProvider;
 
-    public OAuthResourceServiceImpl(ClientManagement clientManagement, OAuthGrantStorage grantStorage) {
+    public OAuthResourceServiceImpl(OAuthAuthorizationService authService, ServiceLookup serviceLookup) {
         super();
-        this.clientManagement = clientManagement;
-        this.grantStorage = grantStorage;
+        this.authService = authService;
+        this.serviceLookup = serviceLookup;
+        sessionProvider = new SessionProvider(serviceLookup);
     }
 
     @Override
-    public OAuthGrant validate(String accessToken) throws OXException {
-        if (!TOKEN_PATTERN.matcher(accessToken).matches() || !UserizedToken.isValid(accessToken)) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
-        }
-
-        StoredGrant grant = grantStorage.getGrantByAccessToken(UserizedToken.parse(accessToken));
-        if (grant == null) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-        }
-
-        if (grant.getExpirationDate().before(new Date())) {
-            throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
-        }
-
-        return new OAuthGrantImpl(grant);
-    }
-
-    @Override
-    public Client getClient(OAuthGrant grant) throws OXException {
+    public OAuthAccess checkAccessToken(String accessToken, HttpServletRequest httpRequest) throws OXException {
+        ValidationResponse response;
         try {
-            Client client = clientManagement.getClientById(grant.getClientId());
-            if (client == null) {
-                throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-            }
+            response = authService.validateAccessToken(accessToken);
+        } catch (AuthorizationException e) {
+            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, "An error occurred while trying to validate an access token.");
+        }
 
-            return client;
-        } catch (ClientManagementException e) {
-            if (e.getReason() == com.openexchange.oauth.provider.client.ClientManagementException.Reason.INVALID_CLIENT_ID) {
+        switch (response.getTokenStatus()) {
+            case MALFORMED:
+                throw new OAuthInvalidTokenException(Reason.TOKEN_MALFORMED);
+            case UNKNOWN:
                 throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
-            }
-
-            throw OAuthProviderExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            case EXPIRED:
+                throw new OAuthInvalidTokenException(Reason.TOKEN_EXPIRED);
+            case VALID:
+                Session session = sessionProvider.getSession(accessToken, response.getContextId(), response.getUserId(), response.getClientName(), httpRequest);
+                return new OAuthAccessImpl(session, Scope.newInstance(response.getScope()));
+            default:
+                throw new OAuthInvalidTokenException(Reason.TOKEN_UNKNOWN);
         }
     }
+
+    @Override
+    public boolean isProviderEnabled(int contextId, int userId) throws OXException {
+        ConfigView configView = requireService(ConfigViewFactory.class, serviceLookup).getView(userId, contextId);
+        return configView.opt(OAuthProviderProperties.ENABLED, Boolean.class, Boolean.TRUE).booleanValue();
+    }
+
+    private static final class OAuthAccessImpl implements OAuthAccess {
+
+        private final Session session;
+
+        private final Scope scope;
+
+        public OAuthAccessImpl(Session session, Scope scope) {
+            super();
+            this.session = session;
+            this.scope = scope;
+        }
+
+        @Override
+        public Session getSession() {
+            return session;
+        }
+
+        @Override
+        public Scope getScope() {
+            return scope;
+        }
+
+    }
+
 }

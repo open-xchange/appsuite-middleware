@@ -77,13 +77,13 @@ import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.ClientDataDto;
-import com.openexchange.oauth.provider.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagementException;
 import com.openexchange.oauth.provider.rmi.client.IconDto;
-import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
-import com.openexchange.oauth.provider.scope.Scope;
 import com.openexchange.tasks.json.TaskActionFactory;
 
 
@@ -395,7 +395,7 @@ public class ClientManagementTest {
 
         @Override
         public void describeTo(Description d) {
-            d.appendText(new com.openexchange.oauth.provider.client.ClientManagementException(Reason.INVALID_CLIENT_DATA, invalidValue).getMessage());
+            d.appendText(new com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException(Reason.INVALID_CLIENT_DATA, invalidValue).getMessage());
         }
 
     }

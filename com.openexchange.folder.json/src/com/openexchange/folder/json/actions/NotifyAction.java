@@ -65,10 +65,10 @@ import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Permissions;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
@@ -143,7 +143,7 @@ public final class NotifyAction extends AbstractFolderAction {
          */
         FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
-        if (isOAuthRequest(request) && !mayWriteViaOAuthRequest(folder.getContentType(), getOAuthGrant(request))) {
+        if (isOAuthRequest(request) && !mayWriteViaOAuthRequest(folder.getContentType(), getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.writeScopeForContentType(folder.getContentType()));
         }
         /*
@@ -166,7 +166,7 @@ public final class NotifyAction extends AbstractFolderAction {
     }
 
     @OAuthScopeCheck
-    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthAccess access) throws OXException {
         String treeId = request.getParameter("tree");
         if (null == treeId) {
             treeId = getDefaultTreeIdentifier();
@@ -179,7 +179,7 @@ public final class NotifyAction extends AbstractFolderAction {
 
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
-        return mayWriteViaOAuthRequest(contentType, grant);
+        return mayWriteViaOAuthRequest(contentType, access);
     }
 
     private static Entities filterEntities(List<Integer> entityIDs, Permission[] permissions) throws OXException {
