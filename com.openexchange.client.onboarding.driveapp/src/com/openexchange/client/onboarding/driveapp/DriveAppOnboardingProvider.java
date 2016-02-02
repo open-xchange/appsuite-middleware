@@ -94,7 +94,7 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
         super();
         this.services = services;
         identifier = BuiltInProvider.DRIVE_APP.getId();
-        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
         supportedTypes = EnumSet.of(OnboardingType.LINK);
     }
 
@@ -170,15 +170,25 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     private Link getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
+        
         LinkType linkType;
         String propertyName;
         {
             Device device = request.getDevice();
             switch (device.getPlatform()) {
                 case APPLE:
-                    propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.appstore";
-                    linkType = LinkType.APPLE_APP_STORE;
+                    {
+                        switch (device) {
+                            case APPLE_MAC:
+                                propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.macappstore";
+                                linkType = LinkType.APPLE_MAC_STORE;
+                                break;
+                            default:
+                                propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.appstore";
+                                linkType = LinkType.APPLE_APP_STORE;
+                                break;
+                        }
+                    }
                     break;
                 case ANDROID_GOOGLE:
                     propertyName = "com.openexchange.client.onboarding.driveapp.store.google.playstore";

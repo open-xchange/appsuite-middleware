@@ -74,10 +74,6 @@ public enum BuiltInProvider {
      */
     DRIVE_WINDOWS_CLIENT("drivewindowsclient"),
     /**
-     * The OX Drive for Mac provider
-     */
-    DRIVE_MAC("drivemac"),
-    /**
      * The OX Drive App provider
      */
     DRIVE_APP("driveapp"),

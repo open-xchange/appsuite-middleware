@@ -141,7 +141,8 @@ drivewindowsclientinstall:
 ################################################################################
 
 emclientinstall:
-    enabled: true
+    # Disabled by default
+    enabled: false
     type: link
     providers: [emclient]
     alternatives: []
@@ -153,21 +154,20 @@ emclientinstall:
     description_t10e: "To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application."
 
 
-### OX Drive for Mac
+### OX Drive App
 ################################################################################
 
-drivemacinstall:
-    # Disabled by default
-    enabled: false
+driveappinstall:
+    enabled: true
     type: link
-    providers: [drivemac]
+    providers: [driveapp]
     alternatives: []
     # The comma-separated Font Awesome names
     icon: fa-cloud
     # The translatable display name
-    displayName_t10e: "Drive Application"
+    displayName_t10e: "Drive App"
     # The translatable description
-    description_t10e: "Synchronize your files with our Drive application."
+    description_t10e: "Synchronize your files with our Drive App."
 
 
 ### OX Mail App
@@ -185,23 +185,6 @@ mailappinstall:
     displayName_t10e: "Mail App"
     # The translatable description
     description_t10e: "Synchronize your Mail with our Mail App."
-
-
-### OX Drive App
-################################################################################
-
-driveappinstall:
-    # Disbled by default
-    enabled: false
-    type: link
-    providers: [driveapp]
-    alternatives: []
-    # The comma-separated Font Awesome names
-    icon: fa-cloud
-    # The translatable display name
-    displayName_t10e: "Drive App"
-    # The translatable description
-    description_t10e: "Synchronize your files with our Drive App."
 
 
 ### Sync App
@@ -225,7 +208,8 @@ syncappinstall:
 ################################################################################
 
 davsync:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: plist
     providers: [carddav, caldav]
     alternatives: [davmanual]
@@ -249,7 +233,8 @@ davsync:
 #    description_t10e: "Synchronize all your appointments and contacts"
 
 davmanual:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: manual
     providers: [carddav, caldav]
     alternatives: []
@@ -314,7 +299,8 @@ easmanual:
 ################################################################################
 
 mailsync:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: plist
     providers: [mail]
     alternatives: [mailmanual]
@@ -326,7 +312,8 @@ mailsync:
     description_t10e: "Synchronize your Mail with Apple Mail App."
 
 mailmanual:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: manual
     providers: [mail]
     alternatives: []
