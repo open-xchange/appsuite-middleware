@@ -113,6 +113,11 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
     }
 
     @Override
+    public Date getLastModified() throws WebdavProtocolException {
+        return null;
+    }
+
+    @Override
     public void putProperty(WebdavProperty prop) throws WebdavProtocolException {
         internalPutProperty(prop);
     }
