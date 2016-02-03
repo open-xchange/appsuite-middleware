@@ -69,6 +69,7 @@ import org.json.JSONInputStream;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
@@ -252,7 +253,26 @@ public final class OXFolderUtility {
                 /*
                  * by default, check for equally named folder on same level
                  */
-                if (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context)) {
+                int existingFolderID = OXFolderSQL.lookUpFolderOnUpdate(folderID, parentFolderID, folderName, module, connection, context);
+                if (-1 != existingFolderID) {
+                    /*
+                     * double-check if cached parent folder lists the existing folder as subfolder, otherwise invalidate
+                     */
+                    FolderCacheManager manager = FolderCacheManager.getInstance();
+                    FolderObject cachedParentFolder = manager.getFolderObject(parentFolderID, context);
+                    if (null != cachedParentFolder) {
+                        List<Integer> cachedSubfolderIDs = null;
+                        try {
+                            cachedSubfolderIDs = cachedParentFolder.getSubfolderIds();
+                        } catch (OXException e) {
+                            if (false == OXFolderExceptionCode.ATTRIBUTE_NOT_SET.equals(e)) {
+                                throw e;
+                            }
+                        }
+                        if (null != cachedSubfolderIDs && false == cachedSubfolderIDs.contains(Integer.valueOf(existingFolderID))) {
+                            manager.removeFolderObject(parentFolderID, context);
+                        }
+                    }
                     throw OXFolderExceptionCode.NO_DUPLICATE_FOLDER.create(Integer.valueOf(parentFolderID), I(context.getContextId()), folderName);
                 }
             }
@@ -443,7 +463,7 @@ public final class OXFolderUtility {
             }
         }
     }
-    
+
     private static boolean isEmptyPermission(final OCLPermission oclPerm) {
         return (!oclPerm.isFolderAdmin() && oclPerm.getFolderPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getReadPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getWritePermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
     }

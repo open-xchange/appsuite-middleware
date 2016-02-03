@@ -988,7 +988,19 @@ public class DriveStorage {
                         return null;
                     }
                 }
-                existingFolder = createFolder(currentFolder, name);
+                try {
+                    existingFolder = createFolder(currentFolder, name);
+                } catch (OXException e) {
+                    if ("FLD-0012".equals(e.getErrorCode())) {
+                        session.trace("Name conflict during folder creation (" + e.getMessage() + "), trying again...");
+                        existingFolder = resolveToLeaf(path, false, false);
+                        if (null == existingFolder) {
+                            throw e;
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
                 knownFolders.remember(currentPath + normalizedName, existingFolder);
             }
             currentFolder = existingFolder;
