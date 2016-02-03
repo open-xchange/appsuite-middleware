@@ -62,14 +62,14 @@ import com.openexchange.ajax.smtptest.actions.GetMailsResponse.Message;
 
 
 /**
- * {@link EASSyncProfileTest}
+ * {@link MailSyncProfileTest}
  *
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class EASSyncProfileTest extends AbstractAJAXSession {
+public class MailSyncProfileTest extends AbstractAJAXSession {
 
-    public EASSyncProfileTest(String name) {
+    public MailSyncProfileTest(String name) {
         super(name);
     }
 
@@ -89,12 +89,11 @@ public class EASSyncProfileTest extends AbstractAJAXSession {
         super.tearDown();
     }
 
-    public void testEASSyncProfileViaEmail() throws Exception {
+    public void testIMAPSyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
         body.put("email", client.getValues().getDefaultAddress());
-        ExecuteRequest req = new ExecuteRequest("apple.iphone/eassync", "email", body, false);
-        OnboardingTestResponse resp = client.execute(req);
-        assertFalse(resp.hasError());
+        ExecuteRequest req = new ExecuteRequest("apple.mac/mailsync", "email", body, false);
+        client.execute(req);
         GetMailsRequest mailReq = new GetMailsRequest();
         GetMailsResponse mailResp = client.execute(mailReq);
         List<Message> messages = mailResp.getMessages();
@@ -102,13 +101,19 @@ public class EASSyncProfileTest extends AbstractAJAXSession {
         assertEquals(1, messages.size());
     }
 
-    public void testEASSyncProfileViaDisplay() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("apple.iphone/easmanual", "display", null, false);
+    public void testIMAPSyncProfileViaDisplay() throws Exception {
+        ExecuteRequest req = new ExecuteRequest("apple.mac/mailmanual", "display", null, false);
         OnboardingTestResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
-        assertTrue(json.hasAndNotNull("eas_hostName"));
-        assertTrue(json.hasAndNotNull("eas_login"));
+        assertTrue(json.hasAndNotNull("imapLogin"));
+        assertTrue(json.hasAndNotNull("imapServer"));
+        assertTrue(json.hasAndNotNull("imapPort"));
+        assertTrue(json.hasAndNotNull("imapSecure"));
+        assertTrue(json.hasAndNotNull("smtpLogin"));
+        assertTrue(json.hasAndNotNull("smtpServer"));
+        assertTrue(json.hasAndNotNull("smtpPort"));
+        assertTrue(json.hasAndNotNull("smtpSecure"));
     }
 
 }

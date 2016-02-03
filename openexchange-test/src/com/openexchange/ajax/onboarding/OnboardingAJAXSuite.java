@@ -53,6 +53,7 @@ import com.openexchange.ajax.onboarding.tests.ConfigTest;
 import com.openexchange.ajax.onboarding.tests.DAVSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.EASSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.EMClientURLTest;
+import com.openexchange.ajax.onboarding.tests.MailSyncProfileTest;
 import com.openexchange.ajax.onboarding.tests.PlistSMSTest;
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -73,6 +74,7 @@ public class OnboardingAJAXSuite {
         tests.addTestSuite(EASSyncProfileTest.class);
         tests.addTestSuite(EMClientURLTest.class);
         tests.addTestSuite(PlistSMSTest.class);
+        tests.addTestSuite(MailSyncProfileTest.class);
         return tests;
     }
 
