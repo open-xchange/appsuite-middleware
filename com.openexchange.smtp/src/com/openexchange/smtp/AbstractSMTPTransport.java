@@ -100,6 +100,7 @@ import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -478,7 +479,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
-                    smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "Open-Xchange, Inc.", "7.2.2"));
+                    smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "Open-Xchange, Inc.", MailAccess.getVersion()));
                 }
             }
         }
