@@ -821,62 +821,14 @@ msgstr ""
 msgid "Synchronize your address books and contacts."
 msgstr ""
 
-#. The default display name for a CaldAV account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.caldav/src/com/openexchange/client/onboarding/caldav/CalDAVOnboardingStrings.java:71
-msgid "CalDAV"
-msgstr ""
-
 #. A description for a CaldAV account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.caldav/src/com/openexchange/client/onboarding/caldav/CalDAVOnboardingStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.caldav/src/com/openexchange/client/onboarding/caldav/CalDAVOnboardingStrings.java:71
 msgid "The CalDAV account for synchronizing calendar entries."
 msgstr ""
 
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.caldav/src/com/openexchange/client/onboarding/caldav/CalDAVOnboardingStrings.java:76
-msgid "Your CalDAV profile"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.caldav/src/com/openexchange/client/onboarding/caldav/CalDAVOnboardingStrings.java:78
-msgid "Your CalDAV settings"
-msgstr ""
-
-#. The default display name for a CardDAV account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.carddav/src/com/openexchange/client/onboarding/carddav/CardDAVOnboardingStrings.java:71
-msgid "CardDAV"
-msgstr ""
-
 #. A description for a CardDAV account
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.carddav/src/com/openexchange/client/onboarding/carddav/CardDAVOnboardingStrings.java:74
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.carddav/src/com/openexchange/client/onboarding/carddav/CardDAVOnboardingStrings.java:71
 msgid "The CardDAV account for synchronizing contact entries."
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.carddav/src/com/openexchange/client/onboarding/carddav/CardDAVOnboardingStrings.java:76
-msgid "Your CardDAV profile"
-msgstr ""
-
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.carddav/src/com/openexchange/client/onboarding/carddav/CardDAVOnboardingStrings.java:78
-msgid "Your CardDAV settings"
-msgstr ""
-
-#. Microsoft Exchange Active-Sync
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.eas/src/com/openexchange/client/onboarding/eas/EASOnboardingStrings.java:64
-msgid "Microsoft Exchange Active-Sync"
-msgstr ""
-
-#. The Microsoft Exchange Active-Sync account for synchronizing with Open-Xchange Server.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.eas/src/com/openexchange/client/onboarding/eas/EASOnboardingStrings.java:67
-msgid ""
-"The Microsoft Exchange Active-Sync account for synchronizing your calendar, "
-"contacts and messages."
-msgstr ""
-
-#. Your Microsoft Exchange Active-Sync profile
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.eas/src/com/openexchange/client/onboarding/eas/EASOnboardingStrings.java:70
-msgid "Your Microsoft Exchange Active-Sync profile"
-msgstr ""
-
-#. Your Microsoft Exchange Active-Sync settings
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding.eas/src/com/openexchange/client/onboarding/eas/EASOnboardingStrings.java:73
-msgid "Your Microsoft Exchange Active-Sync settings"
 msgstr ""
 
 #. The default display name for an IMAP account
