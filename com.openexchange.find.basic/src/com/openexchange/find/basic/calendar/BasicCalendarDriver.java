@@ -277,7 +277,6 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
          */
         List<OXException> warnings = new ArrayList<OXException>();
         int limit = getHardResultLimit();
-        limit = 3;
         List<Appointment> appointments = new ArrayList<Appointment>();
         AppointmentSQLInterface appointmentSql = Services.requireService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         SearchIterator<Appointment> searchIterator = null;
