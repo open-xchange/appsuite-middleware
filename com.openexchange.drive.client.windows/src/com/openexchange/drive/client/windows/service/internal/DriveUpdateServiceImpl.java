@@ -122,12 +122,9 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     @Override
     public String getInstallerDownloadUrl(HostData hostData, Session session) throws OXException {
         // Get associated branding
-        String branding;
-        {
-            branding = BrandingService.getBranding(session);
-            if (!isValid(branding)) {
-                throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
-            }
+        String branding = BrandingService.getBranding(session);
+        if (!isValid(branding)) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
         }
 
         // Get the name of .exe file
