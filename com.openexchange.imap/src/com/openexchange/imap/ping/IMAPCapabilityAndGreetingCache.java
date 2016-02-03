@@ -55,8 +55,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -71,6 +70,7 @@ import com.openexchange.imap.config.IIMAPProperties;
 import com.openexchange.imap.services.Services;
 import com.openexchange.java.BoundaryExceededException;
 import com.openexchange.java.BoundedStringBuilder;
+import com.openexchange.java.Strings;
 import com.openexchange.tools.ssl.TrustAllSSLSocketFactory;
 
 /**
@@ -277,128 +277,135 @@ public final class IMAPCapabilityAndGreetingCache {
 
             Socket s = null;
             try {
-                try {
-                    if (isSecure) {
-                        s = TrustAllSSLSocketFactory.getDefault().createSocket();
-                    } else {
-                        s = new Socket();
-                    }
-                    /*
-                     * Set connect timeout
-                     */
-                    final int connectionTimeout = imapProperties.getImapConnectionTimeout();
+                // Establish socket connection
+                {
+                    s = isSecure ? TrustAllSSLSocketFactory.getDefault().createSocket() : new Socket();
+
+                    // Set connect timeout
+                    int connectionTimeout = imapProperties.getImapConnectionTimeout();
                     if (connectionTimeout > 0) {
                         s.connect(toSocketAddress(serverUrl) , connectionTimeout);
                     } else {
                         s.connect(toSocketAddress(serverUrl));
                     }
-                    final int timeout = imapProperties.getImapTimeout();
+
+                    // Set read timeout
+                    int timeout = imapProperties.getImapTimeout();
                     if (timeout > 0) {
-                        /*
-                         * Define timeout for blocking operations
-                         */
                         s.setSoTimeout(timeout);
                     }
-                } catch (final IOException e) {
-                    throw e;
                 }
-                final InputStream in = s.getInputStream();
-                final OutputStream out = s.getOutputStream();
-                /*
-                 * Read IMAP server greeting on connect
-                 */
+
+                // State variables
+                InputStream in = s.getInputStream();
+                OutputStream out = s.getOutputStream();
                 boolean skipLF = false;
                 boolean eol = false;
-                int i = -1;
+
+                // Read IMAP server greeting on connect
                 if (in.available() > 0) {
-                    while (!eol && ((i = in.read()) != -1)) {
-                        final char c = (char) i;
-                        if (c == '\r') {
-                            eol = true;
-                            skipLF = true;
-                        } else if (c == '\n') {
-                            eol = true;
-                            skipLF = false;
-                        } else {
-                            sb.append(c);
+                    for (int i; !eol && ((i = in.read()) != -1);) {
+                        char c = (char) i;
+                        switch (c) {
+                            case '\r':
+                                eol = true;
+                                skipLF = true;
+                                break;
+                            case '\n':
+                                eol = true;
+                                skipLF = false;
+                                break;
+                            default:
+                                sb.append(c);
+                                break;
                         }
                     }
                 }
                 greeting = sb.toString();
                 sb.setLength(0);
+
                 if (skipLF) {
-                    /*
-                     * Consume final LF
-                     */
-                    i = in.read();
+                    // Consume final LF
+                    in.read();
                     skipLF = false;
                 }
-                /*
-                 * Request capabilities through CAPABILITY command
-                 */
-                out.write("A10 CAPABILITY\r\n".getBytes());
+
+                // Request capabilities through CAPABILITY command
+                out.write("A1 CAPABILITY\r\n".getBytes());
                 out.flush();
-                /*
-                 * Read CAPABILITY response
-                 */
+
+                // Read CAPABILITY response
                 {
-                    boolean byeChecked = false;
-                    boolean nextLine = false;
-                    NextLoop: do {
+                    boolean hasNextLine = true;
+                    while (hasNextLine) {
+                        hasNextLine = false;
                         eol = false;
-                        i = in.read();
+
+                        if (skipLF) {
+                            // Consume final LF
+                            in.read();
+                            skipLF = false;
+                        }
+
+                        int i = in.read();
                         if (i != -1) {
-                            /*
-                             * Character '*' (whose integer value is 42) indicates an untagged response; meaning subsequent response lines
-                             * will follow
-                             */
-                            nextLine = (i == 42);
+                            // Character '*' (42) indicates an un-tagged response; meaning subsequent response lines will follow
+                            hasNextLine = (i == 42);
+
                             do {
-                                final char c = (char) i;
-                                if ((c == '\n') || (c == '\r')) {
-                                    if ((c == '\n') && skipLF) {
-                                        // Discard remaining LF
-                                        skipLF = false;
-                                        nextLine = true;
-                                        continue NextLoop;
-                                    }
-                                    if (c == '\r') {
+                                char c = (char) i;
+                                switch (c) {
+                                    case '\r':
+                                        eol = true;
                                         skipLF = true;
-                                    }
-                                    eol = true;
-                                } else {
-                                    sb.append(c);
-                                    if (!byeChecked && sb.length() >= 6) {
-                                        if (sb.indexOf("* BYE ", 0) == 0) {
-                                            // Received an odd "BYE" response
-                                            throw new IOException("Received BYE response from IMAP server.");
-                                        }
-                                        byeChecked = true;
-                                    }
+                                        break;
+                                    case '\n':
+                                        eol = true;
+                                        skipLF = false;
+                                        break;
+                                    default:
+                                        sb.append(c);
+                                        break;
                                 }
                             } while (!eol && ((i = in.read()) != -1));
+
+                            if (sb.length() >= 5 && sb.indexOf(" BYE ", 0) >= 0) {
+                                // Received "BYE" response
+                                sb.insert(0, "Received BYE response from IMAP server: ");
+                                throw new IOException(sb.toString());
+                            }
+
+                            // Append LF if a next line is expected
+                            if (hasNextLine) {
+                                sb.append('\n');
+                            }
+
                         }
-                        if (nextLine) {
-                            sb.append('\n');
-                        }
-                    } while (nextLine);
-                    final String[] lines = SPLIT.split(sb.toString());
+                    }
+
+                    String[] lines = SPLIT.split(sb.toString());
                     sb.setLength(0);
-                    for (final String line : lines) {
-                        if (!line.startsWith("A10 ")) {
+                    for (String line : lines) {
+                        if (line.startsWith("* CAPABILITY ")) {
+                            sb.append(line.substring(12));
+                        } else if (!line.startsWith("A1 ")) {
                             sb.append(' ').append(line);
                         }
                     }
                     capabilities = sb.toString();
                 }
-                /*
-                 * Close connection through LOGOUT command
-                 */
-                out.write("A11 LOGOUT\r\n".getBytes());
+
+                if (skipLF) {
+                    // Consume final LF
+                    in.read();
+                    skipLF = false;
+                }
+
+                // Close connection through LOGOUT command
+                out.write("A2 LOGOUT\r\n".getBytes());
                 out.flush();
-                /*
-                 * Create new CAG object
-                 */
+
+                // Create & return new CapabilityAndGreeting instance
                 return new CapabilityAndGreeting(capabilities, greeting);
             } catch (BoundaryExceededException e) {
                 if (null == greeting) {
@@ -453,16 +460,17 @@ public final class IMAPCapabilityAndGreetingCache {
         private final String greeting;
         private final long stamp;
 
-        CapabilityAndGreeting(final String capability, final String greeting) {
+        CapabilityAndGreeting(String capability, String greeting) {
             super();
             if (null == capability) {
                 capabilities = Collections.emptyMap();
             } else {
-                final String[] caps = SPLIT.split(capability);
-                final Map<String, String> capabilities = new HashMap<String, String>(caps.length);
-                final Locale locale = Locale.ENGLISH;
-                for (final String cap : caps) {
-                    capabilities.put(cap.toUpperCase(locale), cap);
+                String[] caps = SPLIT.split(capability);
+                Map<String, String> capabilities = new LinkedHashMap<String, String>(caps.length);
+                for (String cap : caps) {
+                    if (!Strings.isEmpty(cap)) {
+                        capabilities.put(Strings.toUpperCase(cap), cap);
+                    }
                 }
                 this.capabilities = Collections.unmodifiableMap(capabilities);
             }
