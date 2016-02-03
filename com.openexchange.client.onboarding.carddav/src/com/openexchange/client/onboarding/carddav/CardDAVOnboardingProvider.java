@@ -175,12 +175,12 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
 
     private final static String CARDDAV_LOGIN_FIELD = "carddav_login";
-    private final static String CARDDAV_HOST_FIELD = "carddav_hostName";
+    private final static String CARDDAV_URL_FIELD = "carddav_url";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, false, session));
+        configuration.put(CARDDAV_URL_FIELD, getCardDAVUrl(request, false, session));
         return new DisplayResult(configuration);
     }
 

@@ -174,12 +174,12 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
 
 
     private final static String CALDAV_LOGIN_FIELD = "caldav_login";
-    private final static String CALDAV_HOST_FIELD = "caldav_hostName";
+    private final static String CALDAV_URL_FIELD = "caldav_url";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CALDAV_HOST_FIELD, getCalDAVUrl(request, false, session));
+        configuration.put(CALDAV_URL_FIELD, getCalDAVUrl(request, false, session));
         return new DisplayResult(configuration);
     }
 

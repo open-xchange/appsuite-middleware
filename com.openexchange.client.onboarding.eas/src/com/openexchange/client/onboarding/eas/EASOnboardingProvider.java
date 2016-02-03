@@ -175,12 +175,12 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
 
 
     private final static String EAS_LOGIN_FIELD = "eas_login";
-    private final static String EAS_HOST_FIELD = "eas_hostName";
+    private final static String EAS_URL_FIELD = "eas_url";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(EAS_LOGIN_FIELD, session.getLogin());
-        configuration.put(EAS_HOST_FIELD, getEASUrl(request, false, session));
+        configuration.put(EAS_URL_FIELD, getEASUrl(request, false, session));
         return new DisplayResult(configuration);
     }
 
