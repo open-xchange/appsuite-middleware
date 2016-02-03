@@ -173,6 +173,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int limit, int[] cols) throws OXException {
+        return delegate.searchAppointments(searchObj, orderBy, orderDir, limit, cols);
+    }
+
+    @Override
     public CalendarDataObject getObjectById(int objectId) throws OXException, SQLException {
         CalendarDataObject cachedAppointment = cached.get(objectId);
         if (cachedAppointment != null) {

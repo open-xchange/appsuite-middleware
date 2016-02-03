@@ -79,7 +79,7 @@ import com.openexchange.user.UserService;
 public class ITipConsistencyCalendar extends ITipCalendarWrapper implements AppointmentSQLInterface {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ITipConsistencyCalendar.class);
-    
+
     protected AppointmentSQLInterface delegate;
 
     private final UserService users;
@@ -344,6 +344,11 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
         final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir,
         final int[] cols) throws OXException {
         return delegate.searchAppointments(searchObj, orderBy, orderDir, cols);
+    }
+
+    @Override
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int limit, int[] cols) throws OXException {
+        return delegate.searchAppointments(searchObj, orderBy, orderDir, limit, cols);
     }
 
     @Override

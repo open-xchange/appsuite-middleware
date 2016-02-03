@@ -1368,7 +1368,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, int limit, final Context ctx, final Connection readcon) throws SQLException, OXException {
         List<Object> searchParameters = new ArrayList<Object>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
         final StringBuilder sb = new StringBuilder(512);
@@ -1653,15 +1653,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                 searchParameters.add(preparedPattern);
             }
         }
-
-        sb.append(" ORDER BY ");
-        String orderby = COLLECTION.getFieldName(orderBy);
-        if (orderby == null) {
-            orderby = COLLECTION.getFieldName(CalendarObject.START_DATE);
+        /*
+         * order by & limit
+         */
+        String orderByField = COLLECTION.getFieldName(orderBy);
+        if (null != orderByField) {
+            sb.append(" ORDER BY pd.").append(orderByField).append(DBUtils.forSQLCommand(orderDir));
         }
-        sb.append("pd." + orderby);
-        sb.append(DBUtils.forSQLCommand(orderDir));
-
+        if (0 < limit) {
+            sb.append(" LIMIT ").append(limit);
+        }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         if (0 < searchParameters.size()) {
             int parameterIndex = 0;

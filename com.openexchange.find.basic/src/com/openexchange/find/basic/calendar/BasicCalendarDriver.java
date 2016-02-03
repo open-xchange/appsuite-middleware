@@ -54,6 +54,7 @@ import static com.openexchange.find.facet.Facets.newExclusiveBuilder;
 import static com.openexchange.find.facet.Facets.newSimpleBuilder;
 import static com.openexchange.java.SimpleTokenizer.tokenize;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.EnumSet;
@@ -66,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.find.AutocompleteRequest;
 import com.openexchange.find.AutocompleteResult;
 import com.openexchange.find.Document;
+import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
@@ -80,6 +82,7 @@ import com.openexchange.find.common.CommonFacetType;
 import com.openexchange.find.common.FolderType;
 import com.openexchange.find.facet.Facet;
 import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets.DefaultFacetBuilder;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.find.util.DisplayItems;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
@@ -202,7 +205,7 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
          * add other facets
          */
         facets.add(getStatusFacet());
-        facets.add(getRelativeDateFacet());
+        facets.add(getRangeFacet());
         facets.add(getRecurringTypeFacet());
         return new AutocompleteResult(facets);
     }
@@ -221,15 +224,17 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         return buildStaticFacetValue(id, displayName, filterFields, id);
     }
 
-    private static Facet getRelativeDateFacet() {
-        List<String> fields = Collections.singletonList(CalendarFacetType.RELATIVE_DATE.getId());
-        return newExclusiveBuilder(CalendarFacetType.RELATIVE_DATE)
-            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_FUTURE, CalendarStrings.RELATIVE_DATE_FUTURE, fields))
-            .addValue(buildRelativeDateFacetValue(CalendarFacetValues.RELATIVE_DATE_PAST, CalendarStrings.RELATIVE_DATE_PAST, fields))
-            .build();
+    private static Facet getRangeFacet() throws OXException {
+        List<String> fields = Collections.singletonList(CalendarFacetType.RANGE.getId());
+        DefaultFacetBuilder facetBuilder = newExclusiveBuilder(CalendarFacetType.RANGE)
+            .addValue(buildRangeFacetValue(CalendarFacetValues.RANGE_ONE_MONTH, CalendarStrings.RANGE_ONE_MONTH, fields))
+            .addValue(buildRangeFacetValue(CalendarFacetValues.RANGE_THREE_MONTHS, CalendarStrings.RANGE_THREE_MONTHS, fields))
+            .addValue(buildRangeFacetValue(CalendarFacetValues.RANGE_ONE_YEAR, CalendarStrings.RANGE_ONE_YEAR, fields))
+        ;
+        return facetBuilder.build();
     }
 
-    private static FacetValue buildRelativeDateFacetValue(String id, String displayName, List<String> filterFields) {
+    private static FacetValue buildRangeFacetValue(String id, String displayName, List<String> filterFields) {
         return buildStaticFacetValue(id, displayName, filterFields, id);
     }
 
@@ -270,27 +275,41 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * perform search
          */
+        List<OXException> warnings = new ArrayList<OXException>();
+        int limit = getHardResultLimit();
+        limit = 3;
         List<Appointment> appointments = new ArrayList<Appointment>();
         AppointmentSQLInterface appointmentSql = Services.requireService(AppointmentSqlFactoryService.class).createAppointmentSql(session);
         SearchIterator<Appointment> searchIterator = null;
         try {
-            searchIterator = appointmentSql.searchAppointments(appointmentSearch, Appointment.START_DATE, Order.ASCENDING, DEFAULT_COLUMN_IDS);
+            searchIterator = appointmentSql.searchAppointments(appointmentSearch, -1, Order.NO_ORDER, limit + 1, DEFAULT_COLUMN_IDS);
             while (searchIterator.hasNext()) {
-                appointments.add(getBestMatchingOccurrence(searchIterator.next(), appointmentSearch.getMinimumEndDate(), appointmentSearch.getMaximumStartDate()));
+                appointments.add(getBestMatchingOccurrence(searchIterator.next()));
+            }
+            OXException[] iteratorWarnings = searchIterator.getWarnings();
+            if (null != iteratorWarnings && 0 < iteratorWarnings.length) {
+                warnings.addAll(Arrays.asList(iteratorWarnings));
             }
         } finally {
             if (null != searchIterator) {
                 searchIterator.close();
             }
         }
-        if (1 < appointments.size()) {
-            Collections.sort(appointments, new RankedAppointmentComparator());
+        /*
+         * check if limit has been exceeded
+         */
+        if (0 < limit && limit < appointments.size()) {
+            appointments.remove(appointments.size() - 1);
+            warnings.add(FindExceptionCode.TOO_MANY_RESULTS.create());
         }
         /*
          * construct search result
          */
+        if (1 < appointments.size()) {
+            Collections.sort(appointments, new RankedAppointmentComparator());
+        }
         return new SearchResult(appointments.size(), searchRequest.getStart(),
-            getDocuments(appointments, searchRequest.getStart(), searchRequest.getSize()), searchRequest.getActiveFacets());
+            getDocuments(appointments, searchRequest.getStart(), searchRequest.getSize()), searchRequest.getActiveFacets(), warnings);
     }
 
     private static List<Document> getDocuments(List<Appointment> appointments, int start, int size) {
@@ -311,45 +330,24 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
      * Invoking this method on a non-recurring appointment has no effect.
      *
      * @param appointment The recurring appointment
-     * @param minimumEndDate The minimum end date to consider, or <code>null</code> if not defined
-     * @param maximumStartDate The maximum start date to consider, or <code>null</code> if not defined
      * @return The supplied appointment, with the values of the best matching occurrence being applied
-     * @throws OXException
      */
-    private static Appointment getBestMatchingOccurrence(Appointment appointment, Date minimumEndDate, Date maximumStartDate) throws OXException {
+    private static Appointment getBestMatchingOccurrence(Appointment appointment) throws OXException {
         if (CalendarObject.NONE != appointment.getRecurrenceType() && 0 == appointment.getRecurrencePosition()) {
             long rangeStart = 0;
             long rangeEnd = Long.MAX_VALUE;
             int pmaxtc =  CalendarCollectionService.MAX_OCCURRENCESE;
             boolean first = true;
-            if (null == minimumEndDate && null == maximumStartDate) {
-                /*
-                 * choose "next" or "last" occurrence in case not specified
-                 */
-                Date until = appointment.getUntil();
-                long now = System.currentTimeMillis();
-                if (null != until && until.getTime() > now) {
-                    rangeStart = now;
-                    pmaxtc = 1;
-                } else {
-                    first = false;
-                }
+            /*
+             * choose "next" or "last" occurrence in case not specified
+             */
+            Date until = appointment.getUntil();
+            long now = System.currentTimeMillis();
+            if (null != until && until.getTime() > now) {
+                rangeStart = now;
+                pmaxtc = 1;
             } else {
-                /*
-                 * get first occurrence after minimum end date
-                 */
-                if (null != minimumEndDate) {
-                    rangeStart = minimumEndDate.getTime();
-                    pmaxtc = 1;
-                    first = true;
-                }
-                /*
-                 * get last occurrence before maximum start date
-                 */
-                if (null != maximumStartDate) {
-                    rangeEnd = maximumStartDate.getTime();
-                    first = false;
-                }
+                first = false;
             }
             /*
              * calculate & apply occurrence
@@ -410,6 +408,10 @@ public class BasicCalendarDriver extends AbstractContactFacetingModuleSearchDriv
             }
         }
         return emailAddresses;
+    }
+
+    private static int getHardResultLimit() throws OXException {
+        return Services.getConfigurationService().getIntProperty("com.openexchange.find.basic.calendar.hardResultLimit", 1000);
     }
 
 }

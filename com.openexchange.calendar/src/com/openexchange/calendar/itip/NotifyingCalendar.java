@@ -366,6 +366,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int limit, int[] cols) throws OXException {
+        return delegate.searchAppointments(searchObj, orderBy, orderDir, limit, cols);
+    }
+
+    @Override
     public Date setExternalConfirmation(final int objectId, final int folderId, final String mail, final int confirm, final String message) throws OXException {
         return delegate.setExternalConfirmation(objectId, folderId, mail, confirm, message);
     }

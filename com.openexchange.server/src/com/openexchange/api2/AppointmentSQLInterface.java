@@ -184,14 +184,26 @@ public interface AppointmentSQLInterface {
 
     /**
      * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
+     *
      * @param searchObj The {@link AppointmentSearchObject}.
      * @param cols Fields that will be added to the data object.
-     * @param orderBy The field for ordering the results.
-     * @param orderDir The direction for ordering the results.
+     * @param orderBy The field for ordering the results, or <code>-1</code> for no order
+     * @param orderDir The direction for ordering the results, or {@link Order#NO_ORDER} for no specific direction
      * @return A SearchIterator containing AppointmentObjects
-     * @throws OXException
      */
-    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int[] cols) throws OXException;
+    SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int[] cols) throws OXException;
+
+    /**
+     * Lists all appointments where the title or description matches the given pattern in the {@link AppointmentSearchObject}.
+     *
+     * @param searchObj The {@link AppointmentSearchObject}.
+     * @param cols Fields that will be added to the data object.
+     * @param orderBy The field for ordering the results, or <code>-1</code> for no order
+     * @param limit The maximum number of results to return, or <code>-1</code> for no limit
+     * @param orderDir The direction for ordering the results, or {@link Order#NO_ORDER} for no specific direction
+     * @return A SearchIterator containing AppointmentObjects
+     */
+    SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int limit, int[] cols) throws OXException;
 
     /**
      * Loads one appointment by the given ID
