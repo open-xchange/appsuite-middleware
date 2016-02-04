@@ -80,35 +80,6 @@ public class OnboardingStrings implements LocalizableStrings {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
-    // The display name for E-Mail module
-    public static final String MODULE_EMAIL_DISPLAY_NAME = "E-Mail";
-
-    // The description for E-Mail module
-    public static final String MODULE_EMAIL_DESCRIPTION = "The E-Mail module for accessing/synchronizing E-Mails.";
-
-
-    // The display name for contacts module
-    public static final String MODULE_CONTACTS_DISPLAY_NAME = "Contacts";
-
-    // The description for contacts module
-    public static final String MODULE_CONTACTS_DESCRIPTION = "The contacts module for accessing/synchronizing contacts.";
-
-
-    // The display name for calendar module
-    public static final String MODULE_CALENDAR_DISPLAY_NAME = "Calendar";
-
-    // The description for calendar module
-    public static final String MODULE_CALENDAR_DESCRIPTION = "The calendar module for accessing/synchronizing events.";
-
-
-    // The display name for Drive module
-    public static final String MODULE_DRIVE_DISPLAY_NAME = "Drive";
-
-    // The description for Drive module
-    public static final String MODULE_DRIVE_DESCRIPTION = "The Drive module for accessing/synchronizing files.";
-
-    // ----------------------------------------------------------------------------------------------------------------------
-
     // The display name for an Apple Mac
     public static final String DEVICE_APPLE_MAC_DISPLAY_NAME = "Mac";
 
@@ -134,20 +105,12 @@ public class OnboardingStrings implements LocalizableStrings {
 
     // ----------------------------------------------------------------------------------------------------------------------
 
-    // E-Mail successfully sent
-    public static final String RESULT_EMAIL_SENT = "E-Mail successfully sent";
+    // Mail successfully sent
+    public static final String RESULT_MAIL_SENT = "Mail successfully sent";
 
     // ----------------------------------------------------------------------------------------------------------------------
 
     // SMS successfully sent
     public static final String RESULT_SMS_SENT = "SMS successfully sent";
-
-    // ----------------------------------------------------------------------------------------------------------------------
-
-    // Used when rendering a form in which the user is supposed to enter an E-Mail address
-    public static final String FORM_EMAIL = "E-Mail address";
-
-    // Used when rendering a form in which the user is supposed to enter a phone number address
-    public static final String FORM_PHONE = "Phone number";
 
 }
