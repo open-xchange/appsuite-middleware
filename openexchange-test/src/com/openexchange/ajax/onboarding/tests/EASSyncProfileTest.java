@@ -107,7 +107,7 @@ public class EASSyncProfileTest extends AbstractAJAXSession {
         OnboardingTestResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
-        assertTrue(json.hasAndNotNull("eas_hostName"));
+        assertTrue(json.hasAndNotNull("eas_url"));
         assertTrue(json.hasAndNotNull("eas_login"));
     }
 

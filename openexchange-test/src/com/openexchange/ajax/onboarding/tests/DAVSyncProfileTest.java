@@ -106,7 +106,7 @@ public class DAVSyncProfileTest extends AbstractAJAXSession {
         OnboardingTestResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
-        assertTrue(json.hasAndNotNull("carddav_hostName"));
+        assertTrue(json.hasAndNotNull("carddav_url"));
         assertTrue(json.hasAndNotNull("carddav_login"));
     }
 
