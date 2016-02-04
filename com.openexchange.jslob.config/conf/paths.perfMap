@@ -24,6 +24,7 @@ modules/com.openexchange.user.passwordchange/special > io.ox/core//password/spec
 # Contact Collector
 modules/mail/contactCollectOnMailAccess > io.ox/mail//contactCollectOnMailAccess
 modules/mail/contactCollectOnMailTransport > io.ox/mail//contactCollectOnMailTransport
+modules/mail/contactCollectFolder > io.ox/mail//contactCollectFolder
 
 # Mail
 modules/mail/defaultseparator > io.ox/mail//defaultseparator
