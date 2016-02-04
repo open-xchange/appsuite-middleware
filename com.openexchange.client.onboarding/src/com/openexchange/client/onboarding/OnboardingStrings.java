@@ -101,7 +101,7 @@ public class OnboardingStrings implements LocalizableStrings {
 
 
     // The display name for a Windows Desktop
-    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Notebook + PC";
+    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Laptop + PC";
 
     // ----------------------------------------------------------------------------------------------------------------------
 
