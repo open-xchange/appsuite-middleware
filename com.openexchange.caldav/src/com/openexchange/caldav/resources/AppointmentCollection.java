@@ -60,6 +60,7 @@ import java.util.Map;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
+import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDate;
 import com.openexchange.caldav.mixins.DefaultAlarmVeventDatetime;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSet;
@@ -75,6 +76,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.webdav.protocol.WebdavPath;
+import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
@@ -92,6 +94,8 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         Appointment.UID, Appointment.FILENAME, Appointment.FOLDER_ID, Appointment.OBJECT_ID, Appointment.LAST_MODIFIED,
         Appointment.RECURRENCE_ID, Appointment.CREATION_DATE, Appointment.CHANGE_EXCEPTIONS
     };
+
+    private Date lastModified;
 
     /**
      * Initializes a new {@link AppointmentCollection}.
@@ -160,6 +164,18 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
         } catch (SQLException e) {
             throw protocolException(e);
         }
+    }
+
+    @Override
+    public Date getLastModified() throws WebdavProtocolException {
+        if (null == this.lastModified) {
+            try {
+                lastModified = Tools.getLatestModified(new Date(factory.getAppointmentInterface().getSequenceNumber(folderID)), folder);
+            } catch (OXException e) {
+                throw protocolException(e);
+            }
+        }
+        return lastModified;
     }
 
     @Override

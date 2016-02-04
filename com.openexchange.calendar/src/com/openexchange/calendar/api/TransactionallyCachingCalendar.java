@@ -157,6 +157,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        return delegate.getSequenceNumber(folderId);
+    }
+
+    @Override
     public void deleteAppointmentObject(CalendarDataObject appointmentObject,
         int inFolder, Date clientLastModified, boolean checkPermissions)
             throws OXException, SQLException {

@@ -1212,6 +1212,40 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
+    public PreparedStatement getPrivateFolderSequenceNumber(int cid, int uid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM prg_dates pd JOIN prg_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0),")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM del_dates pd JOIN del_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, cid, fid, uid, cid, cid, fid, uid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
+    public PreparedStatement getPublicFolderSequenceNumber(int cid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(changing_date) FROM prg_dates WHERE cid=? AND fid=?),0),")
+            .append("COALESCE((SELECT MAX(changing_date) FROM del_dates WHERE cid=? AND fid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, fid, cid, fid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
     public final String getObjectsByidSQL(final int oids[][], final int cid, final String select) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));

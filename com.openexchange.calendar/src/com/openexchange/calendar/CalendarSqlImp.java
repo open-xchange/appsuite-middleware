@@ -111,6 +111,29 @@ public interface CalendarSqlImp {
 
     PreparedStatement getPublicFolderDeletedSinceSQL(Context c, int uid, int fid, Date d1, String select, Connection readcon) throws SQLException;
 
+    /**
+     * Constructs a prepared statement to select the sequence number of a private or shared folder, which is evaluated by determining the
+     * biggest changing date of all contained appointments, considering both the "working" as well as the "backup" tables.
+     *
+     * @param cid The context identifier
+     * @param uid The folder owner's user identifier
+     * @param fid The folder identifier
+     * @param readcon The connection for creating the prepared statement
+     * @return The prepared statement
+     */
+    PreparedStatement getPrivateFolderSequenceNumber(int cid, int uid, int fid, Connection readcon) throws SQLException;
+
+    /**
+     * Constructs a prepared statement to select the sequence number of a public folder, which is evaluated by determining the biggest
+     * changing date of all contained appointments, considering both the "working" as well as the "backup" tables.
+     *
+     * @param cid The context identifier
+     * @param fid The folder identifier
+     * @param readcon The connection for creating the prepared statement
+     * @return The prepared statement
+     */
+    PreparedStatement getPublicFolderSequenceNumber(int cid, int fid, Connection readcon) throws SQLException;
+
     PreparedStatement getPublicFolderObjects(int fid, Context c, Connection readcon) throws SQLException ;
 
     String loadAppointment(int oid, Context c) throws SQLException;

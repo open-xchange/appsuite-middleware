@@ -172,6 +172,15 @@ public interface AppointmentSQLInterface {
     SearchIterator<Appointment> getDeletedAppointmentsInFolder(int folderId, int cols[], Date since) throws OXException, SQLException;
 
     /**
+     * Gets the sequence number for the contents of a specific folder, which is evaluated by determining the biggest changing date of
+     * all contained appointments, considering both the "working" as well as the "backup" tables.
+     *
+     * @param folderId The identifier of the folder to get the sequence number for
+     * @return The sequence number, or <code>0</code> if there is none
+     */
+    long getSequenceNumber(int folderId) throws OXException;
+
+    /**
      * Lists all appointment that match the given search
      * @param searchObject
      * The SearchObject

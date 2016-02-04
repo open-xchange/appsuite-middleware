@@ -267,6 +267,11 @@ public class NotifyingCalendar extends ITipCalendarWrapper implements Appointmen
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        return delegate.getSequenceNumber(folderId);
+    }
+
+    @Override
     public int getFolder(final int objectId) throws OXException {
         return delegate.getFolder(objectId);
     }

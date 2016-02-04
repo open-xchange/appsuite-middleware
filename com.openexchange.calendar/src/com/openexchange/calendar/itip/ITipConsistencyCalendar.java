@@ -340,6 +340,11 @@ public class ITipConsistencyCalendar extends ITipCalendarWrapper implements Appo
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        return delegate.getSequenceNumber(folderId);
+    }
+
+    @Override
     public SearchIterator<Appointment> searchAppointments(
         final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir,
         final int[] cols) throws OXException {

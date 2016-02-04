@@ -410,6 +410,43 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        if (null == session) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        Connection readcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        Context ctx = Tools.getContext(session);
+        UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        try {
+            readcon = DBPool.pickup(ctx);
+            OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
+            mayRead(ofa.getFolderPermission(folderId, session.getUserId(), userConfig));
+            CalendarSqlImp cimp = CalendarSql.cimp;
+
+            if (FolderObject.PUBLIC == ofa.getFolderType(folderId, session.getUserId())) {
+                prep = cimp.getPublicFolderSequenceNumber(ctx.getContextId(), folderId, readcon);
+            } else if (FolderObject.PRIVATE == ofa.getFolderType(folderId, session.getUserId())) {
+                prep = cimp.getPrivateFolderSequenceNumber(ctx.getContextId(), session.getUserId(), folderId, readcon);
+            } else {
+                int shared_folder_owner = ofa.getFolderOwner(folderId);
+                prep = cimp.getPrivateFolderSequenceNumber(ctx.getContextId(), shared_folder_owner, folderId, readcon);
+            }
+            rs = cimp.getResultSet(prep);
+            return rs.next() ? rs.getLong(1) : 0L;
+        } catch (SQLException sqle) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+        } finally {
+            calendarCollection.closeResultSet(rs);
+            calendarCollection.closePreparedStatement(prep);
+            if (readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
+
+    @Override
     public CalendarDataObject getObjectById(final int oid) throws OXException, SQLException {
         return getObjectById(oid, 0, null, false);
     }
