@@ -149,7 +149,7 @@ emclientinstall:
     # The comma-separated Font Awesome names
     icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
-    displayName_t10e: "Email + Calendar + Address Book"
+    displayName_t10e: "Mail + Calendar + Address Book"
     # The translatable description
     description_t10e: "To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application."
 
@@ -262,7 +262,7 @@ oxupdaterinstall:
     # The translatable display name
     displayName_t10e: "Connector for Microsoft Outlook®"
     # The translatable description
-    description_t10e: "Synchronization of Emails, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
+    description_t10e: "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
 
 
 ### Exchange ActiveSync
@@ -277,7 +277,7 @@ eassync:
     # The comma-separated Font Awesome names
     icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
-    displayName_t10e: "Email + Calendar + Address Book"
+    displayName_t10e: "Mail + Calendar + Address Book"
     # The translatable description
     description_t10e: "Synchronize your Mail, Calendar and Address Book data with your device."
 
@@ -290,7 +290,7 @@ easmanual:
     # The comma-separated Font Awesome names
     icon: "fa-envelope-o, fa-calendar, fa-users"
     # The translatable display name
-    displayName_t10e: "Email + Calendar + Address Book"
+    displayName_t10e: "Mail + Calendar + Address Book"
     # The translatable description
     description_t10e: "To manually setup your Mail, Calendar and Address Book accounts, please use the following information."
 
@@ -307,7 +307,7 @@ mailsync:
     # The comma-separated Font Awesome names
     icon: fa-envelope-o
     # The translatable display name
-    displayName_t10e: "eMail"
+    displayName_t10e: "Mail"
     # The translatable description
     description_t10e: "Synchronize your Mail with Apple Mail App."
 
@@ -320,7 +320,7 @@ mailmanual:
     # The comma-separated Font Awesome names
     icon: fa-envelope-o
     # The translatable display name
-    displayName_t10e: "eMail"
+    displayName_t10e: "Mail"
     # The translatable description
     description_t10e: "To manually setup your Mail account, please use the following information"
 
