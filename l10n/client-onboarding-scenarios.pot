@@ -23,8 +23,8 @@ msgstr ""
 msgid "Synchronize your files with our Drive application."
 msgstr ""
 
-# Email + Calendar + Address Book
-msgid "Email + Calendar + Address Book"
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
 msgstr ""
 
 # To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
@@ -75,9 +75,9 @@ msgstr ""
 msgid "Connector for Microsoft Outlook®"
 msgstr ""
 
-# Synchronization of Emails, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
 msgid ""
-"Synchronization of Emails, Calendar, Contacts and Tasks, along with Public, "
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
 "Shared and System Folders to Microsoft Outlook® clients."
 msgstr ""
 
@@ -92,8 +92,8 @@ msgid ""
 "the following information."
 msgstr ""
 
-# eMail
-msgid "eMail"
+# Mail
+msgid "Mail"
 msgstr ""
 
 # Synchronize your Mail with Apple Mail App.
