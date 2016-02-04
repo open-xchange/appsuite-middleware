@@ -354,27 +354,18 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     }
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Scenario scenario = request.getScenario();
-
-        PListDict old = null;
-        if (previousResult != null) {
-            old = ((PlistResult) previousResult).getPListDict();
-        }
-        return new PlistResult(getPlist(old, session.getUserId(), session.getContextId(), scenario, request), ResultReply.NEUTRAL);
+        PListDict previousPListDict = previousResult == null ? null : ((PlistResult) previousResult).getPListDict();
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
-        return getPlist(null, userId, contextId, scenario, req);
-    }
-
-    @Override
-    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
-        if (null == previousPListDict) {
+        if (null == optPrevPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
@@ -382,7 +373,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             pListDict.setPayloadVersion(1);
             pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
         } else {
-            pListDict = previousPListDict;
+            pListDict = optPrevPListDict;
         }
 
         // Generate content

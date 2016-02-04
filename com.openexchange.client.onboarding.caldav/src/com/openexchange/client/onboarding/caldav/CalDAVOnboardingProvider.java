@@ -71,6 +71,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
@@ -179,53 +180,24 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CALDAV_URL_FIELD, getCalDAVUrl(request, false, session));
+        configuration.put(CALDAV_URL_FIELD, getCalDAVUrl(request.getHostData(), false, session.getUserId(), session.getContextId()));
         return new DisplayResult(configuration);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-
-        PListDict pListDict = getPlist(session.getUserId(), session.getContextId(), request.getScenario(), request);
+        PListDict previousPListDict = null == previousResult ? null : ((PlistResult) previousResult).getPListDict();
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
-    private String getCalDAVUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
-        return getCalDAVUrl(request, generateIfAbsent, session.getUserId(), session.getContextId());
-    }
-
-    private String getCalDAVUrl(OnboardingRequest request, boolean generateIfAbsent, int userId, int contextId) throws OXException {
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(userId, contextId);
-        String propertyName = "com.openexchange.client.onboarding.caldav.url";
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
-        }
-
-        String value = property.get();
-        if (Strings.isEmpty(value)) {
-            if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/caldav", false, null).toString();
-            }
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
-        }
-
-        return value;
-    }
-
     @Override
-    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
-        return getPlist(null, userId, contextId, scenario, req);
-    }
-
-    @Override
-    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
 
         // Get the PListDict to contribute to
         PListDict pListDict;
-        if (null == previousPListDict) {
+        if (null == optPrevPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
@@ -233,7 +205,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
             pListDict.setPayloadVersion(1);
             pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
         } else {
-            pListDict = previousPListDict;
+            pListDict = optPrevPListDict;
         }
 
         // Generate payload content dictionary
@@ -244,7 +216,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
-        String calDAVUrl = getCalDAVUrl(req, false, userId, contextId);
+        String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
         payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
         payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, userId, contextId));
@@ -253,4 +225,28 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         pListDict.addPayloadContent(payloadContent);
         return pListDict;
     }
+
+    private String getCalDAVUrl(HostData hostData, boolean generateIfAbsent, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+        String propertyName = "com.openexchange.client.onboarding.caldav.url";
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/caldav", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        String value = property.get();
+        if (Strings.isEmpty(value)) {
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/caldav", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        return value;
+    }
+
 }

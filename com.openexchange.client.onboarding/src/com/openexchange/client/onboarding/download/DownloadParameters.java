@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,50 +49,81 @@
 
 package com.openexchange.client.onboarding.download;
 
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
-
 /**
- * {@link DownloadLinkProvider}
+ * {@link DownloadParameters} - The parameters extracted from a download URL.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface DownloadLinkProvider {
+public class DownloadParameters {
+
+    private final int contextId;
+    private final int userId;
+    private final String deviceId;
+    private final String scenarioId;
+    private final String challenge;
 
     /**
-     * Retrieves a user specific download link to a plist file.
+     * Initializes a new {@link DownloadParameters}.
      *
-     * @param hostData The data of the host
-     * @param userId The user id
-     * @param contextId The context id
-     * @param scenario The name of the scenario
-     * @param device The name of the device
-     * @return The download link
-     * @throws OXException If link cannot be returned
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @param deviceId The device identifier
+     * @param scenarioId The scenario identifier
+     * @param challenge The challenge
      */
-    String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException;
+    public DownloadParameters(int userId, int contextId, String deviceId, String scenarioId, String challenge) {
+        super();
+        this.contextId = contextId;
+        this.userId = userId;
+        this.deviceId = deviceId;
+        this.scenarioId = scenarioId;
+        this.challenge = challenge;
+    }
 
     /**
-     * Validates the challenge of a download link
+     * Gets the context identifier
      *
-     * @param userId The user id of the request
-     * @param contextId The context id of the request
-     * @param scenario The scenario of the request
-     * @param device The device of the request
-     * @param challenge The challenge of the request
-     * @return true if the challenge is valid, false otherwise
-     * @throws OXException If validation fails
+     * @return The context identifier
      */
-    boolean validateChallenge(int userId, int contextId, String scenario, String device, String challenge) throws OXException;
+    public int getContextId() {
+        return contextId;
+    }
 
     /**
-     * Extracts the parameters from specified URL.
+     * Gets the user identifier
      *
-     * @param url The download URL
-     * @return The download parameters
-     * @throws OXException If parameters cannot be returned
+     * @return The user identifier
      */
-    DownloadParameters getParameter(String url) throws OXException;
+    public int getUserId() {
+        return userId;
+    }
+
+    /**
+     * Gets the device identifier
+     *
+     * @return The device identifier
+     */
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    /**
+     * Gets the scenario identifier
+     *
+     * @return The scenario identifier
+     */
+    public String getScenarioId() {
+        return scenarioId;
+    }
+
+    /**
+     * Gets the challenge
+     *
+     * @return The challenge
+     */
+    public String getChallenge() {
+        return challenge;
+    }
 
 }
