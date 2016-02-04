@@ -997,6 +997,21 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
         }
         /*
+         * detect and adjust an acknowledged alarm in a change exception as indicated in the recurring appointment master by the Lightning client
+         */
+        if (recurring && null != acknowledgedDate && null != exceptionsToSave && 0 < exceptionsToSave.size() &&
+            CalDAVAgent.THUNDERBIRD_LIGHTNING.equals(factory.getState().getUserAgent())) {
+            for (CalendarDataObject changeException : exceptionsToSave) {
+                Date exceptionAcknowledged = changeException.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
+                if (null == exceptionAcknowledged) {
+                    /*
+                     * take over acknowledged date from recurring appointment master
+                     */
+                    changeException.setProperty("com.openexchange.data.conversion.ical.alarm.acknowledged", acknowledgedDate);
+                }
+            }
+        }
+        /*
          * take over snoozed alarm if valid
          */
         if (null != snoozeDate && snoozeDate.after(now) && (null == acknowledgedDate || snoozeDate.after(acknowledgedDate))) {
