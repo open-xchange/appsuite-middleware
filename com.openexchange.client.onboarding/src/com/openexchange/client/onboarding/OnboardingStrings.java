@@ -70,22 +70,13 @@ public class OnboardingStrings implements LocalizableStrings {
     // The display name for Apple platform
     public static final String PLATFORM_APPLE_DISPLAY_NAME = "Apple";
 
-    // The description for Apple platform
-    public static final String PLATFORM_APPLE_DESCRIPTION = "The Apple platform";
-
 
     // The display name for Windows platform
     public static final String PLATFORM_WINDOWS_DISPLAY_NAME = "Windows";
 
-    // The description for Apple platform
-    public static final String PLATFORM_WINDOWS_DESCRIPTION = "The Windows platform";
-
 
     // The display name for Android/Google platform
     public static final String PLATFORM_ANDROID_DISPLAY_NAME = "Android";
-
-    // The description for Apple platform
-    public static final String PLATFORM_ANDROID_DESCRIPTION = "The Android/Google platform";
 
     // ----------------------------------------------------------------------------------------------------------------------
 
@@ -121,43 +112,25 @@ public class OnboardingStrings implements LocalizableStrings {
     // The display name for an Apple Mac
     public static final String DEVICE_APPLE_MAC_DISPLAY_NAME = "Mac";
 
-    // The description for an Apple Mac
-    public static final String DEVICE_APPLE_MAC_DESCRIPTION = "The device for an Apple Mac";
-
 
     // The display name for an Apple iPad
     public static final String DEVICE_APPLE_IPAD_DISPLAY_NAME = "iPad";
-
-    // The description for an Apple iPad
-    public static final String DEVICE_APPLE_IPAD_DESCRIPTION = "The device for an Apple iPad";
 
 
     // The display name for an Apple iPhone
     public static final String DEVICE_APPLE_IPHONE_DISPLAY_NAME = "iPhone";
 
-    // The description for an Apple iPhone
-    public static final String DEVICE_APPLE_IPHONE_DESCRIPTION = "The device for an Apple iPhone";
-
 
     // The display name for an Android/Google tablet
     public static final String DEVICE_ANDROID_TABLET_DISPLAY_NAME = "Tablet";
-
-    // The description for an Android/Google tablet
-    public static final String DEVICE_ANDROID_TABLET_DESCRIPTION = "The device for an Android/Google tablet";
 
 
     // The display name for an Android/Google phone
     public static final String DEVICE_ANDROID_PHONE_DISPLAY_NAME = "Smartphone";
 
-    // The description for an Android/Google phone
-    public static final String DEVICE_ANDROID_PHONE_DESCRIPTION = "The device for an Android/Google phone";
-
 
     // The display name for a Windows Desktop
-    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Desktop";
-
-    // The description for a Windows Desktop
-    public static final String DEVICE_WINDOWS_DESKTOP_DESCRIPTION = "The device for a Windows Desktop";
+    public static final String DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME = "Windows PC";
 
     // ----------------------------------------------------------------------------------------------------------------------
 

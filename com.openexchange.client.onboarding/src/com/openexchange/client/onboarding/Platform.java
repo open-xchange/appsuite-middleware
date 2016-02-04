@@ -63,15 +63,15 @@ public enum Platform implements Entity {
     /**
      * The Apple platform for OSX Desktop applications and iOS devices.
      */
-    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, OnboardingStrings.PLATFORM_APPLE_DESCRIPTION, "fa-apple"),
+    APPLE("apple", OnboardingStrings.PLATFORM_APPLE_DISPLAY_NAME, "fa-apple"),
     /**
      * The Android/Google platform for Android devices
      */
-    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, OnboardingStrings.PLATFORM_ANDROID_DESCRIPTION, "fa-android"),
+    ANDROID_GOOGLE("android", OnboardingStrings.PLATFORM_ANDROID_DISPLAY_NAME, "fa-android"),
     /**
      * The Windows platform for Windows Desktop applications.
      */
-    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, OnboardingStrings.PLATFORM_WINDOWS_DESCRIPTION, "fa-windows"),
+    WINDOWS("windows", OnboardingStrings.PLATFORM_WINDOWS_DISPLAY_NAME, "fa-windows"),
     ;
 
     private final String id;
@@ -79,22 +79,18 @@ public enum Platform implements Entity {
 
     private final String enabledProperty;
     private final String displayNameProperty;
-    private final String descriptionProperty;
 
     private final String defaultDisplayName;
-    private final String defaultDescription;
 
-    private Platform(String id, String defaultDisplayName, String defaultDescription, String fontAwesomeName) {
+    private Platform(String id, String defaultDisplayName, String fontAwesomeName) {
         this.id = id;
         icon = new FontAwesomeIcon(fontAwesomeName);
 
         String prefix = "com.openexchange.client.onboarding." + id;
         enabledProperty = prefix + ".enabled";
         displayNameProperty = prefix + ".displayName";
-        descriptionProperty = prefix + ".description";
 
         this.defaultDisplayName = defaultDisplayName;
-        this.defaultDescription = defaultDescription;
     }
 
     @Override
@@ -129,7 +125,7 @@ public enum Platform implements Entity {
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(descriptionProperty, defaultDescription, true, session);
+        return null;
     }
 
     /**
