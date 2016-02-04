@@ -745,7 +745,7 @@ public class ParameterList {
 	}
 
 	public void addNV(String name, String value) {
-	    value = quote(value);
+	    // value = quote(value);
 	    sb.append("; ");
 	    used += 2;
 	    int len = name.length() + value.length() + 1;
