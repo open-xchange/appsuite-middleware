@@ -2609,16 +2609,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 prep.setInt(2, ctx.getId().intValue());
                 prep.executeUpdate();
 
-                int result = prep.executeUpdate();
-                if (result == 1) {
-                    try {
-                        Cache cache = AdminServiceRegistry.getInstance().getService(CacheService.class).getCache("QuotaFileStorages");
-                        if (cache != null) {
-                            cache.invalidateGroup(Integer.toString(ctx.getId()));
-                        }
-                    } catch (OXException e) {
-                        LOG.warn("Unable to invalidate QuotaFilestorages cache");
-                    }
+                try {
+                    CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);
+                    Cache qfsCache = cacheService.getCache("QuotaFileStorages");
+                    qfsCache.invalidateGroup(ctx.getId().toString());
+                } catch (Exception e) {
+                    LOG.error("Failed to invalidate caches. Restart recommended.", e);
                 }
             } finally {
                 try {
