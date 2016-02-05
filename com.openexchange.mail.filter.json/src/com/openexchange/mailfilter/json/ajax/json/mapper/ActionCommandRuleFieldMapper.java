@@ -54,10 +54,7 @@ import java.util.Hashtable;
 import java.util.List;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
-import org.apache.jsieve.NumberArgument;
 import org.apache.jsieve.SieveException;
-import org.apache.jsieve.TagArgument;
-import org.apache.jsieve.parser.generated.Token;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -283,19 +280,19 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
             final ArrayList<Object> arrayList = new ArrayList<Object>();
             final String days = object.getString(VacationActionField.days.getFieldName());
             if (null != days) {
-                arrayList.add(createTagArg(VacationActionField.days));
-                arrayList.add(createNumberArg(days));
+                arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.days));
+                arrayList.add(ArgumentUtil.createNumberArgument(days));
             }
             final JSONArray addresses = object.optJSONArray(VacationActionField.addresses.getFieldName());
             if (null != addresses) {
-                arrayList.add(createTagArg(VacationActionField.addresses));
+                arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.addresses));
                 arrayList.add(JSONArrayToStringList(addresses));
             }
             final String subjectFieldname = VacationActionField.subject.getFieldName();
             if (object.has(subjectFieldname)) {
                 String subject = object.getString(subjectFieldname);
                 subject = MimeMessageUtility.quotePhrase(subject, true);
-                arrayList.add(createTagArg(VacationActionField.subject));
+                arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.subject));
                 arrayList.add(stringToList(subject));
             }
             final String fromFieldName = VacationActionField.from.getFieldName();
@@ -325,7 +322,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
                 }
 
                 if (!Strings.isEmpty(from)) {
-                    arrayList.add(createTagArg(VacationActionField.from));
+                    arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));
                     arrayList.add(stringToList(from));
                 }
             }
@@ -340,7 +337,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
             final String messageFieldName = EnotifyActionField.message.getFieldName();
             if (object.has(messageFieldName)) {
                 final String message = object.getString(messageFieldName);
-                arrayList.add(createTagArg(EnotifyActionField.message));
+                arrayList.add(ArgumentUtil.createTagArgument(EnotifyActionField.message));
                 arrayList.add(stringToList(message));
             }
             final String method = object.getString(EnotifyActionField.method.getFieldName());
@@ -364,7 +361,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
                 if (0 == keys.length()) {
                     throw new JSONException("Empty string-arrays are not allowed in sieve.");
                 }
-                arrayList.add(createTagArg(PGPEncryptActionField.keys));
+                arrayList.add(ArgumentUtil.createTagArgument(PGPEncryptActionField.keys));
                 arrayList.add(JSONArrayToStringList(keys));
             }
             return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
@@ -437,24 +434,6 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         }
     }
 
-    private TagArgument createTagArg(final VacationActionField field) {
-        final Token token = new Token();
-        token.image = field.getTagName();
-        return new TagArgument(token);
-    }
-
-    private TagArgument createTagArg(final EnotifyActionField field) {
-        final Token token = new Token();
-        token.image = field.getTagName();
-        return new TagArgument(token);
-    }
-
-    private TagArgument createTagArg(final PGPEncryptActionField field) {
-        final Token token = new Token();
-        token.image = field.getTagName();
-        return new TagArgument(token);
-    }
-
     private List<String> JSONArrayToStringList(JSONArray jarray) throws JSONException {
         int length = jarray.length();
         List<String> retval = new ArrayList<String>(length);
@@ -462,12 +441,6 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
             retval.add(jarray.getString(i));
         }
         return retval;
-    }
-
-    private NumberArgument createNumberArg(final String string) {
-        final Token token = new Token();
-        token.image = string;
-        return new NumberArgument(token);
     }
 
 }
