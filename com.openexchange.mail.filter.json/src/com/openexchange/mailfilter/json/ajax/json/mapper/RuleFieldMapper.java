@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json;
+package com.openexchange.mailfilter.json.ajax.json.mapper;
 
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;

@@ -64,7 +64,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper;
 import com.openexchange.mailfilter.json.ajax.json.fields.AddressEnvelopeAndHeaderTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.AllOfOrAnyOfTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.BodyTestField;

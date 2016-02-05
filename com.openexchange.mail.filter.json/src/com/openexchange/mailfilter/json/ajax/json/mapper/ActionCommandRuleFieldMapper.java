@@ -71,7 +71,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper;
 import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.EnotifyActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
