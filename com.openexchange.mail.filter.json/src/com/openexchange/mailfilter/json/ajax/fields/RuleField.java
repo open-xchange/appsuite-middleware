@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,20 +50,10 @@
 package com.openexchange.mailfilter.json.ajax.fields;
 
 /**
- * 
- * {@link RuleFields}
+ * {@link RuleField}
  *
- * @deprecated Use {@link RuleField} 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RuleFields {
-
-    public static final String ID = "id";
-    public static final String POSITION = "position";
-    public static final String RULENAME = "rulename";
-    public static final String ACTIVE = "active";
-    public static final String FLAGS = "flags";
-    public static final String TEST = "test";
-    public static final String ACTIONCMDS = "actioncmds";
-    public static final String TEXT = "text";
-    public static final String ERRORMSG = "errormsg";
+public enum RuleField {
+    id, position, rulename, active, flags, test, actioncmds, text, errormsg;
 }

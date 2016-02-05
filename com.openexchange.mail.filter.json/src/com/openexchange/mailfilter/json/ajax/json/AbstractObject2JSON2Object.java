@@ -167,6 +167,9 @@ public abstract class AbstractObject2JSON2Object<T> {
         return write(objs, getListFields());
     }
 
+    /**
+     * @deprecated Use {@link RuleFieldMapper}
+     */
     public static interface Mapper<T> {
         String getAttrName();
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,53 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.fields;
+package com.openexchange.mailfilter.json.ajax.json;
+
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import com.openexchange.exception.OXException;
 
 /**
  * 
- * {@link RuleFields}
+ * {@link RuleFieldMapper}
  *
- * @deprecated Use {@link RuleField} 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @param <T> The type of the mapper
  */
-public class RuleFields {
+public interface RuleFieldMapper<T> {
 
-    public static final String ID = "id";
-    public static final String POSITION = "position";
-    public static final String RULENAME = "rulename";
-    public static final String ACTIVE = "active";
-    public static final String FLAGS = "flags";
-    public static final String TEST = "test";
-    public static final String ACTIONCMDS = "actioncmds";
-    public static final String TEXT = "text";
-    public static final String ERRORMSG = "errormsg";
+    /**
+     * Returns the attribute name
+     * 
+     * @return the attribute name
+     */
+    String getAttributeName();
+
+    /**
+     * Verifies whether the specified object is <code>null</code>
+     * 
+     * @param object The object to verify
+     * @return true if the object {@link T} is <code>null</code>; false otherwise
+     */
+    boolean isNull(T object);
+
+    /**
+     * Gets the attribute of the specified {@link T} object
+     * 
+     * @param object The object to get the attribute from
+     * @return The attribute
+     * @throws JSONException If a JSON error occurs
+     */
+    Object getAttribute(T object) throws JSONException;
+
+    /**
+     * Sets the specified attribute to the specified {@link T} object
+     * 
+     * @param object The object to set the attribute to
+     * @param attribute The attribute to set to the object
+     * @throws JSONException If a JSON error occurs
+     * @throws SieveException If a Sieve parsing error occurs
+     * @throws OXException If an error occurs
+     */
+    void setAttribute(T object, Object attribute) throws JSONException, SieveException, OXException;
 }
