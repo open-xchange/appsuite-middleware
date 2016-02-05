@@ -258,7 +258,7 @@ oxupdaterinstall:
     providers: [oxupdater]
     alternatives: []
     # The comma-separated Font Awesome names
-    icon: fa-desktop
+    icon: fa-laptop
     # The translatable display name
     displayName_t10e: "Connector for Microsoft Outlook®"
     # The translatable description
