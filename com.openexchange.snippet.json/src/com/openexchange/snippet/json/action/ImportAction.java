@@ -83,6 +83,7 @@ import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
@@ -112,10 +113,14 @@ public final class ImportAction extends SnippetAction {
 
     @Override
     protected AJAXRequestResult perform(SnippetRequest snippetRequest) throws OXException, JSONException, IOException {
-        // Check quota settings
-        long maxSize;
-        long maxFileSize;
+        // Mandatory parameter
+        String displayName = snippetRequest.getRequestData().checkParameter("displayName");
+
+        // Parse & get upload
+        UploadEvent uploadEvent;
         {
+            long maxSize;
+            long maxFileSize;
             UserSettingMail usm = snippetRequest.getSession().getUserSettingMail();
             maxFileSize = usm.getUploadQuotaPerFile();
             if (maxFileSize <= 0) {
@@ -137,15 +142,15 @@ public final class ImportAction extends SnippetAction {
                     maxSize = globalQuota <= 0 ? -1L : globalQuota;
                 }
             }
-        }
 
-        if (false == snippetRequest.getRequestData().hasUploads(maxFileSize, maxSize)) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
-        }
+            if (false == snippetRequest.getRequestData().hasUploads(maxFileSize, maxSize)) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
 
-        UploadEvent uploadEvent = snippetRequest.getRequestData().getUploadEvent();
-        if (null == uploadEvent) {
-            throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            uploadEvent = snippetRequest.getRequestData().getUploadEvent();
+            if (null == uploadEvent) {
+                throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
+            }
         }
 
         List<UploadFile> uploadFiles = uploadEvent.getUploadFiles();
@@ -192,9 +197,7 @@ public final class ImportAction extends SnippetAction {
         if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create("No valid HTML content");
         }
-        content = htmlService.sanitize(content, null, false, null, null);
-
-        String displayName = snippetRequest.getRequestData().getParameter("displayName");
+        content = SnippetUtils.sanitizeHtmlContent(content, htmlService);
 
         DefaultSnippet snippet = new DefaultSnippet();
         snippet.setContent(content);
