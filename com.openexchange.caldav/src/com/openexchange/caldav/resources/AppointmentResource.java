@@ -1163,6 +1163,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return null;
     }
 
+    /**
+     * Inserts a new or updates an existing reminder in the database.
+     *
+     * @param reminder The reminder to insert or update
+     */
     private void insertOrUpdateReminder(ReminderObject reminder) throws OXException {
         ReminderService reminderService = new ReminderHandler(factory.getContext());
         DatabaseService databaseService = factory.requireService(DatabaseService.class);
@@ -1171,24 +1176,31 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         try {
             connection = databaseService.getWritable(factory.getContext());
             connection.setAutoCommit(false);
-            if (0 < reminder.getObjectId()) {
-                ReminderObject reloadedReminder = null;
-                try {
-                    reloadedReminder = reminderService.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
-                    reloadedReminder.setDate(reminder.getDate());
-                    if (0 < reminder.getRecurrencePosition()) {
-                        reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
-                    }
-                    reminderService.updateReminder(reloadedReminder, connection);
-                    connection.commit();
-                    committed = true;
-                    return;
-                } catch (OXException e) {
-                    if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                        throw e;
-                    }
+            /*
+             * try updating existing reminder
+             */
+            ReminderObject reloadedReminder = null;
+            try {
+                reloadedReminder = reminderService.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
+                if (null != reloadedReminder.getDate() && reloadedReminder.getDate().equals(reminder.getDate())) {
+                    return; // already up-to-date
+                }
+                reloadedReminder.setDate(reminder.getDate());
+                if (0 < reminder.getRecurrencePosition()) {
+                    reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
+                }
+                reminderService.updateReminder(reloadedReminder, connection);
+                connection.commit();
+                committed = true;
+                return;
+            } catch (OXException e) {
+                if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                    throw e;
                 }
             }
+            /*
+             * insert new reminder, otherwise
+             */
             reminder.setObjectId(0);
             reminderService.insertReminder(reminder);
             connection.commit();
