@@ -45,6 +45,7 @@
  *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  */
+
 package com.openexchange.mailfilter.json.ajax.json;
 
 import java.text.ParseException;
@@ -75,7 +76,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * @author cutmasta
- *
+ * @deprecated Use the {@link RuleParser} instead.
  */
 @SuppressWarnings("unchecked")
 public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
@@ -86,69 +87,70 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
     private final static Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
-    private final static String[] RULE_FIELDS_LIST = {
-        RuleFields.ID,
-        RuleFields.POSITION,
-        RuleFields.RULENAME,
-        RuleFields.ACTIVE,
-        RuleFields.FLAGS,
-        RuleFields.TEST,
-        RuleFields.ACTIONCMDS,
-        RuleFields.TEXT,
-        RuleFields.ERRORMSG
+    private final static String[] RULE_FIELDS_LIST = { RuleFields.ID, RuleFields.POSITION, RuleFields.RULENAME, RuleFields.ACTIVE, RuleFields.FLAGS, RuleFields.TEST, RuleFields.ACTIONCMDS, RuleFields.TEXT, RuleFields.ERRORMSG
     };
 
     static class GeneralFields {
+
         final static String ID = "id";
     }
 
     private static class AddressEnvelopeAndHeaderTestFields {
+
         final static String COMPARISON = "comparison";
         final static String HEADERS = "headers";
         final static String VALUES = "values";
     }
 
     private static class NotTestFields {
+
         final static String TEST = "test";
     }
 
     private static class SizeTestFields {
+
         final static String COMPARISON = "comparison";
         final static String SIZE = "size";
     }
 
     private static class BodyTestFields {
+
         final static String COMPARISON = "comparison";
-        final static String EXTENSIONSKEY ="extensionskey";
+        final static String EXTENSIONSKEY = "extensionskey";
         final static String EXTENSIONSVALUE = "extensionsvalue";
         final static String VALUES = "values";
     }
 
     private static class CurrentDateTestFields {
+
         final static String COMPARISON = "comparison";
         final static String DATEPART = "datepart";
         final static String DATEVALUE = "datevalue";
     }
 
     private static class AllofOrAnyOfTestFields {
+
         final static String TESTS = "tests";
     }
 
     static class RedirectActionFields {
+
         final static String TO = "to";
     }
 
     static class MoveActionFields {
+
         final static String INTO = "into";
     }
 
     static class RejectActionFields {
+
         final static String TEXT = "text";
     }
 
     enum EnotifyActionFields {
-        MESSAGE("message",":message"),
-        METHOD("method",null);
+        MESSAGE("message", ":message"),
+        METHOD("method", null);
 
         private final String fieldname;
 
@@ -176,11 +178,11 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     }
 
     enum VacationActionFields {
-        DAYS("days",":days"),
-        ADDRESSES("addresses",":addresses"),
-        SUBJECT("subject",":subject"),
+        DAYS("days", ":days"),
+        ADDRESSES("addresses", ":addresses"),
+        SUBJECT("subject", ":subject"),
         FROM("from", ":from"),
-        TEXT("text",null);
+        TEXT("text", null);
 
         private final String fieldname;
 
@@ -205,11 +207,10 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             return tagname;
         }
 
-
     }
 
     enum PGPEncryptActionFields {
-        KEYS("keys",":keys");
+        KEYS("keys", ":keys");
 
         private final String fieldname;
 
@@ -237,6 +238,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     }
 
     static class AddFlagsActionFields {
+
         final static String FLAGS = "flags";
     }
 
@@ -245,24 +247,24 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
     }
 
     @Override
-	protected Mapper<Rule>[] allMapper() {
+    protected Mapper<Rule>[] allMapper() {
         return mappers;
     }
 
     @Override
-	protected Rule createObject() {
+    protected Rule createObject() {
         return new Rule();
     }
 
     @Override
-	protected String[] getListFields() {
+    protected String[] getListFields() {
         return RULE_FIELDS_LIST;
     }
 
     private final static Map<String, Mapper<Rule>> attr2Mapper;
 
     @Override
-	protected Mapper<Rule> getMapper(final String attrName) {
+    protected Mapper<Rule> getMapper(final String attrName) {
         return attr2Mapper.get(attrName);
     }
 
@@ -326,8 +328,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         return new NumberArgument(token);
     }
 
-    private static final Mapper<Rule>[] mappers = new Mapper[] {
-        new IDMapper(),
+    private static final Mapper<Rule>[] mappers = new Mapper[] { new IDMapper(),
 
         new Mapper<Rule>() {
 
@@ -348,7 +349,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
             @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
-                obj.setPosition(((Integer)attr).intValue());
+                obj.setPosition(((Integer) attr).intValue());
             }
         },
 
@@ -364,9 +365,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
                     final String rulename = ruleComment.getRulename();
-                    return (null == rulename) ? JSONObject.NULL :rulename;
+                    return (null == rulename) ? JSONObject.NULL : rulename;
                 }
-				return JSONObject.NULL;
+                return JSONObject.NULL;
             }
 
             @Override
@@ -378,9 +379,9 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
                 final RuleComment ruleComment = obj.getRuleComment();
                 if (null != ruleComment) {
-                    ruleComment.setRulename((String)attr);
+                    ruleComment.setRulename((String) attr);
                 } else {
-                    obj.setRuleComments(new RuleComment((String)attr));
+                    obj.setRuleComments(new RuleComment((String) attr));
                 }
             }
         },
@@ -499,14 +500,14 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                 } else if (TestCommand.Commands.SIZE.getCommandname().equals(id)) {
                     final String size = getString(jobj, SizeTestFields.SIZE, id);
                     try {
-                        if(false == DIGITS.matcher(size).matches()) {
+                        if (false == DIGITS.matcher(size).matches()) {
                             throw OXJSONExceptionCodes.CONTAINS_NON_DIGITS.create(size, id);
                         }
                         final List<Object> argList = new ArrayList<Object>();
                         argList.add(createTagArg(getString(jobj, SizeTestFields.COMPARISON, id)));
                         argList.add(createNumberArg(size));
                         return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
-                    } catch(NumberFormatException e) {
+                    } catch (NumberFormatException e) {
                         throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, id);
                     }
                 } else if (TestCommand.Commands.HEADER.getCommandname().equals(id)) {
@@ -598,12 +599,12 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.ADDRESS.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
                         tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size())));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size() + 1)));
                     } else if (TestCommand.Commands.ENVELOPE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.ENVELOPE.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
                         tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size())));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size() + 1)));
                     } else if (TestCommand.Commands.TRUE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.TRUE.getCommandname());
                     } else if (TestCommand.Commands.NOT.equals(testCommand.getCommand())) {
@@ -618,8 +619,8 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                     } else if (TestCommand.Commands.HEADER.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.HEADER.getCommandname());
                         tmp.put(AddressEnvelopeAndHeaderTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List)testCommand.getArguments().get(testCommand.getTagarguments().size())));
-                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(testCommand.getTagarguments().size()+1)));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.HEADERS, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size())));
+                        tmp.put(AddressEnvelopeAndHeaderTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(testCommand.getTagarguments().size() + 1)));
                     } else if (TestCommand.Commands.BODY.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, TestCommand.Commands.BODY.getCommandname());
                         tmp.put(BodyTestFields.COMPARISON, testCommand.getMatchtype().substring(1));
@@ -629,27 +630,27 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
                             // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is
                             // allowed according to our specification
                             tmp.put(BodyTestFields.EXTENSIONSVALUE, testCommand.getArguments().get(2));
-                            tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(3)));
+                            tmp.put(BodyTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(3)));
                         } else {
                             tmp.put(BodyTestFields.EXTENSIONSVALUE, JSONObject.NULL);
-                            tmp.put(BodyTestFields.VALUES, new JSONArray((List)testCommand.getArguments().get(2)));
+                            tmp.put(BodyTestFields.VALUES, new JSONArray((List) testCommand.getArguments().get(2)));
                         }
                     } else if (TestCommand.Commands.CURRENTDATE.equals(testCommand.getCommand())) {
                         tmp.put(GeneralFields.ID, testCommand.getCommand().getCommandname());
                         final String comparison = testCommand.getMatchtype().substring(1);
                         if ("value".equals(comparison)) {
-                            tmp.put(CurrentDateTestFields.COMPARISON, ((List)testCommand.getArguments().get(testCommand.getTagarguments().size())).get(0));
+                            tmp.put(CurrentDateTestFields.COMPARISON, ((List) testCommand.getArguments().get(testCommand.getTagarguments().size())).get(0));
                         } else {
                             tmp.put(CurrentDateTestFields.COMPARISON, comparison);
                         }
-                        final List value = (List)testCommand.getArguments().get(testCommand.getArguments().size()-2);
+                        final List value = (List) testCommand.getArguments().get(testCommand.getArguments().size() - 2);
                         tmp.put(CurrentDateTestFields.DATEPART, value.get(0));
                         if ("date".equals(value.get(0))) {
-                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1), dateFormatPattern));
+                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List) testCommand.getArguments().get(testCommand.getArguments().size() - 1), dateFormatPattern));
                         } else if ("time".equals(value.get(0))) {
-                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1), timeFormatPattern));
+                            tmp.put(CurrentDateTestFields.DATEVALUE, getJSONDateArray((List) testCommand.getArguments().get(testCommand.getArguments().size() - 1), timeFormatPattern));
                         } else {
-                            tmp.put(CurrentDateTestFields.DATEVALUE, new JSONArray((List)testCommand.getArguments().get(testCommand.getArguments().size()-1)));
+                            tmp.put(CurrentDateTestFields.DATEVALUE, new JSONArray((List) testCommand.getArguments().get(testCommand.getArguments().size() - 1)));
                         }
                     } else if (TestCommand.Commands.ALLOF.equals(testCommand.getCommand())) {
                         createAllofOrAnyofObjects(tmp, testCommand, TestCommand.Commands.ALLOF);
@@ -732,7 +733,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
             @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
-                obj.setText((String)attr);
+                obj.setText((String) attr);
             }
 
         },
@@ -756,7 +757,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
 
             @Override
             public void setAttribute(final Rule obj, final Object attr) throws JSONException {
-                obj.setErrormsg((String)attr);
+                obj.setErrormsg((String) attr);
             }
 
         }
