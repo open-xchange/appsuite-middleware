@@ -54,7 +54,7 @@ package com.openexchange.mailfilter.json.ajax.json.fields;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum PGPEncryptActionField {
+public enum PGPEncryptActionField implements ActionField {
     keys("keys", ":keys");
 
     private final String fieldName;
@@ -71,20 +71,22 @@ public enum PGPEncryptActionField {
         this.tagName = tagName;
     }
 
-    /**
-     * Get the field name
+    /*
+     * (non-Javadoc)
      * 
-     * @return the field name
+     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getFieldName()
      */
+    @Override
     public final String getFieldName() {
         return fieldName;
     }
 
-    /**
-     * Get the tag name
+    /*
+     * (non-Javadoc)
      * 
-     * @return the tag name
+     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getTagName()
      */
+    @Override
     public final String getTagName() {
         return tagName;
     }

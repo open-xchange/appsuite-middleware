@@ -50,48 +50,23 @@
 package com.openexchange.mailfilter.json.ajax.json.fields;
 
 /**
- * {@link VacationActionField}
+ * {@link ActionField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum VacationActionField implements ActionField {
-    days("days", ":days"),
-    addresses("addresses", ":addresses"),
-    subject("subject", ":subject"),
-    from("from", ":from"),
-    text("text", null);
-
-    private final String fieldName;
-    private final String tagName;
+public interface ActionField {
 
     /**
-     * Initialises a new {@link VacationActionField}.
+     * Get the field name
      * 
-     * @param fieldName The field name
-     * @param tagName The tag name
+     * @return the field name
      */
-    private VacationActionField(final String fieldName, final String tagName) {
-        this.fieldName = fieldName;
-        this.tagName = tagName;
-    }
+    String getFieldName();
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Get the tag name
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getFieldName()
+     * @return the tag name
      */
-    @Override
-    public final String getFieldName() {
-        return fieldName;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getTagName()
-     */
-    @Override
-    public final String getTagName() {
-        return tagName;
-    }
+    String getTagName();
 }

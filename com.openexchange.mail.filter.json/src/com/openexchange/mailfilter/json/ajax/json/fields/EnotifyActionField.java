@@ -54,7 +54,7 @@ package com.openexchange.mailfilter.json.ajax.json.fields;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public enum EnotifyActionField {
+public enum EnotifyActionField implements ActionField {
     message("message", ":message"),
     method("method", null);
 
@@ -72,20 +72,22 @@ public enum EnotifyActionField {
         this.tagName = tagName;
     }
 
-    /**
-     * Returns the field name
+    /*
+     * (non-Javadoc)
      * 
-     * @return the field name
+     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getFieldName()
      */
+    @Override
     public final String getFieldName() {
         return fieldName;
     }
 
-    /**
-     * Returns the tag name
+    /*
+     * (non-Javadoc)
      * 
-     * @return the tag name
+     * @see com.openexchange.mailfilter.json.ajax.json.fields.ActionField#getTagName()
      */
+    @Override
     public final String getTagName() {
         return tagName;
     }
