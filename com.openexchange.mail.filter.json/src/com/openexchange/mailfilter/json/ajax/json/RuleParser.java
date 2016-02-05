@@ -49,9 +49,9 @@
 
 package com.openexchange.mailfilter.json.ajax.json;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -77,7 +77,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.TextRuleFieldMapper;
  */
 public class RuleParser {
 
-    private final Map<RuleField, RuleFieldMapper> mappers;
+    private final List<RuleFieldMapper> mappers;
 
     /**
      * Initialises a new {@link RuleParser}.
@@ -85,18 +85,18 @@ public class RuleParser {
     public RuleParser() {
         super();
 
-        Map<RuleField, RuleFieldMapper> map = new HashMap<RuleField, RuleFieldMapper>(9);
-        map.put(RuleField.actioncmds, new ActionCommandRuleFieldMapper());
-        map.put(RuleField.active, new ActiveRuleFieldMapper());
-        map.put(RuleField.errormsg, new ErrorMessageRuleFieldMapper());
-        map.put(RuleField.flags, new FlagsRuleFieldMapper());
-        map.put(RuleField.id, new IDRuleFieldMapper());
-        map.put(RuleField.position, new PositionRuleFieldMapper());
-        map.put(RuleField.rulename, new RuleNameRuleFieldMapper());
-        map.put(RuleField.test, new TestCommandRuleFieldMapper());
-        map.put(RuleField.text, new TextRuleFieldMapper());
+        List<RuleFieldMapper> list = new ArrayList<RuleFieldMapper>(9);
+        list.add(new IDRuleFieldMapper());
+        list.add(new PositionRuleFieldMapper());
+        list.add(new RuleNameRuleFieldMapper());
+        list.add(new ActiveRuleFieldMapper());
+        list.add(new FlagsRuleFieldMapper());
+        list.add(new TestCommandRuleFieldMapper());
+        list.add(new ActionCommandRuleFieldMapper());
+        list.add(new TextRuleFieldMapper());
+        list.add(new ErrorMessageRuleFieldMapper());
 
-        mappers = Collections.unmodifiableMap(map);
+        mappers = Collections.unmodifiableList(list);
     }
 
     /**
@@ -124,7 +124,7 @@ public class RuleParser {
      * @throws OXException
      */
     public Rule parse(Rule rule, JSONObject json) throws JSONException, SieveException, OXException {
-        for (RuleFieldMapper mapper : mappers.values()) {
+        for (RuleFieldMapper mapper : mappers) {
             String attributeName = mapper.getAttributeName().name();
             if (json.has(attributeName)) {
                 try {
@@ -146,7 +146,7 @@ public class RuleParser {
      */
     public JSONObject parse(Rule rule) throws JSONException {
         JSONObject object = new JSONObject();
-        for (RuleFieldMapper mapper : mappers.values()) {
+        for (RuleFieldMapper mapper : mappers) {
             if (!mapper.isNull(rule)) {
                 object.put(mapper.getAttributeName().name(), mapper.getAttribute(rule));
             }
