@@ -84,4 +84,16 @@ public final class ArgumentUtil {
         token.image = value;
         return new NumberArgument(token);
     }
+
+    /**
+     * Creates a {@link TagArgument} from the specified string value
+     * 
+     * @param value The value of the {@link TagArgument}
+     * @return the {@link TagArgument}
+     */
+    public static final TagArgument createTagArgument(String value) {
+        Token token = new Token();
+        token.image = ":" + value;
+        return new TagArgument(token);
+    }
 }
