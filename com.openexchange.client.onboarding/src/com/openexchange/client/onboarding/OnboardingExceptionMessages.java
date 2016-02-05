@@ -84,4 +84,7 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     // The download link is invalid.
     public final static String INVALID_DOWNLOAD_LINK_MSG = "The download link is invalid.";
 
+    // The download link is invalid.
+    public final static String INVALID_PHONE_NUMBER_MSG = "The phone number %1$s is invalid.";
+
 }

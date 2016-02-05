@@ -144,7 +144,7 @@ public class FileResult implements Result {
             ComposedMailMessage message = notify.createMail(data, Collections.singleton(mailAttachment));
             transport.sendMailMessage(message, ComposeType.NEW);
 
-            ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session), "string");
+            ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_MAIL_SENT, session), "string");
             error = false;
             return resultObject;
         } catch (RuntimeException e) {

@@ -156,6 +156,7 @@ public final class ImportAction extends AbstractMailAction {
                 force = null == tmp ? false : AJAXRequestDataTools.parseBoolParameter(tmp.trim());
             }
             boolean preserveReceivedDate = mailRequest.optBool("preserveReceivedDate", false);
+            boolean strictParsing = mailRequest.optBool("strictParsing", true);
             /*
              * Iterate upload files
              */
@@ -194,7 +195,9 @@ public final class ImportAction extends AbstractMailAction {
                             if (null != tmpFile) {
                                 try {
                                     // Validate content
-                                    validateRfc822Message(tmpFile);
+                                    if (strictParsing) {
+                                        validateRfc822Message(tmpFile);
+                                    }
                                     first = false;
 
                                     // Parse & add to queue

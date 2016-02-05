@@ -9,7 +9,6 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-autocontextid"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-contextrestore"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-drive-client-windows"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-oauth-provider"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-reseller"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-admin-soap"/>

@@ -104,7 +104,6 @@ public class PlistResult implements Result {
     private final ResultReply reply;
 
     private static final String SMS_KEY = "sms";
-    private static final String SMS_CODE_KEY = "code";
 
     /**
      * Initializes a new {@link PlistResult}.
@@ -184,7 +183,7 @@ public class PlistResult implements Result {
             ComposedMailMessage message = notify.createMail(data, Collections.singleton(MailAttachments.newMailAttachment(fileHolder)));
             transport.sendMailMessage(message, ComposeType.NEW);
 
-            ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_EMAIL_SENT, session), "string");
+            ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_MAIL_SENT, session), "string");
             error = false;
             return resultObject;
         } catch (IOException e) {
@@ -273,15 +272,36 @@ public class PlistResult implements Result {
             throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(SMS_KEY);
         }
         String number = (String) input.get(SMS_KEY);
-        String code = (String) input.get(SMS_CODE_KEY);
-        if (number == null || code == null) {
-            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(number == null ? SMS_KEY : SMS_CODE_KEY);
+        if (number == null) {
+            throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(SMS_KEY);
         }
-        smsService.sendMessage(number, text, code);
+
+        number = sanitizeNumber(number);
+
+        smsService.sendMessage(number, text);
         setRateLimitTime(ratelimit, session);
 
         ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         return resultObject;
+    }
+
+    /**
+     * Removes all non digits from the number string except the leading '+'
+     * 
+     * @param number Expect a internationalized phone number
+     * @return The sanitized phone number
+     * @throws OXException if the number does not start with a '+' sign
+     */
+    private String sanitizeNumber(String number) throws OXException {
+
+        if (!number.startsWith("+")) {
+            throw OnboardingExceptionCodes.INVALID_PHONE_NUMBER.create(number);
+        }
+
+        number = number.substring(1);
+        number = number.replaceAll("[^0-9]", "");
+
+        return "+" + number;
     }
 
     private boolean seemsLikeDav(List<OnboardingProvider> providers) {

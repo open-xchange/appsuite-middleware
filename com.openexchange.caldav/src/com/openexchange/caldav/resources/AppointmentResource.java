@@ -658,27 +658,40 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     }
 
     @Override
-    protected void deserialize(final InputStream body) throws OXException, IOException {
-        final List<CalendarDataObject> appointments = this.parse(body);
+    protected void deserialize(InputStream body) throws OXException, IOException {
+        List<CalendarDataObject> appointments = parse(body);
         if (null != appointments && 0 < appointments.size()) {
-            this.deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
-            this.exceptionsToSave = new ArrayList<CalendarDataObject>();
-            for (final CalendarDataObject cdo : appointments) {
+            /*
+             * skip any X-MOZ-FAKED-MASTER appointments
+             */
+            for (Iterator<CalendarDataObject> iterator = appointments.iterator(); iterator.hasNext();) {
+                CalendarDataObject appointment = iterator.next();
+                if (Boolean.TRUE.equals(appointment.getProperty("com.openexchange.data.conversion.ical.recurrence.mozFakedMaster"))) {
+                    LOG.debug("Skipping appointment marked with \"X-MOZ-FAKED-MASTER\": {}", appointment);
+                    iterator.remove();
+                }
+            }
+            /*
+             * parse appointment & exceptions
+             */
+            deleteExceptionsToSave = new ArrayList<CalendarDataObject>();
+            exceptionsToSave = new ArrayList<CalendarDataObject>();
+            for (CalendarDataObject cdo : appointments) {
                 cdo.setContext(factory.getContext());
                 cdo.removeLastModified();
                 cdo.setIgnoreConflicts(true);
-                if (null != this.object) {
-                    cdo.setParentFolderID(this.object.getParentFolderID());
+                if (null != object) {
+                    cdo.setParentFolderID(object.getParentFolderID());
                     cdo.removeUid();
                 } else {
-                    cdo.setParentFolderID(this.parentFolderID);
+                    cdo.setParentFolderID(parentFolderID);
                 }
                 if (1 == appointments.size() || looksLikeMaster(cdo)) {
                     if (null != object) {
                         cdo.setObjectID(object.getObjectID());
                     }
-                    this.appointmentToSave = cdo;
-                    createNewDeleteExceptions(this.object, appointmentToSave);
+                    appointmentToSave = cdo;
+                    createNewDeleteExceptions(object, appointmentToSave);
                 } else {
                     factory.getCalendarUtilities().removeRecurringType(cdo);
                     if (null != object) {
@@ -687,15 +700,16 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                     exceptionsToSave.add(cdo);
                 }
             }
-            /*
-             * store filename when different from uid
-             */
-            final String resourceName = super.extractResourceName();
-            if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
-                appointmentToSave.setFilename(resourceName);
-            }
-        } else {
+        }
+        if (null == appointmentToSave) {
             throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "supported-calendar-component", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        /*
+         * store filename when different from uid
+         */
+        String resourceName = extractResourceName();
+        if (null != resourceName && false == resourceName.equals(appointmentToSave.getUid())) {
+            appointmentToSave.setFilename(resourceName);
         }
     }
 
@@ -983,6 +997,21 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
         }
         /*
+         * detect and adjust an acknowledged alarm in a change exception as indicated in the recurring appointment master by the Lightning client
+         */
+        if (recurring && null != acknowledgedDate && null != exceptionsToSave && 0 < exceptionsToSave.size() &&
+            CalDAVAgent.THUNDERBIRD_LIGHTNING.equals(factory.getState().getUserAgent())) {
+            for (CalendarDataObject changeException : exceptionsToSave) {
+                Date exceptionAcknowledged = changeException.getProperty("com.openexchange.data.conversion.ical.alarm.acknowledged");
+                if (null == exceptionAcknowledged) {
+                    /*
+                     * take over acknowledged date from recurring appointment master
+                     */
+                    changeException.setProperty("com.openexchange.data.conversion.ical.alarm.acknowledged", acknowledgedDate);
+                }
+            }
+        }
+        /*
          * take over snoozed alarm if valid
          */
         if (null != snoozeDate && snoozeDate.after(now) && (null == acknowledgedDate || snoozeDate.after(acknowledgedDate))) {
@@ -1011,12 +1040,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             }
         }
         /*
-         * if not yet acknowledged, take over reminder minutes if different from original
+         * if not yet acknowledged, just take over reminder minutes
          */
         if (null == acknowledgedDate) {
-            if (null != originalAppointment && originalAppointment.getAlarm() == updatedAppointment.getAlarm()) {
-                updatedAppointment.removeAlarm();
-            }
             return null;
         }
         /*
@@ -1030,11 +1056,24 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
             calendar.setTime(updatedAppointment.getStartDate());
             calendar.add(Calendar.MINUTE, -1 * updatedAppointment.getAlarm());
             Date trigger = calendar.getTime();
-            /*
-             * assume alarm is acknowledged, if acknowledged date is after trigger, and alarm is not updated concurrently
-             */
-            if (false == acknowledgedDate.before(trigger) && (null == originalAppointment || originalAppointment.getAlarm() == updatedAppointment.getAlarm())) {
-                updatedAppointment.setAlarm(-1);
+            if (null != existingReminder) {
+                /*
+                 * assume alarm is acknowledged, if acknowledged date is after trigger, and different from server-inserted acknowledged guardian
+                 */
+                calendar.setTime(existingReminder.getDate());
+                calendar.add(Calendar.MINUTE, -1);
+                Date acknowledgedGuardian = calendar.getTime();
+                if (false == acknowledgedDate.before(trigger) && false == acknowledgedGuardian.equals(acknowledgedDate)) {
+                    updatedAppointment.setAlarm(-1);
+                }
+            } else {
+                /*
+                 * assume alarm is acknowledged, if acknowledged date is after trigger, and alarm- and related start-date not updated concurrently
+                 */
+                if (false == acknowledgedDate.before(trigger) && (null == originalAppointment ||
+                    (originalAppointment.getAlarm() == updatedAppointment.getAlarm() && originalAppointment.getStartDate().equals(updatedAppointment.getStartDate())))) {
+                    updatedAppointment.setAlarm(-1);
+                }
             }
         } else {
             /*
@@ -1124,6 +1163,11 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         return null;
     }
 
+    /**
+     * Inserts a new or updates an existing reminder in the database.
+     *
+     * @param reminder The reminder to insert or update
+     */
     private void insertOrUpdateReminder(ReminderObject reminder) throws OXException {
         ReminderService reminderService = new ReminderHandler(factory.getContext());
         DatabaseService databaseService = factory.requireService(DatabaseService.class);
@@ -1132,24 +1176,31 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
         try {
             connection = databaseService.getWritable(factory.getContext());
             connection.setAutoCommit(false);
-            if (0 < reminder.getObjectId()) {
-                ReminderObject reloadedReminder = null;
-                try {
-                    reloadedReminder = reminderService.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
-                    reloadedReminder.setDate(reminder.getDate());
-                    if (0 < reminder.getRecurrencePosition()) {
-                        reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
-                    }
-                    reminderService.updateReminder(reloadedReminder, connection);
-                    connection.commit();
-                    committed = true;
-                    return;
-                } catch (OXException e) {
-                    if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
-                        throw e;
-                    }
+            /*
+             * try updating existing reminder
+             */
+            ReminderObject reloadedReminder = null;
+            try {
+                reloadedReminder = reminderService.loadReminder(reminder.getTargetId(), reminder.getUser(), reminder.getModule(), connection);
+                if (null != reloadedReminder.getDate() && reloadedReminder.getDate().equals(reminder.getDate())) {
+                    return; // already up-to-date
+                }
+                reloadedReminder.setDate(reminder.getDate());
+                if (0 < reminder.getRecurrencePosition()) {
+                    reloadedReminder.setRecurrencePosition(reminder.getRecurrencePosition());
+                }
+                reminderService.updateReminder(reloadedReminder, connection);
+                connection.commit();
+                committed = true;
+                return;
+            } catch (OXException e) {
+                if (false == ReminderExceptionCode.NOT_FOUND.equals(e)) {
+                    throw e;
                 }
             }
+            /*
+             * insert new reminder, otherwise
+             */
             reminder.setObjectId(0);
             reminderService.insertReminder(reminder);
             connection.commit();

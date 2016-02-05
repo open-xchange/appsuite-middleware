@@ -152,16 +152,14 @@ public class Namespaces {
 	r.skipSpaces();
 	//    Namespace = nil / "(" 1*( Namespace_Element) ")"
 	if (r.peekByte() == '(') {
-	    Vector v = new Vector();
+	    List<Namespace> v = new ArrayList<Namespace>();
 	    r.readByte();
 	    do {
 		Namespace ns = new Namespace(r);
-		v.addElement(ns);
+		v.add(ns);
 	    } while (r.peekByte() != ')');
 	    r.readByte();
-	    Namespace[] nsa = new Namespace[v.size()];
-	    v.copyInto(nsa);
-	    return nsa;
+	    return v.toArray(new Namespace[v.size()]);
 	} else {
 	    String s = r.readAtom();
 	    if (s == null)

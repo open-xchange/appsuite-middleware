@@ -67,14 +67,7 @@ public class CardDAVOnboardingStrings implements LocalizableStrings {
         super();
     }
 
-    // The default display name for a CardDAV account
-    public static final String CARDDAV_DISPLAY_NAME = "CardDAV";
-
     // A description for a CardDAV account
     public static final String CARDDAV_ACCOUNT_DESCRIPTION = "The CardDAV account for synchronizing contact entries.";
-
-    public static final String CARDDAV_TEXT_PROFILE = "Your CardDAV profile";
-
-    public static final String CARDDAV_TEXT_SETTINGS = "Your CardDAV settings";
 
 }

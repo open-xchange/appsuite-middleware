@@ -232,9 +232,22 @@ public final class QuotedInternetAddress extends InternetAddress {
         for (String addr : addrs) {
             if (addr.lastIndexOf('<') < 0 && addr.indexOf("=?") >= 0) {
                 addr = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+            } else if (addr.indexOf("'?= <") > 0) {
+                // Expect something like: =?utf-8?Q?...'?= <jane@doe.org>
+                String tmp = MimeMessageUtility.decodeMultiEncodedHeader(addr);
+
+                // Check if personal part is surrounded by single-quotes
+                if (tmp.startsWith("'")) {
+                    int pos = tmp.indexOf("' <");
+                    if (pos > 0) {
+                        // Replace with double-quotes
+                        addr = new StringBuilder(tmp.length()).append('"').append(tmp.substring(1, pos)).append("\" <").append(tmp.substring(pos + 3)).toString();
+                    }
+                }
             }
-            QuotedInternetAddress a = new QuotedInternetAddress(addr, strict);
-            l.add(a);
+
+
+            l.add(new QuotedInternetAddress(addr, strict));
         }
         return l.toArray(new InternetAddress[l.size()]);
     }

@@ -86,6 +86,15 @@ public class CalendarStrings implements LocalizableStrings {
 
     public static final String FACET_TYPE_PARTICIPANT = "Participant";
 
+    // Range
+    public static final String FACET_TYPE_RANGE = "Range";
+
+    public static final String RANGE_ONE_MONTH = "\u207A\u2215\u208B 1 month";
+
+    public static final String RANGE_THREE_MONTHS = "\u207A\u2215\u208B 3 months";
+
+    public static final String RANGE_ONE_YEAR = "\u207A\u2215\u208B 1 year";
+
     // Status
     public static final String STATUS_ACCEPTED = "Accepted";
 
@@ -94,11 +103,6 @@ public class CalendarStrings implements LocalizableStrings {
     public static final String STATUS_TENTATIVE = "Tentative";
 
     public static final String STATUS_NONE = "None";
-
-    // Relative date
-    public static final String RELATIVE_DATE_FUTURE = "Future";
-
-    public static final String RELATIVE_DATE_PAST = "Past";
 
     // Recurring type
     public static final String RECURRING_TYPE_SINGLE = "Single";

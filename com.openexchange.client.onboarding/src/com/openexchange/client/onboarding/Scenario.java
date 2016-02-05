@@ -85,7 +85,7 @@ public interface Scenario extends Entity {
     /**
      * Gets the associated on-boarding providers.
      *
-     * @param userId The user ididentifier
+     * @param userId The user identifier
      * @param contextId The context identifier
      * @return The provider list
      */
@@ -94,8 +94,26 @@ public interface Scenario extends Entity {
     /**
      * Gets the alternative scenarios.
      *
+     * @param session The session to use
      * @return The alternative scenarios
      */
     List<Scenario> getAlternatives(Session session);
+
+    /**
+     * Gets the optional capabilities associated with this scenario
+     *
+     * @param session The session to use
+     * @return The optional capabilities (may be <code>null</code> or an empty list)
+     */
+    List<String> getCapabilities(Session session);
+
+    /**
+     * Gets the optional capabilities associated with this scenario
+     *
+     *  @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The optional capabilities (may be <code>null</code> or an empty list)
+     */
+    List<String> getCapabilities(int userId, int contextId);
 
 }

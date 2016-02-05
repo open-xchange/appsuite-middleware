@@ -157,6 +157,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        return delegate.getSequenceNumber(folderId);
+    }
+
+    @Override
     public void deleteAppointmentObject(CalendarDataObject appointmentObject,
         int inFolder, Date clientLastModified, boolean checkPermissions)
             throws OXException, SQLException {
@@ -170,6 +175,11 @@ public class TransactionallyCachingCalendar implements AppointmentSQLInterface {
         AppointmentSearchObject searchObj, int orderBy, Order orderDir,
         int[] cols) throws com.openexchange.exception.OXException {
         return delegate.searchAppointments(searchObj, orderBy, orderDir, cols);
+    }
+
+    @Override
+    public SearchIterator<Appointment> searchAppointments(AppointmentSearchObject searchObj, int orderBy, Order orderDir, int limit, int[] cols) throws OXException {
+        return delegate.searchAppointments(searchObj, orderBy, orderDir, limit, cols);
     }
 
     @Override

@@ -95,6 +95,16 @@ public class DeviceAwareScenarionImpl implements DeviceAwareScenario {
     }
 
     @Override
+    public List<String> getCapabilities(Session session) {
+        return scenario.getCapabilities(session);
+    }
+
+    @Override
+    public List<String> getCapabilities(int userId, int contextId) {
+        return scenario.getCapabilities(userId, contextId);
+    }
+
+    @Override
     public CompositeId getCompositeId() {
         return compositeId;
     }

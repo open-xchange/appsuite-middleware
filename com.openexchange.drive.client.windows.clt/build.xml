@@ -15,12 +15,12 @@
     </target>
 
     <target name="createLinks">
-        <property name="brandingLinks" value="listbrandings" />
+        <property name="brandingLinks" value="listdriveclients" />
         <foreach list="${brandingLinks}" target="createContextLink" param="linkName" />
     </target>
 
     <target name="createContextLink">
-        <symlink resource="${prefix}/${sbinDir}/reloadbrandings" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+        <symlink resource="${prefix}/${sbinDir}/reloaddriveclients" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
     </target>
 
 </project>

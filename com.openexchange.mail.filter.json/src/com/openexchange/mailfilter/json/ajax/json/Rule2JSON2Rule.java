@@ -70,7 +70,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.fields.RuleFields;
+import com.openexchange.mailfilter.json.ajax.json.fields.RuleFields;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**

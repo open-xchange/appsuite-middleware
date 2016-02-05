@@ -72,60 +72,54 @@ public enum Device implements Entity {
     /**
      * The device for an Apple Mac; <code>"apple.mac"</code>
      */
-    APPLE_MAC(Platform.APPLE.getId() + ".mac", OnboardingStrings.DEVICE_APPLE_MAC_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_MAC_DESCRIPTION, "device_icon_apple_mac.png", Platform.APPLE),
+    APPLE_MAC(Platform.APPLE.getId() + ".mac", OnboardingStrings.DEVICE_APPLE_MAC_DISPLAY_NAME, "fa-laptop", Platform.APPLE),
     /**
      * The device for an Apple iPad; <code>"apple.ipad"</code>
      */
-    APPLE_IPAD(Platform.APPLE.getId() + ".ipad", OnboardingStrings.DEVICE_APPLE_IPAD_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_IPAD_DESCRIPTION, "device_icon_apple_ipad.png", Platform.APPLE),
+    APPLE_IPAD(Platform.APPLE.getId() + ".ipad", OnboardingStrings.DEVICE_APPLE_IPAD_DISPLAY_NAME, "fa-tablet", Platform.APPLE),
     /**
      * The device for an Apple iPhone; <code>"apple.iphone"</code>
      */
-    APPLE_IPHONE(Platform.APPLE.getId() + ".iphone", OnboardingStrings.DEVICE_APPLE_IPHONE_DISPLAY_NAME, OnboardingStrings.DEVICE_APPLE_IPHONE_DESCRIPTION, "device_icon_apple_iphone.png", Platform.APPLE),
+    APPLE_IPHONE(Platform.APPLE.getId() + ".iphone", OnboardingStrings.DEVICE_APPLE_IPHONE_DISPLAY_NAME, "fa-mobile", Platform.APPLE),
 
     /**
      * The device for an Android/Google tablet; <code>"android.tablet"</code>
      */
-    ANDROID_TABLET(Platform.ANDROID_GOOGLE.getId() + ".tablet", OnboardingStrings.DEVICE_ANDROID_TABLET_DISPLAY_NAME, OnboardingStrings.DEVICE_ANDROID_TABLET_DESCRIPTION, "device_icon_android_tablet.png", Platform.ANDROID_GOOGLE),
+    ANDROID_TABLET(Platform.ANDROID_GOOGLE.getId() + ".tablet", OnboardingStrings.DEVICE_ANDROID_TABLET_DISPLAY_NAME, "fa-tablet", Platform.ANDROID_GOOGLE),
     /**
      * The device for an Android/Google phone; <code>"android.phone"</code>
      */
-    ANDROID_PHONE(Platform.ANDROID_GOOGLE.getId() + ".phone", OnboardingStrings.DEVICE_ANDROID_PHONE_DISPLAY_NAME, OnboardingStrings.DEVICE_ANDROID_PHONE_DESCRIPTION, "device_icon_android_phone.png", Platform.ANDROID_GOOGLE),
+    ANDROID_PHONE(Platform.ANDROID_GOOGLE.getId() + ".phone", OnboardingStrings.DEVICE_ANDROID_PHONE_DISPLAY_NAME, "fa-mobile", Platform.ANDROID_GOOGLE),
 
     /**
      * The device for a Windows Desktop 8 + 10; <code>"windows.desktop"</code>
      */
-    WINDOWS_DESKTOP_8_10(Platform.WINDOWS.getId() + ".desktop", OnboardingStrings.DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME, OnboardingStrings.DEVICE_WINDOWS_DESKTOP_DESCRIPTION, "device_icon_windows_desktop.png", Platform.WINDOWS),
+    WINDOWS_DESKTOP_8_10(Platform.WINDOWS.getId() + ".desktop", OnboardingStrings.DEVICE_WINDOWS_DESKTOP_DISPLAY_NAME, "fa-laptop", Platform.WINDOWS),
 
     ;
 
     private final String id;
+    private final FontAwesomeIcon icon;
 
     private final String enabledProperty;
     private final String displayNameProperty;
-    private final String iconProperty;
-    private final String descriptionProperty;
     private final String scenariosProperty;
 
     private final String defaultDisplayName;
-    private final String defaultIcon;
-    private final String defaultDescription;
 
     private final Platform platform;
 
-    private Device(String id, String defaultDisplayName, String defaultDescription, String defaultIcon, Platform platform) {
+    private Device(String id, String defaultDisplayName, String fontAwesomeName, Platform platform) {
         this.id = id;
         this.platform = platform;
+        icon = new FontAwesomeIcon(fontAwesomeName);
 
         String prefix = "com.openexchange.client.onboarding." + id;
         enabledProperty = prefix + ".enabled";
         displayNameProperty = prefix + ".displayName";
-        iconProperty = prefix + ".icon";
-        descriptionProperty = prefix + ".description";
         scenariosProperty = prefix + ".scenarios";
 
         this.defaultDisplayName = defaultDisplayName;
-        this.defaultIcon = defaultIcon;
-        this.defaultDescription = defaultDescription;
     }
 
     @Override
@@ -191,12 +185,12 @@ public enum Device implements Entity {
 
     @Override
     public Icon getIcon(Session session) throws OXException {
-        return OnboardingUtility.loadIconImageFromProperty(iconProperty, defaultIcon, session);
+        return icon;
     }
 
     @Override
     public String getDescription(Session session) throws OXException {
-        return OnboardingUtility.getTranslationFromProperty(descriptionProperty, defaultDescription, true, session);
+        return null;
     }
 
     /**

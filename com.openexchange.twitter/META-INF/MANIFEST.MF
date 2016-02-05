@@ -10,7 +10,6 @@ Bundle-ClassPath: .,
  lib/htmlunit-core-js-2.5.jar,
  lib/sac-1.3.jar,
  lib/serializer-2.7.1.jar,
- lib/xalan-2.7.1.jar,
  lib/twitter4j-all-one-3.0.3.jar
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,

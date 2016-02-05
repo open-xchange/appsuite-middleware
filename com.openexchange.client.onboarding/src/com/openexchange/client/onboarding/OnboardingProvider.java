@@ -70,11 +70,25 @@ public interface OnboardingProvider {
     String getId();
 
     /**
+     * Gets this provider's description
+     *
+     * @return The description
+     */
+    String getDescription();
+
+    /**
      * Gets the supported devices.
      *
      * @return The supported devices
      */
     Set<Device> getSupportedDevices();
+
+    /**
+     * Gets the on-boarding types, which are supported by this provider
+     *
+     * @return The supported on-boarding types
+     */
+    Set<OnboardingType> getSupportedTypes();
 
     /**
      * Executes specified on-boarding scenario according to given action.

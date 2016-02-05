@@ -614,6 +614,7 @@ public class DispatcherServlet extends SessionServlet {
          */
         AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
         requestData.setSession(session);
+        LogProperties.putSessionProperties(session);
         return requestData;
     }
 

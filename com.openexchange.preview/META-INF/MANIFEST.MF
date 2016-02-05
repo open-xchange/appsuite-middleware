@@ -102,5 +102,4 @@ Bundle-ClassPath: .,
  lib/juh-3.2.1.jar,
  lib/jurt-3.2.1.jar,
  lib/ridl-3.2.1.jar,
- lib/unoil-3.2.1.jar,
  lib/jodreports-2.4.0.jar

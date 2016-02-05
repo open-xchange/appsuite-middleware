@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.internal;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,6 +59,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.apache.commons.codec.binary.Base64;
 import com.openexchange.client.onboarding.DefaultIcon;
+import com.openexchange.client.onboarding.FontAwesomeIcon;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
@@ -76,7 +78,7 @@ import com.openexchange.java.Strings;
  */
 public class OnboardingConfig {
 
-    private static final String CONFIGFILE_SCENARIOS = "scenarios.yml";
+    private static final String CONFIGFILE_SCENARIOS = "client-onboarding-scenarios.yml";
 
     /**
      * Initializes a new {@link OnboardingConfig}.
@@ -161,7 +163,7 @@ public class OnboardingConfig {
                         if (!Strings.isEmpty(sType)) {
                             linkType = LinkType.typeFor(sType);
                             if (null == linkType) {
-                                throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(id);
+                                throw OnboardingExceptionCodes.INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION.create(sType, id);
                             }
                         }
                     }
@@ -179,6 +181,18 @@ public class OnboardingConfig {
                         } catch (URISyntaxException e) {
                             throw OnboardingExceptionCodes.INVALID_SCENARIO_CONFIGURATION.create(e, id);
                         }
+                    }
+                }
+            }
+
+            // Associated static capabilities
+            List<String> capabilities = Collections.emptyList();
+            if (OnboardingType.LINK == type) {
+                String sCapabilities = (String) values.get("capabilities");
+                if (!Strings.isEmpty(sCapabilities) && !"null".equalsIgnoreCase(sCapabilities)) {
+                    String[] saCpabilities = Strings.splitByComma(sCapabilities);
+                    if (null != saCpabilities && saCpabilities.length > 0) {
+                        capabilities = Arrays.asList(saCpabilities);
                     }
                 }
             }
@@ -211,7 +225,11 @@ public class OnboardingConfig {
                     icon = null;
                 } else {
                     iconValue = iconValue.trim();
-                    if (PATTERN_FILENAME.matcher(iconValue).matches()) {
+                    if (Strings.asciiLowerCase(iconValue).startsWith("fa-")) {
+                        // Assume Font-Awesome names
+                        String[] names = Strings.splitByComma(iconValue);
+                        icon = new FontAwesomeIcon(names);
+                    } else if (PATTERN_FILENAME.matcher(iconValue).matches()) {
                         // Assume a file name
                         icon = new TemplateIcon(iconValue);
                     } else {
@@ -227,7 +245,7 @@ public class OnboardingConfig {
             String displayName = (String) values.get("displayName_t10e");
             String description = (String) values.get("description_t10e");
 
-            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, link, providerIds, alternativeIds, displayName, icon, description));
+            scenarios.put(id, new ConfiguredScenario(id, enabled.booleanValue(), type, link, providerIds, alternativeIds, displayName, icon, description, capabilities));
         }
         return scenarios;
     }

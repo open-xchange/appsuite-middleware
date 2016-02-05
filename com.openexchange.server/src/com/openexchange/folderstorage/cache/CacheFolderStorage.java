@@ -695,7 +695,7 @@ public final class CacheFolderStorage implements ReinitializableFolderStorage, F
                 removeFromCache(id, treeId, userId, contextId, null, folderPath);
             } else {
                 PathPerformer pathPerformer;
-                if (optSession == null) {
+                if (optSession != null) {
                     pathPerformer = new PathPerformer(ServerSessionAdapter.valueOf(optSession), null, registry);
                 } else {
                     pathPerformer = new PathPerformer(user, context, null, registry);

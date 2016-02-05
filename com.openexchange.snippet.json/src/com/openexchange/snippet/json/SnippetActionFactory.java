@@ -83,12 +83,13 @@ public class SnippetActionFactory implements AJAXActionServiceFactory {
      */
     public SnippetActionFactory(final ServiceLookup services, final ServiceListing<SnippetService> snippetServices) {
         super();
-        actions = new ConcurrentHashMap<String, SnippetAction>(10, 0.9f, 1);
+        actions = new ConcurrentHashMap<String, SnippetAction>(12, 0.9f, 1);
         addAction(new com.openexchange.snippet.json.action.AllAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.GetAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.ListAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.DeleteAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.NewAction(services, snippetServices, actions));
+        addAction(new com.openexchange.snippet.json.action.ImportAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.AttachAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.DetachAction(services, snippetServices, actions));
         addAction(new com.openexchange.snippet.json.action.UpdateAction(services, snippetServices, actions));

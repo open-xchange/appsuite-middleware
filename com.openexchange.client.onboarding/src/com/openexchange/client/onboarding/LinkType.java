@@ -61,6 +61,8 @@ public enum LinkType {
     COMMON("common"),
     /** The link points the Apple App Store. */
     APPLE_APP_STORE("appstore"),
+    /** The link points the Apple Mac App Store. */
+    APPLE_MAC_STORE("macappstore"),
     /** The link points the Google Play Store. */
     GOOGLE_PLAY_STORE("playstore"),
     ;

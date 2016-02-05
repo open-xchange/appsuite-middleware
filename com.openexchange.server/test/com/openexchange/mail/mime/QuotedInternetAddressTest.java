@@ -141,4 +141,20 @@ public class QuotedInternetAddressTest extends TestCase {
         addr = new QuotedInternetAddress("bar@foo.org", "Peter Lustig \\");
         assertEquals("Display name does not equals \"Peter Lustig \\\"", "Peter Lustig \\", addr.getPersonal());
     }
+
+    public void testBug43709() throws Exception {
+        String addresses = "\"pere6@20101027.de\" <pere6@20101027.de>, =?iso-8859-1?Q?'Jochum=2C_Christel;_Sch=F6ndorf=2C_Werner'?= <boeser.recipient@example.com>, \"pere20@20101027.de\" <pere20@20101027.de>";
+        InternetAddress[] addrs = QuotedInternetAddress.parseHeader(addresses, true);
+
+        assertNotNull("Unexpected parse result", addrs);
+        assertEquals("Unexpected number of addresses", 3, addrs.length);
+
+        // Check first address
+        assertEquals("Unexpected personal", "pere6@20101027.de", addrs[0].getPersonal());
+        assertEquals("Unexpected address", "pere6@20101027.de", addrs[0].getAddress());
+
+        // Check second address
+        assertEquals("Unexpected personal", "Jochum, Christel; Sch\u00f6ndorf, Werner", addrs[1].getPersonal());
+        assertEquals("Unexpected address", "boeser.recipient@example.com", addrs[1].getAddress());
+    }
 }

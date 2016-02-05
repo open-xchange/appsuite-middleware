@@ -98,7 +98,7 @@ public class ListOnboardingProvidersTool extends AbstractRmiCLI<Void> {
     protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
         RemoteOnboardingService rmiService = getRmiStub(optRmiHostName, RemoteOnboardingService.RMI_NAME);
         List<List<String>> data = rmiService.getAllProviders();
-        OutputHelper.doOutput(new String[] { "l", "l" }, new String[] { "Provider", "Supported devices" }, data);
+        OutputHelper.doOutput(new String[] { "l", "l", "l", "l" }, new String[] { "Provider", "Description", "Supported types", "Supported devices" }, data);
         return null;
     }
 

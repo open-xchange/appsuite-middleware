@@ -54,14 +54,13 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.client.onboarding.AvailabilityResult;
 import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
@@ -94,10 +93,10 @@ import com.openexchange.user.UserService;
  */
 public class MailOnboardingProvider implements OnboardingPlistProvider {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MailOnboardingProvider.class);
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link MailOnboardingProvider}.
@@ -107,6 +106,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         this.services = services;
         identifier = BuiltInProvider.MAIL.getId();
         supportedDevices = EnumSet.allOf(Device.class);
+        supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Configures IMAP/SMTP.";
     }
 
     @Override
@@ -147,6 +152,11 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override
@@ -344,27 +354,18 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     }
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        Scenario scenario = request.getScenario();
-
-        PListDict old = null;
-        if (previousResult != null) {
-            old = ((PlistResult) previousResult).getPListDict();
-        }
-        return new PlistResult(getPlist(old, session.getUserId(), session.getContextId(), scenario, request), ResultReply.NEUTRAL);
+        PListDict previousPListDict = previousResult == null ? null : ((PlistResult) previousResult).getPListDict();
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
-        return getPlist(null, userId, contextId, scenario, req);
-    }
-
-    @Override
-    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
         // Get the PListDict to contribute to
         PListDict pListDict;
-        if (null == previousPListDict) {
+        if (null == optPrevPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
@@ -372,7 +373,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
             pListDict.setPayloadVersion(1);
             pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
         } else {
-            pListDict = previousPListDict;
+            pListDict = optPrevPListDict;
         }
 
         // Generate content

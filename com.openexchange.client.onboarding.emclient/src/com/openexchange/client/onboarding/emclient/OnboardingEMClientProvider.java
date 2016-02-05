@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
@@ -77,7 +78,7 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
 
     private final String identifier;
     private final Set<Device> supportedDevices;
-    private static final String URL_CONFIGURATION = "com.openexchange.client.onboarding.emclient.url";
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link DriveWindowsClientOnboardingActivator}.
@@ -86,11 +87,22 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
         super();
         identifier = BuiltInProvider.EM_CLIENT.getId();
         supportedDevices = EnumSet.of(Device.WINDOWS_DESKTOP_8_10);
+        supportedTypes = EnumSet.of(OnboardingType.LINK);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Provides a link for the eM Client.";
     }
 
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override
@@ -131,9 +143,10 @@ public class OnboardingEMClientProvider implements OnboardingProvider {
     }
 
     private String getDownloadLink(Session session) throws OXException {
-        String url = OnboardingUtility.getValueFromProperty(URL_CONFIGURATION, null, session);
+        String propertyName = "com.openexchange.client.onboarding.emclient.url";
+        String url = OnboardingUtility.getValueFromProperty(propertyName, null, session);
         if (Strings.isEmpty(url)) {
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(URL_CONFIGURATION);
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
         return url;
     }

@@ -288,6 +288,11 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
              * throw appropriate protocol exception
              */
             throw protocolException(e, HttpServletResponse.SC_CONFLICT);
+        } else if (Category.CATEGORY_SERVICE_DOWN.equals(e.getCategory())) {
+            /*
+             * throw appropriate protocol exception
+             */
+            throw protocolException(e, HttpServletResponse.SC_SERVICE_UNAVAILABLE);
         } else {
             throw protocolException(e);
         }

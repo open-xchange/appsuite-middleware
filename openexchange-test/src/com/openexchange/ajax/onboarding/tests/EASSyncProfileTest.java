@@ -92,8 +92,9 @@ public class EASSyncProfileTest extends AbstractAJAXSession {
     public void testEASSyncProfileViaEmail() throws Exception {
         JSONObject body = new JSONObject();
         body.put("email", client.getValues().getDefaultAddress());
-        ExecuteRequest req = new ExecuteRequest("apple.mac/eassync", "email", body, false);
-        client.execute(req);
+        ExecuteRequest req = new ExecuteRequest("apple.iphone/eassync", "email", body, false);
+        OnboardingTestResponse resp = client.execute(req);
+        assertFalse(resp.hasError());
         GetMailsRequest mailReq = new GetMailsRequest();
         GetMailsResponse mailResp = client.execute(mailReq);
         List<Message> messages = mailResp.getMessages();
@@ -102,18 +103,12 @@ public class EASSyncProfileTest extends AbstractAJAXSession {
     }
 
     public void testEASSyncProfileViaDisplay() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("apple.mac/easmanual", "display", null, false);
+        ExecuteRequest req = new ExecuteRequest("apple.iphone/easmanual", "display", null, false);
         OnboardingTestResponse resp = client.execute(req);
         assertFalse(resp.hasError());
         JSONObject json = (JSONObject) resp.getData();
-        assertTrue(json.hasAndNotNull("eas_hostName"));
+        assertTrue(json.hasAndNotNull("eas_url"));
         assertTrue(json.hasAndNotNull("eas_login"));
     }
-
-    //    public void testEASSyncProfileViaDownload() throws Exception {
-    //        ExecuteRequest req = new ExecuteRequest("apple.mac/eassync", "download", null, false);
-    //        OnboardingTestResponse resp = client.execute(req);
-    //        assertFalse(resp.hasError());
-    //    }
 
 }

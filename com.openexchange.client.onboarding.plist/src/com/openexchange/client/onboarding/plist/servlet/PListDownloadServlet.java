@@ -49,7 +49,6 @@
 
 package com.openexchange.client.onboarding.plist.servlet;
 
-import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -60,18 +59,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
-import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.Device;
-import com.openexchange.client.onboarding.OnboardingAction;
 import com.openexchange.client.onboarding.OnboardingProvider;
-import com.openexchange.client.onboarding.OnboardingRequest;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.download.DownloadParameters;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PListSigner;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Streams;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceLookup;
@@ -94,7 +91,7 @@ public class PListDownloadServlet extends WebDavServlet {
     public static final String SERVLET_PATH = "plist";
     private static final Logger LOG = LoggerFactory.getLogger(PListDownloadServlet.class);
 
-    private ServiceLookup lookup;
+    private final ServiceLookup lookup;
 
     /**
      * Initializes a new {@link PListDownloadServlet}.
@@ -105,10 +102,8 @@ public class PListDownloadServlet extends WebDavServlet {
 
     }
 
-    @SuppressWarnings("resource")
     @Override
-    protected void doGet(final HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         InputStream filestream = null;
         ThresholdFileHolder fileHolder = null;
         try {
@@ -127,79 +122,43 @@ public class PListDownloadServlet extends WebDavServlet {
             }
 
             DownloadLinkProvider downloadLinkProvider = lookup.getService(DownloadLinkProvider.class);
-            String[] arguments;
+            DownloadParameters parameters;
             try {
-                arguments = downloadLinkProvider.getParameter(req.getPathInfo());
-            } catch (OXException ex) {
-                resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
-                return;
-            }
-            String scenarioId = arguments[3];
-            Device device = Device.deviceFor(arguments[2]);
-            int userId;
-            int contextId;
-
-            try {
-                userId = Integer.valueOf(arguments[0]);
-                contextId = Integer.valueOf(arguments[1]);
-            } catch (NumberFormatException ex) {
+                parameters = downloadLinkProvider.getParameter(req.getPathInfo());
+            } catch (OXException e) {
+                LOG.error("", e);
                 resp.sendError(HttpServletResponse.SC_BAD_REQUEST);
                 return;
             }
 
+            String scenarioId = parameters.getScenarioId();
+            Device device = Device.deviceFor(parameters.getDeviceId());
+            int userId = parameters.getUserId();
+            int contextId = parameters.getContextId();
+
             try {
-                if (!downloadLinkProvider.validateChallenge(userId, contextId, scenarioId, device.getId(), arguments[4])) {
+                if (false == downloadLinkProvider.validateChallenge(userId, contextId, scenarioId, device.getId(), parameters.getChallenge())) {
                     resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                     return;
                 }
-            } catch (OXException e1) {
-                LOG.error(e1.getMessage());
+            } catch (OXException e) {
+                LOG.error("", e);
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
+
             Scenario scenario = null;
             PListDict plist = null;
-            OnboardingService onboardingService = lookup.getService(OnboardingService.class);
             try {
+                OnboardingService onboardingService = lookup.getService(OnboardingService.class);
                 scenario = onboardingService.getScenario(scenarioId, device, userId, contextId);
-                List<OnboardingProvider> list = scenario.getProviders(userId, contextId);
-                for (OnboardingProvider provider : list) {
+                for (OnboardingProvider provider : scenario.getProviders(userId, contextId)) {
                     if (provider instanceof OnboardingPlistProvider) {
-                        HostData data = new HostData() {
-                            
-                            @Override
-                            public boolean isSecure() {
-                                return req.isSecure();
-                            }
-                            @Override
-                            public String getRoute() {
-                                return null;
-                            }
-                            @Override
-                            public int getPort() {
-                                return req.getServerPort();
-                            }
-                            @Override
-                            public String getHost() {
-                                return req.getServerName();
-                            }
-                            @Override
-                            public String getHTTPSession() {
-                                return null;
-                            }
-                            @Override
-                            public String getDispatcherPrefix() {
-                                return null;
-                            }
-                        };
-                        OnboardingRequest onboardingReq = new DefaultOnboardingRequest(scenario, OnboardingAction.SMS, device, data, null);
-                        plist = ((OnboardingPlistProvider) provider).getPlist(userId, contextId, scenario, onboardingReq);
-                        if (plist != null) {
-                            break;
-                        }
+                        plist = ((OnboardingPlistProvider) provider).getPlist(plist, scenario, userId, contextId);
                     }
                 }
             } catch (OXException e) {
+                LOG.error("", e);
                 resp.sendError(HttpServletResponse.SC_NOT_FOUND);
                 return;
             }
@@ -234,29 +193,18 @@ public class PListDownloadServlet extends WebDavServlet {
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/octet-stream");
             resp.setContentLength(fileSize);
-            try {
-                resp.setHeader("Content-disposition", "attachment; filename=\"" + scenario.getDisplayName(userId, contextId) + ".mobileconfig\"");
-            } catch (OXException e) {
-                resp.setHeader("Content-disposition", "attachment; filename=\"" + scenarioId + ".mobileconfig\"");
-            }
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + scenarioId + ".mobileconfig\"");
             Tools.removeCachingHeader(resp);
 
             OutputStream out = resp.getOutputStream();
             byte[] buf = new byte[4096];
-            int length = -1;
-            while ((length = filestream.read(buf)) != -1) {
-                out.write(buf, 0, length);
+            for (int read; (read = filestream.read(buf)) > 0;) {
+                out.write(buf, 0, read);
             }
-
             out.flush();
             filestream.close();
         } finally {
-            if (filestream != null) {
-                filestream.close();
-            }
-            if (fileHolder != null) {
-                fileHolder.close();
-            }
+            Streams.close(filestream, fileHolder);
         }
     }
 

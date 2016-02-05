@@ -80,4 +80,11 @@ public interface Icon extends Serializable {
      */
     byte[] getData();
 
+    /**
+     * Gets the icon's type
+     *
+     * @return The type
+     */
+    IconType getType();
+
 }

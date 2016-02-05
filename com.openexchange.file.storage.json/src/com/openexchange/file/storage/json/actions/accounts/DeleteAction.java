@@ -49,18 +49,19 @@
 
 package com.openexchange.file.storage.json.actions.accounts;
 
+import static com.openexchange.file.storage.json.FileStorageAccountConstants.FILE_STORAGE_SERVICE;
+import static com.openexchange.file.storage.json.FileStorageAccountConstants.ID;
 import java.util.List;
 import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageService;
-import com.openexchange.file.storage.generic.DefaultFileStorageAccount;
-import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
-
 
 /**
  * This action deletes a file storage account. Parameters are:
@@ -80,22 +81,21 @@ public class DeleteAction extends AbstractFileStorageAccountAction {
     }
 
     @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final List<String> missingParameters = request.getMissingParameters(FileStorageAccountConstants.FILE_STORAGE_SERVICE, FileStorageAccountConstants.ID);
-        if(!missingParameters.isEmpty()) {
+    protected AJAXRequestResult doIt(AJAXRequestData request, ServerSession session) throws JSONException, OXException {
+        List<String> missingParameters = request.getMissingParameters(FILE_STORAGE_SERVICE, ID);
+        if (false == missingParameters.isEmpty()) {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(missingParameters.toString());
         }
-        final String messagingServiceId = request.getParameter(FileStorageAccountConstants.FILE_STORAGE_SERVICE);
-
-        final String id = request.getParameter(FileStorageAccountConstants.ID);
-
-        final FileStorageService messagingService = registry.getFileStorageService(messagingServiceId);
-
-        final DefaultFileStorageAccount messagingAccount = new DefaultFileStorageAccount();
-        messagingAccount.setFileStorageService(messagingService);
-        messagingAccount.setId(id);
-        messagingService.getAccountManager().deleteAccount(messagingAccount, session);
-
+        /*
+         * get targeted account
+         */
+        FileStorageService fileStorageService = registry.getFileStorageService(request.getParameter(FILE_STORAGE_SERVICE));
+        FileStorageAccountManager accountManager = fileStorageService.getAccountManager();
+        FileStorageAccount account = accountManager.getAccount(request.getParameter(ID), session);
+        /*
+         * delete the account & return appropriate result on success
+         */
+        accountManager.deleteAccount(account, session);
         return new AJAXRequestResult(Integer.valueOf(1));
     }
 

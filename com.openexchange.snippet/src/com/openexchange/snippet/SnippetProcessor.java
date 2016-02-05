@@ -53,10 +53,15 @@ import static com.openexchange.java.Strings.isEmpty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLConnection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.mail.internet.MimeUtility;
 import org.slf4j.Logger;
 import com.openexchange.config.cascade.ConfigProperty;
@@ -65,6 +70,8 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.filemanagement.ManagedFile;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -127,6 +134,159 @@ public class SnippetProcessor {
         this.session = session;
     }
 
+    private static final Pattern IMG_PATTERN = Pattern.compile("<img[^>]*>", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+    private static final Pattern SRC_PATTERN = Pattern.compile("(?:src=\"([^\"]+)\")|(?:src='([^']+)')", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+    /**
+     * Process the images in the snippet, extracts them and convert them to attachments
+     *
+     * @param snippet The snippet to process
+     * @param attachments The list to add attachments to
+     * @throws OXException
+     */
+    public void processExternalImages(DefaultSnippet snippet, List<Attachment> attachments) throws OXException {
+        String content = snippet.getContent();
+        if (isEmpty(content)) {
+            return;
+        }
+
+        MaxImageProps maxImageProps = getMaxImageProps();
+        long maxImageSize = maxImageProps.maxImageSize;
+        int maxImageLimit = maxImageProps.maxImageLimit;
+
+        Matcher m = IMG_PATTERN.matcher(content);
+        if (false == m.find()) {
+            return;
+        }
+
+        StringBuffer sb = new StringBuffer(content.length());
+        int count = 0;
+        do {
+            String imgTag = m.group();
+
+            Matcher srcMatcher = SRC_PATTERN.matcher(imgTag);
+            if (srcMatcher.find()) {
+                // Get the 'src' attribute's value
+                String src = srcMatcher.group(1);
+                if (src == null) {
+                    src = srcMatcher.group(2);
+                }
+
+                // Check for valid URL
+                URL url;
+                try {
+                    url = new URL(src);
+                } catch (Exception e) {
+                    // No... it's not
+                    throw SnippetExceptionCodes.UNEXPECTED_ERROR.create(e, "Invalid image URL: " + src);
+                }
+
+                // Check max. number of images
+                count++;
+                if (maxImageLimit > 0 && count > maxImageLimit) {
+                    throw SnippetExceptionCodes.MAXIMUM_IMAGES_COUNT.create(Integer.valueOf(maxImageLimit));
+                }
+
+                // Get content identifier for URL resource
+                String contentId = loadImage(url, count, maxImageSize, attachments);
+
+                // Replace <img> tag
+                int start = srcMatcher.start();
+                int end = srcMatcher.end();
+                String iTag = new StringBuilder(imgTag.length()).append(imgTag.substring(0, start)).append("src=\"cid:").append(contentId).append("\"").append(imgTag.substring(end)).toString();
+                m.appendReplacement(sb, Strings.quoteReplacement(iTag));
+            } else {
+                m.appendReplacement(sb, Strings.quoteReplacement(imgTag));
+            }
+
+        } while (m.find());
+        m.appendTail(sb);
+        snippet.setContent(sb.toString());
+    }
+
+    private static final int READ_TIMEOUT = 10000;
+    private static final int CONNECT_TIMEOUT = 3000;
+
+    private String loadImage(URL url, int count, long maxImageSize, List<Attachment> attachments) throws OXException { // HttpURLConnection
+        InputStream in = null;
+        try {
+            URLConnection con = url.openConnection();
+            if (con instanceof HttpURLConnection) {
+                return loadHttpImage((HttpURLConnection) con, count, maxImageSize, attachments);
+            }
+
+            // Generic URLConnection handling
+            con.connect();
+            in = con.getInputStream();
+
+            int contentLength = con.getContentLength();
+            if (contentLength > 0 && contentLength > maxImageSize) {
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+            }
+
+            String contentType = con.getHeaderField("content-type");
+            if (!Strings.isEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
+                throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Not an image");
+            }
+            contentType = Strings.isEmpty(contentType) ? "image/jpeg" : contentType;
+            String ext = MimeType2ExtMap.getFileExtension(contentType);
+
+            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+            ManagedFile managedFile = mfm.createManagedFile(in, false);
+            managedFile.setContentType(contentType);
+            managedFile.setFileName("image" + count + "." + ext);
+
+            return processLocalImage(managedFile, managedFile.getID(), true, attachments);
+        } catch (IOException e) {
+            throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+        }
+    }
+
+    private String loadHttpImage(HttpURLConnection httpCon, int count, long maxImageSize, List<Attachment> attachments) throws OXException {
+        InputStream in = null;
+        try {
+            httpCon.setRequestMethod("GET");
+            httpCon.setConnectTimeout(CONNECT_TIMEOUT);
+            httpCon.setReadTimeout(READ_TIMEOUT);
+            httpCon.connect();
+
+            int responseCode = httpCon.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
+
+            in = httpCon.getInputStream();
+
+            int contentLength = httpCon.getContentLength();
+            if (contentLength > 0 && contentLength > maxImageSize) {
+                throw SnippetExceptionCodes.MAXIMUM_IMAGE_SIZE.create(Long.valueOf(maxImageSize));
+            }
+
+            String contentType = httpCon.getHeaderField("content-type");
+            if (!Strings.isEmpty(contentType) && !Strings.asciiLowerCase(contentType).startsWith("image/")) {
+                throw SnippetExceptionCodes.UNEXPECTED_ERROR.create("Not an image");
+            }
+            contentType = Strings.isEmpty(contentType) ? "image/jpeg" : contentType;
+            String ext = MimeType2ExtMap.getFileExtension(contentType);
+
+            ManagedFileManagement mfm = Services.getService(ManagedFileManagement.class);
+            ManagedFile managedFile = mfm.createManagedFile(in, false);
+            managedFile.setContentType(contentType);
+            managedFile.setFileName("image" + count + "." + ext);
+
+            return processLocalImage(managedFile, managedFile.getID(), true, attachments);
+        } catch (IOException e) {
+            throw SnippetExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
+            httpCon.disconnect();
+        }
+    }
+
+    // -------------------------------------------------------------------------------------------------------------------------- //
+
     /**
      * Process the images in the snippet, extracts them and convert them to attachments
      *
@@ -140,32 +300,9 @@ public class SnippetProcessor {
             return;
         }
 
-        long maxImageSize;
-        int maxImageLimit;
-        {
-            ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
-            ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
-            ConfigProperty<Integer> maxImageLimitConf = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
-
-            if (maxImageLimitConf.isDefined()) {
-                maxImageLimit = maxImageLimitConf.get().intValue();
-            } else {
-                // Defaults to 3 images
-                maxImageLimit = 3;
-            }
-
-            {
-                ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
-                final double mis;
-                if (misConf.isDefined()) {
-                    mis = misConf.get().doubleValue();
-                } else {
-                    // Defaults to 1 MB
-                    mis = (1d);
-                }
-                maxImageSize = (long) (Math.pow(1024, 2) * mis);
-            }
-        }
+        MaxImageProps maxImageProps = getMaxImageProps();
+        long maxImageSize = maxImageProps.maxImageSize;
+        int maxImageLimit = maxImageProps.maxImageLimit;
 
         ImageMatcher m = ImageMatcher.matcher(content);
         StringBuffer sb = new StringBuffer(content.length());
@@ -280,6 +417,50 @@ public class SnippetProcessor {
             attachments.add(att);
         }
         return id;
+    }
+
+    private MaxImageProps getMaxImageProps() throws OXException {
+        long maxImageSize;
+        int maxImageLimit;
+        {
+            ConfigViewFactory configViewFactory = Services.getService(ConfigViewFactory.class);
+            ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+            ConfigProperty<Integer> maxImageLimitConf = configView.property("com.openexchange.mail.signature.maxImageLimit", Integer.class);
+
+            if (maxImageLimitConf.isDefined()) {
+                maxImageLimit = maxImageLimitConf.get().intValue();
+            } else {
+                // Defaults to 3 images
+                maxImageLimit = 3;
+            }
+
+            {
+                ConfigProperty<Double> misConf = configView.property("com.openexchange.mail.signature.maxImageSize", Double.class);
+                final double mis;
+                if (misConf.isDefined()) {
+                    mis = misConf.get().doubleValue();
+                } else {
+                    // Defaults to 1 MB
+                    mis = (1d);
+                }
+                maxImageSize = (long) (Math.pow(1024, 2) * mis);
+            }
+        }
+        return new MaxImageProps(maxImageSize, maxImageLimit);
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    private static class MaxImageProps {
+
+        final long maxImageSize;
+        final int maxImageLimit;
+
+        MaxImageProps(long maxImageSize, int maxImageLimit) {
+            super();
+            this.maxImageSize = maxImageSize;
+            this.maxImageLimit = maxImageLimit;
+        }
     }
 
 }

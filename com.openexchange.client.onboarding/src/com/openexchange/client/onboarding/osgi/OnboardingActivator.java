@@ -106,7 +106,7 @@ public class OnboardingActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         // Create service instance
-        OnboardingServiceImpl serviceImpl = new OnboardingServiceImpl();
+        OnboardingServiceImpl serviceImpl = new OnboardingServiceImpl(this);
         this.registry = serviceImpl;
         serviceImpl.setConfiguredScenarios(OnboardingConfig.parseScenarios(getService(ConfigurationService.class)));
         addService(OnboardingService.class, serviceImpl);

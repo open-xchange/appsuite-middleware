@@ -61,6 +61,7 @@ import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
@@ -84,7 +85,8 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link SyncAppOnboardingProvider}.
@@ -94,6 +96,12 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = BuiltInProvider.SYNC_APP.getId();
         supportedDevices = EnumSet.of(Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        supportedTypes = EnumSet.of(OnboardingType.LINK);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Provides a link to the Sync App in Google Play Store.";
     }
 
     @Override
@@ -116,6 +124,11 @@ public class SyncAppOnboardingProvider implements OnboardingProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override

@@ -108,6 +108,27 @@ public class SipgateSMSService implements SMSService {
     }
 
     @Override
+    public void sendMessage(String recipient, String message) throws OXException {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
+            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+        }
+        String parsedNumber = checkAndFormatPhoneNumber(recipient, null);
+        JSONObject jsonObject = new JSONObject(3);
+        try {
+            jsonObject.put("TOS", "text");
+            jsonObject.put("Content", message);
+            jsonObject.put("RemoteUri", parsedNumber);
+            String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
+            HttpMethod method = getHttpMethod("samurai.SessionInitiate", encoded);
+            execute(method);
+        } catch (JSONException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        }
+    }
+    
+    @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
             throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
@@ -132,6 +153,30 @@ public class SipgateSMSService implements SMSService {
     public void sendMessage(String recipient, String message, String languageTag) throws OXException {
         Locale locale = new Locale("none", languageTag.toUpperCase());
         sendMessage(recipient, message, locale);
+    }
+    
+    @Override
+    public void sendMessage(String[] recipients, String message) throws OXException {
+        if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
+            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+        }
+        JSONArray phoneNumbers = new JSONArray(recipients.length);
+        try {
+            for (int i = 0; i < recipients.length; i++) {
+                phoneNumbers.put(i, checkAndFormatPhoneNumber(recipients[i], null));
+            }
+            JSONObject jsonObject = new JSONObject(3);
+            jsonObject.put("TOS", "text");
+            jsonObject.put("Content", message);
+            jsonObject.put("RemoteUri", phoneNumbers);
+            String encoded = URLEncoder.encode(jsonObject.toString(), StandardCharsets.UTF_8.toString());
+            HttpMethod method = getHttpMethod("samurai.SessionInitiateMulti", encoded);
+            execute(method);
+        } catch (JSONException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        } catch (UnsupportedEncodingException e) {
+            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+        }
     }
 
     @Override

@@ -1212,6 +1212,40 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
+    public PreparedStatement getPrivateFolderSequenceNumber(int cid, int uid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM prg_dates pd JOIN prg_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0),")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM del_dates pd JOIN del_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, cid, fid, uid, cid, cid, fid, uid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
+    public PreparedStatement getPublicFolderSequenceNumber(int cid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(changing_date) FROM prg_dates WHERE cid=? AND fid=?),0),")
+            .append("COALESCE((SELECT MAX(changing_date) FROM del_dates WHERE cid=? AND fid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, fid, cid, fid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
     public final String getObjectsByidSQL(final int oids[][], final int cid, final String select) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -1368,7 +1402,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, int limit, final Context ctx, final Connection readcon) throws SQLException, OXException {
         List<Object> searchParameters = new ArrayList<Object>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
         final StringBuilder sb = new StringBuilder(512);
@@ -1653,15 +1687,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                 searchParameters.add(preparedPattern);
             }
         }
-
-        sb.append(" ORDER BY ");
-        String orderby = COLLECTION.getFieldName(orderBy);
-        if (orderby == null) {
-            orderby = COLLECTION.getFieldName(CalendarObject.START_DATE);
+        /*
+         * order by & limit
+         */
+        String orderByField = COLLECTION.getFieldName(orderBy);
+        if (null != orderByField) {
+            sb.append(" ORDER BY pd.").append(orderByField).append(DBUtils.forSQLCommand(orderDir));
         }
-        sb.append("pd." + orderby);
-        sb.append(DBUtils.forSQLCommand(orderDir));
-
+        if (0 < limit) {
+            sb.append(" LIMIT ").append(limit);
+        }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         if (0 < searchParameters.size()) {
             int parameterIndex = 0;

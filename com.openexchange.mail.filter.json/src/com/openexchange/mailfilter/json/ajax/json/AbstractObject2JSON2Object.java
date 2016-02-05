@@ -54,6 +54,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.json.ajax.json.mapper.RuleFieldMapper;
 
 /**
  *
@@ -167,6 +168,9 @@ public abstract class AbstractObject2JSON2Object<T> {
         return write(objs, getListFields());
     }
 
+    /**
+     * @deprecated Use {@link RuleFieldMapper}
+     */
     public static interface Mapper<T> {
         String getAttrName();
 
