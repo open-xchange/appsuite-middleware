@@ -53,7 +53,7 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.mailfilter.json.ajax.fields.RuleField;
+import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
 
 /**
  * 

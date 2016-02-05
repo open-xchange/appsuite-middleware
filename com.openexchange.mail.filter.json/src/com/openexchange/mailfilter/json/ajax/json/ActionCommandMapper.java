@@ -71,7 +71,6 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.mailfilter.json.ajax.fields.RuleFields;
 import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object.Mapper;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.AddFlagsActionFields;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.EnotifyActionFields;
@@ -81,6 +80,7 @@ import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.PGPEncryptActio
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.RedirectActionFields;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.VacationActionFields;
+import com.openexchange.mailfilter.json.ajax.json.fields.RuleFields;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;

@@ -55,8 +55,8 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.mailfilter.json.ajax.fields.RuleField;
 import com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper;
+import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
 
 /**
  * {@link RuleNameRuleFieldMapper}

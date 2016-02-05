@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.fields;
+package com.openexchange.mailfilter.json.ajax.json.fields;
 
 /**
  * 
