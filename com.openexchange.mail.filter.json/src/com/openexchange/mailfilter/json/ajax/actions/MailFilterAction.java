@@ -70,7 +70,8 @@ import com.openexchange.mailfilter.MailFilterService.FilterType;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
-import com.openexchange.mailfilter.json.ajax.json.RuleParser;
+import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object;
+import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -90,7 +91,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return INSTANCE;
     }
 
-    private static final RuleParser CONVERTER = new RuleParser();
+    private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
 
     // -------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -267,6 +268,14 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         final Credentials credentials = request.getCredentials();
         final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
         return mailFilterService.getActiveScript(credentials);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected Rule2JSON2Rule getConverter() {
+        return new Rule2JSON2Rule();
     }
 
     private JSONArray getActionArray(final Set<String> capabilities) {
