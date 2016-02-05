@@ -53,6 +53,7 @@ import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.mailfilter.json.ajax.fields.RuleField;
 
 /**
  * 
@@ -67,7 +68,7 @@ public interface RuleFieldMapper {
      * 
      * @return the attribute name
      */
-    String getAttributeName();
+    RuleField getAttributeName();
 
     /**
      * Verifies whether the specified rule is <code>null</code>

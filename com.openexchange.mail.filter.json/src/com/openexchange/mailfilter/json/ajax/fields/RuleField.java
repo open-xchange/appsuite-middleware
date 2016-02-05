@@ -49,11 +49,41 @@
 
 package com.openexchange.mailfilter.json.ajax.fields;
 
+import java.util.List;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.TestCommand;
+
 /**
  * {@link RuleField}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
 public enum RuleField {
-    id, position, rulename, active, flags, test, actioncmds, text, errormsg;
+    id(Integer.class),
+    position(Integer.class),
+    rulename(String.class),
+    active(Boolean.class),
+    flags(List.class),
+    test(TestCommand.class),
+    actioncmds(ActionCommand.class),
+    text(String.class),
+    errormsg(String.class);
+
+    private final Class<?> jsonType;
+
+    /**
+     * Initialises a new {@link RuleField}.
+     */
+    private RuleField(Class<?> jsonType) {
+        this.jsonType = jsonType;
+    }
+
+    /**
+     * Returns the jsonType
+     * 
+     * @return the jsonType
+     */
+    public Class<?> getJSONType() {
+        return jsonType;
+    }
 }
