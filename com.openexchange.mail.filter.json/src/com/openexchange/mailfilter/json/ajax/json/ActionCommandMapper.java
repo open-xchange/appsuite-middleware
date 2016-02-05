@@ -81,11 +81,15 @@ import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.RedirectActionF
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.RejectActionFields;
 import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule.VacationActionFields;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleFields;
+import com.openexchange.mailfilter.json.ajax.json.mapper.ActionCommandRuleFieldMapper;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
+/**
+ * @deprecated Use {@link ActionCommandRuleFieldMapper} instead.
+ */
 final class ActionCommandMapper implements Mapper<Rule> {
 
     @Override
@@ -190,7 +194,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
                         throw OXJSONExceptionCodes.INVALID_VALUE.create(from, VacationActionFields.FROM.getFieldname());
                     }
                 }
-                
+
                 if (!Strings.isEmpty(from)) {
                     arrayList.add(Rule2JSON2Rule.createTagArg(VacationActionFields.FROM));
                     arrayList.add(stringToList(from));
@@ -212,8 +216,7 @@ final class ActionCommandMapper implements Mapper<Rule> {
             }
             final String method = object.getString(EnotifyActionFields.METHOD.getFieldname());
             if (null == method) {
-                throw new JSONException(
-                    "Parameter " + EnotifyActionFields.METHOD.getFieldname() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+                throw new JSONException("Parameter " + EnotifyActionFields.METHOD.getFieldname() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
             }
             arrayList.add(stringToList(method.replaceAll("(\r)?\n", "\r\n")));
             return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
