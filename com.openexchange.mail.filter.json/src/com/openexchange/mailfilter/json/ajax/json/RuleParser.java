@@ -160,11 +160,9 @@ public class RuleParser {
      * 
      * @param rules The rules
      * @return the JSONArray
-     * @throws OXException
-     * @throws SieveException
      * @throws JSONException
      */
-    public JSONArray write(Rule[] rules) throws JSONException, SieveException, OXException {
+    public JSONArray write(Rule[] rules) throws JSONException {
         int objectCount = rules.length;
         if (objectCount == 0) {
             return new JSONArray(0);
