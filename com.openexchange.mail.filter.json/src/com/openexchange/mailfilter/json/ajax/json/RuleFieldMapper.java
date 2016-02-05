@@ -52,15 +52,15 @@ package com.openexchange.mailfilter.json.ajax.json;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.Rule;
 
 /**
  * 
  * {@link RuleFieldMapper}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
- * @param <T> The type of the mapper
  */
-public interface RuleFieldMapper<T> {
+public interface RuleFieldMapper {
 
     /**
      * Returns the attribute name
@@ -70,30 +70,30 @@ public interface RuleFieldMapper<T> {
     String getAttributeName();
 
     /**
-     * Verifies whether the specified object is <code>null</code>
+     * Verifies whether the specified rule is <code>null</code>
      * 
-     * @param object The object to verify
+     * @param rule The rule to verify
      * @return true if the object {@link T} is <code>null</code>; false otherwise
      */
-    boolean isNull(T object);
+    boolean isNull(Rule rule);
 
     /**
      * Gets the attribute of the specified {@link T} object
      * 
-     * @param object The object to get the attribute from
+     * @param rule The rule to get the attribute from
      * @return The attribute
      * @throws JSONException If a JSON error occurs
      */
-    Object getAttribute(T object) throws JSONException;
+    Object getAttribute(Rule rule) throws JSONException;
 
     /**
      * Sets the specified attribute to the specified {@link T} object
      * 
-     * @param object The object to set the attribute to
-     * @param attribute The attribute to set to the object
+     * @param rule The rule to set the attribute to
+     * @param attribute The attribute to set to the rule
      * @throws JSONException If a JSON error occurs
      * @throws SieveException If a Sieve parsing error occurs
      * @throws OXException If an error occurs
      */
-    void setAttribute(T object, Object attribute) throws JSONException, SieveException, OXException;
+    void setAttribute(Rule rule, Object attribute) throws JSONException, SieveException, OXException;
 }
