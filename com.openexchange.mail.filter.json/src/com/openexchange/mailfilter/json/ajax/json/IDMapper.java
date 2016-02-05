@@ -54,7 +54,11 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.mailfilter.json.ajax.fields.RuleFields;
 import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object.Mapper;
+import com.openexchange.mailfilter.json.ajax.json.mapper.IDRuleFieldMapper;
 
+/**
+ * @deprecated Use the {@link IDRuleFieldMapper}
+ */
 final class IDMapper implements Mapper<Rule> {
 
     @Override
@@ -80,9 +84,9 @@ final class IDMapper implements Mapper<Rule> {
     public void setAttribute(final Rule obj, final Object attr) throws JSONException {
         final RuleComment ruleComment = obj.getRuleComment();
         if (null != ruleComment) {
-            ruleComment.setUniqueid(((Integer)attr).intValue());
+            ruleComment.setUniqueid(((Integer) attr).intValue());
         } else {
-            obj.setRuleComments(new RuleComment(((Integer)attr).intValue()));
+            obj.setRuleComments(new RuleComment(((Integer) attr).intValue()));
         }
     }
 }
