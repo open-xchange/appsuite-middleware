@@ -67,14 +67,7 @@ public class MailOnboardingStrings implements LocalizableStrings {
         super();
     }
 
-    // The default display name for an IMAP account
-    public static final String IMAP_DISPLAY_NAME = "IMAP";
-
     // A description for an IMAP account on a mobile device
-    public static final String IMAP_ACCOUNT_DESCRIPTION = "The account for accessing and sending E-Mails.";
-
-    public static final String IMAP_TEXT_PROFILE = "Your IMAP profile";
-
-    public static final String IMAP_TEXT_SETTINGS = "Your IMAP settings";
+    public static final String IMAP_ACCOUNT_DESCRIPTION = "The account for accessing and sending mails.";
 
 }

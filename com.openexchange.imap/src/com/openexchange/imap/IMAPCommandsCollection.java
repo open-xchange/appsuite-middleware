@@ -84,6 +84,7 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
+import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
 import javax.mail.Store;
@@ -3191,8 +3192,7 @@ public final class IMAPCommandsCollection {
                     }
                     byteArray = b.getByteArray();
                 } else {
-                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
-                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    final RFC822DATA rd = p.fetchRFC822(uid, null);
                     if (null == rd) {
                         return null;
                     }
@@ -3349,8 +3349,7 @@ public final class IMAPCommandsCollection {
                     }
                     byteArray = b.getByteArray();
                 } else {
-                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
-                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    final RFC822DATA rd = p.fetchRFC822(uid, null);
                     if (null == rd) {
                         return null;
                     }

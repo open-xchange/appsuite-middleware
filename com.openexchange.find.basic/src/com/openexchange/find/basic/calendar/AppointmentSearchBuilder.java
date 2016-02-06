@@ -51,12 +51,11 @@ package com.openexchange.find.basic.calendar;
 
 import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SERIES;
 import static com.openexchange.find.calendar.CalendarFacetValues.RECURRING_TYPE_SINGLE;
-import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_FUTURE;
-import static com.openexchange.find.calendar.CalendarFacetValues.RELATIVE_DATE_PAST;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_ACCEPTED;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_DECLINED;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_NONE;
 import static com.openexchange.find.calendar.CalendarFacetValues.STATUS_TENTATIVE;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -68,10 +67,12 @@ import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.basic.Folders;
 import com.openexchange.find.calendar.CalendarFacetType;
+import com.openexchange.find.calendar.CalendarFacetValues;
 import com.openexchange.find.facet.Filter;
 import com.openexchange.groupware.calendar.CalendarDataObject;
 import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.java.Strings;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -136,8 +137,8 @@ public class AppointmentSearchBuilder {
                 applyLocation(filter.getQueries());
             } else if (CalendarFacetType.ATTACHMENT_NAME.getId().equals(field)) {
                 applyAttachmentName(filter.getQueries());
-            } else if (CalendarFacetType.RELATIVE_DATE.getId().equals(field)) {
-                applyRelativeDate(filter.getQueries());
+            } else if (CalendarFacetType.RANGE.getId().equals(field)) {
+                applyRange(filter.getQueries());
             } else if (CalendarFacetType.STATUS.getId().equals(field)) {
                 applyStatus(filter.getQueries());
             } else if (CalendarFacetType.RECURRING_TYPE.getId().equals(field)) {
@@ -278,14 +279,32 @@ public class AppointmentSearchBuilder {
         }
     }
 
-    private void applyRelativeDate(List<String> queries) throws OXException {
+    private void applyRange(List<String> queries) throws OXException {
+        Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         for (String query : queries) {
-            if (RELATIVE_DATE_FUTURE.equals(query)) {
-                appointmentSearch.setMinimumEndDate(new Date());
-            } else if (RELATIVE_DATE_PAST.equals(query)) {
-                appointmentSearch.setMaximumStartDate(new Date());
+            if (CalendarFacetValues.RANGE_ONE_MONTH.equals(query)) {
+                calendar.setTime(new Date());
+                calendar.add(Calendar.MONTH, -1);
+                appointmentSearch.setMinimumEndDate(calendar.getTime());
+                calendar.setTime(new Date());
+                calendar.add(Calendar.MONTH, 1);
+                appointmentSearch.setMaximumStartDate(calendar.getTime());
+            } else if (CalendarFacetValues.RANGE_THREE_MONTHS.equals(query)) {
+                calendar.setTime(new Date());
+                calendar.add(Calendar.MONTH, -3);
+                appointmentSearch.setMinimumEndDate(calendar.getTime());
+                calendar.setTime(new Date());
+                calendar.add(Calendar.MONTH, 3);
+                appointmentSearch.setMaximumStartDate(calendar.getTime());
+            } else if (CalendarFacetValues.RANGE_ONE_YEAR.equals(query)) {
+                calendar.setTime(new Date());
+                calendar.add(Calendar.YEAR, -1);
+                appointmentSearch.setMinimumEndDate(calendar.getTime());
+                calendar.setTime(new Date());
+                calendar.add(Calendar.YEAR, 1);
+                appointmentSearch.setMaximumStartDate(calendar.getTime());
             } else {
-                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RELATIVE_DATE.getId());
+                throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CalendarFacetType.RANGE.getId());
             }
         }
     }

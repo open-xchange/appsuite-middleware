@@ -99,15 +99,25 @@ public class TemplateIcon implements Icon {
 
     @Override
     public byte[] getData() {
+        if (false == file.exists()) {
+            LOG.debug("Icon image {} does not exist.", file.getPath());
+            return new byte[0];
+        }
+
         try {
             return Streams.stream2bytes(new FileInputStream(file));
         } catch (java.io.FileNotFoundException e) {
-            LOG.warn("Icon image {} does not exist.", file.getPath());
+            LOG.debug("Icon image {} does not exist.", file.getPath());
             return new byte[0];
         } catch (IOException e) {
-            LOG.warn("Could not load icon image {}.", file.getPath(), e);
+            LOG.debug("Could not load icon image {}.", file.getPath(), e);
             return new byte[0];
         }
+    }
+
+    @Override
+    public IconType getType() {
+        return IconType.RAW;
     }
 
 }

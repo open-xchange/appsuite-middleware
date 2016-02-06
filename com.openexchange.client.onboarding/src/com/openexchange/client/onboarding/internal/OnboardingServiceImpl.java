@@ -62,7 +62,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.client.onboarding.AvailabilityResult;
+import com.openexchange.client.onboarding.BuiltInProvider;
 import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultScenario;
 import com.openexchange.client.onboarding.Device;
@@ -79,6 +82,8 @@ import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.client.onboarding.service.OnboardingView;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -91,14 +96,21 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(OnboardingServiceImpl.class);
 
+    /** The identifier for generic app provider: <code>"app"</code> */
+    private static final String GENERIC_APP_ID = BuiltInProvider.GENERIC_APP.getId();
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    private final ServiceLookup services;
     private final ConcurrentMap<String, OnboardingProvider> providers;
     private final AtomicReference<Map<String, ConfiguredScenario>> configuredScenariosReference;
 
     /**
      * Initializes a new {@link OnboardingServiceImpl}.
      */
-    public OnboardingServiceImpl() {
+    public OnboardingServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
         providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
         configuredScenariosReference = new AtomicReference<>(null);
     }
@@ -223,7 +235,7 @@ public class OnboardingServiceImpl implements OnboardingService {
             if (null == provider) {
                 LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
                 return false;
-            } else if (!provider.isAvailable(session).isAvailable()) {
+            } else if (!isAvailable(provider, configuredScenario, session).isAvailable()) {
                 return false;
             }
         }
@@ -247,7 +259,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         Set<String> missingCapabilities = new LinkedHashSet<String>(4);
         for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
             OnboardingProvider provider = it.next();
-            AvailabilityResult result = provider.isAvailable(session);
+            AvailabilityResult result = isAvailable(provider, scenario, session);
             enabled &= result.isAvailable();
             missingCapabilities.addAll(result.getMissingCapabilities());
         }
@@ -271,7 +283,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         Set<String> missingCapabilities = new LinkedHashSet<String>(4);
         for (Iterator<OnboardingProvider> it = scenario.getProviders(userId, contextId).iterator(); enabled && it.hasNext();) {
             OnboardingProvider provider = it.next();
-            AvailabilityResult result = provider.isAvailable(userId, contextId);
+            AvailabilityResult result = isAvailable(provider, scenario, userId, contextId);
             enabled &= result.isAvailable();
             missingCapabilities.addAll(result.getMissingCapabilities());
         }
@@ -301,7 +313,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                     Set<String> missingCapabilities = new LinkedHashSet<String>(4);
                     for (Iterator<OnboardingProvider> it = scenario.getProviders(session).iterator(); enabled && it.hasNext();) {
                         OnboardingProvider provider = it.next();
-                        AvailabilityResult result = provider.isAvailable(session);
+                        AvailabilityResult result = isAvailable(provider, scenario, session);
                         enabled &= result.isAvailable();
                         missingCapabilities.addAll(result.getMissingCapabilities());
                     }
@@ -310,6 +322,62 @@ public class OnboardingServiceImpl implements OnboardingService {
             }
         }
         return scenarios;
+    }
+
+    private AvailabilityResult isAvailable(OnboardingProvider provider, Scenario scenario, Session session) throws OXException {
+        if (!GENERIC_APP_ID.equals(provider.getId())) {
+            // Not the special provider for generic apps
+            return provider.isAvailable(session);
+        }
+
+        // Check for statically specified capabilities
+        return isAvailable0(provider, scenario.getCapabilities(session), session, session.getUserId(), session.getContextId());
+    }
+
+    private AvailabilityResult isAvailable(OnboardingProvider provider, ConfiguredScenario scenario, Session session) throws OXException {
+        if (!GENERIC_APP_ID.equals(provider.getId())) {
+            // Not the special provider for generic apps
+            return provider.isAvailable(session);
+        }
+
+        return isAvailable0(provider, scenario.getCapabilities(), session, session.getUserId(), session.getContextId());
+    }
+
+    private AvailabilityResult isAvailable(OnboardingProvider provider, Scenario scenario, int userId, int contextId) throws OXException {
+        if (!GENERIC_APP_ID.equals(provider.getId())) {
+            // Not the special provider for generic apps
+            return provider.isAvailable(userId, contextId);
+        }
+
+        return isAvailable0(provider, scenario.getCapabilities(userId, contextId), null, userId, contextId);
+    }
+
+    private AvailabilityResult isAvailable0(OnboardingProvider provider, List<String> requiredCapabilities, Session optSession, int userId, int contextId) throws OXException {
+        // Check for statically specified capabilities
+        if (null == requiredCapabilities || requiredCapabilities.isEmpty()) {
+            return null == optSession ? provider.isAvailable(userId, contextId) : provider.isAvailable(optSession);
+        }
+
+        CapabilitySet capabilities;
+        {
+            CapabilityService capabilityService = services.getOptionalService(CapabilityService.class);
+            if (null == capabilityService) {
+                return null == optSession ? provider.isAvailable(userId, contextId) : provider.isAvailable(optSession);
+            }
+            capabilities = null == optSession ? capabilityService.getCapabilities(userId, contextId) : capabilityService.getCapabilities(optSession);
+        }
+
+        Set<String> missingCaps = new LinkedHashSet<String>(requiredCapabilities.size());
+        boolean enabled = true;
+        for (String requiredCapability : requiredCapabilities) {
+            requiredCapability = Strings.asciiLowerCase(requiredCapability);
+            boolean contained = capabilities.contains(requiredCapability);
+            enabled &= contained;
+            if (false == contained) {
+                missingCaps.add(requiredCapability);
+            }
+        }
+        return enabled ? AvailabilityResult.available() : new AvailabilityResult(false, new ArrayList<String>(missingCaps));
     }
 
     private Scenario getScenario(String scenarioId, Map<String, ConfiguredScenario> configuredScenarios, Session session) throws OXException {
@@ -355,7 +423,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         // Create scenario instance
-        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
+        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getCapabilities(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
 
         // Iterate & check its providers
         for (String providerId : configuredScenario.getProviderIds()) {
@@ -397,7 +465,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }
 
         // Create scenario instance
-        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
+        DefaultScenario scenario = DefaultScenario.newInstance(configuredScenario.getId(), configuredScenario.getType(), link, configuredScenario.getIcon(), configuredScenario.getCapabilities(), configuredScenario.getDisplayName(), configuredScenario.getDescription());
 
         // Iterate & check its providers
         for (String providerId : configuredScenario.getProviderIds()) {

@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,6 +88,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -738,6 +740,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        return moveFromContextToUserFilestore(ctx, user, dstFilestore, maxQuota, credentials, true);
+    }
+
+    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean async) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -835,7 +841,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+
+            if (async) {
+                return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+            }
+
+            // Execute with current thread
+            fsdm.call();
+            return -1;
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -858,6 +871,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("", e);
             throw new StorageException(e);
         } catch (final OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (IOException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (ProgrammErrorException e) {
             LOGGER.error("", e);
             throw new StorageException(e);
         }
@@ -1016,6 +1040,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         Integer userid = null;
+
         try {
             contextcheck(ctx);
 
@@ -1129,9 +1154,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         throw new StorageException(e.getMessage(), e);
                     }
 
-                    // Move from context to individual user file storage
+                    // (Synchronous) Move from context to individual user file storage
                     try {
-                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials);
+                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials, false);
                     } catch (RemoteException e) {
                         throw new StorageException(e);
                     } catch (NoSuchFilestoreException e) {
@@ -1177,7 +1202,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        // change cached admin credentials if neccessary
+        // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);

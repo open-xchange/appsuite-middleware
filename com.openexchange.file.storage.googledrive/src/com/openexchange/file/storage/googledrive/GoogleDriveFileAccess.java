@@ -437,7 +437,7 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
             /*
              * get download URL from file or revision
              */
-            com.google.api.services.drive.model.File file = drive.files().get(id).setFields(FIELDS_DEFAULT + ",downloadUrl").execute();
+            com.google.api.services.drive.model.File file = drive.files().get(id).setFields(FIELDS_DEFAULT + ",downloadUrl,fileSize").execute();
             checkFileValidity(file);
             String downloadUrl;
             if (CURRENT_VERSION == version) {
@@ -454,7 +454,11 @@ public class GoogleDriveFileAccess extends AbstractGoogleDriveAccess implements 
              * get content stream
              */
             HttpResponse resp = drive.getRequestFactory().buildGetRequest(new GenericUrl(downloadUrl)).execute();
-            return new SizeKnowingInputStream(resp.getContent(), file.getFileSize().longValue());
+            if (null != file.getFileSize()) {
+                return new SizeKnowingInputStream(resp.getContent(), file.getFileSize().longValue());
+            } else {
+                return resp.getContent();
+            }
         } catch (final HttpResponseException e) {
             if (!isUserRateLimitExceeded(e)) {
                 // Otherwise throw exception

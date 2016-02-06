@@ -61,6 +61,7 @@ import com.openexchange.client.onboarding.LinkType;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
@@ -83,7 +84,8 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
 
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link DriveAppOnboardingProvider}.
@@ -92,7 +94,13 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
         super();
         this.services = services;
         identifier = BuiltInProvider.DRIVE_APP.getId();
-        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        supportedTypes = EnumSet.of(OnboardingType.LINK);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Provides links for the Drive App.";
     }
 
     @Override
@@ -115,6 +123,11 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override
@@ -157,15 +170,25 @@ public class DriveAppOnboardingProvider implements OnboardingProvider {
     private Link getAppStoreLink(OnboardingRequest request, Session session) throws OXException {
         ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-
+        
         LinkType linkType;
         String propertyName;
         {
             Device device = request.getDevice();
             switch (device.getPlatform()) {
                 case APPLE:
-                    propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.appstore";
-                    linkType = LinkType.APPLE_APP_STORE;
+                    {
+                        switch (device) {
+                            case APPLE_MAC:
+                                propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.macappstore";
+                                linkType = LinkType.APPLE_MAC_STORE;
+                                break;
+                            default:
+                                propertyName = "com.openexchange.client.onboarding.driveapp.store.apple.appstore";
+                                linkType = LinkType.APPLE_APP_STORE;
+                                break;
+                        }
+                    }
                     break;
                 case ANDROID_GOOGLE:
                     propertyName = "com.openexchange.client.onboarding.driveapp.store.google.playstore";

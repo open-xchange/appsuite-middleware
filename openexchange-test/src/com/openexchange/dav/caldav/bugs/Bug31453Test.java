@@ -52,7 +52,6 @@ package com.openexchange.dav.caldav.bugs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
@@ -245,11 +244,7 @@ public class Bug31453Test extends CalDAVTest {
         iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        List<Component> alarms = iCalResource.getVEvent().getVAlarms();
-        assertEquals("Expected one (dummy) VAlarm Component", 1, alarms.size());
-        for (String indicator : DUMMY_ALARM_INDICATORS) {
-            assertTrue("Wrong Alarm.", alarms.get(0).toString().contains(indicator));            
-        }
+        assertDummyAlarm(iCalResource.getVEvent());
     }
 
     @Test
@@ -396,11 +391,7 @@ public class Bug31453Test extends CalDAVTest {
         iCalResource = super.get(publicFolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        List<Component> alarms = iCalResource.getVEvent().getVAlarms();
-        assertEquals("Expected one (dummy) VAlarm Component", 1, alarms.size());
-        for (String indicator : DUMMY_ALARM_INDICATORS) {
-            assertTrue("Wrong Alarm.", alarms.get(0).toString().contains(indicator));            
-        }
+        assertDummyAlarm(iCalResource.getVEvent());
     }
 
     @Test

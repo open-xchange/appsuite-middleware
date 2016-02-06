@@ -54,6 +54,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import javax.mail.internet.AddressException;
 import org.json.JSONException;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
@@ -69,6 +70,7 @@ import com.openexchange.groupware.userconfiguration.UserConfigurationCodes;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.guest.GuestService;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.passwordmechs.IPasswordMech;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceExceptionCode;
@@ -174,11 +176,21 @@ public class ShareUtils {
      * @return The guest user
      */
     private UserImpl prepareGuestUser(int contextId, User sharingUser, GuestRecipient recipient) throws OXException {
-        String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        /*
+         * extract and validate the recipient's e-mail address
+         */
+        String emailAddress;
+        try {
+            QuotedInternetAddress address = new QuotedInternetAddress(recipient.getEmailAddress(), true);
+            emailAddress = address.getAddress();
+        } catch (AddressException e) {
+            throw ShareExceptionCodes.INVALID_MAIL_ADDRESS.create(recipient.getEmailAddress());
+        }
         /*
          * try to lookup & reuse data from existing guest in other context via guest service
          */
-        UserImpl copiedUser = requireService(GuestService.class).createUserCopy(recipient.getEmailAddress(), groupId, contextId);
+        String groupId = requireService(ConfigViewFactory.class).getView(sharingUser.getId(), contextId).opt("com.openexchange.context.group", String.class, "default");
+        UserImpl copiedUser = requireService(GuestService.class).createUserCopy(emailAddress, groupId, contextId);
         if (copiedUser != null) {
             return prepareGuestUser(sharingUser, copiedUser);
         }
@@ -187,8 +199,8 @@ public class ShareUtils {
          */
         UserImpl guestUser = prepareGuestUser(sharingUser);
         guestUser.setDisplayName(recipient.getDisplayName());
-        guestUser.setMail(recipient.getEmailAddress());
-        guestUser.setLoginInfo(recipient.getEmailAddress());
+        guestUser.setMail(emailAddress);
+        guestUser.setLoginInfo(emailAddress);
 
         PasswordMechFactory passwordMechFactory = services.getService(PasswordMechFactory.class);
         IPasswordMech iPasswordMech = passwordMechFactory.get(IPasswordMech.BCRYPT);

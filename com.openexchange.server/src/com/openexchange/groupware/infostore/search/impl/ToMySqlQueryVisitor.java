@@ -90,6 +90,7 @@ import com.openexchange.groupware.infostore.search.VersionCommentTerm;
 import com.openexchange.groupware.infostore.search.VersionTerm;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ToMySqlQueryVisitor}
@@ -115,8 +116,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
     private final String prefix;
     private final List<Integer> readAllFolders;
     private final List<Integer> readOwnFolders;
-    private final int contextId;
-    private final int userId;
+    private final ServerSession session;
 
     /**
      * Initializes a new {@link ToMySqlQueryVisitor}.
@@ -131,7 +131,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
      * @param start The start of the requested range
      * @param end The end of the requested range
      */
-    public ToMySqlQueryVisitor(List<Integer> readAllFolders, List<Integer> readOwnFolders, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
+    public ToMySqlQueryVisitor(ServerSession session, List<Integer> readAllFolders, List<Integer> readOwnFolders, String cols, Metadata sortedBy, int dir, int start, int end) {
         super();
         this.filterBuilder = new StringBuilder(1024);
         this.codec = new MySQLCodec(Mode.STANDARD);
@@ -142,28 +142,27 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
 
         this.readAllFolders = readAllFolders;
         this.readOwnFolders = readOwnFolders;
-        this.contextId = contextId;
-        this.userId = userId;
+        this.session = session;
 
         // Build prefix
         this.prefix = new StringBuilder(cols.length() + PREFIX.length()).append(cols).append(PREFIX).toString();
     }
 
-    protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols, Metadata sortedBy, int dir, int start, int end) {
-        this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
+    protected ToMySqlQueryVisitor(ServerSession session,  int[] allFolderIds, int[] ownFolderIds, String cols, Metadata sortedBy, int dir, int start, int end) {
+        this(session, null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
             null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
-            contextId, userId, cols, sortedBy, dir, start, end);
+            cols, sortedBy, dir, start, end);
     }
 
-    protected ToMySqlQueryVisitor(int[] allFolderIds, int[] ownFolderIds, int contextId, int userId, String cols) {
-        this(null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
+    protected ToMySqlQueryVisitor(ServerSession session, int[] allFolderIds, int[] ownFolderIds, String cols) {
+        this(session, null == allFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(allFolderIds)),
             null == ownFolderIds ? Collections.<Integer>emptyList() : Arrays.asList(Autoboxing.i2I(ownFolderIds)),
-            contextId, userId, cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
+            cols, null, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET, InfostoreSearchEngine.NOT_SET);
     }
 
     public String getMySqlQuery() {
         StringBuilder queryBuilder = new StringBuilder(8192).append(prefix);
-        SearchEngineImpl.appendFoldersAsUnion(queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, contextId, userId, readAllFolders, readOwnFolders);
+        SearchEngineImpl.appendFoldersAsUnion(session, queryBuilder, filterBuilder.length() > 0 ? filterBuilder.toString() : null, readAllFolders, readOwnFolders);
         if (null != sortedBy && dir != InfostoreSearchEngine.NOT_SET) {
             queryBuilder.append(" ORDER BY ").append(sortedBy.getName());
             if (dir == InfostoreSearchEngine.ASC) {

@@ -51,7 +51,6 @@ package com.openexchange.sessiond.impl;
 
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.log.LogProperties;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SessionHolderExtended;
@@ -92,9 +91,6 @@ public class ThreadLocalSessionHolder implements SessionHolderExtended {
      */
     public void setSession(final ServerSession serverSession) {
         session.set(serverSession);
-        if (serverSession != null) {
-            LogProperties.putSessionProperties(serverSession);
-        }
     }
 
     public void clear() {

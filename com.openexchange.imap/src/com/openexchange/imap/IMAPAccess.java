@@ -1361,7 +1361,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
          * Create new IMAP session from initialized properties
          */
         final javax.mail.Session imapSession = javax.mail.Session.getInstance(imapProps, null);
-        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", storeClass.getName(), "Open-Xchange, Inc.", "7.6.1"));
+        imapSession.addProvider(new Provider(Provider.Type.STORE, "imap", storeClass.getName(), "Open-Xchange, Inc.", getVersion()));
         return imapSession;
     }
 

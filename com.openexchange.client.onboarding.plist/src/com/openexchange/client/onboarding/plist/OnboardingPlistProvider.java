@@ -50,7 +50,6 @@
 package com.openexchange.client.onboarding.plist;
 
 import com.openexchange.client.onboarding.OnboardingProvider;
-import com.openexchange.client.onboarding.OnboardingRequest;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.exception.OXException;
 import com.openexchange.plist.PListDict;
@@ -65,28 +64,15 @@ import com.openexchange.plist.PListDict;
 public interface OnboardingPlistProvider extends OnboardingProvider {
 
     /**
-     * Retrieves the plist for the given user and scenario.
-     * 
+     * Retrieves the PLIST dictionary for the given user and scenario.
+     *
+     * @param optPrevPListDict The optional previous PLIST dictionary; or <code>null</code>
+     * @param scenario The scenario
      * @param userId The user id
      * @param contextId The context id
-     * @param scenario The scenario
-     * @param req The request
-     * @return The scenario and user specific plist
-     * @throws OXException
+     * @return The associated PLIST dictionary
+     * @throws OXException If returning PLIST dictionary fails
      */
-    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException;
-
-    /**
-     * Retrieves the plist for the given user and scenario.
-     * 
-     * @param previousPListDict A previous plist result
-     * @param userId The user id
-     * @param contextId The context id
-     * @param scenario The scenario
-     * @param req The request
-     * @return The scenario and user specific plist
-     * @throws OXException
-     */
-    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException;
+    PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException;
 
 }

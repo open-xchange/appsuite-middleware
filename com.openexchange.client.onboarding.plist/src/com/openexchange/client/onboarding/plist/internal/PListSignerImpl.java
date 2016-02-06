@@ -113,11 +113,17 @@ public final class PListSignerImpl implements PListSigner {
             throw ServiceExceptionCode.absentService(ConfigurationService.class);
         }
 
+        // Check if enabled
         boolean enabled = configService.getBoolProperty("com.openexchange.client.onboarding.plist.signature.enabled", false);
+        if (false == enabled) {
+            return toSign;
+        }
+
+        // Get & check needed parameters
         String storeName = configService.getProperty("com.openexchange.client.onboarding.plist.pkcs12store.filename");
         String password = configService.getProperty("com.openexchange.client.onboarding.plist.pkcs12store.password");
         String alias = view.get("com.openexchange.client.onboarding.plist.signkey.alias", String.class);
-        if (!enabled || Strings.isEmpty(storeName) || Strings.isEmpty(password) || Strings.isEmpty(alias)) {
+        if (Strings.isEmpty(storeName) || Strings.isEmpty(password) || Strings.isEmpty(alias)) {
             return toSign;
         }
 

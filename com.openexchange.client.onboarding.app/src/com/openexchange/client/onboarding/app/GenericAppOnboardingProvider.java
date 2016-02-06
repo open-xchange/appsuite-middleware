@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.LinkResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingProvider;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.Scenario;
 import com.openexchange.exception.OXException;
@@ -78,6 +79,7 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     private final ServiceLookup services;
     private final String identifier;
     private final EnumSet<Device> supportedDevices;
+    private final EnumSet<OnboardingType> supportedTypes;
     private final AvailabilityResult availabilityResult;
 
     /**
@@ -88,7 +90,13 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
         this.services = services;
         identifier = BuiltInProvider.GENERIC_APP.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.ANDROID_PHONE, Device.ANDROID_TABLET);
+        supportedTypes = EnumSet.of(OnboardingType.LINK);
         availabilityResult = AvailabilityResult.available();
+    }
+
+    @Override
+    public String getDescription() {
+        return "Provides links for arbitrary locations.";
     }
 
     @Override
@@ -109,6 +117,11 @@ public class GenericAppOnboardingProvider implements OnboardingProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public EnumSet<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override

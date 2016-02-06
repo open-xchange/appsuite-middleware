@@ -94,22 +94,11 @@ public class SortTerm {
     public static final SortTerm TO = new SortTerm("TO");
 
     private final String term;
-
-    /**
-     * Creates a new sort term
-     *
-     * @param term The term's upper-case string representation
-     * @throws NullPointerException If string representation is <code>null</code>
-     */
     public SortTerm(String term) {
-        super();
-        if (null == term) {
-            throw new NullPointerException("Term is null.");
-        }
-        this.term = term;
+	this.term = term;
     }
 
     public String toString() {
-        return term;
+	return term;
     }
 }

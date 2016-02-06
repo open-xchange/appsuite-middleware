@@ -681,7 +681,7 @@ public class InternetAddress extends Address implements Cloneable {
 	boolean route_addr = false;	// address came from route-addr term
 	boolean rfc822 = false;		// looks like an RFC822 address
 	char c;
-	List v = new ArrayList();
+	List<InternetAddress> v = new ArrayList<InternetAddress>();
 	InternetAddress ma;
 
 	for (start = end = -1, index = 0; index < length; index++) {
@@ -751,7 +751,7 @@ public class InternetAddress extends Address implements Cloneable {
 			break;	// nope, nothing there
 		    }
 		    if (!in_group) {
-			// got a token, add this to our InternetAddress vector
+			// got a token, add this to our InternetAddress list
 			if (end == -1)	// should never happen
 			    end = index;
 			String addr = s.substring(start, end).trim();
@@ -823,9 +823,11 @@ public class InternetAddress extends Address implements Cloneable {
 		}
 
 		if (!in_group) {
-		    start_personal = start;
-		    if (start_personal >= 0)
+		    if (start >= 0) {
+			// seen some characters?  use them as the personal name
+			start_personal = start;
 			end_personal = rindex;
+		    }
 		    start = rindex + 1;
 		}
 		route_addr = true;
@@ -940,7 +942,7 @@ public class InternetAddress extends Address implements Cloneable {
 		    route_addr = false;
 		    break;
 		}
-		// got a token, add this to our InternetAddress vector
+		// got a token, add this to our InternetAddress list
 		if (end == -1)
 		    end = index;
 
@@ -1063,7 +1065,7 @@ public class InternetAddress extends Address implements Cloneable {
 
 	if (start >= 0) {
 	    /*
-	     * The last token, add this to our InternetAddress vector.
+	     * The last token, add this to our InternetAddress list.
 	     * Note that this block of code should be identical to the
 	     * block above for "case ','".
 	     */
@@ -1208,6 +1210,22 @@ public class InternetAddress extends Address implements Cloneable {
 		    inquote = true;
 		}
 		continue;
+	    } else if (c == '\r') {
+		// peek ahead, next char must be LF
+		if (i + 1 < len && addr.charAt(i + 1) != '\n')
+		    throw new AddressException(
+			"Quoted local address contains CR without LF", addr);
+	    } else if (c == '\n') {
+		/*
+		 * CRLF followed by whitespace is allowed in a quoted string.
+		 * We allowed naked LF, but ensure LF is always followed by
+		 * whitespace to prevent spoofing the end of the header.
+		 */
+		if (i + 1 < len && addr.charAt(i + 1) != ' ' &&
+				    addr.charAt(i + 1) != '\t')
+		    throw new AddressException(
+		     "Quoted local address contains newline without whitespace",
+			addr);
 	    }
 	    if (inquote)
 		continue;
@@ -1252,11 +1270,20 @@ public class InternetAddress extends Address implements Cloneable {
 
 	if (addr.charAt(start) == '.')
 	    throw new AddressException("Domain starts with dot", addr);
+	boolean inliteral = false;
 	for (i = start; i < len; i++) {
 	    c = addr.charAt(i);
-	    if (c == '[')
-		return;		// domain literal, don't validate
-	    if (c <= 040 || c >= 0177)
+	    if (c == '[') {
+		if (i != start)
+		    throw new AddressException(
+				"Domain literal not at start of domain", addr);
+		inliteral = true;	// domain literal, don't validate
+	    } else if (c == ']') {
+		if (i != len - 1)
+		    throw new AddressException(
+			    "Domain literal end not at end of domain", addr);
+		inliteral = false;
+	    } else if (c <= 040 || c >= 0177)
 		throw new AddressException(
 				"Domain contains control or whitespace", addr);
 	    // RFC 2822 rule
@@ -1272,12 +1299,14 @@ public class InternetAddress extends Address implements Cloneable {
 	     * <let-dig-hyp> ::= <let-dig> | "-"
 	     * <let-dig> ::= <letter> | <digit>
 	     */
-	    if (!(Character.isLetterOrDigit(c) || c == '_' || c == '-' || c == '.'))
-		throw new AddressException(
-				"Domain contains illegal character", addr);
-	    if (c == '.' && lastc == '.')
-		throw new AddressException(
-				"Domain contains dot-dot", addr);
+	    if (!inliteral) {
+		if (!(Character.isLetterOrDigit(c) || c == '-' || c == '.'))
+		    throw new AddressException(
+				    "Domain contains illegal character", addr);
+		if (c == '.' && lastc == '.')
+		    throw new AddressException(
+				    "Domain contains dot-dot", addr);
+	    }
 	    lastc = c;
 	}
 	if (lastc == '.')

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,7 +42,6 @@ package com.sun.mail.imap.protocol;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Vector;
 import javax.mail.internet.ParameterList;
 import com.sun.mail.iap.*; 
 import com.sun.mail.util.PropUtil;
@@ -83,7 +82,7 @@ public class BODYSTRUCTURE implements Item {
     private int processedType;	// MULTI | SINGLE | NESTED
 
     // special debugging output to debug parsing errors
-    private static boolean parseDebug =
+    private static final boolean parseDebug =
 	PropUtil.getBooleanSystemProperty("mail.imap.parse.debug", false);
 
 
@@ -509,6 +508,8 @@ public class BODYSTRUCTURE implements Item {
 		String value = r.readString();
 		if (parseDebug)
 		    System.out.println("DEBUG IMAP: parameter value " + value);
+		if (value == null)	// work around buggy servers
+		    value = "";
 		list.set(name, value);
 	    } while (r.readByte() != ')');
 	    list.combineSegments();

@@ -98,8 +98,6 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     protected final DAVFactory factory;
     protected final UserizedFolder folder;
 
-    private Date lastModified = null;
-
     /**
      * Initializes a new {@link CommonFolderCollection}.
      *
@@ -145,10 +143,28 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
      */
     protected abstract Collection<T> getObjects() throws OXException;
 
+    /**
+     * Gets a groupware object by its resource name.
+     *
+     * @param resourceName The resource name
+     * @return The object
+     */
     protected abstract T getObject(String resourceName) throws OXException;
 
+    /**
+     * Creates a new resource in this collection.
+     *
+     * @param object The object to create
+     * @param url The URL to use
+     * @return The created resource
+     */
     protected abstract AbstractResource createResource(T object, WebdavPath url) throws OXException;
 
+    /**
+     * Gets the file extension to use for resources in this collcetion.
+     *
+     * @return The file extension
+     */
     protected abstract String getFileExtension();
 
     /**
@@ -271,32 +287,6 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
             }
             throw protocolException(e);
         }
-    }
-
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
-        if (null == this.lastModified) {
-            lastModified = folder.getLastModifiedUTC();
-            try {
-                /*
-                 * new and modified objects
-                 */
-                Collection<T> modifiedObjects = getModifiedObjects(lastModified);
-                for (T object : modifiedObjects) {
-                    lastModified = Tools.getLatestModified(lastModified, object);
-                }
-                /*
-                 * deleted objects
-                 */
-                Collection<T> deletedObjects = getDeletedObjects(lastModified);
-                for (T object : deletedObjects) {
-                    lastModified = Tools.getLatestModified(lastModified, object);
-                }
-            } catch (OXException e) {
-                throw protocolException(e);
-            }
-        }
-        return lastModified;
     }
 
     @Override

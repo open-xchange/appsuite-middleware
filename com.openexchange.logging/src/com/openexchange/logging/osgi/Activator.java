@@ -49,35 +49,34 @@
 
 package com.openexchange.logging.osgi;
 
+import java.net.URL;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-import javax.management.ObjectName;
+import java.util.Map;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.jul.LevelChangePropagator;
-import ch.qos.logback.classic.spi.LoggerContextListener;
-import ch.qos.logback.classic.turbo.TurboFilter;
 import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
-import com.openexchange.exception.OXException;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppenderMBean;
-import com.openexchange.logging.LogConfigReloadable;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
-import com.openexchange.logging.mbean.LogbackConfiguration;
-import com.openexchange.logging.mbean.LogbackConfigurationMBean;
-import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 import com.openexchange.management.ManagementService;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.classic.jul.LevelChangePropagator;
+import ch.qos.logback.classic.spi.LoggerContextListener;
+import ch.qos.logback.classic.turbo.TurboFilter;
+import ch.qos.logback.classic.util.ContextInitializer;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.status.StatusListenerAsList;
+import ch.qos.logback.core.status.StatusManager;
 
 /**
  * {@link Activator}
@@ -85,11 +84,12 @@ import com.openexchange.management.ManagementService;
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class Activator implements BundleActivator {
+public class Activator implements BundleActivator, Reloadable {
 
     protected static final String LOGIN_PERFORMER = "com.openexchange.login.internal.LoginPerformer";
-
     protected static final String SESSION_HANDLER = "com.openexchange.sessiond.impl.SessionHandler";
+    private static final String CONFIGFILE = "logback.xml";
+    private static final String[] PROPERTIES = new String[] { "all properties in file" };
 
     /** The logger */
     protected static Logger LOGGER = LoggerFactory.getLogger(Activator.class);
@@ -100,7 +100,6 @@ public class Activator implements BundleActivator {
     private volatile ServiceTracker<ConfigurationService, ConfigurationService> configurationTracker;
     private volatile RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private volatile ServiceRegistration<IncludeStackTraceService> includeStackTraceServiceRegistration;
-
     private ServiceRegistration<Reloadable> reloadable;
 
     /*
@@ -131,25 +130,20 @@ public class Activator implements BundleActivator {
             }
         }
 
-        // Initialization stuff for JUL/JCL bridges
+        // Initialisation stuff for JUL/JCL bridges
         configureJavaUtilLogging();
         overrideLoggerLevels(loggerContext);
         installJulLevelChangePropagator(loggerContext);
 
         // The ranking-aware turbo filter list - itself acting as a turbo filter
-        final RankingAwareTurboFilterList rankingAwareTurboFilterList = new RankingAwareTurboFilterList();
-        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
-        loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+        initialiseRankingAwareTurboFilterList(loggerContext);
 
+        // Register services
         final IncludeStackTraceServiceImpl serviceImpl = new IncludeStackTraceServiceImpl();
-
         registerLoggingConfigurationMBean(context, loggerContext, rankingAwareTurboFilterList, serviceImpl);
-
         registerExceptionCategoryFilter(context, rankingAwareTurboFilterList, serviceImpl);
-
         registerIncludeStackTraceService(serviceImpl, context);
-
-        reloadable = context.registerService(Reloadable.class, new LogConfigReloadable(), null);
+        reloadable = context.registerService(Reloadable.class, this, null);
     }
 
     @Override
@@ -241,10 +235,7 @@ public class Activator implements BundleActivator {
 
                 if (level == null || level.isGreaterOrEqual(Level.WARN)) {
                     lLogger.setLevel(Level.INFO);
-                    LOGGER.info(
-                        "Configured log level {} for class {} is too coarse. It is changed to INFO!",
-                        level,
-                        className);
+                    LOGGER.info("Configured log level {} for class {} is too coarse. It is changed to INFO!", level, className);
                 }
             } else {
                 LOGGER.warn("Not able to check (and set) the log level to INFO for class: {}", className);
@@ -253,67 +244,23 @@ public class Activator implements BundleActivator {
     }
 
     /**
+     * Initialise the {@link RankingAwareTurboFilterList} and register itself acting as a turbo filter
+     * 
+     * @param loggerContext The {@link LoggerContext}
+     */
+    private void initialiseRankingAwareTurboFilterList(LoggerContext loggerContext) {
+        final RankingAwareTurboFilterList rankingAwareTurboFilterList = new RankingAwareTurboFilterList();
+        this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
+        loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+    }
+
+    /**
      * Register the LoggingConfigurationMBean
      */
     protected void registerLoggingConfigurationMBean(final BundleContext context, final LoggerContext loggerContext, final RankingAwareTurboFilterList turboFilterList, final IncludeStackTraceServiceImpl serviceImpl) {
         try {
-            final ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, new ServiceTrackerCustomizer<ManagementService, ManagementService>() {
-
-                private volatile ObjectName logbackConfObjName;
-                private volatile LogbackConfiguration logbackConfiguration;
-
-                @Override
-                public synchronized ManagementService addingService(ServiceReference<ManagementService> reference) {
-                    ManagementService managementService = context.getService(reference);
-                    try {
-                        final ObjectName logbackConfObjName = new ObjectName(LogbackConfigurationMBean.DOMAIN, LogbackConfigurationMBean.KEY, LogbackConfigurationMBean.VALUE);
-                        this.logbackConfObjName = logbackConfObjName;
-                        // Register MBean
-                        final LogbackConfiguration logbackConfiguration = new LogbackConfiguration(loggerContext, turboFilterList, serviceImpl);
-                        this.logbackConfiguration = logbackConfiguration;
-                        managementService.registerMBean(logbackConfObjName, logbackConfiguration);
-
-                        // Register Logstash Appender MBean
-                        {
-                            boolean logstash = Boolean.parseBoolean(loggerContext.getProperty("com.openexchange.logback.extensions.logstash.enabled"));
-                            if (logstash) {
-                                final ObjectName logstashConfName = new ObjectName(LogstashSocketAppenderMBean.DOMAIN, LogstashSocketAppenderMBean.KEY, LogstashSocketAppenderMBean.VALUE);
-                                managementService.registerMBean(logstashConfName, LogstashSocketAppender.getInstance());
-                            }
-                        }
-                        return managementService;
-                    } catch (final Exception e) {
-                        LOGGER.error("Could not register LogbackConfigurationMBean", e);
-                    }
-                    context.ungetService(reference);
-                    return null;
-                }
-
-                @Override
-                public synchronized void modifiedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                    // Nothing
-                }
-
-                @Override
-                public synchronized void removedService(ServiceReference<ManagementService> reference, ManagementService service) {
-                    if (service != null) {
-                        try {
-                            final ObjectName logbackConfObjName = this.logbackConfObjName;
-                            if (logbackConfObjName != null) {
-                                service.unregisterMBean(logbackConfObjName);
-                                LOGGER.info("LoggingConfigurationMBean successfully unregistered.");
-                            }
-                            final LogbackConfiguration logbackConfiguration = this.logbackConfiguration;
-                            if (null != logbackConfiguration) {
-                                logbackConfiguration.dispose();
-                                this.logbackConfiguration = null;
-                            }
-                        } catch (OXException e) {
-                            LOGGER.warn("Could not unregister LogbackConfigurationMBean", e);
-                        }
-                    }
-                }
-            });
+            LogbackConfigurationMBeanRegisterer logbackConfigurationMBeanRegisterer = new LogbackConfigurationMBeanRegisterer(context, turboFilterList, serviceImpl);
+            ServiceTracker<ManagementService, ManagementService> tracker = new ServiceTracker<ManagementService, ManagementService>(context, ManagementService.class, logbackConfigurationMBeanRegisterer);
             this.managementTracker = tracker;
             tracker.open();
         } catch (final Exception e) {
@@ -323,14 +270,69 @@ public class Activator implements BundleActivator {
         LOGGER.info("LoggingConfigurationMBean successfully registered.");
     }
 
+    /**
+     * Register the exception category filter
+     * 
+     * @param context The bundle context
+     * @param turboFilterList The ranking aware turbo filter list
+     * @param serviceImpl The include stack trace service
+     */
     protected void registerExceptionCategoryFilter(final BundleContext context, final RankingAwareTurboFilterList turboFilterList, IncludeStackTraceServiceImpl serviceImpl) {
-        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl));
+        ExceptionCategoryFilterRegisterer exceptionCategoryFilterRegisterer = new ExceptionCategoryFilterRegisterer(context, turboFilterList, serviceImpl);
+        final ServiceTracker<ConfigurationService, ConfigurationService> tracker = new ServiceTracker<ConfigurationService, ConfigurationService>(context, ConfigurationService.class, exceptionCategoryFilterRegisterer);
         configurationTracker = tracker;
         tracker.open();
     }
 
+    /**
+     * Register the include stacktrace service
+     * 
+     * @param serviceImpl The implementation
+     * @param context The bundle context
+     */
     protected void registerIncludeStackTraceService(final IncludeStackTraceServiceImpl serviceImpl, final BundleContext context) {
         includeStackTraceServiceRegistration = context.registerService(IncludeStackTraceService.class, serviceImpl, null);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#reloadConfiguration(com.openexchange.config.ConfigurationService)
+     */
+    @Override
+    public void reloadConfiguration(ConfigurationService configService) {
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        ContextInitializer ci = new ContextInitializer(loggerContext);
+        URL url = ci.findURLOfDefaultConfigurationFile(true);
+        StatusListenerAsList statusListenerAsList = new StatusListenerAsList();
+        StatusManager sm = loggerContext.getStatusManager();
+        loggerContext.reset();
+        // after a reset the statusListenerAsList gets removed as a listener
+        sm.add(statusListenerAsList);
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerContext);
+            configurator.doConfigure(url);
+
+            // Restore the ranking aware turbo filer list to the logger context
+            loggerContext.addTurboFilter(rankingAwareTurboFilterList);
+        } catch (JoranException e) {
+            LOGGER.error("Error reloading logback configuration: {}", e);
+        } finally {
+            sm.remove(statusListenerAsList);
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.config.Reloadable#getConfigfileNames()
+     */
+    @Override
+    public Map<String, String[]> getConfigFileNames() {
+        Map<String, String[]> map = new HashMap<String, String[]>(1);
+        map.put(CONFIGFILE, PROPERTIES);
+        return map;
     }
 
 }

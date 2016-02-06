@@ -49,7 +49,7 @@
 
 package com.openexchange.drive;
 
-
+import java.util.Map;
 
 /**
  * {@link DriveSettings}
@@ -63,6 +63,7 @@ public class DriveSettings {
     private DriveQuota quota;
     private String supportedApiVersion;
     private String minApiVersion;
+    private Map<String, String> localizedFolders;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -159,6 +160,24 @@ public class DriveSettings {
      */
     public void setMinApiVersion(String minApiVersion) {
         this.minApiVersion = minApiVersion;
+    }
+
+    /**
+     * Gets the localizedFolders
+     *
+     * @return The localizedFolders
+     */
+    public Map<String, String> getLocalizedFolders() {
+        return localizedFolders;
+    }
+
+    /**
+     * Sets the localizedFolders
+     *
+     * @param localizedFolders The localizedFolders to set
+     */
+    public void setLocalizedFolders(Map<String, String> localizedFolders) {
+        this.localizedFolders = localizedFolders;
     }
 
 }

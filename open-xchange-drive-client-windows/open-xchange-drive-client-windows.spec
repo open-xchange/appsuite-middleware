@@ -13,9 +13,10 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
+BuildRequires: open-xchange-admin
 BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
 Version:       @OXVERSION@
-%define        ox_release 0
+%define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -25,6 +26,7 @@ Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       New updater for windows drive clients
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
+Requires:      open-xchange-admin >= @OXVERSION@
 
 %description
 This package offers windows drive clients the possibility to update themselves without the use of the ox-updater.
@@ -55,7 +57,15 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %config(noreplace) /opt/open-xchange/etc/*
 %dir /opt/open-xchange/templates/
 /opt/open-xchange/templates/*
+%dir /opt/open-xchange/lib/
+/opt/open-xchange/lib/*
+%dir /opt/open-xchange/sbin/
+/opt/open-xchange/sbin/*
 
 %changelog
+* Wed Feb 03 2016 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+Second candidate for 7.8.1 release
+* Tue Jan 26 2016 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
+First candidate for 7.8.1 release
 * Tue Nov 10 2015 Kevin Ruthmann <kevin.ruthmann@open-xchange.com>
 Initial release

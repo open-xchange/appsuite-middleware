@@ -115,15 +115,32 @@ import com.openexchange.xml.jdom.JDOMParser;
 public abstract class CalDAVFolderCollection<T extends CalendarObject> extends CommonFolderCollection<T> implements FilteringResource {
 
     protected static final int NO_ORDER = -1;
-    private static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
+    protected static final Pattern OBJECT_ID_PATTERN = Pattern.compile("^\\d+$");
 
     protected final GroupwareCaldavFactory factory;
     protected final int folderID;
 
+    private Date lastModified;
+
+    /**
+     * Initializes a new {@link CalDAVFolderCollection}.
+     *
+     * @param factory The factory
+     * @param url The WebDAV path
+     * @param folder The underlying folder, or <code>null</code> if it not yet exists
+     */
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
         this(factory, url, folder, NO_ORDER);
     }
 
+    /**
+     * Initializes a new {@link CalDAVFolderCollection}.
+     *
+     * @param factory The factory
+     * @param url The WebDAV path
+     * @param folder The underlying folder, or <code>null</code> if it not yet exists
+     * @param order The calendar order to use, or {@value #NO_ORDER} for no specific order
+     */
     public CalDAVFolderCollection(GroupwareCaldavFactory factory, WebdavPath url, UserizedFolder folder, int order) throws OXException {
         super(factory, url, folder);
         this.factory = factory;
@@ -152,6 +169,32 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
 
     public Date getIntervalEnd() {
         return factory.getState().getMaxDateTime();
+    }
+
+    @Override
+    public Date getLastModified() throws WebdavProtocolException {
+        if (null == this.lastModified) {
+            lastModified = Tools.getLatestModified(getIntervalStart(), folder);
+            try {
+                /*
+                 * new and modified objects
+                 */
+                Collection<T> modifiedObjects = getModifiedObjects(lastModified);
+                for (T object : modifiedObjects) {
+                    lastModified = Tools.getLatestModified(lastModified, object);
+                }
+                /*
+                 * deleted objects
+                 */
+                Collection<T> deletedObjects = getDeletedObjects(lastModified);
+                for (T object : deletedObjects) {
+                    lastModified = Tools.getLatestModified(lastModified, object);
+                }
+            } catch (OXException e) {
+                throw protocolException(e);
+            }
+        }
+        return lastModified;
     }
 
     @Override

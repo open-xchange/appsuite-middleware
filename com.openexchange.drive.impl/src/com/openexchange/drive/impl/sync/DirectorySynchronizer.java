@@ -451,9 +451,10 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
      */
     private List<DirectoryVersion> getKnownSubDirectories(DirectoryVersion version) {
         List<DirectoryVersion> subDirectories = new ArrayList<DirectoryVersion>();
+        String prefix = version.getPath() + DriveConstants.PATH_SEPARATOR;
         for (DirectoryVersion directoryVersion : mapper.getServerVersions()) {
             String candidatePath = directoryVersion.getPath();
-            if (candidatePath.startsWith(version.getPath()) && false == candidatePath.equals(version.getPath())) {
+            if (candidatePath.startsWith(prefix)) {
                 subDirectories.add(directoryVersion);
             }
         }

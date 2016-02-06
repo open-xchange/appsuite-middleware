@@ -139,7 +139,7 @@ public class SearchEngineImpl extends DBService {
      * @return The search results
      */
     public SearchIterator<DocumentMetadata> search(ServerSession session, SearchTerm<?> searchTerm, List<Integer> all, List<Integer> own, Metadata[] cols, Metadata sortedBy, int dir, int start, int end) throws OXException {
-        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(all, own, session.getContextId(), session.getUserId(), getResultFieldsSelect(cols), sortedBy, dir, start, end);
+        ToMySqlQueryVisitor visitor = new ToMySqlQueryVisitor(session, all, own, getResultFieldsSelect(cols), sortedBy, dir, start, end);
         searchTerm.visit(visitor);
         String sqlQuery = visitor.getMySqlQuery();
         boolean successful = false;
@@ -290,21 +290,21 @@ public class SearchEngineImpl extends DBService {
      * Appends a UNION-clause to restrict the results to the supplied set of folders. An appropriate condition for the special folder
      * holding single shared files (10) is appended automatically if the <code>readAllFolders</code> collection contains it.
      *
+     * @param session The requesting user's session
      * @param sqlQuery The string builder holding the current SQL query w/o WHERE
      * @param filter An optional filter expression that is supposed to be appended to WHERE clause
-     * @param contextID The context identifier
-     * @param userID The identifier of the requesting user
      * @param readAllFolders A collection of folder identifiers the user is able to read "all" items from
      * @param readOwnFolders A collection of folder identifiers the user is able to read only "own" items from
      */
-    protected static void appendFoldersAsUnion(StringBuilder sqlQuery, String filter, int contextID, int userID, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
+    protected static void appendFoldersAsUnion(ServerSession session, StringBuilder sqlQuery, String filter, List<Integer> readAllFolders, List<Integer> readOwnFolders) {
         if (readAllFolders.isEmpty() && readOwnFolders.isEmpty()) {
             if (null != filter) {
                 sqlQuery.append(" WHERE ").append(filter);
             }
             return;
         }
-
+        int contextID = session.getContextId();
+        int userID = session.getUserId();
         String prefix = sqlQuery.toString();
 
         boolean appendUnion = false;
@@ -318,7 +318,14 @@ public class SearchEngineImpl extends DBService {
                 sqlQuery.append(" WHERE infostore.cid = ").append(contextID).append(" AND ");
                 sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=");
                 sqlQuery.append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID);
-                sqlQuery.append(" AND permission_id=").append(userID).append("))");
+                sqlQuery.append(" AND ((group_flag<>1 AND permission_id=").append(userID).append(')');
+                int[] groups = session.getUser().getGroups();
+                if (null == groups || 0 == groups.length) {
+                    sqlQuery.append(')');
+                } else {
+                    sqlQuery.append(" OR (group_flag=1 AND permission_id IN (").append(Strings.join(groups, ",")).append(")))");
+                }
+                sqlQuery.append("))");
                 if (null != filter) {
                     sqlQuery.append(" AND ").append(filter);
                 }

@@ -209,7 +209,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
-        assertNull("ALARM in iCal found", iCalResource.getVEvent().getVAlarm());
+        assertDummyAlarm(iCalResource.getVEvent());
     }
 
     @Test
@@ -1025,7 +1025,7 @@ public class AlarmTestIOSCalendar extends CalDAVTest {
         assertEquals("Not all VEVENTs in iCal found", 2, iCalResource.getVEvents().size());
         assertEquals("UID wrong", uid, iCalResource.getVEvents().get(1).getUID());
         assertEquals("SUMMARY wrong", "SerieEdit", iCalResource.getVEvents().get(1).getSummary());
-        assertNull("ALARM in iCal exception found", iCalResource.getVEvents().get(1).getVAlarm());
+        assertDummyAlarm(iCalResource.getVEvents().get(1));
     }
 
     @Test

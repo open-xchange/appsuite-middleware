@@ -91,7 +91,7 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
         ShareExceptionMessages.NO_DELETE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
 
     /** You don't have sufficient permissions to edit the share. || User %1$d has no edit permissions for share \"%2$s\" in context %3$d. */
-    NO_EDIT_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
+    NO_EDIT_PERMISSIONS("User %1$d has no edit permissions for share \"%2$s\" in context %3$d.",
         ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
 
     /** You don't have sufficient permissions to share folder or item \"%2$s\". || User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d. */

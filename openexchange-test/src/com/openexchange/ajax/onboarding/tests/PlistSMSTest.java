@@ -91,7 +91,7 @@ public class PlistSMSTest extends AbstractAJAXSession {
     private static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
     public void testExecute() throws Exception {
-        String jsonString = "{\"sms\":\"0276183850\",\"code\":\"de\"}";
+        String jsonString = "{\"sms\":\"+49276183850\",\"code\":\"de\"}";
         JSONObject body = new JSONObject(jsonString);
 
         for (String id : SCENARIOS) {

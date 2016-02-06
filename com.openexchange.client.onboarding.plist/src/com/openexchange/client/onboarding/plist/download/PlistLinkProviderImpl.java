@@ -56,10 +56,13 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.codec.binary.Base64;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
+import com.openexchange.client.onboarding.download.DownloadParameters;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.notify.hostname.HostData;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.user.UserService;
 
@@ -174,24 +177,33 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
     }
 
     @Override
-    public String[] getParameter(String url) throws OXException{
-        if(null==url || url.isEmpty()){
+    public DownloadParameters getParameter(String url) throws OXException {
+        if (Strings.isEmpty(url)) {
             throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
         }
+
+        // Expect something like: /<user-id>/<context-id>/<device-id>/<scenario-id>/<challenge>
         String[] result = new String[5];
-        for (int x = 4; x >= 0; x--) {
-            int index = url.lastIndexOf(SLASH);
-            if (index == -1 || index == url.length() - 1) {
-                throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
+        try {
+            String toParse = url;
+            for (int x = 5; x-- > 0;) {
+                int index = toParse.lastIndexOf(SLASH);
+                if (index == -1 || index == toParse.length() - 1) {
+                    throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
+                }
+                String token = toParse.substring(index + 1, toParse.length());
+                result[x] = x <= 3 ? Charsets.toAsciiString(Base64.decodeBase64(token)) : token;
+                toParse = toParse.substring(0, index);
             }
-            result[x] = url.substring(index + 1, url.length());
-            url = url.substring(0, index);
-        }
-        for (int x = 0; x <= 3; x++) {
-            result[x] = new String(Base64.decodeBase64(result[x]));
+        } catch (RuntimeException e) {
+            throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create(e);
         }
 
-        return result;
+        try {
+            return new DownloadParameters(Integer.parseInt(result[0]), Integer.parseInt(result[1]), result[2], result[3], result[4]);
+        } catch (NumberFormatException e) {
+            throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create(e);
+        }
     }
 
     private String getServletPrefix() {

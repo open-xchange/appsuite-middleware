@@ -995,6 +995,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                             return part;
                         }
                     }
+                } catch (MessageRemovedException e) {
+                    throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);
                 } catch (final IOException e) {
                     if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
                         throw MailExceptionCode.MAIL_NOT_FOUND.create(e, Long.valueOf(msgUID), fullName);

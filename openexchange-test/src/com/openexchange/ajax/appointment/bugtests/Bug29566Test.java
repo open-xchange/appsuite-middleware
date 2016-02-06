@@ -125,17 +125,13 @@ public class Bug29566Test extends AbstractAJAXSession {
         clone.setUsers(new UserParticipant[] { user, user2 });
         
         ctm2.update(clone);
-        
-        if (shared) {
-            assertTrue("Error expected.", ctm2.getLastResponse().hasError());
-            assertEquals("Wrong error.", OXCalendarExceptionCodes.NO_SHARED_FOLDER_OWNER.getNumber(), ctm2.getLastResponse().getException().getCode());
-        } else {
-            assertFalse("No error expected.", ctm2.getLastResponse().hasError());
-            
-            Appointment loaded = ctm.get(appointment);
-            assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
-            assertEquals("Expected two users.", 2, loaded.getUsers().length);
-        }
+
+        assertFalse("No error expected.", ctm2.getLastResponse().hasError());
+
+        Appointment loaded = ctm.get(appointment);
+        assertEquals("Expected two participants.", 2, loaded.getParticipants().length);
+        assertEquals("Expected two users.", 2, loaded.getUsers().length);
+
     }
     
     public void testAddParticipantWithoutInfoShared() throws Exception {

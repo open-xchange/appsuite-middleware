@@ -74,6 +74,8 @@ import com.openexchange.tools.update.Tools;
  */
 public class RdbAliasStorage implements UserAliasStorage {
 
+    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
+
     private static final String CREATE_ALIAS_WITH_UUID = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
 
     private static final String READ_ALIASES = "SELECT alias FROM user_alias WHERE cid=? AND user=?";

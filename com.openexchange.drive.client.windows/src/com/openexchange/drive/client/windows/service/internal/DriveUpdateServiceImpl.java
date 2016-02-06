@@ -52,6 +52,7 @@ package com.openexchange.drive.client.windows.service.internal;
 import static com.openexchange.java.Strings.quote;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -121,12 +122,9 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     @Override
     public String getInstallerDownloadUrl(HostData hostData, Session session) throws OXException {
         // Get associated branding
-        String branding;
-        {
-            branding = BrandingService.getBranding(session);
-            if (!isValid(branding)) {
-                throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
-            }
+        String branding = BrandingService.getBranding(session);
+        if (!isValid(branding)) {
+            throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
         }
 
         // Get the name of .exe file
@@ -135,8 +133,8 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         // Compile server URL
         String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
 
-        // ... and return URL
-        return Utils.getFileUrl(serverUrl, exeFileName);
+        // ... and return URL with "session" URL parameter
+        return Utils.compileUrl(serverUrl, new String[] { Utils.getServletPrefix(), Constants.INSTALL_SERVLET, exeFileName }, Collections.singletonMap("session", session.getSessionID()));
     }
 
     @Override

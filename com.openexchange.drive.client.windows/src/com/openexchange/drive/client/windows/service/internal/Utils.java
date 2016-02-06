@@ -54,6 +54,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
 import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.codec.binary.Base64InputStream;
 import org.apache.commons.io.IOUtils;
@@ -149,9 +152,13 @@ public class Utils {
     }
 
     public static String compileUrl(String baseUrl, String... segments) {
+        return compileUrl(baseUrl, segments, Collections.<String, String>emptyMap());
+    }
+
+    public static String compileUrl(String baseUrl, String[] pathSegments, Map<String, String> queryParams) {
         StringBuilder path = new StringBuilder();
-        if (segments != null && segments.length > 0) {
-            for (String segment : segments) {
+        if (pathSegments != null && pathSegments.length > 0) {
+            for (String segment : pathSegments) {
                 if (segment != null && segment.length() > 0) {
                     if (segment.charAt(0) != '/') {
                         path.append('/');
@@ -165,7 +172,13 @@ public class Utils {
             }
         }
 
-        return new URIBuilder(URI.create(baseUrl)).setPath(path.toString()).toString();
+        URIBuilder uri = new URIBuilder(URI.create(baseUrl)).setPath(path.toString());
+        if (queryParams != null && queryParams.size() > 0) {
+            for (Entry<String, String> entry : queryParams.entrySet()) {
+                uri.addParameter(entry.getKey(), entry.getValue());
+            }
+        }
+        return uri.toString();
     }
 
     public static String convertToBase64(File icon) throws IOException {

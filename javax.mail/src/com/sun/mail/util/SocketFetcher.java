@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,14 +42,11 @@ package com.sun.mail.util;
 
 import java.security.*;
 import java.net.*;
-import java.nio.channels.SocketChannel;
 import java.io.*;
+import java.nio.channels.SocketChannel;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.regex.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.security.cert.*;
 import javax.net.*;
@@ -81,7 +78,7 @@ public class SocketFetcher {
     /**
      * This method returns a Socket.  Properties control the use of
      * socket factories and other socket characteristics.  The properties
-     * used are: <p>
+     * used are:
      * <ul>
      * <li> <i>prefix</i>.socketFactory
      * <li> <i>prefix</i>.socketFactory.class
@@ -142,6 +139,8 @@ public class SocketFetcher {
      * @param props Properties object containing socket properties
      * @param prefix Property name prefix, e.g., "mail.imap"
      * @param useSSL use the SSL socket factory as the default
+     * @return		the Socket
+     * @exception	IOException	for I/O errors
      */
     public static Socket getSocket(String host, int port, Properties props,
 				String prefix, boolean useSSL)
@@ -240,8 +239,11 @@ public class SocketFetcher {
 		    host, port, cto, to, props, prefix, null, useSSL);
 
 	} else {
-	    if (to >= 0)
+	    if (to >= 0) {
+		if (logger.isLoggable(Level.FINEST))
+		    logger.finest("set socket read timeout " + to);
 		socket.setSoTimeout(to);
+	    }
 	}
 
 	return socket;
@@ -266,6 +268,13 @@ public class SocketFetcher {
 				throws IOException {
 	Socket socket = null;
 
+	if (logger.isLoggable(Level.FINEST))
+	    logger.finest("create socket: prefix " + prefix +
+		", localaddr " + localaddr + ", localport " + localport +
+		", host " + host + ", port " + port +
+		", connection timeout " + cto + ", timeout " + to +
+		", socket factory " + sf + ", useSSL " + useSSL);
+		
 	String socksHost = props.getProperty(prefix + ".socks.host", null);
 	int socksPort = 1080;
 	String err = null;
@@ -286,7 +295,7 @@ public class SocketFetcher {
 		logger.finer("socks host " + socksHost + ", port " + socksPort);
 	}
 
-	if (sf != null)
+	if (sf != null && !(sf instanceof SSLSocketFactory))
 	    socket = sf.createSocket();
 	if (socket == null) {
 	    if (socksHost != null) {
@@ -300,20 +309,29 @@ public class SocketFetcher {
 	    } else
 		socket = new Socket();
 	}
-	if (to >= 0)
+	if (to >= 0) {
+	    if (logger.isLoggable(Level.FINEST))
+		logger.finest("set socket read timeout " + to);
 	    socket.setSoTimeout(to);
+	}
 	int writeTimeout = PropUtil.getIntProperty(props,
 						prefix + ".writetimeout", -1);
-	if (writeTimeout != -1)	// wrap original
+	if (writeTimeout != -1) {	// wrap original
+	    if (logger.isLoggable(Level.FINEST))
+		logger.finest("set socket write timeout " + writeTimeout);
 	    socket = new WriteTimeoutSocket(socket, writeTimeout);
+	}
 	if (localaddr != null)
 	    socket.bind(new InetSocketAddress(localaddr, localport));
 	try {
+	    logger.finest("connecting...");
 	    if (cto >= 0)
 		socket.connect(new InetSocketAddress(host, port), cto);
 	    else
 		socket.connect(new InetSocketAddress(host, port));
+	    logger.finest("success!");
 	} catch (IOException ex) {
+	    logger.log(Level.FINEST, "connection failed", ex);
 	    throw new SocketConnectException(err, ex, host, port, cto);
 	}
 
@@ -321,7 +339,8 @@ public class SocketFetcher {
 	 * If we want an SSL connection and we didn't get an SSLSocket,
 	 * wrap our plain Socket with an SSLSocket.
 	 */
-	if (useSSL && !(socket instanceof SSLSocket)) {
+	if ((useSSL || sf instanceof SSLSocketFactory) &&
+		!(socket instanceof SSLSocket)) {
 	    String trusted;
 	    SSLSocketFactory ssf;
 	    if ((trusted = props.getProperty(prefix + ".ssl.trust")) != null) {
@@ -338,7 +357,9 @@ public class SocketFetcher {
 		    ioex.initCause(gex);
 		    throw ioex;
 		}
-	    } else
+	    } else if (sf instanceof SSLSocketFactory)
+		ssf = (SSLSocketFactory)sf;
+	    else
 		ssf = (SSLSocketFactory)SSLSocketFactory.getDefault();
 	    socket = ssf.createSocket(socket, host, port, true);
 	    sf = ssf;
@@ -367,7 +388,7 @@ public class SocketFetcher {
 	// dynamically load the class 
 
 	ClassLoader cl = getContextClassLoader();
-	Class clsSockFact = null;
+	Class<?> clsSockFact = null;
 	if (cl != null) {
 	    try {
 		clsSockFact = Class.forName(sfClass, false, cl);
@@ -377,7 +398,7 @@ public class SocketFetcher {
 	    clsSockFact = Class.forName(sfClass);
 	// get & invoke the getDefault() method
 	Method mthGetDefault = clsSockFact.getMethod("getDefault", 
-						     new Class[]{});
+						     new Class<?>[]{});
 	SocketFactory sf = (SocketFactory)
 	    mthGetDefault.invoke(new Object(), new Object[]{});
 	return sf;
@@ -388,7 +409,13 @@ public class SocketFetcher {
      * Supports the "STARTTLS" command in many protocols.
      * This version for compatibility with possible third party code
      * that might've used this API even though it shouldn't.
+     *
+     * @param	socket	the existing socket
+     * @return		the wrapped Socket
+     * @exception	IOException	for I/O errors
+     * @deprecated
      */
+    @Deprecated
     public static Socket startTLS(Socket socket) throws IOException {
 	return startTLS(socket, new Properties(), "socket");
     }
@@ -398,7 +425,15 @@ public class SocketFetcher {
      * Supports the "STARTTLS" command in many protocols.
      * This version for compatibility with possible third party code
      * that might've used this API even though it shouldn't.
+     *
+     * @param	socket	the existing socket
+     * @param	props	the properties
+     * @param	prefix	the property prefix
+     * @return		the wrapped Socket
+     * @exception	IOException	for I/O errors
+     * @deprecated
      */
+    @Deprecated
     public static Socket startTLS(Socket socket, Properties props,
 				String prefix) throws IOException {
 	InetAddress a = socket.getInetAddress();
@@ -409,6 +444,13 @@ public class SocketFetcher {
     /**
      * Start TLS on an existing socket.
      * Supports the "STARTTLS" command in many protocols.
+     *
+     * @param	socket	the existing socket
+     * @param	host	the host the socket is connected to
+     * @param	props	the properties
+     * @param	prefix	the property prefix
+     * @return		the wrapped Socket
+     * @exception	IOException	for I/O errors
      */
     public static Socket startTLS(Socket socket, String host, Properties props,
 				String prefix) throws IOException {
@@ -521,20 +563,30 @@ public class SocketFetcher {
 	    sslsocket.setEnabledProtocols(stringArray(protocols));
 	else {
 	    /*
-	     * At least the UW IMAP server insists on only the TLSv1
+	     * The UW IMAP server insists on at least the TLSv1
 	     * protocol for STARTTLS, and won't accept the old SSLv2
-	     * or SSLv3 protocols.  Here we enable only the TLSv1
-	     * protocol.  XXX - this should probably be parameterized.
+	     * or SSLv3 protocols.  Here we enable only the non-SSL
+	     * protocols.  XXX - this should probably be parameterized.
 	     */
-	    sslsocket.setEnabledProtocols(new String[] {"TLSv1"});
+	    String[] prots = sslsocket.getEnabledProtocols();
+	    if (logger.isLoggable(Level.FINER))
+		logger.finer("SSL enabled protocols before " +
+		    Arrays.asList(prots));
+	    List<String> eprots = new ArrayList<String>();
+	    for (int i = 0; i < prots.length; i++) {
+		if (prots[i] != null && !prots[i].startsWith("SSL"))
+		    eprots.add(prots[i]);
+	    }
+	    sslsocket.setEnabledProtocols(
+				eprots.toArray(new String[eprots.size()]));
 	}
 	String ciphers = props.getProperty(prefix + ".ssl.ciphersuites", null);
 	if (ciphers != null)
 	    sslsocket.setEnabledCipherSuites(stringArray(ciphers));
 	if (logger.isLoggable(Level.FINER)) {
-	    logger.finer("SSL protocols after " +
+	    logger.finer("SSL enabled protocols after " +
 		Arrays.asList(sslsocket.getEnabledProtocols()));
-	    logger.finer("SSL ciphers after " +
+	    logger.finer("SSL enabled ciphers after " +
 		Arrays.asList(sslsocket.getEnabledCipherSuites()));
 	}
 
@@ -570,7 +622,7 @@ public class SocketFetcher {
      * 
      * @param	server		name of the server expected
      * @param   sslSocket	SSLSocket connected to the server
-     * @return  true if the RFC 2595 check passes
+     * @exception	IOException	if we can't verify identity of server
      */
     private static void checkServerIdentity(String server, SSLSocket sslSocket)
 				throws IOException {
@@ -615,12 +667,12 @@ public class SocketFetcher {
 	 * in the JDK we're running on.
 	 */
 	try {
-	    Class hnc = Class.forName("sun.security.util.HostnameChecker");
+	    Class<?> hnc = Class.forName("sun.security.util.HostnameChecker");
 	    // invoke HostnameChecker.getInstance(HostnameChecker.TYPE_LDAP)
 	    // HostnameChecker.TYPE_LDAP == 2
 	    // LDAP requires the same regex handling as we need
 	    Method getInstance = hnc.getMethod("getInstance", 
-					new Class[] { byte.class });
+					new Class<?>[] { byte.class });
 	    Object hostnameChecker = getInstance.invoke(new Object(),
 					new Object[] { Byte.valueOf((byte)2) });
 
@@ -628,12 +680,12 @@ public class SocketFetcher {
 	    if (logger.isLoggable(Level.FINER))
 		logger.finer("using sun.security.util.HostnameChecker");
 	    Method match = hnc.getMethod("match",
-			new Class[] { String.class, X509Certificate.class });
+			new Class<?>[] { String.class, X509Certificate.class });
 	    try {
 		match.invoke(hostnameChecker, new Object[] { server, cert });
 		return true;
 	    } catch (InvocationTargetException cex) {
-		logger.log(Level.FINER, "FAIL", cex);
+		logger.log(Level.FINER, "HostnameChecker FAIL", cex);
 		return false;
 	    }
 	} catch (Exception ex) {
@@ -651,11 +703,11 @@ public class SocketFetcher {
 	     * XXX - only checks DNS names, should also handle
 	     * case where server name is a literal IP address
 	     */
-	    Collection names = cert.getSubjectAlternativeNames();
+	    Collection<List<?>> names = cert.getSubjectAlternativeNames();
 	    if (names != null) {
 		boolean foundName = false;
-		for (Iterator it = names.iterator(); it.hasNext(); ) {
-		    List nameEnt = (List)it.next();
+		for (Iterator<List<?>> it = names.iterator(); it.hasNext(); ) {
+		    List<?> nameEnt = it.next();
 		    Integer type = (Integer)nameEnt.get(0);
 		    if (type.intValue() == 2) {	// 2 == dNSName
 			foundName = true;
@@ -714,10 +766,10 @@ public class SocketFetcher {
      */
     private static String[] stringArray(String s) {
 	StringTokenizer st = new StringTokenizer(s);
-	List tokens = new ArrayList();
+	List<String> tokens = new ArrayList<String>();
 	while (st.hasMoreTokens())
 	    tokens.add(st.nextToken());
-	return (String[])tokens.toArray(new String[tokens.size()]);
+	return tokens.toArray(new String[tokens.size()]);
     }
 
     /**
@@ -726,9 +778,9 @@ public class SocketFetcher {
      * Thread.getContextClassLoader method.
      */
     private static ClassLoader getContextClassLoader() {
-	return (ClassLoader)
-		AccessController.doPrivileged(new PrivilegedAction() {
-	    public Object run() {
+	return
+	AccessController.doPrivileged(new PrivilegedAction<ClassLoader>() {
+	    public ClassLoader run() {
 		ClassLoader cl = null;
 		try {
 		    cl = Thread.currentThread().getContextClassLoader();
@@ -736,305 +788,5 @@ public class SocketFetcher {
 		return cl;
 	    }
 	});
-    }
-
-    private static volatile ConcurrentMap<InetSocketAddress, Counter> counterMap;
-
-    private static Counter getCounter(InetSocketAddress socketAddress) {
-        ConcurrentMap<InetSocketAddress, Counter> counterMap = SocketFetcher.counterMap;
-        if (null == counterMap) {
-            synchronized (SocketFetcher.class) {
-                counterMap = SocketFetcher.counterMap;
-                if (null == counterMap) {
-                    counterMap = new ConcurrentHashMap<InetSocketAddress, Counter>();
-                    SocketFetcher.counterMap = counterMap;
-                }
-            }
-        }
-        // Get counter
-        Counter counter = counterMap.get(socketAddress);
-        if (null == counter) {
-            final Counter newCounter = new Counter(socketAddress, logger);
-            counter = counterMap.putIfAbsent(socketAddress, newCounter);
-            if (null == counter) {
-                counter = newCounter;
-            }
-        }
-        return counter;
-    }
-
-    private static final class Counter {
-        private final AtomicInteger counter;
-        private final String message;
-        private final Pattern pattern;
-        private final AtomicInteger max;
-        private final String lineSeparator;
-        private final MailLogger logger;
-
-        Counter(InetSocketAddress addr, MailLogger logger) {
-            super();
-            this.logger = logger;
-            this.counter = new AtomicInteger();
-            max = new AtomicInteger(0);
-            this.message = "Number of connections $1 to \"" + addr + "\": ";
-            pattern = Pattern.compile(Pattern.quote("$1"));
-            lineSeparator = System.getProperty("line.separator");
-        }
-
-        public void increment() {
-            int val = counter.incrementAndGet();
-            int cmax;
-            do {
-                cmax = max.get();
-            } while (val > cmax && !max.compareAndSet(cmax, val));
-            log(val, val > cmax ? val : cmax, true);
-        }
-
-        public void decrement() {
-            int val = counter.decrementAndGet();
-            log(val, -1, false);
-        }
-
-        private void log(final int val, final int max, final boolean incremented) {
-            final StringBuilder sb = new StringBuilder(message).append(Integer.toString(val));
-            if (incremented) {
-                sb.append(" (max=").append(max).append(')');
-            }
-            sb.append(lineSeparator);
-            appendStackTrace(new Throwable().getStackTrace(), lineSeparator, sb);
-            logger.log(Level.FINER, pattern.matcher(sb).replaceFirst(incremented ? "incremented" : "decremented"));
-        }
-
-        private static final int MAX_STACK_TRACE_ELEMENTS = 1000;
-
-        private static void appendStackTrace(final StackTraceElement[] trace, final String lineSeparator, final StringBuilder sb) {
-            if (null == trace) {
-                return;
-            }
-            final int length = (MAX_STACK_TRACE_ELEMENTS <= trace.length) ? MAX_STACK_TRACE_ELEMENTS : trace.length;
-            for (int i = 0; i < length; i++) {
-                final StackTraceElement ste = trace[i];
-                final String className = ste.getClassName();
-                if (null != className) {
-                    sb.append("    at ").append(className).append('.').append(ste.getMethodName());
-                    if (ste.isNativeMethod()) {
-                        sb.append("(Native Method)");
-                    } else {
-                        final String fileName = ste.getFileName();
-                        if (null == fileName) {
-                            sb.append("(Unknown Source)");
-                        } else {
-                            final int lineNumber = ste.getLineNumber();
-                            sb.append('(').append(fileName);
-                            if (lineNumber >= 0) {
-                                sb.append(':').append(lineNumber);
-                            }
-                            sb.append(')');
-                        }
-                    }
-                    sb.append(lineSeparator);
-                }
-            }
-        }
-        
-    }
-
-    private static final class CountingSocket extends Socket {
-
-        private final Socket socket;
-        private Counter counter;
-        private volatile boolean counted;
-
-        CountingSocket(final Socket socket, final Counter counter) {
-            super();
-            this.socket = socket;
-            this.counter = counter;
-        }
-
-        public int hashCode() {
-            return socket.hashCode();
-        }
-
-        public boolean equals(Object obj) {
-            return socket.equals(obj);
-        }
-
-        public void connect(SocketAddress endpoint) throws IOException {
-            socket.connect(endpoint);
-            counter.increment();
-            counted = true;
-        }
-
-        public void connect(SocketAddress endpoint, int timeout) throws IOException {
-            socket.connect(endpoint, timeout);
-            counter.increment();
-            counted = true;
-        }
-
-        public void bind(SocketAddress bindpoint) throws IOException {
-            socket.bind(bindpoint);
-        }
-
-        public InetAddress getInetAddress() {
-            return socket.getInetAddress();
-        }
-
-        public InetAddress getLocalAddress() {
-            return socket.getLocalAddress();
-        }
-
-        public int getPort() {
-            return socket.getPort();
-        }
-
-        public int getLocalPort() {
-            return socket.getLocalPort();
-        }
-
-        public SocketAddress getRemoteSocketAddress() {
-            return socket.getRemoteSocketAddress();
-        }
-
-        public SocketAddress getLocalSocketAddress() {
-            return socket.getLocalSocketAddress();
-        }
-
-        public SocketChannel getChannel() {
-            return socket.getChannel();
-        }
-
-        public InputStream getInputStream() throws IOException {
-            return socket.getInputStream();
-        }
-
-        public OutputStream getOutputStream() throws IOException {
-            return socket.getOutputStream();
-        }
-
-        public void setTcpNoDelay(boolean on) throws SocketException {
-            socket.setTcpNoDelay(on);
-        }
-
-        public boolean getTcpNoDelay() throws SocketException {
-            return socket.getTcpNoDelay();
-        }
-
-        public void setSoLinger(boolean on, int linger) throws SocketException {
-            socket.setSoLinger(on, linger);
-        }
-
-        public int getSoLinger() throws SocketException {
-            return socket.getSoLinger();
-        }
-
-        public void sendUrgentData(int data) throws IOException {
-            socket.sendUrgentData(data);
-        }
-
-        public void setOOBInline(boolean on) throws SocketException {
-            socket.setOOBInline(on);
-        }
-
-        public boolean getOOBInline() throws SocketException {
-            return socket.getOOBInline();
-        }
-
-        public void setSoTimeout(int timeout) throws SocketException {
-            socket.setSoTimeout(timeout);
-        }
-
-        public int getSoTimeout() throws SocketException {
-            return socket.getSoTimeout();
-        }
-
-        public void setSendBufferSize(int size) throws SocketException {
-            socket.setSendBufferSize(size);
-        }
-
-        public int getSendBufferSize() throws SocketException {
-            return socket.getSendBufferSize();
-        }
-
-        public void setReceiveBufferSize(int size) throws SocketException {
-            socket.setReceiveBufferSize(size);
-        }
-
-        public int getReceiveBufferSize() throws SocketException {
-            return socket.getReceiveBufferSize();
-        }
-
-        public void setKeepAlive(boolean on) throws SocketException {
-            socket.setKeepAlive(on);
-        }
-
-        public boolean getKeepAlive() throws SocketException {
-            return socket.getKeepAlive();
-        }
-
-        public void setTrafficClass(int tc) throws SocketException {
-            socket.setTrafficClass(tc);
-        }
-
-        public int getTrafficClass() throws SocketException {
-            return socket.getTrafficClass();
-        }
-
-        public void setReuseAddress(boolean on) throws SocketException {
-            socket.setReuseAddress(on);
-        }
-
-        public boolean getReuseAddress() throws SocketException {
-            return socket.getReuseAddress();
-        }
-
-        public void close() throws IOException {
-            if (!counted) {
-                socket.close();
-                return;
-            }
-            // Decrement
-            try {
-                socket.close();
-            } finally {
-                counter.decrement();
-            }
-        }
-
-        public void shutdownInput() throws IOException {
-            socket.shutdownInput();
-        }
-
-        public void shutdownOutput() throws IOException {
-            socket.shutdownOutput();
-        }
-
-        public String toString() {
-            return socket.toString();
-        }
-
-        public boolean isConnected() {
-            return socket.isConnected();
-        }
-
-        public boolean isBound() {
-            return socket.isBound();
-        }
-
-        public boolean isClosed() {
-            return socket.isClosed();
-        }
-
-        public boolean isInputShutdown() {
-            return socket.isInputShutdown();
-        }
-
-        public boolean isOutputShutdown() {
-            return socket.isOutputShutdown();
-        }
-
-        public void setPerformancePreferences(int connectionTime, int latency, int bandwidth) {
-            socket.setPerformancePreferences(connectionTime, latency, bandwidth);
-        }
-
     }
 }

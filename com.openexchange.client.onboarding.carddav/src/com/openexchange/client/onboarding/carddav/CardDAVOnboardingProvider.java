@@ -60,6 +60,7 @@ import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DisplayResult;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.OnboardingRequest;
+import com.openexchange.client.onboarding.OnboardingType;
 import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
@@ -70,6 +71,7 @@ import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
@@ -87,7 +89,8 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
     private final ServiceLookup services;
     private final String identifier;
-    private final EnumSet<Device> supportedDevices;
+    private final Set<Device> supportedDevices;
+    private final Set<OnboardingType> supportedTypes;
 
     /**
      * Initializes a new {@link CardDAVOnboardingProvider}.
@@ -97,6 +100,12 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         this.services = services;
         identifier = BuiltInProvider.CARDDAV.getId();
         supportedDevices = EnumSet.of(Device.APPLE_IPAD, Device.APPLE_IPHONE, Device.APPLE_MAC);
+        supportedTypes = EnumSet.of(OnboardingType.PLIST, OnboardingType.MANUAL);
+    }
+
+    @Override
+    public String getDescription() {
+        return "Configures CardDAV.";
     }
 
     @Override
@@ -119,6 +128,11 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
     @Override
     public String getId() {
         return identifier;
+    }
+
+    @Override
+    public Set<OnboardingType> getSupportedTypes() {
+        return supportedTypes;
     }
 
     @Override
@@ -162,56 +176,28 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
 
     private final static String CARDDAV_LOGIN_FIELD = "carddav_login";
-    private final static String CARDDAV_HOST_FIELD = "carddav_hostName";
+    private final static String CARDDAV_URL_FIELD = "carddav_url";
 
     private Result displayResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
-        configuration.put(CARDDAV_HOST_FIELD, getCardDAVUrl(request, false, session));
+        configuration.put(CARDDAV_URL_FIELD, getCardDAVUrl(false, request.getHostData(), session.getUserId(), session.getContextId()));
         return new DisplayResult(configuration);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
-        PListDict pListDict = getPlist(session.getUserId(), session.getContextId(), request.getScenario(), request);
+        PListDict previousPListDict = null == previousResult ? null : ((PlistResult) previousResult).getPListDict();
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
-    private String getCardDAVUrl(OnboardingRequest request, boolean generateIfAbsent, Session session) throws OXException {
-        return getCardDAVUrl(request, generateIfAbsent, session.getUserId(), session.getContextId());
-    }
-
-    private String getCardDAVUrl(OnboardingRequest request, boolean generateIfAbsent, int userId, int contextId) throws OXException {
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        ConfigView view = viewFactory.getView(userId, contextId);
-        String propertyName = "com.openexchange.client.onboarding.carddav.url";
-        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
-        if (null == property || !property.isDefined()) {
-            return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/carddav", false, null).toString();
-        }
-
-        String value = property.get();
-        if (Strings.isEmpty(value)) {
-            if (generateIfAbsent) {
-                return OnboardingUtility.constructURLWithParameters(request.getHostData(), null, "/carddav", false, null).toString();
-            }
-            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
-        }
-
-        return value;
-    }
-
     @Override
-    public PListDict getPlist(int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
-        return getPlist(null, userId, contextId, scenario, req);
-    }
-
-    @Override
-    public PListDict getPlist(PListDict previousPListDict, int userId, int contextId, Scenario scenario, OnboardingRequest req) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
         // Get the PListDict to contribute to
         PListDict pListDict;
-        if (null == previousPListDict) {
+        if (null == optPrevPListDict) {
             pListDict = new PListDict();
             pListDict.setPayloadIdentifier("com.open-xchange." + scenario.getId());
             pListDict.setPayloadType("Configuration");
@@ -219,7 +205,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
             pListDict.setPayloadVersion(1);
             pListDict.setPayloadDisplayName(scenario.getDisplayName(userId, contextId));
         } else {
-            pListDict = previousPListDict;
+            pListDict = optPrevPListDict;
         }
 
         // Generate payload content dictionary
@@ -230,7 +216,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
-        String cardDAVUrl = getCardDAVUrl(req, false, userId, contextId);
+        String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);
         payloadContent.addStringValue("CardDAVHostName", cardDAVUrl);
         payloadContent.addBooleanValue("CardDAVUseSSL", cardDAVUrl.startsWith("https://"));
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, userId, contextId));
@@ -242,5 +228,27 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         return pListDict;
     }
 
+    private String getCardDAVUrl(boolean generateIfAbsent, HostData hostData, int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
+        ConfigView view = viewFactory.getView(userId, contextId);
+        String propertyName = "com.openexchange.client.onboarding.carddav.url";
+        ComposedConfigProperty<String> property = view.property(propertyName, String.class);
+        if (null == property || !property.isDefined()) {
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        String value = property.get();
+        if (Strings.isEmpty(value)) {
+            if (generateIfAbsent) {
+                return OnboardingUtility.constructURLWithParameters(hostData, null, "/carddav", false, null).toString();
+            }
+            throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
+        }
+
+        return value;
+    }
 
 }

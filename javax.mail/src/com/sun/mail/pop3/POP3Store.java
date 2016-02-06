@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -43,6 +43,7 @@ package com.sun.mail.pop3;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.lang.reflect.*;
+
 import javax.mail.*;
 import javax.mail.internet.*;
 import java.io.File;
@@ -51,6 +52,7 @@ import java.io.IOException;
 import java.io.EOFException;
 import java.util.Collections;
 import java.util.Map;
+
 import com.sun.mail.util.PropUtil;
 import com.sun.mail.util.MailLogger;
 import com.sun.mail.util.SocketConnectException;
@@ -84,7 +86,7 @@ public class POP3Store extends Store {
     private MailLogger logger;
 
     // following set here and accessed by other classes in this package
-    volatile Constructor messageConstructor = null;
+    volatile Constructor<?> messageConstructor = null;
     volatile boolean rsetBeforeQuit = false;
     volatile boolean disableTop = false;
     volatile boolean forgetTopHeaders = false;
@@ -141,7 +143,7 @@ public class POP3Store extends Store {
 		ClassLoader cl = this.getClass().getClassLoader();
 
 		// now load the class
-		Class messageClass = null;
+		Class<?> messageClass = null;
 		try {
 		    // First try the "application's" class loader.
 		    // This should eventually be replaced by
@@ -154,7 +156,7 @@ public class POP3Store extends Store {
 		    messageClass = Class.forName(s);
 		}
 
-		Class[] c = {javax.mail.Folder.class, int.class};
+		Class<?>[] c = {javax.mail.Folder.class, int.class};
 		messageConstructor = messageClass.getConstructor(c);
 	    } catch (Exception ex) {
 		logger.log(Level.CONFIG, "failed to load message class", ex);
@@ -385,16 +387,16 @@ public class POP3Store extends Store {
      * @since	JavaMail 1.4.3
      */
     public Map<String, String> capabilities() throws MessagingException {
-	Map c;
+	Map<String, String> c;
 	synchronized (this) {
 	    c = capabilities;
 	}
 	if (c != null)
 	    return Collections.unmodifiableMap(c);
 	else
-	    return Collections.EMPTY_MAP;
+	    return Collections.<String, String>emptyMap();
     }
-
+    
     /**
      * Reinitializes & returns a Map of the capabilities the server provided,
      * as per RFC 2449.  If the server doesn't support RFC 2449,
@@ -434,10 +436,12 @@ public class POP3Store extends Store {
     }
 
     protected void finalize() throws Throwable {
-	super.finalize();
-
-	if (port != null)	// don't force a connection attempt
-	    close();
+	try {
+	    if (port != null)	// don't force a connection attempt
+		close();
+	} finally {
+	    super.finalize();
+	}
     }
 
     private void checkConnected() throws MessagingException {

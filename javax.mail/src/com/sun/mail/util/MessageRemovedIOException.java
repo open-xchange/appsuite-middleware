@@ -70,13 +70,13 @@ public class MessageRemovedIOException extends IOException {
     public MessageRemovedIOException(String s) {
 	super(s);
     }
-
+    
     /**
      * Constructs a MessageRemovedIOException with the specified detail message.
      * @param s     the detail message
-     * @param cause The cause
+     * @param c     the cause
      */
-    public MessageRemovedIOException(String s, Throwable cause) {
-    super(s, cause);
+    public MessageRemovedIOException(String s, Throwable c) {
+    super(s, c);
     }
 }

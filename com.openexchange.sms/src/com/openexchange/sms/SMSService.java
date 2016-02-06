@@ -59,6 +59,15 @@ import com.openexchange.exception.OXException;
  * @since v7.8.1
  */
 public interface SMSService {
+    
+    /**
+     * Send a SMS message to a recipient
+     *
+     * @param recipient Phone number to send the message
+     * @param message The message
+     * @throws OXException
+     */
+    public void sendMessage(String recipient, String message) throws OXException;
 
     /**
      * Send a SMS message to a recipient
@@ -80,6 +89,15 @@ public interface SMSService {
      */
     public void sendMessage(String recipient, String message, String languageTag) throws OXException;
 
+    /**
+     * Send a SMS message to recipients
+     *
+     * @param recipients Phone numbers to send the message
+     * @param message The message
+     * @throws OXException
+     */
+    public void sendMessage(String[] recipients, String message) throws OXException;
+    
     /**
      * Send a SMS message to recipients
      *

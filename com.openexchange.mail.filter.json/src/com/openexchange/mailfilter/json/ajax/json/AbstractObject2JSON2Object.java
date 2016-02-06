@@ -54,10 +54,12 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.mailfilter.json.ajax.json.mapper.RuleFieldMapper;
 
 /**
  *
  * @author <a href="mailto:dennis.sieben@open-xchange.org">Dennis Sieben</a>
+ * @deprecated Use the {@link RuleParser} instead.
  */
 public abstract class AbstractObject2JSON2Object<T> {
 
@@ -113,9 +115,9 @@ public abstract class AbstractObject2JSON2Object<T> {
      * given field.
      *
      * @param objs -
-     *                the data objects
+     *            the data objects
      * @param field -
-     *                the field to write
+     *            the field to write
      * @return
      * @throws JSONException
      */
@@ -128,9 +130,9 @@ public abstract class AbstractObject2JSON2Object<T> {
      * turn are put into a surrounding JSONArray
      *
      * @param objs -
-     *                the data objects
+     *            the data objects
      * @param fields -
-     *                the fields to write
+     *            the fields to write
      * @return resulting <code>JSONArray</code>
      * @throws JSONException
      */
@@ -159,7 +161,7 @@ public abstract class AbstractObject2JSON2Object<T> {
      * with {@link #getListFields()} as second argument
      *
      * @param objs -
-     *                the data objects
+     *            the data objects
      * @return resulting <code>JSONArray</code>
      * @throws JSONException
      */
@@ -167,7 +169,11 @@ public abstract class AbstractObject2JSON2Object<T> {
         return write(objs, getListFields());
     }
 
+    /**
+     * @deprecated Use {@link RuleFieldMapper}
+     */
     public static interface Mapper<T> {
+
         String getAttrName();
 
         boolean isNull(T obj);

@@ -295,10 +295,20 @@ public class SyncSession {
         if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
             throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
         }
+        StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server files in path \"").append(path).append("\":\n") : null;
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
         List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
         for (int i = 0; i < files.size(); i++) {
-            serverFiles.add(new ServerFileVersion(files.get(i), checksums.get(i)));
+            ServerFileVersion fileVersion = new ServerFileVersion(files.get(i), checksums.get(i));
+            serverFiles.add(fileVersion);
+            if (isTraceEnabled()) {
+                stringBuilder.append(" [").append(fileVersion.getFileChecksum().getFileID()).append("] ")
+                    .append(fileVersion.getName()).append(" | ").append(fileVersion.getChecksum())
+                    .append(" (").append(fileVersion.getFileChecksum().getSequenceNumber()).append(")\n");
+            }
+        }
+        if (isTraceEnabled()) {
+            trace(stringBuilder);
         }
         return serverFiles;
     }

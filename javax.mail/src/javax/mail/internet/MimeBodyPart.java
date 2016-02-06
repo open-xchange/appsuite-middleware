@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -298,7 +298,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     }
 
     /**
-     * Returns the value of the "Content-Disposition" header field.
+     * Returns the disposition from the "Content-Disposition" header field.
      * This represents the disposition of this part. The disposition
      * describes how the part should be presented to the user. <p>
      *
@@ -316,9 +316,9 @@ public class MimeBodyPart extends BodyPart implements MimePart {
     }
 
     /**
-     * Set the "Content-Disposition" header field of this body part.
-     * If the disposition is null, any existing "Content-Disposition"
-     * header field is removed.
+     * Set the disposition in the "Content-Disposition" header field
+     * of this body part.  If the disposition is null, any existing
+     * "Content-Disposition" header field is removed.
      *
      * @exception	IllegalWriteException if the underlying
      *			implementation does not support modification
@@ -1033,6 +1033,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return all the headers from this Message as an Enumeration of
      * Header objects.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getAllHeaders() throws MessagingException {
 	return headers.getAllHeaders();
     }
@@ -1041,6 +1042,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return matching headers from this Message as an Enumeration of
      * Header objects.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getMatchingHeaders(String[] names)
                         throws MessagingException {
 	return headers.getMatchingHeaders(names);
@@ -1050,6 +1052,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * Return non-matching headers from this Message as an
      * Enumeration of Header objects.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getNonMatchingHeaders(String[] names)
                         throws MessagingException {
 	return headers.getNonMatchingHeaders(names);
@@ -1067,6 +1070,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * line is a raw RFC 822 header line, containing both the "name"
      * and "value" field.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getAllHeaderLines() throws MessagingException {
   	return headers.getAllHeaderLines(); 
     }
@@ -1076,6 +1080,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * A Header line is a raw RFC 822 header line, containing both
      * the "name" and "value" field.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getMatchingHeaderLines(String[] names)
                                     throws MessagingException {
 	return headers.getMatchingHeaderLines(names);
@@ -1086,6 +1091,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
      * A Header line is a raw RFC 822 header line, containing both
      * the "name"  and "value" field.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getNonMatchingHeaderLines(String[] names)  
                                         throws MessagingException {
 	return headers.getNonMatchingHeaderLines(names);
@@ -1275,7 +1281,17 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	String s = part.getHeader("Content-Disposition", null);
 	ContentDisposition cd = 
 		new ContentDisposition(s == null ? Part.ATTACHMENT : s);
-	cd.setParameter("filename", name);
+	// ensure that the filename is encoded if necessary
+	String charset = MimeUtility.getDefaultMIMECharset();
+	ParameterList p = cd.getParameterList();
+	if (p == null) {
+	    p = new ParameterList();
+	    cd.setParameterList(p);
+	}
+	if (encodeFileName)
+	    p.setLiteral("filename", name);
+	else
+	    p.set("filename", name, charset);
 	part.setHeader("Content-Disposition", cd.toString());
 
 	/*
@@ -1288,7 +1304,16 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	    if (s != null) {
 		try {
 		    ContentType cType = new ContentType(s);
-		    cType.setParameter("name", name);
+		    // ensure that the filename is encoded if necessary
+		    p = cType.getParameterList();
+		    if (p == null) {
+			p = new ParameterList();
+			cType.setParameterList(p);
+		    }
+		    if (encodeFileName)
+			p.setLiteral("name", name);
+		    else
+			p.set("name", name, charset);
 		    part.setHeader("Content-Type", cType.toString());
 		} catch (ParseException pex) { }	// ignore it
 	    }
@@ -1304,7 +1329,7 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 
 	// Tokenize the header to obtain the Language-tags (skip comments)
 	HeaderTokenizer h = new HeaderTokenizer(s, HeaderTokenizer.MIME);
-	Vector v = new Vector();
+	List<String> v = new ArrayList<String>();
 
 	HeaderTokenizer.Token tk;
 	int tkType;
@@ -1315,16 +1340,16 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	    if (tkType == HeaderTokenizer.Token.EOF)
 		break; // done
 	    else if (tkType == HeaderTokenizer.Token.ATOM)
-		v.addElement(tk.getValue());
+		v.add(tk.getValue());
 	    else // invalid token, skip it.
 		continue;
 	}
 
-	if (v.size() == 0)
+	if (v.isEmpty())
 	    return null;
 
 	String[] language = new String[v.size()];
-	v.copyInto(language);
+	v.toArray(language);
 	return language;	
     }
 
@@ -1478,14 +1503,19 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 		MimePartDataHandler mdh = (MimePartDataHandler)dh;
 		MimePart mpart = mdh.getPart();
 		if (mpart != part) {
-		    // XXX - can't change the encoding of the data from the
-		    // other part without decoding and reencoding it, so
-		    // we just force it to match the original
-		    setEncoding(part, mpart.getEncoding());
 		    if (needCTHeader)
 			part.setHeader("Content-Type", mpart.getContentType());
-		}
-		return;
+		    // XXX - can't change the encoding of the data from the
+		    // other part without decoding and reencoding it, so
+		    // we just force it to match the original, but if the
+		    // original has no encoding we'll consider reencoding it
+		    String enc = mpart.getEncoding();
+		    if (enc != null) {
+			setEncoding(part, enc);
+			return;
+		    }
+		} else
+		    return;
 	    }
 
 	    // Content-Transfer-Encoding, but only if we don't
@@ -1528,14 +1558,26 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 		 * satisfy older MUAs (DtMail, Roam and probably
 		 * a bunch of others).
 		 */
-		String s = part.getHeader("Content-Disposition", null);
-		if (s != null) {
-		    // Parse the header ..
-		    ContentDisposition cd = new ContentDisposition(s);
-		    String filename = cd.getParameter("filename");
-		    if (filename != null) {
-			cType.setParameter("name", filename);
-			type = cType.toString();
+		if (setContentTypeFileName) {
+		    String s = part.getHeader("Content-Disposition", null);
+		    if (s != null) {
+			// Parse the header ..
+			ContentDisposition cd = new ContentDisposition(s);
+			String filename = cd.getParameter("filename");
+			if (filename != null) {
+			    ParameterList p = cType.getParameterList();
+			    if (p == null) {
+				p = new ParameterList();
+				cType.setParameterList(p);
+			    }
+			    if (encodeFileName)
+				p.setLiteral("name",
+					MimeUtility.encodeText(filename));
+			    else
+				p.set("name", filename,
+					MimeUtility.getDefaultMIMECharset());
+			    type = cType.toString();
+			}
 		    }
 		}
 		
@@ -1564,9 +1606,11 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	}
 
 	// First, write out the header
-	Enumeration hdrLines = part.getNonMatchingHeaderLines(ignoreList);
+	@SuppressWarnings("unchecked")
+	Enumeration<String> hdrLines
+		= part.getNonMatchingHeaderLines(ignoreList);
 	while (hdrLines.hasMoreElements())
-	    los.writeln((String)hdrLines.nextElement());
+	    los.writeln(hdrLines.nextElement());
 
 	// The CRLF separator between header and content
 	los.writeln();
@@ -1578,23 +1622,16 @@ public class MimeBodyPart extends BodyPart implements MimePart {
 	try {
 	    /*
 	     * If the data for this part comes from a stream,
+	     * and is already encoded,
 	     * just copy it to the output stream without decoding
 	     * and reencoding it.
 	     */
 	    DataHandler dh = part.getDataHandler();
 	    if (dh instanceof MimePartDataHandler) {
-		// call getContentStream to give subclass a chance to
-		// provide the data on demand
-		is = ((MimePartDataHandler)dh).getContentStream();
-		/*
-		if (part instanceof MimeBodyPart) {
-		    MimeBodyPart mbp = (MimeBodyPart)part;
-		    is = mbp.getContentStream();
-		} else if (part instanceof MimeMessage) {
-		    MimeMessage msg = (MimeMessage)part;
-		    is = msg.getContentStream();
-		}
-		*/
+		MimePartDataHandler mpdh = (MimePartDataHandler)dh;
+		MimePart mpart = mpdh.getPart();
+		if (mpart.getEncoding() != null)
+		    is = mpdh.getContentStream();
 	    }
 	    if (is != null) {
 		// now copy the data to the output stream

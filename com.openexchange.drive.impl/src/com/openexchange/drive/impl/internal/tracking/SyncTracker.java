@@ -179,6 +179,11 @@ public class SyncTracker {
                         LOG.warn("Requesting client to stop synchronization: {}", session, e);
                         optimizedActionsForClient.add(new ErrorDirectoryAction(null, directoryVersion, null, e, false, true));
                     }
+                    /*
+                     * clear result history after aborting sync
+                     */
+                    session.trace("Clrearing result history.");
+                    getResultHistory().clear();
                 }
             } else {
                 /*

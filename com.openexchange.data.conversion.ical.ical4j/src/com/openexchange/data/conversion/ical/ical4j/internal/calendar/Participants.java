@@ -145,8 +145,10 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
     @Override
     public void emit(final Mode mode, final int index, final U cObj, final T component, final List<ConversionWarning> warnings, final Context ctx, final Object... args) throws ConversionError {
         final List<ResourceParticipant> resources = new LinkedList<ResourceParticipant>();
-        for (UserParticipant up : cObj.getUsers()) {
-            addUserAttendee(index, up, ctx, component, cObj);
+        if (cObj.getUsers() != null) {
+            for (UserParticipant up : cObj.getUsers()) {
+                addUserAttendee(index, up, ctx, component, cObj);
+            }
         }
         for(final Participant p : cObj.getParticipants()) {
             switch(p.getType()) {

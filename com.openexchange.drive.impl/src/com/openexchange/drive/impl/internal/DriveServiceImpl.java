@@ -54,7 +54,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
@@ -104,8 +106,10 @@ import com.openexchange.drive.impl.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DriveServiceImpl}
@@ -415,6 +419,9 @@ public class DriveServiceImpl implements DriveService {
     public DriveSettings getSettings(DriveSession session) throws OXException {
         SyncSession syncSession = new SyncSession(session);
         LOG.debug("Handling get-settings for '{}'", session);
+        /*
+         * collect settings
+         */
         DriveSettings settings = new DriveSettings();
         Quota[] quota = syncSession.getStorage().getQuota();
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
@@ -423,6 +430,19 @@ public class DriveServiceImpl implements DriveService {
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
+        /*
+         * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
+         */
+        Map<String, String> localizedFolders = new HashMap<String, String>();
+        int maxDirectories = DriveConfig.getInstance().getMaxDirectories();
+        Map<String, FileStorageFolder> folders = syncSession.getStorage().getFolders(maxDirectories, 2);
+        for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+            String localizedName = entry.getValue().getLocalizedName(session.getLocale());
+            if (Strings.isNotEmpty(localizedName) && false == localizedName.equals(entry.getValue().getName())) {
+                localizedFolders.put(entry.getKey(), localizedName);
+            }
+        }
+        settings.setLocalizedFolders(localizedFolders);
         return settings;
     }
 

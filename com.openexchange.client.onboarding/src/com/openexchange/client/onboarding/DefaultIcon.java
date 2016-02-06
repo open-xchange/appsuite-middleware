@@ -86,4 +86,9 @@ public class DefaultIcon implements Icon {
         return data;
     }
 
+    @Override
+    public IconType getType() {
+        return IconType.RAW;
+    }
+
 }

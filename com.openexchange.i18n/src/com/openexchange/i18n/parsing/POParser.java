@@ -73,9 +73,10 @@ public class POParser {
         final POTokenStream tokens = new POTokenStream(stream, filename);
         while (tokens.lookahead(POToken.MSGCTXT) || tokens.lookahead(POToken.MSGID)) {
             readFullTranslation(translations, tokens);
-            if (null != translations.translate("") && headers.isEmpty()) {
+            if (headers.isEmpty() && Strings.isNotEmpty(translations.translate(""))) {
                 parseHeader(translations.translate(""));
                 setCharSet(tokens);
+                translations.setTranslation("", ""); // remove header section again after headers are parsed
             }
         }
 
@@ -105,9 +106,9 @@ public class POParser {
         final String charset = contentType.substring(pos + 8);
         tokens.setCharset(charset);
     }
-    
+
     private void readFullTranslation(Translations translations, POTokenStream tokens) throws OXException {
-        
+
         String context = null;
         if (tokens.lookahead(POToken.MSGCTXT)) {
             tokens.consume(POToken.MSGCTXT);
@@ -115,11 +116,11 @@ public class POParser {
             collectTexts(tokens, sb);
             context = sb.toString();
         }
-        
+
         tokens.consume(POToken.MSGID);
         StringBuilder key = new StringBuilder();
         collectTexts(tokens, key);
-        
+
         String keyPlural = null;
         if (tokens.lookahead(POToken.MSGID_PLURAL)) {
             StringBuilder sb = new StringBuilder();
@@ -127,9 +128,9 @@ public class POParser {
             collectTexts(tokens, sb);
             keyPlural = sb.toString();
         }
-        
+
         List<String> strings = new LinkedList<String>();
-        while (tokens.lookahead(POToken.MSGSTR)) {
+        do {
             tokens.consume(POToken.MSGSTR);
             StringBuilder string = new StringBuilder();
             collectTexts(tokens, string);
@@ -137,8 +138,8 @@ public class POParser {
             if (!Strings.isEmpty(s)) {
                 strings.add(s);
             }
-        }
-        
+        } while (tokens.lookahead(POToken.MSGSTR));
+
         if (!strings.isEmpty()) {
             translations.setContextTranslationPlural(context, key.toString(), keyPlural, strings);
         }

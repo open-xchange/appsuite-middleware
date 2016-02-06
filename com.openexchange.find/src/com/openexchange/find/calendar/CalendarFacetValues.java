@@ -61,10 +61,12 @@ public class CalendarFacetValues {
 
     public static final String RECURRING_TYPE_SERIES = "series";
 
-    //Relative Date
-    public static final String RELATIVE_DATE_FUTURE = "future";
+    //Range
+    public static final String RANGE_ONE_MONTH = "one_month";
 
-    public static final String RELATIVE_DATE_PAST = "past";
+    public static final String RANGE_THREE_MONTHS = "three_months";
+
+    public static final String RANGE_ONE_YEAR = "one_year";
 
     // Status
     public static final String STATUS_ACCEPTED = "accepted";

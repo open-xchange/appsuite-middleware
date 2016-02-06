@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2010-2011 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,13 +40,7 @@
 
 package com.sun.mail.pop3;
 
-import java.util.*;
-import java.net.*;
 import java.io.*;
-import java.security.*;
-
-import com.sun.mail.util.PropUtil;
-import javax.mail.util.SharedFileInputStream;
 
 /**
  * A temporary file used to cache POP3 messages.
@@ -87,107 +81,10 @@ class TempFile {
     }
 
     protected void finalize() throws Throwable {
-	super.finalize();
-	close();
-    }
-}
-
-/**
- * A subclass of SharedFileInputStream that also allows writing.
- */
-class WritableSharedFile extends SharedFileInputStream {
-    private RandomAccessFile raf;
-    private AppendStream af;
-
-    public WritableSharedFile(File file) throws IOException {
-	super(file);
 	try {
-	    raf = new RandomAccessFile(file, "rw");
-	} catch (IOException ex) {
-	    // if anything goes wrong opening the writable file,
-	    // close the readable file too
-	    super.close();
-	}
-    }
-
-    /**
-     * Return the writable version of this file.
-     */
-    public RandomAccessFile getWritableFile() {
-	return raf;
-    }
-
-    /**
-     * Close the readable and writable files.
-     */
-    public void close() throws IOException {
-	try {
-	    super.close();
+	    close();
 	} finally {
-	    raf.close();
+	    super.finalize();
 	}
-    }
-
-    /**
-     * Update the size of the readable file after writing
-     * to the file.  Updates the length to be the current
-     * size of the file.
-     */
-    synchronized long updateLength() throws IOException {
-	datalen = in.length();
-	af = null;
-	return datalen;
-    }
-
-    /**
-     * Return a new AppendStream, but only if one isn't in active use.
-     */
-    public synchronized AppendStream getAppendStream() throws IOException {
-	if (af != null)
-	    throw new IOException(
-		"POP3 file cache only supports single threaded access");
-	af = new AppendStream(this);
-	return af;
-    }
-}
-
-/**
- * A stream for writing to the temp file, and when done
- * can return a stream for reading the data just written.
- * NOTE: We assume that only one thread is writing to the
- * file at a time.
- */
-class AppendStream extends OutputStream {
-    private final WritableSharedFile tf;
-    private RandomAccessFile raf;
-    private final long start;
-    private long end;
-
-    public AppendStream(WritableSharedFile tf) throws IOException {
-	this.tf = tf;
-	raf = tf.getWritableFile();
-	start = raf.length();
-	raf.seek(start);
-    }
-
-    public void write(int b) throws IOException {
-	raf.write(b);
-    }
-
-    public void write(byte[] b) throws IOException {
-	raf.write(b);
-    }
-
-    public void write(byte[] b, int off, int len) throws IOException {
-	raf.write(b, off, len);
-    }
-
-    public synchronized void close() throws IOException {
-	end = tf.updateLength();
-	raf = null;	// no more writing allowed
-    }
-
-    public synchronized InputStream getInputStream() throws IOException {
-	return tf.newStream(start, end);
     }
 }

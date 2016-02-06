@@ -235,6 +235,9 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If contact search fails
      */
     private List<Contact> searchContacts(ServerSession session, String prefix, AutocompleteParameters parameters, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
+        if (false == session.getUserConfiguration().hasContact()) {
+            return Collections.emptyList();
+        }
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (Strings.isEmpty(prefix) || prefix.length() < minimumSearchCharacters) {
             return Collections.emptyList();

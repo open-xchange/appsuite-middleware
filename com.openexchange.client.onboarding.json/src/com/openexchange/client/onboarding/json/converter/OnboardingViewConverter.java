@@ -49,6 +49,7 @@
 
 package com.openexchange.client.onboarding.json.converter;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -69,7 +70,9 @@ import com.openexchange.client.onboarding.CompositeId;
 import com.openexchange.client.onboarding.DefaultOnboardingRequest;
 import com.openexchange.client.onboarding.Device;
 import com.openexchange.client.onboarding.DeviceAwareScenario;
+import com.openexchange.client.onboarding.FontAwesomeIcon;
 import com.openexchange.client.onboarding.Icon;
+import com.openexchange.client.onboarding.IconType;
 import com.openexchange.client.onboarding.OnboardingAction;
 import com.openexchange.client.onboarding.OnboardingSMSConstants;
 import com.openexchange.client.onboarding.Platform;
@@ -351,7 +354,18 @@ public class OnboardingViewConverter implements ResultConverter {
             jObject.put(key, JSONObject.NULL);
         } else {
             if (value instanceof Icon) {
-                jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(((Icon) value).getData(), false)));
+                Icon icon = (Icon) value;
+                if (IconType.FONT_AWESOME.equals(icon.getType())) {
+                    FontAwesomeIcon fontAwesomeIcon = (FontAwesomeIcon) icon;
+                    jObject.put(key, new JSONArray(Arrays.asList(fontAwesomeIcon.getNames())));
+                } else {
+                    byte[] binaryData = icon.getData();
+                    if (binaryData == null || binaryData.length == 0) {
+                        jObject.put(key, JSONObject.NULL);
+                    } else {
+                        jObject.put(key, Charsets.toAsciiString(Base64.encodeBase64(binaryData, false)));
+                    }
+                }
             } else {
                 jObject.put(key, value);
             }

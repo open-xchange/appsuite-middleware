@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -115,7 +116,7 @@ public final class DeleteAction extends SnippetAction {
     }
 
     @Override
-    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
+    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException, IOException {
         if (!Method.GET.equals(method)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }

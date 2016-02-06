@@ -49,7 +49,6 @@
 
 package com.openexchange.sms.osgi;
 
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.impl.PhoneNumberParserServiceImpl;
@@ -71,13 +70,13 @@ public class SMSActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class };
+        return new Class<?>[] { };
     }
 
     @Override
     public void startBundle() throws Exception {
         org.slf4j.LoggerFactory.getLogger(SMSActivator.class).info("starting bundle: \"com.openexchange.sms\"");
-        PhoneNumberParserService parser = new PhoneNumberParserServiceImpl(this);
+        PhoneNumberParserService parser = new PhoneNumberParserServiceImpl();
         registerService(PhoneNumberParserService.class, parser);
     }
 
