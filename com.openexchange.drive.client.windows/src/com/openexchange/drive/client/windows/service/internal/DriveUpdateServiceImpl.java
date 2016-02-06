@@ -134,7 +134,7 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
 
         // ... and return URL with "session" URL parameter
-        return Utils.compileUrl(serverUrl, new String[] { Utils.getServletPrefix(), Constants.DOWNLOAD_SERVLET, exeFileName }, Collections.singletonMap("session", session.getSessionID()));
+        return Utils.compileUrl(serverUrl, new String[] { Utils.getServletPrefix(), Constants.INSTALL_SERVLET, exeFileName }, Collections.singletonMap("session", session.getSessionID()));
     }
 
     @Override

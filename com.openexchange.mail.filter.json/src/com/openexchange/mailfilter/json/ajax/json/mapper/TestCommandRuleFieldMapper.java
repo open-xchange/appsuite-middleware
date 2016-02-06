@@ -61,6 +61,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
@@ -137,10 +138,15 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
         JSONObject object = (JSONObject) attribute;
         String id = object.getString(GeneralField.id.name());
 
-        ///
-        TestCommand testCommand = createTestCommandFromJSON(object, id);
-
-        ///
+        TestCommand existingTestCommand = rule.getTestCommand();
+        TestCommand parsedTestCommand = createTestCommandFromJSON(object, id);
+        if (existingTestCommand == null) {
+            if (rule.getCommands().isEmpty()) {
+                rule.addCommand(new IfCommand(parsedTestCommand));
+            }
+        } else {
+            rule.getIfCommand().setTestcommand(parsedTestCommand);
+        }
     }
 
     ////////////////////////////////////////////////////// HELPERS //////////////////////////////////////////////////////
