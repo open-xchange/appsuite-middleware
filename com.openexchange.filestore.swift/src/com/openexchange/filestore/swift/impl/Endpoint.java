@@ -49,6 +49,9 @@
 
 package com.openexchange.filestore.swift.impl;
 
+import java.util.UUID;
+import com.openexchange.java.util.UUIDs;
+
 /**
  * Represents a Swift end-point.
  *
@@ -63,41 +66,49 @@ public class Endpoint {
     /**
      * Initializes a new {@link Endpoint}.
      *
-     * @param endpoint The API end-point, e.g. <code>"https://snet-storage101.dfw1.clouddrive.com/v1/MossoCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
+     * @param endpoint The API end-point, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
      */
     public Endpoint(String endpoint) {
         super();
         this.endpoint = endpoint;
 
-        int prime = 31;
-        int result = 1;
-        result = prime * result + ((endpoint == null) ? 0 : endpoint.hashCode());
-        hash = result;
+        hash = 31 * 1 + ((endpoint == null) ? 0 : endpoint.hashCode());
     }
 
     /**
-     * Gets the URL for the according context or user store, e.g. <code>"https://snet-storage101.dfw1.clouddrive.com/v1/MossoCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/"</code>.
+     * Gets the URL for the according context or user store, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/"</code>.
      *
      * @param containerName The container name
      * @return The URL; always with trailing slash
      */
-    public String getFullUrl(String containerName) {
-        return endpoint + "/" + containerName + "/";
+    public StringBuilder getFullUrl(String containerName) {
+        return new StringBuilder(endpoint).append('/').append(containerName).append('/');
     }
 
     /**
-     * Gets the URL for the given object, e.g. <code>"https://snet-storage101.dfw1.clouddrive.com/v1/MossoCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/411615f4a607432fa2e12cc18b8c5f9c"</code>.
+     * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/411615f4a607432fa2e12cc18b8c5f9c"</code>.
+     *
+     * @param containerName The container name
+     * @param id The object identifier
+     * @return The URL; always without trailing slash
+     */
+    public String getObjectUrl(String containerName, UUID id) {
+        return getFullUrl(containerName).append(UUIDs.getUnformattedString(id)).toString();
+    }
+
+    /**
+     * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/411615f4a607432fa2e12cc18b8c5f9c"</code>.
      *
      * @param containerName The container name
      * @param id The object identifier
      * @return The URL; always without trailing slash
      */
     public String getObjectUrl(String containerName, String id) {
-        return getFullUrl(containerName) + id;
+        return getFullUrl(containerName).append(id).toString();
     }
 
     /**
-     * Gets the base URL, e.g. <code>"https://snet-storage101.dfw1.clouddrive.com/v1/MossoCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
+     * Gets the base URL, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
      *
      * @return The URL; always with trailing slash
      */

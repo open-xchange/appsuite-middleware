@@ -52,27 +52,42 @@ package com.openexchange.filestore.swift.impl;
 import org.apache.http.client.HttpClient;
 
 /**
- * {@link SproxydConfig}
+ * {@link SwiftConfig}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @since v7.8.2
  */
-public final class SproxydConfig {
+public final class SwiftConfig {
 
     private final HttpClient httpClient;
-
     private final EndpointPool endpointPool;
 
-    public SproxydConfig(HttpClient httpClient, EndpointPool endpointPool) {
+    /**
+     * Initializes a new {@link SwiftConfig}.
+     *
+     * @param httpClient The associated HTTP client
+     * @param endpointPool The end-point pool
+     */
+    public SwiftConfig(HttpClient httpClient, EndpointPool endpointPool) {
         super();
         this.httpClient = httpClient;
         this.endpointPool = endpointPool;
     }
 
+    /**
+     * Gets the <code>HttpClient</code> instance.
+     *
+     * @return The <code>HttpClient</code> instance
+     */
     public HttpClient getHttpClient() {
         return httpClient;
     }
 
+    /**
+     * Gets the end-point pool.
+     *
+     * @return The end-point pool
+     */
     public EndpointPool getEndpointPool() {
         return endpointPool;
     }

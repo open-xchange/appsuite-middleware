@@ -53,7 +53,7 @@ import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link SwiftExceptionMessages} - Exception messages for Sproxyd module that needs to be translated.
+ * {@link SwiftExceptionMessages} - Exception messages for Swift module that needs to be translated.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */

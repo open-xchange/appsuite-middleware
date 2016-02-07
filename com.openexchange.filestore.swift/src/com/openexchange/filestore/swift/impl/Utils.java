@@ -50,12 +50,22 @@
 package com.openexchange.filestore.swift.impl;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,14 +74,79 @@ import org.slf4j.LoggerFactory;
  * {@link Utils}
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 class Utils {
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
     /**
-     * Closes the supplied HTTP request / response resources silently.
+     * Gets a (parameters) map for specified arguments.
+     *
+     * @param args The arguments
+     * @return The resulting map
+     */
+    static Map<String, String> mapFor(String... args) {
+        if (null == args) {
+            return null;
+        }
+
+        int length = args.length;
+        if (0 == length || (length % 2) != 0) {
+            return null;
+        }
+
+        Map<String, String> map = new LinkedHashMap<String, String>(length >> 1);
+        for (int i = 0; i < length; i+=2) {
+            map.put(args[i], args[i+1]);
+        }
+        return map;
+    }
+
+    /**
+     * Gets the appropriate query string for given parameters
+     *
+     * @param parameters The parameters
+     * @return The query string
+     */
+    static List<NameValuePair> toQueryString(Map<String, String> parameters) {
+        if (null == parameters || parameters.isEmpty()) {
+            return null;
+        }
+
+        List<NameValuePair> l = new LinkedList<NameValuePair>();
+        for (Map.Entry<String, String> e : parameters.entrySet()) {
+            l.add(new BasicNameValuePair(e.getKey(), e.getValue()));
+        }
+        return l;
+    }
+
+    /**
+     * Builds the URI from given arguments
+     *
+     * @param The URL w/o query string
+     * @param queryString The query string parameters
+     * @return The built URI string
+     * @throws IllegalArgumentException If the given string violates RFC 2396
+     */
+    static URI buildUri(String url, List<NameValuePair> queryString) {
+        try {
+            URI uri = new URI(url);
+            URIBuilder builder = new URIBuilder();
+            builder.setScheme(uri.getScheme()).
+                    setHost(uri.getHost()).
+                    setPort(uri.getPort()).
+                    setPath(uri.getPath()).
+                    setQuery(null == queryString ? null : URLEncodedUtils.format(queryString, "UTF-8"));
+            return builder.build();
+        } catch (URISyntaxException x) {
+            throw new IllegalArgumentException("Failed to build URI", x);
+        }
+    }
+
+    /**
+     * Closes the supplied HTTP request & response resources silently.
      *
      * @param request The HTTP request to reset
      * @param response The HTTP response to consume and close
@@ -87,6 +162,7 @@ class Utils {
                 }
             }
         }
+
         if (null != request) {
             try {
                 request.reset();
@@ -97,19 +173,20 @@ class Utils {
     }
 
     /**
-     * Checks if an sproxyd endpoint is currently unavailable. Therefore the namespace configuration file
-     * is requested. If the file can be got (server responds with status <code>200</code> or <code>206</code>)
-     * the endpoint is considered available; otherwise it's not.
+     * Checks if a Swift end-point is currently unavailable. Therefore the account details are requested.
+     * <p>
+     * If the account details can be retrieved (server responds with status <code>200</code> or <code>206</code>) the end-point is
+     * considered available; otherwise it's not.
      *
-     * @param baseUrl The base URL of the endpoint
+     * @param baseUrl The base URL of the end-point; e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>
      * @param httpClient The HTTP client to use
-     * @return <code>true</code> if the endpoint is unavailable
+     * @return <code>true</code> if the end-point is unavailable
      */
     static boolean endpointUnavailable(String baseUrl, HttpClient httpClient) {
         HttpGet get = null;
         HttpResponse response = null;
         try {
-            get = new HttpGet(baseUrl + '/' + ".conf");
+            get = new HttpGet(buildUri(baseUrl, toQueryString(mapFor("format", "json"))));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {

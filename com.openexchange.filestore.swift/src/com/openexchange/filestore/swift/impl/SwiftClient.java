@@ -83,14 +83,14 @@ public class SwiftClient {
     /**
      * Initializes a new {@link SwiftClient}.
      *
-     * @param sproxydConfig The sproxyd config
-     * @param contextId The context ID
-     * @param userId The user ID
+     * @param swiftConfig The Swift configuration
+     * @param contextId The context identifier
+     * @param userId The user identifier
      */
-    public SwiftClient(SproxydConfig sproxydConfig, int contextId, int userId) {
+    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) {
         super();
-        this.endpoints = sproxydConfig.getEndpointPool();
-        this.httpClient = sproxydConfig.getHttpClient();
+        this.endpoints = swiftConfig.getEndpointPool();
+        this.httpClient = swiftConfig.getHttpClient();
         this.contextId = contextId;
         this.userId = userId;
 
@@ -129,12 +129,12 @@ public class SwiftClient {
      * @return The new identifier of the stored object
      */
     public UUID put(InputStream data, long length) throws OXException {
-        UUID id = UUID.randomUUID();
         HttpResponse response = null;
         HttpPut request = null;
         Endpoint endpoint = getEndpoint();
         try {
-            request = new HttpPut(endpoint.getObjectUrl(id));
+            UUID id = UUID.randomUUID();
+            request = new HttpPut(endpoint.getObjectUrl(containerName, id));
             request.setEntity(new InputStreamEntity(data, length));
             response = httpClient.execute(request);
             int status = response.getStatusLine().getStatusCode();
@@ -172,7 +172,7 @@ public class SwiftClient {
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            get = new HttpGet(endpoint.getObjectUrl(id));
+            get = new HttpGet(endpoint.getObjectUrl(containerName, id));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
@@ -207,7 +207,7 @@ public class SwiftClient {
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            delete = new HttpDelete(endpoint.getObjectUrl(id));
+            delete = new HttpDelete(endpoint.getObjectUrl(containerName, id));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status) {
@@ -236,10 +236,10 @@ public class SwiftClient {
     }
 
     /**
-     * Gets an endpoint from the pool.
+     * Gets an end-point from the pool.
      *
-     * @return the endpoint
-     * @throws OXException If no endpoint is available (i.e. all are blacklisted due to connection timeouts).
+     * @return The end-point
+     * @throws OXException If no end-point is available (i.e. all are blacklisted due to connection timeouts).
      */
     private Endpoint getEndpoint() throws OXException {
         Endpoint endpoint = endpoints.get(contextId, userId);
@@ -250,15 +250,15 @@ public class SwiftClient {
     }
 
     /**
-     * Handles communication errors. If the endpoint is not available it is blacklisted.
+     * Handles communication errors. If the end-point is not available it is blacklisted.
      *
-     * @param endpoint The endpoint for which the exception occurred.
+     * @param endpoint The end-point for which the exception occurred.
      * @param e The exception
      * @return An OXException to re-throw
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
         if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
-            LOG.warn("Sproxyd endpoint is unavailable: " + endpoint);
+            LOG.warn("Swift end-point is unavailable: " + endpoint);
             endpoints.blacklist(endpoint.getBaseUrl());
         }
 

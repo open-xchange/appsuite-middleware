@@ -70,18 +70,18 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link SproxydActivator}
+ * {@link SwiftdActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SproxydActivator extends HousekeepingActivator {
+public class SwiftdActivator extends HousekeepingActivator {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydActivator.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftdActivator.class);
 
     /**
-     * Initializes a new {@link SproxydActivator}.
+     * Initializes a new {@link SwiftdActivator}.
      */
-    public SproxydActivator() {
+    public SwiftdActivator() {
         super();
     }
 
@@ -92,7 +92,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.filestore.sproxyd");
+        LOG.info("Starting bundle: com.openexchange.filestore.swift");
 
         // Trackers
         trackService(ContextService.class);
@@ -116,7 +116,7 @@ public class SproxydActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.filestore.sproxyd");
+        LOG.info("Stopping bundle: com.openexchange.filestore.swift");
         super.stopBundle();
     }
 

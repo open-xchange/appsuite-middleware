@@ -56,7 +56,7 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link SwiftExceptionCode} - Enumeration of all {@link OXException}s known in Sproxyd module.
+ * {@link SwiftExceptionCode} - Enumeration of all {@link OXException}s known in Swift module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -87,15 +87,15 @@ public enum SwiftExceptionCode implements DisplayableOXExceptionCode {
      */
     NO_NEXT_CHUNK("No next chunk for chunk: %1$s", CATEGORY_ERROR, 6, SwiftExceptionMessages.NO_NEXT_CHUNK_MSG),
     /**
-     * All configured sproxyd endpoints are currently unavailable.
+     * All configured Swift end-points are currently unavailable.
      */
-    STORAGE_UNAVAILABLE("All configured sproxyd endpoints are currently unavailable.", Category.CATEGORY_SERVICE_DOWN, 7),
+    STORAGE_UNAVAILABLE("All configured Swift end-points are currently unavailable.", Category.CATEGORY_SERVICE_DOWN, 7),
     ;
 
-    private static final String PREFIX = "SPROXYD";
+    private static final String PREFIX = "SWIFT";
 
     /**
-     * Gets the <code>"SPROXYD"</code> prefix
+     * Gets the <code>"SWIFT"</code> prefix
      *
      * @return The prefix
      */

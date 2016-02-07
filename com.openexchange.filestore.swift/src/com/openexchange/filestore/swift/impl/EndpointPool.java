@@ -63,12 +63,12 @@ import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
 /**
- * A {@link EndpointPool} manages a set of endpoints for the sproxyd client. The available
- * endpoints are returned in a round-robin manner. If endpoints become unavailable they can
+ * A {@link EndpointPool} manages a set of end-points for the Swift client. The available
+ * end-points are returned in a round-robin manner. If end-points become unavailable they can
  * be blacklisted. Every host on the blacklist is periodically checked by a heartbeat for
  * availability. If a formerly blacklisted host becomes available again, it is removed from
  * the blacklist and returned to the pool of available hosts. The process of blacklisting
- * an endpoint is up to the client.
+ * an end-point is up to the client.
  *
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.2
@@ -76,25 +76,21 @@ import com.openexchange.timer.TimerService;
 @ThreadSafe
 public class EndpointPool {
 
-    private static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
+    /** The logger constant */
+    static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-
     private final List<String> available;
-
     private final List<String> blacklist;
-
     private final AtomicInteger counter;
-
     private final String filestoreId;
-
     private volatile ScheduledTimerTask heartbeat;
 
     /**
      * Initializes a new {@link EndpointPool}.
      *
-     * @param filestoreId The filestore ID
-     * @param endpointUrls A list of endpoint URLs to manage; must not be empty; URLs must always end with a trailing slash
+     * @param filestoreId The file storage identifier
+     * @param endpointUrls A list of end-point URLs to manage; must not be empty; URLs must always end with a trailing slash
      * @param httpClient
      * @param heartbeatInterval
      * @param timerService
@@ -110,7 +106,7 @@ public class EndpointPool {
             throw new IllegalArgumentException("Paramater 'endpointUrls' must not be empty");
         }
 
-        LOG.debug("Sproxyd endpoint pool [{}]: Scheduling heartbeat timer task", filestoreId);
+        LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), heartbeatInterval, heartbeatInterval);
     }
 
@@ -135,7 +131,7 @@ public class EndpointPool {
                 next = newNext;
             }
             Endpoint endpoint = new Endpoint(available.get(next % available.size()));
-            LOG.debug("Sproxyd endpoint pool [{}]: Returning endpoint {}", filestoreId, endpoint);
+            LOG.debug("Swift end-point pool [{}]: Returning endpoint {}", filestoreId, endpoint);
             return endpoint;
         } finally {
             lock.readLock().unlock();
@@ -151,7 +147,7 @@ public class EndpointPool {
         lock.writeLock().lock();
         try {
             if (available.remove(url)) {
-                LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is added to blacklist", filestoreId, url);
+                LOG.warn("Swift end-point pool [{}]: Endpoint {} is added to blacklist", filestoreId, url);
                 blacklist.add(url);
             }
         } finally {
@@ -160,15 +156,15 @@ public class EndpointPool {
     }
 
     /**
-     * Removes an endpoint from the blacklist and adds it back to list of available ones.
+     * Removes an end-point from the blacklist and adds it back to list of available ones.
      *
-     * @param url The base URL of the endpoint
+     * @param url The base URL of the end-point
      */
     public void unblacklist(String url) {
         lock.writeLock().lock();
         try {
             if (blacklist.remove(url)) {
-                LOG.info("Sproxyd endpoint pool [{}]: Endpoint {} is removed from blacklist", filestoreId, url);
+                LOG.info("Swift end-point pool [{}]: Endpoint {} is removed from blacklist", filestoreId, url);
                 available.add(url);
             }
         } finally {
@@ -177,7 +173,7 @@ public class EndpointPool {
     }
 
     /**
-     * Closes this endpoint pool instance. The blacklist heartbeat task is cancelled.
+     * Closes this end-point pool instance. The blacklist heartbeat task is cancelled.
      */
     public synchronized void close() {
         ScheduledTimerTask heartbeat = this.heartbeat;
@@ -216,20 +212,20 @@ public class EndpointPool {
             try {
                 List<String> blacklist = endpoints.getBlacklist();
                 if (blacklist.isEmpty()) {
-                    LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist is empty, nothing to do", filestoreId);
+                    LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist is empty, nothing to do", filestoreId);
                     return;
                 }
 
-                LOG.debug("Sproxyd endpoint pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, blacklist.size());
+                LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, blacklist.size());
                 for (String endpoint : blacklist) {
                     if (Utils.endpointUnavailable(endpoint, httpClient)) {
-                        LOG.warn("Sproxyd endpoint pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
+                        LOG.warn("Swift end-point pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
                     } else {
                         endpoints.unblacklist(endpoint);
                     }
                 }
             } catch (Throwable t) {
-                LOG.error("Sproxyd endpoint pool [{}]: Error during heartbeat execution", filestoreId, t);
+                LOG.error("Swift end-point pool [{}]: Error during heartbeat execution", filestoreId, t);
                 ExceptionUtils.handleThrowable(t);
             }
         }

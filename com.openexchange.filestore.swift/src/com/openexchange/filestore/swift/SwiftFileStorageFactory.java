@@ -69,7 +69,7 @@ import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.chunkstorage.RdbChunkStorage;
 import com.openexchange.filestore.swift.impl.EndpointPool;
 import com.openexchange.filestore.swift.impl.SwiftClient;
-import com.openexchange.filestore.swift.impl.SproxydConfig;
+import com.openexchange.filestore.swift.impl.SwiftConfig;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -99,7 +99,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
 
     private final ServiceLookup services;
     private final ConcurrentMap<URI, SwiftFileStorage> storages;
-    private final ConcurrentMap<String, SproxydConfig> sproxydConfigs;
+    private final ConcurrentMap<String, SwiftConfig> swiftConfigs;
 
     /**
      * Initializes a new {@link SwiftFileStorageFactory}.
@@ -110,7 +110,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         super();
         this.services = services;
         this.storages = new ConcurrentHashMap<URI, SwiftFileStorage>();
-        this.sproxydConfigs = new ConcurrentHashMap<String, SproxydConfig>();
+        this.swiftConfigs = new ConcurrentHashMap<String, SwiftConfig>();
     }
 
 
@@ -199,36 +199,36 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     }
 
     /**
-     * Initializes an {@link SwiftClient} as configured by the referenced authority part of the supplied endpoints.
+     * Initializes an {@link SwiftClient} as configured by the referenced authority part of the supplied end-points.
      *
-     * @param uri The filestore identifier
+     * @param uri The file storage identifier
      * @param contextID The context identifier
      * @param userID The user identifier
      * @return The client
      */
     private SwiftClient initClient(String filestoreID, int contextID, int userID) throws OXException {
-        SproxydConfig sproxydConfig = sproxydConfigs.get(filestoreID);
-        if (sproxydConfig == null) {
-            SproxydConfig newSproxydConfig = initSproxydConfig(filestoreID);
-            sproxydConfig = sproxydConfigs.putIfAbsent(filestoreID, newSproxydConfig);
-            if (sproxydConfig == null) {
-                sproxydConfig = newSproxydConfig;
+        SwiftConfig swiftConfig = swiftConfigs.get(filestoreID);
+        if (swiftConfig == null) {
+            SwiftConfig newSwiftConfig = initSwiftConfig(filestoreID);
+            swiftConfig = swiftConfigs.putIfAbsent(filestoreID, newSwiftConfig);
+            if (swiftConfig == null) {
+                swiftConfig = newSwiftConfig;
             } else {
-                newSproxydConfig.getEndpointPool().close();
+                newSwiftConfig.getEndpointPool().close();
             }
         }
 
-        return new SwiftClient(sproxydConfig, contextID, userID);
+        return new SwiftClient(swiftConfig, contextID, userID);
     }
 
     /**
-     * Initializes a new HTTP client and endpoint pool for a configured sproxyd filestore.
+     * Initializes a new HTTP client and end-point pool for a configured Swift file storage.
      *
-     * @param filestoreID The filestore ID
+     * @param filestoreID The  file storage ID
      * @return The configured items
      * @throws OXException
      */
-    private SproxydConfig initSproxydConfig(String filestoreID) throws OXException {
+    private SwiftConfig initSwiftConfig(String filestoreID) throws OXException {
         ConfigurationService config = services.getService(ConfigurationService.class);
         // endpoint config
         String protocol = config.getProperty(property(filestoreID, "protocol"));
@@ -261,10 +261,10 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 try {
                     uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
                 } catch (NumberFormatException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
                 }
             } else {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
             }
 
             uriBuilder.setPath(path);
@@ -275,12 +275,12 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 }
                 urls.add(baseUrl);
             } catch (URISyntaxException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Sproxyd configuration leads to invalid URI: " + uriBuilder.toString());
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Swift configuration leads to invalid URI: " + uriBuilder.toString());
             }
         }
 
         if (urls.isEmpty()) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.sproxyd." + filestoreID + ".hosts': " + hosts);
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
         }
 
         HttpClient httpClient = HttpClients.getHttpClient(ClientConfig.newInstance()
@@ -289,11 +289,11 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
         EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SproxydConfig(httpClient, endpointPool);
+        return new SwiftConfig(httpClient, endpointPool);
     }
 
     private static final String property(String filestoreID, String property) {
-        return "com.openexchange.filestore.sproxyd." + filestoreID + '.' + property;
+        return "com.openexchange.filestore.swift." + filestoreID + '.' + property;
     }
 
     /**
