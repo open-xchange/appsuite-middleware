@@ -72,8 +72,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -160,7 +160,7 @@ public final class ListAction extends AbstractFolderAction {
 
         // Used to filter out folders that must not be visible due to insufficient scope
         boolean checkOAuthScope = isOAuthRequest(request);
-        OAuthGrant grant = getOAuthGrant(request);
+        OAuthAccess oauthAccess = getOAuthAccess(request);
 
         /*
          * length > 0
@@ -173,7 +173,7 @@ public final class ListAction extends AbstractFolderAction {
             final Map<String, UserizedFolder> id2folder = new HashMap<String, UserizedFolder>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
-                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), grant)) {
+                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), oauthAccess)) {
                     continue;
                 }
 
@@ -213,7 +213,7 @@ public final class ListAction extends AbstractFolderAction {
             final List<UserizedFolder> ret = new ArrayList<UserizedFolder>(length);
             for (int i = 0; i < length; i++) {
                 final UserizedFolder userizedFolder = subfolders[i];
-                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), grant)) {
+                if (checkOAuthScope && !mayReadViaOAuthRequest(userizedFolder.getContentType(), oauthAccess)) {
                     continue;
                 }
 

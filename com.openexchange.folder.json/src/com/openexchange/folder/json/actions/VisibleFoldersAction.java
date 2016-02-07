@@ -75,8 +75,8 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -120,7 +120,7 @@ public final class VisibleFoldersAction extends AbstractFolderAction {
         if (null == contentType) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
-        if (isOAuthRequest(request) && !mayReadViaOAuthRequest(contentType, getOAuthGrant(request))) {
+        if (isOAuthRequest(request) && !mayReadViaOAuthRequest(contentType, getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException();
         }
 

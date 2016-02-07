@@ -50,9 +50,9 @@
 package com.openexchange.oauth.provider.impl.client.storage;
 
 import java.util.List;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientData;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
 
 /**
  * {@link OAuthClientStorage} - The storage for clients.

@@ -63,12 +63,12 @@ import com.openexchange.filemanagement.ManagedFileManagement;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.mail.mime.MimeType2ExtMap;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.Icon;
-import com.openexchange.oauth.provider.grant.GrantView;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -86,7 +86,7 @@ public class GrantViewJSONConverter {
 
     private final ServerSession session;
 
-    private final OAuthProviderService oAuthProvider;
+    private final GrantManagement grantManagement;
 
     private final Translator translator;
 
@@ -95,7 +95,7 @@ public class GrantViewJSONConverter {
     public GrantViewJSONConverter(ServiceLookup services, ServerSession session) throws OXException {
         super();
         this.session = session;
-        oAuthProvider = requireService(OAuthProviderService.class, services);
+        grantManagement = requireService(GrantManagement.class, services);
         translator = requireService(TranslatorFactory.class, services).translatorFor(session.getUser().getLocale());
         managedFileManagement = requireService(ManagedFileManagement.class, services);
     }
@@ -124,7 +124,7 @@ public class GrantViewJSONConverter {
         JSONObject jScopes = new JSONObject();
         Set<String> scopeTokens = scope.get();
         for (String token : scopeTokens) {
-            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+            OAuthScopeProvider scopeProvider = grantManagement.getScopeProvider(token);
             String description;
             if (scopeProvider == null) {
                 LOG.warn("No scope provider available for token {}", token);

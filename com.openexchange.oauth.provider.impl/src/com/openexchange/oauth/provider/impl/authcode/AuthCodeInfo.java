@@ -49,7 +49,7 @@
 
 package com.openexchange.oauth.provider.impl.authcode;
 
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 /**
  * {@link AuthCodeInfo}

@@ -74,9 +74,9 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -218,7 +218,7 @@ public final class DeleteAction extends AbstractFolderAction {
     }
 
     @OAuthScopeCheck
-    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthAccess access) throws OXException {
         final JSONArray jsonArray = (JSONArray) request.requireData();
         final int len = jsonArray.length();
         String treeId = request.getParameter("tree");
@@ -231,7 +231,7 @@ public final class DeleteAction extends AbstractFolderAction {
             for (int i = 0; i < len; i++) {
                 final String folderId = jsonArray.getString(i);
                 UserizedFolder folder = folderService.getFolder(treeId, folderId, session, new FolderServiceDecorator());
-                if (!mayWriteViaOAuthRequest(folder.getContentType(), grant)) {
+                if (!mayWriteViaOAuthRequest(folder.getContentType(), access)) {
                     return false;
                 }
             }
