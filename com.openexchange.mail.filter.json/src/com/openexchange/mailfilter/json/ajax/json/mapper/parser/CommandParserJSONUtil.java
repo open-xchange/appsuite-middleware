@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,26 +58,43 @@ import com.openexchange.exception.OXException;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link ActionCommandParserUtil}
+ * {@link CommandParserJSONUtil}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class ActionCommandParserUtil {
+public final class CommandParserJSONUtil {
 
     /**
      * Gets the string value from the specified {@link JSONObject}
      * 
      * @param jsonObject The {@link JSONObject}
      * @param key The key
-     * @param commandName The component name
+     * @param commandName The command name
      * @return The string value
-     * @throws OXException If specified key is not present on the specified {@link JSONObject}
+     * @throws OXException If specified key is not present in the specified {@link JSONObject}
      */
-    static final String getString(JSONObject jsonObject, String key, String commandName) throws OXException {
+    public static final String getString(JSONObject jsonObject, String key, String commandName) throws OXException {
         try {
             return jsonObject.getString(key);
         } catch (final JSONException e) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading command '" + commandName + "'. The parameter '" + key + "' is missing: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Gets the JSONArray from the specified {@link JSONObject}
+     * 
+     * @param jobj The {@link JSONObject}
+     * @param key The key
+     * @param commandName The command name
+     * @return The {@link JSONArray}
+     * @throws OXException If specified key is not present in the specified {@link JSONObject}@throws OXException
+     */
+    public static JSONArray getJSONArray(final JSONObject jobj, final String key, final String commandName) throws OXException {
+        try {
+            return jobj.getJSONArray(key);
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading command " + commandName + ". The parameter '" + key + "' is missing: : " + e.getMessage());
         }
     }
 
@@ -87,7 +104,7 @@ final class ActionCommandParserUtil {
      * @param string The string value to encapsulate into an array of arrays
      * @return The created array of arrays
      */
-    static final ArrayList<Object> createArrayOfArrays(final String string) {
+    public static final ArrayList<Object> createArrayOfArrays(final String string) {
         final ArrayList<Object> retval = new ArrayList<Object>(1);
         final ArrayList<String> strings = new ArrayList<String>(1);
         strings.add(string);
@@ -101,7 +118,7 @@ final class ActionCommandParserUtil {
      * @param string The string
      * @return A singleton {@link ArrayList}
      */
-    static final ArrayList<String> stringToList(final String string) {
+    public static final ArrayList<String> stringToList(final String string) {
         final ArrayList<String> retval = new ArrayList<String>(1);
         retval.add(string);
         return retval;
@@ -114,7 +131,7 @@ final class ActionCommandParserUtil {
      * @return The {@link List}
      * @throws JSONException if a JSON parsing error occurs
      */
-    static final List<String> coerceToStringList(JSONArray jarray) throws JSONException {
+    public static final List<String> coerceToStringList(JSONArray jarray) throws JSONException {
         int length = jarray.length();
         List<String> retval = new ArrayList<String>(length);
         for (int i = 0; i < length; i++) {
@@ -122,4 +139,5 @@ final class ActionCommandParserUtil {
         }
         return retval;
     }
+
 }

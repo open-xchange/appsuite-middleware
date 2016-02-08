@@ -60,6 +60,7 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -88,7 +89,7 @@ public class AddFlagActionCommandParser implements CommandParser<ActionCommand> 
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
         }
         final ArrayList<Object> arrayList = new ArrayList<Object>();
-        arrayList.add(ActionCommandParserUtil.coerceToStringList(array));
+        arrayList.add(CommandParserJSONUtil.coerceToStringList(array));
 
         return new ActionCommand(ActionCommand.Commands.ADDFLAG, arrayList);
     }

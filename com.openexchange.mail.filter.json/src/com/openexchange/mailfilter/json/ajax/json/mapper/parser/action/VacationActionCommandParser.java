@@ -68,6 +68,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.VacationActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -100,14 +101,14 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
         final JSONArray addresses = jsonObject.optJSONArray(VacationActionField.addresses.getFieldName());
         if (null != addresses) {
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.addresses));
-            arrayList.add(ActionCommandParserUtil.coerceToStringList(addresses));
+            arrayList.add(CommandParserJSONUtil.coerceToStringList(addresses));
         }
         final String subjectFieldname = VacationActionField.subject.getFieldName();
         if (jsonObject.has(subjectFieldname)) {
             String subject = jsonObject.getString(subjectFieldname);
             subject = MimeMessageUtility.quotePhrase(subject, true);
             arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.subject));
-            arrayList.add(ActionCommandParserUtil.stringToList(subject));
+            arrayList.add(CommandParserJSONUtil.stringToList(subject));
         }
         final String fromFieldName = VacationActionField.from.getFieldName();
         if (jsonObject.has(fromFieldName)) {
@@ -137,14 +138,14 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
 
             if (!Strings.isEmpty(from)) {
                 arrayList.add(ArgumentUtil.createTagArgument(VacationActionField.from));
-                arrayList.add(ActionCommandParserUtil.stringToList(from));
+                arrayList.add(CommandParserJSONUtil.stringToList(from));
             }
         }
         final String text = jsonObject.getString(VacationActionField.text.getFieldName());
         if (null == text) {
             throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionField.text.getFieldName() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
         }
-        arrayList.add(ActionCommandParserUtil.stringToList(text.replaceAll("(\r)?\n", "\r\n")));
+        arrayList.add(CommandParserJSONUtil.stringToList(text.replaceAll("(\r)?\n", "\r\n")));
 
         return new ActionCommand(ActionCommand.Commands.VACATION, arrayList);
     }

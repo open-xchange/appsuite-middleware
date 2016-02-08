@@ -63,6 +63,7 @@ import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.MoveActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -92,7 +93,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = ActionCommandParserUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonname());
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonname());
 
         ConfigurationService config = Services.getService(ConfigurationService.class);
         String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
@@ -105,7 +106,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
             folderName = MailFolderUtility.prepareMailFolderParam(stringParam).getFullname();
         }
 
-        return new ActionCommand(Commands.FILEINTO, ActionCommandParserUtil.createArrayOfArrays(folderName));
+        return new ActionCommand(Commands.FILEINTO, CommandParserJSONUtil.createArrayOfArrays(folderName));
     }
 
     /*

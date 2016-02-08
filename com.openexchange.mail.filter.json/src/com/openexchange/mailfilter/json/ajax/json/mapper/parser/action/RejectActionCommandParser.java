@@ -60,6 +60,7 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
  * {@link RejectActionCommandParser}
@@ -82,8 +83,8 @@ public class RejectActionCommandParser implements CommandParser<ActionCommand> {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = ActionCommandParserUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandname());
-        return new ActionCommand(Commands.REJECT, ActionCommandParserUtil.createArrayOfArrays(stringParam));
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandname());
+        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
     }
 
     /*

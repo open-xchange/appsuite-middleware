@@ -65,6 +65,7 @@ import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.osgi.Services;
 
 /**
@@ -88,7 +89,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = ActionCommandParserUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandname());
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandname());
         // Check for valid email address here:
         try {
             new QuotedInternetAddress(stringParam, true);
@@ -102,7 +103,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
             throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
         
-        return new ActionCommand(Commands.REDIRECT, ActionCommandParserUtil.createArrayOfArrays(stringParam));
+        return new ActionCommand(Commands.REDIRECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
     }
 
     /*

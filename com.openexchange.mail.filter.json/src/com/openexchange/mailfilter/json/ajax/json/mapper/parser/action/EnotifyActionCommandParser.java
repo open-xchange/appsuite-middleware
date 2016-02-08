@@ -61,6 +61,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.EnotifyActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
  * {@link EnotifyActionCommandParser}
@@ -88,13 +89,13 @@ public class EnotifyActionCommandParser implements CommandParser<ActionCommand> 
         if (jsonObject.has(messageFieldName)) {
             final String message = jsonObject.getString(messageFieldName);
             arrayList.add(ArgumentUtil.createTagArgument(EnotifyActionField.message));
-            arrayList.add(ActionCommandParserUtil.stringToList(message));
+            arrayList.add(CommandParserJSONUtil.stringToList(message));
         }
         final String method = jsonObject.getString(EnotifyActionField.method.getFieldName());
         if (null == method) {
             throw new JSONException("Parameter " + EnotifyActionField.method.getFieldName() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
         }
-        arrayList.add(ActionCommandParserUtil.stringToList(method.replaceAll("(\r)?\n", "\r\n")));
+        arrayList.add(CommandParserJSONUtil.stringToList(method.replaceAll("(\r)?\n", "\r\n")));
 
         return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
     }

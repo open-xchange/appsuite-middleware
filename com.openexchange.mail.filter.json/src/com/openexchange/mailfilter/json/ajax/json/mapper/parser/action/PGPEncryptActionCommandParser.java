@@ -62,6 +62,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
  * {@link PGPEncryptActionCommandParser}
@@ -91,7 +92,7 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
                 throw new JSONException("Empty string-arrays are not allowed in sieve.");
             }
             arrayList.add(ArgumentUtil.createTagArgument(PGPEncryptActionField.keys));
-            arrayList.add(ActionCommandParserUtil.coerceToStringList(keys));
+            arrayList.add(CommandParserJSONUtil.coerceToStringList(keys));
         }
 
         return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
