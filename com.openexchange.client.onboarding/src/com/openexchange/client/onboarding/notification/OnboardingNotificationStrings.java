@@ -70,6 +70,9 @@ public class OnboardingNotificationStrings implements LocalizableStrings {
     // The content of the E-Mail providing the profile attachment
     public static final String CONTENT = "to automatically configure your device, please download & install the attached configuration profile.";
 
+    // The content of the E-Mail providing the profile attachment
+    public static final String CONTENT_WITH_FILENAME = "to automatically configure your device, please download & install the attached configuration profile \"%1$s\".";
+
     // The subject of the E-Mail providing the profile attachment
     public static final String SUBJECT = "Your device configuration";
 

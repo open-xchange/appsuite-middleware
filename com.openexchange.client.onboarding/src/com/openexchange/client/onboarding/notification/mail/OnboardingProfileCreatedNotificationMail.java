@@ -64,6 +64,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.server.ServiceExceptionCode;
@@ -91,11 +92,12 @@ public class OnboardingProfileCreatedNotificationMail {
      *
      * @param mailAddress The E-Mail address to use as recipient
      * @param hostName The associated host name
+     * @param fileName The name of the file providing the configuration profile
      * @param session The session providing user data
      * @return A new {@code MailData} instance representing the profile delivery mail
      * @throws OXException If {@code MailData} instance cannot be returned
      */
-    public static MailData createProfileNotificationMail(String mailAddress, String hostName, Session session) throws OXException {
+    public static MailData createProfileNotificationMail(String mailAddress, String hostName, String fileName, Session session) throws OXException {
         Map<String, Object> vars = new HashMap<String, Object>(4);
 
         // Get translator
@@ -114,8 +116,12 @@ public class OnboardingProfileCreatedNotificationMail {
         }
 
         // E-Mail content
-        {
+        if (Strings.isEmpty(fileName)) {
             String translated = translator.translate(OnboardingNotificationStrings.CONTENT);
+            vars.put(VARIABLE_CONTENT, translated);
+        } else {
+            String translated = translator.translate(OnboardingNotificationStrings.CONTENT_WITH_FILENAME);
+            translated = String.format(translated, fileName);
             vars.put(VARIABLE_CONTENT, translated);
         }
 
