@@ -47,36 +47,40 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.mail.internet.AddressException;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
-import com.openexchange.mail.mime.QuotedInternetAddress;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
+import com.openexchange.mail.utils.MailFolderUtility;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
+import com.openexchange.mailfilter.json.ajax.json.fields.MoveActionField;
 import com.openexchange.mailfilter.json.osgi.Services;
+import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
+import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
 
 /**
- * {@link RedirectActionCommandParser}
+ * {@link FileIntoActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RedirectActionCommandParser implements ActionCommandParser {
+public class FileIntoActionCommandParser implements ActionCommandParser {
+
+    /*
+     * TODO: implement {@link Reloadable} and reload the MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property
+     */
 
     /**
-     * Initialises a new {@link RedirectActionCommandParser}.
+     * Initialises a new {@link FileIntoActionCommandParser}.
      */
-    public RedirectActionCommandParser() {
+    public FileIntoActionCommandParser() {
         super();
     }
 
@@ -87,21 +91,20 @@ public class RedirectActionCommandParser implements ActionCommandParser {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = ActionCommandParserUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandname());
-        // Check for valid email address here:
-        try {
-            new QuotedInternetAddress(stringParam, true);
-        } catch (final AddressException e) {
-            throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
+        String stringParam = ActionCommandParserUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonname());
+
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
+
+        final String folderName;
+        if (useUTF7Encoding) {
+            folderName = BASE64MailboxEncoder.encode(MailFolderUtility.prepareMailFolderParam(stringParam).getFullname());
+        } else {
+            folderName = MailFolderUtility.prepareMailFolderParam(stringParam).getFullname();
         }
-        // And finally check of that forward address is allowed
-        final ConfigurationService service = Services.getService(ConfigurationService.class);
-        final Filter filter;
-        if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
-            throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
-        }
-        
-        return new ActionCommand(Commands.REDIRECT, ActionCommandParserUtil.createArrayOfArrays(stringParam));
+
+        return new ActionCommand(Commands.FILEINTO, ActionCommandParserUtil.createArrayOfArrays(folderName));
     }
 
     /*
@@ -114,7 +117,20 @@ public class RedirectActionCommandParser implements ActionCommandParser {
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonname());
-        jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
+        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
+
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
+
+        final String folderName;
+        if (useUTF7Encoding) {
+            folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
+        } else {
+            folderName = ((List<String>) arguments.get(0)).get(0);
+        }
+
+        jsonObject.put(MoveActionField.into.name(), MailFolderUtility.prepareFullname(0, folderName));
     }
+
 }

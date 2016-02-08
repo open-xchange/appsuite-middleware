@@ -47,32 +47,31 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import org.apache.jsieve.SieveException;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.mailfilter.json.ajax.json.fields.EnotifyActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 
 /**
- * {@link PGPEncryptActionCommandParser}
+ * {@link EnotifyActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGPEncryptActionCommandParser implements ActionCommandParser {
+public class EnotifyActionCommandParser implements ActionCommandParser {
 
     /**
-     * Initialises a new {@link PGPEncryptActionCommandParser}.
+     * Initialises a new {@link EnotifyActionCommandParser}.
      */
-    public PGPEncryptActionCommandParser() {
+    public EnotifyActionCommandParser() {
         super();
     }
 
@@ -84,16 +83,19 @@ public class PGPEncryptActionCommandParser implements ActionCommandParser {
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
         final ArrayList<Object> arrayList = new ArrayList<Object>();
-        final JSONArray keys = jsonObject.optJSONArray(PGPEncryptActionField.keys.getFieldName());
-        if (null != keys) {
-            if (0 == keys.length()) {
-                throw new JSONException("Empty string-arrays are not allowed in sieve.");
-            }
-            arrayList.add(ArgumentUtil.createTagArgument(PGPEncryptActionField.keys));
-            arrayList.add(ActionCommandParserUtil.coerceToStringList(keys));
+        final String messageFieldName = EnotifyActionField.message.getFieldName();
+        if (jsonObject.has(messageFieldName)) {
+            final String message = jsonObject.getString(messageFieldName);
+            arrayList.add(ArgumentUtil.createTagArgument(EnotifyActionField.message));
+            arrayList.add(ActionCommandParserUtil.stringToList(message));
         }
+        final String method = jsonObject.getString(EnotifyActionField.method.getFieldName());
+        if (null == method) {
+            throw new JSONException("Parameter " + EnotifyActionField.method.getFieldName() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+        }
+        arrayList.add(ActionCommandParserUtil.stringToList(method.replaceAll("(\r)?\n", "\r\n")));
 
-        return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
+        return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
     }
 
     /*
@@ -101,14 +103,17 @@ public class PGPEncryptActionCommandParser implements ActionCommandParser {
      * 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
+    @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonname());
-        final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
-        final List<String> keys = tagarguments.get(PGPEncryptActionField.keys.getTagName());
-        if (null != keys) {
-            jsonObject.put(PGPEncryptActionField.keys.getFieldName(), keys);
-        }
-    }
+        ArrayList<Object> arguments = actionCommand.getArguments();
 
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ENOTIFY.getJsonname());
+        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagarguments();
+        final List<String> message = tagArguments.get(EnotifyActionField.message.getTagName());
+        if (null != message) {
+            jsonObject.put(EnotifyActionField.message.getFieldName(), message.get(0));
+        }
+        jsonObject.put(EnotifyActionField.method.getFieldName(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
+    }
 }

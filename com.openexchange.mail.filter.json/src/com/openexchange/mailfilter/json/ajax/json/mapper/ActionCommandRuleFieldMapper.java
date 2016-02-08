@@ -64,17 +64,17 @@ import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.AddFlagActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.DiscardActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.EnotifyActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.FileIntoActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.KeepActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.PGPEncryptActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.RedirectActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.RejectActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.StopActionCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.VacationActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.ActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.AddFlagActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.DiscardActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.EnotifyActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.FileIntoActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.KeepActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.PGPEncryptActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.RedirectActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.RejectActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.StopActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.VacationActionCommandParser;
 
 /**
  * {@link ActionCommandRuleFieldMapper}

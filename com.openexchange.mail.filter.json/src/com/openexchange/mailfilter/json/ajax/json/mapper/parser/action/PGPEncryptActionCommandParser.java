@@ -47,40 +47,32 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 import org.apache.jsieve.SieveException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
-import com.openexchange.mail.utils.MailFolderUtility;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.MoveActionField;
-import com.openexchange.mailfilter.json.osgi.Services;
-import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
-import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
+import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 
 /**
- * {@link FileIntoActionCommandParser}
+ * {@link PGPEncryptActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FileIntoActionCommandParser implements ActionCommandParser {
-
-    /*
-     * TODO: implement {@link Reloadable} and reload the MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property
-     */
+public class PGPEncryptActionCommandParser implements ActionCommandParser {
 
     /**
-     * Initialises a new {@link FileIntoActionCommandParser}.
+     * Initialises a new {@link PGPEncryptActionCommandParser}.
      */
-    public FileIntoActionCommandParser() {
+    public PGPEncryptActionCommandParser() {
         super();
     }
 
@@ -91,20 +83,17 @@ public class FileIntoActionCommandParser implements ActionCommandParser {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = ActionCommandParserUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonname());
-
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
-        boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
-
-        final String folderName;
-        if (useUTF7Encoding) {
-            folderName = BASE64MailboxEncoder.encode(MailFolderUtility.prepareMailFolderParam(stringParam).getFullname());
-        } else {
-            folderName = MailFolderUtility.prepareMailFolderParam(stringParam).getFullname();
+        final ArrayList<Object> arrayList = new ArrayList<Object>();
+        final JSONArray keys = jsonObject.optJSONArray(PGPEncryptActionField.keys.getFieldName());
+        if (null != keys) {
+            if (0 == keys.length()) {
+                throw new JSONException("Empty string-arrays are not allowed in sieve.");
+            }
+            arrayList.add(ArgumentUtil.createTagArgument(PGPEncryptActionField.keys));
+            arrayList.add(ActionCommandParserUtil.coerceToStringList(keys));
         }
 
-        return new ActionCommand(Commands.FILEINTO, ActionCommandParserUtil.createArrayOfArrays(folderName));
+        return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
     }
 
     /*
@@ -112,25 +101,14 @@ public class FileIntoActionCommandParser implements ActionCommandParser {
      * 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
-
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
-        final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
-
-        final String folderName;
-        if (useUTF7Encoding) {
-            folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
-        } else {
-            folderName = ((List<String>) arguments.get(0)).get(0);
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonname());
+        final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
+        final List<String> keys = tagarguments.get(PGPEncryptActionField.keys.getTagName());
+        if (null != keys) {
+            jsonObject.put(PGPEncryptActionField.keys.getFieldName(), keys);
         }
-
-        jsonObject.put(MoveActionField.into.name(), MailFolderUtility.prepareFullname(0, folderName));
     }
 
 }

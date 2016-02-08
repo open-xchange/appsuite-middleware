@@ -47,63 +47,85 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
-import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link AddFlagActionCommandParser}
+ * {@link ActionCommandParserUtil}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddFlagActionCommandParser implements ActionCommandParser {
+final class ActionCommandParserUtil {
 
     /**
-     * Initialises a new {@link AddFlagActionCommandParser}.
-     */
-    public AddFlagActionCommandParser() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Gets the string value from the specified {@link JSONObject}
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @param jsonObject The {@link JSONObject}
+     * @param key The key
+     * @param component The component name
+     * @return The string value
+     * @throws OXException If specified key is not present on the specified {@link JSONObject}
+     * @throws JSONException If the value of the specified key is <code>null</code>
      */
-    @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        final JSONArray array = jsonObject.getJSONArray(AddFlagsActionField.flags.name());
-        if (null == array) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
+    static final String getString(JSONObject jsonObject, String key, String component) throws OXException, JSONException {
+        String retval = null;
+        try {
+            retval = jsonObject.getString(key);
+        } catch (final JSONException e) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading ActionCommand '" + component + "': " + e.getMessage());
         }
-        final ArrayList<Object> arrayList = new ArrayList<Object>();
-        arrayList.add(ActionCommandParserUtil.coerceToStringList(array));
-
-        return new ActionCommand(ActionCommand.Commands.ADDFLAG, arrayList);
+        if (retval == null) {
+            throw new JSONException("The parameter '" + key + "' is missing for the action command '" + component + "'.");
+        }
+        return retval;
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Creates an array of arrays
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @param string The string value to encapsulate into an array of arrays
+     * @return The created array of arrays
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonname());
-        jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
+    static final ArrayList<Object> createArrayOfArrays(final String string) {
+        final ArrayList<Object> retval = new ArrayList<Object>(1);
+        final ArrayList<String> strings = new ArrayList<String>(1);
+        strings.add(string);
+        retval.add(strings);
+        return retval;
     }
 
+    /**
+     * Creates a singleton {@link ArrayList} with the specified string
+     * 
+     * @param string The string
+     * @return A singleton {@link ArrayList}
+     */
+    static final ArrayList<String> stringToList(final String string) {
+        final ArrayList<String> retval = new ArrayList<String>(1);
+        retval.add(string);
+        return retval;
+    }
+
+    /**
+     * Coerces the specified {@link JSONArray} to a {@link List}
+     * 
+     * @param jarray The {@link JSONArray} to coerce
+     * @return The {@link List}
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    static final List<String> coerceToStringList(JSONArray jarray) throws JSONException {
+        int length = jarray.length();
+        List<String> retval = new ArrayList<String>(length);
+        for (int i = 0; i < length; i++) {
+            retval.add(jarray.getString(i));
+        }
+        return retval;
+    }
 }

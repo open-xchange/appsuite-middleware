@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
 import java.util.Hashtable;

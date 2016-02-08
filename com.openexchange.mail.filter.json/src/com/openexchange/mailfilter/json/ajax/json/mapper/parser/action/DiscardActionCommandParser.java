@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
 import org.apache.jsieve.SieveException;
@@ -58,16 +58,16 @@ import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 
 /**
- * {@link KeepActionCommandParser}
+ * {@link DiscardActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class KeepActionCommandParser implements ActionCommandParser {
+public class DiscardActionCommandParser implements ActionCommandParser {
 
     /**
-     * Initialises a new {@link KeepActionCommandParser}.
+     * Initialises a new {@link DiscardActionCommandParser}.
      */
-    public KeepActionCommandParser() {
+    public DiscardActionCommandParser() {
         super();
     }
 
@@ -78,7 +78,7 @@ public class KeepActionCommandParser implements ActionCommandParser {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException {
-        return new ActionCommand(Commands.KEEP, new ArrayList<Object>(0));
+        return new ActionCommand(Commands.DISCARD, new ArrayList<Object>(0));
     }
 
     /*
@@ -88,6 +88,6 @@ public class KeepActionCommandParser implements ActionCommandParser {
      */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), Commands.KEEP.getJsonname());
+        jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonname());
     }
 }

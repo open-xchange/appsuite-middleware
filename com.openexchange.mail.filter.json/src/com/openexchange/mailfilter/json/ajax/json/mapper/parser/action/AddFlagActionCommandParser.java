@@ -47,38 +47,63 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.jsieve.SieveException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
+import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link ActionCommandParser}
+ * {@link AddFlagActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ActionCommandParser {
+public class AddFlagActionCommandParser implements ActionCommandParser {
 
     /**
-     * Parses the specified {@link JSONObject} and creates an {@link ActionCommand}
-     * 
-     * @param jsonObject The {@link JSONObject} to parse
-     * @return The newly created {@link ActionCommand}
-     * @throws JSONException if a JSON parsing error occurs
-     * @throws SieveException if a Sieve parsing error occurs
-     * @throws OXException if a semantic error occurs
+     * Initialises a new {@link AddFlagActionCommandParser}.
      */
-    ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException;
+    public AddFlagActionCommandParser() {
+        super();
+    }
 
-    /**
-     * Parses the specified {@link ActionCommand} to the specified {@link JSONObject}
+    /*
+     * (non-Javadoc)
      * 
-     * @param jsonObject The {@link JSONObject} to parse the {@link ActionCommand} into
-     * @param actionCommand The {@link ActionCommand} to parse
-     * @throws JSONException if a JSON parsing error occurs
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
      */
-    void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException;
+    @Override
+    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        final JSONArray array = jsonObject.getJSONArray(AddFlagsActionField.flags.name());
+        if (null == array) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
+        }
+        final ArrayList<Object> arrayList = new ArrayList<Object>();
+        arrayList.add(ActionCommandParserUtil.coerceToStringList(array));
+
+        return new ActionCommand(ActionCommand.Commands.ADDFLAG, arrayList);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+        ArrayList<Object> arguments = actionCommand.getArguments();
+
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonname());
+        jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
+    }
+
 }

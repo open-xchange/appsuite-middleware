@@ -47,31 +47,36 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
+import javax.mail.internet.AddressException;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.mailfilter.json.ajax.json.fields.EnotifyActionField;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
+import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
+import com.openexchange.mailfilter.json.osgi.Services;
 
 /**
- * {@link EnotifyActionCommandParser}
+ * {@link RedirectActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EnotifyActionCommandParser implements ActionCommandParser {
+public class RedirectActionCommandParser implements ActionCommandParser {
 
     /**
-     * Initialises a new {@link EnotifyActionCommandParser}.
+     * Initialises a new {@link RedirectActionCommandParser}.
      */
-    public EnotifyActionCommandParser() {
+    public RedirectActionCommandParser() {
         super();
     }
 
@@ -82,20 +87,21 @@ public class EnotifyActionCommandParser implements ActionCommandParser {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        final ArrayList<Object> arrayList = new ArrayList<Object>();
-        final String messageFieldName = EnotifyActionField.message.getFieldName();
-        if (jsonObject.has(messageFieldName)) {
-            final String message = jsonObject.getString(messageFieldName);
-            arrayList.add(ArgumentUtil.createTagArgument(EnotifyActionField.message));
-            arrayList.add(ActionCommandParserUtil.stringToList(message));
+        String stringParam = ActionCommandParserUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandname());
+        // Check for valid email address here:
+        try {
+            new QuotedInternetAddress(stringParam, true);
+        } catch (final AddressException e) {
+            throw MailFilterExceptionCode.INVALID_REDIRECT_ADDRESS.create(e, stringParam);
         }
-        final String method = jsonObject.getString(EnotifyActionField.method.getFieldName());
-        if (null == method) {
-            throw new JSONException("Parameter " + EnotifyActionField.method.getFieldName() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+        // And finally check of that forward address is allowed
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
+        final Filter filter;
+        if (null != service && (null != (filter = service.getFilterFromProperty("com.openexchange.mail.filter.redirectWhitelist"))) && !filter.accepts(stringParam)) {
+            throw MailFilterExceptionCode.REJECTED_REDIRECT_ADDRESS.create(stringParam);
         }
-        arrayList.add(ActionCommandParserUtil.stringToList(method.replaceAll("(\r)?\n", "\r\n")));
-
-        return new ActionCommand(ActionCommand.Commands.ENOTIFY, arrayList);
+        
+        return new ActionCommand(Commands.REDIRECT, ActionCommandParserUtil.createArrayOfArrays(stringParam));
     }
 
     /*
@@ -108,12 +114,7 @@ public class EnotifyActionCommandParser implements ActionCommandParser {
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ENOTIFY.getJsonname());
-        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagarguments();
-        final List<String> message = tagArguments.get(EnotifyActionField.message.getTagName());
-        if (null != message) {
-            jsonObject.put(EnotifyActionField.message.getFieldName(), message.get(0));
-        }
-        jsonObject.put(EnotifyActionField.method.getFieldName(), ((List<String>) arguments.get(arguments.size() - 1)).get(0));
+        jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonname());
+        jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
     }
 }
