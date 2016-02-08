@@ -63,7 +63,6 @@ import java.util.HashMap;
 import java.util.Map;
 import javax.servlet.ServletInputStream;
 import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
@@ -88,21 +87,21 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthModule;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
-import com.openexchange.oauth.provider.scope.Scope;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
-import com.openexchange.oauth.provider.SimOAuthResourceService;
+import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.SimOAuthResourceService;
+import com.openexchange.oauth.provider.resourceserver.SimOAuthResourceService.TestGrant;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.SimServerSession;
 
@@ -159,8 +158,8 @@ public class OAuthDispatcherServletTest {
             }
 
             @OAuthScopeCheck
-            public boolean checkScope(AJAXRequestData requestData, ServerSession session, OAuthGrant grant) {
-                return grant.getScope().has("r_test") && grant.getScope().has("w_test");
+            public boolean checkScope(AJAXRequestData requestData, ServerSession session, OAuthAccess access) {
+                return access.getScope().has("r_test") && access.getScope().has("w_test");
             }
         }
 
@@ -182,61 +181,6 @@ public class OAuthDispatcherServletTest {
         @Override
         public AJAXActionService createActionService(String action) throws OXException {
             return services.get(action);
-        }
-    }
-
-    public class TestGrant implements OAuthGrant {
-
-        private final int contextId;
-        private final int userId;
-        private final String accessToken;
-        private final String refreshToken;
-        private final Date expirationDate;
-        private final Scope scope;
-
-        public TestGrant(int contextId, int userId, String accessToken, String refreshToken, Date expirationDate, Scope scope) {
-            super();
-            this.contextId = contextId;
-            this.userId = userId;
-            this.accessToken = accessToken;
-            this.refreshToken = refreshToken;
-            this.expirationDate = expirationDate;
-            this.scope = scope;
-        }
-
-        @Override
-        public String getClientId() {
-            return "1234";
-        }
-
-        @Override
-        public int getContextId() {
-            return contextId;
-        }
-
-        @Override
-        public int getUserId() {
-            return userId;
-        }
-
-        @Override
-        public String getAccessToken() {
-            return accessToken;
-        }
-
-        @Override
-        public String getRefreshToken() {
-            return refreshToken;
-        }
-
-        @Override
-        public Date getExpirationDate() {
-            return expirationDate;
-        }
-
-        @Override
-        public Scope getScope() {
-            return scope;
         }
     }
 
@@ -270,7 +214,14 @@ public class OAuthDispatcherServletTest {
 
     @Before
     public void setUp() throws Exception {
-        resourceService = new SimOAuthResourceService();
+        resourceService = new SimOAuthResourceService(new SimOAuthResourceService.SessionProvider() {
+            @Override
+            public Session createSession(TestGrant grant) {
+                SimServerSession simServerSession = new SimServerSession(grant.getContextId(), grant.getUserId());
+                simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "db1");
+                return simServerSession;
+            }
+        });
         TestGrant readToken = new TestGrant(1, 3, UUIDs.getUnformattedStringFromRandom(), UUIDs.getUnformattedStringFromRandom(), new Date(System.currentTimeMillis() + 3600 * 1000L), Scope.newInstance("r_test"));
         resourceService.addToken(readToken);
         this.readToken = readToken.getAccessToken();
@@ -288,15 +239,7 @@ public class OAuthDispatcherServletTest {
         this.expiredToken = expiredToken.getAccessToken();
 
         SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
-        serviceLookup.add(OAuthResourceService.class, resourceService);
-        serviceLookup.add(OAuthSessionProvider.class, new OAuthSessionProvider() {
-            @Override
-            public ServerSession getSession(OAuthGrant token, HttpServletRequest httpRequest) throws OXException {
-                SimServerSession simServerSession = new SimServerSession(token.getContextId(), token.getUserId());
-                simServerSession.setParameter(LogProperties.Name.DATABASE_SCHEMA.getName(), "oxdb1");
-                return simServerSession;
-            }
-        });
+        serviceLookup.add(com.openexchange.oauth.provider.resourceserver.OAuthResourceService.class, resourceService);
         servlet = new OAuthDispatcherServlet(serviceLookup, "/ajax/");
         request = new SimHttpServletRequest();
         request.setMethod("GET");

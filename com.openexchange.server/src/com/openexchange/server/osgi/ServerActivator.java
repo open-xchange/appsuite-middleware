@@ -60,8 +60,6 @@ import java.util.List;
 import javax.activation.MailcapCommandMap;
 import javax.management.ObjectName;
 import javax.servlet.ServletException;
-import net.htmlparser.jericho.Config;
-import net.htmlparser.jericho.LoggerProvider;
 import org.json.JSONObject;
 import org.json.JSONValue;
 import org.osgi.framework.BundleActivator;
@@ -208,8 +206,7 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
@@ -250,6 +247,8 @@ import com.openexchange.userconf.internal.UserConfigurationServiceImpl;
 import com.openexchange.userconf.internal.UserPermissionServiceImpl;
 import com.openexchange.xml.jdom.JDOMParser;
 import com.openexchange.xml.spring.SpringParser;
+import net.htmlparser.jericho.Config;
+import net.htmlparser.jericho.LoggerProvider;
 
 /**
  * {@link ServerActivator} - The activator for server bundle.
@@ -570,7 +569,6 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track OAuth provider services
          */
         track(OAuthResourceService.class, new RegistryCustomizer<OAuthResourceService>(context, OAuthResourceService.class));
-        track(OAuthSessionProvider.class, new RegistryCustomizer<OAuthSessionProvider>(context, OAuthSessionProvider.class));
 
         /*
          * Track QuotaFileStorageService

@@ -50,8 +50,8 @@
 package com.openexchange.oauth.provider.impl.grant;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.scope.Scope;
-import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.oauth.provider.impl.tools.UserizedToken;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 /**
  * {@link StoredGrant}

@@ -64,8 +64,8 @@ import com.openexchange.contacts.json.converters.ContactJSONDataHandler;
 import com.openexchange.contacts.json.converters.ContactJSONResultConverter;
 import com.openexchange.conversion.DataHandler;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
 /**
  * {@link ContactJSONActivator} - OSGi Activator for the Contact JSON interface.

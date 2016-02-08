@@ -71,7 +71,7 @@ import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
-import com.openexchange.oauth.provider.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;

@@ -50,9 +50,9 @@
 package com.openexchange.oauth.provider.impl.grant;
 
 import java.util.Date;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.authorizationserver.grant.Grant;
 import com.openexchange.oauth.provider.impl.authcode.AuthCodeInfo;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 
 /**
@@ -61,9 +61,7 @@ import com.openexchange.oauth.provider.scope.Scope;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public class OAuthGrantImpl implements OAuthGrant {
-
-    private final String clientId;
+public class OAuthGrantImpl implements Grant {
 
     private final int contextId;
 
@@ -77,10 +75,8 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     private Scope scope;
 
-
     public OAuthGrantImpl(AuthCodeInfo authCodeInfo, String accessToken, String refreshToken, Date expirationDate) {
         super();
-        clientId = authCodeInfo.getClientId();
         contextId = authCodeInfo.getContextId();
         userId = authCodeInfo.getUserId();
         this.accessToken = accessToken;
@@ -91,7 +87,6 @@ public class OAuthGrantImpl implements OAuthGrant {
 
     public OAuthGrantImpl(StoredGrant storedGrant) {
         super();
-        clientId = storedGrant.getClientId();
         contextId = storedGrant.getContextId();
         userId = storedGrant.getUserId();
         accessToken = storedGrant.getAccessToken().getToken();
@@ -103,9 +98,8 @@ public class OAuthGrantImpl implements OAuthGrant {
     /**
      * Copy constructor
      */
-    public OAuthGrantImpl(OAuthGrant grant) {
+    public OAuthGrantImpl(Grant grant) {
         super();
-        clientId = grant.getClientId();
         contextId = grant.getContextId();
         userId = grant.getUserId();
         accessToken = grant.getAccessToken();
@@ -113,13 +107,6 @@ public class OAuthGrantImpl implements OAuthGrant {
         expirationDate = grant.getExpirationDate();
         scope = grant.getScope();
     }
-
-
-    @Override
-    public String getClientId() {
-        return clientId;
-    }
-
     @Override
     public int getContextId() {
         return contextId;

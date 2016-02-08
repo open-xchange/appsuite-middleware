@@ -59,8 +59,8 @@ import com.openexchange.ajax.oauth.provider.actions.RevokeRequest;
 import com.openexchange.calendar.json.AppointmentActionFactory;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.grant.GrantView;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 
 /**

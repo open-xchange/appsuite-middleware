@@ -53,7 +53,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 
 
 /**
@@ -83,7 +83,7 @@ public class OAuthScopeProviderTracker implements ServiceTrackerCustomizer<OAuth
 
     @Override
     public void modifiedService(ServiceReference<OAuthScopeProvider> reference, OAuthScopeProvider service) {
-
+        // nothing
     }
 
     @Override

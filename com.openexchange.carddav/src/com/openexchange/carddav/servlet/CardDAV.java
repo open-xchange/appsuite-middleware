@@ -59,7 +59,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dav.DAVServlet;
 import com.openexchange.exception.OXException;
 import com.openexchange.login.Interface;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -101,12 +101,12 @@ public class CardDAV extends DAVServlet {
             ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
             ComposedConfigProperty<Boolean> property = configView.property("com.openexchange.carddav.enabled", boolean.class);
             if (property.isDefined() && property.get()) {
-                OAuthGrant oAuthGrant = (OAuthGrant) request.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
-                if (oAuthGrant == null) {
+                OAuthAccess oAuthAccess = (OAuthAccess) request.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
+                if (oAuthAccess == null) {
                     // basic auth took place
                     return true;
                 } else {
-                    return oAuthGrant.getScope().has(Tools.OAUTH_SCOPE);
+                    return oAuthAccess.getScope().has(Tools.OAUTH_SCOPE);
                 }
             }
         } catch (OXException e) {

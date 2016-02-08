@@ -53,7 +53,6 @@ import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.concurrent.TimeUnit;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.json.JSONException;
@@ -62,11 +61,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.google.common.net.HttpHeaders;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.grant.Grant;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
+import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
@@ -87,12 +87,12 @@ public class TokenEndpoint extends OAuthEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(TokenEndpoint.class);
 
 
-    public TokenEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super(oAuthProvider, services);
+    public TokenEndpoint(ClientManagement clientManagement, GrantManagement grantManagement, ServiceLookup services) {
+        super(clientManagement, grantManagement, services);
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Tools.disableCaching(response);
             if (!Tools.considerSecure(request)) {
@@ -107,7 +107,7 @@ public class TokenEndpoint extends OAuthEndpoint {
                 return;
             }
 
-            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
+            Client client = clientManagement.getClientById(clientId);
             if (client == null) {
                 failWithInvalidParameter(response, OAuthProviderConstants.PARAM_CLIENT_ID);
                 return;
@@ -167,7 +167,7 @@ public class TokenEndpoint extends OAuthEndpoint {
             return;
         }
 
-        OAuthGrant token = oAuthProvider.redeemAuthCode(client, redirectUri, authCode);
+        Grant token = grantManagement.redeemAuthCode(client, redirectUri, authCode);
         if (token == null) {
             failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_CODE);
             return;
@@ -183,7 +183,7 @@ public class TokenEndpoint extends OAuthEndpoint {
             return;
         }
 
-        OAuthGrant token = oAuthProvider.redeemRefreshToken(client, refreshToken);
+        Grant token = grantManagement.redeemRefreshToken(client, refreshToken);
         if (token == null) {
             failWithInvalidParameter(resp, OAuthProviderConstants.PARAM_REFRESH_TOKEN);
             return;
@@ -192,7 +192,7 @@ public class TokenEndpoint extends OAuthEndpoint {
         respondWithToken(token, resp);
     }
 
-    private static void respondWithToken(OAuthGrant grant, HttpServletResponse resp) throws IOException, JSONException {
+    private static void respondWithToken(Grant grant, HttpServletResponse resp) throws IOException, JSONException {
         JSONObject result = new JSONObject();
         result.put("access_token", grant.getAccessToken());
         result.put("refresh_token", grant.getRefreshToken());

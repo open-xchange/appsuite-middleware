@@ -51,14 +51,14 @@ package com.openexchange.oauth.provider.impl.servlets;
 
 import static com.openexchange.tools.servlet.http.Tools.sendErrorResponse;
 import java.io.IOException;
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.http.Tools;
 
@@ -79,12 +79,12 @@ public class RevokeEndpoint extends OAuthEndpoint {
      * Initializes a new {@link RevokeEndpoint}.
      * @param oAuthProvider
      */
-    public RevokeEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super(oAuthProvider, services);
+    public RevokeEndpoint(ClientManagement clientManagement, GrantManagement grantManagement, ServiceLookup services) {
+        super(clientManagement, grantManagement, services);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         try {
             Tools.disableCaching(response);
             String accessToken = request.getParameter("access_token");
@@ -94,13 +94,13 @@ public class RevokeEndpoint extends OAuthEndpoint {
                     failWithMissingParameter(response, "refresh_token");
                     return;
                 } else {
-                    if (!oAuthProvider.revokeByRefreshToken(refreshToken)) {
+                    if (!grantManagement.revokeByRefreshToken(refreshToken)) {
                         failWithInvalidParameter(response, "refresh_token");
                         return;
                     }
                 }
             } else {
-                if (!oAuthProvider.revokeByAccessToken(accessToken)) {
+                if (!grantManagement.revokeByAccessToken(accessToken)) {
                     failWithInvalidParameter(response, "access_token");
                     return;
                 }

@@ -57,18 +57,18 @@ import java.util.UUID;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagement;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
-import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientData;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
 import com.openexchange.oauth.provider.impl.client.storage.OAuthClientStorage;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
 import com.openexchange.oauth.provider.impl.tools.ClientId;
 import com.openexchange.oauth.provider.impl.tools.OAuthClientIdHelper;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.oauth.provider.tools.URIValidator;
 
 
