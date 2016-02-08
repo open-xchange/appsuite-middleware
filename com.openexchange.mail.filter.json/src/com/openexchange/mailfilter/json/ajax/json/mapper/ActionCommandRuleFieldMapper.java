@@ -50,8 +50,11 @@
 package com.openexchange.mailfilter.json.ajax.json.mapper;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import org.apache.jsieve.SieveException;
@@ -63,6 +66,7 @@ import com.openexchange.config.Filter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.json.parser.MessageParser;
@@ -80,6 +84,17 @@ import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
 import com.openexchange.mailfilter.json.ajax.json.fields.VacationActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.AddFlagActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.DiscardActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.EnotifyActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.FileIntoActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.KeepActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.PGPEncryptActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.RedirectActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.RejectActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.StopActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.VacationActionCommandParser;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
@@ -92,11 +107,26 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  */
 public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
+    private final Map<String, ActionCommandParser> parsers;
+
     /**
      * Initialises a new {@link ActionCommandRuleFieldMapper}.
      */
     public ActionCommandRuleFieldMapper() {
         super();
+
+        Map<String, ActionCommandParser> p = new HashMap<String, ActionCommandParser>();
+        p.put(Commands.KEEP.getJsonname(), new KeepActionCommandParser());
+        p.put(Commands.DISCARD.getJsonname(), new DiscardActionCommandParser());
+        p.put(Commands.REDIRECT.getJsonname(), new RedirectActionCommandParser());
+        p.put(Commands.REJECT.getJsonname(), new RejectActionCommandParser());
+        p.put(Commands.FILEINTO.getJsonname(), new FileIntoActionCommandParser());
+        p.put(Commands.STOP.getJsonname(), new StopActionCommandParser());
+        p.put(Commands.VACATION.getJsonname(), new VacationActionCommandParser());
+        p.put(Commands.ENOTIFY.getJsonname(), new EnotifyActionCommandParser());
+        p.put(Commands.ADDFLAG.getJsonname(), new AddFlagActionCommandParser());
+        p.put(Commands.PGP_ENCRYPT.getJsonname(), new PGPEncryptActionCommandParser());
+        parsers = Collections.unmodifiableMap(p);
     }
 
     /*
@@ -134,9 +164,10 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            // TODO: Create an action command registry with action command parsers
-            // e.g. Map<ActionCommand, ActionCommandParser> parsers;
-            createJSONFromActionCommand(object, actionCommand);
+            ActionCommandParser parser = parsers.get(actionCommand.getCommand().getCommandname());
+            if (parser != null) {
+                parser.parse(object, actionCommand);
+            }
             array.put(object);
         }
         return array;
@@ -159,8 +190,12 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         JSONArray array = (JSONArray) attribute;
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
-            // TODO: Create an action command registry with action command parsers
-            ActionCommand actionCommand = createActionCommandFromJSON(object);
+            String id = object.getString(GeneralField.id.name());
+            ActionCommandParser parser = parsers.get(id);
+            if (parser == null) {
+                throw new JSONException("Unknown action command while creating object: " + id);
+            }
+            ActionCommand actionCommand = parser.parse(object);
             ifCommand.addActionCommand(actionCommand);
         }
     }
