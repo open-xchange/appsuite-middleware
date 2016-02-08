@@ -62,6 +62,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.MoveActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.sun.mail.imap.protocol.BASE64MailboxDecoder;
 import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
@@ -71,7 +72,7 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class FileIntoActionCommandParser implements ActionCommandParser {
+public class FileIntoActionCommandParser implements CommandParser<ActionCommand> {
 
     /*
      * TODO: implement {@link Reloadable} and reload the MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property

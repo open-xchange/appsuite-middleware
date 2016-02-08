@@ -60,13 +60,14 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.EnotifyActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
  * {@link EnotifyActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class EnotifyActionCommandParser implements ActionCommandParser {
+public class EnotifyActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link EnotifyActionCommandParser}.

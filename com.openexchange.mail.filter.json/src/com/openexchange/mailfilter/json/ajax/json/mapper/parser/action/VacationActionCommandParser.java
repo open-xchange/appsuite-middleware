@@ -67,6 +67,7 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.VacationActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -74,7 +75,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class VacationActionCommandParser implements ActionCommandParser {
+public class VacationActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link VacationActionCommandParser}.

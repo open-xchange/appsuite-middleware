@@ -47,38 +47,38 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
 
 /**
- * {@link ActionCommandParser}
+ * {@link CommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public interface ActionCommandParser {
+public interface CommandParser<T> {
 
     /**
-     * Parses the specified {@link JSONObject} and creates an {@link ActionCommand}
+     * Parses the specified {@link JSONObject} and creates a {@link T} object
      * 
      * @param jsonObject The {@link JSONObject} to parse
-     * @return The newly created {@link ActionCommand}
+     * @return The newly created {@link T} object
      * @throws JSONException if a JSON parsing error occurs
      * @throws SieveException if a Sieve parsing error occurs
      * @throws OXException if a semantic error occurs
      */
-    ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException;
+    T parse(JSONObject jsonObject) throws JSONException, SieveException, OXException;
 
     /**
-     * Parses the specified {@link ActionCommand} to the specified {@link JSONObject}
+     * Parses the specified {@link T} object to the specified {@link JSONObject}
      * 
-     * @param jsonObject The {@link JSONObject} to parse the {@link ActionCommand} into
-     * @param actionCommand The {@link ActionCommand} to parse
+     * @param jsonObject The {@link JSONObject} to parse the {@link T} object into
+     * @param command The {@link T} to parse
      * @throws JSONException if a JSON parsing error occurs
      */
-    void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException;
+    void parse(JSONObject jsonObject, T command) throws JSONException;
+
 }

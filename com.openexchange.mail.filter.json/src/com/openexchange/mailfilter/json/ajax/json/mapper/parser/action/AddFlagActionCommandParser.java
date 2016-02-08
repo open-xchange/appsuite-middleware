@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
@@ -66,7 +67,7 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class AddFlagActionCommandParser implements ActionCommandParser {
+public class AddFlagActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link AddFlagActionCommandParser}.

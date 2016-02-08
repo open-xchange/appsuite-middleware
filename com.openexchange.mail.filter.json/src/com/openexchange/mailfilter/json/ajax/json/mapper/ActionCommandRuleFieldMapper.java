@@ -64,7 +64,7 @@ import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.ActionCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.AddFlagActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.DiscardActionCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.EnotifyActionCommandParser;
@@ -83,7 +83,7 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.action.VacationA
  */
 public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
-    private final Map<String, ActionCommandParser> parsers;
+    private final Map<String, CommandParser<ActionCommand>> parsers;
 
     /**
      * Initialises a new {@link ActionCommandRuleFieldMapper}.
@@ -91,7 +91,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
     public ActionCommandRuleFieldMapper() {
         super();
 
-        Map<String, ActionCommandParser> p = new HashMap<>();
+        Map<String, CommandParser<ActionCommand>> p = new HashMap<>();
         p.put(Commands.KEEP.getJsonname(), new KeepActionCommandParser());
         p.put(Commands.DISCARD.getJsonname(), new DiscardActionCommandParser());
         p.put(Commands.REDIRECT.getJsonname(), new RedirectActionCommandParser());
@@ -140,7 +140,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            ActionCommandParser parser = parsers.get(actionCommand.getCommand().getCommandname());
+            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getCommandname());
             if (parser != null) {
                 parser.parse(object, actionCommand);
             }
@@ -167,7 +167,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         for (int i = 0; i < array.length(); i++) {
             JSONObject object = array.getJSONObject(i);
             String id = object.getString(GeneralField.id.name());
-            ActionCommandParser parser = parsers.get(id);
+            CommandParser<ActionCommand> parser = parsers.get(id);
             if (parser == null) {
                 throw new JSONException("Unknown action command while creating object: " + id);
             }

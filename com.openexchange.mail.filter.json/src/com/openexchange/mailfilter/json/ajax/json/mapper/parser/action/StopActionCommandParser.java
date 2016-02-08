@@ -56,13 +56,14 @@ import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
  * {@link StopActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class StopActionCommandParser implements ActionCommandParser {
+public class StopActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link StopActionCommandParser}.

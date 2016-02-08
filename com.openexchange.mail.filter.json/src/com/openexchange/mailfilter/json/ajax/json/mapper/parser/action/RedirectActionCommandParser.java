@@ -64,6 +64,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RedirectActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.osgi.Services;
 
 /**
@@ -71,7 +72,7 @@ import com.openexchange.mailfilter.json.osgi.Services;
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RedirectActionCommandParser implements ActionCommandParser {
+public class RedirectActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link RedirectActionCommandParser}.

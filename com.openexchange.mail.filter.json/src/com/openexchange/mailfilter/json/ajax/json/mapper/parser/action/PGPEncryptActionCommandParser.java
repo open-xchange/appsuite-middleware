@@ -61,13 +61,14 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
  * {@link PGPEncryptActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGPEncryptActionCommandParser implements ActionCommandParser {
+public class PGPEncryptActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link PGPEncryptActionCommandParser}.

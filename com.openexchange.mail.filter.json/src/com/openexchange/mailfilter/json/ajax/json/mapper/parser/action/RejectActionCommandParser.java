@@ -59,13 +59,14 @@ import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
  * {@link RejectActionCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RejectActionCommandParser implements ActionCommandParser {
+public class RejectActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
      * Initialises a new {@link RejectActionCommandParser}.
