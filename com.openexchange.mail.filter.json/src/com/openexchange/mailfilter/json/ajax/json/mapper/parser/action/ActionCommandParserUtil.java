@@ -69,22 +69,16 @@ final class ActionCommandParserUtil {
      * 
      * @param jsonObject The {@link JSONObject}
      * @param key The key
-     * @param component The component name
+     * @param commandName The component name
      * @return The string value
      * @throws OXException If specified key is not present on the specified {@link JSONObject}
-     * @throws JSONException If the value of the specified key is <code>null</code>
      */
-    static final String getString(JSONObject jsonObject, String key, String component) throws OXException, JSONException {
-        String retval = null;
+    static final String getString(JSONObject jsonObject, String key, String commandName) throws OXException {
         try {
-            retval = jsonObject.getString(key);
+            return jsonObject.getString(key);
         } catch (final JSONException e) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading ActionCommand '" + component + "': " + e.getMessage());
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create(e, "Error while reading command '" + commandName + "'. The parameter '" + key + "' is missing: " + e.getMessage());
         }
-        if (retval == null) {
-            throw new JSONException("The parameter '" + key + "' is missing for the action command '" + component + "'.");
-        }
-        return retval;
     }
 
     /**
