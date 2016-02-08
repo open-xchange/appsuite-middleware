@@ -91,7 +91,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
     public ActionCommandRuleFieldMapper() {
         super();
 
-        Map<String, ActionCommandParser> p = new HashMap<String, ActionCommandParser>();
+        Map<String, ActionCommandParser> p = new HashMap<>();
         p.put(Commands.KEEP.getJsonname(), new KeepActionCommandParser());
         p.put(Commands.DISCARD.getJsonname(), new DiscardActionCommandParser());
         p.put(Commands.REDIRECT.getJsonname(), new RedirectActionCommandParser());
