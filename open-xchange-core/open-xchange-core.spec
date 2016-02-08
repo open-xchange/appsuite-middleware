@@ -1164,9 +1164,6 @@ ox_add_property com.openexchange.mail.signature.maxImageLimit 3 /opt/open-xchang
 # SoftwareChange_Request-2353
 ox_add_property com.openexchange.infostore.trash.retentionDays -1 /opt/open-xchange/etc/infostore.properties
 
-# SoftwareChange_Request-2429
-ox_add_property com.openexchange.guard.endpoint "" /opt/open-xchange/etc/guard-api.properties
-
 # SoftwareChange_Request-2442
 VALUE=$(ox_read_property html.style.background-position /opt/open-xchange/etc/whitelist.properties)
 if [ "\",top,bottom,center,left,right,\"" = "$VALUE" ]; then
@@ -1274,9 +1271,6 @@ PFILE=/opt/open-xchange/etc/permissions.properties
 if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
     ox_set_property com.openexchange.capability.archive_emails true $PFILE
 fi
-
-# SoftwareChange_Request-2884
-ox_move_config_file /opt/open-xchange/etc /opt/open-xchange/etc guard.properties guard-api.properties
 
 # SoftwareChange_Request-2914
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
