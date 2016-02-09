@@ -121,6 +121,7 @@ import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1155,6 +1156,15 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
             @Override
             protected SaveResult callInTransaction(final FileStorageFileAccess access) throws OXException {
                 ComparedObjectPermissions comparedPermissions = ShareHelper.processGuestPermissions(session, access, document, modifiedColumns);
+                if (null != comparedPermissions && comparedPermissions.hasAddedUsers()) {
+                    ObjectUseCountService useCountService = Services.optService(ObjectUseCountService.class);
+                    if (null != useCountService) {
+                        List<Integer> addedUsers = comparedPermissions.getAddedUsers();
+                        for (Integer i : addedUsers) {
+                            useCountService.incrementObjectUseCountForInternalUser(session, i.intValue());
+                        }
+                    }
+                }
                 IDTuple result = access.saveFileMetadata(document, sequenceNumber, modifiedColumns);
                 document.setFolderId(result.getFolder());
                 document.setId(result.getId());

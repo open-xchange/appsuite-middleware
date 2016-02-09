@@ -67,6 +67,7 @@ import com.openexchange.file.storage.composition.internal.CompositingIDBasedAdmi
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
 import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
@@ -177,6 +178,7 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
         rememberTracker(registry);
         trackService(ShareService.class);
         trackService(ShareNotificationService.class);
+        trackService(ObjectUseCountService.class);
         openTrackers();
         registerService(FileStreamHandlerRegistry.class, registry);
     }
