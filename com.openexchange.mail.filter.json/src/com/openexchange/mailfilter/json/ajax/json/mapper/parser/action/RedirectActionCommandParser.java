@@ -89,7 +89,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandname());
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, RedirectActionField.to.name(), Commands.REDIRECT.getCommandName());
         // Check for valid email address here:
         try {
             new QuotedInternetAddress(stringParam, true);
@@ -116,7 +116,7 @@ public class RedirectActionCommandParser implements CommandParser<ActionCommand>
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonname());
+        jsonObject.put(GeneralField.id.name(), Commands.REDIRECT.getJsonName());
         jsonObject.put(RedirectActionField.to.name(), ((List<String>) arguments.get(0)).get(0));
     }
 }

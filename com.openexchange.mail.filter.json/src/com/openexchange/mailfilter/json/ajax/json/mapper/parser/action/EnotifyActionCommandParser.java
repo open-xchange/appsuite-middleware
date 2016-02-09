@@ -93,7 +93,7 @@ public class EnotifyActionCommandParser implements CommandParser<ActionCommand> 
         }
         final String method = jsonObject.getString(EnotifyActionField.method.getFieldName());
         if (null == method) {
-            throw new JSONException("Parameter " + EnotifyActionField.method.getFieldName() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonname() + " is missing in JSON-Object. This is a required field");
+            throw new JSONException("Parameter " + EnotifyActionField.method.getFieldName() + " is missing for " + ActionCommand.Commands.ENOTIFY.getJsonName() + " is missing in JSON-Object. This is a required field");
         }
         arrayList.add(CommandParserJSONUtil.stringToList(method.replaceAll("(\r)?\n", "\r\n")));
 
@@ -110,8 +110,8 @@ public class EnotifyActionCommandParser implements CommandParser<ActionCommand> 
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ENOTIFY.getJsonname());
-        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagarguments();
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ENOTIFY.getJsonName());
+        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagArguments();
         final List<String> message = tagArguments.get(EnotifyActionField.message.getTagName());
         if (null != message) {
             jsonObject.put(EnotifyActionField.message.getFieldName(), message.get(0));

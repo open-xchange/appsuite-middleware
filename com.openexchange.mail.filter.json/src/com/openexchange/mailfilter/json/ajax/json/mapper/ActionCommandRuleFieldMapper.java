@@ -92,16 +92,16 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         super();
 
         Map<String, CommandParser<ActionCommand>> p = new HashMap<>();
-        p.put(Commands.KEEP.getJsonname(), new KeepActionCommandParser());
-        p.put(Commands.DISCARD.getJsonname(), new DiscardActionCommandParser());
-        p.put(Commands.REDIRECT.getJsonname(), new RedirectActionCommandParser());
-        p.put(Commands.REJECT.getJsonname(), new RejectActionCommandParser());
-        p.put(Commands.FILEINTO.getJsonname(), new FileIntoActionCommandParser());
-        p.put(Commands.STOP.getJsonname(), new StopActionCommandParser());
-        p.put(Commands.VACATION.getJsonname(), new VacationActionCommandParser());
-        p.put(Commands.ENOTIFY.getJsonname(), new EnotifyActionCommandParser());
-        p.put(Commands.ADDFLAG.getJsonname(), new AddFlagActionCommandParser());
-        p.put(Commands.PGP_ENCRYPT.getJsonname(), new PGPEncryptActionCommandParser());
+        p.put(Commands.KEEP.getJsonName(), new KeepActionCommandParser());
+        p.put(Commands.DISCARD.getJsonName(), new DiscardActionCommandParser());
+        p.put(Commands.REDIRECT.getJsonName(), new RedirectActionCommandParser());
+        p.put(Commands.REJECT.getJsonName(), new RejectActionCommandParser());
+        p.put(Commands.FILEINTO.getJsonName(), new FileIntoActionCommandParser());
+        p.put(Commands.STOP.getJsonName(), new StopActionCommandParser());
+        p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser());
+        p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser());
+        p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser());
+        p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser());
         parsers = Collections.unmodifiableMap(p);
     }
 
@@ -140,7 +140,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getJsonname());
+            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getJsonName());
             if (parser != null) {
                 parser.parse(object, actionCommand);
             }

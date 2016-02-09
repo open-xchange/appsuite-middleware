@@ -83,7 +83,7 @@ public class RejectActionCommandParser implements CommandParser<ActionCommand> {
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandname());
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
         return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
     }
 
@@ -96,7 +96,7 @@ public class RejectActionCommandParser implements CommandParser<ActionCommand> {
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
+        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
         jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
     }
 }

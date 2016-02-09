@@ -143,7 +143,7 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
         }
         final String text = jsonObject.getString(VacationActionField.text.getFieldName());
         if (null == text) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionField.text.getFieldName() + " is missing for " + ActionCommand.Commands.VACATION.getJsonname() + " is missing in JSON-Object. This is a required field");
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + VacationActionField.text.getFieldName() + " is missing for " + ActionCommand.Commands.VACATION.getJsonName() + " is missing in JSON-Object. This is a required field");
         }
         arrayList.add(CommandParserJSONUtil.stringToList(text.replaceAll("(\r)?\n", "\r\n")));
 
@@ -160,8 +160,8 @@ public class VacationActionCommandParser implements CommandParser<ActionCommand>
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.VACATION.getJsonname());
-        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagarguments();
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.VACATION.getJsonName());
+        final Hashtable<String, List<String>> tagArguments = actionCommand.getTagArguments();
         final List<String> days = tagArguments.get(VacationActionField.days.getTagName());
         if (null != days) {
             jsonObject.put(VacationActionField.days.getFieldName(), days.get(0));

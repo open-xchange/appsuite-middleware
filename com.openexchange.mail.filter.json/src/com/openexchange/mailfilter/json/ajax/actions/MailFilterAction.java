@@ -274,11 +274,11 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
             final List<String> required = command.getRequired();
             if (required.isEmpty()) {
-                actionarray.put(command.getJsonname());
+                actionarray.put(command.getJsonName());
             } else {
                 for (final String req : required) {
                     if (capabilities.contains(req)) {
-                        actionarray.put(command.getJsonname());
+                        actionarray.put(command.getJsonName());
                         break;
                     }
                 }

@@ -89,6 +89,6 @@ public class DiscardActionCommandParser implements CommandParser<ActionCommand> 
      */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonname());
+        jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonName());
     }
 }

@@ -86,7 +86,7 @@ public class AddFlagActionCommandParser implements CommandParser<ActionCommand> 
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
         final JSONArray array = jsonObject.getJSONArray(AddFlagsActionField.flags.name());
         if (null == array) {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonname() + " is missing in JSON-Object. This is a required field");
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.ADDFLAG.getJsonName() + " is missing in JSON-Object. This is a required field");
         }
         final ArrayList<Object> arrayList = new ArrayList<Object>();
         arrayList.add(CommandParserJSONUtil.coerceToStringList(array));
@@ -104,7 +104,7 @@ public class AddFlagActionCommandParser implements CommandParser<ActionCommand> 
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonname());
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonName());
         jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
 

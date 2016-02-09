@@ -105,8 +105,8 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
      */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonname());
-        final Hashtable<String, List<String>> tagarguments = actionCommand.getTagarguments();
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonName());
+        final Hashtable<String, List<String>> tagarguments = actionCommand.getTagArguments();
         final List<String> keys = tagarguments.get(PGPEncryptActionField.keys.getTagName());
         if (null != keys) {
             jsonObject.put(PGPEncryptActionField.keys.getFieldName(), keys);

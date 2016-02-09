@@ -93,7 +93,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
      */
     @Override
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonname());
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonName());
 
         ConfigurationService config = Services.getService(ConfigurationService.class);
         String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
@@ -119,7 +119,7 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
+        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
         ConfigurationService config = Services.getService(ConfigurationService.class);
         String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);

@@ -91,15 +91,15 @@ public class ActionCommand extends ControlOrActionCommand {
         FILEINTO("fileinto", 1, new Hashtable<String, Integer>(), "move", Collections.singletonList("fileinto")),
         REJECT("reject", 1, new Hashtable<String, Integer>(), "reject", Collections.singletonList("reject")),
         STOP("stop", 0, new Hashtable<String, Integer>(), "stop", Collections.<String> emptyList()),
-        VACATION("vacation", 1, vacationtags(), "vacation", Collections.singletonList("vacation")),
-        ENOTIFY("notify", 1, enotifytags(), "notify", Collections.singletonList("enotify")),
+        VACATION("vacation", 1, vacationTags(), "vacation", Collections.singletonList("vacation")),
+        ENOTIFY("notify", 1, enotifyTags(), "notify", Collections.singletonList("enotify")),
         ADDFLAG("addflag", 1, new Hashtable<String, Integer>(), "addflags", java.util.Arrays.asList("imapflags", "imap4flags")),
-        PGP_ENCRYPT("pgp_encrypt", 0, pgp_encrypt_tags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
-        ADDHEADER("addheader", 2, addheadertags(), "addheader", Collections.singletonList("editheader")),
-        DELETEHEADER("deleteheader", 1, deleteheadertags(), "deleteheader", Collections.singletonList("editheader")),
-        SET("set", 2, variables_tags(), "set", Collections.singletonList("variables"));
+        PGP_ENCRYPT("pgp_encrypt", 0, pgpEncryptTags(), "pgp", java.util.Arrays.asList("vnd.dovecot.pgp-encrypt")),
+        ADDHEADER("addheader", 2, addHeaderTags(), "addheader", Collections.singletonList("editheader")),
+        DELETEHEADER("deleteheader", 1, deleteHeaderTags(), "deleteheader", Collections.singletonList("editheader")),
+        SET("set", 2, variablesTags(), "set", Collections.singletonList("variables"));
 
-        private static Hashtable<String, Integer> addheadertags() {
+        private static Hashtable<String, Integer> addHeaderTags() {
             /*
              * http://tools.ietf.org/html/rfc5293
              *
@@ -110,7 +110,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
-        private static Hashtable<String, Integer> deleteheadertags() {
+        private static Hashtable<String, Integer> deleteHeaderTags() {
             /*
              * http://tools.ietf.org/html/rfc5293
              *
@@ -123,7 +123,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
-        private static Hashtable<String, Integer> variables_tags() {
+        private static Hashtable<String, Integer> variablesTags() {
             /*
              * http://tools.ietf.org/html/rfc5229
              *
@@ -134,7 +134,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
-        private static Hashtable<String, Integer> vacationtags() {
+        private static Hashtable<String, Integer> vacationTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             // The second parameter given the number of parameters which are
             // allowed after this tag
@@ -148,7 +148,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
-        private static Hashtable<String, Integer> enotifytags() {
+        private static Hashtable<String, Integer> enotifyTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             /*
              * http://tools.ietf.org/html/rfc5435
@@ -166,7 +166,7 @@ public class ActionCommand extends ControlOrActionCommand {
             return retval;
         }
 
-        private static Hashtable<String, Integer> pgp_encrypt_tags() {
+        private static Hashtable<String, Integer> pgpEncryptTags() {
             final Hashtable<String, Integer> retval = new Hashtable<String, Integer>();
             retval.put(":keys", Integer.valueOf(1));
             return retval;
@@ -180,12 +180,12 @@ public class ActionCommand extends ControlOrActionCommand {
         /**
          * The name of the command
          */
-        private final String commandname;
+        private final String commandName;
 
         /**
          * Defines if this command can take a match-type argument or not
          */
-        private final Hashtable<String, Integer> tagargs;
+        private final Hashtable<String, Integer> tagArgs;
 
         /**
          * Defines what must be included for this command to run
@@ -195,37 +195,37 @@ public class ActionCommand extends ControlOrActionCommand {
         /**
          * Stores the name of the parameter for the json object
          */
-        private final String jsonname;
+        private final String jsonName;
 
-        Commands(final String commandname, final int minNumberOfArguments, final Hashtable<String, Integer> tagargs, final String jsonname, final List<String> required) {
-            this.commandname = commandname;
+        Commands(final String commandName, final int minNumberOfArguments, final Hashtable<String, Integer> tagArgs, final String jsonName, final List<String> required) {
+            this.commandName = commandName;
             this.minNumberOfArguments = minNumberOfArguments;
-            this.tagargs = tagargs;
+            this.tagArgs = tagArgs;
             this.required = null == required || required.isEmpty() ? Collections.<String> emptyList() : Collections.unmodifiableList(required);
-            this.jsonname = jsonname;
+            this.jsonName = jsonName;
         }
 
         public final int getMinNumberOfArguments() {
             return minNumberOfArguments;
         }
 
-        public final String getCommandname() {
-            return commandname;
+        public final String getCommandName() {
+            return commandName;
         }
 
         /**
          * @return the jsonname
          */
-        public final String getJsonname() {
-            return jsonname;
+        public final String getJsonName() {
+            return jsonName;
         }
 
         public final List<String> getRequired() {
             return required;
         }
 
-        public final Hashtable<String, Integer> getTagargs() {
-            return tagargs;
+        public final Hashtable<String, Integer> getTagArgs() {
+            return tagArgs;
         }
 
     }
@@ -235,7 +235,7 @@ public class ActionCommand extends ControlOrActionCommand {
     /**
      * This Hashtable contains the tagargument and the corresponding value
      */
-    private final Hashtable<String, List<String>> tagarguments;
+    private final Hashtable<String, List<String>> tagArguments;
 
     /**
      * Provides all types of arguments. The object here can either be a
@@ -246,34 +246,34 @@ public class ActionCommand extends ControlOrActionCommand {
     public ActionCommand(final Commands command, final ArrayList<Object> arguments) throws SieveException {
         this.command = command;
         this.arguments = arguments;
-        this.tagarguments = new Hashtable<String, List<String>>();
+        this.tagArguments = new Hashtable<String, List<String>>();
         final int size = arguments.size();
         for (int i = 0; i < size; i++) {
             final Object object = arguments.get(i);
             if (object instanceof TagArgument) {
-                final TagArgument tagarg = (TagArgument) object;
-                final String tag = tagarg.getTag();
+                final TagArgument tagArg = (TagArgument) object;
+                final String tag = tagArg.getTag();
                 // Check if an argument is allowed for this tag
-                final Hashtable<String, Integer> tagargs = this.command.getTagargs();
-                if (null != tagargs && tagargs.containsKey(tag) && 0 < tagargs.get(tag)) {
+                final Hashtable<String, Integer> tagArgs = this.command.getTagArgs();
+                if (null != tagArgs && tagArgs.containsKey(tag) && 0 < tagArgs.get(tag)) {
                     // Get next element check if it is a list and insert
                     final Object object2 = arguments.get(++i);
                     if (object2 instanceof List) {
                         final List<String> list = (List<String>) object2;
-                        this.tagarguments.put(tag, list);
+                        this.tagArguments.put(tag, list);
                     } else if (object2 instanceof NumberArgument) {
                         final ArrayList<String> arrayList = new ArrayList<String>();
                         arrayList.add((String.valueOf(((NumberArgument) object2).getInteger())));
-                        this.tagarguments.put(tag, arrayList);
+                        this.tagArguments.put(tag, arrayList);
                     } else {
                         throw new SieveException("No right argument for tag " + tag + " found.");
                     }
                 } else {
-                    this.tagarguments.put(tag, new ArrayList<String>());
+                    this.tagArguments.put(tag, new ArrayList<String>());
                 }
             } else {
-                for (String tag : command.getTagargs().keySet()) {
-                    if (command.getTagargs().get(tag) > 0 && i == 0) {
+                for (String tag : command.getTagArgs().keySet()) {
+                    if (command.getTagArgs().get(tag) > 0 && i == 0) {
                         throw new SieveException("The main arguments have to stand after the tag argument in the rule: " + this.toString());
                     }
                 }
@@ -288,16 +288,16 @@ public class ActionCommand extends ControlOrActionCommand {
      * @throws SieveException
      */
     private void checkCommand() throws SieveException {
-        if (null != this.tagarguments) {
+        if (null != this.tagArguments) {
             // This complicated copying is needed because there's no way in java
             // to clone a set. And because the set
             // is backed up by the Hshtable we would otherwise delete the
             // elements in the Hashtable.
-            final Set<String> tagarray = this.tagarguments.keySet();
-            final Set<String> tagargs = this.command.getTagargs().keySet();
+            final Set<String> tagArray = this.tagArguments.keySet();
+            final Set<String> tagArgs = this.command.getTagArgs().keySet();
             final ArrayList<String> rest = new ArrayList<String>();
-            for (final String string : tagarray) {
-                if (!tagargs.contains(string)) {
+            for (final String string : tagArray) {
+                if (!tagArgs.contains(string)) {
                     rest.add(string);
                 }
             }
@@ -305,13 +305,13 @@ public class ActionCommand extends ControlOrActionCommand {
             // tagarray.removeAll(tagargs);
             // }
             if (!rest.isEmpty()) {
-                throw new SieveException("One of the tagarguments: " + rest + " is not valid for " + this.command.getCommandname());
+                throw new SieveException("One of the tagarguments: " + rest + " is not valid for " + this.command.getCommandName());
             }
         }
-        final int counttags = counttags();
+        final int countTags = countTags();
 
-        if (null != this.arguments && this.command.getMinNumberOfArguments() >= 0 && (this.arguments.size() - counttags) < this.command.getMinNumberOfArguments()) {
-            throw new SieveException("The number of arguments for " + this.command.getCommandname() + " is not valid. ; " + this.toString());
+        if (null != this.arguments && this.command.getMinNumberOfArguments() >= 0 && (this.arguments.size() - countTags) < this.command.getMinNumberOfArguments()) {
+            throw new SieveException("The number of arguments for " + this.command.getCommandName() + " is not valid. ; " + this.toString());
         }
     }
 
@@ -320,9 +320,9 @@ public class ActionCommand extends ControlOrActionCommand {
      *
      * @return
      */
-    private int counttags() {
+    private int countTags() {
         int i = 0;
-        for (final List<String> list : this.tagarguments.values()) {
+        for (final List<String> list : this.tagArguments.values()) {
             if (list.isEmpty()) {
                 i++;
             } else {
@@ -334,15 +334,15 @@ public class ActionCommand extends ControlOrActionCommand {
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + " : " + this.command.getCommandname() + " : " + this.tagarguments + " : " + this.arguments;
+        return this.getClass().getSimpleName() + " : " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments;
     }
 
     public final Commands getCommand() {
         return command;
     }
 
-    public final Hashtable<String, List<String>> getTagarguments() {
-        return tagarguments;
+    public final Hashtable<String, List<String>> getTagArguments() {
+        return tagArguments;
     }
 
     /**
@@ -357,7 +357,7 @@ public class ActionCommand extends ControlOrActionCommand {
      * @return
      */
     public final List<String> getArgumentToTag(final String tag) {
-        return this.tagarguments.get(tag);
+        return this.tagArguments.get(tag);
     }
 
     public final ArrayList<Object> getArguments() {

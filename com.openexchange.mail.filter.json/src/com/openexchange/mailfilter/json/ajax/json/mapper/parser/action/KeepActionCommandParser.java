@@ -89,6 +89,6 @@ public class KeepActionCommandParser implements CommandParser<ActionCommand> {
      */
     @Override
     public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), Commands.KEEP.getJsonname());
+        jsonObject.put(GeneralField.id.name(), Commands.KEEP.getJsonName());
     }
 }
