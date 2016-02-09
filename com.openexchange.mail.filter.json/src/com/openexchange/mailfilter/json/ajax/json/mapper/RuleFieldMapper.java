@@ -84,8 +84,9 @@ public interface RuleFieldMapper {
      * @param rule The rule to get the attribute from
      * @return The attribute
      * @throws JSONException If a JSON error occurs
+     * @throws OXException If a semantic error occurs
      */
-    Object getAttribute(Rule rule) throws JSONException;
+    Object getAttribute(Rule rule) throws JSONException, OXException;
 
     /**
      * Sets the specified attribute to the specified {@link T} object

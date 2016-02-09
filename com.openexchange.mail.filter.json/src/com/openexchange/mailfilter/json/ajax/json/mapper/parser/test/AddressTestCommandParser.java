@@ -87,7 +87,7 @@ public class AddressTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         TestCommandParserUtil.fillWithAddressEnvelopeOrHeaderTest(jsonObject, command);
     }
 

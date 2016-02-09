@@ -115,7 +115,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.BODY.getCommandName());
         jsonObject.put(BodyTestField.comparison.name(), command.getMatchType().substring(1));
         final String extensionkey = command.getTagArguments().get(1).substring(1);

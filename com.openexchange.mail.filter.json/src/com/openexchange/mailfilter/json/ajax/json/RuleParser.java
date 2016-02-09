@@ -144,7 +144,7 @@ public class RuleParser {
      * @return The parsed {@link JSONObject}
      * @throws JSONException if a JSON parsing error occurs
      */
-    public JSONObject parse(Rule rule) throws JSONException {
+    public JSONObject parse(Rule rule) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         for (RuleFieldMapper mapper : mappers) {
             if (!mapper.isNull(rule)) {
@@ -162,7 +162,7 @@ public class RuleParser {
      * @return the JSONArray
      * @throws JSONException
      */
-    public JSONArray write(Rule[] rules) throws JSONException {
+    public JSONArray write(Rule[] rules) throws JSONException, OXException {
         int objectCount = rules.length;
         if (objectCount == 0) {
             return new JSONArray(0);

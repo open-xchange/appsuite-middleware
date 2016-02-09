@@ -99,7 +99,7 @@ public class NotTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
         final JSONObject testobject = new JSONObject();
 

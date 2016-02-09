@@ -103,7 +103,7 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException {
+    public Object getAttribute(Rule rule) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         if (!isNull(rule)) {
             TestCommand testCommand = rule.getTestCommand();

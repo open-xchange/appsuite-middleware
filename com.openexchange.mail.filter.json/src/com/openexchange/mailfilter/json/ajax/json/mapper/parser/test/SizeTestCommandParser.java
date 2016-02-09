@@ -109,7 +109,7 @@ public class SizeTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());
         jsonObject.put(SizeTestField.comparison.name(), command.getMatchType().substring(1));
         jsonObject.put(SizeTestField.size.name(), Long.parseLong(command.getArguments().get(1).toString()));

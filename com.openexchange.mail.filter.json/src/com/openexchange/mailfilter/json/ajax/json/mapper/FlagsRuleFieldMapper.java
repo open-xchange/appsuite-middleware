@@ -98,7 +98,7 @@ public class FlagsRuleFieldMapper implements RuleFieldMapper {
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException {
+    public Object getAttribute(Rule rule) throws JSONException, OXException {
         JSONArray array = new JSONArray();
         RuleComment ruleComment = rule.getRuleComment();
         if ((ruleComment != null) && (ruleComment.getFlags() != null)) {

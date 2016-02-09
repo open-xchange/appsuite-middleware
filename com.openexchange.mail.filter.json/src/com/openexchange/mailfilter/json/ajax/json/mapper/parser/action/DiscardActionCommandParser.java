@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
@@ -88,7 +89,7 @@ public class DiscardActionCommandParser implements CommandParser<ActionCommand> 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.DISCARD.getJsonName());
     }
 }
