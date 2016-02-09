@@ -100,13 +100,13 @@ public class NotTestCommandParser implements CommandParser<TestCommand> {
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandname());
+        jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
         final JSONObject testobject = new JSONObject();
 
         try {
-            TestCommand nestedTestCommand = command.getTestcommands().get(0);
+            TestCommand nestedTestCommand = command.getTestCommands().get(0);
             CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-            CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandname());
+            CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
             parser.parse(testobject, nestedTestCommand);
         } catch (OXException e) {
             // TODO Auto-generated catch block

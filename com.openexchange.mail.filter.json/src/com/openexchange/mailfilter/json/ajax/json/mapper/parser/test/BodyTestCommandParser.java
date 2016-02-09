@@ -87,7 +87,7 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
      */
     @Override
     public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String commandName = Commands.BODY.getCommandname();
+        String commandName = Commands.BODY.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
         argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, BodyTestField.comparison.name(), commandName)));
         final String extensionkey = CommandParserJSONUtil.getString(jsonObject, BodyTestField.extensionskey.name(), commandName);
@@ -116,9 +116,9 @@ public class BodyTestCommandParser implements CommandParser<TestCommand> {
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), Commands.BODY.getCommandname());
-        jsonObject.put(BodyTestField.comparison.name(), command.getMatchtype().substring(1));
-        final String extensionkey = command.getTagarguments().get(1).substring(1);
+        jsonObject.put(GeneralField.id.name(), Commands.BODY.getCommandName());
+        jsonObject.put(BodyTestField.comparison.name(), command.getMatchType().substring(1));
+        final String extensionkey = command.getTagArguments().get(1).substring(1);
         jsonObject.put(BodyTestField.extensionskey.name(), extensionkey);
         if ("content".equals(extensionkey)) {
             // TODO: This part should be tested for correct operation, our GUI doesn't use this, but this is

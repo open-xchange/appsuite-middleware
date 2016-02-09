@@ -124,16 +124,16 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
 
     private void registerTestCommandParserRegistry() {
         TestCommandParserRegistry registry = new TestCommandParserRegistry();
-        registry.register(Commands.ADDRESS.getCommandname(), new AddressTestCommandParser());
-        registry.register(Commands.ALLOF.getCommandname(), new AllOfTestCommandParser());
-        registry.register(Commands.ANYOF.getCommandname(), new AnyOfTestCommandParser());
-        registry.register(Commands.BODY.getCommandname(), new BodyTestCommandParser());
-        registry.register(Commands.CURRENTDATE.getCommandname(), new CurrentDateTestCommandParser());
-        registry.register(Commands.ENVELOPE.getCommandname(), new EnvelopeTestCommandParser());
-        registry.register(Commands.HEADER.getCommandname(), new HeaderTestCommandParser());
-        registry.register(Commands.NOT.getCommandname(), new NotTestCommandParser());
-        registry.register(Commands.SIZE.getCommandname(), new SizeTestCommandParser());
-        registry.register(Commands.TRUE.getCommandname(), new TrueTestCommandParser());
+        registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser());
+        registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser());
+        registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser());
+        registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser());
+        registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser());
+        registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser());
+        registry.register(Commands.HEADER.getCommandName(), new HeaderTestCommandParser());
+        registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser());
+        registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser());
+        registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser());
 
         registerService(TestCommandParserRegistry.class, registry);
         trackService(TestCommandParserRegistry.class);

@@ -93,7 +93,7 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
      */
     @Override
     public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String commandName = Commands.CURRENTDATE.getCommandname();
+        String commandName = Commands.CURRENTDATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
         final String comparison = CommandParserJSONUtil.getString(jsonObject, CurrentDateTestField.comparison.name(), commandName);
         // FIXME: replace if/strings with switch/enum
@@ -132,10 +132,10 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandname());
-        final String comparison = command.getMatchtype().substring(1);
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
-            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(command.getTagarguments().size())).get(0));
+            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(command.getTagArguments().size())).get(0));
         } else {
             jsonObject.put(CurrentDateTestField.comparison.name(), comparison);
         }

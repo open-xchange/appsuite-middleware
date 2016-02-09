@@ -82,9 +82,9 @@ final class TestCommandParserUtil {
      */
     static final TestCommand createAddressEnvelopeOrHeaderTest(final JSONObject jsonObject, final Commands command) throws JSONException, SieveException, OXException {
         final List<Object> argList = new ArrayList<Object>();
-        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressEnvelopeAndHeaderTestField.comparison.name(), command.getCommandname())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.headers.name(), command.getCommandname())));
-        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.values.name(), command.getCommandname())));
+        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressEnvelopeAndHeaderTestField.comparison.name(), command.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.headers.name(), command.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.values.name(), command.getCommandName())));
         return new TestCommand(command, argList, new ArrayList<TestCommand>());
     }
 
@@ -97,9 +97,9 @@ final class TestCommandParserUtil {
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
     static final void fillWithAddressEnvelopeOrHeaderTest(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandname());
-        jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), command.getMatchtype().substring(1));
-        jsonObject.put(AddressEnvelopeAndHeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagarguments().size())));
-        jsonObject.put(AddressEnvelopeAndHeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagarguments().size() + 1)));
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), command.getMatchType().substring(1));
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
     }
 }

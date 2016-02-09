@@ -88,7 +88,7 @@ public class SizeTestCommandParser implements CommandParser<TestCommand> {
      */
     @Override
     public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String commandName = Commands.SIZE.getCommandname();
+        String commandName = Commands.SIZE.getCommandName();
         final String size = CommandParserJSONUtil.getString(jsonObject, SizeTestField.size.name(), commandName);
         try {
             if (!DIGITS.matcher(size).matches()) {
@@ -110,8 +110,8 @@ public class SizeTestCommandParser implements CommandParser<TestCommand> {
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandname());
-        jsonObject.put(SizeTestField.comparison.name(), command.getMatchtype().substring(1));
+        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());
+        jsonObject.put(SizeTestField.comparison.name(), command.getMatchType().substring(1));
         jsonObject.put(SizeTestField.size.name(), Long.parseLong(command.getArguments().get(1).toString()));
     }
 

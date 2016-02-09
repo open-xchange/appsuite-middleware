@@ -179,8 +179,8 @@ public class RuleConverter {
 
     private static ASTtest createCompleteTestPart(final TestCommand testcommand, final int[] js) {
         final ASTtest ttest = new ASTtest(js[0]++);
-        final List<TestCommand> testcommands = testcommand.getTestcommands();
-        final String commandname = testcommand.getCommand().getCommandname();
+        final List<TestCommand> testcommands = testcommand.getTestCommands();
+        final String commandname = testcommand.getCommand().getCommandName();
         ttest.setName(commandname);
         if ("not".equals(commandname)) {
             ttest.jjtAddChild(createCompleteTestPart(testcommands.get(0), js), 0);

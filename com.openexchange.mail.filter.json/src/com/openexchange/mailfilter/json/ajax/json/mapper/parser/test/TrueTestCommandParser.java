@@ -89,6 +89,6 @@ public class TrueTestCommandParser implements CommandParser<TestCommand> {
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.TRUE.getCommandname());
+        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.TRUE.getCommandName());
     }
 }

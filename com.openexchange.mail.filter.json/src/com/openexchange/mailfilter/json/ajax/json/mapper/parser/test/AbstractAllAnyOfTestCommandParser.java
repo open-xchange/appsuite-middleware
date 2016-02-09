@@ -79,13 +79,13 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
     }
 
     TestCommand parse(JSONObject jsonObject, Commands command) throws OXException, JSONException, SieveException {
-        final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandname());
+        final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
         final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(jarray.length());
         CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
         
         for (int i = 0; i < jarray.length(); i++) {
             final JSONObject object = jarray.getJSONObject(i);
-            String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandname());
+            String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandName());
             CommandParser<TestCommand> parser = parserRegistry.get(commandName);
             commandlist.add(parser.parse(object));
         }
@@ -93,13 +93,13 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
     }
     
     void parse(JSONObject jsonObject, TestCommand testCommand, Commands command) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), command.getCommandname());
+        jsonObject.put(GeneralField.id.name(), command.getCommandName());
         final JSONArray array = new JSONArray();
         CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-        for (final TestCommand testCommand2 : testCommand.getTestcommands()) {
+        for (final TestCommand testCommand2 : testCommand.getTestCommands()) {
             final JSONObject object = new JSONObject();
             try {
-                CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandname());
+                CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandName());
                 parser.parse(object, testCommand2);
                 //createJSONFromTestCommand(object, testCommand2);
                 array.put(object);

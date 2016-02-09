@@ -307,7 +307,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
             final JSONObject object = new JSONObject();
             if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();
-                object.put("test", command.getCommandname());
+                object.put("test", command.getCommandName());
                 final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
                     for (final String[] matchtype : jsonMatchTypes) {
