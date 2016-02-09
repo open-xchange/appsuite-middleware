@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -62,6 +63,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.CurrentDateTestField;
+import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
@@ -130,8 +132,22 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
      */
     @Override
     public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
-        // TODO Auto-generated method stub
-
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandname());
+        final String comparison = command.getMatchtype().substring(1);
+        if ("value".equals(comparison)) {
+            jsonObject.put(CurrentDateTestField.comparison.name(), ((List) command.getArguments().get(command.getTagarguments().size())).get(0));
+        } else {
+            jsonObject.put(CurrentDateTestField.comparison.name(), comparison);
+        }
+        final List value = (List) command.getArguments().get(command.getArguments().size() - 2);
+        jsonObject.put(CurrentDateTestField.datepart.name(), value.get(0));
+        if ("date".equals(value.get(0))) {
+            jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), dateFormatPattern));
+        } else if ("time".equals(value.get(0))) {
+            jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), timeFormatPattern));
+        } else {
+            jsonObject.put(CurrentDateTestField.datevalue.name(), new JSONArray((List) command.getArguments().get(command.getArguments().size() - 1)));
+        }
     }
 
     private List<String> JSONDateArrayToStringList(JSONArray jarray, String formatPattern) throws JSONException {
@@ -152,5 +168,21 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
         } catch (NumberFormatException e) {
             throw new JSONException("Date field \"" + string + "\" is no date value");
         }
+    }
+
+    private JSONArray getJSONDateArray(final List<String> collection, final String formatPattern) throws JSONException {
+        final SimpleDateFormat df = new SimpleDateFormat(formatPattern);
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        final JSONArray retval = new JSONArray();
+        for (final String part : collection) {
+            Date parse;
+            try {
+                parse = df.parse(part);
+                retval.put(parse.getTime());
+            } catch (ParseException e) {
+                throw new JSONException("Error while parsing date from string \"" + part + "\"");
+            }
+        }
+        return retval;
     }
 }
