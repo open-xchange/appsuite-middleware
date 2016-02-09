@@ -79,6 +79,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.mail.MailField;
 import com.openexchange.mail.MailFields;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.mime.ContentType;
@@ -249,6 +250,8 @@ public final class MessageUtility {
                 }
             };
             return readStream(streamProvider, charset);
+        } catch (final MaxBytesExceededIOException e) {
+            throw new MaxBytesExceededMessagingException(e.getMessage(), e);
         } catch (final IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof MessagingException) {
@@ -303,9 +306,25 @@ public final class MessageUtility {
      * @param mailPart The mail part
      * @param charset The charset encoding used to generate a {@link String} object from raw bytes
      * @return the <code>String</code> read from mail part's stream
-     * @throws IOException
+     * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
+     * @throws IOException If an I/O error occurs
      */
     public static String readMailPart(final MailPart mailPart, final String charset) throws IOException, OXException {
+        return readMailPart(mailPart, charset, false, MailProperties.getInstance().getBodyDisplaySize());
+    }
+
+    /**
+     * Reads the stream content from given mail part.
+     *
+     * @param mailPart The mail part
+     * @param charset The charset encoding used to generate a {@link String} object from raw bytes
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @param maxSize The maximum size to read
+     * @return the <code>String</code> read from mail part's stream
+     * @throws MaxBytesExceededIOException If specified maximum size is exceeded
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readMailPart(final MailPart mailPart, String charset, boolean errorOnNoContent, long maxSize) throws IOException, OXException {
         final InputStreamProvider streamProvider = new AbstractInputStreamProvider() {
 
             @Override
@@ -318,7 +337,7 @@ public final class MessageUtility {
             }
         };
         try {
-            return readStream(streamProvider, charset);
+            return readStream(streamProvider, charset, errorOnNoContent, maxSize);
         } catch (final IOException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -334,6 +353,7 @@ public final class MessageUtility {
      * @param bytes The bytes to read
      * @param charset The charset
      * @return The <code>String</code> read from input stream
+     * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws IOException If an I/O error occurs
      */
     public static String readBytes(final byte[] bytes, final String charset) throws IOException {
@@ -347,7 +367,8 @@ public final class MessageUtility {
         return readStream(streamProvider, charset);
     }
 
-    private static final int BUFSIZE = 8192; // 8K
+    private static final int BUFSIZE_8K = 8192; // 8K
+    private static final int BUFSIZE_20K = 20480; // 20K
 
     /**
      * The unknown character: <code>'&#65533;'</code>
@@ -360,9 +381,25 @@ public final class MessageUtility {
      * @param streamProvider The input stream provider
      * @param charset The charset
      * @return The <code>String</code> read from input stream
+     * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static String readStream(final InputStreamProvider streamProvider, final String charset) throws IOException {
+    public static String readStream(InputStreamProvider streamProvider, String charset) throws IOException {
+        return readStream(streamProvider, charset, false, MailProperties.getInstance().getBodyDisplaySize());
+    }
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param streamProvider The input stream provider
+     * @param charset The charset
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @param maxSize The maximum size to read
+     * @return The <code>String</code> read from input stream
+     * @throws MaxBytesExceededIOException If specified maximum size is exceeded
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readStream(InputStreamProvider streamProvider, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
         if (null == streamProvider) {
             return STR_EMPTY;
         }
@@ -370,19 +407,19 @@ public final class MessageUtility {
             /*
              * Special treatment for possible BIG5 encoded stream
              */
-            return readBig5Bytes(getBytesFrom(streamProvider.getInputStream()));
+            return readBig5Bytes(getBytesFrom(streamProvider.getInputStream(), maxSize));
         }
         if ("GB18030".equalsIgnoreCase(charset)) {
             /*
              * Special treatment for possible GB18030 encoded stream
              */
-            return readGB18030Bytes(getBytesFrom(streamProvider.getInputStream()));
+            return readGB18030Bytes(getBytesFrom(streamProvider.getInputStream(), maxSize));
         }
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
              */
-            final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+            final byte[] bytes = getBytesFrom(streamProvider.getInputStream(), maxSize);
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
@@ -408,7 +445,7 @@ public final class MessageUtility {
             /*
              * Special treatment for Shift-JIS
              */
-            final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+            final byte[] bytes = getBytesFrom(streamProvider.getInputStream(), maxSize);
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
@@ -419,11 +456,11 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        final String retval = readStream0(streamProvider.getInputStream(), charset);
+        final String retval = readStream0(streamProvider.getInputStream(), charset, errorOnNoContent, maxSize);
         if (true || retval.indexOf(UNKNOWN) < 0) {
             return retval;
         }
-        final byte[] bytes = getBytesFrom(streamProvider.getInputStream());
+        final byte[] bytes = getBytesFrom(streamProvider.getInputStream(), maxSize);
         final String detectedCharset = CharsetDetector.detectCharset(Streams.newByteArrayInputStream(bytes));
         LOG.debug("Mapped \"{}\" charset to \"{}\".", charset, detectedCharset);
         return new String(bytes, detectedCharset);
@@ -435,9 +472,25 @@ public final class MessageUtility {
      * @param inStream The input stream
      * @param charset The charset
      * @return The <code>String</code> read from input stream
+     * @throws MaxBytesExceededIOException If {@link MailProperties#getBodyDisplaySize() default maximum size} is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static String readStream(final InputStream inStream, final String charset) throws IOException {
+    public static String readStream(InputStream inStream, String charset) throws IOException {
+        return readStream(inStream, charset, false, MailProperties.getInstance().getBodyDisplaySize());
+    }
+
+    /**
+     * Reads a string from given input stream using direct buffering.
+     *
+     * @param inStream The input stream
+     * @param charset The charset
+     * @param errorOnNoContent Whether to throw an error if read attempt causes a <i>"No content"</i> I/O exception
+     * @param maxSize The maximum size to read
+     * @return The <code>String</code> read from input stream
+     * @throws MaxBytesExceededIOException If specified maximum size is exceeded
+     * @throws IOException If an I/O error occurs
+     */
+    public static String readStream(InputStream inStream, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
         if (null == inStream) {
             return STR_EMPTY;
         }
@@ -445,19 +498,19 @@ public final class MessageUtility {
             /*
              * Special treatment for possible BIG5 encoded stream
              */
-            return readBig5Bytes(getBytesFrom(inStream));
+            return readBig5Bytes(getBytesFrom(inStream, maxSize));
         }
         if ("GB18030".equalsIgnoreCase(charset)) {
             /*
              * Special treatment for possible GB18030 encoded stream
              */
-            return readGB18030Bytes(getBytesFrom(inStream));
+            return readGB18030Bytes(getBytesFrom(inStream, maxSize));
         }
         if (isGB2312(charset)) {
             /*
              * Special treatment for possible GB2312 encoded stream
              */
-            final byte[] bytes = getBytesFrom(inStream);
+            final byte[] bytes = getBytesFrom(inStream, maxSize);
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
@@ -483,7 +536,7 @@ public final class MessageUtility {
             /*
              * Special treatment for Shift-JIS
              */
-            final byte[] bytes = getBytesFrom(inStream);
+            final byte[] bytes = getBytesFrom(inStream, maxSize);
             if (bytes.length == 0) {
                 return STR_EMPTY;
             }
@@ -494,7 +547,7 @@ public final class MessageUtility {
             // MS932
             return CP932EmojiMapping.getInstance().replaceIn(new String(bytes, Charsets.forName("MS932")));
         }
-        return readStream0(inStream, charset);
+        return readStream0(inStream, charset, errorOnNoContent, maxSize);
     }
 
     private static String readGB18030Bytes(final byte[] bytes) throws Error {
@@ -542,16 +595,38 @@ public final class MessageUtility {
         }
     }
 
-    private static String readStream0(final InputStream inStream, final String charset) throws IOException {
-        if (null == inStream) {
+    private static String readStream0(InputStream input, String charset, boolean errorOnNoContent, long maxSize) throws IOException {
+        if (null == input) {
             return STR_EMPTY;
         }
+
+        // Check first byte
+        int check = input.read();
+        if (check < 0) {
+            Streams.close(input);
+            return STR_EMPTY;
+        }
+
         try {
-            final ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFSIZE << 1);
-            final byte[] buf = new byte[BUFSIZE];
-            for (int read; (read = inStream.read(buf, 0, BUFSIZE)) > 0;) {
-                tmp.write(buf, 0, read);
+            byte[] buf = new byte[BUFSIZE_8K];
+            ByteArrayOutputStream tmp = Streams.newByteArrayOutputStream(BUFSIZE_20K);
+            tmp.write(check);
+
+            if (maxSize > 0) {
+                long size = 0;
+                for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                    size += read;
+                    if (size > maxSize) {
+                        throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
+                    }
+                    tmp.write(buf, 0, read);
+                }
+            } else {
+                for (int read; (read = input.read(buf, 0, BUFSIZE_8K)) > 0;) {
+                    tmp.write(buf, 0, read);
+                }
             }
+
             try {
                 return tmp.toString(charset);
             } catch (final UnsupportedCharsetException e) {
@@ -568,7 +643,7 @@ public final class MessageUtility {
                 throw error;
             }
         } catch (final IOException e) {
-            if ("No content".equals(e.getMessage())) {
+            if (!errorOnNoContent && "No content".equals(e.getMessage())) {
                 /*-
                  * Special JavaMail I/O error to indicate no content available from IMAP server.
                  * Return the empty string in this case.
@@ -577,7 +652,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            Streams.close(inStream);
+            Streams.close(input);
         }
     }
 
@@ -633,7 +708,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        final String lc = toLowerCase(charset);
+        final String lc = com.openexchange.java.Strings.asciiLowerCase(charset);
         if (!lc.startsWith("big", 0)) {
             return false;
         }
@@ -653,7 +728,7 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return GB2312.equals(toLowerCase(charset));
+        return GB2312.equals(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
     private static final Set<String> SHIFT_JIS = new HashSet<String>(Arrays.asList("shift_jis", "shift-jis", "sjis", "cp932"));
@@ -668,30 +743,50 @@ public final class MessageUtility {
         if (null == charset) {
             return false;
         }
-        return SHIFT_JIS.contains(toLowerCase(charset));
+        return SHIFT_JIS.contains(com.openexchange.java.Strings.asciiLowerCase(charset));
     }
 
     /**
      * Gets the byte content from specified input stream.
      *
-     * @param in The input stream to get the byte content from
+     * @param input The input stream to get the byte content from
+     * @param maxSize The maximum size to read
      * @return The byte content
+     * @throws MaxBytesExceededIOException If specified maximum size is exceeded
      * @throws IOException If an I/O error occurs
      */
-    public static byte[] getBytesFrom(final InputStream in) throws IOException {
-        if (null == in) {
+    public static byte[] getBytesFrom(InputStream input, long maxSize) throws IOException {
+        if (null == input) {
             return new byte[0];
         }
+
+        // Check first byte
+        int check = input.read();
+        if (check < 0) {
+            Streams.close(input);
+            return new byte[0];
+        }
+
         try {
-            final byte[] buf = new byte[BUFSIZE];
-            int len = 0;
-            if ((len = in.read(buf, 0, buf.length)) <= 0) {
-                return new byte[0];
+            byte[] buf = new byte[BUFSIZE_8K];
+            ByteArrayOutputStream out = Streams.newByteArrayOutputStream(BUFSIZE_20K);
+            out.write(check);
+
+            if (maxSize > 0) {
+                long size = 0;
+                for (int len; (len = input.read(buf, 0, buf.length)) > 0;) {
+                    size += len;
+                    if (size > maxSize) {
+                        throw new MaxBytesExceededIOException(new StringBuilder(32).append("Max. byte count of ").append(maxSize).append(" exceeded.").toString());
+                    }
+                    out.write(buf, 0, len);
+                }
+            } else {
+                for (int len; (len = input.read(buf, 0, buf.length)) > 0;) {
+                    out.write(buf, 0, len);
+                }
             }
-            final ByteArrayOutputStream out = Streams.newByteArrayOutputStream(BUFSIZE);
-            do {
-                out.write(buf, 0, len);
-            } while ((len = in.read(buf, 0, buf.length)) > 0);
+
             return out.toByteArray();
         } catch (final IOException e) {
             if ("No content".equals(e.getMessage())) {
@@ -703,7 +798,7 @@ public final class MessageUtility {
             }
             throw e;
         } finally {
-            Streams.close(in);
+            Streams.close(input);
         }
     }
 
@@ -977,7 +1072,7 @@ public final class MessageUtility {
         final String st = null == subtype ? "plain" : subtype;
         final String objectMimeType = new StringBuilder(32).append("text/").append(st).append("; charset=").append(
             MimeUtility.quote(null == charset ? "us-ascii" : charset, HeaderTokenizer.MIME)).toString();
-        final DataContentHandler dch = dchFor(toLowerCase(st));
+        final DataContentHandler dch = dchFor(com.openexchange.java.Strings.asciiLowerCase(st));
         if (null == dch) {
             // No object DCH for MIME type
             try {
@@ -1021,20 +1116,6 @@ public final class MessageUtility {
                 }
             }
         }
-    }
-
-    /** ASCII-wise to lower-case */
-    private static String toLowerCase(final CharSequence chars) {
-        if (null == chars) {
-            return null;
-        }
-        final int length = chars.length();
-        final StringBuilder builder = new StringBuilder(length);
-        for (int i = 0; i < length; i++) {
-            final char c = chars.charAt(i);
-            builder.append((c >= 'A') && (c <= 'Z') ? (char) (c ^ 0x20) : c);
-        }
-        return builder.toString();
     }
 
 }

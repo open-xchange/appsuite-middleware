@@ -1395,29 +1395,34 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @throws StorageException if loading the filestore information fails.
      */
     private Filestore getFilestore(final int id, final boolean loadRealUsage, final Connection con) throws StorageException {
-        PreparedStatement stmt = null;
-        ResultSet result = null;
-        final Filestore fs;
-        try {
-            stmt = con.prepareStatement("SELECT uri,size,max_context FROM filestore WHERE id=?");
-            stmt.setInt(1, id);
-            result = stmt.executeQuery();
-            if (!result.next()) {
-                throw new StorageException("unable to get filestore data");
+        // Load URI, size, max-context-count
+        Filestore fs;
+        {
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("SELECT uri,size,max_context FROM filestore WHERE id=?");
+                stmt.setInt(1, id);
+                result = stmt.executeQuery();
+                if (!result.next()) {
+                    throw new StorageException("unable to get filestore data");
+                }
+                fs = new Filestore();
+                int pos = 1;
+                fs.setId(I(id));
+                fs.setUrl(result.getString(pos++));
+                fs.setSize(L(toMB(result.getLong(pos++))));
+                fs.setMaxContexts(I(result.getInt(pos++)));
+            } catch (final SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
             }
-            fs = new Filestore();
-            int pos = 1;
-            fs.setId(I(id));
-            fs.setUrl(result.getString(pos++));
-            fs.setSize(L(toMB(result.getLong(pos++))));
-            fs.setMaxContexts(I(result.getInt(pos++)));
-        } catch (final SQLException e) {
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } finally {
-            closeSQLStuff(result, stmt);
         }
-        final FilestoreUsage usage = getUsage(id, loadRealUsage);
+
+        // Set number of current contexts and usage information
+        FilestoreUsage usage = getUsage(id, loadRealUsage, con);
         fs.setUsed(L(toMB(usage.getUsage())));
         fs.setCurrentContexts(I(usage.getCtxCount()));
         fs.setReserved(L(getAverageFilestoreSpace() * usage.getCtxCount()));
@@ -1666,10 +1671,63 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
      * @return The {@link FilestoreUsage} object for the filestore.
      * @throws StorageException if some problem occurs loading the information.
      */
-    private final FilestoreUsage getUsage(final int filestoreId, final boolean loadRealUsage) throws StorageException {
-        final FilestoreUsage usage = new FilestoreUsage();
-        for (final int cid : getContextsInFilestore(filestoreId)) {
-            usage.addContextUsage(loadRealUsage ? getContextUsedQuota(cid) : 0);
+    private final FilestoreUsage getUsage(int filestoreId, boolean loadRealUsage) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            return getUsage(filestoreId, loadRealUsage, con);
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads the usage information for a filestore.
+     *
+     * @param filestoreId the unique identifier of the filestore.
+     * @param loadRealUsage <code>true</code> to load the filestore usage from every context in it. BEWARE! This is a slow operation.
+     * @param con The connection to use
+     * @return The {@link FilestoreUsage} object for the filestore.
+     * @throws StorageException if some problem occurs loading the information.
+     */
+    private final FilestoreUsage getUsage(int filestoreId, boolean loadRealUsage, Connection con) throws StorageException {
+        if (null == con) {
+            return getUsage(filestoreId, loadRealUsage);
+        }
+
+        if (false == loadRealUsage) {
+            // Only load context count for given file storage
+            PreparedStatement stmt = null;
+            ResultSet result = null;
+            try {
+                stmt = con.prepareStatement("SELECT COUNT(cid) FROM context WHERE filestore_id=?");
+                stmt.setInt(1, filestoreId);
+                result = stmt.executeQuery();
+                if (false == result.next()) {
+                    return new FilestoreUsage(0, 0L);
+                }
+
+                return new FilestoreUsage(result.getInt(1), 0L);
+            } catch (SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                closeSQLStuff(result, stmt);
+            }
+        }
+
+        FilestoreUsage usage = new FilestoreUsage();
+        for (int contextId : getContextsInFilestore(filestoreId)) {
+            usage.addContextUsage(getContextUsedQuota(contextId));
         }
         return usage;
     }

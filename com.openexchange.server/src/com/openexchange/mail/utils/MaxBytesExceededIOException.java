@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,54 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
+package com.openexchange.mail.utils;
 
-final class FilestoreUsage {
+import java.io.IOException;
 
-    private int ctxCount;
-    private long usage;
 
-    FilestoreUsage() {
+/**
+ * {@link MaxBytesExceededIOException} - Thrown if a specified maximum byte count is exceeded.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
+ */
+public class MaxBytesExceededIOException extends IOException {
+
+    private static final long serialVersionUID = -2821126584291903503L;
+
+    /**
+     * Initializes a new {@link MaxBytesExceededIOException}.
+     */
+    public MaxBytesExceededIOException() {
         super();
     }
 
-    FilestoreUsage(int ctxCount, long usage) {
-        super();
-        this.ctxCount = ctxCount;
-        this.usage = usage;
+    /**
+     * Initializes a new {@link MaxBytesExceededIOException}.
+     *
+     * @param message The detail message
+     */
+    public MaxBytesExceededIOException(String message) {
+        super(message);
     }
 
-    final void addContextUsage(final long ctxUsage) {
-        ctxCount++;
-        usage += ctxUsage;
+    /**
+     * Initializes a new {@link MaxBytesExceededIOException}.
+     *
+     * @param cause The cause
+     */
+    public MaxBytesExceededIOException(Throwable cause) {
+        super(cause);
     }
 
-    final int getCtxCount() {
-        return ctxCount;
+    /**
+     * Initializes a new {@link MaxBytesExceededIOException}.
+     *
+     * @param message The detail message
+     * @param cause The cause
+     */
+    public MaxBytesExceededIOException(String message, Throwable cause) {
+        super(message, cause);
     }
 
-    final long getUsage() {
-        return usage;
-    }
 }

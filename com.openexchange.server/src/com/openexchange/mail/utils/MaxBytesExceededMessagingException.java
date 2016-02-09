@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,45 @@
  *
  */
 
-package com.openexchange.admin.storage.mysqlStorage;
+package com.openexchange.mail.utils;
 
-final class FilestoreUsage {
+import javax.mail.MessagingException;
 
-    private int ctxCount;
-    private long usage;
 
-    FilestoreUsage() {
+/**
+ * {@link MaxBytesExceededMessagingException} - Thrown if a specified maximum byte count is exceeded.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
+ */
+public class MaxBytesExceededMessagingException extends MessagingException {
+
+    private static final long serialVersionUID = 656229884485289184L;
+
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     */
+    public MaxBytesExceededMessagingException() {
         super();
     }
 
-    FilestoreUsage(int ctxCount, long usage) {
-        super();
-        this.ctxCount = ctxCount;
-        this.usage = usage;
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param s The detail message
+     */
+    public MaxBytesExceededMessagingException(String s) {
+        super(s);
     }
 
-    final void addContextUsage(final long ctxUsage) {
-        ctxCount++;
-        usage += ctxUsage;
+    /**
+     * Initializes a new {@link MaxBytesExceededMessagingException}.
+     *
+     * @param s The detail message
+     * @param e The cause
+     */
+    public MaxBytesExceededMessagingException(String s, Exception e) {
+        super(s, e);
     }
 
-    final int getCtxCount() {
-        return ctxCount;
-    }
-
-    final long getUsage() {
-        return usage;
-    }
 }

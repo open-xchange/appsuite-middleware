@@ -58,11 +58,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -551,7 +553,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             // }
             // } else {
             // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            // }
+            // } 
             getAttachmentsArr().put(jsonObject);
             return true;
         } catch (final JSONException e) {
@@ -1159,12 +1161,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * Since we obviously touched message's content, mark its corresponding message object as seen
          */
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
+        
+        /*
+         * Check if we did not append any text so far
+         */
         if (!textAppended && plainText != null) {
             /*
-             * No text present
+             * Append the plain text...
              */
-            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
+            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content), true);
+
         }
+        
         try {
             final String headersKey = HEADERS;
             if (!jsonObject.hasAndNotNull(headersKey)) {
@@ -1514,7 +1522,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
     }
 
-    private void asRawContent(final String id, final String baseContentType, final HtmlSanitizeResult sanitizeResult) throws OXException {
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult) throws OXException {
+        asRawContent(id, baseContentType, sanitizeResult, false);
+    }
+
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult, boolean asFirstAttachment) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(ID, id);
@@ -1525,7 +1537,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT, sanitizeResult.getContent());
             final MultipartInfo mpInfo = multiparts.peek();
             jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
-            getAttachmentsArr().put(jsonObject);
+
+            if (asFirstAttachment) {
+                JSONArray jAttachments = getAttachmentsArr();
+                if (jAttachments.isEmpty()) {
+                    getAttachmentsArr().put(jsonObject);
+                } else {
+                    jAttachments.add(0, jsonObject);
+                }
+            } else {
+                getAttachmentsArr().put(jsonObject);
+            }
+
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
