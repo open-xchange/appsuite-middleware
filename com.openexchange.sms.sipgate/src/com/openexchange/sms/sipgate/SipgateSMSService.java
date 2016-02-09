@@ -70,6 +70,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sms.PhoneNumberParserService;
+import com.openexchange.sms.SMSExceptionCode;
 import com.openexchange.sms.SMSService;
 
 /**
@@ -110,7 +111,7 @@ public class SipgateSMSService implements SMSService {
     @Override
     public void sendMessage(String recipient, String message) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, null);
         JSONObject jsonObject = new JSONObject(3);
@@ -127,11 +128,11 @@ public class SipgateSMSService implements SMSService {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
         JSONObject jsonObject = new JSONObject(3);
@@ -154,11 +155,11 @@ public class SipgateSMSService implements SMSService {
         Locale locale = new Locale("none", languageTag.toUpperCase());
         sendMessage(recipient, message, locale);
     }
-    
+
     @Override
     public void sendMessage(String[] recipients, String message) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
@@ -182,7 +183,7 @@ public class SipgateSMSService implements SMSService {
     @Override
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
@@ -234,13 +235,13 @@ public class SipgateSMSService implements SMSService {
                 JSONObject resp = new JSONObject(response);
                 if (resp.hasAndNotNull("error")) {
                     String errorMessage = resp.getString("error");
-                    throw SipgateSMSExceptionCode.NOT_SENT.create(errorMessage);
+                    throw SMSExceptionCode.NOT_SENT.create(errorMessage);
                 }
             } else {
                 throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
             }
         } catch (IOException e) {
-            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+            throw SMSExceptionCode.SERVICE_UNAVAILABLE.create(e, e.getMessage());
         } catch (JSONException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         } finally {
