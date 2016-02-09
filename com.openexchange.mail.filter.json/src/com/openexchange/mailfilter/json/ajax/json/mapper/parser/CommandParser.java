@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,38 @@
  *
  */
 
-package com.openexchange.client.onboarding.notification;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link CommandParser}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public interface CommandParser<T> {
 
-    private OnboardingNotificationStrings() {
-        super();
-    }
+    /**
+     * Parses the specified {@link JSONObject} and creates a {@link T} object
+     * 
+     * @param jsonObject The {@link JSONObject} to parse
+     * @return The newly created {@link T} object
+     * @throws JSONException if a JSON parsing error occurs
+     * @throws SieveException if a Sieve parsing error occurs
+     * @throws OXException if a semantic error occurs
+     */
+    T parse(JSONObject jsonObject) throws JSONException, SieveException, OXException;
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
-
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the attached configuration profile.";
-
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT_WITH_FILENAME = "to automatically configure your device, please download & install the attached configuration profile \"%1$s\".";
-
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your device configuration";
+    /**
+     * Parses the specified {@link T} object to the specified {@link JSONObject}
+     * 
+     * @param jsonObject The {@link JSONObject} to parse the {@link T} object into
+     * @param command The {@link T} to parse
+     * @throws JSONException if a JSON parsing error occurs
+     */
+    void parse(JSONObject jsonObject, T command) throws JSONException;
 
 }

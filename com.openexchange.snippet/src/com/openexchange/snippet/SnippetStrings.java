@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,33 @@
  *
  */
 
-package com.openexchange.client.onboarding.notification;
+package com.openexchange.snippet;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link SnippetStrings} - Provides localizable strings for snippet module.
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class SnippetStrings implements LocalizableStrings {
 
-    private OnboardingNotificationStrings() {
+    /**
+     * Initializes a new {@link SnippetStrings}.
+     */
+    private SnippetStrings() {
         super();
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    // Thrown if a user tries to create a snippet/signature referencing to invalid or even harmful image data
+    public static final String INVALID_IMAGE_DATA_MSG = "Invalid or harmful image data detected";
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the attached configuration profile.";
+    // Thrown if a user tries to create a snippet/signature referencing to an image which is too big
+    public static final String MAXIMUM_IMAGE_SIZE_MSG = "The maximum allowed size of '%1$s' for an image in the signature is reached.";
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT_WITH_FILENAME = "to automatically configure your device, please download & install the attached configuration profile \"%1$s\".";
-
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your device configuration";
+    // Thrown if a user tries to create a snippet/signature containing more than max. number of allowed images
+    public static final String MAXIMUM_IMAGES_COUNT_MSG = "The maximum allowed number of '%1$s' images in the signature is reached.";
 
 }

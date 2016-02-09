@@ -51,7 +51,6 @@ package com.openexchange.snippet.json.action;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -73,6 +72,7 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link NewAction}
@@ -127,18 +127,14 @@ public final class NewAction extends SnippetAction {
         }
 
         // Process image in an img HTML tag and add it as an attachment
+        ServerSession session = snippetRequest.getSession();
         String contentSubType = getContentSubType(snippet);
         if (contentSubType.equals("html")) {
-            SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
-            List<Attachment> parsedAttachments = new LinkedList<Attachment>();
-            snippetProcessor.processImages(snippet, parsedAttachments);
-            for (Attachment attachment : parsedAttachments) {
-                snippet.addAttachment(attachment);
-            }
+            new SnippetProcessor(session).processImages(snippet);
         }
 
         // Create via management
-        String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
+        String id = getSnippetService(session).getManagement(session).createSnippet(snippet);
         return new AJAXRequestResult(id, "string");
     }
 

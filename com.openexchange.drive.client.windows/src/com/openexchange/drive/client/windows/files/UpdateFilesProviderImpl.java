@@ -185,6 +185,9 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public boolean contains(String branding, String name) throws OXException {
+        if (isValid(branding)) {
+            return false;
+        }
         return loaders.get(branding).getAvailableFiles().contains(name);
     }
 

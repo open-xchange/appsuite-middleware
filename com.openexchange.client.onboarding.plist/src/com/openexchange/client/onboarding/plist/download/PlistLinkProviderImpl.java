@@ -53,7 +53,7 @@ import java.io.UnsupportedEncodingException;
 import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.apache.commons.codec.binary.Base64;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.client.onboarding.OnboardingExceptionCodes;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadParameters;
@@ -165,11 +165,13 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
     @Override
     public String getLink(HostData hostData, int userId, int contextId, String scenario, String device) throws OXException {
         String serverUrl = (hostData.isSecure() ? "https://" : "http://") + hostData.getHost();
+        BaseEncoding encoder = BaseEncoding.base64().omitPadding();
         StringBuilder url = new StringBuilder();
-        String userString = new String(Base64.encodeBase64(String.valueOf(userId).getBytes()));
-        String contextString = new String(Base64.encodeBase64(String.valueOf(contextId).getBytes()));
-        String scenarioString = new String(Base64.encodeBase64(scenario.getBytes()));
-        String deviceString = new String(Base64.encodeBase64(device.getBytes()));
+
+        String userString = new String(encoder.encode(String.valueOf(userId).getBytes()));
+        String contextString = new String(encoder.encode(String.valueOf(contextId).getBytes()));
+        String scenarioString = new String(encoder.encode(scenario.getBytes()));
+        String deviceString = new String(encoder.encode(device.getBytes()));
         String challenge = toHash(userId, contextId, scenario, device);
         url.append(serverUrl).append(getServletPrefix()).append(SERVLET_PATH);
         url.append(SLASH).append(userString).append(SLASH).append(contextString).append(SLASH).append(deviceString).append(SLASH).append(scenarioString).append(SLASH).append(challenge);
@@ -184,6 +186,8 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
 
         // Expect something like: /<user-id>/<context-id>/<device-id>/<scenario-id>/<challenge>
         String[] result = new String[5];
+        BaseEncoding decoder = BaseEncoding.base64().omitPadding();
+
         try {
             String toParse = url;
             for (int x = 5; x-- > 0;) {
@@ -192,7 +196,7 @@ public class PlistLinkProviderImpl implements DownloadLinkProvider {
                     throw OnboardingExceptionCodes.INVALID_DOWNLOAD_LINK.create();
                 }
                 String token = toParse.substring(index + 1, toParse.length());
-                result[x] = x <= 3 ? Charsets.toAsciiString(Base64.decodeBase64(token)) : token;
+                result[x] = x <= 3 ? Charsets.toAsciiString(decoder.decode(token)) : token;
                 toParse = toParse.substring(0, index);
             }
         } catch (RuntimeException e) {

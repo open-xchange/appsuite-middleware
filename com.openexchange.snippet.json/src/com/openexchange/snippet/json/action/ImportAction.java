@@ -53,7 +53,6 @@ import static com.openexchange.java.Strings.toLowerCase;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.json.JSONException;
@@ -79,7 +78,6 @@ import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.osgi.ServiceListing;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultSnippet;
 import com.openexchange.snippet.SnippetProcessor;
 import com.openexchange.snippet.SnippetService;
@@ -206,13 +204,8 @@ public final class ImportAction extends SnippetAction {
         snippet.setDisplayName(Strings.isEmpty(displayName) ? "My signature" : displayName);
         snippet.setMisc(new JSONObject(3).put("insertion", "below").put("content-type", "text/html"));
 
-        // Process image in an <img> HTML tag and add it as an attachment
-        SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
-        List<Attachment> parsedAttachments = new LinkedList<Attachment>();
-        snippetProcessor.processExternalImages(snippet, parsedAttachments);
-        for (Attachment attachment : parsedAttachments) {
-            snippet.addAttachment(attachment);
-        }
+        // Process images in an <img> HTML tag and add it as an attachment
+        new SnippetProcessor(snippetRequest.getSession()).processExternalImages(snippet);
 
         // Create via management
         String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);

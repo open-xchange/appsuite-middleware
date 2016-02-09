@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,33 +47,56 @@
  *
  */
 
-package com.openexchange.client.onboarding.notification;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
- * {@link OnboardingNotificationStrings}
+ * {@link RejectActionCommandParser}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
- * @since v7.8.1
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class OnboardingNotificationStrings implements LocalizableStrings {
+public class RejectActionCommandParser implements CommandParser<ActionCommand> {
 
-    private OnboardingNotificationStrings() {
+    /**
+     * Initialises a new {@link RejectActionCommandParser}.
+     */
+    public RejectActionCommandParser() {
         super();
     }
 
-    // The user salutation; e.g. "Dear John Doe,"
-    public static final String SALUTATION = "Dear %1$s,";
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandname());
+        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
+    }
 
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT = "to automatically configure your device, please download & install the attached configuration profile.";
-
-    // The content of the E-Mail providing the profile attachment
-    public static final String CONTENT_WITH_FILENAME = "to automatically configure your device, please download & install the attached configuration profile \"%1$s\".";
-
-    // The subject of the E-Mail providing the profile attachment
-    public static final String SUBJECT = "Your device configuration";
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+        ArrayList<Object> arguments = actionCommand.getArguments();
+        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
+        jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
+    }
 }
