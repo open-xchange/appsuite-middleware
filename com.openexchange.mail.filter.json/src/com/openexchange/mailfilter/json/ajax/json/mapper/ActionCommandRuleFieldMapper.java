@@ -140,7 +140,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         List<ActionCommand> actionCommands = ifCommand.getActionCommands();
         for (ActionCommand actionCommand : actionCommands) {
             JSONObject object = new JSONObject();
-            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getCommandname());
+            CommandParser<ActionCommand> parser = parsers.get(actionCommand.getCommand().getJsonname());
             if (parser != null) {
                 parser.parse(object, actionCommand);
             }
