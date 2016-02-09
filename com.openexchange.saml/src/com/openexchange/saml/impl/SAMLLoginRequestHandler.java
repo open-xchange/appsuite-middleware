@@ -202,7 +202,7 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
             uiWebPath = conf.getUiWebPath();
         }
 
-        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, user.getPreferredLanguage(), uiWebPath));
+        resp.sendRedirect(SAMLLoginTools.buildFrontendRedirectLocation(session, uiWebPath));
     }
 
     private LoginResult login(HttpServletRequest httpRequest, final Context context, final User user, final Map<String, String> optState, LoginConfiguration loginConfiguration, final String samlCookieValue) throws OXException {

@@ -1,3 +1,9 @@
+open-xchange-drive (7.6.2-48) stable; urgency=medium
+
+  * Build for patch 2016-02-08 (3071)
+
+ -- Tobias Friedrich <tobias.friedrich@open-xchange.com>  Mon, 01 Feb 2016 12:32:25 +0100
+
 open-xchange-drive (7.6.2-47) stable; urgency=medium
 
   * Build for patch 2016-01-25 (3052)

@@ -202,6 +202,8 @@ import com.sun.mail.imap.Rights;
 import com.sun.mail.imap.protocol.BODYSTRUCTURE;
 import com.sun.mail.util.MessageRemovedIOException;
 import com.sun.mail.util.ReadableMime;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link IMAPMessageStorage} - The IMAP implementation of message storage.
@@ -694,11 +696,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
             final MailMessage[] messages;
             final MailField[] fields = fieldSet.toArray();
             if (imapConfig.asMap().containsKey("UIDPLUS")) {
+                long[] valids = filterNegativeElements(uids);
                 final TLongObjectHashMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
                         fullName,
-                        uids,
-                        uids.length,
+                        valids,
+                        valids.length,
                         getFetchProfile(fields, headerNames, null, null, getIMAPProperties().isFastFetch()),
                         imapConfig.getImapCapabilities().hasIMAP4rev1(),
                         false);
@@ -710,7 +713,8 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     messages[i] = fetchedMsgs.get(uids[i]);
                 }
             } else {
-                final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, uids);
+                long[] valids = filterNegativeElements(uids);
+                final TLongIntMap seqNumsMap = IMAPCommandsCollection.uids2SeqNumsMap(imapFolder, valids);
                 final TLongObjectMap<MailMessage> fetchedMsgs =
                     fetchValidWithFallbackFor(
                         fullName,
@@ -840,10 +844,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         mailInterfaceMonitor.addUseTime(time);
         LOG.debug("IMAP fetch for {} messages took {}msec", Integer.valueOf(len), Long.valueOf(time));
         for (final MailMessage mailMessage : tmp) {
-            final IDMailMessage idmm = (IDMailMessage) mailMessage;
-            if (null != idmm) {
+            if (null != mailMessage) {
+                IDMailMessage idmm = (IDMailMessage) mailMessage;
                 map.put(seqnum ? idmm.getSeqnum() : idmm.getUid(), idmm);
             }
+
         }
         return map;
     }
@@ -4497,14 +4502,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return map;
     }
 
-    private static <E> List<E> filterNullElements(final E[] elements) {
+    private static <E> List<E> filterNullElements(E[] elements) {
         if (null == elements) {
             return Collections.emptyList();
         }
-        final int length = elements.length;
-        final List<E> list = new LinkedList<E>();
+
+        int length = elements.length;
+        List<E> list = new ArrayList<E>(length);
         for (int i = 0; i < length; i++) {
-            final E elem = elements[i];
+            E elem = elements[i];
             if (null != elem) {
                 list.add(elem);
             }
@@ -4512,7 +4518,44 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return list;
     }
 
-    private static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
+    private static long[] filterNegativeElements(long[] uids) {
+        if (null == uids) {
+            return null;
+        }
+
+        int i = 0;
+        boolean fine = true;
+        while (fine && i < uids.length) {
+            if (uids[i] < 0) {
+                fine = false;
+            } else {
+                i++;
+            }
+        }
+
+        if (fine) {
+            return uids;
+        }
+
+        TLongList valids = new TLongArrayList(uids.length);
+        valids.add(uids, 0, i);
+        for (int j = i + 1; j < uids.length; j++) {
+            long uid = uids[j];
+            if (uid >= 0) {
+                valids.add(uid);
+            }
+        }
+        return valids.toArray();
+    }
+
+    /**
+     * Checks given fetch profile to only contain fetch items and no single headers<br>
+     * In case {@link IMAPProperties#allowFetchSingleHeaders()} signals <code>true</code>.
+     *
+     * @param fetchProfile The fetch profile to check
+     * @return The checked fetch profile
+     */
+    protected static FetchProfile checkFetchProfile(FetchProfile fetchProfile) {
         if (null == fetchProfile || IMAPProperties.getInstance().allowFetchSingleHeaders()) {
             return fetchProfile;
         }

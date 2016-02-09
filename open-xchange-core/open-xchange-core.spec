@@ -9,7 +9,7 @@ BuildRequires: open-xchange-osgi
 BuildRequires: open-xchange-xerces
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 47
+%define        ox_release 48
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -1212,6 +1212,9 @@ if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
     ox_set_property com.openexchange.capability.archive_emails true $PFILE
 fi
 
+# SoftwareChange_Request-3034
+ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xchange/etc/mail.properties
+
 PROTECT="configdb.properties mail.properties management.properties oauth-provider.properties secret.properties secrets sessiond.properties tokenlogin-secrets"
 for FILE in $PROTECT
 do
@@ -1252,6 +1255,8 @@ exit 0
 %doc com.openexchange.server/ChangeLog
 
 %changelog
+* Mon Feb 01 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-02-08 (3071)
 * Fri Jan 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-01-25 (3052)
 * Wed Jan 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
