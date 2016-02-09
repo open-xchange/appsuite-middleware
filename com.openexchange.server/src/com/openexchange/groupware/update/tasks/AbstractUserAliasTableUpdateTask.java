@@ -77,7 +77,7 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
 
     /**
      * Returns all the aliases that are stored in the 'user_attribute' table
-     * 
+     *
      * @param conn The Connection
      * @return A {@link Set} with all the aliases
      * @throws SQLException If an SQL error is occurred
@@ -122,7 +122,7 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
 
         /**
          * Initialises a new {@link Alias}.
-         * 
+         *
          * @param cid The context identifier
          * @param userId The user identifier
          * @param alias The alias
@@ -190,7 +190,7 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#hashCode()
          */
         @Override
@@ -200,7 +200,7 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see java.lang.Object#equals(java.lang.Object)
          */
         @Override
@@ -240,15 +240,6 @@ abstract class AbstractUserAliasTableUpdateTask extends UpdateTaskAdapter {
             }
             return true;
         }
-<<<<<<< HEAD:com.openexchange.server/src/com/openexchange/groupware/update/tasks/AbtractUserAliasTableUpdateTask.java
-
-        private AbtractUserAliasTableUpdateTask getOuterType() {
-            return AbtractUserAliasTableUpdateTask.this;
-        }
-
-    }
-=======
->>>>>>> 932f9214f8d0668e7e1a1870c73a0fa63419f54d:com.openexchange.server/src/com/openexchange/groupware/update/tasks/AbstractUserAliasTableUpdateTask.java
 
         private AbstractUserAliasTableUpdateTask getOuterType() {
             return AbstractUserAliasTableUpdateTask.this;
