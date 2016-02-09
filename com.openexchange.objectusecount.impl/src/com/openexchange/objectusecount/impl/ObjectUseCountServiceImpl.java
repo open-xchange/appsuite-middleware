@@ -60,6 +60,7 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.objectusecount.ObjectUseCountService;
@@ -205,6 +206,46 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     public void incrementObjectUseCount(Session session, Set<InternetAddress> addresses, Connection con) throws OXException {
         for (InternetAddress address : addresses) {
             incrementObjectUseCount(session, address.getAddress(), con);
+        }
+    }
+
+    @Override
+    public void incrementObjectUseCountForInternalUser(Session session, int userId) throws OXException {
+        incrementObjectUseCountForInternalUser(session, userId, null);
+    }
+
+    @Override
+    public void incrementObjectUseCountForInternalUser(Session session, int userId, Connection con) throws OXException {
+        DatabaseService dbService = services.getService(DatabaseService.class);
+        if (null == dbService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
+        }
+        UserService userService = services.getService(UserService.class);
+        if (null == userService) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(UserService.class);
+        }
+        User user = userService.getUser(userId, session.getContextId());
+        boolean newConnection = false;
+        PreparedStatement stmt = null;
+        try {
+            if (null == con) {
+                con = dbService.getWritable(session.getContextId());
+                newConnection = true;
+            }
+            stmt = con.prepareStatement("INSERT INTO object_use_count (cid, user, folder, object, value) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE value=value+1");
+            stmt.setInt(1, session.getContextId());
+            stmt.setInt(2, session.getUserId());
+            stmt.setInt(3, FolderObject.SYSTEM_LDAP_FOLDER_ID);
+            stmt.setInt(4, user.getContactId());
+            stmt.setInt(5, 1);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+            if (newConnection) {
+                dbService.backWritable(con);
+            }
         }
     }
 

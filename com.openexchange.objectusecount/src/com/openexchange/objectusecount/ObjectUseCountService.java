@@ -88,7 +88,7 @@ public interface ObjectUseCountService {
 
     /**
      * Set use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
@@ -99,7 +99,7 @@ public interface ObjectUseCountService {
 
     /**
      * Set use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
@@ -111,7 +111,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
@@ -121,7 +121,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for contact identified by mail address
-     * 
+     *
      * @param session
      * @param mail
      * @throws OXException
@@ -130,7 +130,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for set of contacts identified by mail addresses
-     * 
+     *
      * @param session
      * @param addresses
      * @throws OXException
@@ -139,7 +139,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
@@ -150,7 +150,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for contact identified by mail address
-     * 
+     *
      * @param session
      * @param mail
      * @param con Writable connection to database
@@ -160,7 +160,7 @@ public interface ObjectUseCountService {
 
     /**
      * Increment use count for set of contacts identified by mail addresses
-     * 
+     *
      * @param session
      * @param addresses
      * @param con Writable connection to database
@@ -169,8 +169,27 @@ public interface ObjectUseCountService {
     void incrementObjectUseCount(Session session, Set<InternetAddress> addresses, Connection con) throws OXException;
 
     /**
+     * Increment use count for contact assigned to internal user
+     *
+     * @param session
+     * @param userId
+     * @throws OXException
+     */
+    void incrementObjectUseCountForInternalUser(Session session, int userId) throws OXException;
+
+    /**
+     * Increment use count for contact assigned to internal user
+     *
+     * @param session
+     * @param userId
+     * @param con
+     * @throws OXException
+     */
+    void incrementObjectUseCountForInternalUser(Session session, int userId, Connection con) throws OXException;
+
+    /**
      * Reset use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
@@ -180,7 +199,7 @@ public interface ObjectUseCountService {
 
     /**
      * Reset use count for object
-     * 
+     *
      * @param session
      * @param folder
      * @param objectId
