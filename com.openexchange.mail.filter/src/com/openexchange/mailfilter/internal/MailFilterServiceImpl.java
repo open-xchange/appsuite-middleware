@@ -616,7 +616,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                         }
                     } else if (Commands.ALLOF.equals(testcommand.getCommand())) {
                         // In this case we find "our" rule at the first place
-                        List<TestCommand> testcommands = testcommand.getTestcommands();
+                        List<TestCommand> testcommands = testcommand.getTestCommands();
                         if (null != testcommands && testcommands.size() > 1) {
                             TestCommand testCommand2 = testcommands.get(0);
                             if (checkOwnVacation(testCommand2.getArguments())) {

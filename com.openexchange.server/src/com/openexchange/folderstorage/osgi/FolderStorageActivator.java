@@ -81,6 +81,7 @@ import com.openexchange.folderstorage.virtual.osgi.VirtualFolderStorageActivator
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.Tools;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.notification.ShareNotificationService;
@@ -209,7 +210,8 @@ public final class FolderStorageActivator implements BundleActivator {
         ShareNotificationService.class,
         UserService.class,
         DatabaseService.class,
-        UserPermissionService.class
+        UserPermissionService.class,
+        ObjectUseCountService.class
     };
 
     @Override

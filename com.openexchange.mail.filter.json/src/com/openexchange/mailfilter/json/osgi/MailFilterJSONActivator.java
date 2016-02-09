@@ -58,7 +58,19 @@ import com.openexchange.capabilities.CapabilityChecker;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AddressTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AllOfTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AnyOfTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.BodyTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.CurrentDateTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.EnvelopeTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TestCommandParserRegistry;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TrueTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServletInit;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -86,6 +98,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
+        registerTestCommandParserRegistry();
 
         MailFilterServletInit.getInstance().start();
 
@@ -109,4 +122,21 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
         }
     }
 
+    private void registerTestCommandParserRegistry() {
+        TestCommandParserRegistry registry = new TestCommandParserRegistry();
+        registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser());
+        registry.register(Commands.ALLOF.getCommandName(), new AllOfTestCommandParser());
+        registry.register(Commands.ANYOF.getCommandName(), new AnyOfTestCommandParser());
+        registry.register(Commands.BODY.getCommandName(), new BodyTestCommandParser());
+        registry.register(Commands.CURRENTDATE.getCommandName(), new CurrentDateTestCommandParser());
+        registry.register(Commands.ENVELOPE.getCommandName(), new EnvelopeTestCommandParser());
+        registry.register(Commands.HEADER.getCommandName(), new HeaderTestCommandParser());
+        registry.register(Commands.NOT.getCommandName(), new NotTestCommandParser());
+        registry.register(Commands.SIZE.getCommandName(), new SizeTestCommandParser());
+        registry.register(Commands.TRUE.getCommandName(), new TrueTestCommandParser());
+
+        registerService(TestCommandParserRegistry.class, registry);
+        trackService(TestCommandParserRegistry.class);
+        openTrackers();
+    }
 }

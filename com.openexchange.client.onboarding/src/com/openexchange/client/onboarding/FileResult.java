@@ -137,7 +137,7 @@ public class FileResult implements Result {
         try {
             NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
 
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), file.getName(), session);
             MailAttachment mailAttachment = MailAttachments.newMailAttachment(file);
             // TODO: Add Content-Id?
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,46 +47,47 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
+import org.apache.jsieve.SieveException;
 import org.json.JSONException;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.jsieve.commands.RuleComment;
-import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object.Mapper;
-import com.openexchange.mailfilter.json.ajax.json.fields.RuleFields;
-import com.openexchange.mailfilter.json.ajax.json.mapper.IDRuleFieldMapper;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
- * @deprecated Use the {@link IDRuleFieldMapper}
+ * {@link HeaderTestCommandParser}
+ *
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-final class IDMapper implements Mapper<Rule> {
+public class HeaderTestCommandParser implements CommandParser<TestCommand> {
 
-    @Override
-    public String getAttrName() {
-        return RuleFields.ID;
+    /**
+     * Initialises a new {@link HeaderTestCommandParser}.
+     */
+    public HeaderTestCommandParser() {
+        super();
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
+     */
     @Override
-    public Object getAttribute(final Rule obj) throws JSONException {
-        final RuleComment ruleComment = obj.getRuleComment();
-        if (null != ruleComment) {
-            return Integer.valueOf(ruleComment.getUniqueid());
-        }
-        return null;
+    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        return TestCommandParserUtil.createAddressEnvelopeOrHeaderTest(jsonObject, Commands.HEADER);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
+     */
     @Override
-    public boolean isNull(final Rule obj) {
-        return ((null == obj.getRuleComment()) || (-1 == obj.getRuleComment().getUniqueid()));
-    }
-
-    @Override
-    public void setAttribute(final Rule obj, final Object attr) throws JSONException {
-        final RuleComment ruleComment = obj.getRuleComment();
-        if (null != ruleComment) {
-            ruleComment.setUniqueid(((Integer) attr).intValue());
-        } else {
-            obj.setRuleComments(new RuleComment(((Integer) attr).intValue()));
-        }
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+        TestCommandParserUtil.fillWithAddressEnvelopeOrHeaderTest(jsonObject, command);
     }
 }

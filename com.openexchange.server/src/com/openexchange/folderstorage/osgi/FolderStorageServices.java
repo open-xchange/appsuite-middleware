@@ -56,7 +56,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.share.ShareService;
 
 
 /**
@@ -137,7 +136,7 @@ public class FolderStorageServices implements ServiceTrackerCustomizer<Object, O
     public static <T> T requireService(Class<T> clazz) throws OXException {
         T service = (T) INSTANCE.services.get(clazz);
         if (service == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ShareService.class.getName());
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(clazz.getName());
         }
 
         return service;

@@ -118,7 +118,7 @@ public class RuleParser {
      * 
      * @param rule The rule object
      * @param json The JSONObject
-     * @return The parsed Rule objecet
+     * @return The parsed Rule object
      * @throws JSONException
      * @throws SieveException
      * @throws OXException

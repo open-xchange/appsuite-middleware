@@ -169,9 +169,9 @@ public class PlistResult implements Result {
         try {
             NotificationMailFactory notify = Services.getService(NotificationMailFactory.class);
 
-            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), session);
-
             String name = request.getScenario().getId() + ".mobileconfig";
+            MailData data = OnboardingProfileCreatedNotificationMail.createProfileNotificationMail(emailAddress, request.getHostData().getHost(), name, session);
+
             fileHolder = new ThresholdFileHolder();
             fileHolder.setDisposition("attachment; filename=" + name);
             fileHolder.setName(name);
@@ -287,7 +287,7 @@ public class PlistResult implements Result {
 
     /**
      * Removes all non digits from the number string except the leading '+'
-     * 
+     *
      * @param number Expect a internationalized phone number
      * @return The sanitized phone number
      * @throws OXException if the number does not start with a '+' sign
