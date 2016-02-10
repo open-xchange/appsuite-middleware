@@ -95,23 +95,41 @@ public final class Tools {
         super();
     }
 
+    /**
+     * Checks if specified column is nullable (<code>NULL</code> is allowed).
+     *
+     * @param con The connection to use
+     * @param table The table
+     * @param column The column
+     * @return <code>true</code> if nullable; otherwise <code>false</code>
+     * @throws SQLException If column cannot be checked if nullable
+     */
     public static final boolean isNullable(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData meta = con.getMetaData();
         ResultSet result = null;
         boolean retval = false;
         try {
             result = meta.getColumns(null, null, table, column);
-            if (result.next()) {
-                retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
-            } else {
+            if (!result.next()) {
                 throw new SQLException("Can't get information for column " + column + " in table " + table + '.');
             }
+
+            retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
         } finally {
             closeSQLStuff(result);
         }
         return retval;
     }
 
+    /**
+     * Checks if denoted table has its PRIMARY KEY set to specified columns.
+     *
+     * @param con The connection to use
+     * @param table The tanle to check
+     * @param columns The expected PRIMARY KEY
+     * @return <code>true</code> it denoted table has such a PRIMARY KEY; otherwise <code>false</code>
+     * @throws SQLException If PRIMARY KEY check fails
+     */
     public static final boolean existsPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         final List<String> foundColumns = new ArrayList<String>();
@@ -904,7 +922,7 @@ public final class Tools {
      * @throws SQLException If operation fails
      */
     public static void checkAndModifyColumns(final Connection con, final String tableName, boolean ignore, final Column... cols) throws SQLException {
-        final List<Column> toDo = new ArrayList<Column>();
+        final List<Column> toDo = new ArrayList<Column>(cols.length);
         for (final Column col : cols) {
             if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
                 toDo.add(col);
