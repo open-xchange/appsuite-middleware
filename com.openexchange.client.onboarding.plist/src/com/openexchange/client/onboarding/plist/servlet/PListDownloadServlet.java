@@ -218,9 +218,11 @@ public class PListDownloadServlet extends WebDavServlet {
     private String determineHostName(final HttpServletRequest req, int userId, int contextId) {
         String hostName = null;
 
-        HostnameService hostnameService = Services.optService(HostnameService.class);
-        if (null != hostnameService) {
-            hostName = hostnameService.getHostname(userId, contextId);
+        {
+            HostnameService hostnameService = Services.optService(HostnameService.class);
+            if (null != hostnameService) {
+                hostName = hostnameService.getHostname(userId, contextId);
+            }
         }
 
         // Get from request
