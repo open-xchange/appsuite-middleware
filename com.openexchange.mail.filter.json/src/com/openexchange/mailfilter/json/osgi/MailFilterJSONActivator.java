@@ -116,6 +116,7 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
             super.stopBundle();
             MailFilterServletInit.getInstance().stop();
             Services.setServiceLookup(null);
+            //TODO: proper shutdown
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
