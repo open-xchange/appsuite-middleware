@@ -74,7 +74,7 @@ import com.openexchange.tools.webdav.OXServlet;
  * {@link DownloadServlet} is a servlet to download the branded setup files for the windows drive client.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class DownloadServlet extends OXServlet {
 

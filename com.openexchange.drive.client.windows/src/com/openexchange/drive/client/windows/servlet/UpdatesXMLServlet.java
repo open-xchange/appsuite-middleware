@@ -73,7 +73,8 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 
 /**
- * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
 public class UpdatesXMLServlet extends OXServlet {
 
@@ -119,7 +120,7 @@ public class UpdatesXMLServlet extends OXServlet {
                     map = driveUpdate.getTemplateValues(serverUrl, Utils.getUserName(session), branding);
                 } catch (NullPointerException e) {
                     LOG.error("Branding properties imcomplete!");
-                    throw new BrandingException(BrandingException.MISSING_PROPERTIES); //TODO store could don't know it
+                    throw new BrandingException(BrandingException.MISSING_PROPERTIES);
                 }
                 writer = resp.getWriter();
                 writeHead(writer);

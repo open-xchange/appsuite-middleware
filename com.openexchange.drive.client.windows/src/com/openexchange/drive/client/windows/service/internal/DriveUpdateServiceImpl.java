@@ -73,6 +73,7 @@ import com.openexchange.templating.TemplateService;
  * {@link DriveUpdateServiceImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
 public class DriveUpdateServiceImpl implements DriveUpdateService {
 

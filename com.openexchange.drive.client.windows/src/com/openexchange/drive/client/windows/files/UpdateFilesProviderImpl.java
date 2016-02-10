@@ -77,7 +77,7 @@ import com.openexchange.exception.OXException;
  * For this purpose it searches for subfolder's under a given path, which have a proper '.branding' or '.properties' file.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 

@@ -62,7 +62,7 @@ import com.openexchange.drive.client.windows.service.Constants;
  * {@link BrandingConfig} is a storage for branding configuration's.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class BrandingConfig {
 

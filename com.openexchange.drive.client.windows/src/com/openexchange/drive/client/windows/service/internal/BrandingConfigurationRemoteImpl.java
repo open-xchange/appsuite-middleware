@@ -61,7 +61,7 @@ import com.openexchange.exception.OXException;
  * {@link BrandingConfigurationRemoteImpl}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class BrandingConfigurationRemoteImpl implements BrandingConfigurationRemote {
 
