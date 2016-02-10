@@ -166,15 +166,16 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
         jsonObject.put(CurrentDateTestField.datepart.name(), datepart);
 
         DatePart datePart = DatePart.valueOf(datepart);
+        int index = command.getArguments().size() - 1;
         switch (datePart) {
             case date:
-                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), dateFormatPattern));
+                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(index), dateFormatPattern));
                 break;
             case time:
-                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), timeFormatPattern));
+                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(index), timeFormatPattern));
                 break;
             case weekday:
-                jsonObject.put(CurrentDateTestField.datevalue.name(), new JSONArray((List) command.getArguments().get(command.getArguments().size() - 1)));
+                jsonObject.put(CurrentDateTestField.datevalue.name(), new JSONArray((List) command.getArguments().get(index)));
                 break;
             default:
                 throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
