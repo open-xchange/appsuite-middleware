@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,54 +47,96 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
+import com.openexchange.exception.OXExceptionFactory;
 
 /**
- * {@link TestCommandParserRegistry}
+ * {@link CommandParserExceptionCodes}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class TestCommandParserRegistry implements CommandParserRegistry<TestCommand> {
-
-    private final Map<String, CommandParser<TestCommand>> parsers;
+public enum CommandParserExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * Initialises a new {@link TestCommandParserRegistry}.
+     * No parser found under the specified key '%1$s'
      */
-    public TestCommandParserRegistry() {
-        super();
-        parsers = new HashMap<>();
+    UNKNOWN_PARSER("No parser found under the specified key '%1$s'", CATEGORY_ERROR, 1)
+
+    ;
+
+    private static final String PREFIX = "MAIL-FILTER";
+
+    private final String message;
+
+    private final Category category;
+
+    private final int number;
+
+    private final String displayMessage;
+
+    private CommandParserExceptionCodes(final String message, final Category category, final int detailNumber) {
+        this(message, category, detailNumber, null);
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#register(java.lang.String, com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser)
-     */
-    @Override
-    public void register(String key, CommandParser<TestCommand> parser) {
-        parsers.put(key, parser);
+    private CommandParserExceptionCodes(final String message, final Category category, final int detailNumber, final String displayMessage) {
+        this.message = message;
+        this.category = category;
+        number = detailNumber;
+        this.displayMessage = displayMessage;
+
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
-     */
     @Override
-    public CommandParser<TestCommand> get(String key) throws OXException {
-        CommandParser<TestCommand> parser = parsers.get(key);
-        if (parser == null) {
-            throw CommandParserExceptionCodes.UNKNOWN_PARSER.create(key);
-        }
-        return parser;
+    public int getNumber() {
+        return number;
     }
+
+    @Override
+    public Category getCategory() {
+        return category;
+    }
+
+    @Override
+    public String getPrefix() {
+        return PREFIX;
+    }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    @Override
+    public String getDisplayMessage() {
+        return displayMessage;
+    }
+
+    @Override
+    public boolean equals(final OXException e) {
+        return OXExceptionFactory.getInstance().equals(this, e);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create() {
+        return OXExceptionFactory.getInstance().create(this, new Object[0]);
+    }
+
+    /**
+     * Creates a new {@link OXException} instance pre-filled with this code's attributes.
+     *
+     * @param args The message arguments in case of printf-style message
+     * @return The newly created {@link OXException} instance
+     */
+    public OXException create(final Object... args) {
+        return OXExceptionFactory.getInstance().create(this, (Throwable) null, args);
+    }
+
 }
