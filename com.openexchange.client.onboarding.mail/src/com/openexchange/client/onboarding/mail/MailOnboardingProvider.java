@@ -356,12 +356,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         PListDict previousPListDict = previousResult == null ? null : ((PlistResult) previousResult).getPListDict();
-        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), request.getHostData().getHost(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
         // Get the PListDict to contribute to
@@ -385,7 +385,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
-        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(MailOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, userId, contextId));
+        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " Mail");
 
         // The full user name for the account. This is the user name in sent messages, etc.
         payloadContent.addStringValue("EmailAccountName", getUser(userId, contextId).getDisplayName());

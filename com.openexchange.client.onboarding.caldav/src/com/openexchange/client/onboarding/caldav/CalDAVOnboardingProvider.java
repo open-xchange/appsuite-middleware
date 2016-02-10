@@ -188,12 +188,12 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         PListDict previousPListDict = null == previousResult ? null : ((PlistResult) previousResult).getPListDict();
-        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), request.getHostData().getHost(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
 
         // Get the PListDict to contribute to
         PListDict pListDict;
@@ -219,7 +219,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
         payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
         payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
-        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, userId, contextId));
+        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CalDAV");
 
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);
