@@ -105,20 +105,18 @@ public final class Tools {
      * @throws SQLException If column cannot be checked if nullable
      */
     public static final boolean isNullable(final Connection con, final String table, final String column) throws SQLException {
-        final DatabaseMetaData meta = con.getMetaData();
+        DatabaseMetaData meta = con.getMetaData();
         ResultSet result = null;
-        boolean retval = false;
         try {
             result = meta.getColumns(null, null, table, column);
             if (!result.next()) {
                 throw new SQLException("Can't get information for column " + column + " in table " + table + '.');
             }
 
-            retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
+            return DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
         } finally {
             closeSQLStuff(result);
         }
-        return retval;
     }
 
     /**
