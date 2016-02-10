@@ -96,7 +96,7 @@ public class IDRuleFieldMapper implements RuleFieldMapper {
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException {
+    public Object getAttribute(Rule rule) throws JSONException, OXException {
         RuleComment ruleComment = rule.getRuleComment();
         return (ruleComment == null) ? null : Integer.valueOf(ruleComment.getUniqueid());
     }

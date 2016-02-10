@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,48 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.fields;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
+
+import org.apache.jsieve.SieveException;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 
 /**
- * 
- * {@link RuleFields}
+ * {@link AddressTestCommandParser}
  *
- * @deprecated Use {@link RuleField} 
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RuleFields {
+public class AddressTestCommandParser implements CommandParser<TestCommand> {
 
-    public static final String ID = "id";
-    public static final String POSITION = "position";
-    public static final String RULENAME = "rulename";
-    public static final String ACTIVE = "active";
-    public static final String FLAGS = "flags";
-    public static final String TEST = "test";
-    public static final String ACTIONCMDS = "actioncmds";
-    public static final String TEXT = "text";
-    public static final String ERRORMSG = "errormsg";
+    /**
+     * Initialises a new {@link AddressTestCommandParser}.
+     */
+    public AddressTestCommandParser() {
+        super();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
+     */
+    @Override
+    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        return TestCommandParserUtil.createAddressEnvelopeOrHeaderTest(jsonObject, Commands.ADDRESS);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
+     */
+    @Override
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        TestCommandParserUtil.fillWithAddressEnvelopeOrHeaderTest(jsonObject, command);
+    }
+
 }

@@ -85,6 +85,7 @@ public class RuleParser {
     public RuleParser() {
         super();
 
+        // Order of processing
         List<RuleFieldMapper> list = new ArrayList<RuleFieldMapper>(9);
         list.add(new IDRuleFieldMapper());
         list.add(new PositionRuleFieldMapper());
@@ -144,7 +145,7 @@ public class RuleParser {
      * @return The parsed {@link JSONObject}
      * @throws JSONException if a JSON parsing error occurs
      */
-    public JSONObject parse(Rule rule) throws JSONException {
+    public JSONObject parse(Rule rule) throws JSONException, OXException {
         JSONObject object = new JSONObject();
         for (RuleFieldMapper mapper : mappers) {
             if (!mapper.isNull(rule)) {
@@ -162,13 +163,8 @@ public class RuleParser {
      * @return the JSONArray
      * @throws JSONException
      */
-    public JSONArray write(Rule[] rules) throws JSONException {
-        int objectCount = rules.length;
-        if (objectCount == 0) {
-            return new JSONArray(0);
-        }
-
-        JSONArray array = new JSONArray(objectCount);
+    public JSONArray write(Rule[] rules) throws JSONException, OXException {
+        JSONArray array = new JSONArray(rules.length);
         for (Rule rule : rules) {
             array.put(parse(rule));
         }

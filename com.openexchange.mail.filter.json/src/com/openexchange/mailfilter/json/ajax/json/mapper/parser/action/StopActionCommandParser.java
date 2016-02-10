@@ -88,7 +88,7 @@ public class StopActionCommandParser implements CommandParser<ActionCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonname());
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
+        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
     }
 }

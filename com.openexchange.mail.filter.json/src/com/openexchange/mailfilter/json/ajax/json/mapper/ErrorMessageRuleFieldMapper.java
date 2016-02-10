@@ -95,7 +95,7 @@ public class ErrorMessageRuleFieldMapper implements RuleFieldMapper {
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
-    public Object getAttribute(Rule rule) throws JSONException {
+    public Object getAttribute(Rule rule) throws JSONException, OXException {
         return rule.getErrormsg();
     }
 

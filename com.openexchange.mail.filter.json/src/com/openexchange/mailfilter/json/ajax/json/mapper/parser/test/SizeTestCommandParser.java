@@ -47,56 +47,72 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.jsieve.SieveException;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
+import com.openexchange.mailfilter.json.ajax.json.fields.SizeTestField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link RejectActionCommandParser}
+ * {@link SizeTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RejectActionCommandParser implements CommandParser<ActionCommand> {
+public class SizeTestCommandParser implements CommandParser<TestCommand> {
+
+    private final static Pattern DIGITS = Pattern.compile("^\\-?\\d+$");
 
     /**
-     * Initialises a new {@link RejectActionCommandParser}.
+     * Initialises a new {@link SizeTestCommandParser}.
      */
-    public RejectActionCommandParser() {
+    public SizeTestCommandParser() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
-        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
+    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        String commandName = Commands.SIZE.getCommandName();
+        final String size = CommandParserJSONUtil.getString(jsonObject, SizeTestField.size.name(), commandName);
+        try {
+            if (!DIGITS.matcher(size).matches()) {
+                throw OXJSONExceptionCodes.CONTAINS_NON_DIGITS.create(size, commandName);
+            }
+            final List<Object> argList = new ArrayList<Object>();
+            argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, SizeTestField.comparison.name(), commandName)));
+            argList.add(ArgumentUtil.createNumberArgument(size));
+            return new TestCommand(TestCommand.Commands.SIZE, argList, new ArrayList<TestCommand>());
+        } catch (NumberFormatException e) {
+            throw OXJSONExceptionCodes.TOO_BIG_NUMBER.create(e, commandName);
+        }
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
-        jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        jsonObject.put(GeneralField.id.name(), TestCommand.Commands.SIZE.getCommandName());
+        jsonObject.put(SizeTestField.comparison.name(), command.getMatchType().substring(1));
+        jsonObject.put(SizeTestField.size.name(), Long.parseLong(command.getArguments().get(1).toString()));
     }
+
 }

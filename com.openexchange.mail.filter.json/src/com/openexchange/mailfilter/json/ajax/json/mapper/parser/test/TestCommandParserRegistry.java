@@ -47,56 +47,53 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
+import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
 
 /**
- * {@link RejectActionCommandParser}
+ * {@link TestCommandParserRegistry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RejectActionCommandParser implements CommandParser<ActionCommand> {
+public class TestCommandParserRegistry implements CommandParserRegistry<TestCommand> {
+
+    private final Map<String, CommandParser<TestCommand>> parsers;
 
     /**
-     * Initialises a new {@link RejectActionCommandParser}.
+     * Initialises a new {@link TestCommandParserRegistry}.
      */
-    public RejectActionCommandParser() {
+    public TestCommandParserRegistry() {
         super();
+        parsers = new HashMap<>();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#register(java.lang.String, com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
-        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
+    public void register(String key, CommandParser<TestCommand> parser) {
+        parsers.putIfAbsent(key, parser);
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
-        jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
+    public CommandParser<TestCommand> get(String key) throws OXException {
+        CommandParser<TestCommand> parser = parsers.get(key);
+        if (parser == null) {
+            //throw ;
+        }
+        return parser;
     }
 }

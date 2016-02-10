@@ -47,56 +47,31 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
-import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
- * {@link RejectActionCommandParser}
+ * {@link CommandParserRegistry}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RejectActionCommandParser implements CommandParser<ActionCommand> {
+public interface CommandParserRegistry<T> {
 
     /**
-     * Initialises a new {@link RejectActionCommandParser}.
-     */
-    public RejectActionCommandParser() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Registers a {@link CommandParser} under the specified key
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @param key The key
+     * @param parser The {@link CommandParser} to register
      */
-    @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
-        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
-    }
+    void register(String key, CommandParser<T> parser);
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Get the parser registered under the specified key
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @param key The key
+     * @return The {@link CommandParser}
+     * @throws OXException if the parser is not found
      */
-    @SuppressWarnings("unchecked")
-    @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
-        jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
-    }
+    CommandParser<T> get(String key) throws OXException;
 }

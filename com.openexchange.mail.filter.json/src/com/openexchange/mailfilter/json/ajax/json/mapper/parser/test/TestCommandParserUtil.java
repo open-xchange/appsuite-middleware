@@ -47,70 +47,59 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import org.apache.jsieve.SieveException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.fields.AddressEnvelopeAndHeaderTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.PGPEncryptActionField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.ArgumentUtil;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 
 /**
- * {@link PGPEncryptActionCommandParser}
+ * {@link TestCommandParserUtil}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class PGPEncryptActionCommandParser implements CommandParser<ActionCommand> {
+final class TestCommandParserUtil {
 
     /**
-     * Initialises a new {@link PGPEncryptActionCommandParser}.
-     */
-    public PGPEncryptActionCommandParser() {
-        super();
-    }
-
-    /*
-     * (non-Javadoc)
+     * Multi-purpose method for creating {@link Commands#ADDRESS}, {@link Commands#ENVELOPE} and {@link Commands#HEADER} {@link TestCommand}s from the specified {@link JSONObject}
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @param jsonObject The {@link JSONObject} that contains the command
+     * @param command The {@link Commands} command to create
+     * @return The newly created {@link TestCommand}
+     * @throws JSONException if a JSON parsing error occurs
+     * @throws SieveException if a Sieve parsing error occurs
+     * @throws OXException if a semantic error occurs
      */
-    @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        final ArrayList<Object> arrayList = new ArrayList<Object>();
-        final JSONArray keys = jsonObject.optJSONArray(PGPEncryptActionField.keys.getFieldName());
-        if (null != keys) {
-            if (0 == keys.length()) {
-                throw new JSONException("Empty string-arrays are not allowed in sieve.");
-            }
-            arrayList.add(ArgumentUtil.createTagArgument(PGPEncryptActionField.keys));
-            arrayList.add(CommandParserJSONUtil.coerceToStringList(keys));
-        }
-
-        return new ActionCommand(ActionCommand.Commands.PGP_ENCRYPT, arrayList);
+    static final TestCommand createAddressEnvelopeOrHeaderTest(final JSONObject jsonObject, final Commands command) throws JSONException, SieveException, OXException {
+        final List<Object> argList = new ArrayList<Object>();
+        argList.add(ArgumentUtil.createTagArgument(CommandParserJSONUtil.getString(jsonObject, AddressEnvelopeAndHeaderTestField.comparison.name(), command.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.headers.name(), command.getCommandName())));
+        argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, AddressEnvelopeAndHeaderTestField.values.name(), command.getCommandName())));
+        return new TestCommand(command, argList, new ArrayList<TestCommand>());
     }
 
-    /*
-     * (non-Javadoc)
+    /**
+     * Multi-purpose method for filling the specified {@link JSONObject} with {@link Commands#ADDRESS}, {@link Commands#ENVELOPE} and {@link Commands#HEADER} {@link TestCommand}s
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @param jsonObject The {@link JSONObject}
+     * @param command The {@link TestCommand}
+     * @throws JSONException if a JSON parsing error occurs
      */
-    @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
-        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonName());
-        final Hashtable<String, List<String>> tagarguments = actionCommand.getTagArguments();
-        final List<String> keys = tagarguments.get(PGPEncryptActionField.keys.getTagName());
-        if (null != keys) {
-            jsonObject.put(PGPEncryptActionField.keys.getFieldName(), keys);
-        }
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    static final void fillWithAddressEnvelopeOrHeaderTest(JSONObject jsonObject, TestCommand command) throws JSONException {
+        jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.comparison.name(), command.getMatchType().substring(1));
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.headers.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size())));
+        jsonObject.put(AddressEnvelopeAndHeaderTestField.values.name(), new JSONArray((List) command.getArguments().get(command.getTagArguments().size() + 1)));
     }
-
 }

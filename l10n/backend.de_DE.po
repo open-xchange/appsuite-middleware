@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-02-02 16:10+0100\n"
+"PO-Revision-Date: 2016-02-09 14:16+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -1175,7 +1175,6 @@ msgstr "Liebe/r %1$s,"
 
 #. The content of the E-Mail providing the profile attachment
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/notification/OnboardingNotificationStrings.java:71
-#, fuzzy
 msgid ""
 "to automatically configure your device, please download & install the "
 "attached configuration profile."
@@ -2024,7 +2023,6 @@ msgstr ""
 "erneut."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
-#, fuzzy
 msgid "The token \"%1$s\" is already registered."
 msgstr "Das Token \"%1$s\" ist bereits registriert."
 
@@ -7412,7 +7410,6 @@ msgstr ""
 
 #. Your search took too long in order to be accomplished.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/infostore/InfostoreExceptionMessages.java:137
-#, fuzzy
 msgid "Your search took too long in order to be accomplished."
 msgstr "Ihre Suche dauerte zu lange, um durchgeführt werden zu können."
 
@@ -9275,7 +9272,6 @@ msgstr "Sie haben keine Berechtigung zum Freigeben des Ordners für \"%2$s\"."
 
 #. You are not allowed to change the permissions of the trash folder or any of its subfolders
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:133
-#, fuzzy
 msgid ""
 "You are not allowed to change the permissions of the trash folder or any of "
 "its subfolders"

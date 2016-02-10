@@ -47,56 +47,72 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
 
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.jsieve.SieveException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.ActionCommand;
-import com.openexchange.jsieve.commands.ActionCommand.Commands;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mailfilter.json.ajax.json.fields.AddressEnvelopeAndHeaderTestField;
 import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
-import com.openexchange.mailfilter.json.ajax.json.fields.RejectActionField;
+import com.openexchange.mailfilter.json.ajax.json.fields.NotTestField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
+import com.openexchange.mailfilter.json.osgi.Services;
 
 /**
- * {@link RejectActionCommandParser}
+ * {@link NotTestCommandParser}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class RejectActionCommandParser implements CommandParser<ActionCommand> {
+public class NotTestCommandParser implements CommandParser<TestCommand> {
 
     /**
-     * Initialises a new {@link RejectActionCommandParser}.
+     * Initialises a new {@link NotTestCommandParser}.
      */
-    public RejectActionCommandParser() {
+    public NotTestCommandParser() {
         super();
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject)
      */
     @Override
-    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
-        String stringParam = CommandParserJSONUtil.getString(jsonObject, RejectActionField.text.name(), Commands.REJECT.getCommandName());
-        return new ActionCommand(Commands.REJECT, CommandParserJSONUtil.createArrayOfArrays(stringParam));
+    public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        final List<Object> argList = new ArrayList<Object>();
+        final JSONArray valuesArray = jsonObject.getJSONArray(AddressEnvelopeAndHeaderTestField.values.name());
+        argList.add(CommandParserJSONUtil.coerceToStringList(valuesArray));
+        return new TestCommand(TestCommand.Commands.NOT, argList, new ArrayList<TestCommand>());
     }
 
     /*
      * (non-Javadoc)
      * 
-     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
-    @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
-        ArrayList<Object> arguments = actionCommand.getArguments();
-        jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
-        jsonObject.put(RejectActionField.text.name(), ((List<String>) arguments.get(0)).get(0));
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
+        jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
+        final JSONObject testobject = new JSONObject();
+
+        try {
+            TestCommand nestedTestCommand = command.getTestCommands().get(0);
+            CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+            CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
+            parser.parse(testobject, nestedTestCommand);
+        } catch (OXException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        jsonObject.put(NotTestField.test.name(), testobject);
     }
 }

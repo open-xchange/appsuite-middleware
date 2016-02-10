@@ -224,7 +224,7 @@ public class InternalVisitor implements SieveParserVisitor {
                 }
             }
             for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-                if (command.getCommandname().equals(name)) {
+                if (command.getCommandName().equals(name)) {
                     final ActionCommand actionCommand = new ActionCommand(command, arguments);
                     // Here we have to decide if we are on the base level or
                     // inside a control command. If we are inside
@@ -293,7 +293,7 @@ public class InternalVisitor implements SieveParserVisitor {
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
         for (final TestCommand.Commands command : TestCommand.Commands.values()) {
-            if (command.getCommandname().equals(name)) {
+            if (command.getCommandName().equals(name)) {
                 final Object visitChildren = visitChildren(node, data);
                 if (visitChildren instanceof ArrayList) {
                     final ArrayList<String> tagargs = new ArrayList<String>();

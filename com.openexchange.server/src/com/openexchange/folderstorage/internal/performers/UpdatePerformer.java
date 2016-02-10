@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -326,6 +327,15 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         doRenameVirtual(folder, storage, openedStorages);
                     }
                 } else if (comparedPermissions.hasChanges() || cascadePermissions) {
+
+                    ObjectUseCountService useCountService = FolderStorageServices.requireService(ObjectUseCountService.class);
+                    List<Integer> addedUsers = comparedPermissions.getAddedUsers();
+                    if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
+                        for (Integer i : addedUsers) {
+                            useCountService.incrementObjectUseCountForInternalUser(session, i.intValue());
+                        }
+                    }
+
                     /*
                      * Check permissions of anonymous guest users
                      */
