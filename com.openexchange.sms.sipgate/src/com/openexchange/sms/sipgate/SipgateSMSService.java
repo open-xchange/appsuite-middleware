@@ -69,9 +69,8 @@ import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.sms.PhoneNumberParserService;
 import com.openexchange.sms.SMSExceptionCode;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSServiceSPI;
 
 /**
  * {@link SipgateSMSService}
@@ -79,13 +78,12 @@ import com.openexchange.sms.SMSService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SipgateSMSService implements SMSService {
+public class SipgateSMSService extends SMSServiceSPI {
 
     private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
     private final int MAX_MESSAGE_LENGTH;
 
     private final HttpClient client;
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link SipgateSMSService}.
@@ -93,8 +91,7 @@ public class SipgateSMSService implements SMSService {
      * @throws OXException
      */
     public SipgateSMSService(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
         ConfigurationService configService = services.getService(ConfigurationService.class);
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
@@ -213,18 +210,18 @@ public class SipgateSMSService implements SMSService {
         sendMessage(recipients, message, locale);
     }
 
+    @Override
+    protected String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
+        String parsedNumber = super.checkAndFormatPhoneNumber(phoneNumber, locale);
+        StringBuilder sb = new StringBuilder(30);
+        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
+        return sb.toString();
+    }
+
     private HttpMethod getHttpMethod(String method, String parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL).append(method).append("/").append(parameters);
         return new GetMethod(sb.toString());
-    }
-
-    private String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
-        PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
-        String parsedNumber = parser.parsePhoneNumber(phoneNumber, locale);
-        StringBuilder sb = new StringBuilder(30);
-        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
-        return sb.toString();
     }
 
     private void execute(HttpMethod method) throws OXException {
