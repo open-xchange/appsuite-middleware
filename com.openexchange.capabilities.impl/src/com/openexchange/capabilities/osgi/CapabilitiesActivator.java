@@ -64,6 +64,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableService;
 import com.openexchange.capabilities.groupware.CapabilityCreateTableTask;
 import com.openexchange.capabilities.groupware.CapabilityDeleteListener;
+import com.openexchange.capabilities.groupware.MakeNotNullUpdateTask;
 import com.openexchange.capabilities.internal.CapabilityReloadable;
 import com.openexchange.capabilities.internal.CapabilityServiceImpl;
 import com.openexchange.config.ConfigurationService;
@@ -195,7 +196,7 @@ public class CapabilitiesActivator extends HousekeepingActivator {
          * Register update task, create table job and delete listener
          */
         registerService(CreateTableService.class, new CapabilityCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask()));
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new CapabilityCreateTableTask(), new MakeNotNullUpdateTask()));
         registerService(DeleteListener.class, new CapabilityDeleteListener());
 
         openTrackers();
