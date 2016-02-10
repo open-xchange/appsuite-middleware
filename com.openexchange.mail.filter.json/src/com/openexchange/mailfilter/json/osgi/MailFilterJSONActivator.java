@@ -116,13 +116,17 @@ public class MailFilterJSONActivator extends HousekeepingActivator {
             super.stopBundle();
             MailFilterServletInit.getInstance().stop();
             Services.setServiceLookup(null);
-            //TODO: proper shutdown
+
+            cleanUp();
         } catch (final Exception e) {
             LOG.error("", e);
             throw e;
         }
     }
 
+    /**
+     * Registers the {@link TestCommandParserRegistry} along with all available {@link TestCommandParser}s
+     */
     private void registerTestCommandParserRegistry() {
         TestCommandParserRegistry registry = new TestCommandParserRegistry();
         registry.register(Commands.ADDRESS.getCommandName(), new AddressTestCommandParser());
