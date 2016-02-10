@@ -73,7 +73,7 @@ public enum GuardApiExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * A Guard error occurred: %1$s
      */
-    GUARD_SERVER_ERROR("A Guard error occurred: %1$s", GuardApiExceptionMessages.GUARD_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 3),
+    GUARD_SERVER_ERROR("A Guard server error occurred. Status code: %1$s. Error message: %2$s", GuardApiExceptionMessages.GUARD_SERVER_ERROR_MSG, Category.CATEGORY_ERROR, 3),
     /**
      * Invalid Guard URL: %1$s
      */
