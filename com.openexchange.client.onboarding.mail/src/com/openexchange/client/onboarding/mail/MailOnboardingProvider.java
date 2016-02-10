@@ -70,6 +70,7 @@ import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
@@ -273,17 +274,17 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
             String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.smtp.host", null, userId, contextId);
             if (null == smtpServer) {
-                smtpServer = transportAcc.getMailServer();
+                smtpServer = transportAcc.getTransportServer();
             }
             Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.smtp.port", null, userId, contextId);
             if (null == smtpPort) {
-                smtpPort = Integer.valueOf(transportAcc.getMailPort());
+                smtpPort = Integer.valueOf(transportAcc.getTransportPort());
             }
             Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.secure", null, userId, contextId);
             if (null == smtpSecure) {
-                smtpSecure = Boolean.valueOf(transportAcc.isMailSecure());
+                smtpSecure = Boolean.valueOf(transportAcc.isTransportSecure());
             }
-            String smtpLogin = getMailLogin(transportAcc, userLogin, userLoginInfo);
+            String smtpLogin = transportAcc.getTransportLogin();
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, null);
         }
 
@@ -413,7 +414,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.addStringValue("IncomingMailServerUsername", configurations.imapConfig.login);
 
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
-        payloadContent.addStringValue("OutgoingMailServerAuthentication", "EmailAuthPassword");
+        payloadContent.addStringValue("OutgoingMailServerAuthentication", (Strings.isEmpty(configurations.smtpConfig.login) && Strings.isEmpty(configurations.smtpConfig.password)) ? "EmailAuthNone" : "EmailAuthPassword");
 
         // Designates the outgoing mail server host name (or IP address).
         payloadContent.addStringValue("OutgoingMailServerHostName", configurations.smtpConfig.host);
