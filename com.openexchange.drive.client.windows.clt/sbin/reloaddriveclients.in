@@ -68,7 +68,7 @@ case "${BNAME}" in
     "listdriveclients")
     ACTION="ListBrandings"
     ;;
-    "reloaddriveclientss")
+    "reloaddriveclients")
     ACTION="ReloadBrandings"
     ;;
 esac
