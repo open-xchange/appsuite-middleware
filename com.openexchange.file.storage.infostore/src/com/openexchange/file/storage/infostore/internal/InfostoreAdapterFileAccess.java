@@ -598,18 +598,18 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
 
     @Override
     public SearchIterator<File> search(List<String> folderIds, SearchTerm<?> searchTerm, List<Field> fields, Field sort, SortDirection order, int start, int end) throws OXException {
-        final TIntList fids = new TIntArrayList(null == folderIds ? 0 : folderIds.size());
+        TIntList fids = new TIntArrayList(null == folderIds ? 0 : folderIds.size());
         if (null != folderIds) {
             for (final String folderId : folderIds) {
                 try {
                     fids.add(Integer.parseInt(folderId));
                 } catch (final NumberFormatException e) {
-                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderId);
+                    throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
                 }
             }
         }
 
-        final ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
+        ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
         return new InfostoreSearchIterator(search.search(
             session, visitor.getInfostoreTerm(), fids.toArray(), getMatching(fields), getMatching(sort), getSortDirection(order), start, end));
@@ -621,8 +621,9 @@ public class InfostoreAdapterFileAccess extends InfostoreAccess implements FileS
         try {
             fid = Integer.parseInt(folderId);
         } catch (NumberFormatException e) {
-            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(folderId);
+            throw FileStorageExceptionCodes.INVALID_FOLDER_IDENTIFIER.create(e, folderId);
         }
+
         ToInfostoreTermVisitor visitor = new ToInfostoreTermVisitor();
         searchTerm.visit(visitor);
         return new InfostoreSearchIterator(search.search(
