@@ -75,10 +75,6 @@ import com.sun.mail.imap.protocol.BASE64MailboxEncoder;
  */
 public class FileIntoActionCommandParser implements CommandParser<ActionCommand> {
 
-    /*
-     * TODO: implement {@link Reloadable} and reload the MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property
-     */
-
     /**
      * Initialises a new {@link FileIntoActionCommandParser}.
      */
@@ -95,12 +91,8 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
     public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
         String stringParam = CommandParserJSONUtil.getString(jsonObject, MoveActionField.into.name(), Commands.FILEINTO.getJsonName());
 
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
-        boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
-
         final String folderName;
-        if (useUTF7Encoding) {
+        if (useUTF7Encoding()) {
             folderName = BASE64MailboxEncoder.encode(MailFolderUtility.prepareMailFolderParam(stringParam).getFullname());
         } else {
             folderName = MailFolderUtility.prepareMailFolderParam(stringParam).getFullname();
@@ -121,12 +113,8 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
 
         jsonObject.put(GeneralField.id.name(), actionCommand.getCommand().getJsonName());
 
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
-        final boolean useUTF7Encoding = Boolean.parseBoolean(encodingProperty);
-
         final String folderName;
-        if (useUTF7Encoding) {
+        if (useUTF7Encoding()) {
             folderName = BASE64MailboxDecoder.decode(((List<String>) arguments.get(0)).get(0));
         } else {
             folderName = ((List<String>) arguments.get(0)).get(0);
@@ -135,4 +123,14 @@ public class FileIntoActionCommandParser implements CommandParser<ActionCommand>
         jsonObject.put(MoveActionField.into.name(), MailFolderUtility.prepareFullname(0, folderName));
     }
 
+    /**
+     * Helper method to fetch the value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
+     * 
+     * @return The value of the 'com.openexchange.mail.filter.useUTF7FolderEncoding' property
+     */
+    private boolean useUTF7Encoding() {
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String encodingProperty = config.getProperty(MailFilterProperties.Values.USE_UTF7_FOLDER_ENCODING.property);
+        return Boolean.parseBoolean(encodingProperty);
+    }
 }

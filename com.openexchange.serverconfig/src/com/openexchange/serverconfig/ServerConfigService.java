@@ -50,6 +50,7 @@
 package com.openexchange.serverconfig;
 
 import com.openexchange.exception.OXException;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * {@link ServerConfigService}
@@ -57,12 +58,13 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:marc.arens@open-xchange.com">Marc Arens</a>
  * @since v7.8.0
  */
+@SingletonService
 public interface ServerConfigService {
 
     /**
      * Get the computed server config
-     * 
-     * @param hostname The hostname to use when building the {@link ServerConfig} 
+     *
+     * @param hostname The hostname to use when building the {@link ServerConfig}
      * @param userID The userID when building the {@link ServerConfig}
      * @param contextID The contextID when building the {@link ServerConfig}
      * @return the computed server config
@@ -72,7 +74,7 @@ public interface ServerConfigService {
 
     /**
      * Get the {@link ServerConfigServicesLookup} that is used when computing the server config.
-     * 
+     *
      * @return
      */
     ServerConfigServicesLookup getServerConfigServicesLookup();

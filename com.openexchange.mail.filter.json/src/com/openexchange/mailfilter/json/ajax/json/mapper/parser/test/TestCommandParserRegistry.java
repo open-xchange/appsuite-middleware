@@ -55,6 +55,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
 /**
  * {@link TestCommandParserRegistry}
@@ -80,7 +81,7 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
      */
     @Override
     public void register(String key, CommandParser<TestCommand> parser) {
-        parsers.putIfAbsent(key, parser);
+        parsers.put(key, parser);
     }
 
     /*
@@ -92,7 +93,7 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
     public CommandParser<TestCommand> get(String key) throws OXException {
         CommandParser<TestCommand> parser = parsers.get(key);
         if (parser == null) {
-            //throw ;
+            throw CommandParserExceptionCodes.UNKNOWN_PARSER.create(key);
         }
         return parser;
     }

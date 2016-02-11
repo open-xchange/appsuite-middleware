@@ -70,6 +70,7 @@ import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
@@ -273,17 +274,17 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
             String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.smtp.host", null, userId, contextId);
             if (null == smtpServer) {
-                smtpServer = transportAcc.getMailServer();
+                smtpServer = transportAcc.getTransportServer();
             }
             Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.smtp.port", null, userId, contextId);
             if (null == smtpPort) {
-                smtpPort = Integer.valueOf(transportAcc.getMailPort());
+                smtpPort = Integer.valueOf(transportAcc.getTransportPort());
             }
             Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.secure", null, userId, contextId);
             if (null == smtpSecure) {
-                smtpSecure = Boolean.valueOf(transportAcc.isMailSecure());
+                smtpSecure = Boolean.valueOf(transportAcc.isTransportSecure());
             }
-            String smtpLogin = getMailLogin(transportAcc, userLogin, userLoginInfo);
+            String smtpLogin = transportAcc.getTransportLogin();
             smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, null);
         }
 
@@ -355,12 +356,12 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         PListDict previousPListDict = previousResult == null ? null : ((PlistResult) previousResult).getPListDict();
-        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), request.getHostData().getHost(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
         Configurations configurations = getEffectiveConfigurations(userId, contextId);
 
         // Get the PListDict to contribute to
@@ -384,7 +385,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
 
         // A user-visible description of the email account, shown in the Mail and Settings applications.
-        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getTranslationFor(MailOnboardingStrings.IMAP_ACCOUNT_DESCRIPTION, userId, contextId));
+        payloadContent.addStringValue("EmailAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " Mail");
 
         // The full user name for the account. This is the user name in sent messages, etc.
         payloadContent.addStringValue("EmailAccountName", getUser(userId, contextId).getDisplayName());
@@ -413,7 +414,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.addStringValue("IncomingMailServerUsername", configurations.imapConfig.login);
 
         // Designates the authentication scheme for outgoing mail. Allowed values are EmailAuthPassword and EmailAuthNone.
-        payloadContent.addStringValue("OutgoingMailServerAuthentication", "EmailAuthPassword");
+        payloadContent.addStringValue("OutgoingMailServerAuthentication", (Strings.isEmpty(configurations.smtpConfig.login) && Strings.isEmpty(configurations.smtpConfig.password)) ? "EmailAuthNone" : "EmailAuthPassword");
 
         // Designates the outgoing mail server host name (or IP address).
         payloadContent.addStringValue("OutgoingMailServerHostName", configurations.smtpConfig.host);

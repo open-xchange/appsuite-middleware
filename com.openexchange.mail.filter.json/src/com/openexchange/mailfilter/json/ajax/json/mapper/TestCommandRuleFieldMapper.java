@@ -109,14 +109,8 @@ public class TestCommandRuleFieldMapper implements RuleFieldMapper {
             TestCommand testCommand = rule.getTestCommand();
             String commandName = testCommand.getCommand().getCommandName();
             CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-            CommandParser<TestCommand> parser;
-            try {
-                parser = parserRegistry.get(commandName);
-                parser.parse(object, testCommand);
-            } catch (OXException e) {
-                //TODO: better exception handling
-                e.printStackTrace();
-            }
+            CommandParser<TestCommand> parser = parserRegistry.get(commandName);
+            parser.parse(object, testCommand);
         }
         return object;
     }

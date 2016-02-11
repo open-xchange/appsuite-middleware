@@ -27,6 +27,7 @@ Summary:       New updater for windows drive clients
 Autoreqprov:   no
 Requires:      open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
+Requires:      open-xchange-drive-client-windows-files
 
 %description
 This package offers windows drive clients the possibility to update themselves without the use of the ox-updater.

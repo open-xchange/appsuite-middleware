@@ -52,6 +52,8 @@ package com.openexchange.client.onboarding.plist.servlet;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -66,9 +68,12 @@ import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadParameters;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PListSigner;
+import com.openexchange.client.onboarding.plist.osgi.Services;
 import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceLookup;
@@ -152,9 +157,11 @@ public class PListDownloadServlet extends WebDavServlet {
             try {
                 OnboardingService onboardingService = lookup.getService(OnboardingService.class);
                 scenario = onboardingService.getScenario(scenarioId, device, userId, contextId);
+                String hostName = determineHostName(req, userId, contextId);
+
                 for (OnboardingProvider provider : scenario.getProviders(userId, contextId)) {
                     if (provider instanceof OnboardingPlistProvider) {
-                        plist = ((OnboardingPlistProvider) provider).getPlist(plist, scenario, userId, contextId);
+                        plist = ((OnboardingPlistProvider) provider).getPlist(plist, scenario, hostName, userId, contextId);
                     }
                 }
             } catch (OXException e) {
@@ -206,6 +213,38 @@ public class PListDownloadServlet extends WebDavServlet {
         } finally {
             Streams.close(filestream, fileHolder);
         }
+    }
+
+    private String determineHostName(final HttpServletRequest req, int userId, int contextId) {
+        String hostName = null;
+
+        {
+            HostnameService hostnameService = Services.optService(HostnameService.class);
+            if (null != hostnameService) {
+                hostName = hostnameService.getHostname(userId, contextId);
+            }
+        }
+
+        // Get from request
+        if (Strings.isEmpty(hostName)) {
+            hostName = req.getServerName();
+        }
+
+        // Get from java
+        if (Strings.isEmpty(hostName)) {
+            try {
+                hostName = InetAddress.getLocalHost().getCanonicalHostName();
+            } catch (UnknownHostException e) {
+                // ignore
+            }
+        }
+
+        // Fall back to localhost as last resort
+        if (Strings.isEmpty(hostName)) {
+            hostName = "localhost";
+        }
+
+        return hostName;
     }
 
     private ThresholdFileHolder sign(ThresholdFileHolder fileHolder, int userId, int contextId) throws OXException, IOException {
