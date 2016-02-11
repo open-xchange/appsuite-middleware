@@ -235,7 +235,27 @@ public enum Device implements Entity {
      * @throws OXException If actions cannot be returned
      */
     public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
-        List<OnboardingAction> actions = new ArrayList<>(getConfiguredActionsFor(device, type, userId, contextId));
+        if (null == device || null == type) {
+            return null;
+        }
+
+        // Only one action possible for types LINK and MANUAL
+        switch (type) {
+            case LINK:
+                return Arrays.asList(OnboardingAction.LINK);
+            case MANUAL:
+                return Arrays.asList(OnboardingAction.DISPLAY);
+            default:
+                break;
+        }
+
+        // Check for other types
+        List<OnboardingAction> actions = getConfiguredActionsFor(device, type, userId, contextId);
+        if (null == actions) {
+            // No actions available for specified device and type
+            return Collections.emptyList();
+        }
+
         for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
             OnboardingAction action = iter.next();
             switch (action) {
@@ -259,27 +279,12 @@ public enum Device implements Entity {
     }
 
     private static List<OnboardingAction> getConfiguredActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
-        if (null == device || null == type) {
-            return Collections.emptyList();
-        }
-
-        // Only one action possible for types LINK and MANUAL
-        switch (type) {
-            case LINK:
-                return Arrays.asList(OnboardingAction.LINK);
-            case MANUAL:
-                return Arrays.asList(OnboardingAction.DISPLAY);
-            default:
-                break;
-        }
-
-        // Check for other types
         switch (device) {
             case ANDROID_PHONE:
                 {
                     switch (type) {
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -288,7 +293,7 @@ public enum Device implements Entity {
                 {
                     switch (type) {
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -324,7 +329,7 @@ public enum Device implements Entity {
                 {
                     switch (type) {
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -341,7 +346,7 @@ public enum Device implements Entity {
         // Query property value
         String propValue = OnboardingUtility.getValueFromProperty(propName, null, userId, contextId);
         if (Strings.isEmpty(propValue)) {
-            return defaultActions;
+            return null == defaultActions ? null : new ArrayList<OnboardingAction>(defaultActions);
         }
 
         // Parse to actions
@@ -352,7 +357,7 @@ public enum Device implements Entity {
 
             if ("none".equals(sAction)) {
                 // Explicitly disabled
-                return Collections.emptyList();
+                return null;
             }
 
             OnboardingAction action = OnboardingAction.actionFor(sAction);
@@ -361,7 +366,7 @@ public enum Device implements Entity {
             }
         }
 
-        return actions.isEmpty() ? defaultActions : actions;
+        return actions.isEmpty() ? (null == defaultActions ? null : new ArrayList<OnboardingAction>(defaultActions)) : actions;
     }
 
 }
