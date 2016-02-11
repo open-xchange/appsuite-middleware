@@ -311,7 +311,7 @@ public enum Device implements Entity {
                         case MANUAL:
                             return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD);
+                            return Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
