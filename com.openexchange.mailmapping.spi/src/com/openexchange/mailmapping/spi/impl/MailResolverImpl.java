@@ -74,14 +74,14 @@ import com.openexchange.user.UserService;
 public class MailResolverImpl implements MailResolver {
 
     private final ServiceLookup services;
-    private final ServiceListing<ContextResolver> spis;
+    private final ServiceListing<ContextResolver> contextResolvers;
 
     /**
      * Initializes a new {@link MailResolverImpl}.
      */
-    public MailResolverImpl(ServiceListing<ContextResolver> spis, ServiceLookup services) {
+    public MailResolverImpl(ServiceListing<ContextResolver> contextResolvers, ServiceLookup services) {
         super();
-        this.spis = spis;
+        this.contextResolvers = contextResolvers;
         this.services = services;
     }
 
@@ -101,8 +101,8 @@ public class MailResolverImpl implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        for (ContextResolver spi : spis.getServiceList()) {
-            ResolvedContext resolved = spi.resolveContext(mail);
+        for (ContextResolver contextResolver : contextResolvers.getServiceList()) {
+            ResolvedContext resolved = contextResolver.resolveContext(mail);
             if (resolved != null) {
                 ResolveReply reply = resolved.getResolveReply();
                 if (ResolveReply.ACCEPT.equals(reply)) {

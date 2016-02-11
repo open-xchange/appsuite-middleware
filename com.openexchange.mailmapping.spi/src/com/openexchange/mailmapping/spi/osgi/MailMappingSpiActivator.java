@@ -54,10 +54,10 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
 /**
- * {@link MailMappingSpiActivator} - The activator for <i>com.openexchange.mailmapping</i>.
+ * {@link MailMappingSpiActivator} - The activator for <i>com.openexchange.mailmapping.spi</i>.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.6.1
+ * @since v7.8.1
  */
 public class MailMappingSpiActivator extends HousekeepingActivator {
 
