@@ -49,12 +49,13 @@
 
 package com.openexchange.mailmapping.spi.impl;
 
+import java.util.List;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.MultipleMailResolver;
 import com.openexchange.mailmapping.ResolveReply;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.mailmapping.spi.ContextResolver;
@@ -71,7 +72,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class MailResolverImpl implements MailResolver {
+public class MailResolverImpl implements MultipleMailResolver {
 
     private final ServiceLookup services;
     private final ServiceListing<ContextResolver> contextResolvers;
@@ -83,6 +84,31 @@ public class MailResolverImpl implements MailResolver {
         super();
         this.contextResolvers = contextResolvers;
         this.services = services;
+    }
+
+    @Override
+    public ResolvedMail[] resolveMultiple(String... mails) throws OXException {
+        if (null == mails || mails.length == 0) {
+            return new ResolvedMail[0];
+        }
+
+        // Acquire needed services
+        ContextService contexts = services.getService(ContextService.class);
+        if (null == contexts) {
+            throw ServiceExceptionCode.absentService(ContextService.class);
+        }
+        UserService users = services.getService(UserService.class);
+        if (null == users) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+        List<ContextResolver> contextResolvers = this.contextResolvers.getServiceList();
+
+
+        ResolvedMail[] results = new ResolvedMail[mails.length];
+        for (int i = results.length; i-- > 0;) {
+            results[i] = resolve(mails[i], contextResolvers, users, contexts);
+        }
+        return results;
     }
 
     @Override
@@ -101,7 +127,11 @@ public class MailResolverImpl implements MailResolver {
             throw ServiceExceptionCode.absentService(UserService.class);
         }
 
-        for (ContextResolver contextResolver : contextResolvers.getServiceList()) {
+        return resolve(mail, contextResolvers.getServiceList(), users, contexts);
+    }
+
+    private ResolvedMail resolve(String mail, List<ContextResolver> contextResolvers, UserService users, ContextService contexts) throws OXException {
+        for (ContextResolver contextResolver : contextResolvers) {
             ResolvedContext resolved = contextResolver.resolveContext(mail);
             if (resolved != null) {
                 ResolveReply reply = resolved.getResolveReply();
