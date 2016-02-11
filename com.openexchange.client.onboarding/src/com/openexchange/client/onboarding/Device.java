@@ -236,7 +236,7 @@ public enum Device implements Entity {
      */
     public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
         if (null == device || null == type) {
-            return null;
+            return Collections.emptyList();
         }
 
         // Only one action possible for types LINK and MANUAL
