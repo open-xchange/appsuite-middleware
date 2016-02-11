@@ -182,7 +182,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
         configuration.put(CARDDAV_URL_FIELD, getCardDAVUrl(false, request.getHostData(), session.getUserId(), session.getContextId()));
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------

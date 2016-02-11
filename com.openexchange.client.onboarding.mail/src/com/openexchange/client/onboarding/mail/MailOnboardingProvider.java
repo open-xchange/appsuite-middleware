@@ -336,7 +336,7 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
         configuration.put(SMTP_PORT_FIELD, new Integer(configurations.smtpConfig.port));
         configuration.put(SMTP_SECURE_FIELD, new Boolean(configurations.smtpConfig.secure));
 
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
