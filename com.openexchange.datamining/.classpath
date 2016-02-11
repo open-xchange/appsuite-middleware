@@ -7,5 +7,6 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.common"/>
 	<classpathentry kind="lib" path="/com.openexchange.bundles/jars/commons-cli-1.2.jar" sourcepath="/com.openexchange.bundles/source/commons-cli-1.2-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.java"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/org.json"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
