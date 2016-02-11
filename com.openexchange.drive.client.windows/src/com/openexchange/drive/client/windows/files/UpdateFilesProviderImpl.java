@@ -150,6 +150,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
                         return name.endsWith(".properties") || name.endsWith(".branding");
                     }
                 };
+                BrandingConfig.clear();
 
                 for (File f : dirs) {
                     File[] brandings = f.listFiles(brandingFilter);
@@ -185,7 +186,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public boolean contains(String branding, String name) throws OXException {
-        if (isValid(branding)) {
+        if (!isValid(branding)) {
             return false;
         }
         return loaders.get(branding).getAvailableFiles().contains(name);
