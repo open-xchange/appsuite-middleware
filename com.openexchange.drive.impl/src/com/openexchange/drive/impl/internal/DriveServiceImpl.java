@@ -143,7 +143,7 @@ public class DriveServiceImpl implements DriveService {
         }
         DriveClientVersion clientVersion = session.getClientVersion();
         if (null != clientVersion) {
-            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
+            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType(), session.getServerSession());
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
                 OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
                 LOG.debug("Client synchronization aborted for {}", session, error);
@@ -234,7 +234,7 @@ public class DriveServiceImpl implements DriveService {
              * check (soft) version restrictions
              */
             if (null != clientVersion) {
-                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
+                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType(), session.getServerSession());
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
                     LOG.trace("Client upgrade available for {}", session, error);

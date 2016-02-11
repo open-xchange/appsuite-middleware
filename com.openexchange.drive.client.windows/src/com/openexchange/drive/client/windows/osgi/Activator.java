@@ -70,6 +70,7 @@ import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRe
 import com.openexchange.drive.client.windows.servlet.DownloadServlet;
 import com.openexchange.drive.client.windows.servlet.InstallServlet;
 import com.openexchange.drive.client.windows.servlet.UpdatesXMLServlet;
+import com.openexchange.drive.impl.management.version.BrandedDriveVersionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;
@@ -86,7 +87,7 @@ public class Activator extends HousekeepingActivator {
 
 
     private static final Class<?>[] NEEDED_SERVICES = { TemplateService.class, ConfigurationService.class, ContextService.class, UserService.class,
-        UserConfigurationService.class, HttpService.class, CapabilityService.class, DispatcherPrefixService.class, ConfigViewFactory.class };
+        UserConfigurationService.class, HttpService.class, CapabilityService.class, DispatcherPrefixService.class, ConfigViewFactory.class, BrandedDriveVersionService.class };
 
     private String downloadServletAlias;
     private String updateServletAlias;
