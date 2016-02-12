@@ -1,5 +1,6 @@
 package com.openexchange.groupware.infostore.validation;
 
+import java.util.Set;
 import junit.framework.TestCase;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
@@ -18,7 +19,7 @@ public class ValidationChainTest extends TestCase{
 		validators.add(new TestValidation3());
 
 		try {
-			validators.validate(null, null);
+			validators.validate(null, null, null, null);
 			fail("No Exception thrown");
 		} catch (final OXException x) {
 			assertEquals("TestValidation2: (title) sucks\nTestValidation3: (title, description) stinks\n", (String)x.getDisplayArgs()[0]);
@@ -32,7 +33,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation1 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {
 			return new DocumentMetadataValidation();
 		}
 
@@ -46,7 +47,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation2 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "sucks");
 			return validation;
@@ -62,7 +63,7 @@ public class ValidationChainTest extends TestCase{
 	private static class TestValidation3 implements InfostoreValidator{
 
 		@Override
-        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata) {
+        public DocumentMetadataValidation validate(ServerSession session, final DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {
 			final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 			validation.setError(Metadata.TITLE_LITERAL, "stinks");
 			validation.setError(Metadata.DESCRIPTION_LITERAL, "stinks");

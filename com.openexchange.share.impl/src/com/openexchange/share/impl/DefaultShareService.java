@@ -188,7 +188,11 @@ public class DefaultShareService implements ShareService {
             connectionHelper.finish();
         }
         if (null != user && user.isGuest()) {
-            return removeExpired(new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user)));
+            DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user));
+            if (Boolean.TRUE.equals(session.getParameter("com.openexchange.share.administrativeUpdate"))) {
+                return guestInfo; // don't remove expired shares during administrative updates to avoid recursions
+            }
+            return removeExpired(guestInfo);
         }
         return null;
     }

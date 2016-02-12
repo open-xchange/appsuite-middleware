@@ -369,6 +369,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts a new file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertFile(AJAXClient client, int folderID, String filename) throws Exception {
+        return insertSharedFile(client, folderID, filename, null);
+    }
+
+    /**
      * Inserts and remembers a new shared file with random content.
      *
      * @param folderID The parent folder identifier
@@ -384,6 +397,22 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, FileStorageObjectPermission permission) throws Exception {
+        byte[] contents = new byte[64 + random.nextInt(256)];
+        random.nextBytes(contents);
+        return insertSharedFile(client, folderID, filename, permission, contents);
+    }
+
+    /**
      * Inserts and remembers a new shared file with random content.
      *
      * @param folderID The parent folder identifier
@@ -391,10 +420,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param permission The permission to assign
      * @param data The file contents
      * @return The inserted file
-     * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
         return insertSharedFile(folderID, filename, null == permission ? null : Collections.singletonList(permission), data);
+    }
+
+    /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
+        return insertSharedFile(client, folderID, filename, null == permission ? null : Collections.singletonList(permission), data);
     }
 
     /**
@@ -408,6 +450,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, List<FileStorageObjectPermission> permissions, byte[] data) throws Exception {
+        File createdFile = insertSharedFile(getClient(), folderID, filename, permissions, data);
+        remember(createdFile);
+        return createdFile;
+    }
+
+    /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, List<FileStorageObjectPermission> permissions, byte[] data) throws Exception {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
@@ -416,14 +475,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
         }
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         newRequest.setNotifyPermissionEntities(Transport.MAIL);
-        NewInfostoreResponse newResponse = getClient().execute(newRequest);
+        NewInfostoreResponse newResponse = client.execute(newRequest);
         String id = newResponse.getID();
         metadata.setId(id);
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
         GetInfostoreResponse getResponse = client.execute(getRequest);
         File createdFile = getResponse.getDocumentMetadata();
         assertNotNull(createdFile);
-        remember(createdFile);
         return createdFile;
     }
 
