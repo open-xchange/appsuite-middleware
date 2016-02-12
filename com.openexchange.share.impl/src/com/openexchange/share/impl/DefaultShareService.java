@@ -320,6 +320,7 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             if (guestUserUpdated) {
                 userService.invalidateUser(context, guest.getId());
+                return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
         } finally {
