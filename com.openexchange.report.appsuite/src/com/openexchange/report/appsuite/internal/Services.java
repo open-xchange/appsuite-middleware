@@ -47,11 +47,17 @@
  *
  */
 
-package com.openexchange.report.appsuite;
+package com.openexchange.report.appsuite.internal;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.report.appsuite.ContextReportCumulator;
+import com.openexchange.report.appsuite.ReportContextHandler;
+import com.openexchange.report.appsuite.ReportFinishingTouches;
+import com.openexchange.report.appsuite.ReportSystemHandler;
+import com.openexchange.report.appsuite.ReportUserHandler;
+import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.server.ServiceLookup;
 
 

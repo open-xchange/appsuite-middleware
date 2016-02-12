@@ -55,7 +55,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.report.LoginCounterService;
 import com.openexchange.report.appsuite.ReportSystemHandler;
-import com.openexchange.report.appsuite.Services;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 
 

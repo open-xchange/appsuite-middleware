@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.report.appsuite.jobs;
+package com.openexchange.report.appsuite.internal;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,15 +58,17 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
+import com.hazelcast.core.ExecutionCallback;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.ILock;
 import com.hazelcast.core.IMap;
 import com.hazelcast.core.Member;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -77,12 +79,12 @@ import com.openexchange.report.appsuite.ReportExceptionCodes;
 import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportSystemHandler;
-import com.openexchange.report.appsuite.Services;
+import com.openexchange.report.appsuite.jobs.AnalyzeContextBatch;
 import com.openexchange.report.appsuite.serialization.PortableReport;
 import com.openexchange.report.appsuite.serialization.Report;
 
 /**
- * The {@link Orchestration} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast:
+ * The {@link HazelcastReportService} class uses hazelcast to coordinate the clusters efforts in producing reports. It maintains the following resources via hazelcast:
  *
  * A Map "com.openexchange.report.Reports" that contains an entry per reportType of the last successful report run for that type
  * A Map "com.openexchange.report.PendingReports.[reportType] per reportType that contains currently running reports.
@@ -94,30 +96,16 @@ import com.openexchange.report.appsuite.serialization.Report;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class Orchestration implements ReportService {
+public class HazelcastReportService extends AbstractReportService {
 
-    private static final String REPORT_TYPE_DEFAULT = "default";
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastReportService.class);
 
-    private static final String REPORTS_MERGE_PRE_KEY = "com.openexchange.report.Reports.Merge.";
+    private final ReportService delegate;
 
-    private static final String PENDING_REPORTS_PRE_KEY = "com.openexchange.report.PendingReports.";
+    private final List<Future<Void>> tasks = new ArrayList<>();
 
-    private static final String REPORTS_KEY = "com.openexchange.report.Reports";
-
-    private static final AtomicReference<Orchestration> INSTANCE = new AtomicReference<Orchestration>(new Orchestration());
-
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(Orchestration.class);
-
-    public static Orchestration getInstance() {
-        return INSTANCE.get();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Report getLastReport() {
-        return getLastReport(REPORT_TYPE_DEFAULT);
+    public HazelcastReportService(ReportService delegate) {
+        this.delegate = delegate;
     }
 
     /**
@@ -125,6 +113,10 @@ public class Orchestration implements ReportService {
      */
     @Override
     public Report getLastReport(String reportType) {
+        if (useLocal()) {
+            return delegate.getLastReport(reportType);
+        }
+
         IMap<String, PortableReport> map = Services.getService(HazelcastInstance.class).getMap(REPORTS_KEY);
         PortableReport portableReport = map.get(reportType);
         return PortableReport.unwrap(portableReport);
@@ -134,19 +126,14 @@ public class Orchestration implements ReportService {
      * {@inheritDoc}
      */
     @Override
-    public String run() throws OXException {
-        return run(REPORT_TYPE_DEFAULT);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String run(String reportType) throws OXException {
+    public String run(final String reportType) throws OXException {
         // Start a new report run or retrieve the UUID of an already running report
-        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        if (useLocal()) {
+            return delegate.run(reportType);
+        }
 
-        String uuid;
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        final String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
         IMap<String, PortableReport> pendingReports;
         List<Integer> allContextIds;
         // Firstly retrieve the global lock per this report type to make sure, we are the only one coordinating a report run of this type for now.
@@ -160,9 +147,6 @@ public class Orchestration implements ReportService {
                 // Yes, there is a report running, so retrieve its UUID and return it.
                 return pendingReports.keySet().iterator().next();
             }
-
-            // No, we have to set up a  new report
-            uuid = UUIDs.getUnformattedString(UUID.randomUUID());
 
             hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
 
@@ -187,6 +171,20 @@ public class Orchestration implements ReportService {
 
         List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
 
+        ExecutionCallback<Void> executionCallback = new ExecutionCallback<Void>() {
+
+            @Override
+            public void onResponse(Void response) {
+                System.out.println("Successfull" + response);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                abortGeneration(uuid, reportType, "Remote error");
+                t.printStackTrace();
+            }
+        };
+
         LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
@@ -195,7 +193,7 @@ public class Orchestration implements ReportService {
             Member member = getRandomMember(hazelcast);
             LOG.info("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
 
-            executorService.submitToMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
+            executorService.submitToMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member, executionCallback);
 
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
@@ -203,6 +201,17 @@ public class Orchestration implements ReportService {
             LOG.info("{} contexts still to assign.", contextsToProcess.size());
         }
         return uuid;
+    }
+
+    private boolean useLocal() {
+        if (delegate == null) {
+            return false;
+        }
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        if ((hazelcast == null) || (hazelcast.getCluster().getMembers().size() <= 1) || Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.report.runLocal", false)) {
+            return true;
+        }
+        return false;
     }
 
     private Member getRandomMember(HazelcastInstance hazelcast) {
@@ -223,6 +232,9 @@ public class Orchestration implements ReportService {
      */
     @Override
     public Report[] getPendingReports(String reportType) {
+        if (useLocal()) {
+            return delegate.getPendingReports(reportType);
+        }
         // Simply look up the pending reports for this type in a hazelcast map
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
@@ -236,18 +248,14 @@ public class Orchestration implements ReportService {
      * {@inheritDoc}
      */
     @Override
-    public Report[] getPendingReports() {
-        return getPendingReports(REPORT_TYPE_DEFAULT);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public void flushPending(String uuid, String reportType) {
+        if (useLocal()) {
+            delegate.flushPending(uuid, reportType);
+            return;
+        }
+
         // Remove entries from hazelcasts pending maps, so a report can be started again
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
-
         IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
 
         ILock lock = hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
@@ -256,20 +264,17 @@ public class Orchestration implements ReportService {
         lock.destroy();
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void flushPending(String uuid) {
-        flushPending(uuid, REPORT_TYPE_DEFAULT);
-    }
-
     // Called by the AnalyzeContextBatch for every context so the context specific entries can be
     // added to the global report. Adds context to general report and mark context as done
-    public void done(ContextReport contextReport) throws OXException {
-        String reportType = contextReport.getType();
-
+    @Override
+    public void finishContext(ContextReport contextReport) throws OXException {
+        if (useLocal()) {
+            delegate.finishContext(contextReport);
+            return;
+        }
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+
+        String reportType = contextReport.getType();
 
         // Retrieve general report and merge in the contextReport
         IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
@@ -344,8 +349,13 @@ public class Orchestration implements ReportService {
         lock.destroy();
     }
 
-    public void abort(String uuid, String reportType) {
+    @Override
+    public void abortContextReport(String uuid, String reportType) {
         // This contextReport failed, so at least decrease the number of pending tasks
+        if (useLocal()) {
+            delegate.abortContextReport(uuid, reportType);
+            return;
+        }
         HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
 
         IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
@@ -381,5 +391,24 @@ public class Orchestration implements ReportService {
         if (report.getNumberOfPendingTasks() == 0) {
             finishUpReport(reportType, hazelcast, pendingReports, lock, report);
         }
+    }
+
+    @Override
+    public void abortGeneration(String uuid, String reportType, String reason) {
+        if (useLocal()) {
+            delegate.abortGeneration(uuid, reportType, reason);
+            return;
+        }
+        LOG.info("Report abortion triggered by a cluster member with reason: {}. Trying to cancel remote threads.", reason);
+        Services.getService(HazelcastInstance.class)
+    }
+
+    @Override
+    public Report getLastErrorReport(String reportType) {
+        if (useLocal()) {
+            return delegate.getLastErrorReport(reportType);
+        }
+        // TODO Auto-generated method stub
+        return null;
     }
 }

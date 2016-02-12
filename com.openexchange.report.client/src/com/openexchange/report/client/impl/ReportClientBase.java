@@ -50,9 +50,11 @@
 package com.openexchange.report.client.impl;
 
 import java.lang.reflect.Field;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.management.InvalidAttributeValueException;
@@ -122,6 +124,8 @@ public class ReportClientBase extends AbstractJMXTools {
     private static final String OPT_APPSUITE_INSPECT_REPORTS_LONG = "inspect-appsuite-reports";
 
     private static final String OPT_APPSUITE_CANCEL_REPORTS_LONG = "cancel-appsuite-reports";
+
+    private static final String OPT_APPSUITE_RUN_LOCAL_LONG = "run-local-reports";
 
     private static final char OPT_APPSUITE_GET_REPORT_SHORT = 'g';
 
@@ -472,8 +476,27 @@ public class ReportClientBase extends AbstractJMXTools {
             CompositeData report = (CompositeData) server.invoke(getAppSuiteReportingName(), "retrieveLastReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
 
             if (report == null) {
+                CompositeData errorReport = (CompositeData) server.invoke(getAppSuiteReportingName(), "retrieveLastErrorReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
                 System.out.println();
-                System.out.println(NO_REPORT_FOUND_MSG);
+                if (errorReport == null) { // no successful and no error report available
+                    System.out.println(NO_REPORT_FOUND_MSG);
+                } else {
+                    String uuid = (String) errorReport.get("uuid");
+                    String type = (String) errorReport.get("type");
+                    System.out.println("The following errors have been found for the report with uuid " + uuid + " for type " + type);
+
+                    String error = (new JSONObject((String) errorReport.get("data")).get("error")).toString();
+                    JSONObject errors = new JSONObject(error.trim());
+
+                    Iterator<?> keys = errors.keys();
+                    while (keys.hasNext()) {
+                        String key = (String) keys.next();
+                        Object object = (String) errors.get(key);
+                        if (object instanceof String) {
+                            System.out.println(errors.get(key));
+                        }
+                    }
+                }
                 return;
             }
             System.out.println("");
@@ -521,6 +544,9 @@ public class ReportClientBase extends AbstractJMXTools {
 
             while (!done) {
                 CompositeData[] reports = (CompositeData[]) server.invoke(getAppSuiteReportingName(), "retrievePendingReports", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+                //                if ((reports == null) || (reports.length == 0)) {
+                //                    Object o = server.invoke(getAppSuiteReportingName(), "retrieveLastErrorReport", new Object[] { reportType }, new String[] { String.class.getCanonicalName() });
+                //                }
 
                 boolean found = false;
                 for (CompositeData report : reports) {
@@ -564,7 +590,7 @@ public class ReportClientBase extends AbstractJMXTools {
         }
 
         StringBuilder b = new StringBuilder();
-
+        b.append(getCurrentTimeStamp() + ", ");
         b.append(report.get("uuid")).append(": ");
         b.append(String.format("%d/%d (%.2f %%) ", finishedContexts, totalContexts, ((float) finishedContexts / totalContexts) * 100f));
         if (timePerContext > 0) {
@@ -574,6 +600,13 @@ public class ReportClientBase extends AbstractJMXTools {
         System.out.print(b);
 
         return b.length();
+    }
+
+    private String getCurrentTimeStamp() {
+        SimpleDateFormat sdfDate = new SimpleDateFormat("HH:mm:ss");//dd/MM/yyyy
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
     }
 
     private void eraseStatusLine(int charNum) {
@@ -699,7 +732,7 @@ public class ReportClientBase extends AbstractJMXTools {
         if (interval < 1000) {
             return interval + " milliseconds";
         }
-        long diffInSeconds = (interval / 1000) * (110/100);
+        long diffInSeconds = (interval / 1000) * (110 / 100);
 
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);

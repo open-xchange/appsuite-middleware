@@ -101,5 +101,7 @@ public interface ReportMXBean {
      */
     public abstract void flushPending(String uuid) throws Exception;
 
-    
+
+    public abstract JMXReport retrieveLastErrorReport(String reportType) throws Exception;
+
 }

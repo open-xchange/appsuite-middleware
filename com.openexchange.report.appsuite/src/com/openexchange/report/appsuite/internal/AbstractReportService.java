@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,59 @@
  *
  */
 
-package com.openexchange.report.appsuite.jobs;
+package com.openexchange.report.appsuite.internal;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import org.junit.Before;
-import org.junit.Test;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.ldap.UserImpl;
-import com.openexchange.report.appsuite.ContextReportCumulator;
-import com.openexchange.report.appsuite.ReportContextHandler;
-import com.openexchange.report.appsuite.ReportFinishingTouches;
-import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.UserReportCumulator;
-import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
-import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
-import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.internal.Services;
-
+import com.openexchange.report.appsuite.ReportService;
+import com.openexchange.report.appsuite.serialization.Report;
 
 /**
- * {@link AnalyzeContextBatchTest}
+ * {@link AbstractReportService}
  *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
- * @since 7.8.0
+ * @since v7.8.1
  */
-public class AnalyzeContextBatchTest {
+public abstract class AbstractReportService implements ReportService {
 
-    private AnalyzeContextBatch analyzeContextBatch;
+    protected static final String REPORT_TYPE_DEFAULT = "default";
+
+    protected static final String REPORTS_MERGE_PRE_KEY = "com.openexchange.report.Reports.Merge.";
+
+    protected static final String PENDING_REPORTS_PRE_KEY = "com.openexchange.report.PendingReports.";
+
+    protected static final String REPORTS_ERROR_KEY = "com.openexchange.report.Reports.Error.";
+
+    protected static final String REPORTS_KEY = "com.openexchange.report.Reports";
 
     /**
-     * @throws java.lang.Exception
+     * {@inheritDoc}
      */
-    @Before
-    public void setUp() throws Exception {
-
-        // Register the implementations for the default report
-        CapabilityHandler capabilityHandler = new CapabilityHandler();
-
-        Services.add((ReportUserHandler) capabilityHandler);
-        Services.add((ReportContextHandler) capabilityHandler);
-        Services.add((UserReportCumulator) capabilityHandler);
-        Services.add((ContextReportCumulator) capabilityHandler);
-        Services.add((ReportFinishingTouches) capabilityHandler);
-
-        Total total = new Total();
-        Services.add(total);
-
-        ClientLoginCount clc = new ClientLoginCount();
-        Services.add(clc);
-
+    @Override
+    public String run() throws OXException {
+        return run(REPORT_TYPE_DEFAULT);
     }
 
-    @Test
-    public void testRun() throws Exception {
-        List<Integer> contexts = new ArrayList<>();
-        contexts.add(1);
-        analyzeContextBatch = new AnalyzeContextBatch(UUID.randomUUID().toString(), "default", contexts) {
-            @Override
-            protected User[] loadUsers(Context ctx) throws OXException {
-                UserImpl user = new UserImpl();
-                User[] users = new User[]{user};
-
-                return users;
-            }
-        };
-
-        analyzeContextBatch.call();
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Report getLastReport() {
+        return getLastReport(REPORT_TYPE_DEFAULT);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Report[] getPendingReports() {
+        return getPendingReports(REPORT_TYPE_DEFAULT);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void flushPending(String uuid) {
+        flushPending(uuid, REPORT_TYPE_DEFAULT);
+    }
 }

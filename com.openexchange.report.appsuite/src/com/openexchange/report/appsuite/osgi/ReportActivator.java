@@ -18,12 +18,13 @@ import com.openexchange.report.appsuite.ReportFinishingTouches;
 import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportSystemHandler;
 import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.defaultHandlers.CapabilityHandler;
 import com.openexchange.report.appsuite.defaultHandlers.ClientLoginCount;
 import com.openexchange.report.appsuite.defaultHandlers.Total;
-import com.openexchange.report.appsuite.jobs.Orchestration;
+import com.openexchange.report.appsuite.internal.HazelcastReportService;
+import com.openexchange.report.appsuite.internal.LocalReportService;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.management.ReportMXBeanImpl;
 import com.openexchange.user.UserService;
 
@@ -36,14 +37,14 @@ public class ReportActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            ContextService.class, UserService.class, HazelcastInstance.class,
-            CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class };
+        return new Class[] { ContextService.class, UserService.class, CapabilityService.class, ManagementService.class, LoginCounterService.class, ConfigurationService.class, DatabaseService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         Services.setServices(this);
+
+        trackService(HazelcastInstance.class);
 
         // ContextReportCumulator
         track(ContextReportCumulator.class, new SimpleRegistryListener<ContextReportCumulator>() {
@@ -152,16 +153,20 @@ public class ReportActivator extends HousekeepingActivator {
         ClientLoginCount clc = new ClientLoginCount();
         Services.add(clc);
 
-        openTrackers();
+        registerService(ReportService.class, new HazelcastReportService(new LocalReportService()));
+        trackService(ReportService.class);
 
-        registerService(ReportService.class, Orchestration.getInstance());
+        openTrackers();
 
         // Register the MBean
         ManagementService managementService = getService(ManagementService.class);
-        managementService.registerMBean(
-            new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting"),
-            new ReportMXBeanImpl());
+        managementService.registerMBean(new ObjectName("com.openexchange.reporting.appsuite", "name", "AppSuiteReporting"), new ReportMXBeanImpl());
+    }
 
+    protected void stopBundle() throws Exception {
+        Services.setServices(null);
+
+        super.stopBundle();
     }
 
 }

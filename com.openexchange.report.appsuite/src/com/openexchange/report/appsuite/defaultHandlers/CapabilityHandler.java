@@ -63,10 +63,11 @@ import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportFinishingTouches;
+import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.report.appsuite.serialization.Report;
 import com.openexchange.tools.file.QuotaFileStorage;
 
@@ -93,9 +94,9 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
         try {
             long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
             contextReport.set("macdetail-quota", "quota", quota);
-
         } catch (OXException e) {
             LOG.error("", e);
+            Services.getService(ReportService.class).abortContextReport(contextReport.getUUID(), contextReport.getType());
         }
     }
 
@@ -141,6 +142,7 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
             }
         } catch (OXException e) {
             LOG.error("", e);
+            Services.getService(ReportService.class).abortContextReport(userReport.getUUID(), userReport.getType());
         }
     }
 

@@ -61,10 +61,11 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ReportContextHandler;
 import com.openexchange.report.appsuite.ReportExceptionCodes;
+import com.openexchange.report.appsuite.ReportService;
 import com.openexchange.report.appsuite.ReportUserHandler;
-import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
+import com.openexchange.report.appsuite.internal.Services;
 import com.openexchange.user.UserService;
 
 /**
@@ -100,45 +101,56 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
 
     @Override
     public Void call() throws Exception {
-        int previousPriority = Thread.currentThread().getPriority();
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+        Thread currentThread = Thread.currentThread();
+        int previousPriority = currentThread.getPriority();
+        currentThread.setPriority(Thread.MIN_PRIORITY);
 
         try {
             if (reportType == null) {
                 reportType = "default";
             }
 
-            for (Integer ctxId : contextIds) {
+            for (int i = contextIds.size(); (!currentThread.isInterrupted()) && (i-- > 0);) {
+                Integer ctxId = contextIds.get(i);
+                ReportService reportService = Services.getService(ReportService.class);
+                ContextReport contextReport = null;
                 try {
                     Context ctx = loadContext(ctxId);
-                    ContextReport contextReport = new ContextReport(uuid, reportType, ctx);
+                    contextReport = new ContextReport(uuid, reportType, ctx);
 
                     handleContext(contextReport);
                     handleUsers(ctx, contextReport);
                     handleGuests(ctx, contextReport);
 
-                    Orchestration.getInstance().done(contextReport);
+                    reportService.finishContext(contextReport);
                 } catch (OXException oxException) {
+                    if (oxException.similarTo(ContextExceptionCodes.UPDATE)) {
+                        reportService.abortGeneration(uuid, reportType, "Not all schemas up to date! Please run schema updates.");
+                        break;
+                    }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {
                         LOG.info("Stop execution of report generation due to an user intruction!");
                         contextIds = Collections.emptyList();
+                        reportService.abortGeneration(uuid, reportType, "Cancelled report generation based on user interaction.");
                         break;
                     }
                     LOG.error("Exception thrown while loading context. Skip report for context {}. Move to next context", ctxId, oxException);
-                    Orchestration.getInstance().abort(uuid, reportType);
+                    reportService.abortContextReport(uuid, reportType);
                     continue;
                 } catch (Exception e) {
-                    LOG.error("Unexpected error while context report generation!");
+                    LOG.error("Unexpected error while context report generation!", e);
+                    reportService.abortContextReport(uuid, reportType);
                 }
             }
         } finally {
-            Thread.currentThread().setPriority(previousPriority);
+            currentThread.setPriority(previousPriority);
         }
         return null;
     }
 
     /**
      * @param contextReport
+     * @throws OXException
      */
     private void handleContext(ContextReport contextReport) {
         // Run all Context Analyzers that apply to this reportType
@@ -206,24 +218,6 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
     }
 
     protected Context loadContext(int contextId) throws OXException {
-        try {
-            return Services.getService(ContextService.class).getContext(contextId);
-        } catch (OXException e) {
-            if (e.similarTo(ContextExceptionCodes.UPDATE)) {
-                for (int i = 1; i <= 3; i++) {
-                    try {
-                        LOG.info("Schema update in progress. Wait {} of 3 and try again", i);
-                        Thread.sleep(30000L);
-                        return Services.getService(ContextService.class).getContext(contextId);
-                    } catch (InterruptedException e1) {
-                        // should not happen
-                    } catch (OXException e1) {
-                        LOG.info("Schema update still in progress.");
-                    }
-                }
-                LOG.error("Blocking schema update took to long. Unable to retrieve context. Stop report generation.");
-            }
-            throw e;
-        }
+        return Services.getService(ContextService.class).getContext(contextId);
     }
 }
