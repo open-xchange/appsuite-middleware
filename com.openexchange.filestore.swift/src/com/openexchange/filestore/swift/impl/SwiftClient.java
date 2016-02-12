@@ -51,18 +51,29 @@ package com.openexchange.filestore.swift.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.LockSupport;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicHeader;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.swift.SwiftExceptionCode;
+import com.openexchange.java.Charsets;
 import com.openexchange.java.util.UUIDs;
 
 /**
@@ -74,11 +85,14 @@ public class SwiftClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftClient.class);
 
+    private final String userName;
+    private final AuthValue authValue;
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
     private final String containerName;
     private final int contextId;
     private final int userId;
+    private final AtomicReference<Token> tokenRef;
 
     /**
      * Initializes a new {@link SwiftClient}.
@@ -86,9 +100,13 @@ public class SwiftClient {
      * @param swiftConfig The Swift configuration
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @throws OXException If initialization fails
      */
-    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) {
+    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) throws OXException {
         super();
+        tokenRef = new AtomicReference<Token>();
+        this.userName = swiftConfig.getUserName();
+        this.authValue = swiftConfig.getAuthValue();
         this.endpoints = swiftConfig.getEndpointPool();
         this.httpClient = swiftConfig.getHttpClient();
         this.contextId = contextId;
@@ -101,6 +119,9 @@ public class SwiftClient {
         }
         sb.append("_store");
         containerName = sb.toString();
+
+        // Get token
+        acquireToken();
     }
 
     /**
@@ -129,23 +150,47 @@ public class SwiftClient {
      * @return The new identifier of the stored object
      */
     public UUID put(InputStream data, long length) throws OXException {
+        return put(data, length, 0);
+    }
+
+    private UUID put(InputStream data, long length, int retryCount) throws OXException {
+        Token token = acquireTokenIfExpired();
+
         HttpResponse response = null;
-        HttpPut request = null;
+        HttpPut put = null;
         Endpoint endpoint = getEndpoint();
         try {
             UUID id = UUID.randomUUID();
-            request = new HttpPut(endpoint.getObjectUrl(containerName, id));
-            request.setEntity(new InputStreamEntity(data, length));
-            response = httpClient.execute(request);
+            put = new HttpPut(endpoint.getObjectUrl(containerName, id));
+            put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
+            put.setEntity(new InputStreamEntity(data, length));
+            response = httpClient.execute(put);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_CREATED == status) {
                 return id;
             }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                throw SwiftExceptionCode.AUTH_FAILED.create();
+            }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            throw handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return put(data, length, nextRetry);
+            }
+
+            throw error;
         } finally {
-            Utils.close(request, response);
+            Utils.close(put, response);
         }
     }
 
@@ -168,11 +213,18 @@ public class SwiftClient {
      * @return The object's input stream
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
+        return get(id, rangeStart, rangeEnd, 0);
+    }
+
+    private InputStream get(UUID id, long rangeStart, long rangeEnd, int retryCount) throws OXException {
+        Token token = acquireTokenIfExpired();
+
         HttpGet get = null;
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             get = new HttpGet(endpoint.getObjectUrl(containerName, id));
+            get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
             }
@@ -187,9 +239,26 @@ public class SwiftClient {
             if (HttpServletResponse.SC_NOT_FOUND == status) {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(UUIDs.getUnformattedString(id));
             }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                throw SwiftExceptionCode.AUTH_FAILED.create();
+            }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            throw handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return get(id, rangeStart, rangeEnd, nextRetry);
+            }
+
+            throw error;
         } finally {
             Utils.close(get, response);
         }
@@ -203,11 +272,18 @@ public class SwiftClient {
      * @throws OXException
      */
     public boolean delete(UUID id) throws OXException {
+        return delete(id, 0);
+    }
+
+    private boolean delete(UUID id, int retryCount) throws OXException {
+        Token token = acquireTokenIfExpired();
+
         HttpDelete delete = null;
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
             delete = new HttpDelete(endpoint.getObjectUrl(containerName, id));
+            delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status) {
@@ -216,9 +292,26 @@ public class SwiftClient {
             if (HttpServletResponse.SC_NOT_FOUND == status) {
                 return false;
             }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                throw SwiftExceptionCode.AUTH_FAILED.create();
+            }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            throw handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return delete(id, nextRetry);
+            }
+
+            throw error;
         } finally {
             Utils.close(delete, response);
         }
@@ -258,11 +351,59 @@ public class SwiftClient {
      */
     private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
         if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
-            LOG.warn("Swift end-point is unavailable: " + endpoint);
-            endpoints.blacklist(endpoint.getBaseUrl());
+            LOG.warn("Swift end-point is unavailable: {}", endpoint);
+            boolean anyAvailable = endpoints.blacklist(endpoint.getBaseUrl());
+            if (anyAvailable) {
+                // Signal retry
+                return null;
+            }
         }
 
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
+    }
+
+    private Token acquireTokenIfExpired() throws OXException {
+        Token token = tokenRef.get();
+        return token.isExpired() ? acquireToken() : token;
+    }
+
+    private synchronized Token acquireToken() throws OXException {
+        HttpPost post = null;
+        HttpResponse response = null;
+        try {
+            post = new HttpPost("https://identity.api.rackspacecloud.com/v2.0/tokens");
+
+            {
+                JSONObject jAuthData = new JSONObject(2);
+                if (AuthValue.Type.PASSWORD.equals(authValue.getType())) {
+                    jAuthData = new JSONObject(2).put("passwordCredentials", new JSONObject(3).put("username", userName).put("password", authValue.getValue()));
+                } else {
+                    jAuthData = new JSONObject(2).put("RAX-KSKEY:apiKeyCredentials", new JSONObject(3).put("username", userName).put("apiKey", authValue.getValue()));
+                }
+                JSONObject jRequestBody = new JSONObject(2).put("auth", jAuthData);
+                post.setEntity(new StringEntity(jRequestBody.toString(), ContentType.APPLICATION_JSON));
+            }
+
+            response = httpClient.execute(post);
+
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK != status) {
+                throw SwiftExceptionCode.AUTH_FAILED.create();
+            }
+
+            JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+            JSONObject jAccess = jResponse.getJSONObject("access");
+            JSONObject jToken = jAccess.getJSONObject("token");
+            Token token = Token.parseFrom(jToken);
+            tokenRef.set(token);
+            return token;
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+        } catch (JSONException e) {
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            Utils.close(post, response);
+        }
     }
 
 }

@@ -49,7 +49,9 @@
 
 package com.openexchange.filestore.swift.impl;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedHashMap;
@@ -65,10 +67,16 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
+import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 
 /**
  * {@link Utils}
@@ -80,6 +88,33 @@ import org.slf4j.LoggerFactory;
 class Utils {
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
+
+    /**
+     * Initializes a new {@link Utils}.
+     */
+    private Utils() {
+        super();
+    }
+
+    /**
+     * Turns specified JSON value into an appropriate HTTP entity.
+     *
+     * @param jValue The JSON value
+     * @return The HTTP entity
+     * @throws JSONException If a JSON error occurs
+     * @throws IOException If an I/O error occurs
+     */
+    static InputStreamEntity asHttpEntity(JSONValue jValue) throws JSONException, IOException {
+        if (null == jValue) {
+            return null;
+        }
+
+        ByteArrayOutputStream bStream = Streams.newByteArrayOutputStream(1024);
+        OutputStreamWriter osw = new OutputStreamWriter(bStream, Charsets.UTF_8);
+        jValue.write(osw);
+        osw.flush();
+        return new InputStreamEntity(Streams.asInputStream(bStream), bStream.size(), ContentType.APPLICATION_JSON);
+    }
 
     /**
      * Gets a (parameters) map for specified arguments.
@@ -200,5 +235,4 @@ class Utils {
 
         return true;
     }
-
 }

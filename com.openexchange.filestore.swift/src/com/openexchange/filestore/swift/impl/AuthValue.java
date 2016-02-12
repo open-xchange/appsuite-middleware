@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,69 +49,74 @@
 
 package com.openexchange.filestore.swift.impl;
 
-import org.apache.http.client.HttpClient;
+import com.openexchange.java.Strings;
 
 /**
- * {@link SwiftConfig}
+ * {@link AuthValue}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final AuthValue authValue;
+public class AuthValue {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
+     * Parses the auth value from given string
      *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * @param authValue The string
+     * @return The parsed value
      */
-    public SwiftConfig(String userName, AuthValue authValue, HttpClient httpClient, EndpointPool endpointPool) {
+    public static AuthValue parseFrom(String authValue) {
+        if (Strings.isEmpty(authValue)) {
+            return null;
+        }
+
+        String prefix = "password:";
+        if (authValue.startsWith(prefix)) {
+            return new AuthValue(authValue.substring(prefix.length()), Type.PASSWORD);
+        }
+
+        prefix = "apikey:";
+        if (authValue.startsWith(prefix)) {
+            return new AuthValue(authValue.substring(prefix.length()), Type.API_KEY);
+        }
+
+        return new AuthValue(authValue, Type.API_KEY);
+    }
+
+    public static enum Type {
+        API_KEY, PASSWORD,;
+    }
+
+    // ----------------------------------------------------------------------------------------------------
+
+    private final String value;
+    private final Type type;
+
+    /**
+     * Initializes a new {@link AuthValue}.
+     */
+    public AuthValue(String value, Type type) {
         super();
-        this.userName = userName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
+        this.value = value;
+        this.type = type;
     }
 
     /**
-     * Gets the user name
+     * Gets the value
      *
-     * @return The user name
+     * @return The value
      */
-    public String getUserName() {
-        return userName;
+    public String getValue() {
+        return value;
     }
 
     /**
-     * Gets the auth value
+     * Gets the type
      *
-     * @return The auth value
+     * @return The type
      */
-    public AuthValue getAuthValue() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
+    public Type getType() {
+        return type;
     }
 
 }

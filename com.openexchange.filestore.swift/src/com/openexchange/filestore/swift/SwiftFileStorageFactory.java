@@ -67,6 +67,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.chunkstorage.RdbChunkStorage;
+import com.openexchange.filestore.swift.impl.AuthValue;
 import com.openexchange.filestore.swift.impl.EndpointPool;
 import com.openexchange.filestore.swift.impl.SwiftClient;
 import com.openexchange.filestore.swift.impl.SwiftConfig;
@@ -230,21 +231,20 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      */
     private SwiftConfig initSwiftConfig(String filestoreID) throws OXException {
         ConfigurationService config = services.getService(ConfigurationService.class);
-        // endpoint config
-        String protocol = config.getProperty(property(filestoreID, "protocol"));
-        if (Strings.isEmpty(protocol)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "protocol"));
-        }
-        String path = config.getProperty(property(filestoreID, "path"));
-        if (Strings.isEmpty(path)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "path"));
-        }
-        String hosts = config.getProperty(property(filestoreID, "hosts"));
-        if (Strings.isEmpty(hosts)) {
-            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(property(filestoreID, "hosts"));
-        }
 
-        // HTTP client config
+        // User name
+        String userName = requireProperty(filestoreID, "userName", config);
+
+        // API key
+        String authValue = requireProperty(filestoreID, "apiKey", config);
+
+        // End-point configuration
+        String protocol = requireProperty(filestoreID, "protocol", config);
+        String path = requireProperty(filestoreID, "path", config);
+        String tenantId = requireProperty(filestoreID, "tenantId", config);
+        String hosts = requireProperty(filestoreID, "hosts", config);
+
+        // HTTP client configuration
         int maxConnections = config.getIntProperty(property(filestoreID, "maxConnections"), 100);
         int maxConnectionsPerHost = config.getIntProperty(property(filestoreID, "maxConnectionsPerHost"), 100);
         int connectionTimeout = config.getIntProperty(property(filestoreID, "connectionTimeout"), 5000);
@@ -254,7 +254,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         List<String> urls = new LinkedList<String>();
         for (String host : Strings.splitAndTrim(hosts, ",")) {
             URIBuilder uriBuilder = new URIBuilder().setScheme(protocol);
-            String[] hostAndPort = host.split(":");
+            String[] hostAndPort = Strings.splitByColon(host);
             if (hostAndPort.length == 1) {
                 uriBuilder.setHost(host);
             } else if (hostAndPort.length == 2) {
@@ -267,7 +267,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
             }
 
-            uriBuilder.setPath(path);
+            uriBuilder.setPath(path + "/" + tenantId + "/");
             try {
                 String baseUrl = uriBuilder.build().toString();
                 if (!baseUrl.endsWith("/")) {
@@ -289,11 +289,20 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
         EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SwiftConfig(httpClient, endpointPool);
+        return new SwiftConfig(userName, AuthValue.parseFrom(authValue), httpClient, endpointPool);
     }
 
-    private static final String property(String filestoreID, String property) {
-        return "com.openexchange.filestore.swift." + filestoreID + '.' + property;
+    private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
+        String propName = property(filestoreID, property);
+        String value = config.getProperty(propName);
+        if (Strings.isEmpty(value)) {
+            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propName);
+        }
+        return value;
+    }
+
+    private static String property(String filestoreID, String property) {
+        return new StringBuilder("com.openexchange.filestore.swift.").append(filestoreID).append('.').append(property).toString();
     }
 
     /**

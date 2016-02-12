@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,69 +49,102 @@
 
 package com.openexchange.filestore.swift.impl;
 
-import org.apache.http.client.HttpClient;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.swift.SwiftExceptionCode;
 
 /**
- * {@link SwiftConfig}
+ * {@link Token}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class SwiftConfig {
+public class Token {
 
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final AuthValue authValue;
+    private static final SimpleDateFormat SDF_EXPIRES;
+    static {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SDF_EXPIRES = sdf;
+    }
 
     /**
-     * Initializes a new {@link SwiftConfig}.
+     * Parses a token from given token JSON representation.
      *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * @param jToken The token JSON representation
+     * @return The parsed token
+     * @throws OXException If parsing fails
      */
-    public SwiftConfig(String userName, AuthValue authValue, HttpClient httpClient, EndpointPool endpointPool) {
+    public static Token parseFrom(JSONObject jToken) throws OXException {
+        if (null == jToken) {
+            return null;
+        }
+
+        String sDate = null;
+        try {
+            String id = jToken.getString("id");
+            Date expires;
+            sDate = jToken.getString("expires");
+            synchronized (SDF_EXPIRES) {
+                expires = SDF_EXPIRES.parse(sDate);
+            }
+            return new Token(id, expires);
+        } catch (JSONException e) {
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } catch (ParseException e) {
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Invalid date format: " + sDate);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------- //
+
+    private final String id;
+    private final Date expires;
+
+    /**
+     * Initializes a new {@link Token}.
+     *
+     * @param id The token identifier
+     * @param expires The token expiry date
+     */
+    public Token(String id, Date expires) {
         super();
-        this.userName = userName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
+        this.id = id;
+        this.expires = expires;
     }
 
     /**
-     * Gets the user name
+     * Checks if this token is expired
+     * <p>
+     * Its expiry ended before now minus 5 seconds.
      *
-     * @return The user name
+     * @return <code>true</code> if expired; otherwise <code>false</code>
      */
-    public String getUserName() {
-        return userName;
+    public boolean isExpired() {
+        return expires.getTime() < System.currentTimeMillis() - 5000L;
     }
 
     /**
-     * Gets the auth value
+     * Gets the token identifier
      *
-     * @return The auth value
+     * @return The token identifier
      */
-    public AuthValue getAuthValue() {
-        return authValue;
+    public String getId() {
+        return id;
     }
 
     /**
-     * Gets the <code>HttpClient</code> instance.
+     * Gets the expiry date
      *
-     * @return The <code>HttpClient</code> instance
+     * @return The expiry date
      */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
+    public Date getExpires() {
+        return expires;
     }
 
 }

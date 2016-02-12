@@ -61,6 +61,7 @@ Import-Package: com.openexchange.ajax.container,
  org.apache.http.impl.client,
  org.apache.http.message,
  org.apache.http.util,
+ org.json,
  org.osgi.framework,
  org.slf4j
 Bundle-Activator: com.openexchange.filestore.swift.osgi.SwiftdActivator
