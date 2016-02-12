@@ -14,7 +14,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 BuildRequires: open-xchange-admin
-BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive (>= @OXVERSION@)
+BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 2
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -25,7 +25,7 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       New updater for windows drive clients
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive (>= @OXVERSION@)
+Requires:      open-xchange-core >= @OXVERSION@, open-xchange-client-onboarding >= @OXVERSION@, open-xchange-drive >= @OXVERSION@
 Requires:      open-xchange-admin >= @OXVERSION@
 Requires:      open-xchange-drive-client-windows-files
 
