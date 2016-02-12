@@ -249,6 +249,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public void reload(String path) throws OXException {
+        this.path = path;
         reinit();
     }
 

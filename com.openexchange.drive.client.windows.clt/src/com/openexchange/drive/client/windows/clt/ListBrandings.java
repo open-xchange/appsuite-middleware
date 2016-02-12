@@ -49,21 +49,14 @@
 
 package com.openexchange.drive.client.windows.clt;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.AdminParser.NeededQuadState;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.CLIParseException;
-import com.openexchange.admin.console.CLIUnknownOptionException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
-import com.openexchange.exception.OXException;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
 
 /**
  * {@link ListBrandings}
@@ -71,15 +64,13 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class ListBrandings extends BasicCommandlineOptions {
+public class ListBrandings extends AbstractRmiCLI<Void> {
 
     private final static String VALIDATE_LONG = "validate";
-    private final static char VALIDATE_SHORT = 'v';
-    CLIOption validate_option;
+    private final static String VALIDATE_SHORT = "v";
 
     private final static String INVALID_ONLY_LONG = "invalid_only";
-    private final static char INVALID_ONLY_SHORT = 'o';
-    CLIOption invalid_only_option;
+    private final static String INVALID_ONLY_SHORT = "o";
 
     /**
      * @param args
@@ -88,55 +79,58 @@ public class ListBrandings extends BasicCommandlineOptions {
         new ListBrandings().execute(args);
     }
 
-    private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("reload_brandings");
-        setOptions(parser);
-        try {
-            parser.ownparse(args);
-            boolean validate = parser.hasOption(validate_option);
-            boolean invalid_only = parser.hasOption(invalid_only_option);
-            validate = invalid_only ? true : validate;
-            BrandingConfigurationRemote remote = (BrandingConfigurationRemote) Naming.lookup(RMI_HOSTNAME + BrandingConfigurationRemote.RMI_NAME);
-            List<String> brands = remote.getBrandings(validate, invalid_only);
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
+    }
 
-            if (invalid_only) {
-                System.out.println("The following brands are invalid:");
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(VALIDATE_SHORT, VALIDATE_LONG, false, "If defined, the brandings will be validated and only valid brandings will be returned. This validation verifies if all required files are present.");
+        options.addOption(INVALID_ONLY_SHORT, INVALID_ONLY_LONG, false, "Retrieves only invalid brandings.");
+    }
+
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        boolean validate = cmd.hasOption(VALIDATE_LONG);
+        boolean invalid_only = cmd.hasOption(INVALID_ONLY_LONG);
+        validate = invalid_only ? true : validate;
+        BrandingConfigurationRemote remote = (BrandingConfigurationRemote) Naming.lookup(RMI_HOSTNAME + BrandingConfigurationRemote.RMI_NAME);
+        List<String> brands = remote.getBrandings(validate, invalid_only);
+
+        if (invalid_only) {
+            System.out.println("The following brands are invalid:");
+        } else {
+            if (validate) {
+                System.out.println("The following brands are available and valid:");
             } else {
                 System.out.println("The following brands are available:");
             }
-            for (String brand : brands) {
-                System.out.println("\t -" + brand);
-            }
-        } catch (CLIParseException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIIllegalOptionValueException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIUnknownOptionException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURLException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
-        } catch (RemoteException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (NotBoundException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
-        } catch (OXException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
+
         }
+        for (String brand : brands) {
+            System.out.println("\t -" + brand);
+        }
+        return null;
     }
 
-    private void setOptions(AdminParser parser) {
-        this.validate_option = setShortLongOpt(parser, VALIDATE_SHORT, VALIDATE_LONG, "If defined, the brandings will be validated and only valid brandings will be returned. This validation verifies if all required files are present.", false, NeededQuadState.notneeded);
-        this.invalid_only_option = setShortLongOpt(parser, INVALID_ONLY_SHORT, INVALID_ONLY_LONG, "Retrieves only invalid brandings.", false, NeededQuadState.notneeded);
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return true;
     }
 
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // Nothing to check
+    }
+
+    @Override
+    protected String getFooter() {
+        return "The command-line tool to list the available windows drive clients";
+    }
+
+    @Override
+    protected String getName() {
+        return "listdriveclients";
+    }
 }
