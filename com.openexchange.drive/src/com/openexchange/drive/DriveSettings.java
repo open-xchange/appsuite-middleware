@@ -50,6 +50,7 @@
 package com.openexchange.drive;
 
 import java.util.Map;
+import java.util.Set;
 
 /**
  * {@link DriveSettings}
@@ -64,6 +65,7 @@ public class DriveSettings {
     private String supportedApiVersion;
     private String minApiVersion;
     private Map<String, String> localizedFolders;
+    private Set<String> capabilities;
 
     /**
      * Initializes a new {@link DriveSettings}.
@@ -178,6 +180,24 @@ public class DriveSettings {
      */
     public void setLocalizedFolders(Map<String, String> localizedFolders) {
         this.localizedFolders = localizedFolders;
+    }
+
+    /**
+     * Gets the capabilities
+     *
+     * @return The capabilities
+     */
+    public Set<String> getCapabilities() {
+        return capabilities;
+    }
+
+    /**
+     * Sets the capabilities
+     *
+     * @param capabilities The capabilities to set
+     */
+    public void setCapabilities(Set<String> capabilities) {
+        this.capabilities = capabilities;
     }
 
 }
