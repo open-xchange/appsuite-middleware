@@ -432,7 +432,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 if (errorOnProviderAbsence) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
                 }
-                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
+                LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
                 return null;
             }
             scenario.addProvider(getProvider(providerId));
@@ -474,7 +474,7 @@ public class OnboardingServiceImpl implements OnboardingService {
                 if (errorOnProviderAbsence) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
                 }
-                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
+                LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
                 return null;
             }
             scenario.addProvider(getProvider(providerId));
