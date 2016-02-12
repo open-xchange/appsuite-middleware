@@ -60,6 +60,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import com.openexchange.capabilities.CapabilityService;
@@ -104,6 +105,7 @@ public class OnboardingServiceImpl implements OnboardingService {
     private final ServiceLookup services;
     private final ConcurrentMap<String, OnboardingProvider> providers;
     private final AtomicReference<Map<String, ConfiguredScenario>> configuredScenariosReference;
+    private final AtomicBoolean warningLogged;
 
     /**
      * Initializes a new {@link OnboardingServiceImpl}.
@@ -113,6 +115,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         this.services = services;
         providers = new ConcurrentHashMap<String, OnboardingProvider>(32, 0.9F, 1);
         configuredScenariosReference = new AtomicReference<>(null);
+        warningLogged = new AtomicBoolean(false);
     }
 
     /**
@@ -233,7 +236,9 @@ public class OnboardingServiceImpl implements OnboardingService {
         for (String providerId : configuredScenario.getProviderIds()) {
             OnboardingProvider provider = providers.get(providerId);
             if (null == provider) {
-                LOG.warn("No such provider '{}' available for configured scenario '{}'", providerId, configuredScenario.getId());
+                if (configuredScenario.logWarningForAbsentProvider()) {
+                    LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
+                }
                 return false;
             } else if (!isAvailable(provider, configuredScenario, session).isAvailable()) {
                 return false;
@@ -432,7 +437,9 @@ public class OnboardingServiceImpl implements OnboardingService {
                 if (errorOnProviderAbsence) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
                 }
-                LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
+                if (configuredScenario.logWarningForAbsentProvider()) {
+                    LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
+                }
                 return null;
             }
             scenario.addProvider(getProvider(providerId));
@@ -474,7 +481,9 @@ public class OnboardingServiceImpl implements OnboardingService {
                 if (errorOnProviderAbsence) {
                     throw OnboardingExceptionCodes.INVALID_SCENARIO.create(configuredScenario.getId(), providerId);
                 }
-                LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
+                if (configuredScenario.logWarningForAbsentProvider()) {
+                    LOG.warn("No such provider '{}' available for configured scenario '{}'. Hence, scenario will not be available. Please check \"{}\" configuration file and align it to available/installed providers.", providerId, configuredScenario.getId(), OnboardingConfig.getScenariosConfigFileName());
+                }
                 return null;
             }
             scenario.addProvider(getProvider(providerId));

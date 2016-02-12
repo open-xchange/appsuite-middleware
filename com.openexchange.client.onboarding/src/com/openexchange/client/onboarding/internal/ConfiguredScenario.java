@@ -51,6 +51,7 @@ package com.openexchange.client.onboarding.internal;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import com.openexchange.client.onboarding.Icon;
 import com.openexchange.client.onboarding.OnboardingType;
 
@@ -72,6 +73,7 @@ public class ConfiguredScenario {
     private final String displayName;
     private final String description;
     private final List<String> capabilities;
+    private final AtomicBoolean warningLoggedForAbsentProvider;
 
     /**
      * Initializes a new {@link ConfiguredScenario}.
@@ -88,6 +90,16 @@ public class ConfiguredScenario {
         this.displayName = displayName;
         this.description = description;
         this.capabilities = null == capabilities ? Collections.<String> emptyList() : Collections.<String> unmodifiableList(capabilities);
+        warningLoggedForAbsentProvider = new AtomicBoolean(false);
+    }
+
+    /**
+     * Check whether a WARN message was already logged that notifies about missing/absent providers associated with this configured scenario.
+     *
+     * @return <code>true</code> if already logged; otherwise <code>false</code>
+     */
+    public boolean logWarningForAbsentProvider() {
+        return warningLoggedForAbsentProvider.compareAndSet(false, true);
     }
 
     /**
