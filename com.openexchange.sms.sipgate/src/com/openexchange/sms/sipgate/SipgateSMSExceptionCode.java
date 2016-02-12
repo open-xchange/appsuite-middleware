@@ -62,14 +62,11 @@ import com.openexchange.exception.OXExceptionStrings;
  * @since v7.8.1
  */
 public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
-    
-    NOT_SENT("Message could not be sent: %1$s", Category.CATEGORY_ERROR, 1),
-    
-    UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 2),
-    
-    HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 3),
-    
-    MESSAGE_TOO_LONG("Message is too long (%1$s characters). Maximum size is %2$s characters.", Category.CATEGORY_USER_INPUT, 4),
+
+    UNKNOWN_ERROR("Unknown error: %1$s", Category.CATEGORY_ERROR, 1),
+
+    HTTP_ERROR("Unexpected HTTP status: %1$s, %2$s", Category.CATEGORY_ERROR, 2),
+
     ;
 
     public static final String PREFIX = "SIPGATE";
@@ -87,7 +84,7 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SipgateSMSExceptionCode}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -98,7 +95,7 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Initializes a new {@link SipgateSMSExceptionCode}.
-     * 
+     *
      * @param message
      * @param category
      * @param detailNumber
@@ -146,7 +143,7 @@ public enum SipgateSMSExceptionCode implements DisplayableOXExceptionCode {
 
     /**
      * Creates a new {@link OXException} instance pre-filled with this code's attributes.
-     * 
+     *
      * @return The newly created {@link OXException} instance
      */
     public OXException create() {

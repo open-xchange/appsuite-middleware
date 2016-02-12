@@ -68,11 +68,12 @@ public interface OnboardingPlistProvider extends OnboardingProvider {
      *
      * @param optPrevPListDict The optional previous PLIST dictionary; or <code>null</code>
      * @param scenario The scenario
+     * @param hostName The host name to use
      * @param userId The user id
      * @param contextId The context id
      * @return The associated PLIST dictionary
      * @throws OXException If returning PLIST dictionary fails
      */
-    PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException;
+    PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException;
 
 }

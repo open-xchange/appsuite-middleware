@@ -82,7 +82,7 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
         final JSONArray jarray = CommandParserJSONUtil.getJSONArray(jsonObject, AllOfOrAnyOfTestField.tests.name(), command.getCommandName());
         final ArrayList<TestCommand> commandlist = new ArrayList<TestCommand>(jarray.length());
         CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-        
+
         for (int i = 0; i < jarray.length(); i++) {
             final JSONObject object = jarray.getJSONObject(i);
             String commandName = CommandParserJSONUtil.getString(object, GeneralField.id.name(), command.getCommandName());
@@ -91,22 +91,16 @@ abstract class AbstractAllAnyOfTestCommandParser implements CommandParser<TestCo
         }
         return new TestCommand(command, new ArrayList<Object>(), commandlist);
     }
-    
-    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command) throws JSONException {
+
+    void parse(JSONObject jsonObject, TestCommand testCommand, Commands command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommandName());
         final JSONArray array = new JSONArray();
         CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
         for (final TestCommand testCommand2 : testCommand.getTestCommands()) {
             final JSONObject object = new JSONObject();
-            try {
-                CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandName());
-                parser.parse(object, testCommand2);
-                //createJSONFromTestCommand(object, testCommand2);
-                array.put(object);
-            } catch (OXException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            CommandParser<TestCommand> parser = parserRegistry.get(testCommand2.getCommand().getCommandName());
+            parser.parse(object, testCommand2);
+            array.put(object);
         }
         jsonObject.put(AllOfOrAnyOfTestField.tests.name(), array);
     }

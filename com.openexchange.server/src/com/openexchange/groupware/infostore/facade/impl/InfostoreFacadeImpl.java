@@ -54,6 +54,8 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -169,8 +171,6 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -637,7 +637,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         setDefaults(document);
-        getValidationChain().validate(session, document);
+        getValidationChain().validate(session, document, null, null);
         CheckSizeSwitch.checkSizes(document, this, context);
 
         FilenameReserver filenameReserver = null;
@@ -876,9 +876,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        getValidationChain().validate(session, document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
+        getValidationChain().validate(session, document, oldDocument, updatedCols);
+
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
         saveParameters.setData(data, offset, session.getUserId(), ignoreVersion);
         saveModifiedDocument(saveParameters);

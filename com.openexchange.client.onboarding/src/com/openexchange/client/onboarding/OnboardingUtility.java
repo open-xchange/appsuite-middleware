@@ -76,6 +76,9 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.mail.transport.TransportProviderRegistry;
 import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.serverconfig.ServerConfig;
+import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -96,6 +99,37 @@ public class OnboardingUtility {
      */
     private OnboardingUtility() {
         super();
+    }
+
+    /**
+     * Gets the configured product name
+     *
+     * @param hostName The host name
+     * @param session The session providing user information
+     * @return The product name
+     * @throws OXException If product name cannot be returned
+     */
+    public static String getProductName(String hostName, Session session) throws OXException {
+        return getProductName(hostName, session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the configured product name
+     *
+     * @param hostName The host name
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The product name
+     * @throws OXException If product name cannot be returned
+     */
+    public static String getProductName(String hostName, int userId, int contextId) throws OXException {
+        ServerConfigService serverConfigService = Services.getService(ServerConfigService.class);
+        if (null == serverConfigService) {
+            throw ServiceExceptionCode.absentService(ServerConfigService.class);
+        }
+
+        ServerConfig serverConfig = serverConfigService.getServerConfig(hostName, userId, contextId);
+        return serverConfig.getProductName();
     }
 
     /**
@@ -830,7 +864,7 @@ public class OnboardingUtility {
 
     /**
      * Retrieves the primary mail address of a user.
-     * 
+     *
      * @param userId The user id
      * @param contextId The context id
      * @return The users primary mail address
@@ -847,7 +881,7 @@ public class OnboardingUtility {
 
     /**
      * Retrieves the primary mail address of a user.
-     * 
+     *
      * @param userId The user id
      * @param contextId The context id
      * @return The users login name

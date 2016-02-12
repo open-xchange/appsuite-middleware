@@ -217,7 +217,7 @@ public class EffectiveInfostoreFolderPermission {
      * @return <code>true</code> if "own" items can be shared, <code>false</code>, otherwise
      */
     public boolean canShareOwnObjects() {
-        return permission.canWriteOwnObjects() && permission.hasFullSharedFolderAccess() && FolderObject.TRASH != permission.getFolderType();
+        return permission.canWriteOwnObjects() && FolderObject.TRASH != permission.getFolderType();
     }
 
     /**
@@ -226,7 +226,7 @@ public class EffectiveInfostoreFolderPermission {
      * @return <code>true</code> if all items can be shared, <code>false</code>, otherwise
      */
     public boolean canShareAllObjects() {
-        return permission.canWriteAllObjects() && permission.hasFullSharedFolderAccess() && FolderObject.TRASH != permission.getFolderType();
+        return permission.canWriteAllObjects() && FolderObject.TRASH != permission.getFolderType();
     }
 
     public OCLPermission getUnderlyingPermission() {

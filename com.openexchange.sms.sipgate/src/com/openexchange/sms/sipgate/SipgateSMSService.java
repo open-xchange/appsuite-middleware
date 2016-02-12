@@ -69,8 +69,8 @@ import org.json.JSONObject;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.sms.PhoneNumberParserService;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSExceptionCode;
+import com.openexchange.sms.SMSServiceSPI;
 
 /**
  * {@link SipgateSMSService}
@@ -78,13 +78,12 @@ import com.openexchange.sms.SMSService;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class SipgateSMSService implements SMSService {
+public class SipgateSMSService extends SMSServiceSPI {
 
     private static final String URL = "https://api.sipgate.net/my/xmlrpcfacade/";
     private final int MAX_MESSAGE_LENGTH;
 
     private final HttpClient client;
-    private final ServiceLookup services;
 
     /**
      * Initializes a new {@link SipgateSMSService}.
@@ -92,8 +91,7 @@ public class SipgateSMSService implements SMSService {
      * @throws OXException
      */
     public SipgateSMSService(ServiceLookup services) {
-        super();
-        this.services = services;
+        super(services);
         ConfigurationService configService = services.getService(ConfigurationService.class);
         String sipgateUsername = configService.getProperty("com.openexchange.sms.sipgate.username");
         String sipgatePassword = configService.getProperty("com.openexchange.sms.sipgate.password");
@@ -110,7 +108,7 @@ public class SipgateSMSService implements SMSService {
     @Override
     public void sendMessage(String recipient, String message) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, null);
         JSONObject jsonObject = new JSONObject(3);
@@ -127,11 +125,11 @@ public class SipgateSMSService implements SMSService {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         }
     }
-    
+
     @Override
     public void sendMessage(String recipient, String message, Locale locale) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         String parsedNumber = checkAndFormatPhoneNumber(recipient, locale);
         JSONObject jsonObject = new JSONObject(3);
@@ -154,11 +152,11 @@ public class SipgateSMSService implements SMSService {
         Locale locale = new Locale("none", languageTag.toUpperCase());
         sendMessage(recipient, message, locale);
     }
-    
+
     @Override
     public void sendMessage(String[] recipients, String message) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
@@ -182,7 +180,7 @@ public class SipgateSMSService implements SMSService {
     @Override
     public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException {
         if (MAX_MESSAGE_LENGTH > 0 && message.length() > MAX_MESSAGE_LENGTH) {
-            throw SipgateSMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
+            throw SMSExceptionCode.MESSAGE_TOO_LONG.create(message.length(), MAX_MESSAGE_LENGTH);
         }
         JSONArray phoneNumbers = new JSONArray(recipients.length);
         try {
@@ -212,18 +210,18 @@ public class SipgateSMSService implements SMSService {
         sendMessage(recipients, message, locale);
     }
 
+    @Override
+    protected String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
+        String parsedNumber = super.checkAndFormatPhoneNumber(phoneNumber, locale);
+        StringBuilder sb = new StringBuilder(30);
+        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
+        return sb.toString();
+    }
+
     private HttpMethod getHttpMethod(String method, String parameters) {
         StringBuilder sb = new StringBuilder();
         sb.append(URL).append(method).append("/").append(parameters);
         return new GetMethod(sb.toString());
-    }
-
-    private String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
-        PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
-        String parsedNumber = parser.parsePhoneNumber(phoneNumber, locale);
-        StringBuilder sb = new StringBuilder(30);
-        sb.append("sip:").append(parsedNumber).append("@sipgate.net");
-        return sb.toString();
     }
 
     private void execute(HttpMethod method) throws OXException {
@@ -234,13 +232,13 @@ public class SipgateSMSService implements SMSService {
                 JSONObject resp = new JSONObject(response);
                 if (resp.hasAndNotNull("error")) {
                     String errorMessage = resp.getString("error");
-                    throw SipgateSMSExceptionCode.NOT_SENT.create(errorMessage);
+                    throw SMSExceptionCode.NOT_SENT.create(errorMessage);
                 }
             } else {
                 throw SipgateSMSExceptionCode.HTTP_ERROR.create(String.valueOf(statusCode), method.getStatusText());
             }
         } catch (IOException e) {
-            throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
+            throw SMSExceptionCode.SERVICE_UNAVAILABLE.create(e, e.getMessage());
         } catch (JSONException e) {
             throw SipgateSMSExceptionCode.UNKNOWN_ERROR.create(e, e.getMessage());
         } finally {

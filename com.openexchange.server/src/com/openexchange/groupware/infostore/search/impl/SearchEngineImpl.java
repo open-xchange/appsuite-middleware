@@ -315,16 +315,18 @@ public class SearchEngineImpl extends DBService {
                 readAllFolders = new ArrayList<Integer>(readAllFolders);
                 readAllFolders.remove(sharedFilesFolderID);
 
-                sqlQuery.append(" WHERE infostore.cid = ").append(contextID).append(" AND ");
-                sqlQuery.append("(infostore.id in (SELECT object_id FROM object_permission WHERE object_permission.module=");
-                sqlQuery.append(FolderObject.INFOSTORE).append(" AND object_permission.cid=").append(contextID);
+                sqlQuery.append(" JOIN object_permission ON infostore.cid=object_permission.cid AND infostore.id=object_permission.object_id");
+                sqlQuery.append(" WHERE infostore.cid=").append(contextID);
+                sqlQuery.append(" AND object_permission.module=").append(FolderObject.INFOSTORE);
                 sqlQuery.append(" AND ((group_flag<>1 AND permission_id=").append(userID).append(')');
+
                 int[] groups = session.getUser().getGroups();
                 if (null == groups || 0 == groups.length) {
                     sqlQuery.append(')');
                 } else {
-                    sqlQuery.append(" OR (group_flag=1 AND permission_id IN (").append(Strings.join(groups, ",")).append(")))");
+                    sqlQuery.append(" OR (group_flag=1 AND permission_id IN (").append(Strings.join(groups, ",")).append(")");
                 }
+
                 sqlQuery.append("))");
                 if (null != filter) {
                     sqlQuery.append(" AND ").append(filter);
@@ -526,15 +528,11 @@ public class SearchEngineImpl extends DBService {
     }
 
     public static void checkPatternLength(final String pattern) throws OXException {
-        final int minimumSearchCharacters;
-        try {
-            minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
-        } catch (final OXException e) {
-            throw e;
-        }
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (0 == minimumSearchCharacters) {
             return;
         }
+
         if (null != pattern && SearchStrings.lengthWithoutWildcards(pattern) < minimumSearchCharacters) {
             throw InfostoreExceptionCodes.PATTERN_NEEDS_MORE_CHARACTERS.create(I(minimumSearchCharacters));
         }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,23 +47,81 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.fields;
+package com.openexchange.drive.impl.management.version;
+
+import java.util.HashMap;
+
 
 /**
- * 
- * {@link RuleFields}
+ * {@link BrandedDriveVersionServiceImpl}
  *
- * @deprecated Use {@link RuleField} 
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class RuleFields {
+public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionService {
 
-    public static final String ID = "id";
-    public static final String POSITION = "position";
-    public static final String RULENAME = "rulename";
-    public static final String ACTIVE = "active";
-    public static final String FLAGS = "flags";
-    public static final String TEST = "test";
-    public static final String ACTIONCMDS = "actioncmds";
-    public static final String TEXT = "text";
-    public static final String ERRORMSG = "errormsg";
+    static BrandedDriveVersionServiceImpl instance = null;
+    private HashMap<String, VersionWrapper> driveVersions;
+
+    static public BrandedDriveVersionServiceImpl getInstance() {
+        if (null == instance) {
+            instance = new BrandedDriveVersionServiceImpl();
+        }
+        return instance;
+    }
+
+    @Override
+    public String getSoftMinimumVersion(String branding) {
+        if (!driveVersions.containsKey(branding)) {
+            return null;
+        }
+        return driveVersions.get(branding).getSoft();
+    }
+
+    @Override
+    public String getHardMinimumVersion(String branding) {
+        if (!driveVersions.containsKey(branding)) {
+            return null;
+        }
+        return driveVersions.get(branding).getHard();
+    }
+
+    @Override
+    public void putBranding(String branding, String minSoftVersion, String minHardVersion) {
+        if (null == driveVersions) {
+            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.VersionWrapper>();
+        }
+        if (null == branding || null == minSoftVersion || null == minHardVersion || branding.isEmpty() || minSoftVersion.isEmpty() || minHardVersion.isEmpty()) {
+            return;
+        }
+        driveVersions.put(branding, new VersionWrapper(minSoftVersion, minHardVersion));
+    }
+
+    @Override
+    public void clearAll() {
+        if (driveVersions != null) {
+            driveVersions.clear();
+        }
+    }
+    
+    private class VersionWrapper {
+
+        private String soft;
+        private String hard;
+
+        public VersionWrapper(String soft, String hard) {
+            super();
+            this.soft = soft;
+            this.hard = hard;
+        }
+
+        String getSoft() {
+            return soft;
+        }
+
+        String getHard() {
+            return hard;
+        }
+    }
+
 }

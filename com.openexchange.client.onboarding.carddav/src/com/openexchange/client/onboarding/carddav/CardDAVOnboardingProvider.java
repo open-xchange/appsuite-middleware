@@ -182,19 +182,19 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CARDDAV_LOGIN_FIELD, session.getLogin());
         configuration.put(CARDDAV_URL_FIELD, getCardDAVUrl(false, request.getHostData(), session.getUserId(), session.getContextId()));
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         PListDict previousPListDict = null == previousResult ? null : ((PlistResult) previousResult).getPListDict();
-        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), request.getHostData().getHost(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
         // Get the PListDict to contribute to
         PListDict pListDict;
         if (null == optPrevPListDict) {
@@ -219,7 +219,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);
         payloadContent.addStringValue("CardDAVHostName", cardDAVUrl);
         payloadContent.addBooleanValue("CardDAVUseSSL", cardDAVUrl.startsWith("https://"));
-        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getTranslationFor(CardDAVOnboardingStrings.CARDDAV_ACCOUNT_DESCRIPTION, userId, contextId));
+        payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CardDAV");
 
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);

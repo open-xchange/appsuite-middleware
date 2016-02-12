@@ -99,19 +99,14 @@ public class NotTestCommandParser implements CommandParser<TestCommand> {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), Commands.NOT.getCommandName());
         final JSONObject testobject = new JSONObject();
 
-        try {
-            TestCommand nestedTestCommand = command.getTestCommands().get(0);
-            CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
-            CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
-            parser.parse(testobject, nestedTestCommand);
-        } catch (OXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        TestCommand nestedTestCommand = command.getTestCommands().get(0);
+        CommandParserRegistry<TestCommand> parserRegistry = Services.getService(TestCommandParserRegistry.class);
+        CommandParser<TestCommand> parser = parserRegistry.get(nestedTestCommand.getCommand().getCommandName());
+        parser.parse(testobject, nestedTestCommand);
 
         jsonObject.put(NotTestField.test.name(), testobject);
     }

@@ -101,7 +101,7 @@ public class AddFlagActionCommandParser implements CommandParser<ActionCommand> 
      */
     @SuppressWarnings("unchecked")
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         ArrayList<Object> arguments = actionCommand.getArguments();
 
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.ADDFLAG.getJsonName());

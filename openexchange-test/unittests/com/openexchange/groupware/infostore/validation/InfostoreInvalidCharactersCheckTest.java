@@ -34,7 +34,7 @@ public class InfostoreInvalidCharactersCheckTest extends TestCase {
 		metadata.setURL("url");
 		metadata.setVersionComment("comment");
 
-		final DocumentMetadataValidation validation = new TestValidator().validate(null, metadata);
+		final DocumentMetadataValidation validation = new TestValidator().validate(null, metadata, null, null);
 
 		assertFalse(validation.isValid());
 

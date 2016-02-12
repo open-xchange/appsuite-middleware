@@ -76,6 +76,14 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  */
 public class CurrentDateTestCommandParser implements CommandParser<TestCommand> {
 
+    private enum Comparison {
+        is, ge, le
+    }
+
+    private enum DatePart {
+        date, time, weekday
+    }
+
     private final static String dateFormatPattern = "yyyy-MM-dd";
     private final static String timeFormatPattern = "HH:mm";
 
@@ -95,31 +103,45 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
     public TestCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
         String commandName = Commands.CURRENTDATE.getCommandName();
         final List<Object> argList = new ArrayList<Object>();
-        final String comparison = CommandParserJSONUtil.getString(jsonObject, CurrentDateTestField.comparison.name(), commandName);
-        // FIXME: replace if/strings with switch/enum
-        if ("is".equals(comparison)) {
-            argList.add(ArgumentUtil.createTagArgument(comparison));
-        } else if ("ge".equals(comparison)) {
-            argList.add(ArgumentUtil.createTagArgument("value"));
-            argList.add(CommandParserJSONUtil.stringToList("ge"));
-        } else if ("le".equals(comparison)) {
-            argList.add(ArgumentUtil.createTagArgument("value"));
-            argList.add(CommandParserJSONUtil.stringToList("le"));
-        } else {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
+
+        // Parse the comparison tag
+        final String comparisonTag = CommandParserJSONUtil.getString(jsonObject, CurrentDateTestField.comparison.name(), commandName);
+        Comparison comparison = Comparison.valueOf(comparisonTag);
+        switch (comparison) {
+            case ge:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("ge"));
+                break;
+            case is:
+                argList.add(ArgumentUtil.createTagArgument(comparison.name()));
+                break;
+            case le:
+                argList.add(ArgumentUtil.createTagArgument("value"));
+                argList.add(CommandParserJSONUtil.stringToList("le"));
+                break;
+            default:
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The comparison \"" + comparison + "\" is not a valid comparison");
+
         }
+
+        // Parse the date part
         final String datepart = CommandParserJSONUtil.getString(jsonObject, CurrentDateTestField.datepart.name(), commandName);
-        if ("date".equals(datepart)) {
-            argList.add(CommandParserJSONUtil.stringToList(datepart));
-            argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName), dateFormatPattern));
-        } else if ("time".equals(datepart)) {
-            argList.add(CommandParserJSONUtil.stringToList(datepart));
-            argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName), timeFormatPattern));
-        } else if ("weekday".equals(datepart)) {
-            argList.add(CommandParserJSONUtil.stringToList(datepart));
-            argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName)));
-        } else {
-            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
+        DatePart datePart = DatePart.valueOf(datepart);
+        switch (datePart) {
+            case date:
+                argList.add(CommandParserJSONUtil.stringToList(datepart));
+                argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName), dateFormatPattern));
+                break;
+            case time:
+                argList.add(CommandParserJSONUtil.stringToList(datepart));
+                argList.add(JSONDateArrayToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName), timeFormatPattern));
+                break;
+            case weekday:
+                argList.add(CommandParserJSONUtil.stringToList(datepart));
+                argList.add(CommandParserJSONUtil.coerceToStringList(CommandParserJSONUtil.getJSONArray(jsonObject, CurrentDateTestField.datevalue.name(), commandName)));
+                break;
+            default:
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
         }
 
         return new TestCommand(TestCommand.Commands.CURRENTDATE, argList, new ArrayList<TestCommand>());
@@ -131,7 +153,7 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), command.getCommand().getCommandName());
         final String comparison = command.getMatchType().substring(1);
         if ("value".equals(comparison)) {
@@ -140,13 +162,23 @@ public class CurrentDateTestCommandParser implements CommandParser<TestCommand> 
             jsonObject.put(CurrentDateTestField.comparison.name(), comparison);
         }
         final List value = (List) command.getArguments().get(command.getArguments().size() - 2);
-        jsonObject.put(CurrentDateTestField.datepart.name(), value.get(0));
-        if ("date".equals(value.get(0))) {
-            jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), dateFormatPattern));
-        } else if ("time".equals(value.get(0))) {
-            jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(command.getArguments().size() - 1), timeFormatPattern));
-        } else {
-            jsonObject.put(CurrentDateTestField.datevalue.name(), new JSONArray((List) command.getArguments().get(command.getArguments().size() - 1)));
+        String datepart = (String) value.get(0);
+        jsonObject.put(CurrentDateTestField.datepart.name(), datepart);
+
+        DatePart datePart = DatePart.valueOf(datepart);
+        int index = command.getArguments().size() - 1;
+        switch (datePart) {
+            case date:
+                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(index), dateFormatPattern));
+                break;
+            case time:
+                jsonObject.put(CurrentDateTestField.datevalue.name(), getJSONDateArray((List) command.getArguments().get(index), timeFormatPattern));
+                break;
+            case weekday:
+                jsonObject.put(CurrentDateTestField.datevalue.name(), new JSONArray((List) command.getArguments().get(index)));
+                break;
+            default:
+                throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Currentdate rule: The datepart \"" + datepart + "\" is not a valid datepart");
         }
     }
 

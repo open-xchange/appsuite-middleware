@@ -66,6 +66,9 @@ public class SMSExceptionMessages implements LocalizableStrings {
     // Unknown country tag: %1$s
     public final static String UNKNOWN_COUNTRY_MSG = "Unknown country tag: %1$s";
 
+    // Message is too long (%1$s characters). Maximum length is %2$s characters.
+    public static final String MESSAGE_TOO_LONG_MSG = "Message is too long (%1$s characters). Maximum length is %2$s characters.";
+
     private SMSExceptionMessages() {
         super();
     }

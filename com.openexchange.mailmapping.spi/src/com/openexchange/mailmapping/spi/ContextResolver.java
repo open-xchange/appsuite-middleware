@@ -47,27 +47,25 @@
  *
  */
 
-package com.openexchange.client.onboarding.carddav;
+package com.openexchange.mailmapping.spi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.exception.OXException;
 
 /**
- * {@link CardDAVOnboardingStrings}
+ * {@link ContextResolver} - Resolves an E-Mail address to a context in which the associated user resides.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class CardDAVOnboardingStrings implements LocalizableStrings {
+public interface ContextResolver {
 
     /**
-     * Initializes a new {@link CardDAVOnboardingStrings}.
+     * Resolves specified E-Mail address to the context in which the associated user resides.
+     *
+     * @param mail The E-Mail address to resolve
+     * @return The resolved context or <code>null</code> if it could not be resolved
+     * @throws OXException If resolve operation fails
      */
-    private CardDAVOnboardingStrings() {
-        super();
-    }
-
-    // A description for a CardDAV account
-    public static final String CARDDAV_ACCOUNT_DESCRIPTION = "The CardDAV account for synchronizing contact entries.";
+    ResolvedContext resolveContext(String mail) throws OXException;
 
 }

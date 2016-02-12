@@ -59,6 +59,7 @@ import com.openexchange.client.onboarding.service.OnboardingService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.SMSService;
@@ -95,6 +96,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
         // Track services needed for SMS transport
         trackService(SMSService.class);
         trackService(DownloadLinkProvider.class);
+        trackService(HostnameService.class);
         openTrackers();
 
         PListSignerImpl signerImpl = new PListSignerImpl();

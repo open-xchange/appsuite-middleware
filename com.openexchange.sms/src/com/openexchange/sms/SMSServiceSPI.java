@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,27 +47,59 @@
  *
  */
 
-package com.openexchange.client.onboarding.mail;
+package com.openexchange.sms;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import java.util.Locale;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link MailOnboardingStrings}
+ * {@link SMSServiceSPI}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public class MailOnboardingStrings implements LocalizableStrings {
+public abstract class SMSServiceSPI implements SMSService {
+
+    protected final ServiceLookup services;
 
     /**
-     * Initializes a new {@link MailOnboardingStrings}.
+     * Initializes a new {@link SMSServiceSPI}.
      */
-    private MailOnboardingStrings() {
+    public SMSServiceSPI(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
-    // A description for an IMAP account on a mobile device
-    public static final String IMAP_ACCOUNT_DESCRIPTION = "The account for accessing and sending mails.";
+    @Override
+    public abstract void sendMessage(String recipient, String message) throws OXException;
+
+    @Override
+    public abstract void sendMessage(String recipient, String message, Locale locale) throws OXException;
+
+    @Override
+    public abstract void sendMessage(String recipient, String message, String languageTag) throws OXException;
+
+    @Override
+    public abstract void sendMessage(String[] recipients, String message) throws OXException;
+
+    @Override
+    public abstract void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
+
+    @Override
+    public abstract void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException;
+
+    /**
+     * Parse phone number into E.123 format
+     *
+     * @param phoneNumber
+     * @param locale
+     * @return
+     * @throws OXException
+     */
+    protected String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
+        PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
+        return parser.parsePhoneNumber(phoneNumber, locale);
+    }
 
 }

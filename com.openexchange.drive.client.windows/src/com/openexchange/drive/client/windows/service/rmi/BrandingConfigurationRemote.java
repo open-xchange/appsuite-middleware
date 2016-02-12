@@ -58,7 +58,7 @@ import com.openexchange.exception.OXException;
  * {@link BrandingConfigurationRemote} is a rmi interface to reload the current branding configuration's.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public interface BrandingConfigurationRemote extends Remote {
 

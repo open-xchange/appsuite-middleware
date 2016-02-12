@@ -86,7 +86,7 @@ public class AllOfTestCommandParser extends AbstractAllAnyOfTestCommandParser {
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser#parse(org.json.JSONObject, java.lang.Object)
      */
     @Override
-    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException {
+    public void parse(JSONObject jsonObject, TestCommand command) throws JSONException, OXException {
         parse(jsonObject, command, Commands.ALLOF);
     }
 

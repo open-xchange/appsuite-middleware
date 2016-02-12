@@ -188,7 +188,11 @@ public class DefaultShareService implements ShareService {
             connectionHelper.finish();
         }
         if (null != user && user.isGuest()) {
-            return removeExpired(new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user)));
+            DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user));
+            if (Boolean.TRUE.equals(session.getParameter("com.openexchange.share.administrativeUpdate"))) {
+                return guestInfo; // don't remove expired shares during administrative updates to avoid recursions
+            }
+            return removeExpired(guestInfo);
         }
         return null;
     }
@@ -320,6 +324,7 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             if (guestUserUpdated) {
                 userService.invalidateUser(context, guest.getId());
+                return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
         } finally {

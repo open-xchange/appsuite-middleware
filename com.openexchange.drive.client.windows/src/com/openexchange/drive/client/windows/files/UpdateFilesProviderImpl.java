@@ -77,7 +77,7 @@ import com.openexchange.exception.OXException;
  * For this purpose it searches for subfolder's under a given path, which have a proper '.branding' or '.properties' file.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
@@ -150,6 +150,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
                         return name.endsWith(".properties") || name.endsWith(".branding");
                     }
                 };
+                BrandingConfig.clear();
 
                 for (File f : dirs) {
                     File[] brandings = f.listFiles(brandingFilter);
@@ -185,7 +186,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public boolean contains(String branding, String name) throws OXException {
-        if (isValid(branding)) {
+        if (!isValid(branding)) {
             return false;
         }
         return loaders.get(branding).getAvailableFiles().contains(name);
@@ -248,6 +249,7 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public void reload(String path) throws OXException {
+        this.path = path;
         reinit();
     }
 

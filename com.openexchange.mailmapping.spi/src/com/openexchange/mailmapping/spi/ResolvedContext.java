@@ -47,27 +47,65 @@
  *
  */
 
-package com.openexchange.client.onboarding.caldav;
+package com.openexchange.mailmapping.spi;
 
-import com.openexchange.i18n.LocalizableStrings;
-
+import com.openexchange.mailmapping.ResolveReply;
+import com.openexchange.mailmapping.ResolvedMail;
 
 /**
- * {@link CalDAVOnboardingStrings}
+ * {@link ResolvedContext}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class CalDAVOnboardingStrings implements LocalizableStrings {
+public class ResolvedContext {
+
+    private final ResolveReply resolveReply;
+    private final int contextID;
 
     /**
-     * Initializes a new {@link CalDAVOnboardingStrings}.
+     * Initializes a new {@link ResolvedMail}.
+     *
+     * @param contextID The context identifier
      */
-    private CalDAVOnboardingStrings() {
-        super();
+    public ResolvedContext(int contextID) {
+        this(contextID, ResolveReply.ACCEPT);
     }
 
-    // A description for a CaldAV account
-    public static final String CALDAV_ACCOUNT_DESCRIPTION = "The CalDAV account for synchronizing calendar entries.";
+    /**
+     * Initializes a new {@link ResolvedMail}.
+     *
+     * @param contextID The context identifier
+     * @param resolveReply The resolve reply
+     */
+    public ResolvedContext(int contextID, ResolveReply resolveReply) {
+        super();
+        this.contextID = contextID;
+        this.resolveReply = null == resolveReply ? ResolveReply.ACCEPT : resolveReply;
+    }
+
+    /**
+     * Gets the context identifier
+     *
+     * @return The context identifier or <code>-1</code> if unknown
+     *         (typically alongside with resolve type set to {@link ResolveReply#NEUTRAL} or {@link ResolveReply#DENY})
+     */
+    public int getContextID() {
+        return contextID;
+    }
+
+    /**
+     * Gets the resolve reply
+     * <ul>
+     * <li>DENY - The {@code MailResolver} denies further processing of passed E-Mail address.
+     * <li>NEUTRAL - The {@code MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     * <li>ACCEPT - The {@code MailResolver} successfully handled passed E-Mail address.
+     * </ul>
+     *
+     * @return The resolve reply
+     */
+    public ResolveReply getResolveReply() {
+        return resolveReply;
+    }
 
 }

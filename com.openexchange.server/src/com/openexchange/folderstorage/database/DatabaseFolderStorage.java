@@ -155,6 +155,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -554,6 +557,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     }
                     for (final OCLPermission permission : parentPermissions) {
                         if ((permission.getSystem() <= 0) && !ignore.contains(permission.getEntity())) {
+                            if (false == permission.isGroupPermission()) {
+                                GuestInfo guestInfo = ServerServiceRegistry.getServize(ShareService.class).getGuestInfo(session, permission.getEntity());
+                                if (null != guestInfo && RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
+                                    continue; // don't inherit anonymous share links
+                                }
+                            }
                             permissions.add(permission);
                         }
                     }

@@ -181,19 +181,19 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
         configuration.put(CALDAV_URL_FIELD, getCalDAVUrl(request.getHostData(), false, session.getUserId(), session.getContextId()));
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------
 
     private Result plistResult(OnboardingRequest request, Result previousResult, Session session) throws OXException {
         PListDict previousPListDict = null == previousResult ? null : ((PlistResult) previousResult).getPListDict();
-        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), session.getUserId(), session.getContextId());
+        PListDict pListDict = getPlist(previousPListDict, request.getScenario(), request.getHostData().getHost(), session.getUserId(), session.getContextId());
         return new PlistResult(pListDict, ResultReply.NEUTRAL);
     }
 
     @Override
-    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, int userId, int contextId) throws OXException {
+    public PListDict getPlist(PListDict optPrevPListDict, Scenario scenario, String hostName, int userId, int contextId) throws OXException {
 
         // Get the PListDict to contribute to
         PListDict pListDict;
@@ -219,7 +219,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
         payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
         payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
-        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getTranslationFor(CalDAVOnboardingStrings.CALDAV_ACCOUNT_DESCRIPTION, userId, contextId));
+        payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CalDAV");
 
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);

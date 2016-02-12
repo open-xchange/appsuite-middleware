@@ -235,7 +235,27 @@ public enum Device implements Entity {
      * @throws OXException If actions cannot be returned
      */
     public static List<OnboardingAction> getActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
-        List<OnboardingAction> actions = new ArrayList<>(getStaticActionsFor(device, type));
+        if (null == device || null == type) {
+            return Collections.emptyList();
+        }
+
+        // Only one action possible for types LINK and MANUAL
+        switch (type) {
+            case LINK:
+                return Arrays.asList(OnboardingAction.LINK);
+            case MANUAL:
+                return Arrays.asList(OnboardingAction.DISPLAY);
+            default:
+                break;
+        }
+
+        // Check for other types
+        List<OnboardingAction> actions = getConfiguredActionsFor(device, type, userId, contextId);
+        if (null == actions) {
+            // No actions available for specified device and type
+            return Collections.emptyList();
+        }
+
         for (Iterator<OnboardingAction> iter = actions.iterator(); iter.hasNext();) {
             OnboardingAction action = iter.next();
             switch (action) {
@@ -258,21 +278,13 @@ public enum Device implements Entity {
         return actions;
     }
 
-    private static List<OnboardingAction> getStaticActionsFor(Device device, OnboardingType type) {
-        if (null == device || null == type) {
-            return Collections.emptyList();
-        }
-
+    private static List<OnboardingAction> getConfiguredActionsFor(Device device, OnboardingType type, int userId, int contextId) throws OXException {
         switch (device) {
             case ANDROID_PHONE:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -280,12 +292,8 @@ public enum Device implements Entity {
             case ANDROID_TABLET:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -293,12 +301,8 @@ public enum Device implements Entity {
             case APPLE_IPAD:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD);
+                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD), userId, contextId);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -306,12 +310,8 @@ public enum Device implements Entity {
             case APPLE_IPHONE:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL, OnboardingAction.DOWNLOAD);
+                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.SMS, OnboardingAction.EMAIL), userId, contextId);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -319,12 +319,8 @@ public enum Device implements Entity {
             case APPLE_MAC:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL);
+                            return queryActionsFor(device, type, Arrays.asList(OnboardingAction.DOWNLOAD, OnboardingAction.EMAIL), userId, contextId);
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -332,12 +328,8 @@ public enum Device implements Entity {
             case WINDOWS_DESKTOP_8_10:
                 {
                     switch (type) {
-                        case LINK:
-                            return Arrays.asList(OnboardingAction.LINK);
-                        case MANUAL:
-                            return Arrays.asList(OnboardingAction.DISPLAY);
                         case PLIST:
-                            return Collections.emptyList();
+                            return null;
                         default:
                             throw new IllegalArgumentException("Unknown type: " + type.getId());
                     }
@@ -345,6 +337,36 @@ public enum Device implements Entity {
             default:
                 throw new IllegalArgumentException("Unknown device: " + device.id);
         }
+    }
+
+    private static List<OnboardingAction> queryActionsFor(Device device, OnboardingType type, List<OnboardingAction> defaultActions, int userId, int contextId) throws OXException {
+        // Build property name
+        String propName = new StringBuilder("com.openexchange.client.onboarding.").append(device.getId()).append('.').append(type.getId()).append(".actions").toString();
+
+        // Query property value
+        String propValue = OnboardingUtility.getValueFromProperty(propName, null, userId, contextId);
+        if (Strings.isEmpty(propValue)) {
+            return null == defaultActions ? null : new ArrayList<OnboardingAction>(defaultActions);
+        }
+
+        // Parse to actions
+        String[] sActions = Strings.splitByComma(propValue);
+        List<OnboardingAction> actions = new ArrayList<OnboardingAction>(sActions.length);
+        for (String sAction : sActions) {
+            sAction = Strings.asciiLowerCase(sAction);
+
+            if ("none".equals(sAction)) {
+                // Explicitly disabled
+                return null;
+            }
+
+            OnboardingAction action = OnboardingAction.actionFor(sAction);
+            if (null != action) {
+                actions.add(action);
+            }
+        }
+
+        return actions.isEmpty() ? (null == defaultActions ? null : new ArrayList<OnboardingAction>(defaultActions)) : actions;
     }
 
 }

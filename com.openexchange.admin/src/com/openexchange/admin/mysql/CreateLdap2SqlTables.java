@@ -207,7 +207,7 @@ public class CreateLdap2SqlTables extends AbstractCreateTableImpl {
         + "user INT4 UNSIGNED NOT NULL, "
         + "alias VARCHAR(255) NOT NULL, "
         + "`uuid` BINARY(16) DEFAULT NULL," 
-        + "PRIMARY KEY (`cid`, `user`, `alias`, `uuid`) " 
+        + "PRIMARY KEY (`cid`, `user`, `alias`) " 
       + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
 
     /**

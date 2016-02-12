@@ -78,7 +78,8 @@ public interface CommandParser<T> {
      * @param jsonObject The {@link JSONObject} to parse the {@link T} object into
      * @param command The {@link T} to parse
      * @throws JSONException if a JSON parsing error occurs
+     * @throws OXException if a semantic error occurs
      */
-    void parse(JSONObject jsonObject, T command) throws JSONException;
+    void parse(JSONObject jsonObject, T command) throws JSONException, OXException;
 
 }

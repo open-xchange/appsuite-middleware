@@ -114,6 +114,15 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     /**
+     * Checks if this service list has any services
+     *
+     * @return <code>true</code> if at least one service exists; otherwise <code>false</code>
+     */
+    protected boolean hasAnyServices() {
+        return !empty;
+    }
+
+    /**
      * Gets the rank-wise sorted service list
      *
      * @return The rank-wise sorted service list

@@ -81,6 +81,17 @@ public class OnboardingConfig {
     private static final String CONFIGFILE_SCENARIOS = "client-onboarding-scenarios.yml";
 
     /**
+     * Gets the name of the YAML configuration file for client on-boarding scenarios
+     *
+     * @return The file name
+     */
+    public static String getScenariosConfigFileName() {
+        return CONFIGFILE_SCENARIOS;
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------- //
+
+    /**
      * Initializes a new {@link OnboardingConfig}.
      */
     public OnboardingConfig() {

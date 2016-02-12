@@ -104,7 +104,7 @@ public class PGPEncryptActionCommandParser implements CommandParser<ActionComman
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
      */
     @Override
-    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException {
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
         jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.PGP_ENCRYPT.getJsonName());
         final Hashtable<String, List<String>> tagarguments = actionCommand.getTagArguments();
         final List<String> keys = tagarguments.get(PGPEncryptActionField.keys.getTagName());
