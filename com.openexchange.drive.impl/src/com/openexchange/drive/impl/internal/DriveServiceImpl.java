@@ -55,9 +55,13 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
@@ -443,6 +447,21 @@ public class DriveServiceImpl implements DriveService {
             }
         }
         settings.setLocalizedFolders(localizedFolders);
+        /*
+         * evaluate relevant capabilities
+         */
+        Set<String> capabilities = new HashSet<String>();
+        CapabilitySet capabilitySet = DriveServiceLookup.getService(CapabilityService.class).getCapabilities(session.getServerSession());
+        if (session.getServerSession().getUserConfiguration().hasFullSharedFolderAccess()) {
+            capabilities.add("invite_users_and_groups");
+            if (capabilitySet.contains("invite_guests")) {
+                capabilities.add("invite_guests");
+            }
+        }
+        if (capabilitySet.contains("share_links")) {
+            capabilities.add("share_links");
+        }
+        settings.setCapabilities(capabilities);
         return settings;
     }
 
