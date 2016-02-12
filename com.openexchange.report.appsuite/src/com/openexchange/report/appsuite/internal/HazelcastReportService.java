@@ -400,7 +400,7 @@ public class HazelcastReportService extends AbstractReportService {
             return;
         }
         LOG.info("Report abortion triggered by a cluster member with reason: {}. Trying to cancel remote threads.", reason);
-        Services.getService(HazelcastInstance.class)
+        // TODO Auto-generated method stub
     }
 
     @Override
