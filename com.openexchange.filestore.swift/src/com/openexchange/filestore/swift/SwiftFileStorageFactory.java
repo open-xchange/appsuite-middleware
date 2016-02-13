@@ -243,12 +243,11 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         String userName = requireProperty(filestoreID, "userName", config);
 
         // API key
-        String authValue = requireProperty(filestoreID, "apiKey", config);
+        String authValue = requireProperty(filestoreID, "authValue", config);
 
         // End-point configuration
         String protocol = requireProperty(filestoreID, "protocol", config);
         String path = requireProperty(filestoreID, "path", config);
-        String tenantId = requireProperty(filestoreID, "tenantId", config);
         String hosts = requireProperty(filestoreID, "hosts", config);
 
         // HTTP client configuration
@@ -274,7 +273,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
             }
 
-            uriBuilder.setPath(path + "/" + tenantId + "/");
+            uriBuilder.setPath(path.endsWith("/") ? path : path + "/");
             try {
                 String baseUrl = uriBuilder.build().toString();
                 if (!baseUrl.endsWith("/")) {
