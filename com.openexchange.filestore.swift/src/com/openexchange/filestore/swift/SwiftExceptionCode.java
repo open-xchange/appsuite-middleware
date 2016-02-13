@@ -59,6 +59,7 @@ import com.openexchange.exception.OXExceptionStrings;
  * {@link SwiftExceptionCode} - Enumeration of all {@link OXException}s known in Swift module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public enum SwiftExceptionCode implements DisplayableOXExceptionCode {
 

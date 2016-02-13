@@ -47,32 +47,67 @@
  *
  */
 
-package com.openexchange.filestore.swift.rmi;
+package com.openexchange.filestore.swift.groupware;
 
-import java.rmi.Remote;
-import java.rmi.RemoteException;
-import java.util.List;
+import com.openexchange.database.AbstractCreateTableImpl;
+import com.openexchange.database.CreateTableService;
+
 
 /**
- * {@link SproxydRemoteManagement} - The RMI stub for Sproxyd management.
+ * {@link SwiftCreateTableService} - The {@link CreateTableService} for Swift object store.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
  */
-public interface SproxydRemoteManagement extends Remote {
+public class SwiftCreateTableService extends AbstractCreateTableImpl {
 
     /**
-     * RMI name to be used in the naming lookup.
-     */
-    public static final String RMI_NAME = SproxydRemoteManagement.class.getSimpleName();
-
-    /**
-     * Lists the URLs for all known objects stored in specified Sproxyd storage.
+     * Gets the table names.
      *
-     * @param adminUser The administrator user name
-     * @param adminPassword The administrator password
-     * @return The list containing the URLs
-     * @throws RemoteException If URLs cannot be returned
+     * @return The table names.
      */
-    List<String> listAllObjectsURLs(String adminUser, String adminPassword) throws RemoteException;
+    public static String[] getTablesToCreate() {
+        return new String[] { "swift_filestore" };
+    }
+
+    /**
+     * Gets the CREATE-TABLE statements.
+     *
+     * @return The CREATE statements
+     */
+    public static String[] getCreateStmts() {
+        return new String[] { "CREATE TABLE swift_filestore (" +
+            " cid INT4 unsigned NOT NULL," +
+            " user INT4 unsigned NOT NULL," +
+            " document_id BINARY(16) NOT NULL," +
+            " swift_id BINARY(16) NOT NULL," +
+            " offset BIGINT(64) NOT NULL," +
+            " length BIGINT(64) NOT NULL," +
+            " PRIMARY KEY (cid, user, document_id, swift_id)," +
+            " UNIQUE KEY `swift_key` (`swift_id`)," +
+            " INDEX `swift_index` (`cid`, `swift_id`)" +
+            ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" };
+    }
+
+    /**
+     * Initializes a new {@link CapabilityCreateTableService}.
+     */
+    public SwiftCreateTableService() {
+        super();
+    }
+
+    @Override
+    public String[] requiredTables() {
+        return new String[] { "user", "infostore_document" };
+    }
+
+    @Override
+    public String[] tablesToCreate() {
+        return getTablesToCreate();
+    }
+
+    @Override
+    protected String[] getCreateStatements() {
+        return getCreateStmts();
+    }
+
 }

@@ -68,9 +68,10 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link S3FileStorage}
+ * {@link SwiftFileStorage} - Represents a Swift file storage.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public class SwiftFileStorage implements FileStorage {
 
@@ -94,10 +95,12 @@ public class SwiftFileStorage implements FileStorage {
 
     /**
      * Creates the Swift container associated with this Swift file storage.
+     *
+     * @throws OXException If container creation fails
      */
-    public void createContainer() {
+    public void createContainer() throws OXException {
         try {
-
+            client.createContainerIfAbsent();
         } finally {
             initializationLatch.countDown();
         }
@@ -166,11 +169,11 @@ public class SwiftFileStorage implements FileStorage {
         UUID documentId = UUIDs.fromUnformattedString(identifier);
         List<Chunk> chunks = chunkStorage.getChunks(documentId);
         if (null != chunks && 0 < chunks.size()) {
-            List<UUID> scalityIds = new ArrayList<UUID>(chunks.size());
+            List<UUID> swiftIds = new ArrayList<UUID>(chunks.size());
             for (Chunk chunk : chunks) {
-                scalityIds.add(chunk.getSwiftId());
+                swiftIds.add(chunk.getSwiftId());
             }
-            client.delete(scalityIds);
+            client.delete(swiftIds);
             chunkStorage.deleteDocument(documentId);
             return true;
         }
@@ -245,8 +248,8 @@ public class SwiftFileStorage implements FileStorage {
                 InputStream data = null;
                 try {
                     data = client.get(chunk.getDocumentId(), 0, newChunkLength);
-                    UUID scalityId = client.put(data, newChunkLength);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, chunk.getOffset(), newChunkLength));
+                    UUID swiftId = client.put(data, newChunkLength);
+                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, chunk.getOffset(), newChunkLength));
                 } finally {
                     Streams.close(data);
                 }
@@ -306,16 +309,16 @@ public class SwiftFileStorage implements FileStorage {
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean success = false;
         ChunkedUpload chunkedUpload = null;
-        List<UUID> scalityIds = new ArrayList<UUID>();
+        List<UUID> swiftIds = new ArrayList<UUID>();
         try {
             chunkedUpload = new ChunkedUpload(data);
             long off = offset;
             while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
-                    UUID scalityId = client.put(chunk.getData(), chunk.getSize());
-                    scalityIds.add(scalityId);
-                    chunkStorage.storeChunk(new Chunk(documentId, scalityId, off, chunk.getSize()));
+                    UUID swiftId = client.put(chunk.getData(), chunk.getSize());
+                    swiftIds.add(swiftId);
+                    chunkStorage.storeChunk(new Chunk(documentId, swiftId, off, chunk.getSize()));
                     off += chunk.getSize();
                 } finally {
                     Streams.close(chunk);
@@ -326,9 +329,9 @@ public class SwiftFileStorage implements FileStorage {
         } finally {
             Streams.close(chunkedUpload);
             if (false == success) {
-                client.delete(scalityIds);
-                for (UUID scalityId : scalityIds) {
-                    chunkStorage.deleteChunk(scalityId);
+                client.delete(swiftIds);
+                for (UUID swiftId : swiftIds) {
+                    chunkStorage.deleteChunk(swiftId);
                 }
             }
         }

@@ -64,11 +64,11 @@ import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link SproxydDeleteListener}
+ * {@link SwiftDeleteListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SproxydDeleteListener implements DeleteListener {
+public class SwiftDeleteListener implements DeleteListener {
 
     @Override
     public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
@@ -87,7 +87,7 @@ public class SproxydDeleteListener implements DeleteListener {
         ResultSet rs = null;
         try {
             int pos = 1;
-            stmt = writeCon.prepareStatement("SELECT scality_id FROM scality_filestore WHERE cid = ?");
+            stmt = writeCon.prepareStatement("SELECT swift_id FROM swift_filestore WHERE cid = ?");
             stmt.setInt(pos, contextId);
             rs = stmt.executeQuery();
             List<UUID> uuids = new LinkedList<UUID>();
@@ -99,7 +99,7 @@ public class SproxydDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             pos = 1;
-            stmt = writeCon.prepareStatement("DELETE FROM scality_filestore WHERE cid = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM swift_filestore WHERE cid = ?");
             stmt.setInt(pos, contextId);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -117,7 +117,7 @@ public class SproxydDeleteListener implements DeleteListener {
         ResultSet rs = null;
         try {
             int pos = 1;
-            stmt = writeCon.prepareStatement("SELECT scality_id FROM scality_filestore WHERE cid = ? AND user = ?");
+            stmt = writeCon.prepareStatement("SELECT swift_id FROM swift_filestore WHERE cid = ? AND user = ?");
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, event.getId());
             rs = stmt.executeQuery();
@@ -130,7 +130,7 @@ public class SproxydDeleteListener implements DeleteListener {
             Databases.closeSQLStuff(rs, stmt);
             rs = null;
             pos = 1;
-            stmt = writeCon.prepareStatement("DELETE FROM scality_filestore WHERE cid = ? AND user = ?");
+            stmt = writeCon.prepareStatement("DELETE FROM swift_filestore WHERE cid = ? AND user = ?");
             stmt.setInt(pos++, contextId);
             stmt.setInt(pos, event.getId());
             stmt.executeUpdate();

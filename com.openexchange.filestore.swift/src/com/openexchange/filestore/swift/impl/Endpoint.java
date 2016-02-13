@@ -86,6 +86,16 @@ public class Endpoint {
     }
 
     /**
+     * Gets the URL for the given container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store"</code>.
+     *
+     * @param containerName The container name
+     * @return The URL; always without trailing slash
+     */
+    public String getContainerUrl(String containerName) {
+        return new StringBuilder(endpoint).append('/').append(containerName).toString();
+    }
+
+    /**
      * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/57462_ctx_store/411615f4a607432fa2e12cc18b8c5f9c"</code>.
      *
      * @param containerName The container name

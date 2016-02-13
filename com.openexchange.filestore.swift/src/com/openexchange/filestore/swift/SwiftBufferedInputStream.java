@@ -67,6 +67,7 @@ import com.openexchange.java.Streams;
  * This implementation is not thread-safe.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 @NotThreadSafe
 public class SwiftBufferedInputStream extends InputStream {

@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: The Sproxyd file storage
+Bundle-Name: The Swift file storage
 Bundle-SymbolicName: com.openexchange.filestore.swift
 Bundle-Version: 7.8.1
 Bundle-Vendor: Open-Xchange Inc.
@@ -64,4 +64,4 @@ Import-Package: com.openexchange.ajax.container,
  org.json,
  org.osgi.framework,
  org.slf4j
-Bundle-Activator: com.openexchange.filestore.swift.osgi.SwiftdActivator
+Bundle-Activator: com.openexchange.filestore.swift.osgi.SwiftActivator

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,28 +47,32 @@
  *
  */
 
-package com.openexchange.filestore.swift;
+package com.openexchange.filestore.swift.rmi;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
+import java.rmi.Remote;
+import java.rmi.RemoteException;
+import java.util.List;
 
 /**
- * {@link UnitTests}
+ * {@link SwiftRemoteManagement} - The RMI stub for Swift management.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class UnitTests {
+public interface SwiftRemoteManagement extends Remote {
 
     /**
-     * Initializes a new {@link UnitTests}.
+     * RMI name to be used in the naming lookup.
      */
-    public UnitTests() {
-        super();
-    }
+    public static final String RMI_NAME = SwiftRemoteManagement.class.getSimpleName();
 
-    public static Test suite() {
-        TestSuite tests = new TestSuite();
-        tests.addTestSuite(SproxydBufferedInputStreamTest.class);
-        return tests;
-    }
+    /**
+     * Lists the URLs for all known objects stored in specified Swift storage.
+     *
+     * @param adminUser The administrator user name
+     * @param adminPassword The administrator password
+     * @return The list containing the URLs
+     * @throws RemoteException If URLs cannot be returned
+     */
+    List<String> listAllObjectsURLs(String adminUser, String adminPassword) throws RemoteException;
 }

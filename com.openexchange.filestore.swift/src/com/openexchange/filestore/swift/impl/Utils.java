@@ -69,6 +69,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -214,18 +215,28 @@ class Utils {
      * considered available; otherwise it's not.
      *
      * @param baseUrl The base URL of the end-point; e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>
+     * @param token The authentication token
      * @param httpClient The HTTP client to use
-     * @return <code>true</code> if the end-point is unavailable
+     * @return <code>true</code>/<code>false</code> if the end-point is unavailable; or <code>null</code> to ignore this check
      */
-    static boolean endpointUnavailable(String baseUrl, HttpClient httpClient) {
+    static Boolean endpointUnavailable(String baseUrl, Token token, HttpClient httpClient) {
+        if (null == token) {
+            return null;
+        }
+
         HttpGet get = null;
         HttpResponse response = null;
         try {
             get = new HttpGet(buildUri(baseUrl, toQueryString(mapFor("format", "json"))));
+            get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
             if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
-                return false;
+                return Boolean.FALSE;
+            }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                // Token expired intermittently
+                return null;
             }
         } catch (IOException e) {
             // ignore
@@ -233,6 +244,6 @@ class Utils {
             Utils.close(get, response);
         }
 
-        return true;
+        return Boolean.TRUE;
     }
 }

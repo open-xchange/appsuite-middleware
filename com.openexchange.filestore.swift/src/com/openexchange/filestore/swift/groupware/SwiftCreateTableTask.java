@@ -63,18 +63,18 @@ import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link SproxydCreateTableTask}
+ * {@link SwiftCreateTableTask}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SproxydCreateTableTask extends UpdateTaskAdapter {
+public class SwiftCreateTableTask extends UpdateTaskAdapter {
 
     private final ServiceLookup services;
 
     /**
      * Initializes a new {@link CapabilityCreateTableTask}.
      */
-    public SproxydCreateTableTask(ServiceLookup services) {
+    public SwiftCreateTableTask(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -122,8 +122,8 @@ public class SproxydCreateTableTask extends UpdateTaskAdapter {
 
         PreparedStatement stmt = null;
         try {
-            String[] tableNames = SproxydCreateTableService.getTablesToCreate();
-            String[] createStmts = SproxydCreateTableService.getCreateStmts();
+            String[] tableNames = SwiftCreateTableService.getTablesToCreate();
+            String[] createStmts = SwiftCreateTableService.getCreateStmts();
             for (int i = 0; i < tableNames.length; i++) {
                 if (false == Databases.tableExists(writeCon, tableNames[i])) {
                     stmt = writeCon.prepareStatement(createStmts[i]);

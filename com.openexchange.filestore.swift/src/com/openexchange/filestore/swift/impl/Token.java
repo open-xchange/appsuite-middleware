@@ -105,6 +105,7 @@ public class Token {
 
     private final String id;
     private final Date expires;
+    private final int hash;
 
     /**
      * Initializes a new {@link Token}.
@@ -116,6 +117,7 @@ public class Token {
         super();
         this.id = id;
         this.expires = expires;
+        hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
     }
 
     /**
@@ -145,6 +147,30 @@ public class Token {
      */
     public Date getExpires() {
         return expires;
+    }
+
+    @Override
+    public int hashCode() {
+        return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof Token)) {
+            return false;
+        }
+        Token other = (Token) obj;
+        if (id == null) {
+            if (other.id != null) {
+                return false;
+            }
+        } else if (!id.equals(other.id)) {
+            return false;
+        }
+        return true;
     }
 
 }

@@ -52,7 +52,7 @@ package com.openexchange.filestore.swift.impl;
 import com.openexchange.java.Strings;
 
 /**
- * {@link AuthValue}
+ * {@link AuthValue} - The authentication value.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
@@ -60,7 +60,7 @@ import com.openexchange.java.Strings;
 public class AuthValue {
 
     /**
-     * Parses the auth value from given string
+     * Parses the authentication value from given string
      *
      * @param authValue The string
      * @return The parsed value
@@ -83,11 +83,19 @@ public class AuthValue {
         return new AuthValue(authValue, Type.API_KEY);
     }
 
+    /** The authentication type */
     public static enum Type {
-        API_KEY, PASSWORD,;
+        /**
+         * Authentication through passing an API key.
+         */
+        API_KEY,
+        /**
+         * Password-based authentication.
+         */
+        PASSWORD,;
     }
 
-    // ----------------------------------------------------------------------------------------------------
+    // ---------------------------------------------------------------------------------------------------------------------- //
 
     private final String value;
     private final Type type;
@@ -102,7 +110,7 @@ public class AuthValue {
     }
 
     /**
-     * Gets the value
+     * Gets the value.
      *
      * @return The value
      */
@@ -111,7 +119,7 @@ public class AuthValue {
     }
 
     /**
-     * Gets the type
+     * Gets the type.
      *
      * @return The type
      */

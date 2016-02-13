@@ -78,9 +78,10 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link S3FileStorageFactory}
+ * {@link SwiftFileStorageFactory} - The factory for Swift file storages
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public class SwiftFileStorageFactory implements FileStorageProvider {
 
@@ -138,7 +139,13 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 storage = newStorage;
                 newStorage.createContainer();
             } else {
-                storage.awaitContainerCreation();
+                try {
+                    storage.awaitContainerCreation();
+                } catch (InterruptedException e) {
+                    // Keep interrupted status
+                    Thread.currentThread().interrupt();
+                    throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Interrupted");
+                }
             }
         }
         return storage;

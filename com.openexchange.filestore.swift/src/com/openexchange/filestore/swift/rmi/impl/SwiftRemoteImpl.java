@@ -66,26 +66,26 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.filestore.swift.rmi.SproxydRemoteManagement;
+import com.openexchange.filestore.swift.rmi.SwiftRemoteManagement;
 import com.openexchange.server.ServiceLookup;
 
 
 /**
- * {@link SproxydRemoteImpl}
+ * {@link SwiftRemoteImpl}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.0
+ * @since v7.8.2
  */
-public class SproxydRemoteImpl implements SproxydRemoteManagement {
+public class SwiftRemoteImpl implements SwiftRemoteManagement {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SproxydRemoteImpl.class);
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftRemoteImpl.class);
 
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link SproxydRemoteImpl}.
+     * Initializes a new {@link SwiftRemoteImpl}.
      */
-    public SproxydRemoteImpl(ServiceLookup services) {
+    public SwiftRemoteImpl(ServiceLookup services) {
         super();
         this.services = services;
     }
@@ -107,11 +107,11 @@ public class SproxydRemoteImpl implements SproxydRemoteManagement {
         try {
             List<Integer> contextIds = contextService.getAllContextIds();
             Set<Integer> visited = new HashSet<Integer>(contextIds.size(), 0.9f);
-            Set<String> scalityIds = new HashSet<String>(1024, 0.9F);
+            Set<String> swiftIds = new HashSet<String>(1024, 0.9F);
             for (Integer contextId : contextIds) {
                 if (visited.add(contextId)) {
-                    // Add the Scality identifiers
-                    addAllObjectsURLsInSchema(contextId.intValue(), scalityIds, dbService);
+                    // Add the Swift identifiers
+                    addAllObjectsURLsInSchema(contextId.intValue(), swiftIds, dbService);
 
                     // Discard other contexts in that schema
                     int[] contextsInSameSchema = dbService.getContextsInSameSchema(contextId.intValue());
@@ -123,8 +123,8 @@ public class SproxydRemoteImpl implements SproxydRemoteManagement {
                 }
             }
 
-            List<String> sortedIds = new ArrayList<String>(scalityIds);
-            scalityIds = null;
+            List<String> sortedIds = new ArrayList<String>(swiftIds);
+            swiftIds = null;
             Collections.sort(sortedIds);
             return sortedIds;
         } catch (OXException e) {
@@ -142,7 +142,7 @@ public class SproxydRemoteImpl implements SproxydRemoteManagement {
         ResultSet result = null;
         try {
             con = dbService.getReadOnly(idOfContextInSchema);
-            stmt = con.prepareStatement("SELECT DISTINCT scality_id FROM scality_filestore");
+            stmt = con.prepareStatement("SELECT DISTINCT swift_id FROM swift_filestore");
             result = stmt.executeQuery();
             while (result.next()) {
                 set.add(result.getString(1));

@@ -79,7 +79,8 @@ import com.openexchange.java.util.UUIDs;
 /**
  * {@link SwiftClient}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public class SwiftClient {
 
@@ -121,7 +122,7 @@ public class SwiftClient {
         containerName = sb.toString();
 
         // Get token
-        acquireToken(null);
+        acquireNewToken(null);
     }
 
     /**
@@ -143,6 +144,104 @@ public class SwiftClient {
     }
 
     /**
+     * Creates associated container if absent
+     *
+     * @throws OXException If container creation fails
+     */
+    public void createContainerIfAbsent() throws OXException {
+        Token token = getOrAcquireNewTokenIfExpired();
+
+        if (false == existsContainer(token, 0)) {
+            createContainer(token, 0);
+        }
+    }
+
+    private boolean existsContainer(Token token, int retryCount) throws OXException {
+        HttpGet get = null;
+        HttpResponse response = null;
+        Endpoint endpoint = getEndpoint();
+        try {
+            get = new HttpGet(endpoint.getContainerUrl(containerName));
+            get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
+            response = httpClient.execute(get);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_NO_CONTENT == status) {
+                // Does already exist
+                return true;
+            }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                return existsContainer(newToken, retryCount);
+            }
+            if (HttpServletResponse.SC_NOT_FOUND != status) {
+                throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+            }
+
+            // 404 -> Does not exist, yet
+            return false;
+        } catch (IOException e) {
+            OXException error = handleCommunicationError(endpoint, token, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return existsContainer(token, nextRetry);
+            }
+
+            throw error;
+        } finally {
+            Utils.close(get, response);
+        }
+    }
+
+    private boolean createContainer(Token token, int retryCount) throws OXException {
+        HttpPut put = null;
+        HttpResponse response = null;
+        Endpoint endpoint = getEndpoint();
+        try {
+            put = new HttpPut(endpoint.getContainerUrl(containerName));
+            put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
+            response = httpClient.execute(put);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_CREATED == status || HttpServletResponse.SC_ACCEPTED == status) {
+                // Does already exist
+                return true;
+            }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                return createContainer(newToken, retryCount);
+            }
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+        } catch (IOException e) {
+            OXException error = handleCommunicationError(endpoint, token, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                return createContainer(token, nextRetry);
+            }
+
+            throw error;
+        } finally {
+            Utils.close(put, response);
+        }
+    }
+
+    /**
      * Stores a new object.
      *
      * @param data The content to store
@@ -150,12 +249,11 @@ public class SwiftClient {
      * @return The new identifier of the stored object
      */
     public UUID put(InputStream data, long length) throws OXException {
-        return put(data, length, 0);
+        Token token = getOrAcquireNewTokenIfExpired();
+        return put(data, length, token, 0);
     }
 
-    private UUID put(InputStream data, long length, int retryCount) throws OXException {
-        Token token = acquireTokenIfExpired();
-
+    private UUID put(InputStream data, long length, Token token, int retryCount) throws OXException {
         HttpResponse response = null;
         HttpPut put = null;
         Endpoint endpoint = getEndpoint();
@@ -170,11 +268,13 @@ public class SwiftClient {
                 return id;
             }
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
-                throw SwiftExceptionCode.AUTH_FAILED.create();
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                return put(data, length, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            OXException error = handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, token, e);
             if (null == error) {
                 // Retry... With exponential back-off
                 int nextRetry = retryCount + 1;
@@ -185,7 +285,7 @@ public class SwiftClient {
 
                 long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
                 LockSupport.parkNanos(nanosToWait);
-                return put(data, length, nextRetry);
+                return put(data, length, token, nextRetry);
             }
 
             throw error;
@@ -213,12 +313,11 @@ public class SwiftClient {
      * @return The object's input stream
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
-        return get(id, rangeStart, rangeEnd, 0);
+        Token token = getOrAcquireNewTokenIfExpired();
+        return get(id, rangeStart, rangeEnd, token, 0);
     }
 
-    private InputStream get(UUID id, long rangeStart, long rangeEnd, int retryCount) throws OXException {
-        Token token = acquireTokenIfExpired();
-
+    private InputStream get(UUID id, long rangeStart, long rangeEnd, Token token, int retryCount) throws OXException {
         HttpGet get = null;
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
@@ -240,11 +339,13 @@ public class SwiftClient {
                 throw FileStorageCodes.FILE_NOT_FOUND.create(UUIDs.getUnformattedString(id));
             }
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
-                throw SwiftExceptionCode.AUTH_FAILED.create();
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                return get(id, rangeStart, rangeEnd, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            OXException error = handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, token, e);
             if (null == error) {
                 // Retry... With exponential back-off
                 int nextRetry = retryCount + 1;
@@ -255,7 +356,7 @@ public class SwiftClient {
 
                 long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
                 LockSupport.parkNanos(nanosToWait);
-                return get(id, rangeStart, rangeEnd, nextRetry);
+                return get(id, rangeStart, rangeEnd, token, nextRetry);
             }
 
             throw error;
@@ -272,12 +373,11 @@ public class SwiftClient {
      * @throws OXException
      */
     public boolean delete(UUID id) throws OXException {
-        return delete(id, 0);
+        Token token = getOrAcquireNewTokenIfExpired();
+        return delete(id, token, 0);
     }
 
-    private boolean delete(UUID id, int retryCount) throws OXException {
-        Token token = acquireTokenIfExpired();
-
+    private boolean delete(UUID id, Token token, int retryCount) throws OXException {
         HttpDelete delete = null;
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
@@ -293,11 +393,13 @@ public class SwiftClient {
                 return false;
             }
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
-                throw SwiftExceptionCode.AUTH_FAILED.create();
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                delete(id, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
-            OXException error = handleCommunicationError(endpoint, e);
+            OXException error = handleCommunicationError(endpoint, token, e);
             if (null == error) {
                 // Retry... With exponential back-off
                 int nextRetry = retryCount + 1;
@@ -308,7 +410,7 @@ public class SwiftClient {
 
                 long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
                 LockSupport.parkNanos(nanosToWait);
-                return delete(id, nextRetry);
+                return delete(id, token, nextRetry);
             }
 
             throw error;
@@ -323,8 +425,9 @@ public class SwiftClient {
      * @param ids The identifier of the objects to delete
      */
     public void delete(Collection<UUID> ids) throws OXException {
+        Token token = getOrAcquireNewTokenIfExpired();
         for (UUID id : ids) {
-            delete(id);
+            delete(id, token, 0);
         }
     }
 
@@ -345,12 +448,14 @@ public class SwiftClient {
     /**
      * Handles communication errors. If the end-point is not available it is blacklisted.
      *
-     * @param endpoint The end-point for which the exception occurred.
+     * @param endpoint The end-point for which the exception occurred
+     * @param token The authentication token
      * @param e The exception
-     * @return An OXException to re-throw
+     * @return An OXException to re-throw or <code>null</code> to retry with another available end-point
      */
-    private OXException handleCommunicationError(Endpoint endpoint, IOException e) {
-        if (Utils.endpointUnavailable(endpoint.getBaseUrl(), httpClient)) {
+    private OXException handleCommunicationError(Endpoint endpoint, Token token, IOException e) {
+        Boolean unavailable = Utils.endpointUnavailable(endpoint.getBaseUrl(), token, httpClient);
+        if (null != unavailable && unavailable.booleanValue()) {
             LOG.warn("Swift end-point is unavailable: {}", endpoint);
             boolean anyAvailable = endpoints.blacklist(endpoint.getBaseUrl());
             if (anyAvailable) {
@@ -362,17 +467,18 @@ public class SwiftClient {
         return FileStorageCodes.IOERROR.create(e, e.getMessage());
     }
 
-    private Token acquireTokenIfExpired() throws OXException {
+    private Token getOrAcquireNewTokenIfExpired() throws OXException {
         Token token = tokenRef.get();
-        return token.isExpired() ? acquireToken(token) : token;
+        return token.isExpired() ? acquireNewToken(token) : token;
     }
 
-    private synchronized Token acquireToken(Token token) throws OXException {
+    private synchronized Token acquireNewToken(Token expiredToken) throws OXException {
         // Check if already newly acquired
         {
-            Token cand = tokenRef.get();
-            if (token != cand) {
-                return cand;
+            Token current = tokenRef.get();
+            if (expiredToken != current) {
+                // Another thread acquired a new token in the meantime
+                return current;
             }
         }
 
@@ -405,6 +511,7 @@ public class SwiftClient {
             JSONObject jToken = jAccess.getJSONObject("token");
             Token newToken = Token.parseFrom(jToken);
             tokenRef.set(newToken);
+            endpoints.applyNewToken(newToken);
             return newToken;
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());

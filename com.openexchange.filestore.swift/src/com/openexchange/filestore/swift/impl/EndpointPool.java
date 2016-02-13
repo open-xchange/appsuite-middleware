@@ -52,6 +52,7 @@ package com.openexchange.filestore.swift.impl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -85,6 +86,7 @@ public class EndpointPool {
     private final List<String> blacklist;
     private final AtomicInteger counter;
     private final String filestoreId;
+    private final AtomicReference<Token> tokenRef;
     private volatile ScheduledTimerTask heartbeat;
 
     /**
@@ -99,6 +101,7 @@ public class EndpointPool {
     public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
         super();
         this.filestoreId = filestoreId;
+        tokenRef = new AtomicReference<Token>();
         int size = endpointUrls.size();
         available = new ArrayList<>(endpointUrls);
         blacklist = new ArrayList<>(size);
@@ -108,7 +111,7 @@ public class EndpointPool {
         }
 
         LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
-        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(filestoreId, this, httpClient), heartbeatInterval, heartbeatInterval);
+        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
     }
 
     /**
@@ -218,25 +221,30 @@ public class EndpointPool {
         }
     }
 
+    /**
+     * Applies a new token to this end-point pool used for heart-beating blacklisted end-points.
+     *
+     * @param newToken The new token to apply
+     */
+    void applyNewToken(Token newToken) {
+        tokenRef.set(newToken);
+    }
+
     // -------------------------------------------------------------------------------------------------------------------------- //
 
-    private static final class Heartbeat implements Runnable {
+    private final class Heartbeat implements Runnable {
 
-        private final String filestoreId;
-        private final EndpointPool endpoints;
         private final HttpClient httpClient;
 
-        Heartbeat(String filestoreId, EndpointPool endpoints, HttpClient httpClient) {
+        Heartbeat(HttpClient httpClient) {
             super();
-            this.filestoreId = filestoreId;
-            this.endpoints = endpoints;
             this.httpClient = httpClient;
         }
 
         @Override
         public void run() {
             try {
-                List<String> blacklist = endpoints.getBlacklist();
+                List<String> blacklist = getBlacklist();
                 int size = blacklist.size();
                 if (size <= 0) {
                     LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist is empty, nothing to do", filestoreId);
@@ -245,10 +253,13 @@ public class EndpointPool {
 
                 LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, Integer.valueOf(size));
                 for (String endpoint : blacklist) {
-                    if (Utils.endpointUnavailable(endpoint, httpClient)) {
-                        LOG.warn("Swift end-point pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
-                    } else {
-                        endpoints.unblacklist(endpoint);
+                    Boolean unavailable = Utils.endpointUnavailable(endpoint, tokenRef.get(), httpClient);
+                    if (null != unavailable) {
+                        if (unavailable.booleanValue()) {
+                            LOG.warn("Swift end-point pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);
+                        } else {
+                            unblacklist(endpoint);
+                        }
                     }
                 }
             } catch (Throwable t) {

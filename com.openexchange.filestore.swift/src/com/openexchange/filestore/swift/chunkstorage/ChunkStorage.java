@@ -81,7 +81,7 @@ public interface ChunkStorage {
     /**
      * Gets the chunk for the denoted document.
      *
-     * @param chunkId The chunk's identifier in Scality system
+     * @param chunkId The chunk's identifier in Swift system
      * @return The chunk or <code>null</code> if there is no such chunk
      * @throws OXException If chunk cannot be returned
      */
@@ -90,7 +90,7 @@ public interface ChunkStorage {
     /**
      * Gets the next chunk following referenced chunk in denoted document.
      *
-     * @param chunkId The chunk's identifier in Scality system
+     * @param chunkId The chunk's identifier in Swift system
      * @param documentId The document identifier
      * @return The next chunk or <code>null</code> if there is no next chunk
      * @throws OXException If chunk cannot be returned
@@ -127,7 +127,7 @@ public interface ChunkStorage {
     /**
      * Deletes a chunk
      *
-     * @param chunkId The chunk's identifier in Scality system
+     * @param chunkId The chunk's identifier in Swift system
      * @return <code>true</code> upon successful deletion; otherwise <code>false</code> if there was no such chunk
      * @throws OXException If chunk cannot be deleted
      */

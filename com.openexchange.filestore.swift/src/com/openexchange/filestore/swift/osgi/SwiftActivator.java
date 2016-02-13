@@ -58,11 +58,11 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.swift.SwiftFileStorageFactory;
-import com.openexchange.filestore.swift.groupware.SproxydCreateTableService;
-import com.openexchange.filestore.swift.groupware.SproxydCreateTableTask;
-import com.openexchange.filestore.swift.groupware.SproxydDeleteListener;
-import com.openexchange.filestore.swift.rmi.SproxydRemoteManagement;
-import com.openexchange.filestore.swift.rmi.impl.SproxydRemoteImpl;
+import com.openexchange.filestore.swift.groupware.SwiftCreateTableService;
+import com.openexchange.filestore.swift.groupware.SwiftCreateTableTask;
+import com.openexchange.filestore.swift.groupware.SwiftDeleteListener;
+import com.openexchange.filestore.swift.rmi.SwiftRemoteManagement;
+import com.openexchange.filestore.swift.rmi.impl.SwiftRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
 import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
@@ -70,18 +70,18 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link SwiftdActivator}
+ * {@link SwiftActivator}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class SwiftdActivator extends HousekeepingActivator {
+public class SwiftActivator extends HousekeepingActivator {
 
-    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftdActivator.class);
+    private final static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftActivator.class);
 
     /**
-     * Initializes a new {@link SwiftdActivator}.
+     * Initializes a new {@link SwiftActivator}.
      */
-    public SwiftdActivator() {
+    public SwiftActivator() {
         super();
     }
 
@@ -99,9 +99,9 @@ public class SwiftdActivator extends HousekeepingActivator {
         openTrackers();
 
         // Register update task, create table job and delete listener
-        registerService(CreateTableService.class, new SproxydCreateTableService());
-        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SproxydCreateTableTask(this)));
-        registerService(DeleteListener.class, new SproxydDeleteListener());
+        registerService(CreateTableService.class, new SwiftCreateTableService());
+        registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SwiftCreateTableTask(this)));
+        registerService(DeleteListener.class, new SwiftDeleteListener());
 
         // Register factory
         registerService(FileStorageProvider.class, new SwiftFileStorageFactory(this));
@@ -109,8 +109,8 @@ public class SwiftdActivator extends HousekeepingActivator {
         // Register RMI
         {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
-            props.put("RMIName", SproxydRemoteManagement.RMI_NAME);
-            registerService(Remote.class, new SproxydRemoteImpl(this), props);
+            props.put("RMIName", SwiftRemoteManagement.RMI_NAME);
+            registerService(Remote.class, new SwiftRemoteImpl(this), props);
         }
     }
 
