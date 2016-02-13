@@ -121,7 +121,7 @@ public class SwiftClient {
         containerName = sb.toString();
 
         // Get token
-        acquireToken();
+        acquireToken(null);
     }
 
     /**
@@ -364,10 +364,19 @@ public class SwiftClient {
 
     private Token acquireTokenIfExpired() throws OXException {
         Token token = tokenRef.get();
-        return token.isExpired() ? acquireToken() : token;
+        return token.isExpired() ? acquireToken(token) : token;
     }
 
-    private synchronized Token acquireToken() throws OXException {
+    private synchronized Token acquireToken(Token token) throws OXException {
+        // Check if already newly acquired
+        {
+            Token cand = tokenRef.get();
+            if (token != cand) {
+                return cand;
+            }
+        }
+
+        // Get a new one
         HttpPost post = null;
         HttpResponse response = null;
         try {
@@ -394,9 +403,9 @@ public class SwiftClient {
             JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
             JSONObject jAccess = jResponse.getJSONObject("access");
             JSONObject jToken = jAccess.getJSONObject("token");
-            Token token = Token.parseFrom(jToken);
-            tokenRef.set(token);
-            return token;
+            Token newToken = Token.parseFrom(jToken);
+            tokenRef.set(newToken);
+            return newToken;
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (JSONException e) {
