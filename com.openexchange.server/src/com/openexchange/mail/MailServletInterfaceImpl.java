@@ -74,6 +74,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -3201,7 +3202,12 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             ObjectUseCountService objectUseCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
             if (null != objectUseCountService) {
-                IncrementArguments arguments = new IncrementArguments.Builder(new HashSet<InternetAddress>(Arrays.asList(composedMail.getAllRecipients()))).build();
+                InternetAddress[] addresses = composedMail.getAllRecipients();
+                Set<String> addrs = new LinkedHashSet<String>(addresses.length);
+                for (InternetAddress address : addresses) {
+                    addrs.add(address.getAddress());
+                }
+                IncrementArguments arguments = new IncrementArguments.Builder(addrs).build();
                 objectUseCountService.incrementObjectUseCount(session, arguments);
             }
             /*

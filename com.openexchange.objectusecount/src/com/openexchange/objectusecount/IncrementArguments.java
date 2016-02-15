@@ -52,9 +52,7 @@ package com.openexchange.objectusecount;
 import java.sql.Connection;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
-import javax.mail.internet.InternetAddress;
 
 /**
  * {@link IncrementArguments} - Specifies arguments to use when incrementing use count(s).
@@ -81,13 +79,9 @@ public class IncrementArguments extends AbstractArguments {
          *
          * @param mailAddresses The mail addresses by which to look-up contacts to update
          */
-        public Builder(Set<InternetAddress> mailAddresses) {
+        public Builder(Set<String> mailAddresses) {
             super();
-            Set<String> addrs = new LinkedHashSet<String>(mailAddresses.size());
-            for (InternetAddress address : mailAddresses) {
-                addrs.add(address.getAddress());
-            }
-            this.mailAddresses = addrs;
+            this.mailAddresses = mailAddresses;
             this.userId = -1;
             this.objectId = -1;
             this.folderId = -1;
