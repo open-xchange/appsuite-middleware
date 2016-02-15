@@ -49,7 +49,7 @@
 
 package com.openexchange.rest.services.users.mailMapping;
 
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -60,12 +60,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.PathSegment;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.MultipleMailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.user.UserService;
@@ -92,7 +92,7 @@ public class MailMappingRESTService {
 
     /**
      * GET /rest/utilities/mailResolver/resolve/[mail1];[mail2]
-     * 
+     *
      * Tries to resolve the given mail addresses to context and user IDs.
      * Returns an Object with the mail addresses as keys and objects with the keys "user" (for the userId) and "context" (for the contextId) as values.
      * If a mail address is unknown, the corresponding key will be missing in the response.
@@ -102,38 +102,62 @@ public class MailMappingRESTService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public JSONObject resolve(@PathParam("mail") PathSegment mail) throws OXException {
-        JSONObject response = new JSONObject();
-        Set<String> mails = new HashSet<String>();
+        // Get E-Mail addresses
+        Set<String> mails = new LinkedHashSet<String>(8);
         mails.add(mail.getPath());
         mails.addAll(mail.getMatrixParameters().keySet());
 
+        // Check required service
         MailResolver resolver = services.getService(MailResolver.class);
-        for (String m : mails) {
-            ResolvedMail resolved = resolver.resolve(m);
-            if (resolved == null) {
-                continue;
-            }
-            ContextService contexts = services.getService(ContextService.class);
-            Context ctx = contexts.getContext(resolved.getContextID());
-            User user = services.getService(UserService.class).getUser(resolved.getUserID(), ctx);
-
-            try {
-                JSONObject userJson = new JSONObject();
-                userJson.put("language", user.getPreferredLanguage());
-                userJson.put("displayName", user.getDisplayName());
-
-                JSONObject resolvedJson = new JSONObject();
-                resolvedJson.put("uid", resolved.getUserID());
-                resolvedJson.put("cid", resolved.getContextID());
-                resolvedJson.put("user", userJson);
-
-                response.put(m, resolvedJson);
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
-            }
+        if (null == resolver) {
+            throw ServiceExceptionCode.absentService(MailResolver.class);
         }
 
-        return response;
+        // Check required service
+        UserService users = services.getService(UserService.class);
+        if (null == users) {
+            throw ServiceExceptionCode.absentService(UserService.class);
+        }
+
+        // Resolve them...
+        try {
+            int size = mails.size();
+            JSONObject response = new JSONObject(size);
+
+            if (resolver instanceof MultipleMailResolver) {
+                MultipleMailResolver multipleMailResolver = (MultipleMailResolver) resolver;
+
+                String[] sMails = mails.toArray(new String[size]);
+                ResolvedMail[] resolveds = multipleMailResolver.resolveMultiple(sMails);
+                for (int i = 0; i < resolveds.length; i++) {
+                    ResolvedMail resolved = resolveds[i];
+                    if (resolved != null) {
+                        User user = users.getUser(resolved.getUserID(), resolved.getContextID());
+                        response.put(sMails[i], asJson(resolved, user));
+                    }
+                }
+            } else {
+                for (String m : mails) {
+                    ResolvedMail resolved = resolver.resolve(m);
+                    if (resolved != null) {
+                        User user = users.getUser(resolved.getUserID(), resolved.getContextID());
+                        response.put(m, asJson(resolved, user));
+                    }
+                }
+            }
+
+            return response;
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
+    }
+
+    private JSONObject asJson(ResolvedMail resolved, User user) throws JSONException {
+        JSONObject resolvedJson = new JSONObject(4);
+        resolvedJson.put("uid", resolved.getUserID());
+        resolvedJson.put("cid", resolved.getContextID());
+        resolvedJson.put("user", new JSONObject(4).put("language", user.getPreferredLanguage()).put("displayName", user.getDisplayName()));
+        return resolvedJson;
     }
 
 }

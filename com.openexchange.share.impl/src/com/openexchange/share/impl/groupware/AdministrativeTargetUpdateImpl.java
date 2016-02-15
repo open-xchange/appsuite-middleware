@@ -117,6 +117,8 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
              */
             AdministrativeFolderTargetProxy folderTargetProxy = (AdministrativeFolderTargetProxy) proxy;
             Session syntheticOwnerSession = ServerSessionAdapter.valueOf(folderTargetProxy.getOwner(), contextID);
+            syntheticOwnerSession.setParameter("com.openexchange.share.administrativeUpdate", Boolean.TRUE);
+            syntheticOwnerSession.setParameter(Connection.class.getName() + '@' + Thread.currentThread().getId(), connection);
             OXFolderManager folderManager = OXFolderManager.getInstance(syntheticOwnerSession, folderAccess, connection, connection);
             folderManager.updateFolder(folderTargetProxy.getFolder(), false, System.currentTimeMillis());
             /*

@@ -74,6 +74,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
@@ -332,7 +333,8 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     List<Integer> addedUsers = comparedPermissions.getAddedUsers();
                     if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
                         for (Integer i : addedUsers) {
-                            useCountService.incrementObjectUseCountForInternalUser(session, i.intValue());
+                            IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
+                            useCountService.incrementObjectUseCount(session, arguments);
                         }
                     }
 

@@ -55,6 +55,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.client.windows.service.Constants;
 
 
@@ -62,13 +65,14 @@ import com.openexchange.drive.client.windows.service.Constants;
  * {@link BrandingConfig} is a storage for branding configuration's.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class BrandingConfig {
 
     private final Properties prop;
     private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
     private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
+    private final static Logger LOG = LoggerFactory.getLogger(BrandingConfig.class);
 
     private BrandingConfig(File file) throws IOException {
         prop = new Properties();
@@ -101,6 +105,12 @@ public class BrandingConfig {
             }
         }
         CONFIGS.put(file.getParentFile().getName(), conf);
+        BrandedDriveVersionService versionService = Services.getService(BrandedDriveVersionService.class);
+        if (versionService != null) {
+            versionService.putBranding(file.getParentFile().getName(), conf.getProperties().getProperty("version"), conf.getProperties().getProperty("minimumVersion"));
+        } else {
+            LOG.warn("BrandedDriveVersionService is not available. Version restrictions are not applied.");
+        }
         return true;
     }
 
@@ -109,6 +119,10 @@ public class BrandingConfig {
      */
     public static void clear() {
         CONFIGS.clear();
+        BrandedDriveVersionService versionService = Services.getService(BrandedDriveVersionService.class);
+        if (versionService != null) {
+            versionService.clearAll();
+        }
     }
 
     /**

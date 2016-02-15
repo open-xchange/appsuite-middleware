@@ -49,9 +49,7 @@
 
 package com.openexchange.sms;
 
-import java.util.Locale;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
 
 /**
  * {@link SMSServiceSPI}
@@ -59,47 +57,17 @@ import com.openexchange.server.ServiceLookup;
  * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
  * @since v7.8.1
  */
-public abstract class SMSServiceSPI implements SMSService {
-
-    protected final ServiceLookup services;
+public interface SMSServiceSPI {
 
     /**
-     * Initializes a new {@link SMSServiceSPI}.
-     */
-    public SMSServiceSPI(ServiceLookup services) {
-        super();
-        this.services = services;
-    }
-
-    @Override
-    public abstract void sendMessage(String recipient, String message) throws OXException;
-
-    @Override
-    public abstract void sendMessage(String recipient, String message, Locale locale) throws OXException;
-
-    @Override
-    public abstract void sendMessage(String recipient, String message, String languageTag) throws OXException;
-
-    @Override
-    public abstract void sendMessage(String[] recipients, String message) throws OXException;
-
-    @Override
-    public abstract void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
-
-    @Override
-    public abstract void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException;
-
-    /**
-     * Parse phone number into E.123 format
+     * Send a SMS message to multiple recipients.
+     * Use com.openexchange.sms.SMSExceptionCode in case of errors.
      *
-     * @param phoneNumber
-     * @param locale
-     * @return
-     * @throws OXException
+     * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. +49 123 4567890
+     * @param message The message to send
+     * @throws OXException On error
      */
-    protected String checkAndFormatPhoneNumber(String phoneNumber, Locale locale) throws OXException {
-        PhoneNumberParserService parser = services.getService(PhoneNumberParserService.class);
-        return parser.parsePhoneNumber(phoneNumber, locale);
-    }
+    void sendMessage(String[] recipients, String message) throws OXException;
+
 
 }

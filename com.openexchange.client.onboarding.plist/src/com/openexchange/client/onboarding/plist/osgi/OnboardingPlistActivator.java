@@ -62,7 +62,7 @@ import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.user.UserService;
 
 
@@ -94,7 +94,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
         Services.setServiceLookup(this);
 
         // Track services needed for SMS transport
-        trackService(SMSService.class);
+        trackService(SMSServiceSPI.class);
         trackService(DownloadLinkProvider.class);
         trackService(HostnameService.class);
         openTrackers();

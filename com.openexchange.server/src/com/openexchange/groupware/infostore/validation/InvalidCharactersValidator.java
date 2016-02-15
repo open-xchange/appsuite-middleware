@@ -49,6 +49,7 @@
 
 package com.openexchange.groupware.infostore.validation;
 
+import java.util.Set;
 import com.openexchange.groupware.data.Check;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -59,7 +60,7 @@ import com.openexchange.tools.session.ServerSession;
 public class InvalidCharactersValidator implements InfostoreValidator{
 
 	@Override
-    public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata) {
+    public DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) {
 		final DocumentMetadataValidation validation = new DocumentMetadataValidation();
 		final GetSwitch get = new GetSwitch(metadata);
 		for(final Metadata field : Metadata.VALUES_ARRAY){

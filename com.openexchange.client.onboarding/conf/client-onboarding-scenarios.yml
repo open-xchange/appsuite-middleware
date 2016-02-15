@@ -158,7 +158,8 @@ emclientinstall:
 ################################################################################
 
 driveappinstall:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: link
     providers: [driveapp]
     alternatives: []
@@ -253,16 +254,20 @@ davmanual:
 # and the associated permissions are granted to the users, which are supposed to download the file
 
 oxupdaterinstall:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: link
     providers: [oxupdater]
     alternatives: []
     # The comma-separated Font Awesome names
     icon: fa-laptop
     # The translatable display name
-    displayName_t10e: "Connector for Microsoft Outlook®"
+    displayName_t10e: "Updater"
     # The translatable description
-    description_t10e: "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
+    description_t10e: "When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater."
+    # Alternative texts for Outlook Connector. If they should be used, remove the 'alt_' prefix and comment out the above ones.
+    alt_displayName_t10e: "Connector for Microsoft Outlook®"
+    alt_description_t10e: "Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients."
 
 
 ### Exchange ActiveSync

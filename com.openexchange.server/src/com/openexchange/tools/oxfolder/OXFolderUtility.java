@@ -70,7 +70,10 @@ import org.json.JSONObject;
 import org.json.JSONValue;
 import com.openexchange.ajax.tools.JSONCoercion;
 import com.openexchange.cache.impl.FolderCacheManager;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
@@ -91,7 +94,13 @@ import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.ShareTarget;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.session.ServerSession;
+import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
 
 /**
@@ -440,32 +449,175 @@ public final class OXFolderUtility {
     }
 
     /**
-     * Ensures that an user who does not hold full shared folder access cannot share one of his private folders
+     * Checks that any permission-related modifications to a folder are allowed based on the session user's module access permissions and
+     * capabilities.
      *
-     * @param folder The folder object
-     * @param permissionBits The session user's permissions
-     * @param context The context
-     * @throws OXException If an user tries to share a folder although he is not allowed to
+     * @param session The session
+     * @param folder The folder being saved
+     * @param originalPermissions The non-system permissions of the original folder in case of updates, or the parent folder's non-system permissions for new folders
      */
-    public static void checkPermissionsAgainstSessionUserConfig(FolderObject folder, UserPermissionBits permissionBits, Context context) throws OXException {
-        List<OCLPermission> permissions = folder.getPermissions();
-        if (1 < permissions.size() && false == permissionBits.hasFullSharedFolderAccess() && (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
-            /*
-             * forbid any non-empty additional permission
-             */
-            for (int i = 1; i < permissions.size(); i++) {
-                if (false == isEmptyPermission(permissions.get(i))) {
+    public static void checkPermissionsAgainstSessionUserConfig(Session session, FolderObject folder, OCLPermission[] originalPermissions) throws OXException {
+        /*
+         * check for added, removed or modified permissions
+         */
+        OCLPermission[] newPermissions = folder.getNonSystemPermissionsAsArray();
+        List<OCLPermission> touchedPermissions = getTouchedPermissions(newPermissions, originalPermissions);
+        if (null == touchedPermissions || 0 == touchedPermissions.size()) {
+            return; // no changes
+        }
+        ServerSession serverSession = ServerSessionAdapter.valueOf(session);
+        ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+        CapabilitySet capabilities = ServerServiceRegistry.getServize(CapabilityService.class).getCapabilities(session);
+        for (OCLPermission permission : touchedPermissions) {
+            GuestInfo guestInfo = permission.isGroupPermission() ? null : shareService.getGuestInfo(session, permission.getEntity());
+            if (null == guestInfo) {
+                /*
+                 * internal permission entity, check "readcreatesharedfolders" flag
+                 */
+                if (permission.getEntity() != session.getUserId() && false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() &&
+                    (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
+                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(I(session.getUserId()), I(folder.getObjectID()), I(session.getContextId()));
+                }
+            } else if (RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
+                /*
+                 * anonymous link permission entity, check if link was added, modified or removed
+                 */
+                OCLPermission originalLinkPermission = getPermissionByEntity(originalPermissions, permission.getEntity());
+                OCLPermission newLinkPermission = getPermissionByEntity(newPermissions, permission.getEntity());
+                if (null == originalLinkPermission) {
                     /*
-                     * Prevent user from sharing a private folder cause he does not hold full shared folder access due to its user configuration
+                     * added link, check link target, assigned permissions & "share_links" capability
                      */
-                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(Integer.valueOf(permissionBits.getUserId()), Integer.valueOf(folder.getObjectID()), I(context.getContextId()));
+                    if (false == matches(guestInfo.getLinkTarget(), folder)) {
+                        throw ShareExceptionCodes.NO_MULTIPLE_TARGETS_LINK.create();
+                    }
+                    if (null == capabilities || false == capabilities.contains("share_links")) {
+                        throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                    }
+                    if (false == isAllowedLinkPermission(newLinkPermission)) {
+                        throw ShareExceptionCodes.INVALID_LINK_PERMISSION.create();
+                    }
+                } else if (null == newLinkPermission) {
+                    if (matches(guestInfo.getLinkTarget(), folder)) {
+                        /*
+                         * removed link during update, check "share_links" capability
+                         */
+                        if (null == capabilities || false == capabilities.contains("share_links")) {
+                            throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                        }
+                    } else {
+                        /*
+                         * another share target's link is not inherited during creation, okay
+                         */
+                    }
+                } else if (false == originalLinkPermission.equals(newLinkPermission)) {
+                    /*
+                     * modified link, re-check assigned permissions & "share_links" capability
+                     */
+                    if (null == capabilities || false == capabilities.contains("share_links")) {
+                        throw ShareExceptionCodes.NO_SHARE_LINK_PERMISSION.create();
+                    }
+                    if (false == isAllowedLinkPermission(newLinkPermission)) {
+                        throw ShareExceptionCodes.INVALID_LINK_PERMISSION.create();
+                    }
+                }
+            } else if (RecipientType.GUEST.equals(guestInfo.getRecipientType())) {
+                /*
+                 * external guest permission entity, check "readcreatesharedfolders" flag and "invite_guests" capability
+                 */
+                if (permission.getEntity() != session.getUserId()) {
+                    if (false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() &&
+                        (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
+                        throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(I(session.getUserId()), I(folder.getObjectID()), I(session.getContextId()));
+                    }
+                    if (null == capabilities || false == capabilities.contains("invite_guests")) {
+                        throw ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
+                    }
                 }
             }
         }
     }
 
-    private static boolean isEmptyPermission(final OCLPermission oclPerm) {
-        return (!oclPerm.isFolderAdmin() && oclPerm.getFolderPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getReadPermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getWritePermission() == OCLPermission.NO_PERMISSIONS && oclPerm.getDeletePermission() == OCLPermission.NO_PERMISSIONS);
+    /**
+     * Gets a list of permissions that have been either been added, removed, or modified based on the supplied new- and original permissions.
+     *
+     * @param newPermissions The new permissions, or <code>null</code> if not passed
+     * @param originalPermissions The original permissions, or <code>null</code> if there are none
+     * @return A list of permissions that have been added, modified or removed, or <code>null</code> or an empty list if there are none
+     */
+    private static List<OCLPermission> getTouchedPermissions(OCLPermission[] newPermissions, OCLPermission[] originalPermissions) {
+        if (null == newPermissions) {
+            return null; // no changes
+        }
+        /*
+         * check for added, removed or modified permissions
+         */
+        List<OCLPermission> touchedPermissions = new ArrayList<OCLPermission>();
+        for (OCLPermission permission : newPermissions) {
+            OCLPermission originalPermission = getPermissionByEntity(originalPermissions, permission.getEntity());
+            if (null == originalPermission || false == originalPermission.equals(permission)) {
+                touchedPermissions.add(permission);
+            }
+        }
+        if (null != originalPermissions) {
+            for (OCLPermission permission : originalPermissions) {
+                if (null == getPermissionByEntity(newPermissions, permission.getEntity())) {
+                    touchedPermissions.add(permission);
+                }
+            }
+        }
+        return touchedPermissions;
+    }
+
+    /**
+     * Searches an array of permissions for a specific entity.
+     *
+     * @param permissions The permissions to search in
+     * @param entity The identifier of the entity to lookup
+     * @return The entity's permission, or <code>null</code> if not present in the supplied permissions
+     */
+    private static OCLPermission getPermissionByEntity(OCLPermission[] permissions, int entity) {
+        if (null != permissions) {
+            for (OCLPermission permission : permissions) {
+                if (permission.getEntity() == entity) {
+                    return permission;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Gets a value indicating whether a share target points to a specific folder or not.
+     *
+     * @param shareTarget The share target to check
+     * @param folder The folder to match
+     * @return <code>true</code> if the share target matches the folder, <code>false</code>, otherwise
+     */
+    private static boolean matches(ShareTarget shareTarget, FolderObject folder) {
+        if (null != shareTarget && shareTarget.isFolder() && shareTarget.getModule() == folder.getModule()) {
+            try {
+                return folder.getObjectID() == Integer.parseInt(shareTarget.getFolder());
+            } catch (NumberFormatException e) {
+                LOG.warn("Unexpected database folder ID", e);
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Gets a value indicating whether the set permissions bits for an an anonymous link allowed or not.
+     *
+     * @param permission The permission to check
+     * @return <code>true</code> if the permission is allowed, <code>false</code>, otherwise
+     */
+    private static boolean isAllowedLinkPermission(OCLPermission permission) {
+        if (permission.isFolderAdmin() || permission.isGroupPermission() || permission.getFolderPermission() != Permission.READ_FOLDER ||
+            permission.getReadPermission() != Permission.READ_ALL_OBJECTS || permission.getWritePermission() != Permission.NO_PERMISSIONS ||
+            permission.getDeletePermission() != Permission.NO_PERMISSIONS) {
+            return false;
+        }
+        return true;
     }
 
     /**

@@ -72,7 +72,7 @@ import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSServiceSPI;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
@@ -112,7 +112,7 @@ public class OnboardingActivator extends HousekeepingActivator {
         addService(OnboardingService.class, serviceImpl);
 
         // Track services needed for SMS transport
-        trackService(SMSService.class);
+        trackService(SMSServiceSPI.class);
         trackService(DownloadLinkProvider.class);
 
         // Initialize & open provider tracker

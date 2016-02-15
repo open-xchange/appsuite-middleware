@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,65 @@
  *
  */
 
-package com.openexchange.sms;
+package com.openexchange.mailmapping.spi;
 
-import java.util.Locale;
-import com.openexchange.exception.OXException;
+import com.openexchange.mailmapping.ResolveReply;
+import com.openexchange.mailmapping.ResolvedMail;
 
 /**
- * {@link SMSService}
+ * {@link ResolvedContext}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public interface SMSService {
-    
-    /**
-     * Send a SMS message to a recipient
-     *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @throws OXException
-     */
-    public void sendMessage(String recipient, String message) throws OXException;
+public class ResolvedContext {
+
+    private final ResolveReply resolveReply;
+    private final int contextID;
 
     /**
-     * Send a SMS message to a recipient
+     * Initializes a new {@link ResolvedMail}.
      *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @param locale Locale of recipient's phone number to parse into correct format
-     * @throws OXException
+     * @param contextID The context identifier
      */
-    public void sendMessage(String recipient, String message, Locale locale) throws OXException;
+    public ResolvedContext(int contextID) {
+        this(contextID, ResolveReply.ACCEPT);
+    }
 
     /**
-     * Send a SMS message to a recipient
+     * Initializes a new {@link ResolvedMail}.
      *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @param languageTag Language tag of recipient's phone number to parse into correct format
-     * @throws OXException
+     * @param contextID The context identifier
+     * @param resolveReply The resolve reply
      */
-    public void sendMessage(String recipient, String message, String languageTag) throws OXException;
+    public ResolvedContext(int contextID, ResolveReply resolveReply) {
+        super();
+        this.contextID = contextID;
+        this.resolveReply = null == resolveReply ? ResolveReply.ACCEPT : resolveReply;
+    }
 
     /**
-     * Send a SMS message to recipients
+     * Gets the context identifier
      *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @throws OXException
+     * @return The context identifier or <code>-1</code> if unknown
+     *         (typically alongside with resolve type set to {@link ResolveReply#NEUTRAL} or {@link ResolveReply#DENY})
      */
-    public void sendMessage(String[] recipients, String message) throws OXException;
-    
-    /**
-     * Send a SMS message to recipients
-     *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @param locale Locales of recipients' phone numbers to parse into correct format
-     * @throws OXException
-     */
-    public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
+    public int getContextID() {
+        return contextID;
+    }
 
     /**
-     * Send a SMS message to recipients
+     * Gets the resolve reply
+     * <ul>
+     * <li>DENY - The {@code MailResolver} denies further processing of passed E-Mail address.
+     * <li>NEUTRAL - The {@code MailResolver} cannot handle passed E-Mail address, therefore delegates to the next one in chain.
+     * <li>ACCEPT - The {@code MailResolver} successfully handled passed E-Mail address.
+     * </ul>
      *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @param languageTags Language tags of recipients' phone numbers to parse into correct format
-     * @throws OXException
+     * @return The resolve reply
      */
-    public void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException;
+    public ResolveReply getResolveReply() {
+        return resolveReply;
+    }
 
 }

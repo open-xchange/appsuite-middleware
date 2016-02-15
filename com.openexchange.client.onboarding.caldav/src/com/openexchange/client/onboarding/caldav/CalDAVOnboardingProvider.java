@@ -181,7 +181,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(CALDAV_LOGIN_FIELD, session.getLogin());
         configuration.put(CALDAV_URL_FIELD, getCalDAVUrl(request.getHostData(), false, session.getUserId(), session.getContextId()));
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------

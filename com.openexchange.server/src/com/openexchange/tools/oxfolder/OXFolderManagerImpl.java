@@ -363,7 +363,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else if (FolderObject.INFOSTORE == folderObj.getModule() && setAdminAsCreatorForPublicDriveFolder() && isPublicInfoStoreFolder(parentFolder)) {
             folderObj.setCreatedBy(ctx.getMailadmin());
         }
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userPerms, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, folderObj, parentFolder.getNonSystemPermissionsAsArray());
         /*
          * Check if admin exists and permission structure
          */
@@ -893,7 +893,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             fo.setCreatedBy(storageObj.getCreatedBy());
         }
         fo.setDefaultFolder(storageObj.isDefaultFolder());
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userPerms, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, fo, storageObj.getNonSystemPermissionsAsArray());
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);

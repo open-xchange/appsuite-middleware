@@ -63,15 +63,18 @@ import com.openexchange.session.Session;
 public class DisplayResult implements Result {
 
     private final Map<String, Object> configuration;
+    private final ResultReply reply;
 
     /**
      * Initializes a new {@link DisplayResult}.
      *
      * @param configuration The configuration
+     * @param reply The result reply
      */
-    public DisplayResult(Map<String, Object> configuration) {
+    public DisplayResult(Map<String, Object> configuration, ResultReply reply) {
         super();
         this.configuration = configuration;
+        this.reply = null == reply ? ResultReply.ACCEPT : reply;
     }
 
     /**
@@ -85,7 +88,7 @@ public class DisplayResult implements Result {
 
     @Override
     public ResultReply getReply() {
-        return ResultReply.ACCEPT;
+        return reply;
     }
 
     @Override

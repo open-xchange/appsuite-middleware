@@ -211,7 +211,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         filterBuilder.append('(');
         terms.get(0).visit(this);
         for (int i = 1; i < size; i++) {
-            filterBuilder.append("AND ");
+            filterBuilder.append(" AND ");
             terms.get(i).visit(this);
         }
         filterBuilder.append(')');
@@ -237,7 +237,7 @@ public class ToMySqlQueryVisitor implements SearchTermVisitor {
         filterBuilder.append('(');
         terms.get(0).visit(this);
         for (int i = 1; i < size; i++) {
-            filterBuilder.append("OR ");
+            filterBuilder.append(" OR ");
             terms.get(i).visit(this);
         }
         filterBuilder.append(')');

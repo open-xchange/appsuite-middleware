@@ -182,7 +182,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         Map<String, Object> configuration = null == previousResult ? new HashMap<String, Object>(8) : ((DisplayResult) previousResult).getConfiguration();
         configuration.put(EAS_LOGIN_FIELD, session.getLogin());
         configuration.put(EAS_URL_FIELD, getEASUrl(request.getHostData(), false, session.getUserId(), session.getContextId()));
-        return new DisplayResult(configuration);
+        return new DisplayResult(configuration, ResultReply.NEUTRAL);
     }
 
     // --------------------------------------------- PLIST utils --------------------------------------------------------------

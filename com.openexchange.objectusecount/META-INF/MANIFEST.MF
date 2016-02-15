@@ -9,6 +9,5 @@ Import-Package: com.openexchange.exception,
  com.openexchange.log,
  com.openexchange.osgi,
  com.openexchange.server,
- com.openexchange.session,
- javax.mail.internet;version="1.5.0"
+ com.openexchange.session
 Export-Package: com.openexchange.objectusecount

@@ -130,7 +130,7 @@ public class EffectiveInfostorePermission {
      * @return <code>true</code> if the item can be shared based on the folder permissions, <code>false</code>, otherwise
      */
     public boolean canShareObjectInFolder() {
-        return permission.hasFullSharedFolderAccess() && canWriteObjectInFolder();
+        return canWriteObjectInFolder();
     }
 
     public boolean canWriteObjectInFolder() {

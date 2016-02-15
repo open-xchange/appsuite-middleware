@@ -74,7 +74,7 @@ import com.openexchange.tools.webdav.OXServlet;
  * {@link DownloadServlet} is a servlet to download the branded setup files for the windows drive client.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.0
+ * @since v7.8.1
  */
 public class DownloadServlet extends OXServlet {
 
@@ -102,7 +102,7 @@ public class DownloadServlet extends OXServlet {
                 resp.sendError(HttpServletResponse.SC_FORBIDDEN);
                 return;
             }
-            
+
             String fileName = req.getPathInfo();
             if (fileName == null) {
                 resp.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -114,7 +114,7 @@ public class DownloadServlet extends OXServlet {
             if (fileName.startsWith("/")) {
                 fileName = fileName.substring(1, fileName.length());
             }
-            
+
             String branding = BrandingService.getBranding(session);
 
             if (provider.contains(branding, fileName)) {
@@ -152,11 +152,15 @@ public class DownloadServlet extends OXServlet {
                 return;
             }
 
-            BrowserDetector detector = BrowserDetector.detectorFor(req.getHeader(Tools.HEADER_AGENT));
+            boolean isMSIE = false;
+            BrowserDetector detector =  BrowserDetector.detectorFor(req.getHeader(Tools.HEADER_AGENT));
+            if (detector != null) {
+                isMSIE = detector.isMSIE();
+            }
             resp.setStatus(HttpServletResponse.SC_OK);
             resp.setContentType("application/octet-stream");
             resp.setContentLength(fileSize);
-            resp.setHeader("Content-disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(fileName, "UTF-8", detector.isMSIE())) + "\"");
+            resp.setHeader("Content-disposition", "attachment; filename=\"" + Helper.escape(Helper.encodeFilename(fileName, "UTF-8", isMSIE)) + "\"");
             Tools.removeCachingHeader(resp);
 
             OutputStream out = resp.getOutputStream();

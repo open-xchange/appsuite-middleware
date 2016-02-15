@@ -109,7 +109,7 @@ public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
             + "`user` INT4 UNSIGNED NOT NULL, " 
             + "`alias` VARCHAR(255) NOT NULL, " 
             + "`uuid` BINARY(16) DEFAULT NULL," 
-            + "PRIMARY KEY (`cid`, `user`, `alias`, `uuid`) " 
+            + "PRIMARY KEY (`cid`, `user`, `alias`) " 
             + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         } finally {
             closeSQLStuff(stmt);

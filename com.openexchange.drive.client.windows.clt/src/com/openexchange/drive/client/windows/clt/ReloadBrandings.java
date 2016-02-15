@@ -49,20 +49,14 @@
 
 package com.openexchange.drive.client.windows.clt;
 
-import java.net.MalformedURLException;
 import java.rmi.Naming;
-import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.List;
-import com.openexchange.admin.console.AdminParser;
-import com.openexchange.admin.console.BasicCommandlineOptions;
-import com.openexchange.admin.console.CLIIllegalOptionValueException;
-import com.openexchange.admin.console.CLIOption;
-import com.openexchange.admin.console.CLIParseException;
-import com.openexchange.admin.console.CLIUnknownOptionException;
-import com.openexchange.admin.rmi.exceptions.MissingOptionException;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.auth.rmi.RemoteAuthenticator;
+import com.openexchange.cli.AbstractRmiCLI;
 import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRemote;
-import com.openexchange.exception.OXException;
 
 /**
  * {@link ReloadBrandings}
@@ -70,67 +64,59 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.0
  */
-public class ReloadBrandings extends BasicCommandlineOptions {
+public class ReloadBrandings extends AbstractRmiCLI<Void> {
 
     private static final String PATH_LONG = "path";
-    private static final char PATH_SHORT = 'p';
 
-    private CLIOption path = null;
-
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
         new ReloadBrandings().execute(args);
     }
 
-    private void execute(String[] args) {
-        final AdminParser parser = new AdminParser("reload_brandings");
-        setOptions(parser);
-        try {
-            parser.ownparse(args);
-            BrandingConfigurationRemote remote = (BrandingConfigurationRemote) Naming.lookup(RMI_HOSTNAME + BrandingConfigurationRemote.RMI_NAME);
-            String path = (String) parser.getOptionValue(this.path);
-            List<String> brands;
-            if (path == null || path.length() == 0) {
-                brands = remote.reload();
-            } else {
-                brands = remote.reload(path);
-            }
-            System.out.println("Brandings successful reloaded!");
-            System.out.println("The following brands are now available:");
-            for (String brand : brands) {
-                System.out.println("\t -" + brand);
-            }
-        } catch (CLIParseException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIIllegalOptionValueException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_ILLEGAL_OPTION_VALUE);
-        } catch (CLIUnknownOptionException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_UNKNOWN_OPTION);
-        } catch (MissingOptionException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_MISSING_OPTION);
-        } catch (MalformedURLException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
-        } catch (RemoteException e) {
-            printError(e.getMessage(), parser);
-            sysexit(SYSEXIT_REMOTE_ERROR);
-        } catch (NotBoundException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
-        } catch (OXException e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, RemoteAuthenticator authenticator) throws RemoteException {
+        authenticator.doAuthentication(login, password);
+    }
+
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption(null, PATH_LONG, true, "Defines the path to look for brandings. If set the configured path will be ignored.");
+    }
+
+    @Override
+    protected Void invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception {
+        BrandingConfigurationRemote remote = (BrandingConfigurationRemote) Naming.lookup(RMI_HOSTNAME + BrandingConfigurationRemote.RMI_NAME);
+        String path = cmd.getOptionValue(PATH_LONG);
+        List<String> brands;
+        if (path == null || path.length() == 0) {
+            brands = remote.reload();
+        } else {
+            brands = remote.reload(path);
         }
+        System.out.println("Brandings successful reloaded!");
+        System.out.println("The following brands are now available:");
+        for (String brand : brands) {
+            System.out.println("\t -" + brand);
+        }
+        return null;
     }
 
-    private void setOptions(AdminParser parser) {
-        this.path = setShortLongOpt(parser, PATH_SHORT, PATH_LONG, "a path", "Defines the path to look for brandings. If set the configured path will be ignored.", false);
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return true;
     }
 
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        // Nothing to check
+    }
+
+    @Override
+    protected String getFooter() {
+        return "The command-line tool to reload the available windows drive clients";
+    }
+
+    @Override
+    protected String getName() {
+        return "reloaddriveclients";
+    }
 }
