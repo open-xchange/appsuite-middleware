@@ -123,25 +123,7 @@ public class AllAction extends AbstractFileStorageAccountAction {
 
                     if (null != rootFolder) {
                         // Check file storage capabilities
-                        Set<String> caps = new HashSet<String>();
-                        if (access instanceof CapabilityAware) {
-                            CapabilityAware capabilityAware = (CapabilityAware) access;
-                            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-                            if (null != supported && supported.booleanValue()) {
-                                caps.add(FileStorageCapability.FILE_VERSIONS.name());
-                            }
-                            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-                            if (null != supported && supported.booleanValue()) {
-                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-                            }
-
-                            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                                caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-                            }
-                            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
-                                caps.add(FileStorageCapability.LOCKS.name());
-                            }
-                        }
+                        Set<String> caps = determineCapabilities(access);
                         result.put(writer.write(account, rootFolder, caps));
                     }
                 } catch (OXException e) {
@@ -154,30 +136,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
                             // Ignore
                         }
                     } else {
-                        //add account with error
-                        Set<String> caps = null;
-                        if (access != null) {
-                            // Check file storage capabilities
-                            if (access instanceof CapabilityAware) {
-                                caps = new HashSet<String>();
-                                CapabilityAware capabilityAware = (CapabilityAware) access;
-                                Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-                                if (null != supported && supported.booleanValue()) {
-                                    caps.add(FileStorageCapability.FILE_VERSIONS.name());
-                                }
-                                supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-                                if (null != supported && supported.booleanValue()) {
-                                    caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-                                }
-
-                                if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                                    caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-                                }
-                                if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
-                                    caps.add(FileStorageCapability.LOCKS.name());
-                                }
-                            }
-                        }
+                        // Add account with error
+                        Set<String> caps = determineCapabilities(access);
                         result.put(writer.write(account, null, caps, e, session));
                     }
                 }
@@ -185,6 +145,33 @@ public class AllAction extends AbstractFileStorageAccountAction {
         }
 
         return requestResult;
+    }
+
+    private Set<String> determineCapabilities(FileStorageAccountAccess access) {
+        if (!(access instanceof CapabilityAware)) {
+            return null;
+        }
+
+        CapabilityAware capabilityAware = (CapabilityAware) access;
+        Set<String> caps = new HashSet<String>();
+        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.LOCKS.name());
+        }
+        return caps;
     }
 
 }

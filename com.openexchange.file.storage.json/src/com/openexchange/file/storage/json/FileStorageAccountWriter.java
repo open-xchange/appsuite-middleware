@@ -153,10 +153,9 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
-        //add capabilities
-        if(capabilities==null)
-        {
-            capabilities=new HashSet<String>(0);
+        // Add capabilities
+        if (capabilities == null) {
+            capabilities = new HashSet<String>(0);
         }
         accountJSON.put("capabilities", capabilities);
         return accountJSON;
@@ -188,9 +187,8 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
-        //add capabilities
-        if (capabilities == null)
-        {
+        // Add capabilities
+        if (capabilities == null) {
             capabilities = new HashSet<String>(0);
         }
         accountJSON.put("capabilities", capabilities);
