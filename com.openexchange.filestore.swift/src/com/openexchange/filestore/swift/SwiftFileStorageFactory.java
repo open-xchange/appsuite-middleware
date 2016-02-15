@@ -137,15 +137,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             storage = storages.putIfAbsent(uri, newStorage);
             if (null == storage) {
                 storage = newStorage;
-                newStorage.createContainer();
-            } else {
-                try {
-                    storage.awaitContainerCreation();
-                } catch (InterruptedException e) {
-                    // Keep interrupted status
-                    Thread.currentThread().interrupt();
-                    throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Interrupted");
-                }
             }
         }
         return storage;

@@ -57,7 +57,11 @@ import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicReference;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -77,7 +81,7 @@ public class SwiftFileStorage implements FileStorage {
 
     private final SwiftClient client;
     private final ChunkStorage chunkStorage;
-    private final CountDownLatch initializationLatch;
+    private final AtomicReference<Future<Void>> containerCreatedTask;
 
     /**
      * Initializes a new {@link SwiftFileStorage}.
@@ -90,34 +94,53 @@ public class SwiftFileStorage implements FileStorage {
         super();
         this.client = client;
         this.chunkStorage = chunkStorage;
-        initializationLatch = new CountDownLatch(1);
+        containerCreatedTask = new AtomicReference<Future<Void>>(null);
     }
 
-    /**
-     * Creates the Swift container associated with this Swift file storage.
-     *
-     * @throws OXException If container creation fails
-     */
-    public void createContainer() throws OXException {
-        try {
-            client.createContainerIfAbsent();
-        } finally {
-            initializationLatch.countDown();
+    private void checkOrCreateContainer() throws OXException {
+        Future<Void> f = containerCreatedTask.get();
+        if (null == f) {
+            synchronized (this) {
+                f = containerCreatedTask.get();
+                if (null == f) {
+                    final SwiftClient client = this.client;
+                    FutureTask<Void> ft = new FutureTask<Void>(new Callable<Void>() {
+
+                        @Override
+                        public Void call() throws Exception {
+                            client.createContainerIfAbsent();
+                            return null;
+                        }
+                    });
+                    if (containerCreatedTask.compareAndSet(null, ft)) {
+                        ft.run();
+                        f = ft;
+                    } else {
+                        f = containerCreatedTask.get();
+                    }
+                }
+            }
         }
-    }
 
-    /**
-     * Awaits completion of container creation
-     *
-     * @throws InterruptedException If interrupted
-     */
-    public void awaitContainerCreation() throws InterruptedException {
-        initializationLatch.await();
+        try {
+            f.get();
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Interrupted");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
     }
 
     @Override
     public String saveNewFile(InputStream file) throws OXException {
         try {
+            checkOrCreateContainer();
             UUID documentId = UUID.randomUUID();
             upload(documentId, file, 0);
             return UUIDs.getUnformattedString(documentId);
@@ -128,10 +151,13 @@ public class SwiftFileStorage implements FileStorage {
 
     @Override
     public InputStream getFile(String name) throws OXException {
+        checkOrCreateContainer();
         List<Chunk> chunks = chunkStorage.getChunks(UUIDs.fromUnformattedString(name));
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+
+        checkOrCreateContainer();
 
         if (1 == chunks.size()) {
             return client.get(chunks.get(0).getSwiftId());
@@ -173,6 +199,7 @@ public class SwiftFileStorage implements FileStorage {
             for (Chunk chunk : chunks) {
                 swiftIds.add(chunk.getSwiftId());
             }
+            checkOrCreateContainer();
             client.delete(swiftIds);
             chunkStorage.deleteDocument(documentId);
             return true;
@@ -220,6 +247,7 @@ public class SwiftFileStorage implements FileStorage {
             if (offset != currentSize) {
                 throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
             }
+            checkOrCreateContainer();
             return upload(documentId, file, offset);
         } finally {
             Streams.close(file);
@@ -233,6 +261,7 @@ public class SwiftFileStorage implements FileStorage {
         if (null == chunks || 0 == chunks.size()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+        checkOrCreateContainer();
         for (Chunk chunk : chunks) {
             if (chunk.getOffset() >= length) {
                 /*
@@ -270,6 +299,8 @@ public class SwiftFileStorage implements FileStorage {
         if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+
+        checkOrCreateContainer();
 
         if (1 == chunks.size()) {
             /*
