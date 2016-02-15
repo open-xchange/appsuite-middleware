@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.drive.impl.management.version;
+package com.openexchange.drive;
 
 
 /**
