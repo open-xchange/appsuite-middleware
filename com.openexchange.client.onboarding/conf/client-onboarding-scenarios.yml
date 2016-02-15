@@ -158,7 +158,8 @@ emclientinstall:
 ################################################################################
 
 driveappinstall:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: link
     providers: [driveapp]
     alternatives: []
@@ -253,7 +254,8 @@ davmanual:
 # and the associated permissions are granted to the users, which are supposed to download the file
 
 oxupdaterinstall:
-    enabled: true
+    # Disbled by default
+    enabled: false
     type: link
     providers: [oxupdater]
     alternatives: []

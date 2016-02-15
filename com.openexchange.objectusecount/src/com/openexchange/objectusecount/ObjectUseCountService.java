@@ -50,8 +50,6 @@
 package com.openexchange.objectusecount;
 
 import java.sql.Connection;
-import java.util.Set;
-import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -66,145 +64,62 @@ public interface ObjectUseCountService {
     /**
      * Get use count for object
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @return
-     * @throws OXException
+     * @param session The associated session
+     * @param folder The identifier of the folder in which the object resides
+     * @param objectId The identifier of the object
+     * @return The object's use count
+     * @throws OXException If use count cannot be returned
      */
     int getObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
     /**
      * Get use count for object
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @param con Existing connection to database
-     * @return
-     * @throws OXException
+     * @param session The associated session
+     * @param folder The identifier of the folder in which the object resides
+     * @param objectId The identifier of the object
+     * @param con An existing connection to database or <code>null</code> to fetch a new one
+     * @return The object's use count
+     * @throws OXException If use count cannot be returned
      */
     int getObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 
     /**
-     * Set use count for object
+     * Sets use count according to specified arguments
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @param value
-     * @throws OXException
+     * @param session The associated session
+     * @param arguments The arguments determining how/what to set
+     * @throws OXException If setting user count(s) fails and arguments signal to throw an error
      */
-    void setObjectUseCount(Session session, int folder, int objectId, int value) throws OXException;
+    void setObjectUseCount(Session session, SetArguments arguments) throws OXException;
 
     /**
-     * Set use count for object
+     * Increments the use count(s) according to specified arguments
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @param value
-     * @param con Writable connection to database
-     * @throws OXException
+     * @param session The associated session
+     * @param arguments The arguments determining how/what to update
+     * @throws OXException If incrementing user count(s) fails and arguments signal to throw an error
      */
-    void setObjectUseCount(Session session, int folder, int objectId, int value, Connection con) throws OXException;
-
-    /**
-     * Increment use count for object
-     *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, int folder, int objectId) throws OXException;
-
-    /**
-     * Increment use count for contact identified by mail address
-     *
-     * @param session
-     * @param mail
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, String mail) throws OXException;
-
-    /**
-     * Increment use count for set of contacts identified by mail addresses
-     *
-     * @param session
-     * @param addresses
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, Set<InternetAddress> addresses) throws OXException;
-
-    /**
-     * Increment use count for object
-     *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @param con Writable connection to database
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
-
-    /**
-     * Increment use count for contact identified by mail address
-     *
-     * @param session
-     * @param mail
-     * @param con Writable connection to database
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, String mail, Connection con) throws OXException;
-
-    /**
-     * Increment use count for set of contacts identified by mail addresses
-     *
-     * @param session
-     * @param addresses
-     * @param con Writable connection to database
-     * @throws OXException
-     */
-    void incrementObjectUseCount(Session session, Set<InternetAddress> addresses, Connection con) throws OXException;
-
-    /**
-     * Increment use count for contact assigned to internal user
-     *
-     * @param session
-     * @param userId
-     * @throws OXException
-     */
-    void incrementObjectUseCountForInternalUser(Session session, int userId) throws OXException;
-
-    /**
-     * Increment use count for contact assigned to internal user
-     *
-     * @param session
-     * @param userId
-     * @param con
-     * @throws OXException
-     */
-    void incrementObjectUseCountForInternalUser(Session session, int userId, Connection con) throws OXException;
+    void incrementObjectUseCount(Session session, IncrementArguments arguments) throws OXException;
 
     /**
      * Reset use count for object
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @throws OXException
+     * @param session The associated session
+     * @param folder The identifier of the folder in which the object resides
+     * @param objectId The identifier of the object
+     * @throws OXException If reset operation fails
      */
     void resetObjectUseCount(Session session, int folder, int objectId) throws OXException;
 
     /**
      * Reset use count for object
      *
-     * @param session
-     * @param folder
-     * @param objectId
-     * @param con Writable connection to database
-     * @throws OXException
+     * @param session The associated session
+     * @param folder The identifier of the folder in which the object resides
+     * @param objectId The identifier of the object
+     * @param con A writable connection to database or <code>null</code> to fetch a new one
+     * @throws OXException If reset operation fails
      */
     void resetObjectUseCount(Session session, int folder, int objectId, Connection con) throws OXException;
 

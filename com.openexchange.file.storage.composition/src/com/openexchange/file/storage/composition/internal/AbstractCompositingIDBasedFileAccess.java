@@ -121,6 +121,7 @@ import com.openexchange.groupware.results.Results;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.CallerRunsCompletionService;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
@@ -1161,7 +1162,8 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
                     if (null != useCountService) {
                         List<Integer> addedUsers = comparedPermissions.getAddedUsers();
                         for (Integer i : addedUsers) {
-                            useCountService.incrementObjectUseCountForInternalUser(session, i.intValue());
+                            IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
+                            useCountService.incrementObjectUseCount(session, arguments);
                         }
                     }
                 }

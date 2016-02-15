@@ -97,6 +97,7 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
@@ -175,7 +176,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
     private final Session session;
-    private CalendarCollection calendarCollection;
+    private final CalendarCollection calendarCollection;
     private boolean includePrivateAppointments;
 
     /**
@@ -626,11 +627,15 @@ public class CalendarSql implements AppointmentSQLInterface {
                 switch (p.getType()) {
                     case Participant.USER:
                         if (p.getIdentifier() != session.getUserId()) {
-                            service.incrementObjectUseCount(session, FolderObject.SYSTEM_LDAP_FOLDER_ID, p.getIdentifier(), con);
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).setCon(con).build();
+                            service.incrementObjectUseCount(session, arguments);
                         }
                         break;
                     case Participant.EXTERNAL_USER:
-                        service.incrementObjectUseCount(session, p.getEmailAddress(), con);
+                        {
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).setCon(con).build();
+                            service.incrementObjectUseCount(session, arguments);
+                        }
                         break;
                     default:
                         break;
