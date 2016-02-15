@@ -56,6 +56,8 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.UpdateStatus;
+import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.user.UserService;
@@ -102,6 +104,16 @@ public class ContextCleanupTask extends AbstractTask<List<GuestCleanupTask>> {
     }
 
     private List<GuestCleanupTask> cleanContext() throws OXException {
+        /*
+         * Check if context needs update
+         */
+        Updater updater = Updater.getInstance();
+        UpdateStatus status = updater.getStatus(contextID);
+        if (status.needsBackgroundUpdates() || status.needsBlockingUpdates() || status.backgroundUpdatesRunning() || status.blockingUpdatesRunning()) {
+            LOG.info("Context {} needs update, skipping cleanup task.", I(contextID));
+            return Collections.emptyList();
+        }
+
         /*
          * gather guest users in context
          */
