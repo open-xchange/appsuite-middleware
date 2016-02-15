@@ -494,42 +494,45 @@ public class HazelcastResourceDirectory extends DefaultResourceDirectory impleme
      * Starts the timer that refreshes synthetic resources
      */
     protected void startRefreshTimer() {
-        Services.getService(TimerService.class).scheduleWithFixedDelay(new Runnable() {
+        TimerService timerService = Services.optService(TimerService.class);
+        if (null != timerService) {
+            timerService.scheduleWithFixedDelay(new Runnable() {
 
-            @Override
-            public void run() {
-                try {
-                    DistributedGroupManager distributedGroupManager = distributedGroupManagerRef.get();
-                    MultiMap<PortableID, PortableID> idMapping = getIDMapping();
-                    IMap<PortableID, PortableResource> resourceMapping = getResourceMapping();
-                    for (PortableID portableID : new LinkedHashSet<PortableID>(resourceMapping.localKeySet())) { // Copy local key set
-                        if (null == distributedGroupManager) {
-                            // No chance to check if active; just do it
-                            touch(idMapping, resourceMapping, portableID);
-                        } else {
-                            if (null != distributedGroupManager.getMembers(portableID)) {
-                                // ID is still in use
+                @Override
+                public void run() {
+                    try {
+                        DistributedGroupManager distributedGroupManager = distributedGroupManagerRef.get();
+                        MultiMap<PortableID, PortableID> idMapping = getIDMapping();
+                        IMap<PortableID, PortableResource> resourceMapping = getResourceMapping();
+                        for (PortableID portableID : new LinkedHashSet<PortableID>(resourceMapping.localKeySet())) { // Copy local key set
+                            if (null == distributedGroupManager) {
+                                // No chance to check if active; just do it
                                 touch(idMapping, resourceMapping, portableID);
+                            } else {
+                                if (null != distributedGroupManager.getMembers(portableID)) {
+                                    // ID is still in use
+                                    touch(idMapping, resourceMapping, portableID);
+                                }
                             }
                         }
+                    } catch (Exception e) {
+                        LOG.error("Error while touching IDs.", e);
                     }
-                } catch (Exception e) {
-                    LOG.error("Error while touching IDs.", e);
                 }
-            }
 
-            private void touch(MultiMap<PortableID, PortableID> idMapping, IMap<PortableID, PortableResource> resourceMapping, PortableID portableID) {
-                Set<PortableID> idSet = new HashSet<PortableID>();
-                idSet.add(portableID);
-                Map<PortableID, PortableResource> portableResource = resourceMapping.getAll(idSet);
-                if ((portableResource == null) || (portableResource.isEmpty())) {
-                    LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", portableID);
-                } else {
-                    LOG.debug("Touched ID: {}", portableID);
+                private void touch(MultiMap<PortableID, PortableID> idMapping, IMap<PortableID, PortableResource> resourceMapping, PortableID portableID) {
+                    Set<PortableID> idSet = new HashSet<PortableID>();
+                    idSet.add(portableID);
+                    Map<PortableID, PortableResource> portableResource = resourceMapping.getAll(idSet);
+                    if ((portableResource == null) || (portableResource.isEmpty())) {
+                        LOG.debug("Unable to touch ID; might have been removed in the meantime: {}", portableID);
+                    } else {
+                        LOG.debug("Touched ID: {}", portableID);
+                    }
                 }
-            }
 
-        }, 1, 5, TimeUnit.MINUTES);
+            }, 1, 5, TimeUnit.MINUTES);
+        }
     }
 
     @Override
