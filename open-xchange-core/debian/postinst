@@ -1148,6 +1148,19 @@ ox_add_property com.openexchange.mail.bodyDisplaySizeLimit 10485760 /opt/open-xc
 # SoftwareChange_Request-3054
 ox_add_property com.openexchange.mail.forwardUnquoted false /opt/open-xchange/etc/mail.properties
 
+# SoftwareChange_Request-3113
+TMPFILE=$(mktemp)
+rm -f $TMPFILE
+cat <<EOF | /opt/open-xchange/sbin/xmlModifier -i /opt/open-xchange/etc/logback.xml -o $TMPFILE -x /configuration/logger -d @name -r -
+<configuration>
+    <logger name="liquibase.ext.logging.slf4j.Slf4jLogger" level="WARN"/>
+</configuration>
+EOF
+if [ -e $TMPFILE ]; then
+    cat $TMPFILE > /opt/open-xchange/etc/logback.xml
+    rm -f $TMPFILE
+fi
+
 setConfigFilePermissions() {
     PROTECT=( autoconfig.properties configdb.properties hazelcast.properties jolokia.properties mail.properties mail-push.properties management.properties secret.properties secrets server.properties sessiond.properties share.properties tokenlogin-secrets )
     for FILE in "${PROTECT[@]}"
