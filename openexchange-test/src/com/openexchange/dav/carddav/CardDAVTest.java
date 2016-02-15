@@ -67,6 +67,8 @@ import java.util.TimeZone;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -418,6 +420,15 @@ public abstract class CardDAVTest extends WebDAVTest {
     	final VCardResource vCard = vCards.get(0);
     	assertNotNull("no vCard data found", vCard);
     	return vCard;
+	}
+
+	protected VCardResource getVCardResource(String href) throws Exception {
+        GetMethod get = new GetMethod(getWebDAVClient().getBaseURI() + href);
+        String vCard = getWebDAVClient().doGet(get);
+        assertNotNull(vCard);
+        Header eTagHeader = get.getResponseHeader("ETag");
+        String eTag = null != eTagHeader ? eTagHeader.getValue() : null;
+        return new VCardResource(vCard, href, eTag);
 	}
 
 	private static JSONObject getSearchFilter(String uid, int[] folderIDs) throws JSONException {
