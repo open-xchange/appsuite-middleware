@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -378,7 +379,11 @@ public class DefaultNotificationService implements ShareNotificationService {
         if (null != service) {
             if (!collectedAddresses.isEmpty()) {
                 try {
-                    IncrementArguments arguments = new IncrementArguments.Builder(collectedAddresses).setThrowException(true).build();
+                    Set<String> addrs = new LinkedHashSet<String>(collectedAddresses.size());
+                    for (InternetAddress address : collectedAddresses) {
+                        addrs.add(address.getAddress());
+                    }
+                    IncrementArguments arguments = new IncrementArguments.Builder(addrs).setThrowException(true).build();
                     service.incrementObjectUseCount(session, arguments);
                 } catch (OXException e) {
                     warnings.add(e);

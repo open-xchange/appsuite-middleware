@@ -25,7 +25,6 @@ Import-Package: com.openexchange.contact,
  gnu.trove.map,
  gnu.trove.map.hash,
  gnu.trove.procedure,
- javax.mail.internet,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
