@@ -88,7 +88,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
     public void testCreateFileWithIllegalCharacters() throws Exception {
         File file = new DefaultFile();
         file.setFolderId(String.valueOf(client.getValues().getPrivateInfostoreFolder()));
-        file.setFileName("invalid<>:/?*\"\\");
+        file.setFileName("invalid<>:/?*\"\\|");
         NewInfostoreRequest req = new NewInfostoreRequest(file);
         NewInfostoreResponse resp = client.execute(req);
         assertNotNull(resp);
@@ -103,6 +103,7 @@ public class CreateFileWithIllegalCharactersTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("*"));
         assertTrue(e.getMessage().contains("\""));
         assertTrue(e.getMessage().contains("\\"));
+        assertTrue(e.getMessage().contains("|"));
     }
 
     public void testCreateFileWithReservedName() throws Exception {
