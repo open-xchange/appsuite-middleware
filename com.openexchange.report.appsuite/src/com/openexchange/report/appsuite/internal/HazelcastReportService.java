@@ -53,16 +53,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
-import com.hazelcast.core.ExecutionCallback;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.ILock;
@@ -101,8 +101,6 @@ public class HazelcastReportService extends AbstractReportService {
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastReportService.class);
 
     private final ReportService delegate;
-
-    private final List<Future<Void>> tasks = new ArrayList<>();
 
     public HazelcastReportService(ReportService delegate) {
         this.delegate = delegate;
@@ -143,12 +141,10 @@ public class HazelcastReportService extends AbstractReportService {
             // Is a report pending?
             pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
 
-            if (!pendingReports.isEmpty()) {
+            if ((pendingReports != null) && !pendingReports.isEmpty()) {
                 // Yes, there is a report running, so retrieve its UUID and return it.
                 return pendingReports.keySet().iterator().next();
             }
-
-            hazelcast.getLock(REPORTS_MERGE_PRE_KEY + reportType);
 
             // Load all contextIds
             allContextIds = Services.getService(ContextService.class).getAllContextIds();
@@ -171,20 +167,6 @@ public class HazelcastReportService extends AbstractReportService {
 
         List<Integer> contextsToProcess = Collections.synchronizedList(new ArrayList<>(allContextIds));
 
-        ExecutionCallback<Void> executionCallback = new ExecutionCallback<Void>() {
-
-            @Override
-            public void onResponse(Void response) {
-                System.out.println("Successfull" + response);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                abortGeneration(uuid, reportType, "Remote error");
-                t.printStackTrace();
-            }
-        };
-
         LOG.info("{} contexts in total will get processed!", contextsToProcess.size());
         while (!contextsToProcess.isEmpty()) {
             Integer firstRemainingContext = contextsToProcess.get(0);
@@ -193,7 +175,7 @@ public class HazelcastReportService extends AbstractReportService {
             Member member = getRandomMember(hazelcast);
             LOG.info("{} will get assigned to new thread on hazelcast member {}", contextsInSameSchema.length, member.getSocketAddress().toString());
 
-            executorService.submitToMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member, executionCallback);
+            executorService.submitToMember(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)), member);
 
             for (int i = 0; i < contextsInSameSchema.length; i++) {
                 contextsToProcess.remove(Integer.valueOf(contextsInSameSchema[i]));
@@ -342,6 +324,7 @@ public class HazelcastReportService extends AbstractReportService {
 
         // We are done. Dump Report
         report.setStopTime(System.currentTimeMillis());
+        report.getNamespace("configs").put("com.openexchange.report.appsuite.ReportService", this.getClass().getSimpleName());
         hazelcast.getMap(REPORTS_KEY).put(report.getType(), PortableReport.wrap(report));
 
         // Clean up resources
@@ -399,8 +382,23 @@ public class HazelcastReportService extends AbstractReportService {
             delegate.abortGeneration(uuid, reportType, reason);
             return;
         }
-        LOG.info("Report abortion triggered by a cluster member with reason: {}. Trying to cancel remote threads.", reason);
-        // TODO Auto-generated method stub
+
+        HazelcastInstance hazelcast = Services.getService(HazelcastInstance.class);
+        IMap<String, PortableReport> pendingReports = hazelcast.getMap(PENDING_REPORTS_PRE_KEY + reportType);
+        Report stoppedReport = PortableReport.unwrap(pendingReports.get(uuid));
+        if (stoppedReport == null) { // already removed from pending reports
+            return;
+        }
+        stoppedReport.set("error", reportType, reason);
+
+        Map<String, PortableReport> stoppedPendingReports = hazelcast.getMap(REPORTS_ERROR_KEY + reportType);
+        if (stoppedPendingReports == null) {
+            stoppedPendingReports = new HashMap<>();
+        }
+        stoppedPendingReports.put(reportType, PortableReport.wrap(stoppedReport));
+
+        pendingReports.remove(uuid);
+        LOG.info("Report abortion triggered by a cluster member with reason: {}. Trying to stop generation and cancel remote threads.", reason);
     }
 
     @Override
@@ -408,7 +406,10 @@ public class HazelcastReportService extends AbstractReportService {
         if (useLocal()) {
             return delegate.getLastErrorReport(reportType);
         }
-        // TODO Auto-generated method stub
-        return null;
+        Map<String, PortableReport> errorReports = Services.getService(HazelcastInstance.class).getMap(REPORTS_ERROR_KEY + reportType);
+        if (errorReports == null) {
+            return null;
+        }
+        return PortableReport.unwrap(errorReports.get(reportType));
     }
 }

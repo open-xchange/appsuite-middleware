@@ -133,7 +133,6 @@ public class LocalReportService extends AbstractReportService {
 
         ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(20, new ThreadFactory() {
 
-            //TODO use 20 threads                executorService.set(Executors.newFixedThreadPool(20, new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 int threadNum;
@@ -163,8 +162,6 @@ public class LocalReportService extends AbstractReportService {
                 contextsToProcess.remove(contextsInSameSchema[i]);
             }
             if (EXECUTOR_SERVICE_REF.get().isShutdown()) {
-                // aborted meanwhile due to errors/instructions
-//                this.abortGeneration(uuid, reportType, "Excecutor service no more available due to previous shutdown.");
                 break;
             }
             EXECUTOR_SERVICE_REF.get().submit(new AnalyzeContextBatch(uuid, reportType, Arrays.asList(contextsInSameSchema)));
@@ -287,6 +284,7 @@ public class LocalReportService extends AbstractReportService {
 
         // We are done. Dump Report
         report.setStopTime(System.currentTimeMillis());
+        report.getNamespace("configs").put("com.openexchange.report.appsuite.ReportService", this.getClass().getSimpleName());
 
         Map<String, Report> finishedReports = cache.asMap().get(REPORTS_KEY);
         if (finishedReports == null) {

@@ -125,7 +125,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                     reportService.finishContext(contextReport);
                 } catch (OXException oxException) {
                     if (oxException.similarTo(ContextExceptionCodes.UPDATE)) {
-                        reportService.abortGeneration(uuid, reportType, "Not all schemas up to date! Please run schema updates.");
+                        reportService.abortGeneration(uuid, reportType, "Not all schemas are up to date! Please ensure schema up-to-dateness (e. g. by calling 'runupdate' CLT).");
                         break;
                     }
                     if (oxException.similarTo(ReportExceptionCodes.REPORT_GENERATION_CANCELED)) {

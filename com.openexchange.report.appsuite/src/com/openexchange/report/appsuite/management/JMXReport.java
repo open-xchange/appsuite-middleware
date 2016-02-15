@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.tools.JSONCoercion;
@@ -88,16 +89,16 @@ public class JMXReport {
         this.type = report.getType();
 
         try {
-            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(report.getData());
-
+            Map<String, Map<String, Object>> lData = report.getData();
+            
+            boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
+            lData.get("configs").put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            
+            JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);
             jsonData.put("reportType", type);
-
             jsonData.put("timestamps", new JSONObject().put("start", startTime).put("stop", stopTime));
             jsonData.put("version", new JSONObject().put("version", Version.getInstance().getVersionString()).put("buildDate", Version.getInstance().getBuildDate()));
-
-            boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
-            jsonData.put("configs", new JSONObject().put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled)));
 
             this.data = jsonData.toString();
         } catch (JSONException e) {
