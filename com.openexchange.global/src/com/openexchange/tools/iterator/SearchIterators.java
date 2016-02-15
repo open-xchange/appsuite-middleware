@@ -51,6 +51,8 @@ package com.openexchange.tools.iterator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.LinkedList;
 import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 
@@ -85,11 +87,11 @@ public final class SearchIterators {
             }
         }
     }
-    
+
     /**
      * Iterates through the supplied search iterator and puts all elements into a list.
-     * 
-     * @param iterator The search iterator to get the elements from 
+     *
+     * @param iterator The search iterator to get the elements from
      * @return The iterator's elements in a list
      */
     public static <T> List<T> asList(SearchIterator<T> iterator) throws OXException {
@@ -101,6 +103,134 @@ public final class SearchIterators {
             list.add(iterator.next());
         }
         return list;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private static final SearchIterator EMPTY_ITERATOR = new EmptySearchIterator<>();
+
+    /**
+     * Gets the singleton iterator for specified element
+     *
+     * @param element The element
+     * @return The singleton iterator
+     */
+    @SuppressWarnings("unchecked")
+    public static <T> SearchIterator<T> singletonIterator(T element) {
+        if (null == element) {
+            return EMPTY_ITERATOR;
+        }
+
+        return new SingletonSearchIterator<T>(element);
+    }
+
+    /**
+     * Gets an empty iterator.
+     *
+     * @param <T> type of elements, if there were any, in the list
+     * @return An empty iterator
+     */
+    @SuppressWarnings("unchecked")
+    public static final <T> SearchIterator<T> emptyIterator() {
+        return EMPTY_ITERATOR;
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    private static final class EmptySearchIterator<T> implements SearchIterator<T> {
+
+        EmptySearchIterator() {
+            super();
+        }
+
+        @Override
+        public boolean hasNext() throws OXException {
+            return false;
+        }
+
+        @Override
+        public T next() throws OXException {
+            throw new NoSuchElementException("Empty iterator has no elements");
+        }
+
+        @Override
+        public void close() {
+            // Nothing
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return false;
+        }
+
+        @Override
+        public void addWarning(OXException warning) {
+            // Nothing
+        }
+
+        @Override
+        public OXException[] getWarnings() {
+            return null;
+        }
+    }
+
+    private static final class SingletonSearchIterator<T> implements SearchIterator<T> {
+
+        private final List<OXException> warnings;
+        private T element;
+
+        SingletonSearchIterator(T element) {
+            super();
+            this.element = element;
+            warnings = new LinkedList<OXException>();
+        }
+
+        @Override
+        public boolean hasNext() throws OXException {
+            return null != element;
+        }
+
+        @Override
+        public T next() throws OXException {
+            T retval = this.element;
+            if (null == retval) {
+                throw new NoSuchElementException();
+            }
+            this.element = null;
+            return retval;
+        }
+
+        @Override
+        public void close() {
+            // Nothing
+        }
+
+        @Override
+        public int size() {
+            return null == element ? 0 : 1;
+        }
+
+        @Override
+        public boolean hasWarnings() {
+            return !warnings.isEmpty();
+        }
+
+        @Override
+        public void addWarning(OXException warning) {
+            if (null != warning) {
+                warnings.add(warning);
+            }
+        }
+
+        @Override
+        public OXException[] getWarnings() {
+            int size = warnings.size();
+            return size == 0 ? null : warnings.toArray(new OXException[size]);
+        }
     }
 
 }

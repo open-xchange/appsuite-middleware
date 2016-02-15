@@ -54,6 +54,7 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 
 /**
@@ -64,21 +65,21 @@ import com.openexchange.user.UserService;
  */
 public class ObjectUseCountActivator extends HousekeepingActivator {
 
-    private final Class<?>[] NEEDED_SERVICES = new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class };
+    /**
+     * Initializes a new {@link ObjectUseCountActivator}.
+     */
+    public ObjectUseCountActivator() {
+        super();
+    }
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
-    }
-
-    @Override
-    protected void stopBundle() throws Exception {
-        unregisterServices();
     }
 
 }

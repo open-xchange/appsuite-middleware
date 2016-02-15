@@ -59,6 +59,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
 import com.openexchange.drive.client.windows.files.UpdateFilesProviderImpl;
 import com.openexchange.drive.client.windows.service.Constants;
@@ -70,7 +71,6 @@ import com.openexchange.drive.client.windows.service.rmi.BrandingConfigurationRe
 import com.openexchange.drive.client.windows.servlet.DownloadServlet;
 import com.openexchange.drive.client.windows.servlet.InstallServlet;
 import com.openexchange.drive.client.windows.servlet.UpdatesXMLServlet;
-import com.openexchange.drive.impl.management.version.BrandedDriveVersionService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.user.UserService;

@@ -65,6 +65,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.search.TaskSearchObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -258,11 +259,15 @@ public class TasksSQLImpl implements TasksSQLInterface {
                     case Participant.USER:
                         if (p.getIdentifier() != session.getUserId()) {
                             //TODO Get contact id
-                            service.incrementObjectUseCount(session, FolderObject.SYSTEM_LDAP_FOLDER_ID, p.getIdentifier());
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).build();
+                            service.incrementObjectUseCount(session, arguments);
                         }
                         break;
                     case Participant.EXTERNAL_USER:
-                        service.incrementObjectUseCount(session, p.getEmailAddress());
+                        {
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).build();
+                            service.incrementObjectUseCount(session, arguments);
+                        }
                         break;
                     default:
                         break;

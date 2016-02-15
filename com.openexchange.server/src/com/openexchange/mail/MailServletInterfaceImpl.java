@@ -192,6 +192,7 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.ServiceExceptionCode;
@@ -3200,9 +3201,8 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
             ObjectUseCountService objectUseCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
             if (null != objectUseCountService) {
-                Set<InternetAddress> addresses = new HashSet<InternetAddress>();
-                addresses.addAll(Arrays.asList(composedMail.getAllRecipients()));
-                objectUseCountService.incrementObjectUseCount(session, addresses);
+                IncrementArguments arguments = new IncrementArguments.Builder(new HashSet<InternetAddress>(Arrays.asList(composedMail.getAllRecipients()))).build();
+                objectUseCountService.incrementObjectUseCount(session, arguments);
             }
             /*
              * Check for a reply/forward

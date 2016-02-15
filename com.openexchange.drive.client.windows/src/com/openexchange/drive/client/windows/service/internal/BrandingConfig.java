@@ -57,8 +57,8 @@ import java.util.Map;
 import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.client.windows.service.Constants;
-import com.openexchange.drive.impl.management.version.BrandedDriveVersionService;
 
 
 /**

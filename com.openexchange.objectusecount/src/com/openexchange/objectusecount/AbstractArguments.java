@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,82 +47,52 @@
  *
  */
 
-package com.openexchange.drive.impl.management.version;
+package com.openexchange.objectusecount;
 
-import java.util.HashMap;
-import com.openexchange.drive.BrandedDriveVersionService;
-
+import java.sql.Connection;
 
 /**
- * {@link BrandedDriveVersionServiceImpl}
+ * {@link AbstractArguments} - Specifies arguments to use when modifying use count(s).
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionService {
+public abstract class AbstractArguments {
 
-    static BrandedDriveVersionServiceImpl instance = null;
-    private HashMap<String, VersionWrapper> driveVersions;
+    /** the optional connection reference */
+    protected final Connection con;
 
-    static public BrandedDriveVersionServiceImpl getInstance() {
-        if (null == instance) {
-            instance = new BrandedDriveVersionServiceImpl();
-        }
-        return instance;
+    /** Signals whether an error is supposed to be thrown or not */
+    protected final boolean throwException;
+
+    /**
+     * Initializes a new {@link AbstractArguments}.
+     *
+     * @param con The connection to use or <code>null</code>
+     * @param throwException Whether an error is supposed to be thrown or not
+     */
+    protected AbstractArguments(Connection con, boolean throwException) {
+        super();
+        this.con = con;
+        this.throwException = throwException;
     }
 
-    @Override
-    public String getSoftMinimumVersion(String branding) {
-        if (!driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getSoft();
+    /**
+     * Checks if an exception is supposed to be thrown or not
+     *
+     * @return <code>true</code> to throw an exception; otherwise <code>false</code>
+     */
+    public boolean isThrowException() {
+        return throwException;
     }
 
-    @Override
-    public String getHardMinimumVersion(String branding) {
-        if (!driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getHard();
-    }
-
-    @Override
-    public void putBranding(String branding, String minSoftVersion, String minHardVersion) {
-        if (null == driveVersions) {
-            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.VersionWrapper>();
-        }
-        if (null == branding || null == minSoftVersion || null == minHardVersion || branding.isEmpty() || minSoftVersion.isEmpty() || minHardVersion.isEmpty()) {
-            return;
-        }
-        driveVersions.put(branding, new VersionWrapper(minSoftVersion, minHardVersion));
-    }
-
-    @Override
-    public void clearAll() {
-        if (driveVersions != null) {
-            driveVersions.clear();
-        }
-    }
-    
-    private class VersionWrapper {
-
-        private String soft;
-        private String hard;
-
-        public VersionWrapper(String soft, String hard) {
-            super();
-            this.soft = soft;
-            this.hard = hard;
-        }
-
-        String getSoft() {
-            return soft;
-        }
-
-        String getHard() {
-            return hard;
-        }
+    /**
+     * Gets the connection
+     *
+     * @return The connection or <code>null</code>
+     */
+    public Connection getCon() {
+        return con;
     }
 
 }
