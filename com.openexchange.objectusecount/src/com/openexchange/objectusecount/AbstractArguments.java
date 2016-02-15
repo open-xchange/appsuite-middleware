@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,39 +47,52 @@
  *
  */
 
-package com.openexchange.objectusecount.osgi;
+package com.openexchange.objectusecount;
 
-import com.openexchange.contact.ContactService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.objectusecount.ObjectUseCountService;
-import com.openexchange.objectusecount.impl.ObjectUseCountServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.threadpool.ThreadPoolService;
-import com.openexchange.user.UserService;
+import java.sql.Connection;
 
 /**
- * {@link ObjectUseCountActivator}
+ * {@link AbstractArguments} - Specifies arguments to use when modifying use count(s).
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.1
  */
-public class ObjectUseCountActivator extends HousekeepingActivator {
+public abstract class AbstractArguments {
+
+    /** the optional connection reference */
+    protected final Connection con;
+
+    /** Signals whether an error is supposed to be thrown or not */
+    protected final boolean throwException;
 
     /**
-     * Initializes a new {@link ObjectUseCountActivator}.
+     * Initializes a new {@link AbstractArguments}.
+     *
+     * @param con The connection to use or <code>null</code>
+     * @param throwException Whether an error is supposed to be thrown or not
      */
-    public ObjectUseCountActivator() {
+    protected AbstractArguments(Connection con, boolean throwException) {
         super();
+        this.con = con;
+        this.throwException = throwException;
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class, ContactService.class, UserService.class, ThreadPoolService.class };
+    /**
+     * Checks if an exception is supposed to be thrown or not
+     *
+     * @return <code>true</code> to throw an exception; otherwise <code>false</code>
+     */
+    public boolean isThrowException() {
+        return throwException;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        registerService(ObjectUseCountService.class, new ObjectUseCountServiceImpl(this));
+    /**
+     * Gets the connection
+     *
+     * @return The connection or <code>null</code>
+     */
+    public Connection getCon() {
+        return con;
     }
 
 }

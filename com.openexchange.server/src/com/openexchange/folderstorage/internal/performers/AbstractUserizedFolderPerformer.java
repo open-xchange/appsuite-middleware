@@ -98,6 +98,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
@@ -626,7 +627,8 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         permission.setEntity(share.getGuest().getGuestID());
                         comparedPermissions.rememberGuestInfo(share.getGuest());
                         if (null != useCountService) {
-                            useCountService.incrementObjectUseCount(session, share.getGuest().getEmailAddress());
+                            IncrementArguments arguments = new IncrementArguments.Builder(share.getGuest().getEmailAddress()).build();
+                            useCountService.incrementObjectUseCount(session, arguments);
                         }
                     }
                 }
