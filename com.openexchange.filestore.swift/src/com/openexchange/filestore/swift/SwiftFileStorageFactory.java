@@ -264,11 +264,11 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
             }
 
-            uriBuilder.setPath(path.endsWith("/") ? path : path + "/");
+            uriBuilder.setPath(path);
             try {
                 String baseUrl = uriBuilder.build().toString();
-                if (!baseUrl.endsWith("/")) {
-                    baseUrl = baseUrl + '/';
+                if (baseUrl.endsWith("/")) {
+                    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
                 }
                 urls.add(baseUrl);
             } catch (URISyntaxException e) {

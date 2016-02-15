@@ -93,8 +93,7 @@ public class ChunkedUpload implements Closeable {
         try {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             byte[] buffer = new byte[0xFFFF]; // 64k
-            int read;
-            while (0 < (read = inputStream.read(buffer, 0, buffer.length))) {
+            for (int read; (read = inputStream.read(buffer, 0, buffer.length)) > 0;) {
                 fileHolder.write(buffer, 0, read);
                 if (fileHolder.getCount() >= UploadChunk.MIN_CHUNK_SIZE) {
                     /*
