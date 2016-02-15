@@ -100,8 +100,8 @@ public class PlistSMSTest extends AbstractAJAXSession {
             assertNotNull("Response is empty!", response);
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
-            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", 1, response.getException().getCode());
-            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", "SIPGATE", response.getException().getPrefix());
+            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", 3, response.getException().getCode());
+            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", "SMS", response.getException().getPrefix());
         }
     }
 
