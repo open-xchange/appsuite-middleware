@@ -92,7 +92,7 @@ public class SwiftActivator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        LOG.info("Starting bundle: com.openexchange.filestore.swift");
+        LOG.info("Starting bundle: {}", context.getBundle().getSymbolicName());
 
         // Trackers
         trackService(ContextService.class);
@@ -116,7 +116,7 @@ public class SwiftActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        LOG.info("Stopping bundle: com.openexchange.filestore.swift");
+        LOG.info("Stopping bundle: {}", context.getBundle().getSymbolicName());
         super.stopBundle();
     }
 
