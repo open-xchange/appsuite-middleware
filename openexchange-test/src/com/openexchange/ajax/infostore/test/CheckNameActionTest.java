@@ -87,7 +87,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
     }
 
     public void testInvalidCharacter() throws Exception {
-        CheckNameRequest req = new CheckNameRequest("withInvalidCharacters<>:/?*\"\\", false);
+        CheckNameRequest req = new CheckNameRequest("withInvalidCharacters<>:/?*\"\\|", false);
         CheckNameResponse resp = client.execute(req);
         assertTrue(resp.hasError());
         assertEquals(FileStorageExceptionCodes.ILLEGAL_CHARACTERS.getNumber(), resp.getException().getCode());
@@ -100,6 +100,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
         assertTrue(e.getMessage().contains("*"));
         assertTrue(e.getMessage().contains("\""));
         assertTrue(e.getMessage().contains("\\"));
+        assertTrue(e.getMessage().contains("|"));
     }
 
     public void testReservedNames() throws Exception {
@@ -113,7 +114,7 @@ public class CheckNameActionTest extends AbstractInfostoreTest {
             assertTrue(resp.getErrorMessage().contains(name));
         }
     }
-    
+
     public void testMatchOnlyExactReservedNames() throws Exception {
         String[] RESERVED_NAMES = new String[] {"COM", "CON1", "NULL", "LPT12", "AUXQWERT", "PRN2" };
         for (String name : RESERVED_NAMES) {

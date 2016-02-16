@@ -90,7 +90,7 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSServiceSPI;
 
 /**
  * {@link PlistResult} - A plist result.
@@ -263,9 +263,9 @@ public class PlistResult implements Result {
         String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
         text = text + link;
 
-        SMSService smsService = Services.getService(SMSService.class);
+        SMSServiceSPI smsService = Services.getService(SMSServiceSPI.class);
         if (smsService == null) {
-            throw ServiceExceptionCode.absentService(SMSService.class);
+            throw ServiceExceptionCode.absentService(SMSServiceSPI.class);
         }
         Map<String, Object> input = request.getInput();
         if (input == null) {
@@ -278,7 +278,7 @@ public class PlistResult implements Result {
 
         number = sanitizeNumber(number);
 
-        smsService.sendMessage(number, text);
+        smsService.sendMessage(new String[] { number }, text);
         setRateLimitTime(ratelimit, session);
 
         ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");

@@ -59,7 +59,7 @@ import com.openexchange.client.onboarding.osgi.Services;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
-import com.openexchange.sms.SMSService;
+import com.openexchange.sms.SMSServiceSPI;
 
 /**
  * {@link Device} - An enumeration for available on-boarding devices.
@@ -261,7 +261,7 @@ public enum Device implements Entity {
             switch (action) {
                 case SMS:
                     // Check availability of needed services
-                    if (null == Services.optService(SMSService.class) || null == Services.optService(DownloadLinkProvider.class)) {
+                    if (null == Services.optService(SMSServiceSPI.class) || null == Services.optService(DownloadLinkProvider.class)) {
                         iter.remove();
                     }
                     break;

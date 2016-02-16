@@ -50,6 +50,8 @@
 package com.openexchange.file.storage.json;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,11 +59,20 @@ import org.json.JSONObject;
 import com.openexchange.datatypes.genericonf.DynamicFormDescription;
 import com.openexchange.datatypes.genericonf.json.FormContentWriter;
 import com.openexchange.datatypes.genericonf.json.FormDescriptionWriter;
+import com.openexchange.exception.Categories;
+import com.openexchange.exception.Category;
+import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccounts;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.groupware.ldap.UserStorage;
+import com.openexchange.i18n.LocaleTools;
+import com.openexchange.i18n.Localizable;
+import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * Renders a FileStorageAccount in its JSON representation also using the dynamic form description of the parent file storage service.
@@ -70,6 +81,46 @@ import com.openexchange.file.storage.composition.FolderID;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileStorageAccountWriter {
+
+    /**
+     * Name of the JSON attribute containing the error message.
+     */
+    public static final String ERROR = "error";
+
+    /**
+     * Name of the JSON attribute containing the error categories.
+     */
+    public static final String ERROR_CATEGORIES = "categories";
+
+    /**
+     * <b>Deprecated</b>: Name of the JSON attribute containing the error category.
+     */
+    public static final String ERROR_CATEGORY = "category";
+
+    /**
+     * Name of the JSON attribute containing the error code.
+     */
+    public static final String ERROR_CODE = "code";
+
+    /**
+     * Name of the JSON attribute containing the unique error identifier.
+     */
+    public static final String ERROR_ID = "error_id";
+
+    /**
+     * Name of the JSON attribute containing the array of the error message attributes.
+     */
+    public static final String ERROR_PARAMS = "error_params";
+
+    /**
+     * Name of the JSON attribute containing the stacks of the error.
+     */
+    public static final String ERROR_STACK = "error_stack";
+
+    /**
+     * Name of the JSON attribute containing the rather technical error description.
+     */
+    public static final String ERROR_DESC = "error_desc";
 
     /**
      * Initializes a new {@link FileStorageAccountWriter}.
@@ -102,13 +153,145 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
-        //add capabilities
-        if(capabilities==null)
-        {
-            capabilities=new HashSet<String>(0);
+        // Add capabilities
+        if (capabilities == null) {
+            capabilities = new HashSet<String>(0);
         }
         accountJSON.put("capabilities", capabilities);
         return accountJSON;
+    }
+
+    /**
+     * Writes given erroneous account into its JSON representation.
+     *
+     * @param account The account
+     * @param rootFolder The accounts root folder
+     * @return The resulting JSON
+     * @throws JSONException If writing JSON fails
+     */
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities, OXException exception, Session session) throws JSONException {
+        JSONObject accountJSON = new JSONObject(7);
+        accountJSON.put(FileStorageAccountConstants.ID, account.getId());
+        final FileStorageService fsService = account.getFileStorageService();
+        accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
+        accountJSON.put(FileStorageAccountConstants.DISPLAY_NAME, account.getDisplayName());
+        accountJSON.put(FileStorageAccountConstants.FILE_STORAGE_SERVICE, fsService.getId());
+        if (rootFolder != null) {
+            accountJSON.put(FileStorageAccountConstants.ROOT_FOLDER, new FolderID(fsService.getId(), account.getId(), rootFolder.getId()).toUniqueID());
+        }
+        accountJSON.put(FileStorageAccountConstants.IS_DEFAULT_ACCOUNT, FileStorageAccounts.isDefaultAccount(account));
+
+        DynamicFormDescription formDescription = fsService.getFormDescription();
+        if (null != formDescription && null != account.getConfiguration()) {
+            JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
+            accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
+        }
+
+        // Add capabilities
+        if (capabilities == null) {
+            capabilities = new HashSet<String>(0);
+        }
+        accountJSON.put("capabilities", capabilities);
+        accountJSON.put("hasError", true);
+        accountJSON.put("error", exception);
+
+        addException(accountJSON, "error", exception, localeFrom(session));
+
+        return accountJSON;
+    }
+
+    private static Locale localeFrom(final Session session) {
+        if (null == session) {
+            return Locale.US;
+        }
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        try {
+            return UserStorage.getInstance().getUser(session.getUserId(), session.getContextId()).getLocale();
+        } catch (OXException e) {
+            return Locale.US;
+        }
+    }
+
+    /**
+     * Writes specified exception to given JSON object using passed locale (if no other locale specified through {@link OXExceptionConstants#PROPERTY_LOCALE}.
+     *
+     * @param json The JSON object
+     * @param errorKey The key value for the error value inside the JSON object
+     * @param exception The exception to write
+     * @param locale The locale
+     * @param includeStackTraceOnError <code>true</code> to append stack trace elements to JSON object; otherwise <code>false</code>
+     * @throws JSONException If writing JSON fails
+     * @see OXExceptionConstants#PROPERTY_LOCALE
+     */
+    public static void addException(final JSONObject json, String errorKey, final OXException exception, final Locale locale) throws JSONException {
+        final Locale l;
+        {
+            final String property = exception.getProperty(OXExceptionConstants.PROPERTY_LOCALE);
+            if (null == property) {
+                l = LocaleTools.getSaneLocale(locale);
+            } else {
+                final Locale parsedLocale = LocaleTools.getLocale(property);
+                l = null == parsedLocale ? LocaleTools.getSaneLocale(locale) : parsedLocale;
+            }
+        }
+        json.put(errorKey, exception.getDisplayMessage(l));
+        /*
+         * Put argument JSON array for compatibility reasons
+         */
+        {
+            Object[] args = exception.getLogArgs();
+            if ((null == args) || (0 == args.length)) {
+                args = exception.getDisplayArgs();
+            }
+            // For compatibility
+            if ((null == args) || (0 == args.length)) {
+                json.put(ERROR_PARAMS, new JSONArray(0));
+            } else {
+                final JSONArray jArgs = new JSONArray(args.length);
+                for (int i = 0; i < args.length; i++) {
+                    Object obj = args[i];
+                    jArgs.put(obj instanceof Localizable ? obj.toString() : obj);
+                }
+                json.put(ERROR_PARAMS, jArgs);
+            }
+        }
+        /*
+         * Categories
+         */
+        {
+            List<Category> categories = exception.getCategories();
+            int size = categories.size();
+            if (1 == size) {
+                Category category = categories.get(0);
+                json.put(ERROR_CATEGORIES, category.toString());
+                // For compatibility
+                int number = Categories.getFormerCategoryNumber(category);
+                if (number > 0) {
+                    json.put(ERROR_CATEGORY, number);
+                }
+            } else {
+                if (size <= 0) {
+                    // Empty JSON array
+                    json.put(ERROR_CATEGORIES, new JSONArray(0));
+                } else {
+                    JSONArray jArray = new JSONArray(size);
+                    for (final Category category : categories) {
+                        jArray.put(category.toString());
+                    }
+                    json.put(ERROR_CATEGORIES, jArray);
+                    // For compatibility
+                    int number = Categories.getFormerCategoryNumber(categories.get(0));
+                    if (number > 0) {
+                        json.put(ERROR_CATEGORY, number);
+                    }
+                }
+            }
+        }
+        json.put(ERROR_CODE, exception.getErrorCode());
+        json.put(ERROR_ID, exception.getExceptionId());
+        json.put(ERROR_DESC, exception.getSoleMessage());
     }
 
     /**

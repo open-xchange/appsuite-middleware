@@ -47,75 +47,25 @@
  *
  */
 
-package com.openexchange.sms;
+package com.openexchange.file.storage;
 
-import java.util.Locale;
 import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link SMSService}
+ * {@link LoginAwareFileStorageServiceExtension}
  *
- * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public interface SMSService {
-    
-    /**
-     * Send a SMS message to a recipient
-     *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @throws OXException
-     */
-    public void sendMessage(String recipient, String message) throws OXException;
+public interface LoginAwareFileStorageServiceExtension {
 
     /**
-     * Send a SMS message to a recipient
-     *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @param locale Locale of recipient's phone number to parse into correct format
-     * @throws OXException
+     * Tests the connection to the filestorage.
+     * 
+     * @throws OXException If connecting fails.
      */
-    public void sendMessage(String recipient, String message, Locale locale) throws OXException;
-
-    /**
-     * Send a SMS message to a recipient
-     *
-     * @param recipient Phone number to send the message
-     * @param message The message
-     * @param languageTag Language tag of recipient's phone number to parse into correct format
-     * @throws OXException
-     */
-    public void sendMessage(String recipient, String message, String languageTag) throws OXException;
-
-    /**
-     * Send a SMS message to recipients
-     *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @throws OXException
-     */
-    public void sendMessage(String[] recipients, String message) throws OXException;
-    
-    /**
-     * Send a SMS message to recipients
-     *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @param locale Locales of recipients' phone numbers to parse into correct format
-     * @throws OXException
-     */
-    public void sendMessage(String[] recipients, String message, Locale[] locale) throws OXException;
-
-    /**
-     * Send a SMS message to recipients
-     *
-     * @param recipients Phone numbers to send the message
-     * @param message The message
-     * @param languageTags Language tags of recipients' phone numbers to parse into correct format
-     * @throws OXException
-     */
-    public void sendMessage(String[] recipients, String message, String[] languageTags) throws OXException;
+    public void testConnection(FileStorageAccount account, Session session) throws OXException;
 
 }
