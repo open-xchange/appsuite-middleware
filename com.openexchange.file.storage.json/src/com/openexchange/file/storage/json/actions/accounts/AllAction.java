@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
@@ -81,6 +83,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractFileStorageAccountAction {
+
+    static final Logger LOG = LoggerFactory.getLogger(AllAction.class.getName());
 
     public AllAction(final FileStorageServiceRegistry registry) {
         super(registry);
@@ -110,37 +114,20 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
             }
 
-
             // Iterate accounts and append its JSON representation
             for (FileStorageAccount account : userAccounts) {
+                FileStorageAccountAccess access = null;
                 try {
-                    FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
+                    access = fsService.getAccountAccess(account.getId(), session);
                     FileStorageFolder rootFolder = access.getRootFolder();
 
                     if (null != rootFolder) {
                         // Check file storage capabilities
-                        Set<String> caps = new HashSet<String>();
-                        if (access instanceof CapabilityAware) {
-                            CapabilityAware capabilityAware = (CapabilityAware) access;
-                            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
-                            if (null != supported && supported.booleanValue()) {
-                                caps.add(FileStorageCapability.FILE_VERSIONS.name());
-                            }
-                            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
-                            if (null != supported && supported.booleanValue()) {
-                                caps.add(FileStorageCapability.EXTENDED_METADATA.name());
-                            }
-
-                            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
-                                caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
-                            }
-                            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
-                                caps.add(FileStorageCapability.LOCKS.name());
-                            }
-                        }
+                        Set<String> caps = determineCapabilities(access);
                         result.put(writer.write(account, rootFolder, caps));
                     }
                 } catch (OXException e) {
+                    LOG.debug(e.getMessage());
                     if (e.equalsCode(6, "OAUTH")) {
                         // "OAUTH-0006" --> OAuth account not found
                         try {
@@ -149,14 +136,42 @@ public class AllAction extends AbstractFileStorageAccountAction {
                             // Ignore
                         }
                     } else {
-                        // Set as error
-                        requestResult.setException(e);
+                        // Add account with error
+                        Set<String> caps = determineCapabilities(access);
+                        result.put(writer.write(account, null, caps, e, session));
                     }
                 }
             }
         }
 
         return requestResult;
+    }
+
+    private Set<String> determineCapabilities(FileStorageAccountAccess access) {
+        if (!(access instanceof CapabilityAware)) {
+            return null;
+        }
+
+        CapabilityAware capabilityAware = (CapabilityAware) access;
+        Set<String> caps = new HashSet<String>();
+        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.LOCKS.name());
+        }
+        return caps;
     }
 
 }

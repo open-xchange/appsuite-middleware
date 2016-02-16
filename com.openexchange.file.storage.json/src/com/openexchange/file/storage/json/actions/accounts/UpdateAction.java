@@ -56,6 +56,7 @@ import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
+import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.tools.session.ServerSession;
@@ -82,6 +83,10 @@ public class UpdateAction extends AbstractFileStorageAccountAction {
             throw FileStorageExceptionCodes.MISSING_PARAMETER.create(FileStorageAccountConstants.ID);
         }
         final FileStorageAccount account = parser.parse(data);
+        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
+            //test connection
+            ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
+        }
         account.getFileStorageService().getAccountManager().updateAccount(account, session);
         return new AJAXRequestResult(Integer.valueOf(1));
     }
