@@ -158,6 +158,36 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
     }
 
     @Override
+    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
+        UserService userService = Services.requireService(UserService.class);
+        User user = userService.getUser(userId, contextId);
+        if (user.getFilestoreId() <= 0) {
+            // No individual file storage set; uses the context-associated one
+            return false;
+        }
+
+        int nextOwnerId = user.getFileStorageOwner();
+        if (nextOwnerId <= 0) {
+            // User is the owner
+            return true;
+        }
+
+        // Separate owner (chain)
+        User owner;
+        do {
+            owner = nextOwnerId == userId ? user : userService.getUser(nextOwnerId, contextId);
+            nextOwnerId = owner.getFileStorageOwner();
+        } while (nextOwnerId > 0);
+
+        if (owner.getFilestoreId() <= 0) {
+            // Huh... Owner has no file storage set
+            throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
+        }
+
+        return owner.getId() == userId;
+    }
+
+    @Override
     public QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException {
         return getQuotaFileStorage(-1, contextId);
     }
@@ -250,13 +280,15 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         // Separate owner (chain)
         User owner;
         do {
-            owner = userService.getUser(nextOwnerId, context);
+            owner = nextOwnerId == userId ? user : userService.getUser(nextOwnerId, context);
             nextOwnerId = owner.getFileStorageOwner();
         } while (nextOwnerId > 0);
+
         if (owner.getFilestoreId() <= 0) {
             // Huh... Owner has no file storage set
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
+
         fsOwner.setValue(owner.getId());
         return owner;
     }

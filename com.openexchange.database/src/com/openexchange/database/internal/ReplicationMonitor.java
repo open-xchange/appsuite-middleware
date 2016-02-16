@@ -328,6 +328,11 @@ public class ReplicationMonitor {
             } else {
                 LOG.error("Updating transaction for replication monitor failed for context {}.", I(contextId));
             }
+        } catch (SQLException e) {
+            if ((e.getErrorCode() == 1146) && (e.getSQLState().equalsIgnoreCase("42S02")) && (org.apache.commons.lang.StringUtils.containsIgnoreCase(e.getMessage(), "replicationMonitor"))) {
+                return;
+            }
+            throw e;
         } finally {
             Databases.closeSQLStuff(result, stmt);
         }

@@ -232,6 +232,15 @@ public abstract class OXUtilStorageInterface {
     public abstract Filestore[] listFilestores(String pattern, boolean omitUsage) throws StorageException;
 
     /**
+     * Loads filestore information, but w/o any usage information. Only basic information.
+     *
+     * @param id The unique identifier of the filestore.
+     * @return Basic filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    public abstract Filestore getFilestoreBasic(int id) throws StorageException;
+
+    /**
      * Gets the filestore associated with given identifier
      *
      * @param id The filestore identifier

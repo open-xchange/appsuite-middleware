@@ -52,6 +52,7 @@ package com.openexchange.filestore;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link FileStorages} - Utility class for file storages.
@@ -305,6 +306,21 @@ public final class FileStorages {
             }
         }
         return sb.toString();
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Checks if the specified user has an individual file storage configured that he/she owns.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if a user-associated file storage is set; otherwise <code>false</code> if specified user accesses either the context-associated or master-associated one
+     * @throws OXException If check for user-associated file storage fails
+     */
+    public static boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
+        QuotaFileStorageService qfss = QFS_REF.get();
+        return qfss.hasIndividualFileStorage(userId, contextId);
     }
 
 }
