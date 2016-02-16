@@ -49,6 +49,8 @@
 package com.openexchange.admin.storage.interfaces;
 
 import java.sql.Connection;
+import java.util.List;
+import java.util.Map;
 import com.openexchange.admin.daemons.AdminDaemon;
 import com.openexchange.admin.exceptions.OXGenericException;
 import com.openexchange.admin.rmi.dataobjects.Context;
@@ -483,4 +485,34 @@ public abstract class OXToolStorageInterface {
      */
     public abstract void changeAccessCombination(int filter, int addAccess, int removeAccess) throws StorageException;
 
+    /**
+     * Verifies whether the specified user is the owner of a master filestore and other users are using this filestore
+     * 
+     * @param context The context
+     * @param userId The user identifier
+     * @return true if the user is a master filestore owner AND other users are using this filestore; false otherwise
+     * @throws StorageException
+     */
+    public abstract boolean isMasterFilestoreOwner(Context context, int userId) throws StorageException;
+
+    /**
+     * Fetches the slave users of the master filestore
+     * 
+     * @param context
+     * @param userId
+     * @return
+     * @throws StorageException
+     */
+    public abstract Map<Integer, List<Integer>> fetchSlaveUsersOfMasterFilestore(Context context, int userId) throws StorageException;
+
+    /**
+     * Determines whether the specified context is the last one on the database schema
+     * 
+     * @param context The context
+     * @return true if the specified context is the last one on the database schema; false otherwise
+     * @throws StorageException if a problem occurs on the storage layer.
+     * @throws InvalidDataException if the specified context does not exist in any known database schema
+     */
+    public abstract boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException;
+    
 }

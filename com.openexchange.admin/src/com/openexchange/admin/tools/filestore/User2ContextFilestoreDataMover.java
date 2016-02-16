@@ -130,6 +130,7 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                 reverter = copyResult.reverter;
 
                 final Reverter rev = reverter;
+                final User user = this.user;
                 finalTask = new Runnable() {
 
                     @Override
@@ -177,6 +178,13 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                             }
                         }
 
+                        try {
+                            OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+                            oxcox.cleanseFilestoreUsageFor(user, ctx);
+                        } catch (Exception x) {
+                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), userId, contextId, x);
+                        }
+
                         if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
                             File fsDirectory = new File(srcStorage.getUri());
                             if (fsDirectory.exists()) {
@@ -190,9 +198,17 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
                     }
                 };
             } else {
+                final User user = this.user;
                 finalTask = new Runnable() {
                     @Override
                     public void run() {
+                        try {
+                            OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
+                            oxcox.cleanseFilestoreUsageFor(user, ctx);
+                        } catch (Exception x) {
+                            LOGGER.error("{} failed to cleanse filestore-usage entry for user {} in context {}", Thread.currentThread().getName(), userId, contextId, x);
+                        }
+
                         if ("file".equalsIgnoreCase(srcBaseUri.getScheme())) {
                             File fsDirectory = new File(srcStorage.getUri());
                             if (fsDirectory.exists()) {
@@ -220,7 +236,6 @@ public class User2ContextFilestoreDataMover extends FilestoreDataMover {
 
             OXUtilStorageInterface oxcox = OXUtilStorageInterface.getInstance();
             oxcox.changeFilestoreDataFor(user, ctx);
-            oxcox.cleanseFilestoreUsageFor(user, ctx);
             error = false;
 
             try {

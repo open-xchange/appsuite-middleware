@@ -1843,6 +1843,65 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
         }
     }
 
+    /**
+     * Loads filestore information, but w/o any usage information. Only basic information.
+     *
+     * @param id The unique identifier of the filestore.
+     * @return Basic filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    @Override
+    public Filestore getFilestoreBasic(int id) throws StorageException {
+        Connection con = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            return getFilestoreBasic(id, con);
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    /**
+     * Loads filestore information, but w/o any usage information. Only basic information.
+     *
+     * @param id The unique identifier of the filestore.
+     * @param configdbCon The connection to use
+     * @return Basic filestore information
+     * @throws StorageException if loading the filestore information fails.
+     */
+    public Filestore getFilestoreBasic(int id, Connection configdbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = configdbCon.prepareStatement("SELECT uri, size, max_context FROM filestore WHERE id=?");
+            stmt.setInt(1, id);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                throw new StorageException("No such file storage for identifier " + id);
+            }
+            Filestore fs = new Filestore();
+            fs.setId(I(id));
+            fs.setUrl(result.getString(1));
+            fs.setSize(L(toMB(result.getLong(2))));
+            fs.setMaxContexts(I(result.getInt(3)));
+            return fs;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
     @Override
     public Filestore getFilestore(final int id) throws StorageException {
         return getFilestore(id, true);
@@ -2451,11 +2510,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
 
         if (false == loadRealUsage) {
 
-            CompletionService<Integer> completionService = new ThreadPoolCompletionService<Integer>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
-            int taskCount = 0;
+            ThreadPoolCompletionService<Integer> completionService = new ThreadPoolCompletionService<Integer>(AdminServiceRegistry.getInstance().getService(ThreadPoolService.class));
 
+            final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
             for (final PoolAndSchema poolAndSchema : retval) {
-                final AdminCacheExtended cache = OXUtilMySQLStorage.cache;
                 completionService.submit(new Callable<Integer>() {
 
                     @Override
@@ -2465,7 +2523,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         ResultSet result = null;
                         try {
                             con = cache.getWRITENoTimeoutConnectionForPoolId(poolAndSchema.poolId, poolAndSchema.dbSchema);
-                            stmt = con.prepareStatement("SELECT COUNT(u.id) FROM user AS u JOIN filestore_usage AS fu ON u.cid=fu.cid AND u.id=fu.user WHERE u.filestore_id=?");
+                            stmt = con.prepareStatement("SELECT COUNT(id) FROM user WHERE filestore_id=?");
                             stmt.setInt(1, filestoreId);
                             result = stmt.executeQuery();
                             int numUsers = 0;
@@ -2474,7 +2532,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                             }
                             return Integer.valueOf(numUsers);
                         } catch (PoolException e) {
-                            LOG.error("SQL Error", e);
+                            LOG.error("Pooling Error", e);
                             throw new StorageException(e);
                         } catch (SQLException e) {
                             LOG.error("SQL Error", e);
@@ -2491,11 +2549,10 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                         }
                     }
                 });
-                taskCount++;
             }
 
             // Await completion
-            List<Integer> counts = ThreadPools.<Integer, StorageException> takeCompletionService(completionService, taskCount, EXCEPTION_FACTORY);
+            List<Integer> counts = ThreadPools.<Integer, StorageException> takeCompletionService(completionService, completionService.getNumberOfSubmits(), EXCEPTION_FACTORY);
 
             int numUsers = 0;
             for (Integer count : counts) {

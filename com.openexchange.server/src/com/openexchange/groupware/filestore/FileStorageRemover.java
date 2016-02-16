@@ -53,15 +53,15 @@ import java.sql.Connection;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.database.provider.SimpleDBProvider;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.delete.ContextDelete;
 import com.openexchange.groupware.delete.DeleteEvent;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
- * This class implements a delete listener and removes the directories of the
- * file store if the context is deleted.
+ * This class implements a delete listener and removes the directories of the file store if the context is deleted.
+ *
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public final class FileStorageRemover extends ContextDelete {
@@ -77,18 +77,18 @@ public final class FileStorageRemover extends ContextDelete {
      * {@inheritDoc}
      */
     @Override
-    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+    public void deletePerformed(DeleteEvent event, Connection readCon, Connection writeCon) throws OXException {
         if (isContextDelete(event)) {
             removeFileStorage(event.getContext(), new SimpleDBProvider(readCon, writeCon));
         }
     }
 
     private void removeFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        final FileStorage stor = getFileStorage(ctx, dbProvider);
-        stor.remove();
+        FileStorage storage = getFileStorage(ctx, dbProvider);
+        storage.remove();
     }
 
     private FileStorage getFileStorage(final Context ctx, final DBProvider dbProvider) throws OXException {
-        return QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
+        return FileStorages.getQuotaFileStorageService().getQuotaFileStorage(ctx.getContextId());
     }
 }
