@@ -88,6 +88,7 @@ public class ImapIdleRegisteringTracker implements ServiceTrackerCustomizer<Obje
     private final ImapIdleConfiguration configuration;
     private final Lock lock = new ReentrantLock();
     private final boolean hazelcastRequired;
+    private ImapIdlePushManagerService imapIdlePushManager;
     private ServiceRegistration<PushManagerService> reg;
     private HazelcastInstance hzInstance;
     private MailProviderRegistration imapRegistration;
@@ -232,7 +233,8 @@ public class ImapIdleRegisteringTracker implements ServiceTrackerCustomizer<Obje
                 activator.addService(HazelcastInstance.class, hzInstance);
             }
 
-            reg = context.registerService(PushManagerService.class, ImapIdlePushManagerService.newInstance(configuration, activator), null);
+            imapIdlePushManager = ImapIdlePushManagerService.newInstance(configuration, activator);
+            reg = context.registerService(PushManagerService.class, imapIdlePushManager, null);
         } catch (Exception e) {
             LOG.warn("Failed start-up for {}", context.getBundle().getSymbolicName(), e);
         }
@@ -244,6 +246,9 @@ public class ImapIdleRegisteringTracker implements ServiceTrackerCustomizer<Obje
             // Already unregistered
             return;
         }
+
+        imapIdlePushManager.shutDown();
+        imapIdlePushManager = null;
 
         reg.unregister();
         reg = null;

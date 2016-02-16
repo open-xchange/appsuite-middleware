@@ -51,6 +51,8 @@ package com.openexchange.mail.json.actions;
 
 import static com.openexchange.mail.mime.utils.MimeMessageUtility.unfold;
 import static com.openexchange.mail.utils.DateUtils.getDateRFC822;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -67,6 +69,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
+import org.apache.james.mime4j.MimeException;
+import org.apache.james.mime4j.parser.ContentHandler;
+import org.apache.james.mime4j.parser.MimeStreamParser;
+import org.apache.james.mime4j.stream.BodyDescriptor;
+import org.apache.james.mime4j.stream.Field;
+import org.apache.james.mime4j.stream.MimeConfig;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -91,6 +99,7 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.mail.mime.converters.FileBackedMimeMessage;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
@@ -147,6 +156,7 @@ public final class ImportAction extends AbstractMailAction {
                 force = null == tmp ? false : AJAXRequestDataTools.parseBoolParameter(tmp.trim());
             }
             boolean preserveReceivedDate = mailRequest.optBool("preserveReceivedDate", false);
+            boolean strictParsing = mailRequest.optBool("strictParsing", true);
             /*
              * Iterate upload files
              */
@@ -160,66 +170,56 @@ public final class ImportAction extends AbstractMailAction {
                 ThreadPoolService service = ServerServiceRegistry.getInstance().getService(ThreadPoolService.class, true);
                 AppenderTask task = new AppenderTask(mailInterface, folder, force, flags, queue);
                 try {
-                    Iterator<UploadFile> iter = request.getFiles(-1L, -1L).iterator();
-                    if (iter.hasNext()) {
-                        future = service.submit(task);
+                    // Initialize iterator
+                    Iterator<UploadFile> iter;
+                    {
+                        long maxFileSize = usm.getUploadQuotaPerFile();
+                        if (maxFileSize <= 0) {
+                            maxFileSize = -1L;
+                        }
+                        long maxSize = usm.getUploadQuota();
+                        if (maxSize <= 0) {
+                            maxSize = -1L;
+                        }
+                        iter = request.getFiles(maxFileSize, maxSize).iterator();
                     }
-                    javax.mail.Session defaultSession = MimeDefaultSession.getDefaultSession();
+
+                    // Iterate uploaded messages
                     boolean keepgoing = true;
-                    while (keepgoing && iter.hasNext()) {
-                        UploadFile item = iter.next();
-                        InputStream is = item.openStream();
-                        MimeMessage message;
-                        try {
-                            if (preserveReceivedDate) {
-                                message = new MimeMessage(defaultSession, is) {
-
-                                    private boolean notParsed = true;
-                                    private Date receivedDate = null;
-
-                                    @Override
-                                    public Date getReceivedDate() throws MessagingException {
-                                        if (notParsed) {
-                                            notParsed = false;
-                                            String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
-                                            if (null != receivedHdrs) {
-                                                long lastReceived = Long.MIN_VALUE;
-                                                for (int i = 0; i < receivedHdrs.length; i++) {
-                                                    String hdr = unfold(receivedHdrs[i]);
-                                                    int pos;
-                                                    if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
-                                                        try {
-                                                            lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
-                                                        } catch (Exception e) {
-                                                            continue;
-                                                        }
-                                                    }
-                                                }
-
-                                                if (lastReceived > 0L) {
-                                                    receivedDate = new Date(lastReceived);
-                                                }
-                                            }
-                                        }
-
-                                        return receivedDate;
+                    if (keepgoing && iter.hasNext()) {
+                        future = service.submit(task);
+                        do {
+                            UploadFile uploadFile = iter.next();
+                            File tmpFile = uploadFile.getTmpFile();
+                            boolean first = true;
+                            if (null != tmpFile) {
+                                try {
+                                    // Validate content
+                                    if (strictParsing) {
+                                        validateRfc822Message(tmpFile);
                                     }
-                                };
-                            } else {
-                                message = new MimeMessage(defaultSession, is);
+                                    first = false;
+
+                                    // Parse & add to queue
+                                    MimeMessage message = newMimeMessagePreservingReceivedDate(tmpFile, preserveReceivedDate);
+                                    message.removeHeader("x-original-headers");
+                                    String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
+                                    if (isEmpty(fromAddr)) {
+                                        // Add from address
+                                        message.setFrom(defaultSendAddr);
+                                    }
+                                    while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
+                                        keepgoing = !future.isDone();
+                                    }
+                                } catch (OXException e) {
+                                    if (first && !iter.hasNext()) {
+                                        throw e;
+                                    }
+                                    // Otherwise add to warnings
+                                    warnings.add(e);
+                                }
                             }
-                            message.removeHeader("x-original-headers");
-                        } finally {
-                            Streams.close(is);
-                        }
-                        String fromAddr = message.getHeader(MessageHeaders.HDR_FROM, null);
-                        if (isEmpty(fromAddr)) {
-                            // Add from address
-                            message.setFrom(defaultSendAddr);
-                        }
-                        while (keepgoing && !queue.offer(message, 1, TimeUnit.SECONDS)) {
-                            keepgoing = !future.isDone();
-                        }
+                        } while (keepgoing && iter.hasNext());
                     }
                 } finally {
                     task.stop();
@@ -280,6 +280,7 @@ public final class ImportAction extends AbstractMailAction {
                     System.arraycopy(byCaller, 0, mirs, alreadyImportedOnes.length, byCaller.length);
                 }
             }
+
             JSONArray respArray = new JSONArray();
             for (MailImportResult m : mirs) {
                 if (m.hasError()) {
@@ -295,9 +296,8 @@ public final class ImportAction extends AbstractMailAction {
                     respArray.put(responseObj);
                 }
             }
-            /*
-             * Create response object
-             */
+
+            // Create response object
             AJAXRequestResult result = new AJAXRequestResult(respArray, "json");
             result.setParameter(PLAIN_JSON, Boolean.TRUE);
             result.addWarnings(warnings);
@@ -309,6 +309,8 @@ public final class ImportAction extends AbstractMailAction {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        } catch (MessageRemovedException e) {
+            throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         } catch (InterruptedException e) {
@@ -316,6 +318,26 @@ public final class ImportAction extends AbstractMailAction {
             throw MailExceptionCode.INTERRUPT_ERROR.create(e);
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private void validateRfc822Message(File rfc822File) throws IOException, OXException {
+        MimeConfig config = new MimeConfig();
+        config.setMaxLineLen(-1);
+        config.setMaxHeaderLen(-1);
+        config.setMaxHeaderCount(250);
+        config.setStrictParsing(true);
+
+        MimeStreamParser parser = new MimeStreamParser(config);
+        parser.setContentHandler(DO_NOTHING_HANDLER);
+
+        InputStream in = new FileInputStream(rfc822File);
+        try {
+            parser.parse(in);
+        } catch (MimeException e) {
+            throw MailExceptionCode.INVALID_MESSAGE.create(e, e.getMessage());
+        } finally {
+            Streams.close(in);
         }
     }
 
@@ -384,6 +406,7 @@ public final class ImportAction extends AbstractMailAction {
                         mails.add(mm);
                     }
                     String[] ids = mailInterface.importMessages(folder, mails.toArray(new MailMessage[mails.size()]), force);
+                    idList.clear();
                     idList.addAll(Arrays.asList(ids));
                     if (flags > 0) {
                         mailInterface.updateMessageFlags(folder, ids, flags, true);
@@ -409,5 +432,115 @@ public final class ImportAction extends AbstractMailAction {
             threadRenamer.rename("Mail Import Thread");
         }
     }
+
+    private MimeMessage newMimeMessagePreservingReceivedDate(File tempFile, boolean preserveReceivedDate) throws MessagingException, IOException {
+        MimeMessage tmp;
+        if (preserveReceivedDate) {
+            tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null) {
+
+                private boolean notParsed = true;
+                private Date receivedDate = null;
+
+                @Override
+                public Date getReceivedDate() throws MessagingException {
+                    if (notParsed) {
+                        notParsed = false;
+                        String[] receivedHdrs = getHeader(MessageHeaders.HDR_RECEIVED);
+                        if (null != receivedHdrs) {
+                            long lastReceived = Long.MIN_VALUE;
+                            for (int i = 0; i < receivedHdrs.length; i++) {
+                                String hdr = unfold(receivedHdrs[i]);
+                                int pos;
+                                if (hdr != null && (pos = hdr.lastIndexOf(';')) != -1) {
+                                    try {
+                                        lastReceived = Math.max(lastReceived, getDateRFC822(hdr.substring(pos + 1).trim()).getTime());
+                                    } catch (Exception e) {
+                                        continue;
+                                    }
+                                }
+                            }
+
+                            if (lastReceived > 0L) {
+                                receivedDate = new Date(lastReceived);
+                            }
+                        }
+                    }
+
+                    return receivedDate;
+                }
+            };
+        } else {
+            tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, null);
+        }
+        return tmp;
+    }
+
+    private static final ContentHandler DO_NOTHING_HANDLER = new ContentHandler() {
+
+        @Override
+        public void startMessage() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endMessage() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void startBodyPart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endBodyPart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void startHeader() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void field(Field rawField) throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endHeader() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void preamble(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void epilogue(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void startMultipart(BodyDescriptor bd) throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void endMultipart() throws MimeException {
+            // Nothing
+        }
+
+        @Override
+        public void body(BodyDescriptor bd, InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+
+        @Override
+        public void raw(InputStream is) throws MimeException, IOException {
+            // Nothing
+        }
+    };
 
 }

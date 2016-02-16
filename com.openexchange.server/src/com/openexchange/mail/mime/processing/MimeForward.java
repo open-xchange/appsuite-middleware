@@ -363,12 +363,12 @@ public final class MimeForward extends AbstractMimeProcessing {
                 if (null == firstSeenText) {
                     firstSeenText = "";
                     contentType.setPrimaryType("text").setSubType("plain");
-                    contentType.setParameter("nature", "virtual");
                 } else if (isHtml) {
                     contentIds = MimeMessageUtility.getContentIDs(firstSeenText);
                     contentType.setCharsetParameter("UTF-8");
                     firstSeenText = replaceMetaEquiv(firstSeenText, contentType);
                 }
+                contentType.setParameter("nature", "virtual");
                 /*
                  * Add appropriate text part prefixed with forward text
                  */
@@ -459,9 +459,11 @@ public final class MimeForward extends AbstractMimeProcessing {
              * Add appropriate text part prefixed with forward text
              */
             {
-                final ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
+                ContentType contentType = new ContentType(MimeTypes.MIME_TEXT_PLAIN);
                 contentType.setCharsetParameter(MailProperties.getInstance().getDefaultMimeCharset());
-                final MimeBodyPart textPart = new MimeBodyPart();
+                contentType.setParameter("nature", "virtual");
+
+                MimeBodyPart textPart = new MimeBodyPart();
                 String txt = usm.isDropReplyForwardPrefix() ? "" : generateForwardText("", new LocaleAndTimeZone(getUser(session, ctx)), originalMsg, false);
                 MessageUtility.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain", textPart);
                 // textPart.setText(txt,MailProperties.getInstance().getDefaultMimeCharset(),"plain");

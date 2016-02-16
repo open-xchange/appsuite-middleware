@@ -104,4 +104,12 @@ public interface SessiondServiceExtended extends SessiondService {
      */
     Collection<Session> getSessions(int userId, int contextId, boolean considerSessionStorage);
 
+    /**
+     * Checks if specified session is applicable for session storage.
+     *
+     * @param session The session to check
+     * @return <code>true</code> if applicable for session storage; otherwise <code>false</code>
+     */
+    boolean isApplicableForSessionStorage(Session session);
+
 }

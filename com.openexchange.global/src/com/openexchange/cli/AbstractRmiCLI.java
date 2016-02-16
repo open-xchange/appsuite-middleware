@@ -243,6 +243,14 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final RuntimeException e) {
             System.err.println("Problem in runtime: " + e.getMessage());
+        } catch (final Error t) {
+            String message = t.getMessage();
+            String clazzName = t.getClass().getName();
+            System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } catch (final Throwable t) {
+            String message = t.getMessage();
+            String clazzName = t.getClass().getName();
+            System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
         } finally {
             if (error) {
                 System.exit(1);

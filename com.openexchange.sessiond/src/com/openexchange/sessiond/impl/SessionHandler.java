@@ -2050,7 +2050,7 @@ public final class SessionHandler {
      * @param session The session to check
      * @return <code>true</code> if session should be put to storage, <code>false</code>, otherwise
      */
-    public static boolean useSessionStorage(SessionImpl session) {
+    public static boolean useSessionStorage(Session session) {
         return null != session && false == session.isTransient() && false == isUsmEas(session.getClient());
     }
 

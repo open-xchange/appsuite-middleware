@@ -65,19 +65,22 @@ public class SessionInfo {
     private final int userId;
     private final String sessionId;
     private final boolean permanent;
+    private final boolean tranzient;
 
     /**
      * Initializes a new {@link SessionInfo}.
      *
      * @param session The associated session
      * @param permanent Whether permanent or not
+     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
      */
-    public SessionInfo(Session session, boolean permanent) {
+    public SessionInfo(Session session, boolean permanent, boolean tranzient) {
         super();
         this.contextId = session.getContextId();
         this.userId = session.getUserId();
         this.sessionId = session.getSessionID();
         this.permanent = permanent;
+        this.tranzient = tranzient;
     }
 
     /**
@@ -114,6 +117,15 @@ public class SessionInfo {
      */
     public boolean isPermanent() {
         return permanent;
+    }
+
+    /**
+     * Signals if associated session is not supposed to be held in session storage.
+     *
+     * @return <code>true</code> if not held in session storage; otherwise <code>false</code>
+     */
+    public boolean isTransient() {
+        return tranzient;
     }
 
 }

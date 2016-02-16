@@ -101,4 +101,9 @@ public abstract class ResourceMappingEntryAdapter implements ResourceMappingEntr
         return Optional.absent();
     }
 
+    @Override
+    public void entryMerged(EntryEvent<PortableID, PortableResource> event) {
+        // Do nothing
+    }
+
 }

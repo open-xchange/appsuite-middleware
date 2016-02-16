@@ -61,7 +61,7 @@ public interface ThreadRenamer {
      *
      * @param newName The new name
      */
-    public void rename(String newName);
+    void rename(String newName);
 
     /**
      * Renames thread's prefix to given <tt>newPrefix</tt>.
@@ -74,6 +74,11 @@ public interface ThreadRenamer {
      *
      * @param newPrefix The new prefix
      */
-    public void renamePrefix(String newPrefix);
+    void renamePrefix(String newPrefix);
+
+    /**
+     * Restores the original name.
+     */
+    void restoreName();
 
 }

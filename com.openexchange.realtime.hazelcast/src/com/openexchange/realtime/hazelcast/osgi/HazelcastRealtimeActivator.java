@@ -49,12 +49,11 @@
 
 package com.openexchange.realtime.hazelcast.osgi;
 
-import java.util.Map;
+import static com.openexchange.realtime.hazelcast.channel.HazelcastAccess.discoverMapName;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.ServiceReference;
 import com.hazelcast.config.Config;
-import com.hazelcast.config.MapConfig;
 import com.hazelcast.core.HazelcastInstance;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
@@ -92,10 +91,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(HazelcastRealtimeActivator.class);
 
     private final AtomicBoolean isStopped = new AtomicBoolean(true);
-
-    private HazelcastResourceDirectory directory;
-
-    private String cleanerRegistrationId;
+    private volatile HazelcastResourceDirectory directory;
+    private volatile String cleanerRegistrationId;
 
     @Override
     protected Class<?>[] getNeededServices() {
@@ -128,7 +125,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
             String msg = "Distributed directory maps couldn't be found in hazelcast configuration";
             throw new IllegalStateException(msg, new BundleException(msg, BundleException.ACTIVATOR_ERROR));
         }
-        directory = new HazelcastResourceDirectory(id_map, resource_map);
+        final HazelcastResourceDirectory directory = new HazelcastResourceDirectory(id_map, resource_map);
+        this.directory = directory;
         managementHouseKeeper.addManagementObject(directory.getManagementObject());
 
         GlobalMessageDispatcherImpl globalDispatcher = new GlobalMessageDispatcherImpl(directory);
@@ -164,8 +162,8 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
         String client_map = discoverMapName(config, "rtClientMapping-");
         String group_map = discoverMapName(config, "rtGroupMapping-");
-        final DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
-        cleanerRegistrationId = directory.addResourceMappingEntryListener(distributedGroupManager.getCleaner(), true);
+        DistributedGroupManagerImpl distributedGroupManager = new DistributedGroupManagerImpl(globalDispatcher, client_map, group_map);
+        cleanerRegistrationId = directory.applyDistributedGroupManager(distributedGroupManager);
 
         registerService(DistributedGroupManager.class, distributedGroupManager);
         registerService(RealtimeJanitor.class, distributedGroupManager);
@@ -185,11 +183,22 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     public void stopBundle() throws Exception {
         if (isStopped.compareAndSet(false, true)) {
             LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
-            try {
-                directory.removeResourceMappingEntryListener(cleanerRegistrationId);
-            } catch (Exception oxe) {
-                LOG.debug("Unable to remove ResourceMappingEntryListener.");
+
+            HazelcastResourceDirectory directory = this.directory;
+            if (null != directory) {
+                this.directory = null;
+
+                String cleanerRegistrationId = this.cleanerRegistrationId;
+                if (null != cleanerRegistrationId) {
+                    this.cleanerRegistrationId = null;
+                    try {
+                        directory.removeResourceMappingEntryListener(cleanerRegistrationId);
+                    } catch (Exception oxe) {
+                        LOG.debug("Unable to remove ResourceMappingEntryListener.");
+                    }
+                }
             }
+
             ManagementHouseKeeper.getInstance().cleanup();
             Services.setServiceLookup(null);
             cleanUp();
@@ -220,24 +229,6 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
         } catch (Exception e) {
             LOG.error("Error while stopping bundle.", e);
         }
-    }
-
-    /**
-     * Discovers map names in the supplied hazelcast configuration based on the map prefix.
-     *
-     * @param config The config object
-     * @return The prefix of the map name
-     */
-    private String discoverMapName(Config config, String mapPrefix){
-        Map<String, MapConfig> mapConfigs = config.getMapConfigs();
-        if (null != mapConfigs && 0 < mapConfigs.size()) {
-            for (String mapName : mapConfigs.keySet()) {
-                if (mapName.startsWith(mapPrefix)) {
-                    return mapName;
-                }
-            }
-        }
-        return null;
     }
 
 }

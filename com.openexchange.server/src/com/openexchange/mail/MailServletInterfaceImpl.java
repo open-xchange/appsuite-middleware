@@ -2512,6 +2512,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         initConnection(accountId);
         String draftFullname = mailAccess.getFolderStorage().getDraftsFolder();
+        if (!draftMail.containsSentDate()) {
+            draftMail.setSentDate(new Date());
+        }
         MailMessage draftMessage = mailAccess.getMessageStorage().saveDraft(draftFullname, draftMail);
         if (null == draftMessage) {
             return null;
@@ -2569,6 +2572,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             {
                 MailMessage filledMail = MimeMessageConverter.fillComposedMailMessage(draftMail);
                 filledMail.setFlag(MailMessage.FLAG_DRAFT, true);
+                if (!filledMail.containsSentDate()) {
+                    filledMail.setSentDate(new Date());
+                }
                 /*
                  * Append message to draft folder without invoking draftMail.cleanUp() afterwards to avoid loss of possibly uploaded images
                  */
@@ -2929,7 +2935,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 }
                 mailSent = true;
             } catch (OXException e) {
-                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e)) {
+                if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
                     throw e;
                 }
 

@@ -49,14 +49,10 @@
 
 package com.openexchange.push.imapidle;
 
-import gnu.trove.list.TLongList;
-import gnu.trove.list.array.TLongArrayList;
+import static com.openexchange.push.imapidle.ImapIdlePushManagerService.isTransient;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 import javax.mail.FetchProfile;
@@ -94,14 +90,13 @@ import com.openexchange.push.PushEventConstants;
 import com.openexchange.push.PushExceptionCodes;
 import com.openexchange.push.PushListener;
 import com.openexchange.push.PushUtility;
+import com.openexchange.push.imapidle.control.ImapIdleControl;
 import com.openexchange.push.imapidle.locking.ImapIdleClusterLock;
 import com.openexchange.push.imapidle.locking.SessionInfo;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
-import com.openexchange.threadpool.AbstractTask;
-import com.openexchange.threadpool.ThreadPools;
-import com.openexchange.threadpool.behavior.CallerRunsBehavior;
+import com.openexchange.threadpool.ThreadRenamer;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 import com.openexchange.user.UserService;
@@ -110,6 +105,8 @@ import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.protocol.IMAPProtocol;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
 
 /**
  * {@link ImapIdlePushListener}
@@ -122,26 +119,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private static final Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ImapIdlePushListener.class);
 
     /** The timeout threshold; cluster lock timeout minus one minute */
-    private static final long TIMEOUT_THRESHOLD_NANOS = TimeUnit.MILLISECONDS.toNanos(ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L);
-
-    /**
-     * A simple task that actually performs the {@link IMAPFolder#idle() IMAP IDLE call}.
-     */
-    private static final class ImapIdleTask extends AbstractTask<Void> {
-
-        private final IMAPFolder imapFolder;
-
-        ImapIdleTask(IMAPFolder imapFolder) {
-            super();
-            this.imapFolder = imapFolder;
-        }
-
-        @Override
-        public Void call() throws MessagingException {
-            imapFolder.idle(true);
-            return null;
-        }
-    }
+    private static final long TIMEOUT_THRESHOLD_MILLIS = ImapIdleClusterLock.TIMEOUT_MILLIS - 60000L;
 
     /**
      * The push mode; either <code>"newmail"</code> or <code>"always"</code>.
@@ -193,6 +171,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     // ------------------------------------------------------------------------------------------------------- //
 
     private final ServiceLookup services;
+    private final ImapIdleControl control;
     private final Session session;
     private ScheduledTimerTask timerTask;
     private final int accountId;
@@ -205,11 +184,13 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private volatile IMAPFolder imapFolderInUse;
     private volatile Map<String, Object> additionalProps;
     private volatile long lastLockRefreshNanos;
+    private volatile boolean interrupted;
+    private volatile boolean idling;
 
     /**
      * Initializes a new {@link ImapIdlePushListener}.
      */
-    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, boolean supportsPermanentListeners, ServiceLookup services) {
+    public ImapIdlePushListener(String fullName, int accountId, PushMode pushMode, long delay, Session session, boolean permanent, boolean supportsPermanentListeners, ImapIdleControl control, ServiceLookup services) {
         super();
         canceled = new AtomicBoolean();
         this.permanent = permanent;
@@ -219,6 +200,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         this.session = session;
         this.delayNanos = TimeUnit.MILLISECONDS.toNanos(delay <= 0 ? 5000L : delay);
         this.services = services;
+        this.control = control;
         this.pushMode = pushMode;
         additionalProps = null;
         lastLockRefreshNanos = System.nanoTime();
@@ -241,12 +223,46 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     }
 
     /**
+     * Gets the context identifier.
+     *
+     * @return The context identifier
+     */
+    public int getContextId() {
+        return session.getContextId();
+    }
+
+    /**
+     * Gets the user identifier.
+     *
+     * @return The user identifier
+     */
+    public int getUserId() {
+        return session.getUserId();
+    }
+
+    /**
+     * Marks this IMAP-IDLE listener as interrupted while IDL'ing.
+     */
+    public void markInterrupted() {
+        this.interrupted = true;
+    }
+
+    /**
      * Gets the permanent flag
      *
      * @return The permanent flag
      */
     public boolean isPermanent() {
         return permanent;
+    }
+
+    /**
+     * Checks if this listener is currently idl'ing.
+     *
+     * @return <code>true</code> if idl'ing; otherwise <code>false</code>
+     */
+    public boolean isIdling() {
+        return idling;
     }
 
     @Override
@@ -268,6 +284,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         String sContextId = Integer.toString(session.getContextId());
         String sUserId = Integer.toString(session.getUserId());
 
+        // Set thread name
+        ThreadRenamer renamer = getThreadRenamer();
+        if (null != renamer) {
+            renamer.renamePrefix("ImapIdle");
+        }
         try {
             boolean error = true;
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
@@ -314,7 +335,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                     // Refresh lock prior to entering IMAP-IDLE
                     if (doRefreshLock()) {
-                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent));
+                        ImapIdlePushManagerService.getInstance().refreshLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                     }
 
                     // Are there already new messages?
@@ -333,7 +354,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
 
                         mailAccess.setWaiting(true);
                         try {
-                            if (false == doImapIdleTimeoutAware(imapFolder)) {
+                            if (false == doImapIdle(imapFolder)) {
                                 // Timeout elapsed
                                 error = false;
                                 return;
@@ -444,15 +465,14 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     LOGGER.debug("Awaiting next IMAP-IDLE run for user {} in context {}.", sUserId, sContextId);
                 }
             }
-        } catch (InterruptedException e) {
-            // Thread interrupted - keep interrupted flag
-            Thread.currentThread().interrupt();
-            LOGGER.debug("Thread interrupted during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
-            cancel(true);
         } catch (Exception e) {
             // Any aborting error
             LOGGER.warn("Severe error during IMAP-IDLE run for user {} in context {}. Therefore going to cancel associated listener permanently.", sUserId, sContextId, e);
             cancel(true);
+        } finally {
+            if (null != renamer) {
+                renamer.restoreName();
+            }
         }
     }
 
@@ -464,7 +484,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
     private boolean doRefreshLock() {
         long last = lastLockRefreshNanos;
         long nanos = System.nanoTime();
-        if (nanos - last > TIMEOUT_THRESHOLD_NANOS) {
+        if (nanos - last > TimeUnit.MILLISECONDS.toNanos(TIMEOUT_THRESHOLD_MILLIS)) {
             lastLockRefreshNanos = nanos;
             return true;
         }
@@ -484,20 +504,40 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
      *
      * @param imapFolder The associated mailbox for which to enter the IMAP-IDLE command
      * @return <code>true</code> in case an IMAP server notification terminated the IMAP-IDLE; otherwise <code>false</code> if timeout elapsed
-     * @throws InterruptedException If idle'ing thread has been interrupted
      * @throws MessagingException If IMAP-IDLE fails for any reason
      */
-    private boolean doImapIdleTimeoutAware(IMAPFolder imapFolder) throws InterruptedException, MessagingException {
-        Future<Void> f = ThreadPools.getThreadPool().submit(new ImapIdleTask(imapFolder), CallerRunsBehavior.<Void> getInstance());
+    private boolean doImapIdle(IMAPFolder imapFolder) throws MessagingException {
+        interrupted = false;
+
+        control.add(this, imapFolder, TIMEOUT_THRESHOLD_MILLIS);
         try {
-            f.get(TIMEOUT_THRESHOLD_NANOS, TimeUnit.NANOSECONDS);
+            // Enter IMAP-IDLE
+            idling = true;
+            try {
+                imapFolder.idle(true);
+            } finally {
+                idling = false;
+            }
+
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleControlTask
+                return false;
+            }
             return true;
-        } catch (TimeoutException e) {
-            // Next run...
-            f.cancel(true);
-            return false;
-        } catch (ExecutionException e) {
-            throw ThreadPools.launderThrowable(e, MessagingException.class);
+        } catch (MessagingException e) {
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleControlTask
+                return false;
+            }
+            throw e;
+        } catch (RuntimeException e) {
+            if (interrupted) {
+                // Consciously interrupted by ImapIdleControlTask
+                return false;
+            }
+            throw e;
+        } finally {
+            control.remove(this);
         }
     }
 
@@ -586,7 +626,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                     // No other listener available
                     // Give up lock and return
                     try {
-                        instance.releaseLock(new SessionInfo(session, permanent));
+                        instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                     } catch (Exception e) {
                         LOGGER.warn("Failed to release lock for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                     }
@@ -598,7 +638,7 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
                         LOGGER.warn("Failed to start new listener for user {} in context {}.", session.getUserId(), session.getContextId(), e);
                         // Give up lock and return
                         try {
-                            instance.releaseLock(new SessionInfo(session, permanent));
+                            instance.releaseLock(new SessionInfo(session, permanent, permanent ? false : isTransient(session, services)));
                         } catch (Exception x) {
                             LOGGER.warn("Failed to release DB lock for user {} in context {}.", session.getUserId(), session.getContextId(), x);
                         }
@@ -801,6 +841,11 @@ public final class ImapIdlePushListener implements PushListener, Runnable {
         mailMessage.setSubject(MimeMessageConverter.getSubject(im));
         mailMessage.setUnreadMessages(unread);
         return mailMessage;
+    }
+
+    private ThreadRenamer getThreadRenamer() {
+        Thread t = Thread.currentThread();
+        return (t instanceof ThreadRenamer) ? (ThreadRenamer)t : null;
     }
 
     private static void closeMailAccess(final MailAccess<?, ?> mailAccess) {

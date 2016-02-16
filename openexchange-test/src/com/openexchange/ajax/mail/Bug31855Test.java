@@ -111,7 +111,7 @@ public class Bug31855Test extends AbstractMailTest {
         streamReader.close();
         InputStream inputStream = new ByteArrayInputStream(
             TestMails.replaceAddresses(sb.toString(), client.getValues().getSendAddress()).getBytes(com.openexchange.java.Charsets.UTF_8));
-        final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream);
+        final ImportMailRequest importMailRequest = new ImportMailRequest(values.getInboxFolder(), MailFlag.SEEN.getValue(), inputStream).setStrictParsing(false);
         final ImportMailResponse importResp = client.execute(importMailRequest);
         JSONArray json = (JSONArray) importResp.getData();
         fmid = importResp.getIds();

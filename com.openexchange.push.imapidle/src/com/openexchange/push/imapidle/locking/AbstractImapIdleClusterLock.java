@@ -63,6 +63,7 @@ import com.hazelcast.core.IExecutorService;
 import com.hazelcast.core.Member;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.sessiond.SessiondService;
+import com.openexchange.sessiond.SessiondServiceExtended;
 import com.openexchange.sessionstorage.hazelcast.serialization.PortableSessionExistenceCheck;
 
 /**
@@ -104,11 +105,12 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      *
      * @param value The value to check
      * @param now The current time stamp nano seconds
+     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if valid; otherwise <code>false</code>
      */
-    protected boolean validValue(String value, long now, HazelcastInstance hzInstance) {
-        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, hzInstance);
+    protected boolean validValue(String value, long now, boolean tranzient, HazelcastInstance hzInstance) {
+        return (TimeUnit.NANOSECONDS.toMillis(now - parseNanosFromValue(value)) <= TIMEOUT_MILLIS) && existsSessionFromValue(value, tranzient, hzInstance);
     }
 
     /**
@@ -126,10 +128,11 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
      * Checks if the session referenced by given value does still exists
      *
      * @param value The value
+     * @param tranzient <code>true</code> if session is not supposed to be held in session storage; otherwise <code>false</code>
      * @param hzInstance The Hazelcast instance
      * @return <code>true</code> if session still exists; otherwise <code>false</code>
      */
-    protected boolean existsSessionFromValue(String value, HazelcastInstance hzInstance) {
+    protected boolean existsSessionFromValue(String value, boolean tranzient, HazelcastInstance hzInstance) {
         int pos = value.indexOf('?');
         if (pos < 0) {
             // Value from a permanent listener - Always true
@@ -141,6 +144,11 @@ public abstract class AbstractImapIdleClusterLock implements ImapIdleClusterLock
         {
             SessiondService sessiondService = services.getService(SessiondService.class);
             if (null != sessiondService) {
+                if (tranzient && (sessiondService instanceof SessiondServiceExtended)) {
+                    // Can only "live" node-local
+                    return ((SessiondServiceExtended) sessiondService).getSession(sessionId, false) != null;
+                }
+
                 if (sessiondService.getSession(sessionId) != null) {
                     return true;
                 }

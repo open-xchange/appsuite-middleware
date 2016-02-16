@@ -99,7 +99,7 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
     /**
      * A part's content could not be read from message %1$s in mail folder %2$s
      */
-    UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s", CATEGORY_USER_INPUT, 7),
+    UNREADBALE_PART_CONTENT("A part's content could not be read from message %1$s in mail folder %2$s", MailExceptionStrings.UNREADBALE_PART_CONTENT_MSG, CATEGORY_USER_INPUT, 7),
     /**
      * An I/O error occurred: %1$s
      */
@@ -541,7 +541,14 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * Archive folder does not allow subfolders.
      */
     ARCHIVE_SUBFOLDER_NOT_ALLOWED("Archive folder does not allow subfolders.", MailExceptionStrings.ARCHIVE_SUBFOLDER_NOT_ALLOWED_MSG, CATEGORY_PERMISSION_DENIED, 100),
-
+    /**
+     * Invalid message data: %1$s
+     */
+    INVALID_MESSAGE("Invalid message data: %1$s", MailExceptionStrings.INVALID_MESSAGE_MSG, CATEGORY_USER_INPUT, 101),
+    /**
+     * The message content is too big from message %1$s in mail folder %2$s
+     */
+    CONTENT_TOO_BIG("The message content is too big from message %1$s in mail folder %2$s", MailExceptionStrings.CONTENT_TOO_BIG_MSG, CATEGORY_ERROR, 102),
     ;
 
     private static String PREFIX = "MSG";
