@@ -62,7 +62,7 @@ import com.openexchange.tools.file.InMemoryFileStorage;
  */
 public class SimQuotaFileStorageService implements QuotaFileStorageService {
 
-    private InMemoryFileStorage fileStorage;
+    private final InMemoryFileStorage fileStorage;
 
     /**
      * Initialises a new {@link SimQuotaFileStorageService}.
@@ -72,69 +72,44 @@ public class SimQuotaFileStorageService implements QuotaFileStorageService {
         this.fileStorage = fileStorage;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#getUnlimitedQuotaFileStorage(java.net.URI, int, int)
-     */
     @Override
     public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#getQuotaFileStorage(int)
-     */
     @Override
     public QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#getQuotaFileStorage(int, int)
-     */
     @Override
     public QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException {
         return fileStorage;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#getFileStorageUriFor(int, int)
-     */
     @Override
     public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
         // TODO Auto-generated method stub
         return null;
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#invalidateCacheFor(int)
-     */
     @Override
     public void invalidateCacheFor(int contextId) {
         // TODO Auto-generated method stub
 
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see com.openexchange.filestore.QuotaFileStorageService#invalidateCacheFor(int, int)
-     */
     @Override
     public void invalidateCacheFor(int userId, int contextId) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
+        return false;
     }
 
 }

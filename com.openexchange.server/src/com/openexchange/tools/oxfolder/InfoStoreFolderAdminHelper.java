@@ -65,6 +65,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.i18n.FolderStrings;
+import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.server.impl.OCLPermission;
 
@@ -218,6 +219,9 @@ public final class InfoStoreFolderAdminHelper {
             case FolderObject.PUBLIC:
                 Context context = new ContextImpl(contextID);
                 String name = OXFolderAdminHelper.getUserDisplayName(userID, contextID, connection);
+                if (null == name) {
+                    throw LdapExceptionCode.USER_NOT_FOUND.create(userID, contextID).setPrefix("USR");
+                }
                 int resetLen = name.length();
                 int count = 0;
                 while (-1 != lookUpFolder(FolderObject.SYSTEM_USER_INFOSTORE_FOLDER_ID, name, FolderObject.INFOSTORE, connection, context)) {

@@ -120,4 +120,14 @@ public interface QuotaFileStorageService {
      */
     void invalidateCacheFor(int userId, int contextId);
 
+    /**
+     * Checks if the specified user has an individual file storage configured that he/she owns.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if a user-associated file storage is set; otherwise <code>false</code> if specified user accesses either the context-associated or master-associated one
+     * @throws OXException If check for user-associated file storage fails
+     */
+    boolean hasIndividualFileStorage(int userId, int contextId) throws OXException;
+
 }
