@@ -92,7 +92,7 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
     private static final String[] PLIST_BASIC_KEYS = new String[] { "PayloadIdentifier", "PayloadType", "PayloadUUID", "PayloadVersion", "PayloadDisplayName", "PayloadContent" };
     private static final String[] PLIST_MAIL_KEYS = new String[] { "PayloadType", "PayloadUUID", "PayloadIdentifier", "PayloadVersion", "EmailAccountDescription", "EmailAccountName", "EmailAccountType", "EmailAddress", "IncomingMailServerAuthentication", "IncomingMailServerHostName", "IncomingMailServerPortNumber", "IncomingMailServerUseSSL", "IncomingMailServerUsername", "OutgoingMailServerAuthentication", "OutgoingMailServerHostName", "OutgoingMailServerPortNumber", "OutgoingMailServerUseSSL", "OutgoingMailServerUsername" };
     private static final String[] PLIST_EAS_KEYS = new String[] { "PayloadType", "PayloadUUID", "PayloadIdentifier", "PayloadVersion", "UserName", "EmailAddress", "Host", "SSL" };
-    private static final String[] PLIST_DAV_KEYS = new String[] { "PayloadType", "PayloadUUID", "PayloadIdentifier", "PayloadVersion", "PayloadOrganization", "CalDAVUsername", "CalDAVHostName", "CalDAVUseSSL", "CalDAVAccountDescription" };
+    private static final String[] PLIST_DAV_KEYS = new String[] { "PayloadType", "PayloadUUID", "PayloadIdentifier", "PayloadVersion", "PayloadOrganization", "CardDAVUsername", "CardDAVHostName", "CardDAVUseSSL", "CardDAVAccountDescription" };
 
     protected void testMailDownload(String url, String host) throws IOException, SAXException, ParserConfigurationException, TransformerException, XmlParseException {
 
@@ -102,11 +102,8 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
             System.err.println("Unable to test mail Download. Mail Scenario is probably deactivated.");
         }
         for (String key : PLIST_MAIL_KEYS) {
-            assertTrue(properties.keySet().contains(key));
-        }
-
-        for (Object o : properties.values()) {
-            assertNotNull(o);
+            assertTrue("Plist does not contain the following property: " + key, properties.keySet().contains(key));
+            assertNotNull("The property " + key + " is null", properties.get(key));
         }
     }
 
@@ -120,11 +117,8 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
         }
 
         for (String key : PLIST_EAS_KEYS) {
-            assertTrue(properties.keySet().contains(key));
-        }
-
-        for (Object o : properties.values()) {
-            assertNotNull(o);
+            assertTrue("Plist does not contain the following property: " + key, properties.keySet().contains(key));
+            assertNotNull("The property " + key + " is null", properties.get(key));
         }
     }
 
@@ -137,11 +131,8 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
             return;
         }
         for (String key : PLIST_DAV_KEYS) {
-            assertTrue(properties.keySet().contains(key));
-        }
-
-        for (Object o : properties.values()) {
-            assertNotNull(o);
+            assertTrue("Plist does not contain the following property: " + key, properties.keySet().contains(key));
+            assertNotNull("The property " + key + " is null", properties.get(key));
         }
     }
 

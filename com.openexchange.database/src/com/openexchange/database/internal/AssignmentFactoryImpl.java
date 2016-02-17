@@ -99,7 +99,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             assignments.clear();
             assignments.addAll(readPools);
         } catch (OXException e) {
-            LOG.error("Unable to init assignments!", e);
+            LOG.error("Unable to init/reload assignments: " + e.getMessage(), e);
         }
     }
 
@@ -116,6 +116,8 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             stmt = readOnly.prepareStatement(GET_POOL_MAPPING);
             result = stmt.executeQuery();
 
+            int serverId = Server.getServerId();
+            
             while (result.next()) {
                 writePoolId = result.getInt("write_db_pool_id");
                 readPoolId = result.getInt("read_db_pool_id");
@@ -124,7 +126,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                     readPoolId = writePoolId;
                 }
                 int context = get(readOnly, writePoolId);
-                AssignmentImpl assignmentImpl = new AssignmentImpl(context, Server.getServerId(), readPoolId, writePoolId, schema);
+                AssignmentImpl assignmentImpl = new AssignmentImpl(context, serverId, readPoolId, writePoolId, schema);
                 lAssignments.add(assignmentImpl);
                 LOG.debug("Found assignment and added to pool: {}", assignmentImpl.toString());
             }
