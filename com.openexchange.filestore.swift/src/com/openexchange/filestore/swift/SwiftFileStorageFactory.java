@@ -67,7 +67,7 @@ import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.chunkstorage.RdbChunkStorage;
-import com.openexchange.filestore.swift.impl.AuthValue;
+import com.openexchange.filestore.swift.impl.AuthInfo;
 import com.openexchange.filestore.swift.impl.EndpointPool;
 import com.openexchange.filestore.swift.impl.SwiftClient;
 import com.openexchange.filestore.swift.impl.SwiftConfig;
@@ -233,8 +233,17 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         // User name
         String userName = requireProperty(filestoreID, "userName", config);
 
-        // API key
+        // Tenant name
+        String tenantName = requireProperty(filestoreID, "tenantName", config);
+
+        // API type & value
+        AuthInfo.Type authType = AuthInfo.Type.typeFor(requireProperty(filestoreID, "authType", config));
+        if (null == authType) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported auth type: " + authType);
+        }
         String authValue = requireProperty(filestoreID, "authValue", config);
+
+        String identityUrl = optProperty(filestoreID, "identityUrl", config);
 
         // End-point configuration
         String protocol = requireProperty(filestoreID, "protocol", config);
@@ -286,7 +295,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
         EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SwiftConfig(userName, AuthValue.parseFrom(authValue), httpClient, endpointPool);
+        return new SwiftConfig(userName, tenantName, new AuthInfo(authValue, authType, identityUrl), httpClient, endpointPool);
     }
 
     private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
@@ -296,6 +305,12 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create(propName);
         }
         return value;
+    }
+
+    private static String optProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
+        String propName = property(filestoreID, property);
+        String value = config.getProperty(propName);
+        return Strings.isEmpty(value) ? null : value;
     }
 
     private static String property(String filestoreID, String property) {

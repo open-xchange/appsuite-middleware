@@ -70,10 +70,12 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.swift.SwiftExceptionCode;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 
 /**
@@ -87,7 +89,8 @@ public class SwiftClient {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftClient.class);
 
     private final String userName;
-    private final AuthValue authValue;
+    private final String tenantName;
+    private final AuthInfo authValue;
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
     private final String containerName;
@@ -107,7 +110,8 @@ public class SwiftClient {
         super();
         tokenRef = new AtomicReference<Token>();
         this.userName = swiftConfig.getUserName();
-        this.authValue = swiftConfig.getAuthValue();
+        this.tenantName = swiftConfig.getTenantName();
+        this.authValue = swiftConfig.getAuthInfo();
         this.endpoints = swiftConfig.getEndpointPool();
         this.httpClient = swiftConfig.getHttpClient();
         this.contextId = contextId;
@@ -486,14 +490,30 @@ public class SwiftClient {
         HttpPost post = null;
         HttpResponse response = null;
         try {
-            post = new HttpPost("https://identity.api.rackspacecloud.com/v2.0/tokens");
-
             {
+                String identityEndPoint = authValue.getIdentityUrl();
                 JSONObject jAuthData = new JSONObject(2);
-                if (AuthValue.Type.PASSWORD.equals(authValue.getType())) {
-                    jAuthData = new JSONObject(2).put("passwordCredentials", new JSONObject(3).put("username", userName).put("password", authValue.getValue()));
-                } else {
-                    jAuthData = new JSONObject(2).put("RAX-KSKEY:apiKeyCredentials", new JSONObject(3).put("username", userName).put("apiKey", authValue.getValue()));
+                switch (authValue.getType()) {
+                    case PASSWORD:
+                        if (Strings.isEmpty(identityEndPoint)) {
+                            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
+                        }
+                        post = new HttpPost(identityEndPoint);
+                        jAuthData = new JSONObject(4).put("tenantName", tenantName).put("passwordCredentials", new JSONObject(3).put("username", userName).put("password", authValue.getValue()));
+                        break;
+                    case TOKEN:
+                        if (Strings.isEmpty(identityEndPoint)) {
+                            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
+                        }
+                        post = new HttpPost(identityEndPoint);
+                        jAuthData = new JSONObject(4).put("tenantName", tenantName).put("token", new JSONObject(2).put("id", authValue.getValue()));
+                        break;
+                    case RACKSPACE_API_KEY:
+                        post = new HttpPost(Strings.isEmpty(identityEndPoint) ? "https://identity.api.rackspacecloud.com/v2.0/tokens" : identityEndPoint);
+                        jAuthData = new JSONObject(2).put("RAX-KSKEY:apiKeyCredentials", new JSONObject(3).put("username", userName).put("apiKey", authValue.getValue()));
+                        break;
+                    default:
+                        throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Unsupported auth type: " + authValue.getType().getId());
                 }
                 JSONObject jRequestBody = new JSONObject(2).put("auth", jAuthData);
                 post.setEntity(new StringEntity(jRequestBody.toString(), ContentType.APPLICATION_JSON));

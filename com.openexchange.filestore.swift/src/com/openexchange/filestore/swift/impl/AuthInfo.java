@@ -52,61 +52,87 @@ package com.openexchange.filestore.swift.impl;
 import com.openexchange.java.Strings;
 
 /**
- * {@link AuthValue} - The authentication value.
+ * {@link AuthInfo} - The authentication value.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AuthValue {
-
-    /**
-     * Parses the authentication value from given string
-     *
-     * @param authValue The string
-     * @return The parsed value
-     */
-    public static AuthValue parseFrom(String authValue) {
-        if (Strings.isEmpty(authValue)) {
-            return null;
-        }
-
-        String prefix = "password:";
-        if (authValue.startsWith(prefix)) {
-            return new AuthValue(authValue.substring(prefix.length()), Type.PASSWORD);
-        }
-
-        prefix = "apikey:";
-        if (authValue.startsWith(prefix)) {
-            return new AuthValue(authValue.substring(prefix.length()), Type.API_KEY);
-        }
-
-        return new AuthValue(authValue, Type.API_KEY);
-    }
+public class AuthInfo {
 
     /** The authentication type */
     public static enum Type {
         /**
-         * Authentication through passing an API key.
+         * Authentication through passing a Rackspace API key.
          */
-        API_KEY,
+        RACKSPACE_API_KEY("raxkey"),
+        /**
+         * Authentication through passing an API key/token.
+         */
+        TOKEN("token"),
         /**
          * Password-based authentication.
          */
-        PASSWORD,;
+        PASSWORD("password"),
+        ;
+
+        private final String id;
+        private Type(String id) {
+            this.id = id;
+        }
+
+        /**
+         * Gets the identifier
+         *
+         * @return The identifier
+         */
+        public String getId() {
+            return id;
+        }
+
+        /**
+         * Gets the type for specified type identifier
+         *
+         * @param type The type identifier
+         * @return The associated type or <code>null</code>
+         */
+        public static Type typeFor(String type) {
+            if (Strings.isEmpty(type)) {
+                return null;
+            }
+
+            type = Strings.asciiLowerCase(type.trim());
+            for (Type t : Type.values()) {
+                if (t.id.equals(type)) {
+                    return t;
+                }
+            }
+            return null;
+        }
     }
 
     // ---------------------------------------------------------------------------------------------------------------------- //
 
     private final String value;
     private final Type type;
+    private final String identityUrl;
 
     /**
-     * Initializes a new {@link AuthValue}.
+     * Initializes a new {@link AuthInfo}.
      */
-    public AuthValue(String value, Type type) {
+    public AuthInfo(String value, Type type, String identityUrl) {
         super();
         this.value = value;
         this.type = type;
+        this.identityUrl = identityUrl;
+    }
+
+    /**
+     * Gets the URL for the Identity API v2.0 end-point.
+     *
+     * @return The URL for the Identity API v2.0 end-point
+     */
+    public String getIdentityUrl() {
+        return identityUrl;
     }
 
     /**

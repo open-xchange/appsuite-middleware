@@ -62,7 +62,8 @@ public final class SwiftConfig {
     private final HttpClient httpClient;
     private final EndpointPool endpointPool;
     private final String userName;
-    private final AuthValue authValue;
+    private final String tenantName;
+    private final AuthInfo authValue;
 
     /**
      * Initializes a new {@link SwiftConfig}.
@@ -70,9 +71,10 @@ public final class SwiftConfig {
      * @param httpClient The associated HTTP client
      * @param endpointPool The end-point pool
      */
-    public SwiftConfig(String userName, AuthValue authValue, HttpClient httpClient, EndpointPool endpointPool) {
+    public SwiftConfig(String userName, String tenantName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
         super();
         this.userName = userName;
+        this.tenantName = tenantName;
         this.authValue = authValue;
         this.httpClient = httpClient;
         this.endpointPool = endpointPool;
@@ -88,11 +90,20 @@ public final class SwiftConfig {
     }
 
     /**
-     * Gets the auth value
+     * Gets the tenant name
      *
-     * @return The auth value
+     * @return The tenant name
      */
-    public AuthValue getAuthValue() {
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    /**
+     * Gets the auth info
+     *
+     * @return The auth info
+     */
+    public AuthInfo getAuthInfo() {
         return authValue;
     }
 
