@@ -51,6 +51,7 @@ package com.openexchange.filestore.swift;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -209,7 +210,11 @@ public class SwiftFileStorage implements FileStorage {
 
     @Override
     public Set<String> deleteFiles(String[] identifiers) throws OXException {
-        Set<String> notDeleted = new HashSet<String>();
+        if (null == identifiers || identifiers.length <= 0) {
+            return Collections.emptySet();
+        }
+
+        Set<String> notDeleted = new HashSet<String>(identifiers.length);
         for (String identifier : identifiers) {
             if (false == deleteFile(identifier)) {
                 notDeleted.add(identifier);

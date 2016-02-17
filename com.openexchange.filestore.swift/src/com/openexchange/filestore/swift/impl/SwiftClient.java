@@ -386,7 +386,7 @@ public class SwiftClient {
             delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK == status) {
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_NO_CONTENT == status) {
                 return true;
             }
             if (HttpServletResponse.SC_NOT_FOUND == status) {
