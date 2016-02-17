@@ -509,7 +509,7 @@ public final class NewAction extends AbstractMailAction {
         QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         PutNewMailData data;
         {
-            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), null);
+            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
             message.removeHeader("x-original-headers");
             if (newMessageId) {
                 message.removeHeader("Message-ID");
