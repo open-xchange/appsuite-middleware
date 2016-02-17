@@ -67,6 +67,7 @@ import org.xml.sax.SAXException;
 import xmlwise.Plist;
 import xmlwise.XmlParseException;
 import com.meterware.httpunit.GetMethodWebRequest;
+import com.meterware.httpunit.HttpNotFoundException;
 import com.meterware.httpunit.WebRequest;
 import com.meterware.httpunit.WebResponse;
 import com.openexchange.webdav.xml.AbstractWebdavXMLTest;
@@ -96,7 +97,10 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
     protected void testMailDownload(String url, String host) throws IOException, SAXException, ParserConfigurationException, TransformerException, XmlParseException {
 
         Map<String, Object> properties = testDownload(host, url);
-
+        if (properties == null) {
+            //Scenario is probably deactivated
+            System.err.println("Unable to test mail Download. Mail Scenario is probably deactivated.");
+        }
         for (String key : PLIST_MAIL_KEYS) {
             assertTrue(properties.keySet().contains(key));
         }
@@ -109,6 +113,11 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
     protected void testEASDownload(String url, String host) throws IOException, SAXException, ParserConfigurationException, TransformerException, XmlParseException {
 
         Map<String, Object> properties = testDownload(host, url);
+        if (properties == null) {
+            //Scenario is probably deactivated
+            System.err.println("Unable to test EAS Download. EAS Scenario is probably deactivated.");
+            return;
+        }
 
         for (String key : PLIST_EAS_KEYS) {
             assertTrue(properties.keySet().contains(key));
@@ -120,9 +129,13 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
     }
 
     protected void testDavDownload(String url, String host) throws IOException, SAXException, ParserConfigurationException, TransformerException, XmlParseException {
-
         Map<String, Object> properties = testDownload(host, url);
 
+        if (properties == null) {
+            //Scenario is probably deactivated
+            System.err.println("Unable to test Dav Download. Dav Scenario is probably deactivated.");
+            return;
+        }
         for (String key : PLIST_DAV_KEYS) {
             assertTrue(properties.keySet().contains(key));
         }
@@ -134,11 +147,13 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
 
     @SuppressWarnings("unchecked")
     private Map<String, Object> testDownload(String host, String url) throws TransformerException, XmlParseException, ParserConfigurationException, SAXException, IOException {
+        try {
         host = AbstractWebdavXMLTest.appendPrefix(host);
         final WebRequest webRequest = new GetMethodWebRequest(host + url);
-        final WebResponse webResponse = getNewWebConversation().getResponse(webRequest);
-        assertEquals(200, webResponse.getResponseCode());
 
+        final WebResponse webResponse = getNewWebConversation().getResponse(webRequest);
+
+        assertEquals(200, webResponse.getResponseCode());
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         DocumentBuilder builder = factory.newDocumentBuilder();
         Document doc = builder.parse(webResponse.getInputStream());
@@ -163,6 +178,11 @@ public class PListDownloadTestHelper extends AbstractWebdavXMLTest {
 
         properties = (Map<String, Object>) ((ArrayList<Object>) properties.get("PayloadContent")).get(0);
         assertNotNull(properties);
+
         return properties;
+        } catch (HttpNotFoundException e) {
+            return null;
+        }
+
     }
 }

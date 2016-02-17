@@ -53,8 +53,8 @@ import java.io.UnsupportedEncodingException;
 import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
+import com.google.common.io.BaseEncoding;
 import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
@@ -100,6 +100,11 @@ public class PlistSMSTest extends AbstractAJAXSession {
             assertNotNull("Response is empty!", response);
             // Expecting an sipgate authorization exception
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+
+            if (response.getException().getCode() == 10 && response.getException().getPrefix().equalsIgnoreCase("ONBRD")) {
+                // scenario disabled
+                continue;
+            }
             assertEquals("Unexpected response from the server! Response does contain an wrong exception.", 3, response.getException().getCode());
             assertEquals("Unexpected response from the server! Response does contain an wrong exception.", "SMS", response.getException().getPrefix());
         }
@@ -118,12 +123,14 @@ public class PlistSMSTest extends AbstractAJAXSession {
         helper.testDavDownload(url, client.getHostname());
     }
 
-    private String getURL(int userId, int contextId, String scenario, String device) throws OXException, NoSuchAlgorithmException, UnsupportedEncodingException {
+    public String getURL(int userId, int contextId, String scenario, String device) throws OXException, NoSuchAlgorithmException, UnsupportedEncodingException {
+        BaseEncoding encoder = BaseEncoding.base64().omitPadding();
         StringBuilder url = new StringBuilder();
-        String userString = new String(Base64.encodeBase64(String.valueOf(userId).getBytes()));
-        String contextString = new String(Base64.encodeBase64(String.valueOf(contextId).getBytes()));
-        String scenarioString = new String(Base64.encodeBase64(scenario.getBytes()));
-        String deviceString = new String(Base64.encodeBase64(device.getBytes()));
+
+        String userString = new String(encoder.encode(String.valueOf(userId).getBytes()));
+        String contextString = new String(encoder.encode(String.valueOf(contextId).getBytes()));
+        String scenarioString = new String(encoder.encode(scenario.getBytes()));
+        String deviceString = new String(encoder.encode(device.getBytes()));
         String challenge = toHash(userId, contextId, scenario, device);
         url.append("/ajax/plist");
         url.append(SLASH).append(userString).append(SLASH).append(contextString).append(SLASH).append(deviceString).append(SLASH).append(scenarioString).append(SLASH).append(challenge);

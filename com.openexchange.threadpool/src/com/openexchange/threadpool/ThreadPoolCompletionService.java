@@ -58,6 +58,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 
 /**
@@ -127,6 +128,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
     private final BlockingQueue<Future<V>> completionQueue;
     private final RefusedExecutionBehavior<V> behavior;
     private final List<Future<V>> submittedFutures;
+    private final AtomicInteger numberOfSubmits;
     private boolean trackable;
 
     /**
@@ -142,6 +144,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
         }
         this.threadPoolService = threadPoolService;
         this.completionQueue = new LinkedBlockingQueue<Future<V>>();
+        numberOfSubmits = new AtomicInteger(0);
         behavior = CallerRunsBehavior.getInstance();
         submittedFutures = new LinkedList<Future<V>>();
     }
@@ -168,6 +171,7 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
         this.threadPoolService = threadPoolService;
         this.completionQueue = completionQueue;
         this.behavior = behavior;
+        numberOfSubmits = new AtomicInteger(0);
         submittedFutures = new LinkedList<Future<V>>();
     }
 
@@ -218,12 +222,23 @@ public class ThreadPoolCompletionService<V> implements CancelableCompletionServi
     }
 
     /**
+     * Gets the number of currently submitted tasks.
+     *
+     * @return The number of submitted tasks
+     */
+    public int getNumberOfSubmits() {
+        return numberOfSubmits.get();
+    }
+
+    /**
      * Submits specified queueing future task.
      *
      * @param f The queueing future task
      */
     protected void submitFutureTask(final FutureTask<V> f) {
-        submittedFutures.add(threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior));
+        Future<V> submitted = threadPoolService.submit(ThreadPools.task(f, (V) null, trackable), behavior);
+        numberOfSubmits.incrementAndGet();
+        submittedFutures.add(submitted);
     }
 
     /**

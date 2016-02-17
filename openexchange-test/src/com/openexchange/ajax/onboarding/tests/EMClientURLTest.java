@@ -72,6 +72,7 @@ public class EMClientURLTest extends AbstractAJAXSession {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
         OnboardingTestResponse response = client.execute(req);
         assertNotNull("Response is empty!", response);
+        assertFalse("The response has an unexpected error: " + response.getException().getMessage(), response.hasError());
         Object data = response.getData();
         assertNotNull("Response has no data!", data);
         assertTrue("Unexpected response data type", data instanceof JSONObject);
