@@ -104,9 +104,8 @@ public class SwiftClient {
      * @param swiftConfig The Swift configuration
      * @param contextId The context identifier
      * @param userId The user identifier
-     * @throws OXException If initialization fails
      */
-    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) throws OXException {
+    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) {
         super();
         tokenRef = new AtomicReference<Token>();
         this.userName = swiftConfig.getUserName();
@@ -124,9 +123,6 @@ public class SwiftClient {
         }
         sb.append("_store");
         containerName = sb.toString();
-
-        // Get token
-        acquireNewToken(null);
     }
 
     /**
@@ -473,7 +469,7 @@ public class SwiftClient {
 
     private Token getOrAcquireNewTokenIfExpired() throws OXException {
         Token token = tokenRef.get();
-        return token.isExpired() ? acquireNewToken(token) : token;
+        return null == token || token.isExpired() ? acquireNewToken(token) : token;
     }
 
     private synchronized Token acquireNewToken(Token expiredToken) throws OXException {

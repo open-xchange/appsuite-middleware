@@ -54,8 +54,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.http.client.HttpClient;
@@ -85,7 +89,8 @@ import com.openexchange.timer.TimerService;
  */
 public class SwiftFileStorageFactory implements FileStorageProvider {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftFileStorageFactory.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftFileStorageFactory.class);
 
     /**
      * The URI scheme identifying <a href="http://docs.openstack.org/developer/swift/">Swift</a> file storages.
@@ -99,8 +104,8 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
 
     // -------------------------------------------------------------------------------------------------------------------- //
 
-    private final ServiceLookup services;
-    private final ConcurrentMap<URI, SwiftFileStorage> storages;
+    final ServiceLookup services;
+    private final ConcurrentMap<URI, Future<SwiftFileStorage>> storages;
     private final ConcurrentMap<String, SwiftConfig> swiftConfigs;
 
     /**
@@ -111,35 +116,54 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     public SwiftFileStorageFactory(ServiceLookup services) {
         super();
         this.services = services;
-        this.storages = new ConcurrentHashMap<URI, SwiftFileStorage>();
+        this.storages = new ConcurrentHashMap<URI, Future<SwiftFileStorage>>();
         this.swiftConfigs = new ConcurrentHashMap<String, SwiftConfig>();
     }
 
-
     @Override
-    public SwiftFileStorage getFileStorage(URI uri) throws OXException {
-        SwiftFileStorage storage = storages.get(uri);
-        if (null == storage) {
-            LOG.debug("Initializing Swift file storage for {}", uri);
+    public SwiftFileStorage getFileStorage(final URI uri) throws OXException {
+        Future<SwiftFileStorage> f = storages.get(uri);
+        if (null == f) {
+            FutureTask<SwiftFileStorage> ft = new FutureTask<SwiftFileStorage>(new Callable<SwiftFileStorage>() {
 
-            // Extract context and user from URI path
-            String filestoreID = extractFilestoreID(uri);
-            int[] contextAndUser = extractContextAndUser(uri);
-            int contextId = contextAndUser[0];
-            int userId = contextAndUser[1];
-            LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
+                @Override
+                public SwiftFileStorage call() throws OXException {
+                    LOG.debug("Initializing Swift file storage for {}", uri);
 
-            // Initialize file storage using dedicated client & chunk storage
-            SwiftClient client = initClient(filestoreID, contextId, userId);
-            ChunkStorage chunkStorage = new RdbChunkStorage(services, contextId, userId);
-            SwiftFileStorage newStorage = new SwiftFileStorage(client, chunkStorage);
+                    // Extract context and user from URI path
+                    String filestoreID = extractFilestoreID(uri);
+                    int[] contextAndUser = extractContextAndUser(uri);
+                    int contextId = contextAndUser[0];
+                    int userId = contextAndUser[1];
+                    LOG.debug("Using \"{}\" as filestore ID, context ID of filestore is \"{}\", user ID is \"{}\".", filestoreID, contextId, userId);
 
-            storage = storages.putIfAbsent(uri, newStorage);
-            if (null == storage) {
-                storage = newStorage;
+                    // Initialize file storage using dedicated client & chunk storage
+                    SwiftClient client = initClient(filestoreID, contextId, userId);
+                    ChunkStorage chunkStorage = new RdbChunkStorage(services, contextId, userId);
+                    return new SwiftFileStorage(client, chunkStorage);
+                }
+            });
+
+            f = storages.putIfAbsent(uri, ft);
+            if (null == f) {
+                ft.run();
+                f = ft;
             }
         }
-        return storage;
+
+        try {
+            return f.get();
+        } catch (InterruptedException e) {
+            // Keep interrupted status
+            Thread.currentThread().interrupt();
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Interrupted");
+        } catch (ExecutionException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof OXException) {
+                throw (OXException) cause;
+            }
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(cause, cause.getMessage());
+        }
     }
 
     @Override
@@ -173,7 +197,14 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      */
     private static final Pattern USER_STORE_PATTERN = Pattern.compile("(\\d+)_ctx_(\\d+)_user_store");
 
-    private int[] extractContextAndUser(URI uri) {
+    /**
+     * Extracts context and user identifiers from specified URI; e.g. <code>"swift://myswift/57462_ctx_3_user_store"</code>
+     *
+     * @param uri The URI to extract from
+     * @return The extracted context and user identifiers
+     * @throws IllegalArgumentException If URI's path does not follow expected pattern
+     */
+    int[] extractContextAndUser(URI uri) {
         String path = uri.getPath();
         while (0 < path.length() && '/' == path.charAt(0)) {
             path = path.substring(1);
@@ -205,7 +236,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
      * @param userID The user identifier
      * @return The client
      */
-    private SwiftClient initClient(String filestoreID, int contextID, int userID) throws OXException {
+    SwiftClient initClient(String filestoreID, int contextID, int userID) throws OXException {
         SwiftConfig swiftConfig = swiftConfigs.get(filestoreID);
         if (swiftConfig == null) {
             SwiftConfig newSwiftConfig = initSwiftConfig(filestoreID);
@@ -267,7 +298,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 try {
                     uriBuilder.setHost(hostAndPort[0]).setPort(Integer.parseInt(hostAndPort[1]));
                 } catch (NumberFormatException e) {
-                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
+                    throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
                 }
             } else {
                 throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Invalid value for 'com.openexchange.filestore.swift." + filestoreID + ".hosts': " + hosts);
@@ -281,7 +312,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
                 }
                 urls.add(baseUrl);
             } catch (URISyntaxException e) {
-                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create("Swift configuration leads to invalid URI: " + uriBuilder.toString());
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "Swift configuration leads to invalid URI: " + uriBuilder.toString());
             }
         }
 
@@ -307,7 +338,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         return value;
     }
 
-    private static String optProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
+    private static String optProperty(String filestoreID, String property, ConfigurationService config) {
         String propName = property(filestoreID, property);
         String value = config.getProperty(propName);
         return Strings.isEmpty(value) ? null : value;
@@ -318,13 +349,13 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     }
 
     /**
-     * Extracts the filestore ID from the configured file store URI, i.e. the 'authority' part from the URI.
+     * Extracts the file storage identifier from the configured file store URI, i.e. the 'authority' part from the URI.
      *
      * @param uri The file store URI
-     * @return The filestore ID
+     * @return The file storage identifier
      * @throws IllegalArgumentException If no valid ID could be extracted
      */
-    private static String extractFilestoreID(URI uri) throws IllegalArgumentException {
+    String extractFilestoreID(URI uri) throws IllegalArgumentException {
         String authority = uri.getAuthority();
         if (null == authority) {
             throw new IllegalArgumentException("No 'authority' part specified in filestore URI");
