@@ -2922,11 +2922,25 @@ public final class CalendarCollection implements CalendarCollectionService {
                 target.setEndDate(new Date(rs.getEnd()));
             }
         } else {
-            if (!target.containsStartDate()) {
-                target.setStartDate(source.getStartDate());
+            boolean success = false;
+            if (source.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE && target.containsRecurrenceType() && target.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) { // Series -> Single
+                RecurringResultsInterface rss = recColl.calculateFirstRecurring(source);
+                if (rss != null && rss.size() > 0) {
+                    RecurringResultInterface rs = rss.getRecurringResult(0);
+                    if (rs != null) {
+                        target.setStartDate(new Date(rs.getStart()));
+                        target.setEndDate(new Date(rs.getEnd()));
+                        success = true;
+                    }
+                }
             }
-            if (!target.containsEndDate()) {
-                target.setEndDate(source.getEndDate());
+            if (!success) {
+                if (!target.containsStartDate()) {
+                    target.setStartDate(source.getStartDate());
+                }
+                if (!target.containsEndDate()) {
+                    target.setEndDate(source.getEndDate());
+                }
             }
         }
     }

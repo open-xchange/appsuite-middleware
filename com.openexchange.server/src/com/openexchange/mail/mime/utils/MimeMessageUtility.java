@@ -2278,12 +2278,24 @@ public final class MimeMessageUtility {
      * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
      *
      * @param is The MIME input stream
+     * @param retainDate <code>true</code> to retain the date (align received date to sent date); otherwise <code>false</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage newMimeMessage(InputStream is, boolean retainDate) throws OXException {
+        return newMimeMessage(is, null, retainDate);
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
      * @param optReceivedDate The optional received date or <code>null</code>
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
     public static MimeMessage parseMimeMessageFrom(InputStream is, Date optReceivedDate) throws OXException {
-        return newMimeMessage(is, optReceivedDate);
+        return newMimeMessage(is, optReceivedDate, false);
     }
 
     /**
@@ -2295,6 +2307,10 @@ public final class MimeMessageUtility {
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
     public static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate) throws OXException {
+        return newMimeMessage(is, optReceivedDate, false);
+    }
+
+    private static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate, final boolean retainDate) throws OXException {
         InputStream msgSrc = is;
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
@@ -2309,11 +2325,26 @@ public final class MimeMessageUtility {
 
                     @Override
                     public Date getReceivedDate() throws MessagingException {
-                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                        if (null != optReceivedDate) {
+                            return optReceivedDate;
+                        }
+
+                        return retainDate ? getSentDate() : super.getReceivedDate();
                     }
                 };
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        Date optReceivedDate = super.getReceivedDate();
+                        if (null != optReceivedDate) {
+                            return optReceivedDate;
+                        }
+
+                        return retainDate ? getSentDate() : super.getReceivedDate();
+                    }
+                };
             }
             closeSink = false;
             return tmp;

@@ -88,19 +88,17 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /**
      * Initializes the db assignments
+     * 
+     * @throws OXException
      */
     @Override
-    public void reload() {
-        try {
-            List<Assignment> readPools = readPools();
-            if (readPools.size() == 0) {
-                LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
-            }
-            assignments.clear();
-            assignments.addAll(readPools);
-        } catch (OXException e) {
-            LOG.error("Unable to init assignments!", e);
+    public void reload() throws OXException {
+        List<Assignment> readPools = readPools();
+        if (readPools.size() == 0) {
+            LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
         }
+        assignments.clear();
+        assignments.addAll(readPools);
     }
 
     private List<Assignment> readPools() throws OXException {
@@ -116,6 +114,8 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             stmt = readOnly.prepareStatement(GET_POOL_MAPPING);
             result = stmt.executeQuery();
 
+            int serverId = Server.getServerId();
+
             while (result.next()) {
                 writePoolId = result.getInt("write_db_pool_id");
                 readPoolId = result.getInt("read_db_pool_id");
@@ -124,7 +124,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
                     readPoolId = writePoolId;
                 }
                 int context = get(readOnly, writePoolId);
-                AssignmentImpl assignmentImpl = new AssignmentImpl(context, Server.getServerId(), readPoolId, writePoolId, schema);
+                AssignmentImpl assignmentImpl = new AssignmentImpl(context, serverId, readPoolId, writePoolId, schema);
                 lAssignments.add(assignmentImpl);
                 LOG.debug("Found assignment and added to pool: {}", assignmentImpl.toString());
             }

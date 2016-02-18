@@ -89,6 +89,8 @@ public interface AssignmentFactory {
 
     /**
      * Reloads the previously read {@link Assignment}s
+     * 
+     * @throws OXException
      */
-    void reload();
+    void reload() throws OXException;
 }
