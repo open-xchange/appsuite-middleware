@@ -134,6 +134,18 @@ public final class LoginPerformer {
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
+    
+    /**
+     * Performs the auto login for the specified login request and with the specified properties
+     * 
+     * @param request The login request
+     * @param properties The properties
+     * @return The login providing login information
+     * @throws OXException If login fails
+     */
+    public LoginResult doAutoLogin(LoginRequest request, Map<String, Object> properties) throws OXException {
+        return doLogin(request, properties, new AutoLoginMethod(request, properties));
+    }
 
     /**
      * Performs the login for specified login request.
