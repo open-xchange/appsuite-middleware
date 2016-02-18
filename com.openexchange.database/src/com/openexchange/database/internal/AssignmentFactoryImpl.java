@@ -88,19 +88,17 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
 
     /**
      * Initializes the db assignments
+     * 
+     * @throws OXException
      */
     @Override
-    public void reload() {
-        try {
-            List<Assignment> readPools = readPools();
-            if (readPools.size() == 0) {
-                LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
-            }
-            assignments.clear();
-            assignments.addAll(readPools);
-        } catch (OXException e) {
-            LOG.error("Unable to init/reload assignments: " + e.getMessage(), e);
+    public void reload() throws OXException {
+        List<Assignment> readPools = readPools();
+        if (readPools.size() == 0) {
+            LOG.error("Cannot find any database assignment. Services that make use of the AssignmentFactory won't work!");
         }
+        assignments.clear();
+        assignments.addAll(readPools);
     }
 
     private List<Assignment> readPools() throws OXException {
@@ -117,7 +115,7 @@ public class AssignmentFactoryImpl implements AssignmentFactory {
             result = stmt.executeQuery();
 
             int serverId = Server.getServerId();
-            
+
             while (result.next()) {
                 writePoolId = result.getInt("write_db_pool_id");
                 readPoolId = result.getInt("read_db_pool_id");
