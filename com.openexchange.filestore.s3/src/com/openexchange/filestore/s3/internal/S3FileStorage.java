@@ -404,7 +404,7 @@ public class S3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         long fileSize = getFileSize(name);
-        if (offset > fileSize || -1 != length && length > fileSize - offset) {
+        if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
         }
         String key = addPrefix(name);
