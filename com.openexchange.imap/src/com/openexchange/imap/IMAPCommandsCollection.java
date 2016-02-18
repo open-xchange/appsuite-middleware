@@ -84,7 +84,6 @@ import javax.mail.Flags;
 import javax.mail.Folder;
 import javax.mail.FolderClosedException;
 import javax.mail.Message;
-import javax.mail.MessageRemovedException;
 import javax.mail.MessagingException;
 import javax.mail.Quota;
 import javax.mail.Store;
@@ -159,6 +158,25 @@ public final class IMAPCommandsCollection {
     private static final String STR_FETCH = "FETCH";
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPCommandsCollection.class);
+
+    private static final Field FIELD_IMAPFOLDER_EXISTS;
+    private static final Field FIELD_IMAPFOLDER_ATTRIBUTES;
+
+    static {
+        Field existsField = null;
+        Field attributesField = null;
+        try {
+            existsField = IMAPFolder.class.getDeclaredField("exists");
+            existsField.setAccessible(true);
+
+            attributesField = IMAPFolder.class.getDeclaredField("attributes");
+            attributesField.setAccessible(true);
+        } catch (Exception e) {
+            LOG.error("", e);
+        }
+        FIELD_IMAPFOLDER_EXISTS = existsField;
+        FIELD_IMAPFOLDER_ATTRIBUTES = attributesField;
+    }
 
     /**
      * Prevent instantiation.
@@ -1409,24 +1427,21 @@ public final class IMAPCommandsCollection {
             }
         });
         if (null == ret) {
-            final ProtocolException pex =
-                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(folder.getFullName()).append(
-                    "\" cannot be renamed.").toString());
+            ProtocolException pex = new ProtocolException("IMAP folder \"" + folder.getFullName() + "\" cannot be renamed.");
             throw new MessagingException(pex.getMessage(), pex);
         }
-        // Reset exists and attributes
+
+        // Reset fields 'exists' and 'attributes'
         try {
-            Field field = IMAPFolder.class.getDeclaredField("exists");
-            field.setAccessible(true);
+            Field field = FIELD_IMAPFOLDER_EXISTS;
             field.setBoolean(folder, false);
-            field = IMAPFolder.class.getDeclaredField("attributes");
-            field.setAccessible(true);
+
+            field = FIELD_IMAPFOLDER_ATTRIBUTES;
             field.set(folder, null);
-        } catch (final NoSuchFieldException e) {
-            LOG.error("", e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             LOG.error("", e);
         }
+
         new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
