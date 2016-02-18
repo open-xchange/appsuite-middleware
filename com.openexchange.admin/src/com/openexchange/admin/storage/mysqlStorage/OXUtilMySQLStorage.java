@@ -1844,6 +1844,168 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     }
 
     /**
+     * Gets the URIs of the file storages that are in use by specified context (either itself or by one if its users).
+     *
+     * @param contextId The context identifier
+     * @return The file storages in use
+     * @throws StorageException If file storages cannot be determined
+     */
+    @Override
+    public List<URI> getUrisforFilestoresUsedBy(int contextId) throws StorageException {
+        Connection configDbCon = null;
+        try {
+            configDbCon = cache.getConnectionForConfigDB();
+
+            // Get URI from context
+            URI ctxUri = getFilestoreUsedByContext(contextId, configDbCon);
+
+            // Get URIs from users
+            List<URI> uris;
+            {
+                Connection con = null;
+                try {
+                    con = cache.getConnectionForContext(contextId);
+                    uris = getFilestoresUsedByUsers(contextId, configDbCon, con);
+                } finally {
+                    if (null != con) {
+                        try {
+                            cache.pushConnectionForContext(contextId, con);
+                        } catch (PoolException e) {
+                            LOG.error("Error pushing configdb connection to pool!", e);
+                        }
+                    }
+                }
+            }
+
+            // Insert context URI & return
+            uris.add(0, ctxUri);
+            return uris;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != configDbCon) {
+                try {
+                    cache.pushConnectionForConfigDB(configDbCon);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private URI getFilestoreUsedByContext(int contextId, Connection configDbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = configDbCon.prepareStatement("SELECT filestore_id, filestore_name FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+
+            if (false == result.next()) {
+                return null;
+            }
+
+            int filestoreId = result.getInt(1);
+            String path = result.getString(2);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            stmt = configDbCon.prepareStatement("SELECT uri FROM filestore WHERE id=?");
+            stmt.setInt(1, filestoreId);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                // No such file storage
+                return null;
+            }
+
+            String fsUri = result.getString(1);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            return new URI(fsUri + (fsUri.endsWith("/") ? "" : "/") + path);
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (URISyntaxException e) {
+            LOG.error("URI Syntax Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private List<URI> getFilestoresUsedByUsers(int contextId, Connection configDbCon, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id, filestore_name FROM user WHERE cid=? AND filestore_id > 0");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+
+            if (false == result.next()) {
+                return new ArrayList<URI>(1);
+            }
+
+            class FidAndName {
+                final int filestoreId;
+                final String name;
+
+                FidAndName(int filestoreId, String name) {
+                    super();
+                    this.filestoreId = filestoreId;
+                    this.name = name;
+                }
+            };
+
+            List<FidAndName> fids = new LinkedList<FidAndName>();
+            do {
+                int filestoreId = result.getInt(1);
+                String path = result.getString(2);
+                fids.add(new FidAndName(filestoreId, path));
+            } while (result.next());
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            Map<Integer, String> baseUris = new HashMap<Integer, String>(fids.size());
+            List<URI> uris = new ArrayList<URI>(fids.size());
+            for (FidAndName fid : fids) {
+                int filestoreId = fid.filestoreId;
+
+                String fsUri;
+                if (baseUris.containsKey(Integer.valueOf(filestoreId))) {
+                    fsUri = baseUris.get(Integer.valueOf(filestoreId));
+                } else {
+                    stmt = configDbCon.prepareStatement("SELECT uri FROM filestore WHERE id=?");
+                    stmt.setInt(1, filestoreId);
+                    result = stmt.executeQuery();
+                    fsUri = result.next() ? result.getString(1) : null;
+                    baseUris.put(Integer.valueOf(filestoreId), fsUri);
+                    closeSQLStuff(result, stmt);
+                    result = null;
+                    stmt = null;
+                }
+
+                if (null != fsUri) {
+                    uris.add(new URI(fsUri + (fsUri.endsWith("/") ? "" : "/") + fid.name));
+                }
+            }
+            return uris;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (URISyntaxException e) {
+            LOG.error("URI Syntax Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    /**
      * Loads filestore information, but w/o any usage information. Only basic information.
      *
      * @param id The unique identifier of the filestore.
