@@ -141,7 +141,6 @@ public class SwiftFileStorage implements FileStorage {
     @Override
     public String saveNewFile(InputStream file) throws OXException {
         try {
-            checkOrCreateContainer();
             UUID documentId = UUID.randomUUID();
             upload(documentId, file, 0);
             return UUIDs.getUnformattedString(documentId);
@@ -255,7 +254,6 @@ public class SwiftFileStorage implements FileStorage {
             if (offset != currentSize) {
                 throw FileStorageCodes.INVALID_OFFSET.create(offset, name, currentSize);
             }
-            checkOrCreateContainer();
             return upload(documentId, file, offset);
         } finally {
             Streams.close(file);
@@ -266,10 +264,12 @@ public class SwiftFileStorage implements FileStorage {
     public void setFileLength(long length, String name) throws OXException {
         UUID documentId = UUIDs.fromUnformattedString(name);
         List<Chunk> chunks = chunkStorage.getChunks(documentId);
-        if (null == chunks || 0 == chunks.size()) {
+        if (null == chunks || chunks.isEmpty()) {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
+
         checkOrCreateContainer();
+
         for (Chunk chunk : chunks) {
             if (chunk.getOffset() >= length) {
                 /*
@@ -308,17 +308,18 @@ public class SwiftFileStorage implements FileStorage {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
 
-        checkOrCreateContainer();
-
         int size = chunks.size();
         if (1 == size) {
             /*
              * download parts of a single chunk
              */
             Chunk chunk = chunks.get(0);
-            if (offset >= chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
+            if ((offset >= chunk.getLength()) || ((length >= 0) && (length > (chunk.getLength() - offset)))) {
                 throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
             }
+
+            checkOrCreateContainer();
+
             long rangeStart = 0 < offset ? offset : 0;
             long rangeEnd = (0 < length ? rangeStart + length : chunk.getLength()) - 1;
             return client.get(chunk.getSwiftId(), rangeStart, rangeEnd);
@@ -329,9 +330,12 @@ public class SwiftFileStorage implements FileStorage {
          */
         Chunk lastChunk = chunks.get(size - 1);
         long totalLength = lastChunk.getOffset() + lastChunk.getLength();
-        if (offset >= totalLength || -1 != length && length > totalLength - offset) {
+        if ((offset >= totalLength) || ((length >= 0) && (length > (totalLength - offset)))) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
         }
+
+        checkOrCreateContainer();
+
         long rangeStart = 0 < offset ? offset : 0;
         long rangeEnd = (0 < length ? rangeStart + length : totalLength) - 1;
         return new SwiftBufferedInputStream(chunks, client, rangeStart, rangeEnd);
@@ -353,7 +357,13 @@ public class SwiftFileStorage implements FileStorage {
         try {
             chunkedUpload = new ChunkedUpload(data);
             long off = offset;
-            while (chunkedUpload.hasNext()) {
+            if (!chunkedUpload.hasNext()) {
+                return off;
+            }
+
+            // Chunks available for upload...
+            checkOrCreateContainer();
+            do {
                 UploadChunk chunk = chunkedUpload.next();
                 try {
                     UUID swiftId = client.put(chunk.getData(), chunk.getSize());
@@ -363,7 +373,7 @@ public class SwiftFileStorage implements FileStorage {
                 } finally {
                     Streams.close(chunk);
                 }
-            }
+            } while (chunkedUpload.hasNext());
             success = true;
             return off;
         } finally {
