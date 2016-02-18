@@ -300,7 +300,7 @@ public class FileStorageHandler implements ModuleHandler {
         List<TargetProxy> targets = new ArrayList<>();
         Context context = requireService(ContextService.class, services).getContext(contextID);
         IDBasedAdministrativeFileAccess administrativeFileAccess = getAdministrativeFileAccess(context);
-        List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID);
+        List<Field> fields = Arrays.asList(Field.ID, Field.FOLDER_ID, Field.OBJECT_PERMISSIONS);
         TimedResult<File> timedResult = administrativeFileAccess.getDocuments(SHARED_FILES_FOLDER_ID, guestID, fields, Field.ID, SortDirection.ASC, null);
         SearchIterator<File> searchIterator = null;
         try {
