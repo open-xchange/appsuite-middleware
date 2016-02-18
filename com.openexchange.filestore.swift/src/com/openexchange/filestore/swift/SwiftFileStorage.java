@@ -310,7 +310,8 @@ public class SwiftFileStorage implements FileStorage {
 
         checkOrCreateContainer();
 
-        if (1 == chunks.size()) {
+        int size = chunks.size();
+        if (1 == size) {
             /*
              * download parts of a single chunk
              */
@@ -326,7 +327,7 @@ public class SwiftFileStorage implements FileStorage {
         /*
          * download from multiple chunks
          */
-        Chunk lastChunk = chunks.get(chunks.size() - 1);
+        Chunk lastChunk = chunks.get(size - 1);
         long totalLength = lastChunk.getOffset() + lastChunk.getLength();
         if (offset > totalLength || -1 != length && length > totalLength - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
