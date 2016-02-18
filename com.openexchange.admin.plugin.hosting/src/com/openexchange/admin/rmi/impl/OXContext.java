@@ -500,7 +500,7 @@ public class OXContext extends OXContextCommonImpl implements OXContextInterface
             basicAuthenticator.removeFromAuthCache(ctx);
         } catch (final StorageException e) {
             LOGGER.error("", e);
-            throw new StorageException(e.getMessage());
+            throw e;
         } catch (final NoSuchContextException e) {
             LOGGER.error("", e);
             throw e;
