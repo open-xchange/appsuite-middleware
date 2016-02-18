@@ -30,7 +30,7 @@ public class OptionsTest extends ActionTestCase {
 		assertTrue(expected.toString(), expected.isEmpty());
 
 		final String[] davs = res.getHeader("DAV").split("\\s*,\\s*");
-		assertEquals(12, davs.length);
+		assertEquals(15, davs.length);
 		assertEquals("1", davs[0]);
 		assertEquals("2", davs[1]);
 		assertEquals("3", davs[2]);
@@ -43,6 +43,9 @@ public class OptionsTest extends ActionTestCase {
         assertEquals("calendarserver-sharing", davs[9]);
         assertEquals("calendarserver-principal-search", davs[10]);
         assertEquals("calendarserver-principal-property-search", davs[11]);
+        assertEquals("calendarserver-private-comments", davs[12]);
+        assertEquals("extended-mkcol", davs[13]);
+        assertEquals("calendar-managed-attachments", davs[14]);
 
 		assertEquals("bytes", res.getHeader("Accept-Ranges"));
 	}
