@@ -49,19 +49,25 @@
 
 package com.openexchange.report.client.impl;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.management.AttributeNotFoundException;
+import javax.management.InstanceNotFoundException;
 import javax.management.InvalidAttributeValueException;
+import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
+import javax.management.ReflectionException;
 import javax.management.openmbean.CompositeData;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mockito.Mockito;
 import com.openexchange.admin.console.AbstractJMXTools;
 import com.openexchange.admin.console.AdminParser;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
@@ -212,85 +218,95 @@ public class ReportClientBase extends AbstractJMXTools {
             final MBeanServerConnection initConnection = initConnection(env);
 
             // Is one of the appsuite report options set? In that case do something completely different.
-
             if (null == parser.getOptionValue(this.runAndDeliverOldReport)) {
-                if (null != parser.getOptionValue(this.csv)) {
-                    System.out.println(CSV_NOT_SUPPORTED_MSG);
-                }
-                if (null != parser.getOptionValue(this.advancedreport)) {
-                    System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
-                }
-                if (null != parser.getOptionValue(this.runAsReport)) {
-                    runASReport(parser.getOptionValue(this.asReportType), initConnection);
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
-                    return;
-                } else if (null != parser.getOptionValue(this.inspectAsReports)) {
-                    inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
-                    return;
-                } else if (null != parser.getOptionValue(this.cancelAsReports)) {
-                    cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
-                    return;
-                } else if (null != parser.getOptionValue(this.getAsReport)) {
-                    getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
-                    return;
+                boolean isAvailable = checkMBeanAvailability(initConnection);
+                if (isAvailable) {
+                    if (null != parser.getOptionValue(this.csv)) {
+                        System.out.println(CSV_NOT_SUPPORTED_MSG);
+                    }
+                    if (null != parser.getOptionValue(this.advancedreport)) {
+                        System.out.println(ADVANCED_NOT_SUPPORTED_MSG);
+                    }
+                    if (null != parser.getOptionValue(this.runAsReport)) {
+                        runASReport(parser.getOptionValue(this.asReportType), initConnection);
+                        inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                        return;
+                    } else if (null != parser.getOptionValue(this.inspectAsReports)) {
+                        inspectASReports(parser.getOptionValue(this.asReportType), initConnection);
+                        return;
+                    } else if (null != parser.getOptionValue(this.cancelAsReports)) {
+                        cancelASReports(parser.getOptionValue(this.asReportType), initConnection);
+                        return;
+                    } else if (null != parser.getOptionValue(this.getAsReport)) {
+                        getASReport(parser.getOptionValue(this.asReportType), mode, savereport, initConnection);
+                        return;
+                    } else {
+                        // run and deliver AS report is no default
+                        runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
+                        return;
+                    }
                 } else {
-                    // run and deliver AS report is no default
-                    runAndDeliverASReport(parser.getOptionValue(this.asReportType), mode, null != parser.getOptionValue(this.asReportType), savereport, initConnection);
-                    return;
+                    System.out.println("Appsuite report MBean not found! Execution continues with old style report in 'display-and-send' mode (-d -s). To run the old style report with your desired configuration use '-o' parameter or have a look at CLTs help ('-h').");
+                    mode = ReportMode.DISPLAYANDSEND;
                 }
             }
 
             // ... otherwise old report style
-
-            final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
-            List<ContextDetail> contextDetails = null;
-            if (null != parser.getOptionValue(this.advancedreport)) {
-                contextDetails = ObjectHandler.getDetailObjects(initConnection);
-            }
-            List<MacDetail> macDetails = ObjectHandler.getMacObjects(initConnection);
-            final String[] versions = VersionHandler.getServerVersion();
-            Map<String, String> serverConfiguration = ObjectHandler.getServerConfiguration(initConnection);
-            final ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
-            final ClientLoginCount clcYear = ObjectHandler.getClientLoginCount(initConnection, true);
-
-            switch (mode) {
-                case SENDONLY:
-                case SAVEONLY:
-                    createTransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
-                    break;
-
-                case DISPLAYONLY:
-                    print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
-                    break;
-
-                case NONE:
-                    System.out.println(NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND);
-                case MULTIPLE:
-                    if (ReportMode.NONE != mode) {
-                        System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
-                    }
-                case DISPLAYANDSEND:
-                default:
-                    savereport = false;
-                    createTransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
-                    print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
-                    break;
-            }
-        } catch (final MalformedObjectNameException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final NullPointerException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final JSONException e) {
-            printServerException(e, parser);
-            sysexit(1);
-        } catch (final InvalidAttributeValueException e) {
-            printServerException(e, parser);
-            sysexit(1);
+            handleOldReport(parser, mode, savereport, initConnection);
         } catch (final Exception e) {
             printServerException(e, parser);
             sysexit(1);
+        }
+    }
+
+    private boolean checkMBeanAvailability(final MBeanServerConnection initConnection) throws MBeanException, ReflectionException, IOException {
+        // check if hazelcast is enabled
+        try {
+            initConnection.invoke(getAppSuiteReportingName(), "retrieveLastReport", new Object[] { "default" }, new String[] { String.class.getCanonicalName() });
+        } catch (InstanceNotFoundException e) { // AS Report MBean not registered ==> try to run old style report
+            return false;
+        } catch (Exception e) { // Another error occurred. ==> try to run old style report
+            System.out.println("An unexpected error occurred: " + e.getMessage() + "\n");
+            System.out.println(e.getStackTrace());
+            return false;
+        }
+        return true;
+    }
+
+    private void handleOldReport(final AdminParser parser, ReportMode mode, boolean savereport, final MBeanServerConnection initConnection) throws AttributeNotFoundException, InstanceNotFoundException, MBeanException, ReflectionException, IOException, MalformedObjectNameException, InvalidAttributeValueException, JSONException {
+        final List<Total> totals = ObjectHandler.getTotalObjects(initConnection);
+        List<ContextDetail> contextDetails = null;
+        if (null != parser.getOptionValue(this.advancedreport)) {
+            contextDetails = ObjectHandler.getDetailObjects(initConnection);
+        }
+        List<MacDetail> macDetails = ObjectHandler.getMacObjects(initConnection);
+        final String[] versions = VersionHandler.getServerVersion();
+        Map<String, String> serverConfiguration = ObjectHandler.getServerConfiguration(initConnection);
+        final ClientLoginCount clc = ObjectHandler.getClientLoginCount(initConnection);
+        final ClientLoginCount clcYear = ObjectHandler.getClientLoginCount(initConnection, true);
+
+        switch (mode) {
+            case SENDONLY:
+            case SAVEONLY:
+                createTransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
+                break;
+
+            case DISPLAYONLY:
+                print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
+                break;
+
+            case NONE:
+                System.out.println(NO_OPTION_SELECTED_USING_THE_DEFAULT_DISPLAY_AND_SEND);
+            case MULTIPLE:
+                if (ReportMode.NONE != mode) {
+                    System.out.println(TOO_MANY_ARGUMENTS_USING_THE_DEFAULT_DISPLAY_AND_SEND);
+                }
+            case DISPLAYANDSEND:
+            default:
+                savereport = false;
+                createTransportHandler().sendReport(totals, macDetails, contextDetails, serverConfiguration, versions, clc, clcYear, savereport);
+                print(totals, contextDetails, macDetails, serverConfiguration, versions, parser, clc, clcYear);
+                break;
         }
     }
 
@@ -539,12 +555,12 @@ public class ReportClientBase extends AbstractJMXTools {
                     Thread.sleep(silent ? 60000 : 10000);
                 }
             }
+
+            getASReport(reportType, mode, savereport, server);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(-1);
         }
-
-        getASReport(reportType, mode, savereport, server);
     }
 
     private int printStatusLine(CompositeData report) {
@@ -699,7 +715,7 @@ public class ReportClientBase extends AbstractJMXTools {
         if (interval < 1000) {
             return interval + " milliseconds";
         }
-        long diffInSeconds = (interval / 1000) * (110/100);
+        long diffInSeconds = (interval / 1000) * (110 / 100);
 
         long diff[] = new long[] { 0, 0, 0 };
         /* sec */diff[2] = (diffInSeconds >= 60 ? diffInSeconds % 60 : diffInSeconds);
