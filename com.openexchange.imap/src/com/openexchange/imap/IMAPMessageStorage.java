@@ -3022,12 +3022,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                 /*
                  * ... and append them to folder
                  */
-                String[] retval = null;
+                String[] newUids = null;
                 final boolean hasUIDPlus = imapConfig.getImapCapabilities().hasUIDPlus();
                 try {
                     if (hasUIDPlus) {
                         // Perform append expecting APPENUID response code
-                        retval = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]))));
+                        newUids = longs2uids(checkAndConvertAppendUID(imapFolder.appendUIDMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]))));
                     } else {
                         // Perform simple append
                         imapFolder.appendMessages(filteredMsgs.toArray(new Message[filteredMsgs.size()]));
@@ -3039,18 +3039,18 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                     }
                     throw e;
                 }
-                if (null != retval) {
+                if (null != newUids && newUids.length > 0) {
                     /*
                      * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                      */
                     notifyIMAPFolderModification(destFullName);
-                    if (retval.length >= length) {
-                        return retval;
+                    if (newUids.length >= length) {
+                        return newUids;
                     }
                     final String[] longs = new String[length];
                     for (int i = 0, k = 0; i < length; i++) {
                         if (null != msgs[i]) {
-                            longs[i] = retval[k++];
+                            longs[i] = newUids[k++];
                         }
                     }
                     return longs;
@@ -3066,15 +3066,15 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                      */
                     LOG.warn("Missing UID information in APPENDUID response");
                 }
-                retval = new String[msgs.length];
+                newUids = new String[msgs.length];
                 {
-                    final long[] uids = IMAPCommandsCollection.findMarker(hash, retval.length, imapFolder);
+                    final long[] uids = IMAPCommandsCollection.findMarker(hash, newUids.length, imapFolder);
                     final int uLen = uids.length;
                     if (uLen == 0) {
-                        Arrays.fill(retval, null);
+                        Arrays.fill(newUids, null);
                     } else {
                         for (int i = 0; i < uLen; i++) {
-                            retval[i] = Long.toString(uids[i]);
+                            newUids[i] = Long.toString(uids[i]);
                         }
                     }
                 }
@@ -3082,13 +3082,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Close affected IMAP folder to ensure consistency regarding IMAFolder's internal cache.
                  */
                 notifyIMAPFolderModification(destFullName);
-                if (retval.length >= length) {
-                    return retval;
+                if (newUids.length >= length) {
+                    return newUids;
                 }
                 final String[] longs = new String[length];
                 for (int i = 0, k = 0; i < length; i++) {
                     if (null != msgs[i]) {
-                        longs[i] = retval[k++];
+                        longs[i] = newUids[k++];
                     }
                 }
                 return longs;
