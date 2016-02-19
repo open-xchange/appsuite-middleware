@@ -83,7 +83,6 @@ import com.sun.mail.iap.ProtocolException;
 import com.sun.mail.iap.Response;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPFolder.ProtocolCommand;
-import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.imap.SortTerm;
 import com.sun.mail.imap.protocol.IMAPProtocol;
 import com.sun.mail.imap.protocol.IMAPResponse;
@@ -169,10 +168,11 @@ public final class IMAPSort {
                     final int[] seqNums;
                     {
                         // Do IMAP sort
-                        final long start = System.currentTimeMillis();
+                        long start = System.currentTimeMillis();
                         seqNums = IMAPCommandsCollection.getServerSortList(imapFolder, sortCriteria, filter);
-                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
-                        LOG.debug("IMAP sort took {}msec", (System.currentTimeMillis() - start));
+                        long duration = System.currentTimeMillis() - start;
+                        mailInterfaceMonitor.addUseTime(duration);
+                        LOG.debug("IMAP sort took {}msec", duration);
                     }
                     if ((seqNums == null) || (seqNums.length == 0)) {
                         return new int[0];
