@@ -118,6 +118,19 @@ public interface GuardApi {
     InputStream requestResource(Map<String, String> parameters) throws OXException;
 
     /**
+     * Requests Guard end-point to process specified resource.
+     *
+     * @param parameters The request parameters
+     * @param resource The resource
+     * @param contentType The resource's content type (optional)
+     * @param name The resource's name (optional)
+     * @return The processed resource data
+     * @throws OXException If resource data cannot be returned
+     * @see GuardApis#mapFor(String...)
+     */
+    InputStream processResource(Map<String, String> parameters, InputStream resource, String contentType, String name) throws OXException;
+
+    /**
      * Performs the GET using given parameters.
      *
      * @param parameters
@@ -158,5 +171,22 @@ public interface GuardApi {
      * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
      */
     InputStream requestSessionSensitiveResource(Map<String, String> parameters, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
+
+    /**
+     * Requests a resource from Guard end-point.
+     *
+     * @param parameters The request parameters
+     * @param resource The resource
+     * @param contentType The resource's content type (optional)
+     * @param name The resource's name (optional)
+     * @param session The associated session
+     * @param cookies The needed cookies for user authentication; typically the secret and public cookie
+     * @param headers The needed headers to set; typically <code>"User-Agent"</code> header
+     * @return The resource data
+     * @throws OXException If resource data cannot be returned
+     * @see GuardApis#mapFor(String...)
+     * @see GuardApis#extractCookiesFrom(javax.servlet.http.HttpServletRequest, Session)
+     */
+    InputStream processSessionSensitiveResource(Map<String, String> parameters, InputStream resource, String contentType, String name, Session session, List<Cookie> cookies, List<Header> headers) throws OXException;
 
 }
