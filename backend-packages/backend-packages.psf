@@ -92,6 +92,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-spamhandler-spamexperts"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-spamsettings-generic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-sso"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-sms-sipgate"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-subscribe"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-themes-default"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,open-xchange-unifiedmail"/>
