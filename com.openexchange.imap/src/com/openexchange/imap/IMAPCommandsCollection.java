@@ -2122,7 +2122,7 @@ public final class IMAPCommandsCollection {
                             IMAPStore imapStore = (IMAPStore) folder.getStore();
                             if (imapStore.hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY(session) && imapStore.hasCapability("SORT=DISPLAY"));
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY(session, serverInfo.getAccountId()) && imapStore.hasCapability("SORT=DISPLAY"));
                                 if (tmp.length > 256) {
                                     /*
                                      * Sort all

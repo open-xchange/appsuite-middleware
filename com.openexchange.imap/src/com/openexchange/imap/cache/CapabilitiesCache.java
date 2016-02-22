@@ -208,7 +208,7 @@ public final class CapabilitiesCache {
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
                 try {
-                    imapCaps.setSortDisplay(map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY) && allowSORTDISPLAY(session));
+                    imapCaps.setSortDisplay(map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY) && allowSORTDISPLAY(session, accontId));
                 } catch (OXException e) {
                     throw new MessagingException("Failed to determine if SORT-DISPLAY extension is allowed", e);
                 }
