@@ -67,7 +67,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link S3FileStorage}
+ * {@link SproxydFileStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */

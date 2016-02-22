@@ -64,8 +64,7 @@ import com.openexchange.java.Streams;
 public class UploadChunk implements Closeable {
 
     /**
-     * The minimum allowed chunk size for AWS multipart uploads, which is 5MB according to
-     * http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
+     * The minimum allowed chunk size for multipart uploads, which is 5MB.
      */
     static final int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
