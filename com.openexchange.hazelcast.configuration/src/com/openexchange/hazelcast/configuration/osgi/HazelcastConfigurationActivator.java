@@ -52,9 +52,11 @@ package com.openexchange.hazelcast.configuration.osgi;
 
 import org.eclipse.osgi.framework.console.CommandProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
+import com.openexchange.hazelcast.configuration.internal.HazelcastReloadable;
 import com.openexchange.hazelcast.configuration.internal.Services;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,6 +88,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
         Services.set(this);
         HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
         registerService(HazelcastConfigurationService.class, configService);
+        registerService(Reloadable.class, new HazelcastReloadable(configService));
         registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }
 

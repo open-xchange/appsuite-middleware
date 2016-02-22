@@ -160,6 +160,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
         throw exception;
     }
 
+    /**
+     * Gets the Hazelcast cofiguration.
+     *
+     * @return The Hazelcast cofiguration or <code>null</code>
+     */
+    public Config getConfigDirect() {
+        return config;
+    }
+
     // -----------------------------------------------------------------------------------------------------------------------------------
 
     /**
