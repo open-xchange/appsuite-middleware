@@ -1097,6 +1097,12 @@ ox_add_property com.openexchange.tools.images.transformations.maxSize 5242880 /o
 ox_add_property com.openexchange.tools.images.transformations.maxResolution 12087962 /opt/open-xchange/etc/server.properties
 ox_add_property com.openexchange.tools.images.transformations.waitTimeoutSeconds 10 /opt/open-xchange/etc/server.properties
 
+# SoftwareChange_Request-2849
+PFILE=/opt/open-xchange/etc/permissions.properties
+if ! ox_exists_property com.openexchange.capability.archive_emails $PFILE; then
+    ox_set_property com.openexchange.capability.archive_emails true $PFILE
+fi
+
 # SoftwareChange_Request-2914
 PFILE=/opt/open-xchange/etc/excludedupdatetasks.properties
 if ! grep "com.openexchange.groupware.update.tasks.FolderCorrectOwnerTask" >/dev/null $PFILE; then
