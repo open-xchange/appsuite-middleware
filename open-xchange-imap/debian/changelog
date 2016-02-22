@@ -1,3 +1,9 @@
+open-xchange-imap (7.6.2-49) stable; urgency=medium
+
+  * Build for patch 2016-02-24 (3129)
+
+ -- Marcus Klein <marcus.klein@open-xchange.com>  Mon, 22 Feb 2016 22:21:36 +0100
+
 open-xchange-imap (7.6.2-48) stable; urgency=medium
 
   * Build for patch 2016-02-08 (3071)
