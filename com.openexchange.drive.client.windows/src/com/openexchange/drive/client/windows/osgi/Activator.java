@@ -148,6 +148,9 @@ public class Activator extends HousekeepingActivator {
             if (updateServletAlias != null) {
                 httpService.unregister(updateServletAlias);
             }
+            if (installServletAlias != null) {
+                httpService.unregister(installServletAlias);
+            }
         }
         Services.setServiceLookup(null);
         super.stopBundle();
