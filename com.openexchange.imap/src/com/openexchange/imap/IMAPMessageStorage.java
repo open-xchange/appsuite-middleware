@@ -102,6 +102,9 @@ import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.imap.OperationKey.Type;
@@ -302,19 +305,48 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     private static volatile Boolean allowSORTDISPLAY;
     /** Whether SORT=DISPLAY is allowed to be utilized */
-    public static boolean allowSORTDISPLAY() {
+    public static boolean allowSORTDISPLAY(int accountId) {
+        if (MailAccount.DEFAULT_ID == accountId) {
+            ConfigurationService service = Services.getService(ConfigurationService.class);
+            String tmp = null == service ? null : service.getProperty("com.openexchange.imap.primary.allowSORTDISPLAY");
+            if (null != tmp) {
+                return Boolean.parseBoolean(tmp.trim());
+            }
+        }
+        
         Boolean b = allowSORTDISPLAY;
         if (null == b) {
             synchronized (IMAPMessageStorage.class) {
                 b = allowSORTDISPLAY;
                 if (null == b) {
-                    final ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.getService(ConfigurationService.class);
                     b = Boolean.valueOf(null == service || service.getBoolProperty("com.openexchange.imap.allowSORTDISPLAY", false));
                     allowSORTDISPLAY = b;
                 }
             }
         }
         return b.booleanValue();
+    }
+
+    /** Whether in-app sort is supposed to be utilized if IMAP-side SORT fails with a "NO" response */
+    public static boolean fallbackOnFailedSORT(Session session, int accountId) throws OXException {
+        return fallbackOnFailedSORT(session.getUserId(), session.getContextId(), accountId);
+    }
+
+    /** Whether in-app sort is supposed to be utilized if IMAP-side SORT fails with a "NO" response */
+    public static boolean fallbackOnFailedSORT(int userId, int contextId, int accountId) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(userId, contextId);
+
+        if (MailAccount.DEFAULT_ID == accountId) {
+            ComposedConfigProperty<Boolean> property = view.property("com.openexchange.imap.primary.fallbackOnFailedSORT", boolean.class);
+            if (property.isDefined()) {
+                return property.get().booleanValue();
+            }
+        }
+
+        ComposedConfigProperty<Boolean> property = view.property("com.openexchange.imap.fallbackOnFailedSORT", boolean.class);
+        return property.isDefined() ? property.get().booleanValue() : false;
     }
 
     static {
@@ -1585,7 +1617,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
              */
             int[] msgIds;
             {
-                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(), imapConfig);
+                ImapSortResult result = IMAPSort.sortMessages(imapFolder, searchTerm, sortField, order, indexRange, allowESORT(), allowSORTDISPLAY(accountId), fallbackOnFailedSORT(session, accountId), imapConfig);
                 msgIds = result.msgIds;
                 if (false == result.rangeApplied) {
                     msgIds = applyIndexRange(msgIds, indexRange);
@@ -2675,7 +2707,7 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                  * Get ( & fetch) new messages
                  */
                 final Message[] msgs =
-                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit);
+                    IMAPCommandsCollection.getUnreadMessages(imapFolder, fields, sortField, order, getIMAPProperties().isFastFetch(), limit, accountId);
                 if ((msgs == null) || (msgs.length == 0) || limit == 0) {
                     return EMPTY_RETVAL;
                 }

@@ -206,7 +206,7 @@ public final class CapabilitiesCache {
             imapCaps.setHasSubscription(!MailProperties.getInstance().isIgnoreSubscription());
             if (hasSort && imapConfig.getIMAPProperties().isImapSort()) {
                 // IMAP sort supported & enabled
-                imapCaps.setSortDisplay(allowSORTDISPLAY() && map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY));
+                imapCaps.setSortDisplay(allowSORTDISPLAY(accontId) && map.containsKey(IMAPCapabilities.CAP_SORT_DISPLAY));
             } else {
                 // The in-memory sorting does sort with primary respect to display name, the actual address
                 imapCaps.setSortDisplay(true);

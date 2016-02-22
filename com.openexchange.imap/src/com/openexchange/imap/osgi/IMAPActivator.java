@@ -65,6 +65,7 @@ import com.openexchange.caching.CacheService;
 import com.openexchange.caching.events.CacheEventService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.imap.IMAPProvider;
@@ -119,7 +120,7 @@ public final class IMAPActivator extends HousekeepingActivator {
         return new Class<?>[] {
             ConfigurationService.class, CacheService.class, CacheEventService.class, UserService.class, MailAccountStorageService.class,
             ThreadPoolService.class, TimerService.class, SessiondService.class, DatabaseService.class, TextXtractService.class,
-            EventAdmin.class };
+            EventAdmin.class, ConfigViewFactory.class };
     }
 
     @Override
