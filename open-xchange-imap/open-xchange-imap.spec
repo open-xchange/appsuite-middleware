@@ -80,6 +80,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2093
     ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
+
+    # SoftwareChange_Request-3134
+    ox_add_property com.openexchange.imap.fallbackOnFailedSORT false $PFILE
 fi
 
 %clean
