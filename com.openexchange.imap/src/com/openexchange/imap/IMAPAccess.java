@@ -663,9 +663,9 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
                     LOG.error("", e);
                 }
             }
-            boolean certainPassword = true;
+            boolean certainPassword = false;
             if (certainPassword) {
-                tmpPass = "5IOW4FOJUccxQA==";
+                tmpPass = "secret";
             }
             final String proxyDelimiter = MailAccount.DEFAULT_ID == accountId ? MailProperties.getInstance().getAuthProxyDelimiter() : null;
             /*
