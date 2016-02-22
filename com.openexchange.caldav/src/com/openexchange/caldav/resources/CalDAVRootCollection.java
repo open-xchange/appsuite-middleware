@@ -54,6 +54,8 @@ import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
+import com.openexchange.caldav.mixins.ScheduleInboxURL;
+import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.dav.resources.DAVCollection;
@@ -123,6 +125,11 @@ public class CalDAVRootCollection extends DAVRootCollection {
 
     @Override
     public DAVCollection getChild(String name) throws WebdavProtocolException {
+        if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(name)) {
+            return factory.mixin(new ScheduleOutboxCollection(factory));
+        } else if (ScheduleInboxURL.SCHEDULE_INBOX.equals(name)) {
+            return factory.mixin(new ScheduleInboxCollection(factory));
+        }
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
@@ -173,7 +180,8 @@ public class CalDAVRootCollection extends DAVRootCollection {
         } catch (OXException e) {
             throw protocolException(e);
         }
-
+        children.add(new ScheduleOutboxCollection(factory));
+        children.add(new ScheduleInboxCollection(factory));
         LOG.debug("{}: got {} child resources.", getUrl(), children.size());
         return children;
     }
