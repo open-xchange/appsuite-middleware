@@ -59,6 +59,7 @@ import com.openexchange.java.Charsets;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.dataobjects.MailFolder;
 
 /**
  * {@link UnifiedInboxUID} - The Unified Mail UID.
@@ -100,6 +101,43 @@ public final class UnifiedInboxUID {
             throw MailExceptionCode.FOLDER_NOT_FOUND.create(prepareMailFolderParam(nestedFullName).getFullname());
         }
         return ret;
+    }
+
+    /**
+     * Extracts the possible nested mail path form given Unified Mail UID (if that UID appears to be a Unified Mail UID string).
+     *
+     * @param uidl The Unified Mail UID string
+     * @return The extracted mail path or <code>null</code>
+     */
+    public static MailPath extractPossibleNestedMailPath(String uidl) {
+        UnifiedInboxUID uid;
+        try {
+            uid = new UnifiedInboxUID(uidl);
+        } catch (OXException e) {
+            return null;
+        }
+
+        // INBOX/default0/INBOX
+        String nestedFullName = uid.getFullName();
+        if (!startsWithKnownFullname(nestedFullName)) {
+            return null;
+        }
+
+        int beginIndex = nestedFullName.indexOf(SEPERATOR) + 1;
+        if (beginIndex <= 0) {
+            return null;
+        }
+
+        String fn = nestedFullName.substring(beginIndex);
+        if (!fn.startsWith(MailFolder.DEFAULT_FOLDER_ID)) {
+            return null;
+        }
+
+        try {
+            return new MailPath(fn + SEPERATOR + uid.getId());
+        } catch (OXException e) {
+            return null;
+        }
     }
 
     private static boolean startsWithKnownFullname(String fullName) {

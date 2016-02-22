@@ -258,7 +258,9 @@ public final class NewAction extends AbstractMailAction {
                 if (null != csid) {
                     if (null != msgref && ComposeType.DRAFT_EDIT.equals(sendType)) {
                         CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
-                        space.addCleanUp(msgref);
+                        if (!space.isMarkedAsReplyOrForward(msgref)) {
+                            space.addCleanUp(msgref);
+                        }
                     }
 
                     CompositionSpaces.applyCompositionSpace(csid, session, mailInterface.getMailAccess(), isDraftAction(sendType));
@@ -282,7 +284,25 @@ public final class NewAction extends AbstractMailAction {
                 }
 
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : ComposeType.NEW;
-                final String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
+
+                // Adjust send type if needed
+                if (null != csid) {
+                    if (ComposeType.DRAFT.equals(sendType) || ComposeType.DRAFT_DELETE_ON_TRANSPORT.equals(sendType)) {
+                        for (ComposedMailMessage composedMail : composedMails) {
+                            MailPath msgref = composedMail.getMsgref();
+                            if (null != msgref) {
+                                CompositionSpace space = CompositionSpace.getCompositionSpace(csid, session);
+                                if (space.isMarkedAsReply(msgref)) {
+                                    sendType = ComposeType.REPLY;
+                                } else if (space.isMarkedAsForward(msgref)) {
+                                    sendType = ComposeType.FORWARD;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                String folder = req.getParameter(AJAXServlet.PARAMETER_FOLDERID);
                 if (null != folder) {
                     // Do the "fake" transport by providing poison address
                     MailTransport mailTransport = MailTransport.getInstance(session, accountId);

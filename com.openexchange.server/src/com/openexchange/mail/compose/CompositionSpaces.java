@@ -59,6 +59,9 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mailaccount.UnifiedInboxManagement;
+import com.openexchange.mailaccount.UnifiedInboxUID;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
 
@@ -238,13 +241,21 @@ public final class CompositionSpaces {
      * @param csid The composition space identifier
      * @param session The associated session
      * @param optMailAccess The optional pre-initialized mail access
-     * @param updateMailFlags Boolean value <code>true</code> if the messages flags should be updated; otherwiese <code>false</code>
+     * @param updateMailFlags Boolean value <code>true</code> if the messages flags should be updated; otherwise <code>false</code>
      * @throws OXException If operation fails
      */
     public static void applyCompositionSpace(String csid, Session session, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage> optMailAccess, boolean updateMailFlags) throws OXException {
         CompositionSpace space = CompositionSpace.optCompositionSpace(csid, session);
         if (null == space) {
             return;
+        }
+
+        int unifiedMailId = -1;
+        {
+            UnifiedInboxManagement uim = ServerServiceRegistry.getInstance().getService(UnifiedInboxManagement.class);
+            if (null != uim) {
+                unifiedMailId = uim.getUnifiedINBOXAccountID(session);
+            }
         }
 
         Map<Integer, MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage>> accesses = new ConcurrentHashMap<Integer, MailAccess<? extends IMailFolderStorage,? extends IMailMessageStorage>>(4, 0.9f, 1);
@@ -317,30 +328,33 @@ public final class CompositionSpaces {
                 Queue<MailPath> draftEditsFor = space.getDraftEditsFor();
                 if (null != draftEditsFor && !draftEditsFor.isEmpty()) {
                     for (final MailPath mailPath : draftEditsFor) {
-                        if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
-                            new SafeAction<Void>() {
+                        // Only delete draft-edit if not already referenced by either replyFor or forwardsFor.
+                        if (!space.isMarkedAsReplyOrForward(mailPath)) {
+                            if (null != optMailAccess && mailPath.getAccountId() == optMailAccess.getAccountId()) {
+                                new SafeAction<Void>() {
 
-                                @Override
-                                Void doPerform(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws Exception {
-                                    mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
-                                    return null;
+                                    @Override
+                                    Void doPerform(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws Exception {
+                                        mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                                        return null;
+                                    }
+                                }.performSafe(optMailAccess);
+                            } else {
+                                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
+                                if (null == access) {
+                                    access = MailAccess.getNewInstance(session, mailPath.getAccountId());
+                                    access.connect(false);
+                                    accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
                                 }
-                            }.performSafe(optMailAccess);
-                        } else {
-                            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> access = accesses.get(Integer.valueOf(mailPath.getAccountId()));
-                            if (null == access) {
-                                access = MailAccess.getNewInstance(session, mailPath.getAccountId());
-                                access.connect(false);
-                                accesses.put(Integer.valueOf(mailPath.getAccountId()), access);
+                                new SafeAction<Void>() {
+
+                                    @Override
+                                    Void doPerform(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws Exception {
+                                        mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
+                                        return null;
+                                    }
+                                }.performSafe(access);
                             }
-                            new SafeAction<Void>() {
-
-                                @Override
-                                Void doPerform(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws Exception {
-                                    mailAccess.getMessageStorage().deleteMessages(mailPath.getFolder(), new String[] { mailPath.getMailID() }, true);
-                                    return null;
-                                }
-                            }.performSafe(access);
                         }
                     }
                 }
@@ -351,6 +365,21 @@ public final class CompositionSpaces {
                 access.close(false);
             }
         }
+    }
+
+    /**
+     * Extracts possible bested mail path
+     *
+     * @param mailPath The mail path to examine
+     * @param unifiedMailId The unified mail account identifier
+     * @return The extracted path or <code>null</code>
+     */
+    public static MailPath optUnifiedInboxUID(MailPath mailPath, int unifiedMailId) {
+        if (unifiedMailId <= 0 || null == mailPath || mailPath.getAccountId() != unifiedMailId) {
+            return null;
+        }
+
+        return UnifiedInboxUID.extractPossibleNestedMailPath(mailPath.getStr());
     }
 
     // ----------------------------------------------------------------------------------------------------------------------------- //
