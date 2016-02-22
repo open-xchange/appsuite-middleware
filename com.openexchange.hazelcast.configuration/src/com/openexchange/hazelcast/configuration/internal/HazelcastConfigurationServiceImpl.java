@@ -78,7 +78,6 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
-import com.openexchange.java.Enums;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.tools.strings.StringParser;
@@ -159,6 +158,15 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
             "No distributed map matching prefix '" + namePrefix + "'  found in hazelcast configuration");
         LOG.warn("", exception);
         throw exception;
+    }
+
+    /**
+     * Gets the Hazelcast cofiguration.
+     *
+     * @return The Hazelcast cofiguration or <code>null</code>
+     */
+    public Config getConfigDirect() {
+        return config;
     }
 
     // -----------------------------------------------------------------------------------------------------------------------------------
