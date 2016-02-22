@@ -55,6 +55,7 @@ import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
+import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
@@ -105,7 +106,7 @@ public class CalDAVRootCollection extends DAVRootCollection {
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory)
+            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet()
         );
     }
 
