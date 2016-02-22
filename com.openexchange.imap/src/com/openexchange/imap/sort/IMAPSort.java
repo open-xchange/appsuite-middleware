@@ -281,7 +281,7 @@ public final class IMAPSort {
     // -----------------------------------------------------------------------------------------------------------------------------------------------------
 
     /**
-     * Attempts to perform a IMAP-based sort with a given search term.
+     * Attempts to perform an IMAP-based sort with a given search term.
      *
      * @param imapFolder The IMAP folder; not <code>null</code>
      * @param jmsSearchTerm The search term or <code>null</code> to sort all messages
@@ -295,6 +295,25 @@ public final class IMAPSort {
      * @throws OXException
      */
     public static ImapSortResult sortMessages(IMAPFolder imapFolder, javax.mail.search.SearchTerm jmsSearchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, IMAPConfig imapConfig) throws MessagingException, OXException {
+        return sortMessages(imapFolder, jmsSearchTerm, sortField, order, indexRange, allowESORT, allowSORTDISPLAY, false, imapConfig);
+    }
+
+    /**
+     * Attempts to perform an IMAP-based sort with a given search term.
+     *
+     * @param imapFolder The IMAP folder; not <code>null</code>
+     * @param jmsSearchTerm The search term or <code>null</code> to sort all messages
+     * @param sortField The sort field; not <code>null</code>
+     * @param order The sort order; not <code>null</code>
+     * @param allowESORT Whether to allow the ESORT command being issued (if supported) to limit number of sort results
+     * @param allowSORTDISPLAY Whether to allow the SORT=DISPLAY extension being used (if supported) to sort by DISPLAY value for From/To address
+     * @param fallbackOnCommandFailed Whether to handle a possible "NO" response from IMAP server as a <code>UNSUPPORTED_SORT_FIELD</code> error (implicitly leading to an in-app search as fall-back)
+     * @param imapConfig The IMAP configuration; not <code>null</code>
+     * @return The IMAP-sorted sequence number
+     * @throws MessagingException
+     * @throws OXException
+     */
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, javax.mail.search.SearchTerm jmsSearchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, boolean fallbackOnCommandFailed, IMAPConfig imapConfig) throws MessagingException, OXException {
         SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC, allowSORTDISPLAY && imapConfig.asMap().containsKey("SORT=DISPLAY"));
         if (sortTerms == null) {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
@@ -344,14 +363,14 @@ public final class IMAPSort {
 
         if (null == seqNums) {
             // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
-            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder, fallbackOnCommandFailed);
         }
 
         return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
     }
 
     /**
-     * Attempts to perform a IMAP-based sort with a given search term.
+     * Attempts to perform an IMAP-based sort with a given search term.
      *
      * @param imapFolder The IMAP folder; not <code>null</code>
      * @param searchTerm The search term or <code>null</code> to sort all messages
@@ -359,12 +378,13 @@ public final class IMAPSort {
      * @param order The sort order; not <code>null</code>
      * @param allowESORT Whether to allow the ESORT command being issued (if supported) to limit number of sort results
      * @param allowSORTDISPLAY Whether to allow the SORT=DISPLAY extension being used (if supported) to sort by DISPLAY value for From/To address
+     * @param fallbackOnCommandFailed Whether to handle a possible "NO" response from IMAP server as a <code>UNSUPPORTED_SORT_FIELD</code> error (implicitly leading to an in-app search as fall-back)
      * @param imapConfig The IMAP configuration; not <code>null</code>
      * @return The IMAP-sorted sequence number
      * @throws MessagingException
      * @throws OXException
      */
-    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, IMAPConfig imapConfig) throws MessagingException, OXException {
+    public static ImapSortResult sortMessages(IMAPFolder imapFolder, com.openexchange.mail.search.SearchTerm<?> searchTerm, MailSortField sortField, OrderDirection order, IndexRange indexRange, boolean allowESORT, boolean allowSORTDISPLAY, boolean fallbackOnCommandFailed, IMAPConfig imapConfig) throws MessagingException, OXException {
         SortTerm[] sortTerms = IMAPSort.getSortTermsForIMAPCommand(sortField, order == OrderDirection.DESC, allowSORTDISPLAY && imapConfig.asMap().containsKey("SORT=DISPLAY"));
         if (sortTerms == null) {
             throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, sortField.toString());
@@ -425,7 +445,7 @@ public final class IMAPSort {
 
         if (null == seqNums) {
             // Either insufficient capabilities/conditions not met or SORT RETURN PARTIAL failed
-            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder);
+            seqNums = sort(sortTerms, jmsSearchTerm, imapFolder, fallbackOnCommandFailed);
         }
 
         int umlautFilterThreshold = IMAPSearch.umlautFilterThreshold();
@@ -553,18 +573,33 @@ public final class IMAPSort {
         }
     }
 
-    private static int[] sort(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IMAPFolder imapFolder) throws MessagingException {
-        return (int[]) imapFolder.doCommand(new ProtocolCommand() {
+    private static int[] sort(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IMAPFolder imapFolder, boolean fallbackOnCommandFailed) throws MessagingException, OXException {
+        try {
+            return (int[]) imapFolder.doCommand(new ProtocolCommand() {
 
-            @Override
-            public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
-                try {
-                    return protocol.sort(sortTerms, jmsSearchTerm);
-                } catch (SearchException e) {
-                    throw new ProtocolException(e.getMessage(), e);
+                @Override
+                public Object doCommand(IMAPProtocol protocol) throws ProtocolException {
+                    try {
+                        return protocol.sort(sortTerms, jmsSearchTerm);
+                    } catch (SearchException e) {
+                        throw new ProtocolException(e.getMessage(), e);
+                    }
+                }
+            });
+        } catch (FolderClosedException e) {
+            throw e;
+        } catch (StoreClosedException e) {
+            throw e;
+        } catch (MessagingException e) {
+            if (fallbackOnCommandFailed) {
+                Exception cause = e.getNextException();
+                if (cause instanceof CommandFailedException) {
+                    // The SORT command failed with a "NO" response; handle it as an unsupported sort field
+                    throw IMAPException.create(Code.UNSUPPORTED_SORT_FIELD, e, sortTerms[sortTerms.length - 1].toString());
                 }
             }
-        });
+            throw e;
+        }
     }
 
     /**
