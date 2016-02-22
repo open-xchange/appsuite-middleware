@@ -51,19 +51,11 @@ package com.openexchange.file.storage.composition.osgi;
 
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.FileStoragePermission;
-import com.openexchange.file.storage.composition.FileID;
 import com.openexchange.file.storage.composition.FileStreamHandlerRegistry;
-import com.openexchange.file.storage.composition.FolderAware;
-import com.openexchange.file.storage.composition.IDBasedAdministrativeFileAccess;
-import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFileAccess;
-import com.openexchange.file.storage.composition.internal.AbstractCompositingIDBasedFolderAccess;
-import com.openexchange.file.storage.composition.internal.CompositingIDBasedAdministrativeFileAccess;
+import com.openexchange.file.storage.composition.internal.CompositingIDBasedFolderAccess;
 import com.openexchange.file.storage.composition.internal.FileStreamHandlerRegistryImpl;
 import com.openexchange.file.storage.composition.internal.Services;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
@@ -80,66 +72,15 @@ import com.openexchange.threadpool.ThreadPoolService;
  * {@link FileStorageCompositionActivator}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class FileStorageCompositionActivator extends HousekeepingActivator {
 
-    private final class CompositingIDBasedFileAccessImpl extends AbstractCompositingIDBasedFileAccess implements FolderAware {
-
-        /**
-         * Initializes a new {@link CompositingIDBasedFileAccessImpl}.
-         */
-        CompositingIDBasedFileAccessImpl(Session session) {
-            super(session);
-        }
-
-        @Override
-        protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
-            return getService(FileStorageServiceRegistry.class);
-        }
-
-        @Override
-        protected EventAdmin getEventAdmin() {
-            return getService(EventAdmin.class);
-        }
-
-        @Override
-        public FileStoragePermission optOwnPermission(final String id) throws OXException {
-            final FileID fileID = new FileID(id);
-            final String folderId = fileID.getFolderId();
-            if (null == folderId) {
-                return null;
-            }
-            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(folderId).getOwnPermission();
-        }
-
-        @Override
-        public FileStorageFolder optFolder(String id) throws OXException {
-            final FileID fileID = new FileID(id);
-            final String folderId = fileID.getFolderId();
-            if (null == folderId) {
-                return null;
-            }
-            return getFolderAccess(fileID.getService(), fileID.getAccountId()).getFolder(folderId);
-        }
-
-    }
-
-    private final class CompositingIDBasedFolderAccessImpl extends AbstractCompositingIDBasedFolderAccess {
-
-        protected CompositingIDBasedFolderAccessImpl(Session session) {
-            super(session);
-        }
-
-        @Override
-        protected FileStorageServiceRegistry getFileStorageServiceRegistry() {
-            return getService(FileStorageServiceRegistry.class);
-        }
-
-        @Override
-        protected EventAdmin getEventAdmin() {
-            return getService(EventAdmin.class);
-        }
-
+    /**
+     * Initializes a new {@link FileStorageCompositionActivator}.
+     */
+    public FileStorageCompositionActivator() {
+        super();
     }
 
     @Override
@@ -151,35 +92,33 @@ public class FileStorageCompositionActivator extends HousekeepingActivator {
     protected void startBundle() throws Exception {
         final ServiceLookup services = this;
         Services.setServiceLookup(services);
-        registerService(IDBasedFileAccessFactory.class, new IDBasedFileAccessFactory() {
 
-            @Override
-            public IDBasedFileAccess createAccess(final Session session) {
-                return new CompositingIDBasedFileAccessImpl(session);
-            }
+        // The tracking factory
+        TrackingIDBasedFileAccessFactory fileAccessFactory = new TrackingIDBasedFileAccessFactory(services, context);
+        rememberTracker(fileAccessFactory);
 
-            @Override
-            public IDBasedAdministrativeFileAccess createAccess(int contextId) {
-                return new CompositingIDBasedAdministrativeFileAccess(contextId, services);
-            }
-
-        });
-        registerService(IDBasedFolderAccessFactory.class, new IDBasedFolderAccessFactory() {
-
-            @Override
-            public CompositingIDBasedFolderAccessImpl createAccess(Session session) {
-                return new CompositingIDBasedFolderAccessImpl(session);
-            }
-
-        });
         // Start-up & register FileStreamHandlerRegistry
-        final FileStreamHandlerRegistryImpl registry = new FileStreamHandlerRegistryImpl(context);
+        FileStreamHandlerRegistryImpl registry = new FileStreamHandlerRegistryImpl(context);
         AbstractCompositingIDBasedFileAccess.setHandlerRegistry(registry);
         rememberTracker(registry);
         trackService(ShareService.class);
         trackService(ShareNotificationService.class);
         trackService(ObjectUseCountService.class);
         openTrackers();
+
+        // Register file access factory
+        registerService(IDBasedFileAccessFactory.class, fileAccessFactory);
+
+        // Register folder access factory
+        registerService(IDBasedFolderAccessFactory.class, new IDBasedFolderAccessFactory() {
+
+            @Override
+            public CompositingIDBasedFolderAccess createAccess(Session session) {
+                return new CompositingIDBasedFolderAccess(session, services);
+            }
+
+        });
+
         registerService(FileStreamHandlerRegistry.class, registry);
     }
 

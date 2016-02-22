@@ -51,7 +51,9 @@ package com.openexchange.admin.storage.interfaces;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.sql.Connection;
+import java.util.List;
 import com.openexchange.admin.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Database;
@@ -222,6 +224,15 @@ public abstract class OXUtilStorageInterface {
      * @throws StorageException If operation fails
      */
     public abstract void cleanseFilestoreUsageFor(User user, Context ctx, Connection con) throws StorageException;
+
+    /**
+     * Gets the URIs of the file storages that are in use by specified context (either itself or by one if its users).
+     *
+     * @param contextId The context identifier
+     * @return The file storages in use
+     * @throws StorageException If file storages cannot be determined
+     */
+    public abstract List<URI> getUrisforFilestoresUsedBy(int contextId) throws StorageException;
 
     /**
      * List all registered file stores.

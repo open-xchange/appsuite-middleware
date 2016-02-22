@@ -467,9 +467,10 @@ public final class OXFolderUtility {
         }
         ServerSession serverSession = ServerSessionAdapter.valueOf(session);
         ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
-        CapabilitySet capabilities = ServerServiceRegistry.getServize(CapabilityService.class).getCapabilities(session);
+        CapabilityService capabilityService = ServerServiceRegistry.getServize(CapabilityService.class);
+        CapabilitySet capabilities = null != capabilityService ? capabilityService.getCapabilities(session) : null;
         for (OCLPermission permission : touchedPermissions) {
-            GuestInfo guestInfo = permission.isGroupPermission() ? null : shareService.getGuestInfo(session, permission.getEntity());
+            GuestInfo guestInfo = null == shareService || permission.isGroupPermission() ? null : shareService.getGuestInfo(session, permission.getEntity());
             if (null == guestInfo) {
                 /*
                  * internal permission entity, check "readcreatesharedfolders" flag

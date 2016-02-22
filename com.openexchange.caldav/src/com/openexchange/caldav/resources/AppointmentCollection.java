@@ -57,6 +57,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.servlet.http.HttpServletResponse;
 import com.google.common.io.BaseEncoding;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Patches;
@@ -340,6 +341,10 @@ public class AppointmentCollection extends CalDAVFolderCollection<Appointment> {
                         return factory.getAppointmentInterface().getObjectById(objectId, folderId);
                     } catch (SQLException e) {
                         throw protocolException(e);
+                    } catch (OXException e) {
+                        if ("APP-0059".equals(e.getErrorCode()) || "OX-0001".equals(e.getErrorCode())) {
+                            throw protocolException(e, HttpServletResponse.SC_NOT_FOUND);
+                        }
                     }
                 }
             } catch (IllegalArgumentException e) {

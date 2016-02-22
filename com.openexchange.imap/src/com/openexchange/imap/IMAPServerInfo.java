@@ -69,15 +69,16 @@ public class IMAPServerInfo {
      * Gets the IMAP server information for given configuration
      *
      * @param imapConfig The configuration
+     * @param accountId The account identifier
      * @return The IMAP server information
      * @throws OXException If IMAP server information cannot be returned
      */
-    public static IMAPServerInfo instanceFor(IMAPConfig imapConfig) throws OXException {
+    public static IMAPServerInfo instanceFor(IMAPConfig imapConfig, int accountId) throws OXException {
         try {
             String serverUrl = new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString();
             String greeting = IMAPCapabilityAndGreetingCache.getGreeting(serverUrl, imapConfig.isSecure(), imapConfig.getIMAPProperties());
             Map<String, String> capabilities = imapConfig.asMap();
-            return new IMAPServerInfo(greeting, capabilities);
+            return new IMAPServerInfo(greeting, capabilities, accountId);
         } catch (IOException e) {
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
@@ -87,14 +88,25 @@ public class IMAPServerInfo {
 
     private final String greeting;
     private final Map<String, String> capabilities;
+    private final int accountId;
 
     /**
      * Initializes a new {@link IMAPServerInfo}.
      */
-    private IMAPServerInfo(String greeting, Map<String, String> capabilities) {
+    private IMAPServerInfo(String greeting, Map<String, String> capabilities, int accountId) {
         super();
         this.greeting = greeting;
         this.capabilities = capabilities;
+        this.accountId = accountId;
+    }
+
+    /**
+     * Gets the account identifier
+     *
+     * @return The account identifier
+     */
+    public int getAccountId() {
+        return accountId;
     }
 
     /**
