@@ -28,7 +28,7 @@ postFix() {
     version=${version//[-.]/}
     # prevent bash from expanding, see bug 13316
     GLOBIGNORE='*'
-    PFILE=/opt/open-xchange/etc/filestore-s3.properties
+    PFILE=/opt/open-xchange/etc/filestore-swift.properties
 
 }
 
