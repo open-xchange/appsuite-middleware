@@ -855,7 +855,6 @@ public final class ConfigurationImpl implements ConfigurationService {
                         for (File changedFilePath : changes) {
                             if (changedFilePath.getName().equals(fileName)) {
                                 doReload = true;
-                                break;
                             }
                         }
                     }
