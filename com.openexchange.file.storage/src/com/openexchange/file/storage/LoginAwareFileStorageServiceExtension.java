@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,40 +47,25 @@
  *
  */
 
-package com.openexchange.file.storage.json.actions.accounts;
+package com.openexchange.file.storage;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.LoginAwareFileStorageServiceExtension;
-import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 
 /**
- * Creates a new MessagingAccount. The body of the request must contain the JSON representation of the given account.
+ * {@link LoginAwareFileStorageServiceExtension}
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class NewAction extends AbstractFileStorageAccountAction {
+public interface LoginAwareFileStorageServiceExtension {
 
-    public NewAction(final FileStorageServiceRegistry registry) {
-        super(registry);
-    }
-
-    @Override
-    protected AJAXRequestResult doIt(final AJAXRequestData request, final ServerSession session) throws JSONException, OXException {
-        final FileStorageAccount account = parser.parse((JSONObject) request.requireData());
-        if (account.getFileStorageService() instanceof LoginAwareFileStorageServiceExtension) {
-            //test connection
-            ((LoginAwareFileStorageServiceExtension) account.getFileStorageService()).testConnection(account, session);
-        }
-        final String id = account.getFileStorageService().getAccountManager().addAccount(account, session);
-        return new AJAXRequestResult(id);
-    }
+    /**
+     * Tests the connection to the filestorage.
+     * 
+     * @throws OXException If connecting fails.
+     */
+    public void testConnection(FileStorageAccount account, Session session) throws OXException;
 
 }

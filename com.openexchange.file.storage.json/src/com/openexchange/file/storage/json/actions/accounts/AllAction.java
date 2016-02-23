@@ -53,11 +53,14 @@ import java.util.ArrayList;
 import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
@@ -76,6 +79,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public class AllAction extends AbstractFileStorageAccountAction {
+
+    static final Logger LOG = LoggerFactory.getLogger(AllAction.class.getName());
 
     public AllAction(final FileStorageServiceRegistry registry) {
         super(registry);
@@ -105,13 +110,15 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 userAccounts = fsService.getAccountManager().getAccounts(session);
             }
 
-
             // Iterate accounts and append its JSON representation
             for (FileStorageAccount account : userAccounts) {
+                FileStorageAccountAccess access = null;
                 try {
-                    FileStorageFolder rootFolder = fsService.getAccountAccess(account.getId(), session).getRootFolder();
+                    access = fsService.getAccountAccess(account.getId(), session);
+                    FileStorageFolder rootFolder = access.getRootFolder();
                     result.put(writer.write(account, rootFolder));
                 } catch (OXException e) {
+                    LOG.debug(e.getMessage());
                     if (e.equalsCode(6, "OAUTH")) {
                         // "OAUTH-0006" --> OAuth account not found
                         try {
@@ -120,8 +127,8 @@ public class AllAction extends AbstractFileStorageAccountAction {
                             // Ignore
                         }
                     } else {
-                        // Set as error
-                        requestResult.setException(e);
+                        //add account with error
+                        result.put(writer.write(account, null, e, session));
                     }
                 }
             }
