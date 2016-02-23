@@ -151,6 +151,70 @@ public class SwiftClient {
     }
 
     /**
+     * Gets the container name
+     *
+     * @return The container name
+     */
+    public String getContainerName() {
+        return containerName;
+    }
+
+    /**
+     * Deletes associated container
+     *
+     * @throws OXException If container deletion fails
+     */
+    public void deleteContainer() throws OXException {
+        Token token = getOrAcquireNewTokenIfExpired();
+        deleteContainer(token, 0);
+    }
+
+    private void deleteContainer(Token token, int retryCount) throws OXException {
+        HttpDelete delete = null;
+        HttpResponse response = null;
+        Endpoint endpoint = getEndpoint();
+        try {
+            delete = new HttpDelete(endpoint.getContainerUrl(containerName));
+            delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
+            response = httpClient.execute(delete);
+            int status = response.getStatusLine().getStatusCode();
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_NO_CONTENT == status) {
+                // Successfully deleted
+                return;
+            }
+            if (HttpServletResponse.SC_UNAUTHORIZED == status) {
+                // Token expired intermittently
+                Token newToken = acquireNewToken(token);
+                Utils.close(delete, response);
+                deleteContainer(newToken, retryCount);
+                return;
+            }
+            if (HttpServletResponse.SC_NOT_FOUND != status) {
+                throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
+            }
+        } catch (IOException e) {
+            OXException error = handleCommunicationError(endpoint, token, e);
+            if (null == error) {
+                // Retry... With exponential back-off
+                int nextRetry = retryCount + 1;
+                if (nextRetry > 5) {
+                    // Give up...
+                    throw FileStorageCodes.IOERROR.create(e, e.getMessage());
+                }
+
+                long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+                deleteContainer(token, nextRetry);
+                return;
+            }
+
+            throw error;
+        } finally {
+            Utils.close(delete, response);
+        }
+    }
+
+    /**
      * Creates associated container if absent
      *
      * @throws OXException If container creation fails

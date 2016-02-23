@@ -63,6 +63,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
@@ -229,6 +230,12 @@ public class SwiftFileStorage implements FileStorage {
     public void remove() throws OXException {
         SortedSet<String> fileList = getFileList();
         deleteFiles(fileList.toArray(new String[fileList.size()]));
+        try {
+            client.deleteContainer();
+        } catch (Exception e) {
+            Logger logger = org.slf4j.LoggerFactory.getLogger(SwiftFileStorage.class);
+            logger.warn("Failed to delete container {}", client.getContainerName(), e);
+        }
     }
 
     @Override
