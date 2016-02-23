@@ -115,6 +115,7 @@ public class HazelcastReloadable implements Reloadable {
                 }
             }
         }
+        logger.info("Applied changed static members to Hazelcast TCP/IP network configuration.");
     }
 
     @Override
