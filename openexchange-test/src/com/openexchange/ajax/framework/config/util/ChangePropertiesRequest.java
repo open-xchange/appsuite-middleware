@@ -47,56 +47,66 @@
  *
  */
 
-package com.openexchange.ajax.onboarding.tests;
+package com.openexchange.ajax.framework.config.util;
 
-import java.util.HashMap;
+import java.io.IOException;
 import java.util.Map;
-import org.apache.commons.validator.routines.UrlValidator;
+import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
+import com.openexchange.ajax.framework.AbstractAJAXResponse;
+import com.openexchange.ajax.framework.Header;
 
 
 /**
- * {@link EMClientURLTest}
+ * {@link ChangePropertiesRequest}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
+public class ChangePropertiesRequest<T extends AbstractAJAXResponse> implements AJAXRequest<ChangePropertiesResponse> {
 
-    public EMClientURLTest(String name) {
-        super(name);
-    }
-
-    private static Map<String, String> confs;
-
-    static {
-        confs = new HashMap<String, String>();
-        confs.put("com.openexchange.client.onboarding.emclient.url", "http://www.open-xchange.com");
+    private Map<String, String> properties;
+    private static final String CONFIG_URL = "/ajax/changeConfigForTest";
+    private String scope;
+    /**
+     * Initializes a new {@link ChangePropertiesRequest}.
+     */
+    public ChangePropertiesRequest(Map<String, String> properties, String scope) {
+        super();
+        this.properties = properties;
+        this.scope = scope;
     }
 
     @Override
-    protected Map<String, String> getNeededConfigurations() {
-        return confs;
+    public com.openexchange.ajax.framework.AJAXRequest.Method getMethod() {
+        return Method.PUT;
     }
 
-    public void testEMClientURL() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
-        OnboardingTestResponse response = client.execute(req);
-        assertNotNull("Response is empty!", response);
-        if (response.hasError()) {
-            fail("The response has an unexpected error: " + response.getException().getMessage());
-        }
-        Object data = response.getData();
-        assertNotNull("Response has no data!", data);
-        assertTrue("Unexpected response data type", data instanceof JSONObject);
-        JSONObject jobj = ((JSONObject) data);
-        Object linkObj = jobj.get("link");
-        assertNotNull("Data object doesn't contain a link field", linkObj);
-        assertTrue("Unexpected link field data type", linkObj instanceof String);
-        String link = ((String) linkObj);
-        assertTrue("The url " + link + " isn't valid!", UrlValidator.getInstance().isValid(link));
+    @Override
+    public String getServletPath() {
+        return CONFIG_URL;
     }
+
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        return new Parameter[] { new Parameter("scope", scope) };
+    }
+
+    @Override
+    public AbstractAJAXParser<ChangePropertiesResponse> getParser() {
+        return new ChangePropertiesParser(true);
+    }
+
+    @Override
+    public Object getBody() throws IOException, JSONException {
+        return new JSONObject(properties);
+    }
+
+    @Override
+    public Header[] getHeaders() {
+        return NO_HEADER;
+    }
+
 }

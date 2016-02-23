@@ -47,56 +47,33 @@
  *
  */
 
-package com.openexchange.ajax.onboarding.tests;
+package com.openexchange.ajax.framework.config.util;
 
-import java.util.HashMap;
-import java.util.Map;
-import org.apache.commons.validator.routines.UrlValidator;
-import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
-import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
-import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
+import org.json.JSONException;
+import com.openexchange.ajax.container.Response;
+import com.openexchange.ajax.framework.AbstractAJAXParser;
 
 
 /**
- * {@link EMClientURLTest}
+ * {@link ChangePropertiesParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
+public class ChangePropertiesParser extends AbstractAJAXParser<ChangePropertiesResponse> {
 
-    public EMClientURLTest(String name) {
-        super(name);
-    }
-
-    private static Map<String, String> confs;
-
-    static {
-        confs = new HashMap<String, String>();
-        confs.put("com.openexchange.client.onboarding.emclient.url", "http://www.open-xchange.com");
+    /**
+     * Initializes a new {@link ChangePropertiesParser}.
+     * 
+     * @param failOnError
+     */
+    protected ChangePropertiesParser(boolean failOnError) {
+        super(failOnError);
     }
 
     @Override
-    protected Map<String, String> getNeededConfigurations() {
-        return confs;
+    protected ChangePropertiesResponse createResponse(Response response) throws JSONException {
+        return new ChangePropertiesResponse(response);
     }
 
-    public void testEMClientURL() throws Exception {
-        ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
-        OnboardingTestResponse response = client.execute(req);
-        assertNotNull("Response is empty!", response);
-        if (response.hasError()) {
-            fail("The response has an unexpected error: " + response.getException().getMessage());
-        }
-        Object data = response.getData();
-        assertNotNull("Response has no data!", data);
-        assertTrue("Unexpected response data type", data instanceof JSONObject);
-        JSONObject jobj = ((JSONObject) data);
-        Object linkObj = jobj.get("link");
-        assertNotNull("Data object doesn't contain a link field", linkObj);
-        assertTrue("Unexpected link field data type", linkObj instanceof String);
-        String link = ((String) linkObj);
-        assertTrue("The url " + link + " isn't valid!", UrlValidator.getInstance().isValid(link));
-    }
 }
