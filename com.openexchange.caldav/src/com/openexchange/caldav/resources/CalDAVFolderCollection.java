@@ -87,6 +87,8 @@ import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -240,6 +242,14 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 throw protocolException(e);
             }
         }
+    }
+
+    @Override
+    protected void internalDelete() throws WebdavProtocolException {
+        if (null != folder && folder.isDefault()) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "default-calendar-needed", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        super.internalDelete();
     }
 
     @Override
