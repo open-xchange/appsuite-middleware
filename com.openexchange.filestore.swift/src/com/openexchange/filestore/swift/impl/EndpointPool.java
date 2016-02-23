@@ -101,18 +101,23 @@ public class EndpointPool {
      */
     public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
         super();
+        int size = endpointUrls.size();
+        if (size <= 0) {
+            throw new IllegalArgumentException("Paramater 'hosts' must not be empty");
+        }
+
         this.filestoreId = filestoreId;
         tokenRef = new AtomicReference<Token>();
-        int size = endpointUrls.size();
         available = new ArrayList<>(endpointUrls);
         blacklist = new ArrayList<>(size);
         counter = new AtomicInteger(size);
-        if (endpointUrls.isEmpty()) {
-            throw new IllegalArgumentException("Paramater 'endpointUrls' must not be empty");
-        }
 
-        LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
-        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
+        if (size > 1) {
+            LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
+            heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
+        } else {
+            LOG.debug("Swift end-point pool [{}]: Scheduling no heartbeat timer task as there is only one end-point specified", filestoreId);
+        }
     }
 
     /**
