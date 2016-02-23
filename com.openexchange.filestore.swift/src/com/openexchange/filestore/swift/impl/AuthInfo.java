@@ -52,7 +52,7 @@ package com.openexchange.filestore.swift.impl;
 import com.openexchange.java.Strings;
 
 /**
- * {@link AuthInfo} - The authentication value.
+ * {@link AuthInfo} - The authentication information.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
