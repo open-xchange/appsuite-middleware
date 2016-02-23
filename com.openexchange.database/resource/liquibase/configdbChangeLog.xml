@@ -143,24 +143,4 @@
         </rollback>
     </changeSet>
 
-    <changeSet id="7.8.1:swift_token" author="thorben.betten@open-xchange.com">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="swift_token" />
-            </not>
-        </preConditions>
-        <comment>Creates the 'swift_token' table</comment>
-        <sql>
-            CREATE TABLE swift_token (
-                id VARCHAR(32) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
-				token VARCHAR(512) COLLATE utf8_unicode_ci NOT NULL,
-				expires BIGINT(64) NOT NULL,
-				PRIMARY KEY (id)
-			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
-        </sql>
-        <rollback>
-            <dropTable tableName="swift_token" />
-        </rollback>
-    </changeSet>
-
 </databaseChangeLog>

@@ -56,6 +56,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.migration.DBMigrationExecutorService;
 import com.openexchange.filestore.FileStorageProvider;
 import com.openexchange.filestore.FileStorageUnregisterListener;
 import com.openexchange.filestore.swift.SwiftFileStorageFactory;
@@ -98,6 +99,7 @@ public class SwiftActivator extends HousekeepingActivator {
 
         // Trackers
         trackService(ContextService.class);
+        track(DBMigrationExecutorService.class, new SwiftDBMigrationServiceTracker(this, context));
         openTrackers();
 
         // Register update task, create table job and delete listener
