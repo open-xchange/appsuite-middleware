@@ -190,7 +190,7 @@ public class AddFulltextIndexTask extends UpdateTaskAdapter {
         Statement stmt = null;
         try {
             stmt = connection.createStatement();
-            return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX ").append(name).append(" ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
+            return stmt.execute(new StringBuilder("CREATE FULLTEXT INDEX `").append(name).append("` ON ").append(Table.CONTACTS).append(" (").append(Mappers.CONTACT.getColumns(fields)).append(");").toString());
         } finally {
             closeSQLStuff(stmt);
         }
