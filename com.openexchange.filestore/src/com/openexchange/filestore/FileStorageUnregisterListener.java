@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,27 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
+package com.openexchange.filestore;
 
-import org.apache.http.client.HttpClient;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SwiftConfig}
+ * {@link FileStorageUnregisterListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.1
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final String tenantName;
-    private final AuthInfo authValue;
-    private final String filestoreId;
+public interface FileStorageUnregisterListener {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
+     * Called when a file storage is about to be unregistered.
      *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * @param fileStorageId The identifier of the unregistered file storage
+     * @param configDbCon The connection to configdb (in transactional state)
+     * @throws SQLException If AN SQL error occurs
+     * @throws OXException If invocation fails unexpectedly (and unregistration is supposed to be canceled)
      */
-    public SwiftConfig(String filestoreId, String userName, String tenantName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
-        super();
-        this.filestoreId = filestoreId;
-        this.userName = userName;
-        this.tenantName = tenantName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
-    }
-
-    /**
-     * Gets the file storage identifier
-     *
-     * @return The file storage identifier
-     */
-    public String getFilestoreId() {
-        return filestoreId;
-    }
-
-    /**
-     * Gets the user name
-     *
-     * @return The user name
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * Gets the tenant name
-     *
-     * @return The tenant name
-     */
-    public String getTenantName() {
-        return tenantName;
-    }
-
-    /**
-     * Gets the auth info
-     *
-     * @return The auth info
-     */
-    public AuthInfo getAuthInfo() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
-    }
-
+    void onFileStorageUnregistration(int fileStorageId, Connection configDbCon) throws SQLException, OXException;
 }

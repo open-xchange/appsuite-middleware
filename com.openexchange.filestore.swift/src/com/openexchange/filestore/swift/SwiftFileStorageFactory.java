@@ -75,6 +75,8 @@ import com.openexchange.filestore.swift.impl.AuthInfo;
 import com.openexchange.filestore.swift.impl.EndpointPool;
 import com.openexchange.filestore.swift.impl.SwiftClient;
 import com.openexchange.filestore.swift.impl.SwiftConfig;
+import com.openexchange.filestore.swift.impl.token.TokenStorage;
+import com.openexchange.filestore.swift.impl.token.TokenStorageImpl;
 import com.openexchange.java.Strings;
 import com.openexchange.rest.client.httpclient.HttpClients;
 import com.openexchange.rest.client.httpclient.HttpClients.ClientConfig;
@@ -107,6 +109,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
     final ServiceLookup services;
     private final ConcurrentMap<URI, Future<SwiftFileStorage>> storages;
     private final ConcurrentMap<String, SwiftConfig> swiftConfigs;
+    private final TokenStorage tokenStorage;
 
     /**
      * Initializes a new {@link SwiftFileStorageFactory}.
@@ -118,6 +121,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         this.services = services;
         this.storages = new ConcurrentHashMap<URI, Future<SwiftFileStorage>>();
         this.swiftConfigs = new ConcurrentHashMap<String, SwiftConfig>();
+        tokenStorage = new TokenStorageImpl(services);
     }
 
     @Override
@@ -248,7 +252,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             }
         }
 
-        return new SwiftClient(swiftConfig, contextID, userID);
+        return new SwiftClient(swiftConfig, contextID, userID, tokenStorage);
     }
 
     /**
@@ -326,7 +330,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
         EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SwiftConfig(userName, tenantName, new AuthInfo(authValue, authType, identityUrl), httpClient, endpointPool);
+        return new SwiftConfig(filestoreID, userName, tenantName, new AuthInfo(authValue, authType, identityUrl), httpClient, endpointPool);
     }
 
     private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {

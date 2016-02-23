@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,60 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
+package com.openexchange.filestore.swift.impl.token;
 
-import org.apache.http.client.HttpClient;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link SwiftConfig}
+ * {@link TokenStorage} - The storage for obtained Swift tokens.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.1
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final String tenantName;
-    private final AuthInfo authValue;
-    private final String filestoreId;
+public interface TokenStorage {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
+     * Acquires the lock for denoted file storage.
      *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * @param filestoreId The file storage identifier
+     * @return <code>true</code> if lock was successfully acquired; otherwise <code>false</code> if already locked
+     * @throws OXException If lock operation fails
      */
-    public SwiftConfig(String filestoreId, String userName, String tenantName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
-        super();
-        this.filestoreId = filestoreId;
-        this.userName = userName;
-        this.tenantName = tenantName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
-    }
+    boolean lock(String filestoreId) throws OXException;
 
     /**
-     * Gets the file storage identifier
+     * Releases the previously acquired lock for denoted file storage.
      *
-     * @return The file storage identifier
+     * @param filestoreId The file storage identifier
+     * @throws OXException If unlock operation fails
      */
-    public String getFilestoreId() {
-        return filestoreId;
-    }
+    void unlock(String filestoreId) throws OXException;
 
     /**
-     * Gets the user name
+     * Checks if specified file storage is still locked.
      *
-     * @return The user name
+     * @param filestoreId The file storage identifier
+     * @return <code>true</code> if locked; otherwise <code>false</code>
+     * @throws OXException If check for locked status fails
      */
-    public String getUserName() {
-        return userName;
-    }
+    boolean isLocked(String filestoreId) throws OXException;
 
     /**
-     * Gets the tenant name
+     * Stores specified token.
      *
-     * @return The tenant name
+     * @param token The token to store
+     * @param filestoreId The identifier of the file storage associated with the token
+     * @throws OXException If store operation fails
      */
-    public String getTenantName() {
-        return tenantName;
-    }
+    void store(Token token, String filestoreId) throws OXException;
 
     /**
-     * Gets the auth info
+     * Gets the token associated with specified file storage.
      *
-     * @return The auth info
+     * @param filestoreId The file storage identifier
+     * @return The token or <code>null</code>
+     * @throws OXException If get operation fails
      */
-    public AuthInfo getAuthInfo() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
-    }
+    Token get(String filestoreId) throws OXException;
 
 }

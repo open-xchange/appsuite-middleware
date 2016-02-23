@@ -74,6 +74,8 @@ import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.swift.SwiftExceptionCode;
+import com.openexchange.filestore.swift.impl.token.Token;
+import com.openexchange.filestore.swift.impl.token.TokenStorage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
@@ -88,6 +90,7 @@ public class SwiftClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftClient.class);
 
+    private final String filestoreId;
     private final String userName;
     private final String tenantName;
     private final AuthInfo authValue;
@@ -96,6 +99,7 @@ public class SwiftClient {
     private final String containerName;
     private final int contextId;
     private final int userId;
+    private final TokenStorage tokenStorage;
     private final AtomicReference<Token> tokenRef;
 
     /**
@@ -104,10 +108,12 @@ public class SwiftClient {
      * @param swiftConfig The Swift configuration
      * @param contextId The context identifier
      * @param userId The user identifier
+     * @param tokenStorage The token storage
      */
-    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId) {
+    public SwiftClient(SwiftConfig swiftConfig, int contextId, int userId, TokenStorage tokenStorage) {
         super();
         tokenRef = new AtomicReference<Token>();
+        this.filestoreId = swiftConfig.getFilestoreId();
         this.userName = swiftConfig.getUserName();
         this.tenantName = swiftConfig.getTenantName();
         this.authValue = swiftConfig.getAuthInfo();
@@ -115,6 +121,7 @@ public class SwiftClient {
         this.httpClient = swiftConfig.getHttpClient();
         this.contextId = contextId;
         this.userId = userId;
+        this.tokenStorage = tokenStorage;
 
         // E.g. "57462_ctx_5_user_store" or "57462_ctx_store"
         StringBuilder sb = new StringBuilder(32).append(contextId).append("_ctx");
@@ -172,6 +179,7 @@ public class SwiftClient {
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
+                Utils.close(get, response);
                 return existsContainer(newToken, retryCount);
             }
             if (HttpServletResponse.SC_NOT_FOUND != status) {
@@ -217,6 +225,7 @@ public class SwiftClient {
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
+                Utils.close(put, response);
                 return createContainer(newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
@@ -270,6 +279,7 @@ public class SwiftClient {
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
+                Utils.close(put, response);
                 return put(data, length, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
@@ -341,6 +351,7 @@ public class SwiftClient {
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
+                Utils.close(get, response);
                 return get(id, rangeStart, rangeEnd, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
@@ -395,6 +406,7 @@ public class SwiftClient {
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
+                Utils.close(delete, response);
                 delete(id, newToken, retryCount);
             }
             throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
@@ -482,6 +494,58 @@ public class SwiftClient {
             }
         }
 
+        // Invalidate token
+        endpoints.applyNewToken(null);
+
+        // Check possible valid one held in storage
+        {
+            Token storedToken = tokenStorage.get(filestoreId);
+            if (null != storedToken && !storedToken.isExpired() && (null == expiredToken || !expiredToken.getId().equals(storedToken.getId()))) {
+                tokenRef.set(storedToken);
+                endpoints.applyNewToken(storedToken);
+                return storedToken;
+            }
+        }
+
+        // Try to acquire lock
+        if (false == tokenStorage.lock(filestoreId)) {
+            // Failed to get lock; await concurrently token acquisition to complete
+            do {
+                long nanosToWait = TimeUnit.NANOSECONDS.convert(3000L + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                LockSupport.parkNanos(nanosToWait);
+            } while (tokenStorage.isLocked(filestoreId));
+
+            // Grab new token and check its validity
+            Token newToken = tokenStorage.get(filestoreId);
+            if (null == newToken || newToken.isExpired()) {
+                // Overall retry...
+                return acquireNewToken(expiredToken);
+            }
+
+            // Accept & set the new token
+            tokenRef.set(newToken);
+            endpoints.applyNewToken(newToken);
+            return newToken;
+        }
+
+        // Acquired lock...
+        try {
+            // Request new token
+            Token newToken = doAcquireNewToken();
+
+            // Store it
+            tokenStorage.store(newToken, filestoreId);
+
+            // Apply it
+            tokenRef.set(newToken);
+            endpoints.applyNewToken(newToken);
+            return newToken;
+        } finally {
+            tokenStorage.unlock(filestoreId);
+        }
+    }
+
+    private Token doAcquireNewToken() throws OXException {
         // Get a new one
         HttpPost post = null;
         HttpResponse response = null;
@@ -525,10 +589,7 @@ public class SwiftClient {
             JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
             JSONObject jAccess = jResponse.getJSONObject("access");
             JSONObject jToken = jAccess.getJSONObject("token");
-            Token newToken = Token.parseFrom(jToken);
-            tokenRef.set(newToken);
-            endpoints.applyNewToken(newToken);
-            return newToken;
+            return Token.parseFrom(jToken);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (JSONException e) {

@@ -76,6 +76,7 @@ import org.json.JSONException;
 import org.json.JSONValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 

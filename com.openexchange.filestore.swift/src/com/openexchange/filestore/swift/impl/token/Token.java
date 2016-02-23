@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
+package com.openexchange.filestore.swift.impl.token;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -171,6 +171,20 @@ public class Token {
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("Token [");
+        if (id != null) {
+            builder.append("id=").append(id).append(", ");
+        }
+        if (expires != null) {
+            builder.append("expires=").append(expires).append(", ");
+        }
+        builder.append("]");
+        return builder.toString();
     }
 
 }

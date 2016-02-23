@@ -57,10 +57,12 @@ import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.filestore.FileStorageProvider;
+import com.openexchange.filestore.FileStorageUnregisterListener;
 import com.openexchange.filestore.swift.SwiftFileStorageFactory;
 import com.openexchange.filestore.swift.groupware.SwiftCreateTableService;
 import com.openexchange.filestore.swift.groupware.SwiftCreateTableTask;
 import com.openexchange.filestore.swift.groupware.SwiftDeleteListener;
+import com.openexchange.filestore.swift.groupware.SwiftFileStorageUnregisterListener;
 import com.openexchange.filestore.swift.rmi.SwiftRemoteManagement;
 import com.openexchange.filestore.swift.rmi.impl.SwiftRemoteImpl;
 import com.openexchange.groupware.delete.DeleteListener;
@@ -102,6 +104,7 @@ public class SwiftActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new SwiftCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new SwiftCreateTableTask(this)));
         registerService(DeleteListener.class, new SwiftDeleteListener());
+        registerService(FileStorageUnregisterListener.class, new SwiftFileStorageUnregisterListener());
 
         // Register factory
         registerService(FileStorageProvider.class, new SwiftFileStorageFactory(this));

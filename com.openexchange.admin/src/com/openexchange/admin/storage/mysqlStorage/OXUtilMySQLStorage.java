@@ -95,6 +95,9 @@ import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageUnregisterListener;
+import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1584,21 +1587,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (cstmt != null) {
-                    cstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(cstmt);
+            closeSQLStuff(pstmt);
 
             if (con != null) {
                 try {
@@ -1643,39 +1633,32 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    if (con != null) {
-                        cache.pushReadConnectionForConfigDB(con);
-                    }
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
-
         }
     }
 
     @Override
     public void unregisterDatabase(final int dbId, final boolean isMaster) throws StorageException {
-        final Connection con;
+        Connection con;
         try {
             con = cache.getWriteConnectionForConfigDB();
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         }
+
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             DBUtils.startTransaction(con);
+            rollback = true;
 
             lock(con);
 
@@ -1711,15 +1694,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 closeSQLStuff(stmt);
             }
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            rollback(con);
             LOG.error("Runtime Error", e);
             throw new StorageException(e);
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             try {
                 cache.pushWriteConnectionForConfigDB(con);
             } catch (final PoolException e) {
@@ -1732,41 +1717,48 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void unregisterFilestore(final int store_id) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
             con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
+            rollback = true;
+
+            {
+                FileStorageUnregisterListenerRegistry listenerRegistry = AdminServiceRegistry.getInstance().getService(FileStorageUnregisterListenerRegistry.class);
+                if (null != listenerRegistry) {
+                    List<FileStorageUnregisterListener> listeners = listenerRegistry.getListeners();
+                    for (FileStorageUnregisterListener listener : listeners) {
+                        listener.onFileStorageUnregistration(store_id, con);
+                    }
+                }
+            }
+
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
             stmt.setInt(1, store_id);
             stmt.executeUpdate();
+
             con.commit();
+            rollback = false;
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of ox connection!", exp);
-            }
             throw new StorageException(ecp);
+        } catch (final OXException oxe) {
+            LOG.error("OX Error", oxe);
+            throw new StorageException(oxe);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
+            closeSQLStuff(stmt);
+            if (con != null) {
+                if (rollback) {
+                    Databases.rollback(con);
                 }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
-            try {
-                if (con != null) {
+                try {
                     cache.pushWriteConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
@@ -1788,13 +1780,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);

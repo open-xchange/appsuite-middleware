@@ -60,6 +60,7 @@ import javax.annotation.concurrent.ThreadSafe;
 import org.apache.http.client.HttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;

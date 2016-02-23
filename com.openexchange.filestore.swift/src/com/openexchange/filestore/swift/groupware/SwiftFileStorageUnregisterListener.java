@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,93 +47,41 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
+package com.openexchange.filestore.swift.groupware;
 
-import org.apache.http.client.HttpClient;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageUnregisterListener;
+
 
 /**
- * {@link SwiftConfig}
+ * {@link SwiftFileStorageUnregisterListener}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.1
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final String tenantName;
-    private final AuthInfo authValue;
-    private final String filestoreId;
+public class SwiftFileStorageUnregisterListener implements FileStorageUnregisterListener {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
-     *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * Initializes a new {@link SwiftFileStorageUnregisterListener}.
      */
-    public SwiftConfig(String filestoreId, String userName, String tenantName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
+    public SwiftFileStorageUnregisterListener() {
         super();
-        this.filestoreId = filestoreId;
-        this.userName = userName;
-        this.tenantName = tenantName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
     }
 
-    /**
-     * Gets the file storage identifier
-     *
-     * @return The file storage identifier
-     */
-    public String getFilestoreId() {
-        return filestoreId;
-    }
-
-    /**
-     * Gets the user name
-     *
-     * @return The user name
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * Gets the tenant name
-     *
-     * @return The tenant name
-     */
-    public String getTenantName() {
-        return tenantName;
-    }
-
-    /**
-     * Gets the auth info
-     *
-     * @return The auth info
-     */
-    public AuthInfo getAuthInfo() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
+    @Override
+    public void onFileStorageUnregistration(int fileStorageId, Connection configDbCon) throws SQLException, OXException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = configDbCon.prepareStatement("DELETE FROM swift_token WHERE CONCAT('swift://', swift_token.id) IN (SELECT filestore.uri FROM filestore WHERE filestore.id=?)");
+            stmt.setInt(1, fileStorageId);
+            stmt.executeUpdate();
+        } finally {
+            Databases.closeSQLStuff(stmt);
+        }
     }
 
 }
