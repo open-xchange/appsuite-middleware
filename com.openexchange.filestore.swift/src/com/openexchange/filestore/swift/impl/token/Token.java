@@ -66,11 +66,16 @@ import com.openexchange.filestore.swift.SwiftExceptionCode;
  */
 public class Token {
 
-    private static final SimpleDateFormat SDF_EXPIRES;
+    private static final SimpleDateFormat SDF_EXPIRES_WITH_MILLIS;
+    private static final SimpleDateFormat SDF_EXPIRES_WITHOUT_MILLIS;
     static {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        SDF_EXPIRES = sdf;
+        SDF_EXPIRES_WITH_MILLIS = sdf;
+
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SDF_EXPIRES_WITHOUT_MILLIS = sdf;
     }
 
     /**
@@ -90,8 +95,9 @@ public class Token {
             String id = jToken.getString("id");
             Date expires;
             sDate = jToken.getString("expires");
-            synchronized (SDF_EXPIRES) {
-                expires = SDF_EXPIRES.parse(sDate);
+            SimpleDateFormat sdf = sDate.indexOf('.') > 0 ? SDF_EXPIRES_WITH_MILLIS : SDF_EXPIRES_WITHOUT_MILLIS;
+            synchronized (sdf) {
+                expires = sdf.parse(sDate);
             }
             return new Token(id, expires);
         } catch (JSONException e) {
