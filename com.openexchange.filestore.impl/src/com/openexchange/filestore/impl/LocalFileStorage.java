@@ -744,7 +744,7 @@ public class LocalFileStorage extends DefaultFileStorage {
     private transient int nameLength = -1;
 
     /**
-     * Formats the entry name as a string. Names will bein the range 0 till (entries - 1).
+     * Formats the entry name as a string. Names will begin the range 0 till (entries - 1).
      *
      * @param entry to format
      * @return formated entry name
