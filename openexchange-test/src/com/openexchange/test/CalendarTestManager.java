@@ -576,7 +576,7 @@ public class CalendarTestManager implements TestManager {
                 try {
                     app.set(Appointment.ALL_COLUMNS[i], row[i]);
                 } catch (ClassCastException x) {
-                    if (x.getMessage().equals("java.lang.Long")) {
+                    if (x.getMessage() != null && x.getMessage().equals("java.lang.Long")) {
                         if (!tryDate(app, Appointment.ALL_COLUMNS[i], (Long) row[i])) {
                             tryInteger(app, Appointment.ALL_COLUMNS[i], (Long) row[i]);
                         }
