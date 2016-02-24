@@ -109,7 +109,7 @@ public class SwiftDBMigrationServiceTracker implements ServiceTrackerCustomizer<
                 @Override
                 public void backAfterReading(Connection connection) {
                     Databases.autocommit(connection);
-                    databaseService.backWritable(connection);
+                    databaseService.backWritableAfterReading(connection);
                 }
 
                 @Override
