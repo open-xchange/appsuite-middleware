@@ -61,13 +61,13 @@ import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageExceptionCodes;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.StorageInfo;
 import com.openexchange.filestore.impl.osgi.Services;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.FileStorageInfo;
 import com.openexchange.groupware.filestore.FilestoreExceptionCodes;
 import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.java.IntReference;
 import com.openexchange.user.UserService;
 
 /**
@@ -206,59 +206,33 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
 
         DBQuotaFileStorage storage = getCachedFileStorage(userId, contextId);
         if (null == storage) {
-            // The owner determines to what 'filestore_usage' entry the quota gets accounted
-            IntReference fsOwner = new IntReference(0);
-
             // Get the file storage info
-            FileStorageInfo info = getFileStorageInfoFor(userId, contextId, fsOwner);
+            StorageInfo info = getFileStorageInfoFor(userId, contextId);
 
             // Determine file storage's base URI
-            URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getFilestoreId()).getUri();
+            URI baseUri = FilestoreStorage.getInstance().getFilestore(info.getId()).getUri();
             try {
                 // Generate full URI
-                URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getFilestoreName(), baseUri.getQuery(), baseUri.getFragment());
+                URI uri = new URI(baseUri.getScheme(), baseUri.getAuthority(), FileStorages.ensureEndingSlash(baseUri.getPath()) + info.getName(), baseUri.getQuery(), baseUri.getFragment());
 
                 // Create appropriate file storage instance
-                storage = new DBQuotaFileStorage(contextId, fsOwner.getValue(), info.getFileStorageQuota(), fileStorageService.getFileStorage(uri), uri);
+                storage = new DBQuotaFileStorage(contextId, info.getOwner(), info.getQuota(), fileStorageService.getFileStorage(uri), uri);
 
                 // Put it into cache
                 putCachedFileStorage(userId, contextId, storage);
             } catch (URISyntaxException e) {
-                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + info.getFilestoreName());
+                throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, baseUri.toString() + '/' + info.getName());
             }
         }
 
         return storage;
     }
 
-    /**
-     * Determines the appropriate file storage path for given user/context pair<br>
-     * (while user information might not be set (<code>userId &lt;= 0</code>) for calls accessing the context-associated file storage)
-     * <p>
-     * Either <span style="margin-left: 0.1in;">''<i>context</i> + <code>"_ctx_store"</code>''</span><br>
-     * or <span style="margin-left: 0.1in;">''<i>context</i> + <code>"_ctx_"</code> + <i>user</i> + <code>"_user_store"</code>''</span>
-     * <hr>
-     * Assuming <code>contextId=57462</code>, <code>userId=5</code>, and <code>ownerId=2</code>
-     * <p>
-     * <ul>
-     * <li>If <code>userId &lt;= 0</code> the context-associated file storage is returned --&gt; <code>"57462_ctx_store"</code></li><br>
-     * <li>Otherwise the user is examined if a dedicated file storage is referenced. If no dedicated file storage is referenced
-     *     (<code>user.getFilestoreId() &lt;= 0</code>) the context-associated file storage is returned  --&gt; <code>"57462_ctx_store"</code></li><br>
-     * <li>In case <code>user.getFilestoreId() &gt; 0</code> is signaled, the user is further checked if that referenced file storage is assigned to another user instance acting as owner.
-     *     If <code>user.getFileStorageOwner() &lt;= 0</code> the user itself is returned as owner --&gt; <code>"57462_ctx_5_user_store"</code></li><br>
-     * <li>In case <code>user.getFileStorageOwner() &gt; 0</code> the owner is returned --&gt; <code>"57462_ctx_2_user_store"</code></li><br>
-     * </ul>
-     *
-     * @param userId The user identifier
-     * @param contextId The context identifier
-     * @param fsOwner The reference for the file storage owner
-     * @return The appropriate file storage information to pass the proper URI to the <code>FileStorage</code> instance
-     * @throws OXException If file storage information cannot be returned
-     */
-    private FileStorageInfo getFileStorageInfoFor(int userId, int contextId, IntReference fsOwner) throws OXException {
+    @Override
+    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
         ContextService contextService = Services.requireService(ContextService.class);
         if (userId <= 0) {
-            return contextService.getContext(contextId);
+            return newStorageInfoFor(0, contextService.getContext(contextId));
         }
 
         UserService userService = Services.requireService(UserService.class);
@@ -266,15 +240,14 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
         User user = userService.getUser(userId, context);
         if (user.getFilestoreId() <= 0) {
             // No user-specific file storage
-            return context;
+            return newStorageInfoFor(0, context);
         }
 
         // A user-specific file storage; determine its owner
         int nextOwnerId = user.getFileStorageOwner();
         if (nextOwnerId <= 0) {
             // User is the owner
-            fsOwner.setValue(userId);
-            return user;
+            return newStorageInfoFor(userId, user);
         }
 
         // Separate owner (chain)
@@ -289,8 +262,11 @@ public class DBQuotaFileStorageService implements QuotaFileStorageService {
             throw QuotaFileStorageExceptionCodes.INSTANTIATIONERROR.create();
         }
 
-        fsOwner.setValue(owner.getId());
-        return owner;
+        return newStorageInfoFor(owner.getId(), owner);
+    }
+
+    private StorageInfo newStorageInfoFor(int owner, FileStorageInfo fileStorageInfo) {
+        return new StorageInfo(fileStorageInfo.getFilestoreId(), owner, fileStorageInfo.getFilestoreName(), fileStorageInfo.getFileStorageQuota());
     }
 
 }

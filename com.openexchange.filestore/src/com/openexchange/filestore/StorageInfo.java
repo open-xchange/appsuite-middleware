@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,75 +47,85 @@
  *
  */
 
-package com.openexchange.consistency;
+package com.openexchange.filestore;
 
-import java.net.URI;
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.QuotaFileStorage;
-import com.openexchange.filestore.QuotaFileStorageService;
-import com.openexchange.filestore.StorageInfo;
-import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
- * {@link SimQuotaFileStorageService}
+ * {@link StorageInfo} - Information for a file storage.
  *
- * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class SimQuotaFileStorageService implements QuotaFileStorageService {
+public class StorageInfo {
 
-    private final InMemoryFileStorage fileStorage;
+    private final int id;
+    private final long quota;
+    private final String name;
+    private final int owner;
 
     /**
-     * Initialises a new {@link SimQuotaFileStorageService}.
+     * Initializes a new {@link StorageInfo}.
+     *
+     * @param id The file storage identifier
+     * @param owner The owner of the file storage
+     * @param name The entity-specific location inside the file storage
+     * @param quota The file storage quota
      */
-    public SimQuotaFileStorageService(InMemoryFileStorage fileStorage) {
+    public StorageInfo(int id, int owner, String name, long quota) {
         super();
-        this.fileStorage = fileStorage;
+        this.id = id;
+        this.owner = owner;
+        this.name = name;
+        this.quota = quota;
+    }
+
+    /**
+     * Gets the file storage quota
+     *
+     * @return The quota for the file storage or <code>0</code> if there is no quota.
+     */
+    public long getQuota() {
+        return quota;
+    }
+
+    /**
+     * Gets the file storage identifier
+     *
+     * @return The file storage identifier
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * Gets the entity-specific location inside the file storage.
+     *
+     * @return The entity-specific location inside the file storage.
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Gets the owner of the file storage.
+     * <p>
+     * The owner determines to what 'filestore_usage' entry the quota gets accounted.
+     *
+     * @return The owner
+     */
+    public int getOwner() {
+        return owner;
     }
 
     @Override
-    public QuotaFileStorage getUnlimitedQuotaFileStorage(URI baseUri, int optOwner, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public QuotaFileStorage getQuotaFileStorage(int userId, int contextId) throws OXException {
-        return fileStorage;
-    }
-
-    @Override
-    public URI getFileStorageUriFor(int userId, int contextId) throws OXException {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public void invalidateCacheFor(int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void invalidateCacheFor(int userId, int contextId) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
-        return false;
-    }
-
-    @Override
-    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
-        return null;
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("StorageInfo [id=").append(id).append(", quota=").append(quota).append(", ");
+        if (name != null) {
+            builder.append("name=").append(name).append(", ");
+        }
+        builder.append("owner=").append(owner).append("]");
+        return builder.toString();
     }
 
 }
