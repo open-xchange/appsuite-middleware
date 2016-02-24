@@ -182,7 +182,7 @@ public class DirectLinkGenerator {
 
     private String getFileImageLink(File file, int width, int height) {
         String mimeType = DriveUtils.determineMimeType(file);
-        if (false == Strings.isEmpty(mimeType)) {
+        if (Strings.isNotEmpty(mimeType) && 0 < file.getFileSize()) {
             // patterns borrowed from web interface
             if (mimeType.matches("(?i)^(image\\/(gif|png|jpe?g|bmp|tiff))$")) {
                 return DriveConfig.getInstance().getImageLinkImageFile()
