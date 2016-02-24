@@ -138,16 +138,11 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     @Override
     public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
-        final InputStream in = resource.getInputStream();
-        if (null == in) {
-            return save(id, resource.getBytes(), resource.getFileName(), resource.getFileType(), userId, contextId);
-        }
-        return save(id, in, resource.getFileName(), resource.getFileType(), userId, contextId);
-    }
-
-    private boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
         try {
-            return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
+            InputStream in = resource.getInputStream();
+            byte[] bytes = null == in ? resource.getBytes() : Streams.stream2bytes(in);
+
+            return save(id, bytes, resource.getFileName(), resource.getFileType(), userId, contextId);
         } catch (final IOException e) {
             throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
