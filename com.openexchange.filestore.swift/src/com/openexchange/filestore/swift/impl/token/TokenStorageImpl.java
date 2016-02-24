@@ -98,8 +98,7 @@ public class TokenStorageImpl implements TokenStorage {
             if (locked) {
                 databaseService.backWritable(con);
             } else {
-                // Maybe there is an after-reading method one day
-                databaseService.backWritable(con);
+                databaseService.backWritableAfterReading(con);
             }
         }
     }
