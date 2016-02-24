@@ -55,7 +55,8 @@ import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 
 /**
- * {@link FileStorage} - A file storage.
+ * {@link FileStorage} - A file storage or rather the entity-specific view or namespace inside a surrounding file storage;e.g.<br>
+ * <code>"file:/mount/disk/1234_ctx_store"</code>
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
