@@ -88,7 +88,7 @@ public class PreviewCacheDeleteListener implements DeleteListener {
                 resourceCache.clearFor(contextId);
             } catch (final Exception e) {
                 final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
-                logger.warn("Failed to clean resource for deleted context {}", Integer.valueOf(contextId), e);
+                logger.warn("Failed to clean resource cache for deleted context {}", Integer.valueOf(contextId), e);
             }
         }
     }
@@ -104,7 +104,7 @@ public class PreviewCacheDeleteListener implements DeleteListener {
                 resourceCache.remove(userId, contextId);
             } catch (final Exception e) {
                 final Logger logger = org.slf4j.LoggerFactory.getLogger(PreviewCacheDeleteListener.class);
-                logger.warn("Failed to clean resource for deleted user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
+                logger.warn("Failed to clean resource cache for deleted user {} in context {}", Integer.valueOf(userId), Integer.valueOf(contextId), e);
             }
         }
     }
