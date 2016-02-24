@@ -579,7 +579,7 @@ public class SwiftClient {
         // Check possible valid one held in storage
         {
             Token storedToken = tokenStorage.get(filestoreId);
-            if (null != storedToken && !storedToken.isExpired() && (null == expiredToken || !expiredToken.getId().equals(storedToken.getId()))) {
+            if (null != storedToken && !storedToken.isExpired() && (!storedToken.getId().equals(null == expiredToken ? null : expiredToken.getId()))) {
                 return applyToken(storedToken);
             }
         }

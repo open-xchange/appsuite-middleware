@@ -49,14 +49,7 @@
 
 package com.openexchange.filestore.swift.impl.token;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.TimeZone;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.exception.OXException;
-import com.openexchange.filestore.swift.SwiftExceptionCode;
 
 /**
  * {@link Token}
@@ -65,49 +58,6 @@ import com.openexchange.filestore.swift.SwiftExceptionCode;
  * @since v7.8.2
  */
 public class Token {
-
-    private static final SimpleDateFormat SDF_EXPIRES_WITH_MILLIS;
-    private static final SimpleDateFormat SDF_EXPIRES_WITHOUT_MILLIS;
-    static {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        SDF_EXPIRES_WITH_MILLIS = sdf;
-
-        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        SDF_EXPIRES_WITHOUT_MILLIS = sdf;
-    }
-
-    /**
-     * Parses a token from given token JSON representation.
-     *
-     * @param jToken The token JSON representation
-     * @return The parsed token
-     * @throws OXException If parsing fails
-     */
-    public static Token parseFrom(JSONObject jToken) throws OXException {
-        if (null == jToken) {
-            return null;
-        }
-
-        String sDate = null;
-        try {
-            String id = jToken.getString("id");
-            Date expires;
-            sDate = jToken.getString("expires");
-            SimpleDateFormat sdf = sDate.indexOf('.') > 0 ? SDF_EXPIRES_WITH_MILLIS : SDF_EXPIRES_WITHOUT_MILLIS;
-            synchronized (sdf) {
-                expires = sdf.parse(sDate);
-            }
-            return new Token(id, expires);
-        } catch (JSONException e) {
-            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } catch (ParseException e) {
-            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Invalid date format: " + sDate);
-        }
-    }
-
-    // ----------------------------------------------------------------------------------------------------------------------- //
 
     private final String id;
     private final Date expires;
@@ -118,12 +68,16 @@ public class Token {
      *
      * @param id The token identifier
      * @param expires The token expiry date
+     * @throws IllegalArgumentException If <code>id</code> is <code>null</code>
      */
     public Token(String id, Date expires) {
         super();
+        if (null == id) {
+            throw new IllegalArgumentException("id must not be null");
+        }
         this.id = id;
         this.expires = expires;
-        hash = 31 * 1 + ((id == null) ? 0 : id.hashCode());
+        hash = 31 * 1 + id.hashCode();
     }
 
     /**
