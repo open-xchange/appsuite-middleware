@@ -193,6 +193,11 @@ public final class ConfigDatabaseServiceImpl implements ConfigDatabaseService {
     }
 
     @Override
+    public void backWritableAfterReading(final Connection con) {
+        back(con, true);
+    }
+
+    @Override
     public void backForUpdateTask(Connection con) {
         back(con, false);
     }

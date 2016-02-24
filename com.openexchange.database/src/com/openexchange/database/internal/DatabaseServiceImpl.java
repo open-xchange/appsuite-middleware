@@ -155,6 +155,11 @@ public final class DatabaseServiceImpl implements DatabaseService {
     }
 
     @Override
+    public void backWritableAfterReading(Connection con) {
+        configDatabaseService.backWritableAfterReading(con);
+    }
+
+    @Override
     public void backForUpdateTask(Connection con) {
         configDatabaseService.backForUpdateTask(con);
     }
