@@ -322,6 +322,10 @@ public class SwiftClient {
      * @return The new identifier of the stored object
      */
     public UUID put(InputStream data, long length) throws OXException {
+        if (null == data) {
+            return null;
+        }
+
         Token token = getOrAcquireNewTokenIfExpired();
         return put(data, length, token, 0);
     }
@@ -387,6 +391,10 @@ public class SwiftClient {
      * @return The object's input stream
      */
     public InputStream get(UUID id, long rangeStart, long rangeEnd) throws OXException {
+        if (null == id) {
+            throw FileStorageCodes.FILE_NOT_FOUND.create("null");
+        }
+
         Token token = getOrAcquireNewTokenIfExpired();
         return get(id, rangeStart, rangeEnd, token, 0);
     }
@@ -448,6 +456,10 @@ public class SwiftClient {
      * @throws OXException
      */
     public boolean delete(UUID id) throws OXException {
+        if (null == id) {
+            return false;
+        }
+
         Token token = getOrAcquireNewTokenIfExpired();
         return delete(id, token, 0);
     }
@@ -501,6 +513,10 @@ public class SwiftClient {
      * @param ids The identifier of the objects to delete
      */
     public void delete(Collection<UUID> ids) throws OXException {
+        if (null == ids || ids.isEmpty()) {
+            return;
+        }
+
         Token token = getOrAcquireNewTokenIfExpired();
         for (UUID id : ids) {
             delete(id, token, 0);
