@@ -467,8 +467,17 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
 
         FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-        InputStream file = fileStorage.getFile(metadata.getRefId());
-        return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
+        try {
+            InputStream file = fileStorage.getFile(metadata.getRefId());
+            return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
+        } catch (OXException e) {
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            // Drop invalid entry
+            metadataStore.remove(contextId, userId, id);
+            return null;
+        }
     }
 
     @Override
