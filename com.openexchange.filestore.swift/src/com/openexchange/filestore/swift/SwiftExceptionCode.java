@@ -92,9 +92,9 @@ public enum SwiftExceptionCode implements DisplayableOXExceptionCode {
      */
     STORAGE_UNAVAILABLE("All configured Swift end-points are currently unavailable.", Category.CATEGORY_SERVICE_DOWN, 7),
     /**
-     * Unable to authenticate user with credentials provided.
+     * Unable to authenticate user with provided credentials.
      */
-    AUTH_FAILED("Unable to authenticate user with credentials provided", Category.CATEGORY_CONFIGURATION, 8),
+    AUTH_FAILED("Unable to authenticate user with provided credentials", Category.CATEGORY_CONFIGURATION, 8),
     ;
 
     private static final String PREFIX = "SWIFT";

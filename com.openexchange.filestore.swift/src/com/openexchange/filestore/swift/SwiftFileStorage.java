@@ -358,7 +358,7 @@ public class SwiftFileStorage implements FileStorage {
      * @throws OXException
      */
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
-        boolean success = false;
+        boolean deleteUploadedChunks = true;
         ChunkedUpload chunkedUpload = null;
         List<UUID> swiftIds = new ArrayList<UUID>();
         try {
@@ -381,11 +381,17 @@ public class SwiftFileStorage implements FileStorage {
                     Streams.close(chunk);
                 }
             } while (chunkedUpload.hasNext());
-            success = true;
+            deleteUploadedChunks = false;
             return off;
+        } catch (OXException e) {
+            if (SwiftExceptionCode.AUTH_FAILED.equals(e)) {
+                // In case authentication failed an attempt to delete uploaded chunks would also fail
+                deleteUploadedChunks = false;
+            }
+            throw e;
         } finally {
             Streams.close(chunkedUpload);
-            if (false == success) {
+            if (deleteUploadedChunks) {
                 client.delete(swiftIds);
                 for (UUID swiftId : swiftIds) {
                     chunkStorage.deleteChunk(swiftId);
