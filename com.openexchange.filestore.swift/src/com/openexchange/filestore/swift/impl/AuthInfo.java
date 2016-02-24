@@ -49,6 +49,7 @@
 
 package com.openexchange.filestore.swift.impl;
 
+import com.openexchange.filestore.swift.impl.token.TokenParser;
 import com.openexchange.java.Strings;
 
 /**
@@ -64,20 +65,25 @@ public class AuthInfo {
         /**
          * Authentication through passing a Rackspace API key.
          */
-        RACKSPACE_API_KEY("raxkey"),
+        RACKSPACE_API_KEY("raxkey", -1, TokenParser.TOKEN_PARSER_V2),
         /**
-         * Authentication through passing an API key/token.
+         * Password-based authentication according to <a href="http://developer.openstack.org/api-ref-identity-v2.html">Identity API v2</a>.
          */
-        TOKEN("token"),
+        PASSWORD_V2("password.v2", 2, TokenParser.TOKEN_PARSER_V2),
         /**
-         * Password-based authentication.
+         * Password-based authentication according to <a href="http://developer.openstack.org/api-ref-identity-v3.html">Identity API v3</a>.
          */
-        PASSWORD("password"),
+        PASSWORD_V3("password.v3", 3, TokenParser.TOKEN_PARSER_V3),
         ;
 
         private final String id;
-        private Type(String id) {
+        private final int version;
+        private final TokenParser parser;
+
+        private Type(String id, int version, TokenParser parser) {
             this.id = id;
+            this.version = version;
+            this.parser = parser;
         }
 
         /**
@@ -87,6 +93,24 @@ public class AuthInfo {
          */
         public String getId() {
             return id;
+        }
+
+        /**
+         * Gets the token parser
+         *
+         * @return The token parser
+         */
+        public TokenParser getParser() {
+            return parser;
+        }
+
+        /**
+         * Gets the version of the Identity API to use
+         *
+         * @return The version of the Identity API
+         */
+        public int getVersion() {
+            return version;
         }
 
         /**
@@ -100,12 +124,24 @@ public class AuthInfo {
                 return null;
             }
 
-            type = Strings.asciiLowerCase(type.trim());
+            String lookMeUp = Strings.asciiLowerCase(type.trim());
+            if (RACKSPACE_API_KEY.id.equals(lookMeUp)) {
+                // Rackspace API key authentication: "raxkey"
+                return RACKSPACE_API_KEY;
+            }
+
+            if (lookMeUp.indexOf('.') <= 0) {
+                // Contains no version identifier: "password"
+                return PASSWORD_V2;
+            }
+
+            // Contains version identifier; e.g. "password.v2"
             for (Type t : Type.values()) {
-                if (t.id.equals(type)) {
+                if (t.id.equals(lookMeUp)) {
                     return t;
                 }
             }
+
             return null;
         }
     }
@@ -114,22 +150,44 @@ public class AuthInfo {
 
     private final String value;
     private final Type type;
+    private final String tenantName;
+    private final String domain;
     private final String identityUrl;
 
     /**
      * Initializes a new {@link AuthInfo}.
      */
-    public AuthInfo(String value, Type type, String identityUrl) {
+    public AuthInfo(String value, Type type, String tenantName, String domain, String identityUrl) {
         super();
         this.value = value;
         this.type = type;
+        this.tenantName = tenantName;
+        this.domain = domain;
         this.identityUrl = identityUrl;
     }
 
     /**
-     * Gets the URL for the Identity API v2.0 end-point.
+     * Gets the domain.
      *
-     * @return The URL for the Identity API v2.0 end-point
+     * @return The domain
+     */
+    public String getDomain() {
+        return domain;
+    }
+
+    /**
+     * Gets the tenant name
+     *
+     * @return The tenant name
+     */
+    public String getTenantName() {
+        return tenantName;
+    }
+
+    /**
+     * Gets the URL for the Identity API end-point.
+     *
+     * @return The URL for the Identity API end-point
      */
     public String getIdentityUrl() {
         return identityUrl;

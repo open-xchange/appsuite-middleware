@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,82 +47,73 @@
  *
  */
 
-package com.openexchange.filestore.swift.impl;
+package com.openexchange.filestore.swift.impl.token;
 
-import org.apache.http.client.HttpClient;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.TimeZone;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.swift.SwiftExceptionCode;
 
 /**
- * {@link SwiftConfig}
+ * {@link TokenParserUtil} - Utility class for token parsing.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.2
+ * @since v7.8.1
  */
-public final class SwiftConfig {
-
-    private final HttpClient httpClient;
-    private final EndpointPool endpointPool;
-    private final String userName;
-    private final AuthInfo authValue;
-    private final String filestoreId;
+public class TokenParserUtil {
 
     /**
-     * Initializes a new {@link SwiftConfig}.
-     *
-     * @param httpClient The associated HTTP client
-     * @param endpointPool The end-point pool
+     * Initializes a new {@link TokenParserUtil}.
      */
-    public SwiftConfig(String filestoreId, String userName, AuthInfo authValue, HttpClient httpClient, EndpointPool endpointPool) {
+    private TokenParserUtil() {
         super();
-        this.filestoreId = filestoreId;
-        this.userName = userName;
-        this.authValue = authValue;
-        this.httpClient = httpClient;
-        this.endpointPool = endpointPool;
+    }
+
+    private static final SimpleDateFormat SDF_EXPIRES_WITH_MILLIS;
+    private static final SimpleDateFormat SDF_EXPIRES_WITH_MILLIS2;
+    private static final SimpleDateFormat SDF_EXPIRES_WITHOUT_MILLIS;
+    static {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SDF_EXPIRES_WITH_MILLIS = sdf;
+
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SDF_EXPIRES_WITH_MILLIS2 = sdf;
+
+        sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        SDF_EXPIRES_WITHOUT_MILLIS = sdf;
     }
 
     /**
-     * Gets the file storage identifier
+     * Parses the specified string representation of the expiry date.
      *
-     * @return The file storage identifier
+     * @param sDate The string representation of the expiry date
+     * @return The parsed date
+     * @throws OXException If parsing the date fails
      */
-    public String getFilestoreId() {
-        return filestoreId;
-    }
+    public static Date parseExpiryDate(String sDate) throws OXException {
+        if (null == sDate) {
+            return null;
+        }
 
-    /**
-     * Gets the user name
-     *
-     * @return The user name
-     */
-    public String getUserName() {
-        return userName;
-    }
-
-    /**
-     * Gets the auth info
-     *
-     * @return The auth info
-     */
-    public AuthInfo getAuthInfo() {
-        return authValue;
-    }
-
-    /**
-     * Gets the <code>HttpClient</code> instance.
-     *
-     * @return The <code>HttpClient</code> instance
-     */
-    public HttpClient getHttpClient() {
-        return httpClient;
-    }
-
-    /**
-     * Gets the end-point pool.
-     *
-     * @return The end-point pool
-     */
-    public EndpointPool getEndpointPool() {
-        return endpointPool;
+        try {
+            SimpleDateFormat sdf;
+            int pos = sDate.indexOf('.');
+            if (pos > 0) {
+                sdf = sDate.length() - pos == 8 ? SDF_EXPIRES_WITH_MILLIS2 : SDF_EXPIRES_WITH_MILLIS;
+            } else {
+                sdf = SDF_EXPIRES_WITHOUT_MILLIS;
+            }
+            synchronized (sdf) {
+                return sdf.parse(sDate);
+            }
+        } catch (ParseException e) {
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, "Invalid date format: " + sDate);
+        }
     }
 
 }

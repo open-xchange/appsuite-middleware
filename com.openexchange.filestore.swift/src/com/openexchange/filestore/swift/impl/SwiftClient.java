@@ -68,6 +68,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
@@ -92,7 +93,6 @@ public class SwiftClient {
 
     private final String filestoreId;
     private final String userName;
-    private final String tenantName;
     private final AuthInfo authValue;
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
@@ -115,7 +115,6 @@ public class SwiftClient {
         tokenRef = new AtomicReference<Token>();
         this.filestoreId = swiftConfig.getFilestoreId();
         this.userName = swiftConfig.getUserName();
-        this.tenantName = swiftConfig.getTenantName();
         this.authValue = swiftConfig.getAuthInfo();
         this.endpoints = swiftConfig.getEndpointPool();
         this.httpClient = swiftConfig.getHttpClient();
@@ -581,19 +580,20 @@ public class SwiftClient {
         {
             Token storedToken = tokenStorage.get(filestoreId);
             if (null != storedToken && !storedToken.isExpired() && (null == expiredToken || !expiredToken.getId().equals(storedToken.getId()))) {
-                tokenRef.set(storedToken);
-                endpoints.applyNewToken(storedToken);
-                return storedToken;
+                return applyToken(storedToken);
             }
         }
 
         // Try to acquire lock
         if (false == tokenStorage.lock(filestoreId)) {
-            // Failed to get lock; await concurrently token acquisition to complete
-            do {
-                long nanosToWait = TimeUnit.NANOSECONDS.convert(3000L + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
-                LockSupport.parkNanos(nanosToWait);
-            } while (tokenStorage.isLocked(filestoreId));
+            // Failed to get lock; await concurrent token acquisition to complete (using exponential back-off)
+            {
+                int retry = 1;
+                do {
+                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retry++ * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                    LockSupport.parkNanos(nanosToWait);
+                } while (tokenStorage.isLocked(filestoreId));
+            }
 
             // Grab new token and check its validity
             Token newToken = tokenStorage.get(filestoreId);
@@ -603,9 +603,7 @@ public class SwiftClient {
             }
 
             // Accept & set the new token
-            tokenRef.set(newToken);
-            endpoints.applyNewToken(newToken);
-            return newToken;
+            return applyToken(newToken);
         }
 
         // Acquired lock...
@@ -617,12 +615,16 @@ public class SwiftClient {
             tokenStorage.store(newToken, filestoreId);
 
             // Apply it
-            tokenRef.set(newToken);
-            endpoints.applyNewToken(newToken);
-            return newToken;
+            return applyToken(newToken);
         } finally {
             tokenStorage.unlock(filestoreId);
         }
+    }
+
+    private Token applyToken(Token token) {
+        tokenRef.set(token);
+        endpoints.applyNewToken(token);
+        return token;
     }
 
     private Token doAcquireNewToken() throws OXException {
@@ -634,19 +636,33 @@ public class SwiftClient {
                 String identityEndPoint = authValue.getIdentityUrl();
                 JSONObject jAuthData = new JSONObject(2);
                 switch (authValue.getType()) {
-                    case PASSWORD:
+                    case PASSWORD_V2:
                         if (Strings.isEmpty(identityEndPoint)) {
                             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
                         }
+
+                        String tenantName = authValue.getTenantName();
+                        if (Strings.isEmpty(tenantName)) {
+                            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("tenantName");
+                        }
+
                         post = new HttpPost(identityEndPoint);
                         jAuthData = new JSONObject(4).put("tenantName", tenantName).put("passwordCredentials", new JSONObject(3).put("username", userName).put("password", authValue.getValue()));
                         break;
-                    case TOKEN:
+                    case PASSWORD_V3:
                         if (Strings.isEmpty(identityEndPoint)) {
                             throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("identityUrl");
                         }
+
+                        String domain = authValue.getDomain();
+                        if (Strings.isEmpty(domain)) {
+                            throw ConfigurationExceptionCodes.PROPERTY_MISSING.create("domain");
+                        }
+
                         post = new HttpPost(identityEndPoint);
-                        jAuthData = new JSONObject(4).put("tenantName", tenantName).put("token", new JSONObject(2).put("id", authValue.getValue()));
+                        JSONObject jUser = new JSONObject(4).put("name", userName).put("domain", new JSONObject(2).put("id", domain)).put("password", authValue.getValue());
+                        JSONObject jIdentity = new JSONObject(4).put("methods", new JSONArray(1).put("password")).put("password", new JSONObject(2).put("user", jUser));
+                        jAuthData = new JSONObject(2).put("identity", jIdentity);
                         break;
                     case RACKSPACE_API_KEY:
                         post = new HttpPost(Strings.isEmpty(identityEndPoint) ? "https://identity.api.rackspacecloud.com/v2.0/tokens" : identityEndPoint);
@@ -667,9 +683,7 @@ public class SwiftClient {
             }
 
             JSONObject jResponse = new JSONObject(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
-            JSONObject jAccess = jResponse.getJSONObject("access");
-            JSONObject jToken = jAccess.getJSONObject("token");
-            return Token.parseFrom(jToken);
+            return authValue.getType().getParser().parseTokenFrom(jResponse);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e, e.getMessage());
         } catch (JSONException e) {

@@ -268,9 +268,6 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         // User name
         String userName = requireProperty(filestoreID, "userName", config);
 
-        // Tenant name
-        String tenantName = requireProperty(filestoreID, "tenantName", config);
-
         // API type & value
         AuthInfo.Type authType = AuthInfo.Type.typeFor(requireProperty(filestoreID, "authType", config));
         if (null == authType) {
@@ -278,7 +275,10 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
         }
         String authValue = requireProperty(filestoreID, "authValue", config);
 
+        // Tenant name, identity URL, and domain
+        String tenantName = optProperty(filestoreID, "tenantName", config);
         String identityUrl = optProperty(filestoreID, "identityUrl", config);
+        String domain = optProperty(filestoreID, "domain", config);
 
         // End-point configuration
         String protocol = requireProperty(filestoreID, "protocol", config);
@@ -330,7 +330,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
             .setConnectionTimeout(connectionTimeout)
             .setSocketReadTimeout(socketReadTimeout));
         EndpointPool endpointPool = new EndpointPool(filestoreID, urls, httpClient, heartbeatInterval, requireService(TimerService.class, services));
-        return new SwiftConfig(filestoreID, userName, tenantName, new AuthInfo(authValue, authType, identityUrl), httpClient, endpointPool);
+        return new SwiftConfig(filestoreID, userName, new AuthInfo(authValue, authType, tenantName, domain, identityUrl), httpClient, endpointPool);
     }
 
     private static String requireProperty(String filestoreID, String property, ConfigurationService config) throws OXException {
