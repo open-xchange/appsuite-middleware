@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -65,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.RejectedExecutionException;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
@@ -102,6 +102,55 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return FileStorages.getFileStorageService().getFileStorage(uri);
     }
 
+    private static interface DataProvider {
+
+        InputStream getStream() throws OXException;
+
+        long getSize();
+    }
+
+    private static class ByteArrayDataProvider implements DataProvider {
+
+        private final byte[] bytes;
+
+        ByteArrayDataProvider(byte[] bytes) {
+            super();
+            this.bytes = bytes;
+        }
+
+        @Override
+        public InputStream getStream() {
+            return Streams.newByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+    }
+
+    private static class StreamingDataProvider implements DataProvider {
+
+        private final ThresholdFileHolder sink;
+
+        StreamingDataProvider(InputStream in) throws OXException {
+            super();
+            ThresholdFileHolder sink = new ThresholdFileHolder();
+            sink.write(in);
+            this.sink = sink;
+        }
+
+        @Override
+        public InputStream getStream() throws OXException {
+            return sink.getClosingStream();
+        }
+
+        @Override
+        public long getSize() {
+            return sink.getLength();
+        }
+    }
+
     // ------------------------------------------------------------------------------- //
 
     private final boolean quotaAware;
@@ -129,7 +178,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     try {
                         fileStorage.deleteFile(id);
                     } catch (final Exception x) {
-                        LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id);
+                        LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id, x);
                     }
                 }
             }
@@ -138,39 +187,35 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     @Override
     public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
-        try {
-            InputStream in = resource.getInputStream();
-            byte[] bytes = null == in ? resource.getBytes() : Streams.stream2bytes(in);
-
-            return save(id, bytes, resource.getFileName(), resource.getFileType(), userId, contextId);
-        } catch (final IOException e) {
-            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+        InputStream in = resource.getInputStream();
+        DataProvider dataProvider = null == in ? new ByteArrayDataProvider(resource.getBytes()) : new StreamingDataProvider(in);
+        return save(id, dataProvider, resource.getFileName(), resource.getFileType(), userId, contextId);
     }
 
     private static final Object SCHEDULED = new Object();
     private static final Object RUNNING = new Object();
     private final ConcurrentMap<Integer, Object> alignmentRequests = new ConcurrentHashMap<Integer, Object>();
 
-    private boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+    private boolean save(String id, DataProvider dataProvider, String optName, String optType, int userId, int contextId) throws OXException {
         LOG.debug("Trying to cache resource {}.", id);
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
         long globalQuota = getGlobalQuota(userId, contextId);
-        if (fitsQuotas(bytes.length, globalQuota, userId, contextId)) {
+
+        if (fitsQuotas(dataProvider.getSize(), globalQuota, userId, contextId)) {
             /*
              * If the resource fits the quotas we store it even if we exceed the quota when storing it.
              * Removing old cache entries is done asynchronously in the finally block.
              */
-            final String refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+            final String refId = fileStorage.saveNewFile(dataProvider.getStream());
             final ResourceCacheMetadata newMetadata = new ResourceCacheMetadata();
             newMetadata.setContextId(contextId);
             newMetadata.setUserId(userId);
             newMetadata.setResourceId(id);
             newMetadata.setFileName(prepareFileName(optName));
             newMetadata.setFileType(prepareFileType(optType));
-            newMetadata.setSize(bytes.length);
+            newMetadata.setSize(dataProvider.getSize());
             newMetadata.setCreatedAt(System.currentTimeMillis());
             newMetadata.setRefId(refId);
 
