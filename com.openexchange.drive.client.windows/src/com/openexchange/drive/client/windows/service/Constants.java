@@ -51,9 +51,10 @@ package com.openexchange.drive.client.windows.service;
 
 
 /**
- * {@link Constants}
+ * {@link Constants} provides several constants for the windows drive updater
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
 public class Constants {
 
@@ -98,8 +99,24 @@ public class Constants {
      */
     public static final String BRANDING_CONF = "com.openexchange.drive.update.branding";
 
+    /**
+     * The name of the branding id field
+     */
     public static final String BRANDING_ID = "id";
+    /**
+     * The name of the branding name field
+     */
     public static final String BRANDING_NAME = "name";
+    /**
+     * The name of the branding version field
+     */
     public static final String BRANDING_VERSION = "version";
+    /**
+     * The name of the branding minimum version field
+     */
+    public static final String BRANDING_MINIMUM_VERSION = "minimumVersion";
+    /**
+     * The name of the branding release date field
+     */
     public static final String BRANDING_RELEASE = "release";
 }

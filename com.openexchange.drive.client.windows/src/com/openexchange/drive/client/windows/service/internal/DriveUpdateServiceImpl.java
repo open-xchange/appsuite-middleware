@@ -84,6 +84,9 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
 
     @Override
     public void init(UpdateFilesProvider provider) throws OXException {
+        if (provider == null) {
+            throw new OXException(new IllegalArgumentException("Provider must not be null"));
+        }
         this.provider = provider;
         ConfigurationService config = Services.getService(ConfigurationService.class);
         String binaryRegex = config.getProperty(Constants.PROP_BINARY_REGEX_EXE);
@@ -205,8 +208,8 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
     }
 
     private boolean isValid(String branding){
-        boolean provBool = provider.isValid(branding);
-        boolean confBool = BrandingConfig.isValid(branding);
+        boolean provBool = provider.contains(branding);
+        boolean confBool = BrandingConfig.containsBranding(branding);
         return provBool && confBool;
     }
 

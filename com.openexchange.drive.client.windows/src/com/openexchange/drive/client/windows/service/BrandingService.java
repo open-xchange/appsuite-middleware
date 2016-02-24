@@ -57,7 +57,7 @@ import com.openexchange.session.Session;
 
 
 /**
- * {@link BrandingService}
+ * {@link BrandingService} provides access to the branding configuration
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
@@ -68,8 +68,8 @@ public class BrandingService {
      * Retrieves the branding for the given session.
      * 
      * @param session
-     * @return
-     * @throws OXException
+     * @return The branding name
+     * @throws OXException if the branding couldn't be retrieved
      */
     public static String getBranding(Session session) throws OXException {
         return getBranding(session.getUserId(), session.getContextId());
@@ -80,8 +80,8 @@ public class BrandingService {
      * 
      * @param userId
      * @param contextId
-     * @return
-     * @throws OXException
+     * @return The branding name
+     * @throws OXException if the branding couldn't be retrieved
      */
     public static String getBranding(int userId, int contextId) throws OXException {
         ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);

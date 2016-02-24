@@ -76,26 +76,33 @@ public class BrandingConfig {
 
     private BrandingConfig(File file) throws IOException {
         prop = new Properties();
-        try {
-            prop.load(new FileInputStream(file));
-        } catch (IOException e) {
-            throw e;
-        }
+        prop.load(new FileInputStream(file));
     }
 
+    /**
+     * Retrieves the branding properties
+     * 
+     * @return The properties
+     */
     public Properties getProperties() {
         return prop;
     }
 
+    /**
+     * Tests if this config contains the given property
+     * 
+     * @param property The name of the property to check
+     * @return true if it contains the property, false otherwise
+     */
     public boolean contains(String property) {
         return prop.containsKey(property);
     }
 
     /**
-     * Checks if the given file is a valid branding configuration and add it to the list of known configurations.
+     * Tests if the given file is a valid branding configuration and add it to the list of known configurations.
      * 
-     * @param file
-     * @throws IOException
+     * @param file The branding configuration
+     * @throws IOException if the file couldn't be found or if an error occurs while retrieving the properties
      */
     public static boolean checkFile(File file) throws IOException {
         BrandingConfig conf = new BrandingConfig(file);
@@ -107,7 +114,7 @@ public class BrandingConfig {
         CONFIGS.put(file.getParentFile().getName(), conf);
         BrandedDriveVersionService versionService = Services.getService(BrandedDriveVersionService.class);
         if (versionService != null) {
-            versionService.putBranding(file.getParentFile().getName(), conf.getProperties().getProperty("version"), conf.getProperties().getProperty("minimumVersion"));
+            versionService.putBranding(file.getParentFile().getName(), conf.getProperties().getProperty(Constants.BRANDING_VERSION), conf.getProperties().getProperty(Constants.BRANDING_MINIMUM_VERSION));
         } else {
             LOG.warn("BrandedDriveVersionService is not available. Version restrictions are not applied.");
         }
@@ -128,14 +135,20 @@ public class BrandingConfig {
     /**
      * Retrieves the configuration for the given branding.
      * 
-     * @param branding
-     * @return
+     * @param branding The branding identifier
+     * @return The configuration or null
      */
     public static BrandingConfig getBranding(String branding) {
         return CONFIGS.get(branding);
     }
 
-    public static boolean isValid(String branding) {
+    /**
+     * Tests if the BrandingConfig contains the given branding
+     * 
+     * @param branding The branding name
+     * @return true if it contains the branding, false otherwise
+     */
+    public static boolean containsBranding(String branding) {
         return CONFIGS.containsKey(branding);
     }
 

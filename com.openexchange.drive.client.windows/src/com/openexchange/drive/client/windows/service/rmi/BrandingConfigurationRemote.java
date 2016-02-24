@@ -72,7 +72,7 @@ public interface BrandingConfigurationRemote extends Remote {
      * It uses the last used path. In the major of cases this will be the path specified in <code>com.openexchange.drive.updater.path</code>.
      * 
      * @return A list of the loaded branding identifiers.
-     * @throws OXException
+     * @throws OXException if the branding folder is missing
      * @throws RemoteException
      */
     public List<String> reload() throws OXException, RemoteException;
@@ -83,19 +83,19 @@ public interface BrandingConfigurationRemote extends Remote {
      * 
      * @param path The path to be used.
      * @return A list of the loaded branding identifiers.
+     * @throws OXException if the branding folder is missing
      * @throws RemoteException
-     * @throws OXException
      */
     public List<String> reload(String path) throws RemoteException, OXException;
 
     /**
      * Retrieves all available branding's.
      *
-     * @param validate if true retrieves only the brandings, which include all the necessary files.
-     * @param invalid_only retrieves only the invalid brandings. The parameter validate must be true for this to take effect.
-     * @return a list of branding names
+     * @param validate If true retrieves only the branding's which include all the necessary files.
+     * @param invalid_only Retrieves only the invalid branding's. The parameter validate must be true for this to take effect.
+     * @return a list of branding identifiers
+     * @throws OXException if it is unable to validate the branding's
      * @throws RemoteException
-     * @throws OXException
      */
     public List<String> getBrandings(boolean validate, boolean invalid_only) throws RemoteException, OXException;
 

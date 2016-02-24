@@ -57,7 +57,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyEvent.Type;
@@ -70,6 +69,8 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
 public class FileSystemResourceLoader extends AbstractResourceLoader implements PropertyListener {
 
@@ -77,12 +78,8 @@ public class FileSystemResourceLoader extends AbstractResourceLoader implements 
 
     private File parentDir = null;
 
-    public FileSystemResourceLoader(String path) throws OXException {
+    public FileSystemResourceLoader(String path) {
         this.parentDir = new File(path);
-    }
-
-    public FileSystemResourceLoader(String path, final Pattern fileNamePattern) throws OXException {
-        this(path);
     }
 
     @Override

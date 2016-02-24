@@ -68,77 +68,73 @@ public interface UpdateFilesProvider {
     /**
      * Forget all knows configuration's and setup files and search them under the last used path.
      * 
-     * @throws OXException
+     * @throws OXException if branding's couldn't be reloaded
      */
     public void reload() throws OXException;
 
     /**
      * Forget all knows configuration's and setup files and search them under given path.
      * 
-     * @throws OXException
+     * @throws OXException if branding's couldn't be reloaded
      */
     void reload(String path) throws OXException;
 
     /**
      * Returns the given setup file as a stream
      * 
-     * @param category The file category
-     * @param branding The branding of the file. Default: "generic"
+     * @param branding The branding of the file.
      * @param name The filename
      * @return the given file as a stream
-     * @throws OXException
+     * @throws OXException if it is unable to retrieve the file
      */
     public InputStream getFile(String branding, String name) throws OXException;
 
     /**
-     * Checks if the provider knows the given file.
+     * Tests if the provider knows the given file und the given brand.
      * 
-     * @param category
-     * @param branding
-     * @param name
-     * @return
-     * @throws OXException
+     * @param branding The branding identifier
+     * @param name The name of the file
+     * @return true if it knows the file, false otherwise
+     * @throws OXException if it is unable to test
      */
     public boolean contains(String branding, String name) throws OXException;
 
     /**
      * Retrieves the size of the given file
      * 
-     * @param categoryDrive
-     * @param fileName
-     * @return
-     * @throws OXException
+     * @param branding The branding identifier
+     * @param name The name of the file
+     * @return The size of the file
+     * @throws OXException if branding isn't valid or if it is unable to retrieve the file size
      */
     public long getSize(String branding, String name) throws OXException;
 
     /**
      * Retrieves the first filename which matches the given regex expression.
      * 
-     * @param category
-     * @param branding
-     * @param regex
+     * @param branding The branding identifier
+     * @param regex A regex expression
      * @return the name or null
-     * @throws OXException
+     * @throws OXException if branding isn't valid or if it is unable to retrieve the filename
      */
     public String getFileName(String branding, Pattern regex) throws OXException;
 
     /**
      * Retrieves the md5 checksum for the given file.
      * 
-     * @param categoryDrive
-     * @param exeFileName
-     * @return
-     * @throws IOException
-     * @throws OXException
+     * @param branding The branding identifier
+     * @param name The name of the file
+     * @return The md5 checksum
+     * @throws OXException if it is unable to calculate the md5
      */
-    public String getMD5(String branding, String name) throws IOException, OXException;
+    public String getMD5(String branding, String name) throws OXException;
 
     /**
-     * Retrieves the icon for the specific branding.
+     * Retrieves the icon for the given branding as a base64 String.
      * 
-     * @param branding
-     * @return
-     * @throws IOException
+     * @param branding The branding identifier
+     * @return The icon as a base64 String
+     * @throws IOException if is is unable to retrieve the icon
      */
     public String getIcon(String branding) throws IOException;
 
@@ -150,11 +146,11 @@ public interface UpdateFilesProvider {
     public List<String> getAvailableBrandings();
 
     /**
-     * Checks if the given branding identifier is valid.
+     * Tests if the Provider knows the given branding
      * 
-     * @param branding
-     * @return true if the UpdateFilesProvider knows the branding.
+     * @param branding The branding identifier
+     * @return true if the UpdateFilesProvider knows the branding, false otherwise.
      */
-    public boolean isValid(String branding);
+    public boolean contains(String branding);
 
 }
