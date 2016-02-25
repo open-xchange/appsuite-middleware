@@ -51,18 +51,21 @@ package com.openexchange.importexport.exporters;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.SequenceInputStream;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardExport;
+import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.contacts.json.mapping.ContactMapper;
 import com.openexchange.exception.OXException;
@@ -235,7 +238,7 @@ public class VCardExporter implements Exporter {
 
     private static final ContactField[] FIELDS_ID = new ContactField[] { ContactField.OBJECT_ID };
 
-    private InputStream export(final ServerSession session, final String folderId, final String objectId, int[] fieldsToBeExported) throws OXException {
+    private InputStream export(final ServerSession session, final String folderId, final String objectId, int[] fieldsToBeExported, Writer optOut) throws OXException {
         ContactField[] fields;
         if (fieldsToBeExported == null || fieldsToBeExported.length == 0) {
             fields = ContactMapper.getInstance().getFields(_contactFields);
@@ -248,47 +251,47 @@ public class VCardExporter implements Exporter {
             fields = ContactMapper.getInstance().getFields(fieldsToBeExported);
         }
 
-        if (objectId == null) {
-            List<InputStream> streams = new ArrayList<InputStream>();
-            if (EnumSet.copyOf(Arrays.asList(fields)).contains(ContactField.IMAGE1)) {
-                // Contact by contact
-                ContactService contactService = ImportExportServices.getContactService();
-                SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
-                try {
-                    while (searchIterator.hasNext()) {
-                        Contact contact = searchIterator.next();
-                        try {
-                            InputStream stream = exportContact(session, contactService.getContact(session, folderId, Integer.toString(contact.getObjectID()), fields));
-                            if (stream != null) {
-                                streams.add(stream);
-                            }
-                        } catch (final OXException e) {
-                            if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
-                                throw e;
-                            }
-                        }
-                    }
-                } finally {
-                    SearchIterators.close(searchIterator);
-                }
-            } else {
-                SearchIterator<Contact> searchIterator = ImportExportServices.getContactService().getAllContacts(session, folderId, fields);
-                LOG.debug("Going to export {} contacts (user={}, context={})", searchIterator.size(), session.getUserId(), session.getContextId());
-                try {
-                    while (searchIterator.hasNext()) {
-                        InputStream stream = exportContact(session, searchIterator.next());
+        // Get required contact service
+        ContactService contactService = ImportExportServices.getContactService();
+
+        // Either export a single contact...
+        if (objectId != null) {
+            Contact contactObj = contactService.getContact(session, folderId, objectId, fields);
+            return exportContact(session, contactObj, null, null, optOut);
+        }
+
+        // ... or export a collection of contacts
+        List<InputStream> streams = new ArrayList<InputStream>();
+        boolean closeStreams = true;
+        try {
+            SearchIterator<Contact> searchIterator = contactService.getAllContacts(session, folderId, FIELDS_ID);
+            try {
+                VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
+                VCardService vCardService = ImportExportServices.getVCardService();
+                while (searchIterator.hasNext()) {
+                    Contact contact = searchIterator.next();
+                    try {
+                        Contact fullContact = contactService.getContact(session, folderId, Integer.toString(contact.getObjectID()), fields);
+                        InputStream stream = exportContact(session, fullContact, vCardService, vCardStorage, optOut);
                         if (stream != null) {
                             streams.add(stream);
                         }
+                    } catch (OXException e) {
+                        if (!ContactExceptionCodes.CONTACT_NOT_FOUND.equals(e)) {
+                            throw e;
+                        }
                     }
-                } finally {
-                    SearchIterators.close(searchIterator);
                 }
+            } finally {
+                SearchIterators.close(searchIterator);
             }
-            return new SequenceInputStream(Collections.enumeration(streams));
-        } else {
-            Contact contactObj = ImportExportServices.getContactService().getContact(session, folderId, objectId, fields);
-            return exportContact(session, contactObj);
+
+            closeStreams = false; // Avoid preliminary closing
+            return null == optOut ? new SequenceInputStream(Collections.enumeration(streams)) : null;
+        } finally {
+            if (closeStreams) {
+                Streams.close(streams);
+            }
         }
     }
 
@@ -315,30 +318,49 @@ public class VCardExporter implements Exporter {
                     requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.VCARD.getMimeType() + "; charset=UTF-8");
                     requestData.setResponseHeader("Content-Disposition", "attachment; filename=" + Format.VCARD.getFullName() + "." + Format.VCARD.getExtension());
                     requestData.removeCachingHeader();
-                    IOUtils.copy(export(session, folder, oId, fieldsToBeExported), out);
+                    export(session, folder, oId, fieldsToBeExported, new OutputStreamWriter(out, DEFAULT_CHARSET));
                     return null;
                 }
             }
             // No streaming support possible
-            return new SizedInputStream(export(session, folder, oId, fieldsToBeExported), -1, Format.VCARD);
+            return new SizedInputStream(export(session, folder, oId, fieldsToBeExported, null), -1, Format.VCARD);
         } catch (final IOException e) {
             throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
         }
     }
 
-    protected InputStream exportContact(ServerSession session, Contact contactObj) throws OXException {
+    protected InputStream exportContact(ServerSession session, Contact contactObj, VCardService optVCardService, VCardStorageService optVCardStorageService, Writer optOut) throws OXException {
         if (contactObj.containsDistributionLists() || contactObj.getMarkAsDistribtuionlist()) {
             return null;
         }
 
         InputStream originalVCard = null;
         try {
-            VCardStorageService vCardStorage = ImportExportServices.getVCardStorageService(session.getContextId());
+            VCardStorageService vCardStorage = null == optVCardStorageService ? ImportExportServices.getVCardStorageService(session.getContextId()) : optVCardStorageService;
             if (vCardStorage != null && contactObj.getVCardId() != null) {
                 originalVCard = vCardStorage.getVCard(contactObj.getVCardId(), session.getContextId());
             }
-            VCardExport vCardExport = ImportExportServices.getVCardService().exportContact(contactObj, originalVCard, null);
-            return vCardExport.getVCard().getStream(); //TODO: getClosingStream()?
+
+            VCardExport vCardExport = (null == optVCardService ? ImportExportServices.getVCardService() : optVCardService).exportContact(contactObj, originalVCard, null);
+
+            if (null == optOut) {
+                return vCardExport.getClosingStream();
+            }
+
+            Reader vcard = new InputStreamReader(vCardExport.getClosingStream(), DEFAULT_CHARSET);
+            try {
+
+                int buflen = 65536;
+                char[] cbuf = new char[buflen];
+                for (int read; (read = vcard.read(cbuf, 0, buflen)) > 0;) {
+                    optOut.write(cbuf, 0, read);
+                }
+                return null;
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+            } finally {
+                Streams.close(vcard);
+            }
         } finally {
             Streams.close(originalVCard);
         }

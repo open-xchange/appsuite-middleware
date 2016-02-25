@@ -49,18 +49,23 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
+import com.openexchange.data.conversion.ical.ICalSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.container.Appointment;
@@ -69,7 +74,6 @@ import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
 import com.openexchange.groupware.userconfiguration.UserConfigurationStorage;
@@ -78,6 +82,7 @@ import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
@@ -206,14 +211,39 @@ public class ICalExporter implements Exporter {
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
         String iCal;
         FolderObject folder = getFolder(session, folderID);
+
+        AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
+        if (null != requestData) {
+            // Try to stream
+            try {
+                OutputStream out = requestData.optOutputStream();
+                if (null != out) {
+                    requestData.setResponseHeader("Content-Type", isSaveToDisk(optionalParams) ? "application/octet-stream" : Format.ICAL.getMimeType() + "; charset=UTF-8");
+                    requestData.setResponseHeader("Content-Disposition", "attachment; filename=export." + Format.ICAL.getExtension());
+                    requestData.removeCachingHeader();
+
+                    if (FolderObject.CALENDAR == folder.getModule()) {
+                        exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                    } else if (FolderObject.TASK == folder.getModule()) {
+                        exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, out);
+                    } else {
+                        throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
+                    }
+                    return null;
+                }
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            }
+        }
+
         if (FolderObject.CALENDAR == folder.getModule()) {
-            iCal = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported);
+            iCal = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
         } else if (FolderObject.TASK == folder.getModule()) {
-            iCal = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported);
+            iCal = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
         } else {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
         }
-        byte[] bytes = Charsets.getBytes(iCal, Charsets.UTF_8);
+        byte[] bytes = Charsets.getBytes(iCal, DEFAULT_CHARSET);
         return new SizedInputStream(new UnsynchronizedByteArrayInputStream(bytes), bytes.length, Format.ICAL);
     }
 
@@ -225,24 +255,28 @@ public class ICalExporter implements Exporter {
      * @param objectID The object ID of the appointment to export, or <code>0</code> to export all appointment in the folder
      * @param fieldsToBeExported The column identifiers to include when fetching the appointment from the storage, or <code>null</code>
      *                           to use the defaults
+     * @param optOut The optional output stream
      * @return The exported appointments as iCal string
      * @throws OXException
      */
-    private static String exportAppointments(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported) throws OXException {
+    private static String exportAppointments(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
+        ICalEmitter emitter = ImportExportServices.getICalEmitter();
+        List<ConversionError> errors = new LinkedList<ConversionError>();
+        List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+        ICalSession iCalSession = emitter.createSession();
+
         AppointmentSQLInterface appointmentSql = ImportExportServices.getAppointmentFactoryService().createAppointmentSql(session);
-        List<Appointment> appointments;
         if (0 < objectID) {
             try {
-                appointments = Collections.<Appointment>singletonList(appointmentSql.getObjectById(objectID, folderID));
+                emitter.writeAppointment(iCalSession, appointmentSql.getObjectById(objectID, folderID), session.getContext(), errors, warnings);
             } catch (SQLException e) {
-                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());            }
+                throw ImportExportExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+            }
         } else {
             int[] fields = null != fieldsToBeExported ? fieldsToBeExported : _appointmentFields;
-            appointments = new LinkedList<Appointment>();
             CalendarCollectionService collectionService = ImportExportServices.getCalendarCollectionService();
-            SearchIterator<Appointment> searchIterator = null;
+            SearchIterator<Appointment> searchIterator = appointmentSql.getModifiedAppointmentsInFolder(folderID, fields, DATE_ZERO);
             try {
-                searchIterator = appointmentSql.getModifiedAppointmentsInFolder(folderID, fields, DATE_ZERO);
                 while (searchIterator.hasNext()) {
                     Appointment appointment = searchIterator.next();
                     try {
@@ -256,16 +290,32 @@ public class ICalExporter implements Exporter {
                                 appointment.setUid(UUID.randomUUID().toString());
                             }
                         }
-                        appointments.add(appointment);
+
+                        emitter.writeAppointment(iCalSession, appointment, session.getContext(), errors, warnings);
                     } catch (OXException e) {
-                        LOG.error("Failed to calculate recurring appointment " + appointment.getObjectID(), e);
+                        LOG.error("Failed to calculate recurring appointment {}", appointment.getObjectID(), e);
                     }
                 }
             } finally {
                 SearchIterators.close(searchIterator);
             }
         }
-        return exportAppointments(session.getContext(), appointments);
+
+        log(errors, warnings);
+
+        if (null != optOut) {
+            emitter.writeSession(iCalSession, optOut);
+            return null;
+        }
+
+        try {
+            ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
+            emitter.writeSession(iCalSession, baos);
+            return baos.toString(DEFAULT_CHARSET.name());
+        } catch (UnsupportedEncodingException e) {
+            // Cannot occur
+            throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+        }
     }
 
     /**
@@ -276,57 +326,45 @@ public class ICalExporter implements Exporter {
      * @param objectID The object ID of the task to export, or <code>0</code> to export all tasks in the folder
      * @param fieldsToBeExported The column identifiers to include when fetching the appointment from the storage, or <code>null</code>
      *                           to use the defaults
+     * @param optOut The optional output stream
      * @return The exported tasks as iCal string
      */
-    private static String exportTasks(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported) throws OXException {
+    private static String exportTasks(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
+        ICalEmitter emitter = ImportExportServices.getICalEmitter();
+        List<ConversionError> errors = new LinkedList<ConversionError>();
+        List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
+        ICalSession iCalSession = emitter.createSession();
+
         TasksSQLInterface tasksSql = new TasksSQLImpl(session);
-        List<Task> tasks;
         if (0 < objectID) {
-            tasks = Collections.singletonList(tasksSql.getTaskById(objectID, folderID));
+            emitter.writeTask(iCalSession, tasksSql.getTaskById(objectID, folderID), session.getContext(), errors, warnings);
         } else {
-            tasks = new LinkedList<Task>();
-            SearchIterator<Task> searchIterator = null;
+            int[] fields = null != fieldsToBeExported ? fieldsToBeExported : _taskFields;
+            SearchIterator<Task> searchIterator = tasksSql.getModifiedTasksInFolder(folderID, fields, DATE_ZERO);
             try {
-                int[] fields = null != fieldsToBeExported ? fieldsToBeExported : _taskFields;
-                searchIterator = tasksSql.getModifiedTasksInFolder(folderID, fields, DATE_ZERO);
                 while (searchIterator.hasNext()) {
-                    tasks.add(searchIterator.next());
+                    emitter.writeTask(iCalSession, searchIterator.next(), session.getContext(), errors, warnings);
                 }
             } finally {
                 SearchIterators.close(searchIterator);
             }
         }
-        return exportTasks(session.getContext(), tasks);
-    }
 
-    /**
-     * Exports one or more appointments to iCal.
-     *
-     * @param context The context
-     * @param appointments The appointments to export
-     * @return The exported appointments as iCal string
-     */
-    private static String exportAppointments(Context context, List<Appointment> appointments) throws OXException {
-        ICalEmitter emitter = ImportExportServices.getICalEmitter();
-        List<ConversionError> errors = new LinkedList<ConversionError>();
-        List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
         log(errors, warnings);
-        return emitter.writeAppointments(appointments, context, errors, warnings);
-    }
 
-    /**
-     * Exports one or more tasks to iCal.
-     *
-     * @param context The context
-     * @param tasks The tasks to export
-     * @return The exported tasks as iCal string
-     */
-    private static String exportTasks(Context context, List<Task> tasks) throws OXException {
-        ICalEmitter emitter = ImportExportServices.getICalEmitter();
-        List<ConversionError> errors = new LinkedList<ConversionError>();
-        List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
-        log(errors, warnings);
-        return emitter.writeTasks(tasks, errors, warnings, context);
+        if (null != optOut) {
+            emitter.writeSession(iCalSession, optOut);
+            return null;
+        }
+
+        try {
+            ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
+            emitter.writeSession(iCalSession, baos);
+            return baos.toString(DEFAULT_CHARSET.name());
+        } catch (UnsupportedEncodingException e) {
+            // Cannot occur
+            throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+        }
     }
 
     /**
@@ -355,6 +393,17 @@ public class ICalExporter implements Exporter {
         for(final ConversionWarning warning : warnings) {
             LOG.warn(warning.getMessage());
         }
+    }
+
+    private boolean isSaveToDisk(final Map<String, Object> optionalParams) {
+        if (null == optionalParams) {
+            return false;
+        }
+        final Object object = optionalParams.get("__saveToDisk");
+        if (null == object) {
+            return false;
+        }
+        return (object instanceof Boolean ? ((Boolean) object).booleanValue() : Boolean.parseBoolean(object.toString().trim()));
     }
 
 }
