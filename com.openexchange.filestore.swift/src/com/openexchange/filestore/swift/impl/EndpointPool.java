@@ -112,12 +112,8 @@ public class EndpointPool {
         blacklist = new ArrayList<>(size);
         counter = new AtomicInteger(size);
 
-        if (size > 1) {
-            LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
-            heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
-        } else {
-            LOG.debug("Swift end-point pool [{}]: Scheduling no heartbeat timer task as there is only one end-point specified", filestoreId);
-        }
+        LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
+        heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
     }
 
     /**
