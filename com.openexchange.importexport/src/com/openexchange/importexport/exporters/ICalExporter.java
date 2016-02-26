@@ -49,16 +49,15 @@
 
 package com.openexchange.importexport.exporters;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
@@ -81,14 +80,12 @@ import com.openexchange.importexport.exceptions.ImportExportExceptionCodes;
 import com.openexchange.importexport.formats.Format;
 import com.openexchange.importexport.helpers.SizedInputStream;
 import com.openexchange.importexport.osgi.ImportExportServices;
-import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
 
 /**
  * @author <a href="mailto:sebastian.kauss@open-xchange.com">Sebastian Kauss</a>
@@ -209,7 +206,6 @@ public class ICalExporter implements Exporter {
 
     @Override
     public SizedInputStream exportData(ServerSession session, Format format, String folderID, int objectID, int[] fieldsToBeExported, Map<String, Object> optionalParams) throws OXException {
-        String iCal;
         FolderObject folder = getFolder(session, folderID);
 
         AJAXRequestData requestData = (AJAXRequestData) (optionalParams == null ? null : optionalParams.get("__requestData"));
@@ -236,15 +232,15 @@ public class ICalExporter implements Exporter {
             }
         }
 
+        ThresholdFileHolder sink;
         if (FolderObject.CALENDAR == folder.getModule()) {
-            iCal = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+            sink = exportAppointments(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
         } else if (FolderObject.TASK == folder.getModule()) {
-            iCal = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
+            sink = exportTasks(session, folder.getObjectID(), objectID, fieldsToBeExported, null);
         } else {
             throw ImportExportExceptionCodes.CANNOT_EXPORT.create(folderID, format);
         }
-        byte[] bytes = Charsets.getBytes(iCal, DEFAULT_CHARSET);
-        return new SizedInputStream(new UnsynchronizedByteArrayInputStream(bytes), bytes.length, Format.ICAL);
+        return new SizedInputStream(sink.getClosingStream(), sink.getLength(), Format.ICAL);
     }
 
     /**
@@ -256,10 +252,10 @@ public class ICalExporter implements Exporter {
      * @param fieldsToBeExported The column identifiers to include when fetching the appointment from the storage, or <code>null</code>
      *                           to use the defaults
      * @param optOut The optional output stream
-     * @return The exported appointments as iCal string
+     * @return The exported appointments
      * @throws OXException
      */
-    private static String exportAppointments(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
+    private static ThresholdFileHolder exportAppointments(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
         ICalEmitter emitter = ImportExportServices.getICalEmitter();
         List<ConversionError> errors = new LinkedList<ConversionError>();
         List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
@@ -308,13 +304,16 @@ public class ICalExporter implements Exporter {
             return null;
         }
 
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
         try {
-            ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-            emitter.writeSession(iCalSession, baos);
-            return baos.toString(DEFAULT_CHARSET.name());
-        } catch (UnsupportedEncodingException e) {
-            // Cannot occur
-            throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            emitter.writeSession(iCalSession, sink.asOutputStream());
+            error = false;
+            return sink;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
         }
     }
 
@@ -327,9 +326,9 @@ public class ICalExporter implements Exporter {
      * @param fieldsToBeExported The column identifiers to include when fetching the appointment from the storage, or <code>null</code>
      *                           to use the defaults
      * @param optOut The optional output stream
-     * @return The exported tasks as iCal string
+     * @return The exported tasks
      */
-    private static String exportTasks(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
+    private static ThresholdFileHolder exportTasks(ServerSession session, int folderID, int objectID, int[] fieldsToBeExported, OutputStream optOut) throws OXException {
         ICalEmitter emitter = ImportExportServices.getICalEmitter();
         List<ConversionError> errors = new LinkedList<ConversionError>();
         List<ConversionWarning> warnings = new LinkedList<ConversionWarning>();
@@ -357,13 +356,16 @@ public class ICalExporter implements Exporter {
             return null;
         }
 
+        ThresholdFileHolder sink = new ThresholdFileHolder();
+        boolean error = true;
         try {
-            ByteArrayOutputStream baos = Streams.newByteArrayOutputStream(8192);
-            emitter.writeSession(iCalSession, baos);
-            return baos.toString(DEFAULT_CHARSET.name());
-        } catch (UnsupportedEncodingException e) {
-            // Cannot occur
-            throw ImportExportExceptionCodes.ICAL_CONVERSION_FAILED.create(e);
+            emitter.writeSession(iCalSession, sink.asOutputStream());
+            error = false;
+            return sink;
+        } finally {
+            if (error) {
+                Streams.close(sink);
+            }
         }
     }
 
