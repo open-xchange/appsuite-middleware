@@ -368,17 +368,23 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverGroupID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
+            if (text.startsWith("mailto:")) {
+                text = text.substring(7);
+            }
             if (text.startsWith("/principals/groups/")) {
-                String groupId = text.substring(19);
-                if ('/' == groupId.charAt(groupId.length() - 1)) {
-                    groupId = groupId.substring(0, groupId.length() - 1);
+                /*
+                 * get group by id
+                 */
+                String value = text.substring(19);
+                if ('/' == value.charAt(value.length() - 1)) {
+                    value = value.substring(0, value.length() - 1);
                 }
                 try {
-                    return Integer.valueOf(groupId);
+                    return Integer.valueOf(value);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing group identifier '{}'", groupId, e);
+                    LOG.debug("Error parsing group identifier '{}'", value, e);
                 }
             }
         }
@@ -386,22 +392,33 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverUserID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
             if (text.startsWith("mailto:")) {
-                String mail = text.substring(7);
-                return factory.getService(UserService.class).searchUser(mail, factory.getContext()).getId();
-            } else if (text.startsWith("/principals/users/")) {
-                String userId = text.substring(18);
-                if ('/' == userId.charAt(userId.length() - 1)) {
-                    userId = userId.substring(0, userId.length() - 1);
-                }
-                try {
-                    return Integer.valueOf(userId);
-                } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing user identifier '{}'", userId, e);
-                }
+                text = text.substring(7);
             }
+            if (text.startsWith("/principals/")) {
+                if (text.startsWith("/principals/users/")) {
+                    /*
+                     * get user by id or login info
+                     */
+                    String value = text.substring(18);
+                    if ('/' == value.charAt(value.length() - 1)) {
+                        value = value.substring(0, value.length() - 1);
+                    }
+                    try {
+                        return Integer.valueOf(value);
+                    } catch (NumberFormatException e) {
+                        LOG.debug("Error parsing user identifier '{}'", value, e);
+                    }
+                    return factory.getService(UserService.class).getUserId(value, factory.getContext());
+                }
+                return -1; // other principal
+            }
+            /*
+             * search by mail address
+             */
+            return factory.getService(UserService.class).searchUser(text, factory.getContext()).getId();
         }
         return -1;
     }
