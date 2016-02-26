@@ -52,6 +52,7 @@ package com.openexchange.dav.resources;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import javax.servlet.http.HttpServletResponse;
@@ -66,6 +67,7 @@ import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.dav.mixins.SyncToken;
 import com.openexchange.dav.reports.SyncStatus;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.ProblematicAttribute;
@@ -97,6 +99,8 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
 
     protected final DAVFactory factory;
     protected final UserizedFolder folder;
+
+    private AbstractFolder folderToUpdate;
 
     /**
      * Initializes a new {@link CommonFolderCollection}.
@@ -264,10 +268,19 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
         if (folder.isDefault() || false == PrivateType.getInstance().equals(folder.getType())) {
             throw protocolException(HttpServletResponse.SC_FORBIDDEN);
         }
-        AbstractFolder updatableFolder = prepareUpdatableFolder();
-        updatableFolder.setName(displayName);
+        getFolderToUpdate().setName(displayName);
+    }
+
+    @Override
+    public void save() throws WebdavProtocolException {
+        if (false == exists() || null == folder) {
+            throw protocolException(HttpServletResponse.SC_NOT_FOUND);
+        }
+        if (null == folderToUpdate) {
+            return; // no changes
+        }
         try {
-            factory.getService(FolderService.class).updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
+            factory.getService(FolderService.class).updateFolder(folderToUpdate, folder.getLastModifiedUTC(), factory.getSession(), null);
         } catch (OXException e) {
             if ("FLD-0092".equals(e.getErrorCode())) {
                 /*
@@ -277,15 +290,20 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
                 if (null != problematics && 0 < problematics.length && null != problematics[0] && IncorrectString.class.isInstance(problematics[0])) {
                     IncorrectString incorrectString = ((IncorrectString) problematics[0]);
                     if (FolderObject.FOLDER_NAME == incorrectString.getId()) {
-                        String correctedDisplayName = displayName.replace(incorrectString.getIncorrectString(), "");
-                        if (false == correctedDisplayName.equals(displayName)) {
-                            setDisplayName(correctedDisplayName);
+                        String name = folderToUpdate.getName();
+                        String correctedDisplayName = name.replace(incorrectString.getIncorrectString(), "");
+                        if (false == correctedDisplayName.equals(name)) {
+                            folderToUpdate.setName(correctedDisplayName);
+                            save();
                             return;
                         }
                     }
                 }
+                if (e.getCategory().equals(Category.CATEGORY_PERMISSION_DENIED)) {
+                    throw WebdavProtocolException.generalError(e, getUrl(), HttpServletResponse.SC_FORBIDDEN);
+                }
+                throw protocolException(e);
             }
-            throw protocolException(e);
         }
     }
 
@@ -353,12 +371,19 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
     }
 
     /**
-     * Prepares a new folder that can be handed down to the folder service for an update operation.
+     * Gets a new folder with "settable" properties to apply any property changes. The actual {@link #save()}-operation that is called
+     * afterwards then uses this folder template for the update-operation.
      *
-     * @return An updatable folder reference based on the current folder
+     * @return An updatable folder based on the current folder
      */
-    protected AbstractFolder prepareUpdatableFolder() {
-        UserizedFolder folder = getFolder();
+    protected AbstractFolder getFolderToUpdate() {
+        if (null == folderToUpdate) {
+            folderToUpdate = prepareUpdatableFolder(getFolder());
+        }
+        return folderToUpdate;
+    }
+
+    private static AbstractFolder prepareUpdatableFolder(UserizedFolder folder) {
         AbstractFolder updatableFolder = new AbstractFolder() {
 
             private static final long serialVersionUID = -367640273380922433L;
@@ -373,6 +398,9 @@ public abstract class CommonFolderCollection<T extends CommonObject> extends DAV
             updatableFolder.setTreeID(folder.getTreeID());
             updatableFolder.setType(folder.getType());
             updatableFolder.setParentID(folder.getParentID());
+            updatableFolder.setMeta(null != folder.getMeta() ? new HashMap<String, Object>(folder.getMeta()) : new HashMap<String, Object>());
+        } else {
+            updatableFolder.setMeta(new HashMap<String, Object>());
         }
         return updatableFolder;
     }

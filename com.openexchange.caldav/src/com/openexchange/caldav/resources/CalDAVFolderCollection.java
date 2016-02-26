@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -72,7 +71,6 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.AllowedSharingModes;
-import com.openexchange.caldav.mixins.CalendarColor;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.CalendarOwner;
 import com.openexchange.caldav.mixins.CalendarTimezone;
@@ -89,6 +87,7 @@ import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -209,12 +208,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             /*
              * apply color to meta field
              */
-            Map<String, Object> meta = folder.getMeta();
-            if (null == meta) {
-                meta = new HashMap<String, Object>();
-            } else {
-                meta = new HashMap<String, Object>(meta);
-            }
+            AbstractFolder folderToUpdate = getFolderToUpdate();
+            Map<String, Object> meta = folderToUpdate.getMeta();
             String value = CalendarColor.parse(prop);
             if (Strings.isEmpty(value)) {
                 meta.remove("color");
@@ -230,16 +225,6 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 if (uiValue != null) {
                     meta.put("color_label", uiValue);
                 }
-            }
-            /*
-             * update folder
-             */
-            AbstractFolder updatableFolder = prepareUpdatableFolder();
-            updatableFolder.setMeta(meta);
-            try {
-                factory.getFolderService().updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
-            } catch (OXException e) {
-                throw protocolException(e);
             }
         }
     }
@@ -307,7 +292,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 hasChanged = true;
             }
             if (hasChanged) {
-                AbstractFolder updatableFolder = prepareUpdatableFolder();
+                AbstractFolder updatableFolder = getFolderToUpdate();
                 updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
                 factory.getFolderService().updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
             }
