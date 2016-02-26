@@ -91,7 +91,7 @@ public class PlistSMSTest extends AbstractAJAXSession {
     private static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
     public void testExecute() throws Exception {
-        String jsonString = "{\"sms\":\"+49276183850\",\"code\":\"de\"}";
+        String jsonString = "{\"sms\":\"+49276183850\"}";
         JSONObject body = new JSONObject(jsonString);
 
         for (String id : SCENARIOS) {
@@ -105,9 +105,47 @@ public class PlistSMSTest extends AbstractAJAXSession {
                 // scenario disabled
                 continue;
             }
-            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", 3, response.getException().getCode());
-            assertEquals("Unexpected response from the server! Response does contain an wrong exception.", "SMS", response.getException().getPrefix());
+            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 3, response.getException().getCode());
+            assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
         }
+    }
+
+    public void testExecute_missingNumber() throws Exception {
+        String jsonString = "{\"sms\":\"\"}";
+        JSONObject body = new JSONObject(jsonString);
+
+        String id = SCENARIOS[0];
+        ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
+        OnboardingTestResponse response = client.execute(req);
+        assertNotNull("Response is empty!", response);
+        // Expecting an invalid number exception
+        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+    }
+
+    public void testExecute_invalidNumber() throws Exception {
+        String jsonString = "{\"sms\":\"1234\"}";
+        JSONObject body = new JSONObject(jsonString);
+
+        String id = SCENARIOS[0];
+        ExecuteRequest req = new ExecuteRequest(id, "sms", body, false);
+        OnboardingTestResponse response = client.execute(req);
+        assertNotNull("Response is empty!", response);
+        // Expecting an invalid number exception
+        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+
+        jsonString = "{\"sms\":\"abcde\"}";
+        body = new JSONObject(jsonString);
+        req = new ExecuteRequest(id, "sms", body, false);
+        response = client.execute(req);
+        assertNotNull("Response is empty!", response);
+        // Expecting an invalid number exception
+        assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 22, response.getException().getCode());
+        assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
     }
 
     public void testDownload() throws Exception {
@@ -149,19 +187,15 @@ public class PlistSMSTest extends AbstractAJAXSession {
         md.update(challenge.getBytes("UTF-8"), 0, challenge.length());
         sha1hash = md.digest();
         return convertToHex(sha1hash);
-
     }
 
-    private static String convertToHex(byte[] data)
-    {
+    private static String convertToHex(byte[] data) {
         StringBuffer buf = new StringBuffer();
 
-        for (int i = 0; i < data.length; i++)
-        {
+        for (int i = 0; i < data.length; i++) {
             int halfbyte = (data[i] >>> 4) & 0x0F;
             int two_halfs = 0;
-            do
-            {
+            do {
                 if ((0 <= halfbyte) && (halfbyte <= 9)) {
                     buf.append((char) ('0' + halfbyte));
                 } else {
