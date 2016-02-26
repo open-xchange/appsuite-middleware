@@ -125,14 +125,12 @@ public class Bug44167Test extends CalDAVTest {
 
     @After
     public void tearDown() throws Exception {
-        if (null != this.manager2) {
+        if (null != manager2) {
             if (null != subfolder) {
                 manager2.getClient().execute(new com.openexchange.ajax.folder.actions.DeleteRequest(EnumAPI.OX_NEW, subfolder));
             }
-            this.manager2.cleanUp();
-            if (null != manager2.getClient()) {
-                manager2.getClient().logout();
-            }
+            manager2.cleanUp();
+            manager2.getClient().logout();
         }
     }
 
