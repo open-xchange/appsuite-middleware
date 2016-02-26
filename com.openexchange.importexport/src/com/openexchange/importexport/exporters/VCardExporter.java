@@ -323,6 +323,11 @@ public class VCardExporter implements Exporter {
                 }
             }
         } finally {
+            try {
+                writer.flush();
+            } catch (IOException e) {
+                throw ImportExportExceptionCodes.VCARD_CONVERSION_FAILED.create(e);
+            }
             SearchIterators.close(searchIterator);
         }
     }
