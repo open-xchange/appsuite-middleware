@@ -54,10 +54,11 @@ import java.util.TimeZone;
 import java.util.regex.Pattern;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.tools.TimeZoneUtils;
-import com.openexchange.tools.file.QuotaFileStorage;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,12 +75,9 @@ public final class ConfigAJAXRequest {
     public static final int NOT_FOUND = -9999;
 
     private final ServerSession session;
-
     private final AJAXRequestData request;
-
-    private QuotaFileStorage qfs;
-
-    private OXException fsException;
+    private final QuotaFileStorage qfs;
+    private final OXException fsException;
 
     private TimeZone timeZone;
 
@@ -91,30 +89,41 @@ public final class ConfigAJAXRequest {
      */
     public ConfigAJAXRequest(final AJAXRequestData request, final ServerSession session) {
         super();
+        QuotaFileStorage qfs = null;
+        OXException fsException = null;
         try {
-            final Context ctx = session.getContext();
-            this.qfs = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx);
-        } catch (final OXException e) {
-            this.fsException = e;
+            qfs = getFileStorage(session.getUserId(), session.getContextId());
+        } catch (OXException e) {
+            fsException = e;
         }
+        this.qfs = qfs;
+        this.fsException = fsException;
         this.request = request;
         this.session = session;
         timeZone = TimeZoneUtils.getTimeZone(session.getUser().getTimeZone());
     }
 
+    private QuotaFileStorage getFileStorage(int userId, int contextId) throws OXException {
+        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+        if (null == storageService) {
+            throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+        }
+        return storageService.getQuotaFileStorage(userId, contextId);
+    }
+
     /**
-     * Gets the qfs
+     * Gets the quota-aware file storage
      *
-     * @return The qfs
+     * @return The quota-aware file storage or <code>null</code> (if an exception occurred while acquiring the file storage)
      */
     public QuotaFileStorage getQfs() {
         return qfs;
     }
 
     /**
-     * Gets the fsException
+     * Gets the possible exception that occurred while acquiring the user-associated quota-aware file storage
      *
-     * @return The fsException
+     * @return The excetion or <code>null</code>
      */
     public OXException getFsException() {
         return fsException;
