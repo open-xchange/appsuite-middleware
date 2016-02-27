@@ -614,7 +614,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     /*
                      * Empty?
                      */
-                    if (0 == messageCount) {
+                    if (messageCount <= 0) {
                         // Nothing to synchronize
                         return;
                     }
