@@ -116,14 +116,14 @@ public class DefaultAuthorizationService implements OAuthAuthorizationService {
             }
 
             response.setScope(new ArrayList<>(grant.getScope().get()));
-        }
 
-        Client client = getClient(grant.getClientId());
-        if (client == null) {
-            response.setTokenStatus(TokenStatus.UNKNOWN);
-        } else {
-            response.setTokenStatus(TokenStatus.VALID);
-            response.setClientName(client.getName());
+            Client client = getClient(grant.getClientId());
+            if (client == null) {
+                response.setTokenStatus(TokenStatus.UNKNOWN);
+            } else {
+                response.setTokenStatus(TokenStatus.VALID);
+                response.setClientName(client.getName());
+            }
         }
 
         return response;
