@@ -1,0 +1,32 @@
+#! /usr/bin/php
+<?php
+
+include("ox-soap.php");
+
+try {
+	
+	srand(microtime()*1000000);
+	$random_id = rand(1, 99999);
+	
+	
+	$group = new Group();
+	$group->name =  "ox_tests_group_".$random_id;	
+	$group->displayname = "OX Test Group ".$random_id;	
+	
+	$group->members = 2;	
+	
+	$result = getGroupClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$group, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+	
+	if (!is_soap_fault($result)) {
+		$group->id = $result->id;
+		$group->name =  $group->name."_changed"	;
+		$group->displayname = $group->displayname."_changed";
+		getGroupClient($SOAPHOST)->change(getContextObject($CONTEXT_ID),$group, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+	}
+	
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>

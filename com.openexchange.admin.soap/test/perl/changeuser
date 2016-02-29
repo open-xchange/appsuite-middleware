@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+package Createuser;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Createuser();
+$test->doRequest();
+
+sub new {
+  my ($inPkg) = @_;
+  my $self = BasicCommandlineOptions->new();
+	
+  bless $self, $inPkg;
+  return $self;
+}
+
+sub doRequest {
+  my $inSelf = shift;
+  my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUserService" );
+  my $name = "testuser";
+  my $password = "secret";
+#
+# the lexical representation of the date time as follows
+# '-'? yyyy '-' mm '-' dd 'T' hh ':' mm ':' ss ('.' s+)? (zzzzzz)?
+# see org.apache.axis2.databinding.utils.ConverterUtil.class
+#
+  my $birthday = "1900-01-01T00:00:00.00Z";
+  my $pwmech = "{CRYPT}";
+
+  my $som_entry = 
+    $soap->change($inSelf->{'Context'},
+		  SOAP::Data->name("User" => \SOAP::Data->value(
+			SOAP::Data->name("name" => $name),
+			SOAP::Data->name("password" => $password),
+			SOAP::Data->name("uploadFileSizeLimit" => "200"),
+			SOAP::Data->name("uploadFileSizeLimitPerFile" => "200"),
+   	          )),
+		  $inSelf->{'creds'}
+		 );
+    
+  if ( $som_entry->fault() ) {
+    $inSelf->fault_output($som_entry);
+    exit(1);
+  } else {
+    print "Fine\n";
+  }
+
+}
+
+exit;
+

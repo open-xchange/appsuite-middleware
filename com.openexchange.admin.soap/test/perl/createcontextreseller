@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+package CreateContextReseller;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new CreateContextReseller();
+$test->doRequest();
+
+sub new {
+    my ($inPkg) = @_;
+    my $self = BasicCommandlineOptions->new();
+
+    bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+    my $inSelf = shift;
+    my $soap = SOAP::Lite->ns("http://soap.reseller.admin.openexchange.com")->proxy($inSelf->{'basisUrl'}."OXResellerContextService");
+
+    my $resellerContext = SOAP::Data->type("ResellerContext")->value(\SOAP::Data->value(
+        SOAP::Data->name("name" => "resellerContext"),
+        SOAP::Data->name("maxQuota" => 0)
+    ));
+
+    my $contextAdmin = SOAP::Data->type("User")->value(\SOAP::Data->value(
+        SOAP::Data->name("name" => "contextAdmin"),
+        SOAP::Data->name("password" => "secret"),
+        SOAP::Data->name("display_name" => "Context Admin"),
+        SOAP::Data->name("sur_name" => "Admin"),
+        SOAP::Data->name("given_name" => "Context"),
+        SOAP::Data->name("primaryEmail" => "admin\@example.org"),
+        SOAP::Data->name("email1" => "admin\@example.org"),
+        SOAP::Data->name("language" => "en_US"),
+        SOAP::Data->name("imapServer" => "imap.ox.example.org"),
+        SOAP::Data->name("smtpServer" => "smtp.ox.example.org"),
+        SOAP::Data->name("imapLogin" => "contextAdmin"),
+        SOAP::Data->name("timezone" => "Europe/Berlin")
+    ));
+
+    my $resellerCredentials = SOAP::Data->type("Credentials")->value(\SOAP::Data->value(
+        SOAP::Data->name("login" => "reselleradmin"),
+        SOAP::Data->name("password" => "secret")
+    ));
+
+    my $som_entry = $soap->createModuleAccessByName(
+        $resellerContext,
+        $contextAdmin,
+        SOAP::Data->type("string")->value("groupware_standard"),
+        $resellerCredentials
+    );
+
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+        exit(1);
+    } else {
+        print "Fine\n";
+    }
+}
+
+exit;

@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+package Registerfilestore;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Registerfilestore();
+$test->doRequest();
+
+sub new {
+	my ($inPkg) = @_;
+	my $self = BasicCommandlineOptions->new();
+	
+	bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+    my $inSelf = shift;
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
+    my $creds = $inSelf->{'mastercreds'};
+    
+    my $sdir   = $ENV{"FSTORE"} || "/tmp/filestore";
+    if( ! -d $sdir ) { 
+      mkdir($sdir) || die "unable to mkdir $sdir";
+    }
+    my $url    = "file://$sdir";
+    my $size   = 123456;
+    my $maxctx = 420;
+    
+    my $som_entry = 
+      $soap->registerFilestore(
+    	      SOAP::Data->value("Filestore")->value(\SOAP::Data->value(
+    	           SOAP::Data->name("url" => $url),
+    	           SOAP::Data->name("size" => $size),
+    	           SOAP::Data->name("maxContexts" => $maxctx)
+    	           )),
+    	      $creds
+    	      );
+    
+    if ( $som_entry->fault() ) {
+      $inSelf->fault_output($som_entry);
+      exit(1);
+    } else {
+      my @result = $som_entry->paramsall;
+      print "filestore $result[0]{id} registered\n";
+    }
+
+}
+
+exit;
+
