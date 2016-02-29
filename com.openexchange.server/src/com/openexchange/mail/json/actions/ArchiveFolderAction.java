@@ -88,7 +88,7 @@ public final class ArchiveFolderAction extends AbstractArchiveMailAction {
     }
 
     @Override
-    protected AJAXRequestResult perform(final MailRequest req) throws OXException {
+    protected AJAXRequestResult performArchive(final MailRequest req) throws OXException {
         int days;
         {
             String sDays = req.getRequest().getParameter("days");

@@ -50,6 +50,7 @@
 package com.openexchange.admin.rmi.impl;
 
 import static com.openexchange.java.Autoboxing.i;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -87,6 +88,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchFilestoreException;
 import com.openexchange.admin.rmi.exceptions.NoSuchObjectException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
+import com.openexchange.admin.rmi.exceptions.ProgrammErrorException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.impl.util.OXUserPropertySorter;
 import com.openexchange.admin.services.AdminServiceRegistry;
@@ -485,6 +487,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             final int userId = user.getId().intValue();
+            if (!tool.existsUser(ctx, userId)) {
+                throw new NoSuchUserException("No such user " + userId + " in context " + ctx.getId());
+            }
+
             final OXUserStorageInterface oxuser = this.oxu;
             if (userId == masterUser.getId().intValue()) {
                 throw new StorageException("User and master user identifiers are equal.");
@@ -525,7 +531,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
-            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestoreBasic(storageUser.getFilestoreId().intValue());
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
@@ -614,6 +620,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
 
             final int userId = user.getId().intValue();
+            if (!tool.existsUser(ctx, userId)) {
+                throw new NoSuchUserException("No such user " + userId + " in context " + ctx.getId());
+            }
+
             final OXUserStorageInterface oxuser = this.oxu;
             if (userId == masterUser.getId().intValue()) {
                 throw new StorageException("User and master user identifiers are equal.");
@@ -661,7 +671,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
-            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageMasterUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestoreBasic(storageMasterUser.getFilestoreId().intValue());
 
             // Check equality
             int srcStore_id = storageMasterUser.getFilestoreId().intValue();
@@ -737,6 +747,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        return moveFromContextToUserFilestore(ctx, user, dstFilestore, maxQuota, credentials, false);
+    }
+
+    private int moveFromContextToUserFilestore(final Context ctx, User user, Filestore dstFilestore, long maxQuota, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -747,12 +761,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         try {
-            basicauth.doAuthentication(auth, ctx);
-            checkContextAndSchema(ctx);
-            try {
-                setIdOrGetIDFromNameAndIdObject(ctx, user);
-            } catch (NoSuchObjectException e) {
-                throw new NoSuchUserException(e);
+            if (false == inline) {
+                basicauth.doAuthentication(auth, ctx);
+                checkContextAndSchema(ctx);
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, user);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchUserException(e);
+                }
+
+                int user_id = user.getId().intValue();
+                if (!tool.existsUser(ctx, user_id)) {
+                    throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+                }
             }
 
             final int user_id = user.getId().intValue();
@@ -781,7 +802,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(dstFilestore.getId().intValue(), false);
-            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestoreBasic(storageContext.getFilestoreId().intValue());
 
             // Check equality
             int srcStore_id = storageContext.getFilestoreId().intValue();
@@ -832,9 +853,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             });
 
-            // Schedule task
             oxuser.disableUser(user_id, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+
+            if (false == inline) {
+                // Schedule task
+                return TaskManager.getInstance().addJob(fsdm, "movefromcontexttouserfilestore", "move user " + user_id + " from context " + ctx.getIdAsString() + " from context to individual filestore " + destFilestore.getId(), ctx.getId());
+            }
+
+            // Execute with current thread
+            fsdm.call();
+            return -1;
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -859,11 +887,26 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final OXException e) {
             LOGGER.error("", e);
             throw new StorageException(e);
+        } catch (IOException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (ProgrammErrorException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
         }
     }
 
     @Override
     public int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        return moveFromUserToContextFilestore(ctx, user, credentials, false);
+    }
+
+    private int moveFromUserToContextFilestore(final Context ctx, User user, Credentials credentials, boolean inline) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, NoSuchFilestoreException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         Credentials auth = credentials == null ? new Credentials("","") : credentials;
         try {
             doNullCheck(user);
@@ -874,12 +917,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
 
         try {
-            basicauth.doAuthentication(auth, ctx);
-            checkContextAndSchema(ctx);
-            try {
-                setIdOrGetIDFromNameAndIdObject(ctx, user);
-            } catch (NoSuchObjectException e) {
-                throw new NoSuchUserException(e);
+            if (false == inline) {
+                basicauth.doAuthentication(auth, ctx);
+                checkContextAndSchema(ctx);
+                try {
+                    setIdOrGetIDFromNameAndIdObject(ctx, user);
+                } catch (NoSuchObjectException e) {
+                    throw new NoSuchUserException(e);
+                }
+
+                int user_id = user.getId().intValue();
+                if (!tool.existsUser(ctx, user_id)) {
+                    throw new NoSuchUserException("No such user " + user_id + " in context " + ctx.getId());
+                }
             }
 
             final int userId = user.getId().intValue();
@@ -923,7 +973,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
             OXUtilStorageInterface oxu = OXUtilStorageInterface.getInstance();
             Filestore destFilestore = oxu.getFilestore(storageContext.getFilestoreId().intValue(), false);
-            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestore(storageUser.getFilestoreId().intValue(), false);
+            Filestore srcFilestore = equal ? destFilestore : oxu.getFilestoreBasic(storageUser.getFilestoreId().intValue());
 
             // Check equality
             int srcStore_id = storageUser.getFilestoreId().intValue();
@@ -967,9 +1017,16 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 }
             });
 
-            // Schedule task
             oxuser.disableUser(userId, ctx);
-            return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
+
+            if (false == inline) {
+                // Schedule task
+                return TaskManager.getInstance().addJob(fsdm, "movefromusertocontextfilestore", "move user " + userId + " from context " + ctx.getIdAsString() + " from individual to context filestore " + destFilestore.getId(), ctx.getId());
+            }
+
+            // Execute with current thread
+            fsdm.call();
+            return -1;
         } catch (final StorageException e) {
             LOGGER.error("", e);
             throw e;
@@ -994,6 +1051,17 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         } catch (final OXException e) {
             LOGGER.error("", e);
             throw new StorageException(e);
+        }  catch (IOException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (InterruptedException e) {
+            // Keep interrupted state
+            Thread.currentThread().interrupt();
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (ProgrammErrorException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
         }
     }
 
@@ -1015,6 +1083,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         // SPECIAL USER AUTH CHECK FOR THIS METHOD!
         // check if credentials are from oxadmin or from an user
         Integer userid = null;
+
         try {
             contextcheck(ctx);
 
@@ -1128,9 +1197,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                         throw new StorageException(e.getMessage(), e);
                     }
 
-                    // Move from context to individual user file storage
+                    // (Synchronous) Move from context to individual user file storage
                     try {
-                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials);
+                        moveFromContextToUserFilestore(ctx, usrdata, filestoreForUser, quota_max_temp, credentials, true);
                     } catch (RemoteException e) {
                         throw new StorageException(e);
                     } catch (NoSuchFilestoreException e) {
@@ -1176,7 +1245,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
         }
 
-        // change cached admin credentials if neccessary
+        // change cached admin credentials if necessary
         if (isContextAdmin && usrdata.getPassword() != null) {
             final Credentials cauth = ClientAdminThread.cache.getAdminCredentials(ctx);
             final String mech = ClientAdminThread.cache.getAdminAuthMech(ctx);
@@ -1735,22 +1804,49 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                 LOGGER.error("No such user(s) {} in context {}", Arrays.toString(users), ctx.getId(), noSuchUserException);
                 throw noSuchUserException;
             }
-            final Set<Integer> dubCheck = new HashSet<Integer>();
+
+            Set<Integer> dubCheck = new HashSet<Integer>();
+            List<User> filestoreOwners = new java.util.LinkedList<User>();
             for (final User user : users) {
-                if (dubCheck.contains(user.getId())) {
+                if (false == dubCheck.add(user.getId())) {
                     throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
                 }
-                dubCheck.add(user.getId());
+
                 if (tool.isContextAdmin(ctx, user.getId().intValue())) {
                     throw new InvalidDataException("Admin delete not supported");
                 }
+
+                if (tool.isMasterFilestoreOwner(ctx, user.getId().intValue())) {
+                    Map<Integer, List<Integer>> slaveUsers = tool.fetchSlaveUsersOfMasterFilestore(ctx, user.getId().intValue());
+                    if (!slaveUsers.isEmpty()) {
+                        String affectedUsers = mapToString(slaveUsers);
+                        throw new InvalidDataException("The user " + user.getId() + " is the owner of a master filestore which other users are using. "
+                            + "Before deleting this user you must move the filestores of the affected users either to the context filestore, "
+                            + "to another master filestore or to a user filestore with the appropriate commandline tools. "
+                            + "Affected users are: " + affectedUsers);
+                    }
+
+                    filestoreOwners.add(user);
+                }
             }
-        } catch (final InvalidDataException e1) {
-            LOGGER.error("", e1);
-            throw e1;
-        } catch (final StorageException e1) {
-            LOGGER.error("", e1);
-            throw e1;
+
+            for (User filestoreOwner : filestoreOwners) {
+                LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
+                moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
+                LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+            }
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (RemoteException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (NoSuchFilestoreException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
         }
 
 
@@ -1845,6 +1941,19 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             }
             throw new StorageException(sb.toString());
         }
+    }
+
+    private String mapToString(Map<Integer, List<Integer>> map) {
+        StringBuilder builder = new StringBuilder();
+        for (Integer cid : map.keySet()) {
+            builder.append("\nCID: ").append(cid).append(", User IDs: ");
+            List<Integer> ids = map.get(cid);
+            for (Integer id : ids) {
+                builder.append(id).append(",");
+            }
+            builder.setLength(builder.length() - 1);
+        }
+        return builder.toString();
     }
 
     @Override

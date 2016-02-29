@@ -58,9 +58,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.osgi.framework.BundleContext;
 import com.openexchange.admin.daemons.ClientAdminThread;
@@ -2644,5 +2646,142 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
         }
     }
+    
+    @Override
+    public boolean isMasterFilestoreOwner(Context context, int userId) throws StorageException {
+        int contextId = context.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            stmt = con.prepareStatement("SELECT 1 FROM user WHERE id = ? AND cid = ? AND filestore_id > 0 AND filestore_owner = 0");
+            stmt.setInt(1, userId);
+            stmt.setInt(2, contextId);
+            result = stmt.executeQuery();
 
+            return result.next();
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(contextId, con);
+                } catch (PoolException e) {
+                    log.error("Error pushing context connection to pool.", e);
+                }
+            }
+        }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#fetchSlaveUsersOfMasterFilestore(com.openexchange.admin.rmi.dataobjects.Context, int)
+     */
+    @Override
+    public Map<Integer, List<Integer>> fetchSlaveUsersOfMasterFilestore(Context context, int userId) throws StorageException {
+        int contextId = context.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = cache.getConnectionForContext(contextId);
+            stmt = con.prepareStatement("SELECT id, cid FROM user WHERE cid = ? AND filestore_owner = ? AND filestore_id > 0");
+            stmt.setInt(1, contextId);
+            stmt.setInt(2, userId);
+            result = stmt.executeQuery();
+
+            Map<Integer, List<Integer>> users = new HashMap<Integer, List<Integer>>();
+            while (result.next()) {
+                int id = result.getInt(1);
+                int cid = result.getInt(2);
+                List<Integer> userIds = users.get(cid);
+                if (userIds == null) {
+                    userIds = new ArrayList<Integer>();
+                    users.put(cid, userIds);
+                }
+                userIds.add(id);
+            }
+
+            return users;
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForContextAfterReading(contextId, con);
+                } catch (PoolException e) {
+                    log.error("Error pushing context connection to pool.", e);
+                }
+            }
+        }
+    }
+
+    /* (non-Javadoc)
+     * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#isLastContextInSchema(com.openexchange.admin.rmi.dataobjects.Context)
+     */
+    @Override
+    public boolean isLastContextInSchema(Context context) throws StorageException, InvalidDataException {
+        int contextId = context.getId().intValue();
+        Connection con = null;
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            con = cache.getConnectionForConfigDB();
+            
+            // Fetch the schema name
+            stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE cid = ?");
+            stmt.setInt(1, contextId);
+            
+            result = stmt.executeQuery();
+            
+            String schemaName;
+            if (result.next()) {
+                schemaName = result.getString(1);
+            } else {
+                throw new InvalidDataException("The specified context '" + contextId + "' is does not exist in any known database schema.");
+            }
+            stmt.close();
+            result.close();
+            
+            // Count the contexts that the schema contains
+            stmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE db_schema = ?");
+            stmt.setString(1, schemaName);
+            
+            result = stmt.executeQuery();
+            
+            if (result.next()) {
+                int count = result.getInt(1);
+                return count == 1;
+            } else {
+                throw new InvalidDataException("The specified schema '" + schemaName + "' does not exist.");
+            }
+        } catch (PoolException e) {
+            log.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (SQLException e) {
+            log.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+            if (null != con) {
+                try {
+                    cache.pushConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Error pushing context connection to pool.", e);
+                }
+            }
+        }
+    }
 }

@@ -80,6 +80,8 @@ import com.openexchange.json.OXJSONWriter;
 import com.openexchange.json.cache.JsonCacheService;
 import com.openexchange.json.cache.JsonCaches;
 import com.openexchange.mail.MailExceptionCode;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.MailFields;
 import com.openexchange.mail.MailJSONField;
 import com.openexchange.mail.MailListField;
 import com.openexchange.mail.MailServletInterface;
@@ -214,9 +216,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Pre-Select field writers
          */
+        MailFields mailFields = new MailFields();
         List<MailFieldWriter> writers = new ArrayList<MailFieldWriter>(columns.size());
         for (Column column : columns) {
-            writers.add(column.getField() > 0 ? MessageWriter.getMailFieldWriter(MailListField.getField(column.getField())) : MessageWriter.getHeaderFieldWriter(column.getHeader()));
+            MailFieldWriter fieldWriter;
+            if (column.getField() > 0) {
+                fieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(column.getField()));
+                MailField mailField = MailField.getField(column.getField());
+                if (null != mailField) {
+                    mailFields.add(mailField);
+                }
+            } else {
+                fieldWriter = MessageWriter.getHeaderFieldWriter(column.getHeader());
+            }
+            writers.add(fieldWriter);
         }
         /*
          * Get mail interface
@@ -234,7 +247,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             for (final List<MailMessage> mails : structure.getMails()) {
                 if (mails != null && !mails.isEmpty()) {
                     final JSONObject jo = new JSONObject(32);
-                    writeThreadSortedMail(mails, jo, writers, containsMultipleFolders, writeThreadAsObjects, userId, contextId, timeZone);
+                    writeThreadSortedMail(mails, jo, writers, mailFields, containsMultipleFolders, writeThreadAsObjects, userId, contextId, timeZone);
                     jsonWriter.value(jo);
                 }
             }
@@ -287,7 +300,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
 
     private static final MailFieldWriter[] WRITER_IDS = MessageWriter.getMailFieldWriters(new MailListField[] { MailListField.ID, MailListField.FOLDER_ID });
 
-    private void writeThreadSortedMail(List<MailMessage> mails, JSONObject jMail, List<MailFieldWriter> writers, boolean containsMultipleFolders, boolean writeThreadAsObjects, int userId, int contextId, TimeZone optTimeZone) throws OXException, JSONException {
+    private void writeThreadSortedMail(List<MailMessage> mails, JSONObject jMail, List<MailFieldWriter> writers, MailFields mailFields, boolean containsMultipleFolders, boolean writeThreadAsObjects, int userId, int contextId, TimeZone optTimeZone) throws OXException, JSONException {
         final MailMessage rootMessage = mails.get(0);
         int accountId = rootMessage.getAccountId();
         for (MailFieldWriter writer : writers) {
@@ -298,26 +311,13 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         final JSONArray jChildMessages = new JSONArray(mails.size());
         if (writeThreadAsObjects) {
             for (final MailMessage child : mails) {
-                JSONObject jChild = new JSONObject(writers.size());
-                accountId = child.getAccountId();
-                for (MailFieldWriter writer : writers) {
-                    writer.writeField(jChild, child, 0, true, accountId, userId, contextId, optTimeZone);
-                }
-                jChildMessages.put(jChild);
-                /*
-                 * Count unread messages in this thread structure
-                 */
-                if (!child.isSeen()) {
-                    unreadCount++;
-                }
-            }
-        } else {
-            if (containsMultipleFolders) {
-                final StringBuilder sb = new StringBuilder(16);
-                final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
-                for (final MailMessage child : mails) {
-                    sb.setLength(0);
-                    jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
+                if (seemsValid(child, mailFields)) {
+                    JSONObject jChild = new JSONObject(writers.size());
+                    accountId = child.getAccountId();
+                    for (MailFieldWriter writer : writers) {
+                        writer.writeField(jChild, child, 0, true, accountId, userId, contextId, optTimeZone);
+                    }
+                    jChildMessages.put(jChild);
                     /*
                      * Count unread messages in this thread structure
                      */
@@ -325,14 +325,33 @@ public final class MailConverter implements ResultConverter, MailActionConstants
                         unreadCount++;
                     }
                 }
+            }
+        } else {
+            if (containsMultipleFolders) {
+                final StringBuilder sb = new StringBuilder(16);
+                final char defaultSeparator = MailProperties.getInstance().getDefaultSeparator();
+                for (final MailMessage child : mails) {
+                    if (seemsValid(child, mailFields)) {
+                        sb.setLength(0);
+                        jChildMessages.put(sb.append(child.getFolder()).append(defaultSeparator).append(child.getMailId()).toString());
+                        /*
+                         * Count unread messages in this thread structure
+                         */
+                        if (!child.isSeen()) {
+                            unreadCount++;
+                        }
+                    }
+                }
             } else {
                 for (final MailMessage child : mails) {
-                    jChildMessages.put(child.getMailId());
-                    /*
-                     * Count unread messages in this thread structure
-                     */
-                    if (!child.isSeen()) {
-                        unreadCount++;
+                    if (seemsValid(child, mailFields)) {
+                        jChildMessages.put(child.getMailId());
+                        /*
+                         * Count unread messages in this thread structure
+                         */
+                        if (!child.isSeen()) {
+                            unreadCount++;
+                        }
                     }
                 }
             }
@@ -349,9 +368,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Pre-Select field writers
          */
+        MailFields mailFields = new MailFields();
         List<MailFieldWriter> writers = new ArrayList<MailFieldWriter>(columns.size());
         for (Column column : columns) {
-            writers.add(column.getField() > 0 ? MessageWriter.getMailFieldWriter(MailListField.getField(column.getField())) : MessageWriter.getHeaderFieldWriter(column.getHeader()));
+            MailFieldWriter fieldWriter;
+            if (column.getField() > 0) {
+                fieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(column.getField()));
+                MailField mailField = MailField.getField(column.getField());
+                if (null != mailField) {
+                    mailFields.add(mailField);
+                }
+            } else {
+                fieldWriter = MessageWriter.getHeaderFieldWriter(column.getHeader());
+            }
+            writers.add(fieldWriter);
         }
         /*
          * Get mail interface
@@ -365,7 +395,7 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             final int userId = session.getUserId();
             final int contextId = session.getContextId();
             for (final MailMessage mail : mails) {
-                if (mail != null) {
+                if (seemsValid(mail, mailFields)) {
                     JSONArray ja = new JSONArray(writers.size());
                     int accountId = mail.getAccountId();
                     for (MailFieldWriter writer : writers) {
@@ -390,10 +420,20 @@ public final class MailConverter implements ResultConverter, MailActionConstants
         /*
          * Pre-Select field writers
          */
+        MailFields mailFields = new MailFields();
         List<MailFieldWriter> writers = new ArrayList<MailFieldWriter>(columns.size());
         for (Column column : columns) {
-            int field = column.getField();
-            writers.add(field > 0 ? MessageWriter.getMailFieldWriter(MailListField.getField(field)) : MessageWriter.getHeaderFieldWriter(column.getHeader()));
+            MailFieldWriter fieldWriter;
+            if (column.getField() > 0) {
+                fieldWriter = MessageWriter.getMailFieldWriter(MailListField.getField(column.getField()));
+                MailField mailField = MailField.getField(column.getField());
+                if (null != mailField) {
+                    mailFields.add(mailField);
+                }
+            } else {
+                fieldWriter = MessageWriter.getHeaderFieldWriter(column.getHeader());
+            }
+            writers.add(fieldWriter);
         }
         final int userId = session.getUserId();
         final int contextId = session.getContextId();
@@ -408,28 +448,28 @@ public final class MailConverter implements ResultConverter, MailActionConstants
              */
             if (("thread".equalsIgnoreCase(sort))) {
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray(writers.size());
-                    if (mail != null) {
+                    if (seemsValid(mail, mailFields)) {
+                        final JSONArray ja = new JSONArray(writers.size());
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
                             writer.writeField(ja, mail, mail.getThreadLevel(), false, accountId, userId, contextId, timeZone);
                         }
+                        jsonWriter.value(ja);
                     }
-                    jsonWriter.value(ja);
                 }
             } else {
                 /*
                  * Get iterator
                  */
                 for (final MailMessage mail : mails) {
-                    final JSONArray ja = new JSONArray(writers.size());
-                    if (mail != null) {
+                    if (seemsValid(mail, mailFields)) {
+                        final JSONArray ja = new JSONArray(writers.size());
                         final int accountId = mail.getAccountId();
                         for (final MailFieldWriter writer : writers) {
                             writer.writeField(ja, mail, 0, false, accountId, userId, contextId, timeZone);
                         }
+                        jsonWriter.value(ja);
                     }
-                    jsonWriter.value(ja);
                 }
             }
         } finally {
@@ -676,5 +716,45 @@ public final class MailConverter implements ResultConverter, MailActionConstants
             }
         }
         return mailInterface;
+    }
+
+    private boolean seemsValid(MailMessage mail, MailFields mailFields) {
+        if (null == mail) {
+            return false;
+        }
+
+        boolean valid = true;
+        if (mailFields.contains(MailField.SUBJECT)) {
+            if (mail.containsSubject()) {
+                return true;
+            }
+            valid = false; // pessimistic
+        }
+        if (mailFields.contains(MailField.FROM)) {
+            if (mail.containsFrom()) {
+                return true;
+            }
+            valid = false; // pessimistic
+        }
+        if (mailFields.contains(MailField.TO)) {
+            if (mail.containsTo()) {
+                return true;
+            }
+            valid = false; // pessimistic
+        }
+        if (mailFields.contains(MailField.SIZE)) {
+            if (mail.containsSize()) {
+                return true;
+            }
+            valid = false; // pessimistic
+        }
+        if (mailFields.contains(MailField.SENT_DATE)) {
+            if (mail.containsSentDate()) {
+                return true;
+            }
+            valid = false; // pessimistic
+        }
+
+        return valid;
     }
 }

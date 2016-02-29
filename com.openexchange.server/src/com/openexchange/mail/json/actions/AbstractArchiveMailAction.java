@@ -49,7 +49,14 @@
 
 package com.openexchange.mail.json.actions;
 
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.json.MailRequest;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 
 
 /**
@@ -60,37 +67,72 @@ import com.openexchange.server.ServiceLookup;
  */
 public abstract class AbstractArchiveMailAction extends AbstractMailAction {
 
+    private static final String CAPABILITY_ARCHIVE_EMAILS = "archive_emails";
+
     /**
      * Initializes a new {@link AbstractArchiveMailAction}.
-     * @param services
      */
     protected AbstractArchiveMailAction(ServiceLookup services) {
         super(services);
     }
 
+    @Override
+    protected final AJAXRequestResult perform(final MailRequest req) throws OXException, JSONException {
+        // Check required "archive_emails" capability
+        {
+            CapabilityService capabilityService = ServerServiceRegistry.getInstance().getService(CapabilityService.class);
+            if (null != capabilityService && !capabilityService.getCapabilities(req.getSession()).contains(CAPABILITY_ARCHIVE_EMAILS)) {
+                throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail-archive");
+            }
+        }
 
+        // Continue...
+        return performArchive(req);
+    }
+
+    /**
+     * Performs specified mail archive request.
+     *
+     * @param req The mail archive request
+     * @return The result
+     * @throws OXException If an error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult performArchive(MailRequest req) throws OXException, JSONException;
+
+    /**
+     * A simple wrapper class for archive actions.
+     */
     public static class ArchiveDataWrapper {
 
-        private String id;
-
-        private boolean created;
+        private final String id;
+        private final boolean created;
 
         /**
-         * Initializes a new {@link AbstractArchiveMailAction.ArchiveDataWrapper}.
+         * Initializes a new {@link ArchiveDataWrapper}.
          */
         public ArchiveDataWrapper(String id, boolean created) {
             this.id = id;
             this.created = created;
         }
 
+        /**
+         * Gets the identifier of the (sub-)archive folder
+         *
+         * @return The identifier
+         */
         public String getId() {
             return id;
         }
 
+        /**
+         * Signals whether that folder has been created or not
+         *
+         * @return <code>true</code> if created; otherwise <code>false</code>
+         */
         public boolean isCreated() {
             return created;
         }
-
     }
 
 }

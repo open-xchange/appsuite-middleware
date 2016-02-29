@@ -192,10 +192,10 @@ public final class PUTAction extends AbstractConfigAction {
         if (setting.isLeaf()) {
             final String path = setting.getPath();
             if (!ignorees.contains(path) && (path.indexOf("/io.ox/core") < 0)) {
-                final String value = (String) setting.getSingleValue();
-                if (!com.openexchange.java.Strings.isEmpty(value)) {
-                    if ('[' == value.charAt(0)) {
-                        final JSONArray array = new JSONArray(value);
+                Object value = setting.getSingleValue();
+                if (value != null) {
+                    if (JSONArray.class.isInstance(value)) {
+                        final JSONArray array = (JSONArray) value;
                         if (array.length() == 0) {
                             setting.setEmptyMultiValue();
                         } else {
@@ -204,8 +204,10 @@ public final class PUTAction extends AbstractConfigAction {
                             }
                         }
                         setting.setSingleValue(null);
-                    } else if ('{' == value.charAt(0)) {
+                    } else if (JSONObject.class.isInstance(value)) {
                         sanitizeJsonSetting(setting);
+                    } else {
+                        setting.setSingleValue(value.toString());
                     }
                 }
                 storage.save(setting);
@@ -233,7 +235,7 @@ public final class PUTAction extends AbstractConfigAction {
                         // Swallow
                         continue Next;
                     }
-                    sub.setSingleValue(json.getString(key));
+                    sub.setSingleValue(json.get(key));
                     try {
                         // Catch single exceptions if GUI writes not writable fields.
                         saveSettingWithSubs(storage, sub);
@@ -253,7 +255,7 @@ public final class PUTAction extends AbstractConfigAction {
     /** Sanitizes possible JSON setting */
     public static void sanitizeJsonSetting(final Setting setting) {
         try {
-            final JSONObject jConfig = new JSONObject((String) setting.getSingleValue());
+            final JSONObject jConfig = (JSONObject) setting.getSingleValue();
             boolean saveBack = false;
             final JSONObject jMailConfig = jConfig.optJSONObject("mail");
             if (null != jMailConfig && jMailConfig.hasAndNotNull("signatures")) {
