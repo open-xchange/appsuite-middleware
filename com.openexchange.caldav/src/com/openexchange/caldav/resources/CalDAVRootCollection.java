@@ -58,6 +58,8 @@ import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
 import com.openexchange.caldav.mixins.SupportedReportSet;
+import com.openexchange.dav.Privilege;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.dav.resources.DAVRootCollection;
 import com.openexchange.dav.resources.PlaceholderCollection;
@@ -108,7 +110,8 @@ public class CalDAVRootCollection extends DAVRootCollection {
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
-            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet()
+            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(),
+            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
         );
     }
 

@@ -51,11 +51,9 @@ package com.openexchange.dav.resources;
 
 import java.util.Date;
 import com.openexchange.dav.DAVFactory;
-import com.openexchange.dav.Privilege;
 import com.openexchange.dav.mixins.ACL;
 import com.openexchange.dav.mixins.ACLRestrictions;
 import com.openexchange.dav.mixins.CurrentUserPrincipal;
-import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.dav.mixins.SupportedPrivilegeSet;
 import com.openexchange.folderstorage.DefaultPermission;
 import com.openexchange.folderstorage.Permission;
@@ -90,8 +88,7 @@ public abstract class DAVRootCollection extends DAVCollection {
         super(factory, ROOT_URL);
         this.displayName = displayName;
         includeProperties(
-            new CurrentUserPrincipal(factory), new SupportedPrivilegeSet(), new ACL(ROOT_PERMISSIONS), new ACLRestrictions(),
-            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET)
+            new CurrentUserPrincipal(factory), new SupportedPrivilegeSet(), new ACL(ROOT_PERMISSIONS), new ACLRestrictions()
         );
     }
 
