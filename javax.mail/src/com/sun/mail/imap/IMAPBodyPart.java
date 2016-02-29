@@ -86,52 +86,65 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
      * be inserted in newly crafted MimeMessages, especially when
      * forwarding or replying to messages.
      */
+    @Override
     protected void updateHeaders() {
 	return;
     }
 
+    @Override
     public int getSize() throws MessagingException {
 	return bs.size;
     }
 
+    @Override
     public int getLineCount() throws MessagingException {
 	return bs.lines;
     }
 
+    @Override
     public String getContentType() throws MessagingException {
 	return type;
     }
 
+    @Override
     public String getDisposition() throws MessagingException {
 	return bs.disposition;
     }
 
+    @Override
     public void setDisposition(String disposition) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public String getEncoding() throws MessagingException {
 	return bs.encoding;
     }
 
+    @Override
     public String getContentID() throws MessagingException {
 	return bs.id;
     }
 
+    @Override
     public String getContentMD5() throws MessagingException {
 	return bs.md5;
     }
 
+    @Override
     public void setContentMD5(String md5) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public String getDescription() throws MessagingException {
-	if (description != null) // cached value ?
-	    return description;
+	if (description != null) {
+        return description;
+    }
 
-	if (bs.description == null)
-	    return null;
+	if (bs.description == null) {
+        return null;
+    }
 	
 	try {
 	    description = MimeUtility.decodeText(bs.description);
@@ -142,17 +155,21 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return description;
     }
 
+    @Override
     public void setDescription(String description, String charset)
 			throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public String getFileName() throws MessagingException {
 	String filename = null;
-	if (bs.dParams != null)
-	    filename = bs.dParams.get("filename");
-	if (filename == null && bs.cParams != null)
-	    filename = bs.cParams.get("name");
+	if (bs.dParams != null) {
+        filename = bs.dParams.get("filename");
+    }
+	if (filename == null && bs.cParams != null) {
+        filename = bs.cParams.get("name");
+    }
 	if (decodeFileName && filename != null) {
 	    try {
 		filename = MimeUtility.decodeText(filename);
@@ -163,10 +180,12 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return filename;
     }
 
+    @Override
     public void setFileName(String filename) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     protected InputStream getContentStream() throws MessagingException {
 	InputStream is = null;
 	boolean pk = message.getPeek();	// acquire outside of message cache lock
@@ -179,20 +198,23 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		// Check whether this message is expunged
 		message.checkExpunged();
 
-		if (p.isREV1() && (message.getFetchBlockSize() != -1))
-		    return new IMAPInputStream(message, sectionId,
+		if (p.isREV1() && (message.getFetchBlockSize() != -1)) {
+            return new IMAPInputStream(message, sectionId,
 			message.ignoreBodyStructureSize() ? -1 : bs.size, pk);
+        }
 
 		// Else, vanila IMAP4, no partial fetch 
 
 		int seqnum = message.getSequenceNumber();
 		BODY b;
-		if (pk)
-		    b = p.peekBody(seqnum, sectionId);
-		else
-		    b = p.fetchBody(seqnum, sectionId);
-		if (b != null)
-		    is = b.getByteArrayInputStream();
+		if (pk) {
+            b = p.peekBody(seqnum, sectionId);
+        } else {
+            b = p.fetchBody(seqnum, sectionId);
+        }
+		if (b != null) {
+            is = b.getByteArrayInputStream();
+        }
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(
 			message.getFolder(), cex.getMessage());
@@ -201,10 +223,11 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	    }
 	}
 
-	if (is == null)
-	    throw new MessagingException("No content");
-	else
-	    return is;
+	if (is == null) {
+        throw new MessagingException("No content");
+    } else {
+        return is;
+    }
     }
 
     /**
@@ -212,7 +235,9 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
      */
     private InputStream getHeaderStream() throws MessagingException {
 	if (!message.isREV1())
-	    loadHeaders();	// will be needed below
+     {
+        loadHeaders();	// will be needed below
+    }
 
 	// Acquire MessageCacheLock, to freeze seqnum.
 	synchronized(message.getMessageCacheLock()) {
@@ -251,8 +276,9 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    try {
 			// Write out the header
 			Enumeration hdrLines = super.getAllHeaderLines();
-			while (hdrLines.hasMoreElements())
-			    los.writeln((String)hdrLines.nextElement());
+			while (hdrLines.hasMoreElements()) {
+                los.writeln((String)hdrLines.nextElement());
+            }
 
 			// The CRLF separator between header and content
 			los.writeln();
@@ -280,6 +306,7 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
      * @return	the MIME format stream
      * @since	JavaMail 1.4.5
      */
+    @Override
     public InputStream getMimeStream() throws MessagingException {
 	/*
 	 * The IMAP protocol doesn't support returning the entire
@@ -289,90 +316,106 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 	return new SequenceInputStream(getHeaderStream(), getContentStream());
     }
 	    
+    @Override
     public synchronized DataHandler getDataHandler() 
 		throws MessagingException {
 	if (dh == null) {
-	   if (bs.isMulti())
-		dh = new DataHandler(
+	   if (bs.isMulti()) {
+        dh = new DataHandler(
 			new IMAPMultipartDataSource(
 				this, bs.bodies, sectionId, message)
 		     );
-	    else if (bs.isNested() && message.isREV1() && bs.envelope != null)
-		dh = new DataHandler(
-			new IMAPNestedMessage(message, 
-					      bs.bodies[0],
-					      bs.envelope,
-					      sectionId),
-			type
-		     );
+    } else if (bs.isNested() && message.isREV1() && bs.envelope != null) {
+            dh = new DataHandler(
+            	new IMAPNestedMessage(message, 
+            			      bs.bodies[0],
+            			      bs.envelope,
+            			      sectionId),
+            	type
+                 );
+        }
 	}
 
 	return super.getDataHandler();
     }
 
+    @Override
     public void setDataHandler(DataHandler content) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void setContent(Object o, String type) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void setContent(Multipart mp) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public String[] getHeader(String name) throws MessagingException {
 	loadHeaders();
 	return super.getHeader(name);
     }
 
+    @Override
     public void setHeader(String name, String value)
 		throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void addHeader(String name, String value)
 		throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public void removeHeader(String name) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public Enumeration getAllHeaders() throws MessagingException {
 	loadHeaders();
 	return super.getAllHeaders();
     }
 
+    @Override
     public Enumeration getMatchingHeaders(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getMatchingHeaders(names);
     }
 
+    @Override
     public Enumeration getNonMatchingHeaders(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getNonMatchingHeaders(names);
     }
 
+    @Override
     public void addHeaderLine(String line) throws MessagingException {
 	throw new IllegalWriteException("IMAPBodyPart is read-only");
     }
 
+    @Override
     public Enumeration getAllHeaderLines() throws MessagingException {
 	loadHeaders();
 	return super.getAllHeaderLines();
     }
 
+    @Override
     public Enumeration getMatchingHeaderLines(String[] names)
 		throws MessagingException {
 	loadHeaders();
 	return super.getMatchingHeaderLines(names);
     }
 
+    @Override
     public Enumeration getNonMatchingHeaderLines(String[] names)
 		throws MessagingException {
 	loadHeaders();
@@ -380,14 +423,16 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
     }
 
     private synchronized void loadHeaders() throws MessagingException {
-	if (headersLoaded)
-	    return;
+	if (headersLoaded) {
+        return;
+    }
 
 	// "headers" should never be null since it's set in the constructor.
 	// If something did go wrong this will fix it, but is an unsynchronized
 	// assignment of "headers".
-	if (headers == null)
-	    headers = new InternetHeaders();
+	if (headers == null) {
+        headers = new InternetHeaders();
+    }
 
 	// load headers
 
@@ -433,15 +478,18 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
 		    // Content-Transfer-Encoding
 		    headers.addHeader("Content-Transfer-Encoding", bs.encoding);
 		    // Content-Description
-		    if (bs.description != null)
-			headers.addHeader("Content-Description",
-							    bs.description);
+		    if (bs.description != null) {
+                headers.addHeader("Content-Description",
+                				    bs.description);
+            }
 		    // Content-ID
-		    if (bs.id != null)
-			headers.addHeader("Content-ID", bs.id);
+		    if (bs.id != null) {
+                headers.addHeader("Content-ID", bs.id);
+            }
 		    // Content-MD5
-		    if (bs.md5 != null)
-			headers.addHeader("Content-MD5", bs.md5);
+		    if (bs.md5 != null) {
+                headers.addHeader("Content-MD5", bs.md5);
+            }
 		}
 	    } catch (ConnectionException cex) {
 		throw new FolderClosedException(
@@ -458,6 +506,9 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
     protected boolean checkExists(IMAPMessage message, IMAPProtocol p) throws ProtocolException, MessagingException {
         long uid = message.getUID();
         if (uid < 0) {
+            if (message.getFolder() == null) {
+                return false;
+            }
             uid = ((IMAPFolder) message.getFolder()).getUID(message);
             if (uid < 0) {
                 return false;
