@@ -63,6 +63,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum FileStorageCodes implements DisplayableOXExceptionCode {
+
     /** An IO error occurred: %s */
     IOERROR("An IO error occurred: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
@@ -93,6 +94,8 @@ public enum FileStorageCodes implements DisplayableOXExceptionCode {
     INVALID_LENGTH("The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 20),
     /** No such file storage: %1$s */
     NO_SUCH_FILE_STORAGE("No such file storage: %1$s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 21),
+    /** An end of stream has been reached unexpectedly during reading input. */
+    CONNECTION_CLOSED("An end of stream has been reached unexpectedly during reading input.", FileStorageStrings.CONNECTION_CLOSED_MSG, Category.CATEGORY_CONNECTIVITY, 22),
 
     /**
      * "Wrong filestore %1$d for context %2$d needing filestore %3$d.

@@ -54,6 +54,7 @@ import java.util.Set;
 import java.util.SortedSet;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorage;
+import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
 import com.openexchange.marker.OXThreadMarkers;
 
@@ -80,6 +81,14 @@ public class CloseableTrackingFileStorage implements FileStorage {
     public String saveNewFile(InputStream file) throws OXException {
         try {
             return delegate.saveNewFile(file);
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if ((cause instanceof java.io.EOFException) || (cause instanceof java.util.concurrent.TimeoutException)) {
+                // End of stream has been reached unexpectedly during reading input
+                throw FileStorageCodes.CONNECTION_CLOSED.create(cause, new Object[0]);
+            }
+
+            throw e;
         } finally {
             Streams.close(file);
         }
