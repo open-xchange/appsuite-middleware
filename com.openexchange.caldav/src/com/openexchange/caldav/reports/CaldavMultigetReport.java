@@ -61,8 +61,11 @@ import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.actions.PROPFINDAction;
 import com.openexchange.webdav.action.WebdavRequest;
 import com.openexchange.webdav.action.WebdavResponse;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
+import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.webdav.xml.resources.PropertiesMarshaller;
 import com.openexchange.webdav.xml.resources.ResourceMarshaller;
 
 /**
@@ -86,15 +89,31 @@ public class CaldavMultigetReport extends PROPFINDAction {
 
     @Override
     public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        Document requestBody = optRequestBody(request);
-        List<Element> elements = new ArrayList<Element>();
-        ResourceMarshaller marshaller = getMarshaller(request, requestBody);
-        for (WebdavPath webdavPath : getPaths(request, requestBody)) {
-            List<Element> marshalled = marshaller.marshal(request.getFactory().resolveResource(webdavPath));
-            elements.addAll(marshalled);
-        }
+        /*
+         * get paths of requested resources
+         */
+        Document requestBody = requireRequestBody(request);
+        List<WebdavPath> paths = getPaths(request, requestBody);
+        /*
+         * marshal requested resources
+         */
+        ResourceMarshaller marshaller = getMarshaller(request, requireRequestBody(request));
+        PropertiesMarshaller helper = new PropertiesMarshaller(request.getURLPrefix(), request.getCharset());
         Element multistatusElement = prepareMultistatusElement();
-        multistatusElement.addContent(elements);
+        for (WebdavPath path : paths) {
+            try {
+                WebdavResource resource = request.getFactory().resolveResource(path);
+                multistatusElement.addContent(marshaller.marshal(resource));
+            } catch (WebdavProtocolException e) {
+                multistatusElement.addContent(new Element("response", Protocol.DAV_NS)
+                    .addContent(helper.marshalHREF(path, false))
+                    .addContent(helper.marshalStatus(e.getStatus()))
+                );
+            }
+        }
+        /*
+         * send multistatus response
+         */
         sendMultistatusResponse(response, multistatusElement);
     }
 
