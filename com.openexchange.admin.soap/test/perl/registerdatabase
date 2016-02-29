@@ -1,0 +1,57 @@
+#!/usr/bin/perl
+package Registerdatabase;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Registerdatabase();
+$test->doRequest();
+
+sub new {
+    my ($inPkg) = @_;
+    my $self = BasicCommandlineOptions->new();
+
+    bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+    my $inSelf = shift;
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXUtilService" );
+    my $creds = $inSelf->{'mastercreds'};
+
+    my $name   = "perltest";
+    my $master = "true";
+    my $maxctx = 42042;
+    my $weight = 100;
+    my $user   = "openexchange";
+    my $passwd = $ENV{"DBPW"} || "secret";
+    my $dbhost = $ENV{"DBHOST"} || "localhost";
+
+    my $som_entry =
+        $soap->registerDatabase(
+            SOAP::Data->value("Database")->value(\SOAP::Data->value(
+                SOAP::Data->name("name" => $name),
+                SOAP::Data->name("url" => "jdbc:mysql://$dbhost/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000"),
+                SOAP::Data->name("master" => $master),
+                SOAP::Data->name("maxUnits" => $maxctx),
+                SOAP::Data->name("clusterWeight" => $weight),
+                SOAP::Data->name("login" => $user),
+                SOAP::Data->name("password" => $passwd)
+                )),
+            $creds
+        );
+
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+        exit(1);
+    } else {
+        print "Fine\n";
+    }
+}
+
+exit;

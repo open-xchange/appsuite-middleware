@@ -1,0 +1,34 @@
+#! /usr/bin/php
+<?php
+include ("ox-soap.php");
+
+try {
+	srand(microtime()*1000000);
+	$random_id = rand(1, 99999);
+
+	$db = new Database();
+	$db->name = "name_by_soap" . $random_id;
+	$db->password = "password_by_soap." . $random_id;
+	$db->login = "login_by_soap" . $random_id;
+	$db->url = "jdbc:mysql://soaphost" . $random_id . "/?useUnicode=true&characterEncoding=UTF-8&autoReconnect=false&useUnicode=true&useServerPrepStmts=false&useTimezone=true&serverTimezone=UTC&connectTimeout=15000&socketTimeout=15000";
+	$db->masterId = 0;
+	$db->master = true;
+	$db->clusterWeight = 100;
+	$db->maxUnits = 1000;
+	$db->poolHardLimit = 11;
+	$db->poolInitial = 2;
+	$db->poolMax = 5;
+
+	$result = getUtilClient($SOAPHOST)->registerDatabase($db, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+
+	if (!is_soap_fault($result)) {
+		$db->id = $result->id;
+		getUtilClient($SOAPHOST)->unregisterDatabase($db, getCredentialsObject($OXMASTER_ADMIN, $OXMASTER_ADMIN_PASS));
+	}
+
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>

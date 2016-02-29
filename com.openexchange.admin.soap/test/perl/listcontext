@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+package Listcontext;
+use strict;
+use Data::Dumper;
+use base qw(BasicCommandlineOptions);
+
+
+#Use the SOAP::Lite Perl module
+#use SOAP::Lite +trace => 'debug';
+use SOAP::Lite;
+
+my $test = new Listcontext();
+$test->doRequest();
+
+sub new {
+	my ($inPkg) = @_;
+	my $self = BasicCommandlineOptions->new();
+	
+	bless $self, $inPkg;
+    return $self;
+}
+
+sub doRequest {
+   	my $inSelf = shift;
+    my $soap = SOAP::Lite->ns( $inSelf->{'serviceNs'} )->proxy( $inSelf->{'basisUrl'}."OXContextService" );
+    
+    my $pattern = SOAP::Data->value("*");
+    my $creds = $inSelf->{'mastercreds'};
+    
+    my $som_entry = 
+      $soap->list($pattern,$creds);
+    
+    if ( $som_entry->fault() ) {
+        $inSelf->fault_output($som_entry);
+	exit(1);
+    } else {
+        my $fields = [ "id", "filestoreId", "filestore_name", "enabled", "maxQuota", "usedQuota", "name", "loginMappings" ]; 
+        
+        my @results = $som_entry->paramsall;
+	#print Dumper(@results);
+        
+        my @data = $inSelf->SUPER::fetch_results($fields, \@results);
+        
+        $inSelf->doCSVOutput($fields, \@data);
+    }
+
+}
+
+exit;
+

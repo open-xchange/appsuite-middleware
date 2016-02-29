@@ -1,0 +1,29 @@
+#! /usr/bin/php
+<?php
+
+include("ox-soap.php");
+
+try {
+	
+	srand(microtime()*1000000);
+	$random_id = rand(1, 99999);
+	
+	
+	$res = new Resource();
+	$res->name =  "ox_tests_resource_".$random_id;	
+	$res->displayname = "OX Test Resource ".$random_id;	
+	$res->email = "ox_tests_resource_".$random_id."@example.org";
+	$res->description = "Test Resource Descrption by SOAP and PHP";
+	
+	$result = getResourceClient($SOAPHOST)->create(getContextObject($CONTEXT_ID),$res, getCredentialsObject($CONTEXT_ADMIN,$CONTEXT_ADMIN_PASS));
+	
+	if (!is_soap_fault($result)) {
+		printResource($result);
+	}
+	
+} catch (SoapFault $fault) {
+	handleSoapFault($fault);
+} catch (Exception $e) {
+	handleExcepion($e);
+}
+?>
