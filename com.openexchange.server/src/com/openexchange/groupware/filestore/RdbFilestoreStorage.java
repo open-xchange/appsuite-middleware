@@ -65,8 +65,8 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     private static final String SELECT = "SELECT uri, size, max_context FROM filestore WHERE id = ?";
 
     @Override
-    public Filestore getFilestore(final int id) throws OXException {
-        final Connection con = DBPool.pickup();
+    public Filestore getFilestore(int id) throws OXException {
+        Connection con = DBPool.pickup();
         try {
             return getFilestore(con, id);
         } finally {
@@ -75,7 +75,11 @@ public class RdbFilestoreStorage extends FilestoreStorage {
     }
 
     @Override
-    public Filestore getFilestore(final Connection con, final int id) throws OXException {
+    public Filestore getFilestore(Connection con, int id) throws OXException {
+        if (null == con) {
+            return getFilestore(id);
+        }
+
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
@@ -85,7 +89,8 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             if (!result.next()) {
                 throw FilestoreExceptionCodes.NO_SUCH_FILESTORE.create(I(id));
             }
-            final FilestoreImpl filestore = new FilestoreImpl();
+
+            FilestoreImpl filestore = new FilestoreImpl();
             filestore.setId(id);
             String tmp = null;
             try {
@@ -94,6 +99,7 @@ public class RdbFilestoreStorage extends FilestoreStorage {
             } catch (final URISyntaxException e) {
                 throw FilestoreExceptionCodes.URI_CREATION_FAILED.create(e, tmp);
             }
+
             filestore.setSize(result.getLong("size"));
             filestore.setMaxContext(result.getLong("max_context"));
             return filestore;
