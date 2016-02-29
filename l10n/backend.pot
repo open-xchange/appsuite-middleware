@@ -2231,6 +2231,11 @@ msgstr ""
 msgid "No next chunk for chunk: %1$s"
 msgstr ""
 
+#. Signals that an end of stream has been reached unexpectedly during reading input.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/FileStorageStrings.java:71
+msgid "The connected client closed the connection unexpectedly"
+msgstr ""
+
 #. * The allowed Quota is reached.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
 msgid ""
