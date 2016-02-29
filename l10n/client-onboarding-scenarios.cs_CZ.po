@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2016-02-24 00:54+0100\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
+"POT-Creation-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: cs_CZ\n"
+"X-Generator: Poedit 1.8.7\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: .\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Aplikace Drive"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "Synchronizujte své soubory s naší aplikací Drive."
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "Zprávy + Kalendář + Adresář"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"Pro synchronizaci svých zpráv, kalendáře, úkolů a adresáře si stáhněte a "
+"nainstalujte naši aplikaci pro pracovní plochu."
+
+# Drive App
+msgid "Drive App"
+msgstr "Aplikace Drive"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "Synchronizujte své soubory s naší aplikací Drive."
+
+# Mail App
+msgid "Mail App"
+msgstr "Aplikace Zprávy"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "Synchronizujte své zprávy s naší aplikací Zprávy."
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "Kalendář + Adresář"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr "Synchronizujte svůj kalendář a adresář se svým zařízením."
+
+# OX Sync
+msgid "OX Sync"
+msgstr "OX Sync"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "Synchronizujte všechny své schůzky a kontakty"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Pro manuální nastavení svých účtů kalendáře a adresáře použijte, prosím, "
+"následující údaje."
+
+# Updater
+msgid "Updater"
+msgstr "Správce aktualizací"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+"Při spuštění staženého souboru bude spuštěn průvodce instalací. Následujte "
+"instrukce a nainstalujte správce aktualizací. Nainstaluje nejnovější verzi "
+"klientského softwaru pro Windows®. Správce aktualizací vás bude automaticky "
+"informovat o nových aktualizacích. Můžete si je stáhnout přímo ze správce."
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr "Konektor pro Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"Synchronizace zpráv, kalendáře, kontaktů a úkolů, spolu s veřejnými, "
+"sdílenými a systémovými složkami, s klienty Microsoft Outlook®."
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr "Synchronizujte své zprávy, kalendář a adresář se svým zařízením."
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Pro manuální nastavení svých účtů zpráv, kalendáře a adresáře použijte, "
+"prosím, následující údaje."
+
+# Mail
+msgid "Mail"
+msgstr "Zprávy"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "Synchronizujte své zprávy s aplikací Apple Mail."
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"Pro manuální nastavení svého poštovního účtu použijte, prosím, následující "
+"údaje"
