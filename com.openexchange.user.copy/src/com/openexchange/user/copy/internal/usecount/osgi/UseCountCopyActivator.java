@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,51 +47,42 @@
  *
  */
 
-package com.openexchange.admin.user.copy.rmi;
+package com.openexchange.user.copy.internal.usecount.osgi;
 
-import java.rmi.RemoteException;
-import com.openexchange.admin.rmi.AbstractRMITest;
-import com.openexchange.admin.rmi.OXContextInterface;
-import com.openexchange.admin.rmi.dataobjects.Context;
-import com.openexchange.admin.rmi.dataobjects.Credentials;
-import com.openexchange.admin.rmi.dataobjects.User;
-import com.openexchange.admin.rmi.exceptions.ContextExistsException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.usecount.UseCountCopyTask;
 
 
 /**
- * {@link TestTool}
+ * {@link UseCountCopyActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.1
  */
-public class TestTool {
+public class UseCountCopyActivator implements BundleActivator {
 
-    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials, int filestoreId) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        Context ctx = null;
-        int ctxId = getRandomContextId();
-        boolean created = false;
-        while (!created) {
-            try {
-                Context newContext = AbstractRMITest.newContext(prefix + ctxId, ctxId);
-                if (filestoreId > 0) {
-                    newContext.setFilestoreId(filestoreId);
-                }
-                ctx = ci.create(newContext, admin, accessCombinationName, superAdminCredentials);
-                created = true;
-            } catch (ContextExistsException e) {
-                ctxId = getRandomContextId();
-            }
+    private ServiceRegistration<CopyUserTaskService> serviceRegistration;
+
+    /**
+     * Initializes a new {@link UseCountCopyActivator}.
+     */
+    public UseCountCopyActivator() {
+        super();
+    }
+
+    @Override
+    public void start(BundleContext context) throws Exception {
+        serviceRegistration = context.registerService(CopyUserTaskService.class, new UseCountCopyTask(), null);
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
         }
-        return ctx;
     }
 
-    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return createContext(ci, prefix, admin, accessCombinationName, superAdminCredentials, -1);
-    }
-
-    private static int getRandomContextId() {
-        return (int) (Math.random() * 1000);
-    }
 }
