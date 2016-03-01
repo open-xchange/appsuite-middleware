@@ -179,6 +179,7 @@ public class Rule2JSON2Rule extends AbstractObject2JSON2Object<Rule> {
         DAYS("days",":days"),
         ADDRESSES("addresses",":addresses"),
         SUBJECT("subject",":subject"),
+        FROM("from", ":from"),
         TEXT("text",null);
 
         private final String fieldname;
