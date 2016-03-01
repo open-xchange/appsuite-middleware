@@ -50,6 +50,7 @@
 package com.openexchange.quota;
 
 import java.util.List;
+import com.openexchange.osgi.annotation.SingletonService;
 
 /**
  * Open-Xchange consists of a set of modules that serve user requests.
@@ -66,6 +67,7 @@ import java.util.List;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.6.1
  */
+@SingletonService
 public interface QuotaService {
 
     /**

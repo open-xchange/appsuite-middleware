@@ -107,6 +107,10 @@ public enum QuotaExceptionCodes implements DisplayableOXExceptionCode {
      */
     QUOTA_EXCEEDED_INVITE_GUESTS("Quota exceeded for guest users. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_INVITE_GUESTS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
     /**
+     * Quota exceeded for snippets. Quota used: %1$s. Quota limit: %2$s.
+     */
+    QUOTA_EXCEEDED_SNIPPETS("Quota exceeded for snippets. Quota used: %1$s. Quota limit: %2$s.", QuotaExceptionMessages.QUOTA_EXCEEDED_SNIPPETS_MSG, CATEGORY_USER_INPUT, 3), // Yes, the same error code number as "QUOTA_EXCEEDED"
+    /**
      * No account %1$s exists for module %2$s.
      */
     UNKNOWN_ACCOUNT("No account $1%s exists for module %2$s.", OXExceptionStrings.MESSAGE, CATEGORY_ERROR, 4),

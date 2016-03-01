@@ -173,9 +173,45 @@ public class AmountQuotas {
         if (null != quotaFromDB) {
             return quotaFromDB.longValue();
         }
-        final ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+
+        return getConfiguredLimitByModuleId(session, moduleID, configViewFactory, defaultValue);
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is retrieved directly from user's
+     * configuration view.
+     * <p>
+     * If no value can be found {@link Quota#UNLIMITED} will be returned
+     *
+     * @param session The session
+     * @param moduleID The module ID
+     * @param configViewFactory A reference to the config view factory
+     * @return The limit or {@link Quota#UNLIMITED} if no amount quota is defined
+     * @throws OXException
+     */
+    public static long getConfiguredLimitByModuleId(Session session, String moduleID, ConfigViewFactory configViewFactory) throws OXException {
+        return getConfiguredLimitByModuleId(session, moduleID, configViewFactory, Quota.UNLIMITED);
+    }
+
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is retrieved directly from user's
+     * configuration view.
+     * <p>
+     * If no value can be found the provided default value will be returned
+     *
+     * @param session The session
+     * @param moduleID The module ID
+     * @param configViewFactory A reference to the config view factory
+     * @param defaultValue Value that will be returned if amount can not be found
+     * @return The limit or the defaultValue if no amount quota is defined
+     * @throws OXException
+     */
+    public static long getConfiguredLimitByModuleId(Session session, String moduleID, ConfigViewFactory configViewFactory, long defaultValue) throws OXException {
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
         // Get property
-        ConfigProperty<String> property = configView.property("com.openexchange.quota." + moduleID, String.class);
+        ConfigProperty<String> property = configView.property(new StringBuilder("com.openexchange.quota.").append(moduleID).toString(), String.class);
         if (!property.isDefined()) {
             return defaultValue;
         }
@@ -186,6 +222,54 @@ public class AmountQuotas {
             return defaultValue;
         }
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Gets the configured amount limit for a specified property name using the supplied session's user. The value is retrieved directly
+     * from user's configuration view.
+     * <p>
+     * If no value can be found {@link Quota#UNLIMITED} will be returned
+     *
+     * @param session The session
+     * @param propName The name of the property providing the amount limit
+     * @param configViewFactory A reference to the config view factory
+     * @return The limit or {@link Quota#UNLIMITED} if no amount quota is defined
+     * @throws OXException
+     */
+    public static long getConfiguredLimitByPropertyName(Session session, String propName, ConfigViewFactory configViewFactory) throws OXException {
+        return getConfiguredLimitByPropertyName(session, propName, configViewFactory, Quota.UNLIMITED);
+    }
+
+    /**
+     * Gets the configured amount limit in a specific module for the supplied session's user. The value is retrieved directly from user's
+     * configuration view.
+     * <p>
+     * If no value can be found the provided default value will be returned
+     *
+     * @param session The session
+     * @param propName The name of the property providing the amount limit
+     * @param configViewFactory A reference to the config view factory
+     * @param defaultValue Value that will be returned if amount can not be found
+     * @return The limit or the defaultValue if no amount quota is defined
+     * @throws OXException
+     */
+    public static long getConfiguredLimitByPropertyName(Session session, String propName, ConfigViewFactory configViewFactory, long defaultValue) throws OXException {
+        ConfigView configView = configViewFactory.getView(session.getUserId(), session.getContextId());
+        // Get property
+        ConfigProperty<String> property = configView.property(propName, String.class);
+        if (!property.isDefined()) {
+            return defaultValue;
+        }
+        try {
+            return Long.parseLong(property.get().trim());
+        } catch (final RuntimeException e) {
+            LOG.warn("Couldn't detect quota from property {} (user={}, context={})", propName, session.getUserId(), session.getContextId(), e);
+            return defaultValue;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Gets the configured amount limit in a specific module for the supplied session's user. The value is either retrieved directly from

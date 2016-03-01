@@ -80,6 +80,14 @@ public interface SnippetManagement {
     List<Snippet> getOwnSnippets() throws OXException;
 
     /**
+     * Gets the number of all snippets belonging to associated user.
+     *
+     * @return The number of all user-associated snippets
+     * @throws OXException If retrieval operation fails
+     */
+    int getOwnSnippetsCount() throws OXException;
+
+    /**
      * Gets a snippet by specified identifier.
      *
      * @param id The identifier
