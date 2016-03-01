@@ -145,6 +145,7 @@ public class UseCountCopyTask implements CopyUserTaskService {
             throw UserCopyExceptionCodes.SQL_PROBLEM.create(e);
         } finally {
             DBUtils.closeSQLStuff(rs, srcStmt);
+            DBUtils.closeSQLStuff(dstStmt);
         }
     }
 
