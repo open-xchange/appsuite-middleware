@@ -62,10 +62,13 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
+
 import com.openexchange.caldav.CalDAVPermission;
 import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
@@ -294,17 +297,23 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverGroupID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
+            if (text.startsWith("mailto:")) {
+                text = text.substring(7);
+            }
             if (text.startsWith("/principals/groups/")) {
-                String groupId = text.substring(19);
-                if ('/' == groupId.charAt(groupId.length() - 1)) {
-                    groupId = groupId.substring(0, groupId.length() - 1);
+                /*
+                 * get group by id
+                 */
+                String value = text.substring(19);
+                if ('/' == value.charAt(value.length() - 1)) {
+                    value = value.substring(0, value.length() - 1);
                 }
                 try {
-                    return Integer.valueOf(groupId);
+                    return Integer.valueOf(value);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing group identifier '{}'", groupId, e);
+                    LOG.debug("Error parsing group identifier '{}'", value, e);
                 }
             }
         }
@@ -312,18 +321,33 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverUserID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
             if (text.startsWith("mailto:")) {
-                String mail = text.substring(7);
-                return CalDAVServiceLookup.getService(UserService.class).searchUser(mail, factory.getContext()).getId();
-            } else if (text.startsWith("/principals/users/")) {
-                String loginName = text.substring(18);
-                if ('/' == loginName.charAt(loginName.length() - 1)) {
-                    loginName = loginName.substring(0, loginName.length() - 1);
-                }
-                return CalDAVServiceLookup.getService(UserService.class).getUserId(loginName, factory.getContext());
+                text = text.substring(7);
             }
+            if (text.startsWith("/principals/")) {
+                if (text.startsWith("/principals/users/")) {
+                    /*
+                     * get user by id or login info
+                     */
+                    String value = text.substring(18);
+                    if ('/' == value.charAt(value.length() - 1)) {
+                        value = value.substring(0, value.length() - 1);
+                    }
+                    try {
+                        return Integer.valueOf(value);
+                    } catch (NumberFormatException e) {
+                        LOG.debug("Error parsing user identifier '{}'", value, e);
+                    }
+                    return CalDAVServiceLookup.getService(UserService.class).getUserId(value, factory.getContext());
+                }
+                return -1; // other principal
+            }
+            /*
+             * search by mail address
+             */
+            return CalDAVServiceLookup.getService(UserService.class).searchUser(text, factory.getContext()).getId();
         }
         return -1;
     }
