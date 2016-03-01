@@ -383,6 +383,21 @@ public class Strings {
         return P_SPLIT_COMMA.split(s, 0);
     }
 
+    private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+
+    /**
+     * Splits given string by colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByColon(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_COLON.split(s, 0);
+    }
+
     private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");
 
     /**

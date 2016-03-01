@@ -51,8 +51,6 @@ package com.openexchange.tools.update;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.io.File;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -73,13 +71,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreStorage;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * This class contains some tools to ease update of database.
@@ -669,18 +662,7 @@ public final class Tools {
     }
 
     private static final int NULLABLE = 11;
-
     private static final String TABLE = "TABLE";
-
-    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException {
-        final Context ctx = ContextStorage.getInstance().loadContext(cid);
-        final URI fileStorageURI = FilestoreStorage.createURI(ctx);
-        final File file = new File(fileStorageURI);
-        if (file.exists()) {
-            final FileStorage fs = QuotaFileStorage.getInstance(fileStorageURI, ctx);
-            fs.deleteFile(fileStoreLocation);
-        }
-    }
 
     public static boolean hasSequenceEntry(final String sequenceTable, final Connection con, final int ctxId) throws SQLException {
         PreparedStatement stmt = null;

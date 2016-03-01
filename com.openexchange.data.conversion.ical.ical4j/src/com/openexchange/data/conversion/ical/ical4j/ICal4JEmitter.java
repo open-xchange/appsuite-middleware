@@ -88,6 +88,7 @@ import com.openexchange.data.conversion.ical.itip.ITipContainer;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.tasks.Task;
+import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -227,22 +228,33 @@ public class ICal4JEmitter implements ICalEmitter {
         return new ICal4jItem(event);
     }
 
+    @Override
+    public boolean writeTimeZone(ICalSession session, String timeZoneID, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError {
+        Calendar calendar = getCalendar(session);
+        return addVTimeZone(session.getZoneInfo(), calendar, timeZoneID);
+    }
+
+    protected boolean addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
+        return addVTimeZone(zoneInfo, calendar, appointment.getTimezone());
+    }
+
     @SuppressWarnings("unchecked")
-    protected void addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, Appointment appointment) {
-        if (appointment.getTimezone() != null && !appointment.getTimezone().trim().equals("")) {
-            String tzid = appointment.getTimezone().trim();
+    private boolean addVTimeZone(ZoneInfo zoneInfo, Calendar calendar, String tzid) {
+        if (Strings.isNotEmpty(tzid)) {
             for (Object o : calendar.getComponents(Component.VTIMEZONE)) {
                 Component vtzComponent = (Component) o;
                 if (vtzComponent.getProperty(Property.TZID).getValue().equalsIgnoreCase(tzid)) {
-                    return;
+                    return false;
                 }
             }
             TimeZone timeZone = new EmitterTools(zoneInfo).getTimeZoneRegistry().getTimeZone(tzid);
             if (null != timeZone) {
                 VTimeZone vTimeZone = timeZone.getVTimeZone();
                 calendar.getComponents().add(0, vTimeZone);
+                return true;
             }
         }
+        return false;
     }
 
     @Override

@@ -190,6 +190,8 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
                 compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.DRAFTS_LITERAL);
             } else if (attribute == Attribute.SPAM_FULLNAME_LITERAL) {
                 compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.SPAM_LITERAL);
+            } else if (attribute == Attribute.ARCHIVE_FULLNAME_LITERAL) {
+                compareByEnding(expectedSwitch, actualSwitch, attribute, Attribute.ARCHIVE_LITERAL);
             } else {
                 final Object expected = attribute.doSwitch(expectedSwitch);
                 final Object actual = attribute.doSwitch(actualSwitch);
@@ -206,7 +208,7 @@ public class MailAccountLifecycleTest extends AbstractMailAccountTest {
             Object confHam = compareAttribute.doSwitch(expectedSwitch);
             assertNotNull(confHam);
             final String confHamString = (String) confHam;
-            assertTrue(((String) actual).endsWith(confHamString));
+            assertTrue("\"" + actual + "\" does not end with \"" + confHamString + "\"", ((String) actual).toLowerCase().endsWith(confHamString.toLowerCase()));
         } else {
             assertEquals(attribute.getName() + " differs!", expected, actual);
         }

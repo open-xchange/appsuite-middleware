@@ -83,6 +83,7 @@ import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIteratorException;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 
@@ -121,6 +122,9 @@ public final class ListAction extends AppointmentAction {
 
         final TIntObjectMap<TIntList> recurrencePositionMap = new TIntObjectHashMap<TIntList>();
         final JSONArray jData = req.getData();
+        if (null == jData) {
+            throw AjaxExceptionCodes.INVALID_JSON_REQUEST_BODY.create();
+        }
         final boolean bRecurrenceMaster = req.parseBoolean(RECURRENCE_MASTER);
 
         final TIntIntMap objectIdMap = new TIntIntHashMap();

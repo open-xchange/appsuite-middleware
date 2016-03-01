@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -72,9 +71,9 @@ import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.Tools;
 import com.openexchange.caldav.mixins.AllowedSharingModes;
-import com.openexchange.caldav.mixins.CalendarColor;
 import com.openexchange.caldav.mixins.CalendarOrder;
 import com.openexchange.caldav.mixins.CalendarOwner;
+import com.openexchange.caldav.mixins.CalendarTimezone;
 import com.openexchange.caldav.mixins.Invite;
 import com.openexchange.caldav.mixins.ManagedAttachmentsServerURL;
 import com.openexchange.caldav.mixins.MaxDateTime;
@@ -86,6 +85,9 @@ import com.openexchange.caldav.mixins.SupportedReportSet;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.query.FilterAnalyzer;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.mixins.CalendarColor;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
@@ -148,7 +150,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
         includeProperties(new SupportedReportSet(), new MinDateTime(this), new MaxDateTime(this), new Invite(factory, this),
             new AllowedSharingModes(factory.getSession()), new CalendarOwner(this), new Organizer(this),
             new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new CalendarColor(this),
-            new ManagedAttachmentsServerURL());
+            new ManagedAttachmentsServerURL(), new CalendarTimezone(factory, this));
         if (NO_ORDER != order) {
             includeProperties(new CalendarOrder(order));
         }
@@ -206,12 +208,8 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
             /*
              * apply color to meta field
              */
-            Map<String, Object> meta = folder.getMeta();
-            if (null == meta) {
-                meta = new HashMap<String, Object>();
-            } else {
-                meta = new HashMap<String, Object>(meta);
-            }
+            AbstractFolder folderToUpdate = getFolderToUpdate();
+            Map<String, Object> meta = folderToUpdate.getMeta();
             String value = CalendarColor.parse(prop);
             if (Strings.isEmpty(value)) {
                 meta.remove("color");
@@ -228,17 +226,15 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                     meta.put("color_label", uiValue);
                 }
             }
-            /*
-             * update folder
-             */
-            AbstractFolder updatableFolder = prepareUpdatableFolder();
-            updatableFolder.setMeta(meta);
-            try {
-                factory.getFolderService().updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
-            } catch (OXException e) {
-                throw protocolException(e);
-            }
         }
+    }
+
+    @Override
+    protected void internalDelete() throws WebdavProtocolException {
+        if (null != folder && folder.isDefault()) {
+            throw new PreconditionException(DAVProtocol.CAL_NS.getURI(), "default-calendar-needed", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+        }
+        super.internalDelete();
     }
 
     @Override
@@ -296,7 +292,7 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
                 hasChanged = true;
             }
             if (hasChanged) {
-                AbstractFolder updatableFolder = prepareUpdatableFolder();
+                AbstractFolder updatableFolder = getFolderToUpdate();
                 updatableFolder.setPermissions(updatedPermissions.toArray(new Permission[updatedPermissions.size()]));
                 factory.getFolderService().updateFolder(updatableFolder, folder.getLastModifiedUTC(), factory.getSession(), null);
             }
@@ -372,17 +368,23 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverGroupID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
+            if (text.startsWith("mailto:")) {
+                text = text.substring(7);
+            }
             if (text.startsWith("/principals/groups/")) {
-                String groupId = text.substring(19);
-                if ('/' == groupId.charAt(groupId.length() - 1)) {
-                    groupId = groupId.substring(0, groupId.length() - 1);
+                /*
+                 * get group by id
+                 */
+                String value = text.substring(19);
+                if ('/' == value.charAt(value.length() - 1)) {
+                    value = value.substring(0, value.length() - 1);
                 }
                 try {
-                    return Integer.valueOf(groupId);
+                    return Integer.valueOf(value);
                 } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing group identifier '{}'", groupId, e);
+                    LOG.debug("Error parsing group identifier '{}'", value, e);
                 }
             }
         }
@@ -390,22 +392,33 @@ public abstract class CalDAVFolderCollection<T extends CalendarObject> extends C
     }
 
     private int discoverUserID(Element hrefElement) throws OXException {
-        if (null != hrefElement.getText() && null != hrefElement.getText()) {
+        if (null != hrefElement && null != hrefElement.getText()) {
             String text = hrefElement.getText();
             if (text.startsWith("mailto:")) {
-                String mail = text.substring(7);
-                return factory.getService(UserService.class).searchUser(mail, factory.getContext()).getId();
-            } else if (text.startsWith("/principals/users/")) {
-                String userId = text.substring(18);
-                if ('/' == userId.charAt(userId.length() - 1)) {
-                    userId = userId.substring(0, userId.length() - 1);
-                }
-                try {
-                    return Integer.valueOf(userId);
-                } catch (NumberFormatException e) {
-                    LOG.debug("Error parsing user identifier '{}'", userId, e);
-                }
+                text = text.substring(7);
             }
+            if (text.startsWith("/principals/")) {
+                if (text.startsWith("/principals/users/")) {
+                    /*
+                     * get user by id or login info
+                     */
+                    String value = text.substring(18);
+                    if ('/' == value.charAt(value.length() - 1)) {
+                        value = value.substring(0, value.length() - 1);
+                    }
+                    try {
+                        return Integer.valueOf(value);
+                    } catch (NumberFormatException e) {
+                        LOG.debug("Error parsing user identifier '{}'", value, e);
+                    }
+                    return factory.getService(UserService.class).getUserId(value, factory.getContext());
+                }
+                return -1; // other principal
+            }
+            /*
+             * search by mail address
+             */
+            return factory.getService(UserService.class).searchUser(text, factory.getContext()).getId();
         }
         return -1;
     }

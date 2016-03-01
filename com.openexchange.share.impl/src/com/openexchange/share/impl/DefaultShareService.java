@@ -200,13 +200,26 @@ public class DefaultShareService implements ShareService {
     @Override
     public Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException {
         Set<Integer> userIDs = new HashSet<Integer>();
-        List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
-        for (TargetProxy target : targets) {
-            List<TargetPermission> permissions = target.getPermissions();
-            if (null != permissions && 0 < permissions.size()) {
-                for (TargetPermission permission : permissions) {
-                    if (guestID != permission.getEntity() && false == permission.isGroup()) {
-                        userIDs.add(I(permission.getEntity()));
+        User guestUser = services.getService(UserService.class).getUser(guestID, contextID);
+        if (false == guestUser.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
+        }
+        /*
+         * always add the user who created this guest
+         */
+        userIDs.add(I(guestUser.getCreatedBy()));
+        /*
+         * for invited guests, also add the user permission entities found in accessible targets
+         */
+        if (false == ShareTool.isAnonymousGuest(guestUser)) {
+            List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
+            for (TargetProxy target : targets) {
+                List<TargetPermission> permissions = target.getPermissions();
+                if (null != permissions && 0 < permissions.size()) {
+                    for (TargetPermission permission : permissions) {
+                        if (guestID != permission.getEntity() && false == permission.isGroup()) {
+                            userIDs.add(I(permission.getEntity()));
+                        }
                     }
                 }
             }

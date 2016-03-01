@@ -72,7 +72,7 @@ public interface DriveUpdateService {
      * This function serves the template data.
      *
      * @return The {@link OXTemplate}.
-     * @throws TemplateException
+     * @throws TemplateException if it is unable to load the template
      */
     public OXTemplate getOxtenderSpecificTemplate() throws OXException;
 
@@ -87,13 +87,13 @@ public interface DriveUpdateService {
     public String getInstallerDownloadUrl(HostData hostData, Session session) throws OXException;
 
     /**
-     * Returns the values for the templates placeholder's.
+     * Retrieves the values for the templates placeholder's.
      *
      * @param serverUrl The URL to the groupware server.
      * @param username The name of the current user.
      * @param branding The branding identifier.
      * @return A Map containing the values for the {@link OXTemplate}.
-     * @throws AbstractOXException
+     * @throws OXException if branding isn't valid or if the values couldn't be retrieved
      */
     public Map<String, Object> getTemplateValues(String serverUrl, String username, String branding) throws OXException;
 
@@ -106,14 +106,14 @@ public interface DriveUpdateService {
     public String[] getNecessaryPermission();
 
     /**
-     * Returns true if this service is able to deliver the file identified by the given name.
+     * Tests if this service is able to deliver the file identified by the given name.
      *
      * This method exists to support the old oxupdater and will eventually be removed in the future.
      *
      * @param fileName The file name. Must not be null.
      * @param branding The branding identifier.
      * @return <code>true</code> if this service is able to deliver that file.
-     * @throws OXException
+     * @throws OXException if it is unable to test the responsibility
      */
     public boolean isResponsibleFor(String fileName, String branding) throws OXException;
 
@@ -140,26 +140,26 @@ public interface DriveUpdateService {
     /**
      * Initialize the DriveUpdateService
      *
-     * @param fileProvider
-     * @throws OXException
+     * @param fileProvider The UpdateFileProvider
+     * @throws OXException if fileProvider is null or if some configuration is missing
      */
     public void init(UpdateFilesProvider fileProvider) throws OXException;
 
     /**
-     * Retrieves the filename of the executable file for the given brand
+     * Retrieves the filename of the executable file for the given branding
      *
      * @param branding The branding identifier
      * @return The name of the file.
-     * @throws OXException
+     * @throws OXException if branding isn't valid or if it is unable to retrieve the filename
      */
     public String getExeFileName(String branding) throws OXException;
 
     /**
-     * Retrieves the filename of the windows installer file for the given brand
+     * Retrieves the filename of the windows installer file for the given branding
      *
      * @param branding The branding identifier.
      * @return The name of the file.
-     * @throws OXException
+     * @throws OXException if branding isn't valid or if it is unable to retrieve the filename
      */
     public String getMsiFileName(String branding) throws OXException;
 

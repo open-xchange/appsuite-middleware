@@ -49,9 +49,11 @@
 
 package com.openexchange.ajax.onboarding.tests;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONObject;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
+import com.openexchange.ajax.framework.AbstractConfigAwareAjaxSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
 
@@ -62,17 +64,31 @@ import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class EMClientURLTest extends AbstractAJAXSession {
+public class EMClientURLTest extends AbstractConfigAwareAjaxSession {
 
     public EMClientURLTest(String name) {
         super(name);
+    }
+
+    private static Map<String, String> confs;
+
+    static {
+        confs = new HashMap<String, String>();
+        confs.put("com.openexchange.client.onboarding.emclient.url", "http://www.open-xchange.com");
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        return confs;
     }
 
     public void testEMClientURL() throws Exception {
         ExecuteRequest req = new ExecuteRequest("windows.desktop/emclientinstall", "link", null, false);
         OnboardingTestResponse response = client.execute(req);
         assertNotNull("Response is empty!", response);
-        assertFalse("The response has an unexpected error: " + response.getException().getMessage(), response.hasError());
+        if (response.hasError()) {
+            fail("The response has an unexpected error: " + response.getException().getMessage());
+        }
         Object data = response.getData();
         assertNotNull("Response has no data!", data);
         assertTrue("Unexpected response data type", data instanceof JSONObject);

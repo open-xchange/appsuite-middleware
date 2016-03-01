@@ -67,7 +67,7 @@ import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link S3FileStorage}
+ * {@link SproxydFileStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -245,12 +245,13 @@ public class SproxydFileStorage implements FileStorage {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
 
-        if (1 == chunks.size()) {
+        int size = chunks.size();
+        if (1 == size) {
             /*
              * download parts of a single chunk
              */
             Chunk chunk = chunks.get(0);
-            if (offset > chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
+            if (offset >= chunk.getLength() || length >= 0 && length > chunk.getLength() - offset) {
                 throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
             }
             long rangeStart = 0 < offset ? offset : 0;
@@ -261,9 +262,9 @@ public class SproxydFileStorage implements FileStorage {
         /*
          * download from multiple chunks
          */
-        Chunk lastChunk = chunks.get(chunks.size() - 1);
+        Chunk lastChunk = chunks.get(size - 1);
         long totalLength = lastChunk.getOffset() + lastChunk.getLength();
-        if (offset > totalLength || -1 != length && length > totalLength - offset) {
+        if (offset >= totalLength || length >= 0 && length > totalLength - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
         }
         long rangeStart = 0 < offset ? offset : 0;

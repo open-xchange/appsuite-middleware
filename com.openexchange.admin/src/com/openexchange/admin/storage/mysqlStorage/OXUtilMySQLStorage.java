@@ -95,6 +95,9 @@ import com.openexchange.admin.storage.sqlStorage.OXUtilSQLStorage;
 import com.openexchange.admin.tools.AdminCache;
 import com.openexchange.admin.tools.AdminCacheExtended;
 import com.openexchange.database.Databases;
+import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorageUnregisterListener;
+import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.threadpool.ThreadPoolCompletionService;
@@ -1584,21 +1587,8 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (cstmt != null) {
-                    cstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
-            try {
-                if (pstmt != null) {
-                    pstmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(cstmt);
+            closeSQLStuff(pstmt);
 
             if (con != null) {
                 try {
@@ -1643,39 +1633,32 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    if (con != null) {
-                        cache.pushReadConnectionForConfigDB(con);
-                    }
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
-
         }
     }
 
     @Override
     public void unregisterDatabase(final int dbId, final boolean isMaster) throws StorageException {
-        final Connection con;
+        Connection con;
         try {
             con = cache.getWriteConnectionForConfigDB();
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         }
+
         PreparedStatement stmt = null;
+        boolean rollback = false;
         try {
             DBUtils.startTransaction(con);
+            rollback = true;
 
             lock(con);
 
@@ -1711,15 +1694,17 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
                 closeSQLStuff(stmt);
             }
             con.commit();
+            rollback = false;
         } catch (final SQLException e) {
-            rollback(con);
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } catch (final RuntimeException e) {
-            rollback(con);
             LOG.error("Runtime Error", e);
             throw new StorageException(e);
         } finally {
+            if (rollback) {
+                rollback(con);
+            }
             try {
                 cache.pushWriteConnectionForConfigDB(con);
             } catch (final PoolException e) {
@@ -1732,41 +1717,48 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
     public void unregisterFilestore(final int store_id) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
-
+        boolean rollback = false;
         try {
             con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
+            rollback = true;
+
+            {
+                FileStorageUnregisterListenerRegistry listenerRegistry = AdminServiceRegistry.getInstance().getService(FileStorageUnregisterListenerRegistry.class);
+                if (null != listenerRegistry) {
+                    List<FileStorageUnregisterListener> listeners = listenerRegistry.getListeners();
+                    for (FileStorageUnregisterListener listener : listeners) {
+                        listener.onFileStorageUnregistration(store_id, con);
+                    }
+                }
+            }
+
             stmt = con.prepareStatement("DELETE FROM filestore WHERE id = ?");
             stmt.setInt(1, store_id);
             stmt.executeUpdate();
+
             con.commit();
+            rollback = false;
         } catch (final PoolException pe) {
             LOG.error("Pool Error", pe);
             throw new StorageException(pe);
         } catch (final SQLException ecp) {
             LOG.error("SQL Error", ecp);
-            try {
-                if (con != null) {
-                    con.rollback();
-                }
-            } catch (final SQLException exp) {
-                LOG.error("Error processing rollback of ox connection!", exp);
-            }
             throw new StorageException(ecp);
+        } catch (final OXException oxe) {
+            LOG.error("OX Error", oxe);
+            throw new StorageException(oxe);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
+            closeSQLStuff(stmt);
+            if (con != null) {
+                if (rollback) {
+                    Databases.rollback(con);
                 }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
-            try {
-                if (con != null) {
+                try {
                     cache.pushWriteConnectionForConfigDB(con);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
@@ -1788,13 +1780,7 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             LOG.error("SQL Error", ecp);
             throw new StorageException(ecp);
         } finally {
-            try {
-                if (stmt != null) {
-                    stmt.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("Error closing statement", e);
-            }
+            closeSQLStuff(stmt);
             if (con != null) {
                 try {
                     cache.pushWriteConnectionForConfigDB(con);
@@ -1847,6 +1833,168 @@ public class OXUtilMySQLStorage extends OXUtilSQLStorage {
             }
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    /**
+     * Gets the URIs of the file storages that are in use by specified context (either itself or by one if its users).
+     *
+     * @param contextId The context identifier
+     * @return The file storages in use
+     * @throws StorageException If file storages cannot be determined
+     */
+    @Override
+    public List<URI> getUrisforFilestoresUsedBy(int contextId) throws StorageException {
+        Connection configDbCon = null;
+        try {
+            configDbCon = cache.getReadConnectionForConfigDB();
+
+            // Get URI from context
+            URI ctxUri = getFilestoreUsedByContext(contextId, configDbCon);
+
+            // Get URIs from users
+            List<URI> uris;
+            {
+                Connection con = null;
+                try {
+                    con = cache.getConnectionForContext(contextId);
+                    uris = getFilestoresUsedByUsers(contextId, configDbCon, con);
+                } finally {
+                    if (null != con) {
+                        try {
+                            cache.pushConnectionForContext(contextId, con);
+                        } catch (PoolException e) {
+                            LOG.error("Error pushing configdb connection to pool!", e);
+                        }
+                    }
+                }
+            }
+
+            // Insert context URI & return
+            uris.add(0, ctxUri);
+            return uris;
+        } catch (PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } finally {
+            if (null != configDbCon) {
+                try {
+                    cache.pushReadConnectionForConfigDB(configDbCon);
+                } catch (PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    private URI getFilestoreUsedByContext(int contextId, Connection configDbCon) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = configDbCon.prepareStatement("SELECT filestore_id, filestore_name FROM context WHERE cid=?");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+
+            if (false == result.next()) {
+                return null;
+            }
+
+            int filestoreId = result.getInt(1);
+            String path = result.getString(2);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            stmt = configDbCon.prepareStatement("SELECT uri FROM filestore WHERE id=?");
+            stmt.setInt(1, filestoreId);
+            result = stmt.executeQuery();
+            if (!result.next()) {
+                // No such file storage
+                return null;
+            }
+
+            String fsUri = result.getString(1);
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            return new URI(fsUri + (fsUri.endsWith("/") ? "" : "/") + path);
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (URISyntaxException e) {
+            LOG.error("URI Syntax Error", e);
+            throw new StorageException(e);
+        } finally {
+            closeSQLStuff(result, stmt);
+        }
+    }
+
+    private List<URI> getFilestoresUsedByUsers(int contextId, Connection configDbCon, Connection con) throws StorageException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = con.prepareStatement("SELECT filestore_id, filestore_name FROM user WHERE cid=? AND filestore_id > 0");
+            stmt.setInt(1, contextId);
+            result = stmt.executeQuery();
+
+            if (false == result.next()) {
+                return new ArrayList<URI>(1);
+            }
+
+            class FidAndName {
+                final int filestoreId;
+                final String name;
+
+                FidAndName(int filestoreId, String name) {
+                    super();
+                    this.filestoreId = filestoreId;
+                    this.name = name;
+                }
+            };
+
+            List<FidAndName> fids = new LinkedList<FidAndName>();
+            do {
+                int filestoreId = result.getInt(1);
+                String path = result.getString(2);
+                fids.add(new FidAndName(filestoreId, path));
+            } while (result.next());
+            closeSQLStuff(result, stmt);
+            result = null;
+            stmt = null;
+
+            Map<Integer, String> baseUris = new HashMap<Integer, String>(fids.size());
+            List<URI> uris = new ArrayList<URI>(fids.size());
+            for (FidAndName fid : fids) {
+                int filestoreId = fid.filestoreId;
+
+                String fsUri;
+                if (baseUris.containsKey(Integer.valueOf(filestoreId))) {
+                    fsUri = baseUris.get(Integer.valueOf(filestoreId));
+                } else {
+                    stmt = configDbCon.prepareStatement("SELECT uri FROM filestore WHERE id=?");
+                    stmt.setInt(1, filestoreId);
+                    result = stmt.executeQuery();
+                    fsUri = result.next() ? result.getString(1) : null;
+                    baseUris.put(Integer.valueOf(filestoreId), fsUri);
+                    closeSQLStuff(result, stmt);
+                    result = null;
+                    stmt = null;
+                }
+
+                if (null != fsUri) {
+                    uris.add(new URI(fsUri + (fsUri.endsWith("/") ? "" : "/") + fid.name));
+                }
+            }
+            return uris;
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } catch (URISyntaxException e) {
+            LOG.error("URI Syntax Error", e);
             throw new StorageException(e);
         } finally {
             closeSQLStuff(result, stmt);

@@ -476,7 +476,7 @@ ox_comment(){
             mv $tmp $propfile
         fi
     elif [ "$action" == "remove" ];then
-        sed "s/^#.*$prop/$prop/" < $propfile > $tmp;
+      sed "s/^#[ ]*\($prop[ ]*=\)/\1/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not remove comment in file $propfile for $prop"

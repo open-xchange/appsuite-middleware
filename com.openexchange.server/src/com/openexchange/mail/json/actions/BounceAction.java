@@ -58,7 +58,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.Mail;
-import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -70,10 +69,10 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.compose.ComposeType;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
 import com.openexchange.mail.json.MailRequest;
-import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeMailMessage;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.MailTransport;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.ServiceLookup;
@@ -164,10 +163,7 @@ public final class BounceAction extends AbstractMailAction {
                     }
                     if (readOnly) {
                         // Construct a new one
-                        final ThresholdFileHolder tmp = new ThresholdFileHolder();
-                        getCloseables(req).add(tmp);
-                        mm.writeTo(tmp.asOutputStream());
-                        mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession(), tmp.getStream());
+                        mimeMessage = MimeMessageUtility.mimeMessageFrom(mm);
                     } else {
                         mimeMessage = mm;
                     }

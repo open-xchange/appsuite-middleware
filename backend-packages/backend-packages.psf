@@ -41,6 +41,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-oauth"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-filestore-s3"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-filestore-sproxyd"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-filestore-swift"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-distribution"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-boxcom"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-file-storage-dropbox"/>

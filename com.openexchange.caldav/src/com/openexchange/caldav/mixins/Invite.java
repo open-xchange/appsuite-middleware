@@ -113,23 +113,28 @@ public class Invite extends SingleXMLPropertyMixin {
     }
 
     private String getEntityElements(Permission permission) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder();
+        String commonName;
+        String uri;
         if (permission.isGroup()) {
+            uri = PrincipalURL.forGroup(permission.getEntity());
             Group group = factory.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
-            stringBuilder.append("<D:href>/principals/groups/").append(group.getIdentifier())
-                .append("/</D:href><CS:common-name> + ").append(group.getDisplayName()).append("</CS:common-name>");
+            commonName = " + " + group.getDisplayName();
         } else {
+            uri = PrincipalURL.forUser(permission.getEntity());
             User user = factory.resolveUser(permission.getEntity());
-            String commonName = user.getDisplayName();
+            commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {
                 commonName = user.getMail();
                 if (Strings.isEmpty(commonName)) {
                     commonName = "User " + user.getId();
                 }
             }
-            stringBuilder.append("<D:href>").append(PrincipalURL.forUser(user.getId())).append("</D:href><CS:common-name>").append(commonName).append("</CS:common-name>");
         }
-        return stringBuilder.toString();
+        boolean mailtoPrefix = true; // bug #44264
+        return new StringBuilder()
+            .append("<D:href>").append(mailtoPrefix ? "mailto:" : "").append(uri).append("</D:href>")
+            .append("<CS:common-name>").append(commonName).append("</CS:common-name>")
+        .toString();
     }
 
 }

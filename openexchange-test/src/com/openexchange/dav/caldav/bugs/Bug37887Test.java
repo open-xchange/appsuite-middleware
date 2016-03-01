@@ -115,7 +115,7 @@ public class Bug37887Test extends CalDAVTest {
          */
         Boolean found = null;
         for (MultiStatusResponse response : responses) {
-            if ("/caldav/".equals(response.getHref())) {
+            if ("/caldav/".equals(response.getHref()) || "/caldav/schedule-inbox/".equals(response.getHref()) || "/caldav/schedule-outbox/".equals(response.getHref())) {
                 continue;
             }
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.CALENDAR_COLOR)) {

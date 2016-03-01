@@ -214,26 +214,26 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
 
         AdminCacheExtended adminCache = cache;
+        boolean simpleDelete = null == gwCtx;
 
         Connection conForConfigDB = null;
         boolean rollbackConfigDB = false;
         try {
-            // Fetch filestores for associated context
-            List<com.openexchange.filestore.QuotaFileStorage> storages;
-            {
-                FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
-                List<com.openexchange.filestore.FileStorage> fileStorages = resolver.getFileStoragesUsedBy(ctx.getId().intValue(), true);
-
-                storages = new ArrayList<com.openexchange.filestore.QuotaFileStorage>(fileStorages.size());
-                for (com.openexchange.filestore.FileStorage fileStorage : fileStorages) {
-                    storages.add(((com.openexchange.filestore.QuotaFileStorage) fileStorage));
-                }
-            }
-
             // Delete filestore directories of the context
             LOG.debug("Starting filestore delete(cid={}) from disc!", ctx.getId());
-            boolean simpleDelete = null == gwCtx;
             if (!simpleDelete) {
+                // Fetch filestores for associated context
+                List<com.openexchange.filestore.QuotaFileStorage> storages;
+                {
+                    FileStorage2EntitiesResolver resolver = FileStorages.getFileStorage2EntitiesResolver();
+                    List<com.openexchange.filestore.FileStorage> fileStorages = resolver.getFileStoragesUsedBy(ctx.getId().intValue(), true);
+
+                    storages = new ArrayList<com.openexchange.filestore.QuotaFileStorage>(fileStorages.size());
+                    for (com.openexchange.filestore.FileStorage fileStorage : fileStorages) {
+                        storages.add(((com.openexchange.filestore.QuotaFileStorage) fileStorage));
+                    }
+                }
+
                 for (Iterator<com.openexchange.filestore.QuotaFileStorage> iter = storages.iterator(); iter.hasNext();) {
                     com.openexchange.filestore.QuotaFileStorage quotaFileStorage = iter.next();
                     try {
@@ -246,13 +246,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
             }
             if (simpleDelete) {
-                for (Iterator<com.openexchange.filestore.QuotaFileStorage> iter = storages.iterator(); iter.hasNext();) {
-                    com.openexchange.filestore.QuotaFileStorage quotaFileStorage = iter.next();
-                    URI storageURI = quotaFileStorage.getUri();
-                    if (!"file".equalsIgnoreCase(storageURI.getScheme())) {
-                        throw new StorageException("Can't hard-delete non-local file store at \"" + storageURI + "\"");
+                List<URI> uris = OXUtilStorageInterface.getInstance().getUrisforFilestoresUsedBy(ctx.getId().intValue());
+                for (URI uri : uris) {
+                    if (!"file".equalsIgnoreCase(uri.getScheme())) {
+                        throw new StorageException("Can't hard-delete non-local file store at \"" + uri + "\"");
                     }
-                    FileUtils.deleteDirectory(new File(storageURI));
+                    FileUtils.deleteDirectory(new File(uri));
                 }
             }
             LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());

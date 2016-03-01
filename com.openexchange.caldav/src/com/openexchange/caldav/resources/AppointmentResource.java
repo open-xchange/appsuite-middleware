@@ -85,6 +85,7 @@ import com.openexchange.dav.PreconditionException;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXException.IncorrectString;
 import com.openexchange.exception.OXException.Truncated;
+import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.Type;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
@@ -249,6 +250,14 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                 throw WebdavProtocolException.Code.EDIT_CONFLICT.create(getUrl(), HttpServletResponse.SC_CONFLICT);
             }
             /*
+             * check folder permissions beforehand
+             */
+            int ownPermissions = parent.getFolder().getOwnPermission().getWritePermission();
+            if (Permission.WRITE_OWN_OBJECTS > ownPermissions ||
+                Permission.WRITE_OWN_OBJECTS == ownPermissions && originalAppointment.getCreatedBy() != factory.getSession().getUserId()) {
+                throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+            }
+            /*
              * handle private comments & reminders
              */
             handlePrivateComments(appointmentToSave);
@@ -290,6 +299,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
              * save next reminder based on last acknowledged occurrence
              */
             if (null != nextReminder) {
+                if (null != originalAppointment && null == ParticipantTools.findUser(originalAppointment, factory.getUser().getId())) {
+                    throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                }
                 insertOrUpdateReminder(nextReminder);
             }
             if (0 == exceptionsToSave.size() && 0 == deleteExceptionsToSave.size()) {
@@ -376,6 +388,9 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
                  * save next reminder based on last acknowledged occurrence
                  */
                 if (null != nextExceptionReminder) {
+                    if (null != originalException && null == ParticipantTools.findUser(originalException, factory.getUser().getId())) {
+                        throw protocolException(HttpServletResponse.SC_FORBIDDEN);
+                    }
                     ReminderObject reminder = optReminder(exceptionToSave);
                     if (null != reminder) {
                         reminder.setDate(nextExceptionReminder.getDate());

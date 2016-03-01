@@ -960,7 +960,7 @@ public final class MailFolderStorage implements FolderStorage {
         final boolean hasSubfolders;
         if (cannotConnect(session)) {
             String accountName = "default" + argument.getAccountId();
-            return new DummyFolder(treeId, argument.getFullname(), accountName, accountName, argument.getFullname(), session.getUserId());
+            return new DummyFolder(treeId, MailFolderUtility.prepareFullname(accountId, argument.getFullname()), accountName, accountName, argument.getFullname(), session.getUserId());
         }
 
         if (MailFolder.DEFAULT_FOLDER_ID.equals(fullName)) {

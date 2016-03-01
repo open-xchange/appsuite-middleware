@@ -105,7 +105,7 @@ public class UseCountTest extends ContactTest {
         c2 = ctm.newAction(c2);
         mtm = new MailTestManager(client);
         Random rnd = new Random(System.currentTimeMillis());
-        address = rnd.nextInt() % 2 == 0 ? c1.getEmail1() : c2.getEmail2();
+        address = rnd.nextInt() % 2 == 0 ? c1.getEmail1() : c2.getEmail1();
         mtm.send(new TestMail(client.getValues().getDefaultAddress(), address, "Test", "text/plain", "Test"));
     }
 
@@ -118,6 +118,7 @@ public class UseCountTest extends ContactTest {
     }
 
     public void testUseCount() throws Exception {
+        AJAXClient client = new AJAXClient(User.User1);
         AutocompleteRequest req = new AutocompleteRequest("UseCount", false, String.valueOf(folderId), CONTACT_FIELDS, false);
         CommonSearchResponse resp = client.execute(req);
         assertFalse(resp.hasError());
@@ -126,6 +127,7 @@ public class UseCountTest extends ContactTest {
         assertEquals(2, json.length());
         Contact[] contacts = jsonArray2ContactArray(json, CONTACT_FIELDS);
         assertEquals(address, contacts[0].getEmail1());
+        client.logout();
     }
 
 }

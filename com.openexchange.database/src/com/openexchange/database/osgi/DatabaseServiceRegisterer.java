@@ -125,7 +125,7 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
                     LOG.error("Publishing AssignmentFactory failed due to missing DatabaseService.");
                 }
             } catch (final Exception e) {
-                LOG.error("Publishing AssignmentFactory failed.", e);
+                LOG.error("Publishing AssignmentFactory failed. This is normal until a server has been registered.", e);
             }
         }
         return obj;

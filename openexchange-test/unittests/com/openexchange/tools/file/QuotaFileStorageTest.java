@@ -314,6 +314,11 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
+        public void backWritableAfterReading(Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
         public Connection getReadOnly() {
             return null;
         }

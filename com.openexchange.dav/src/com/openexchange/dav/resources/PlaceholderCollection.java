@@ -176,7 +176,7 @@ public class PlaceholderCollection<T extends CommonObject> extends CommonFolderC
         try {
             FolderService folderService = factory.requireService(FolderService.class);
             UserizedFolder parentFolder = folderService.getDefaultFolder(factory.getUser(), treeID, contentType, factory.getSession(), null);
-            AbstractFolder folder = prepareUpdatableFolder();
+            AbstractFolder folder = getFolderToUpdate();
             folder.setParentID(parentFolder.getID());
             folder.setName(displayName);
             folder.setType(parentFolder.getType());

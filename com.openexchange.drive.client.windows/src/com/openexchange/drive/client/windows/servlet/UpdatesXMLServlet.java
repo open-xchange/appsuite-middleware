@@ -73,6 +73,9 @@ import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.tools.webdav.OXServlet;
 
 /**
+ * 
+ * {@link UpdatesXMLServlet} is a servlet which provides update informations about the drive client
+ *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */

@@ -53,6 +53,7 @@ import java.net.URI;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.QuotaFileStorage;
 import com.openexchange.filestore.QuotaFileStorageService;
+import com.openexchange.filestore.StorageInfo;
 import com.openexchange.tools.file.InMemoryFileStorage;
 
 /**
@@ -110,6 +111,11 @@ public class SimQuotaFileStorageService implements QuotaFileStorageService {
     @Override
     public boolean hasIndividualFileStorage(int userId, int contextId) throws OXException {
         return false;
+    }
+
+    @Override
+    public StorageInfo getFileStorageInfoFor(int userId, int contextId) throws OXException {
+        return null;
     }
 
 }

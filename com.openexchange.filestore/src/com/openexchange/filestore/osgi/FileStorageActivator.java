@@ -52,11 +52,13 @@ package com.openexchange.filestore.osgi;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
+import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import com.openexchange.filestore.FileStorage2EntitiesResolver;
 import com.openexchange.filestore.FileStorageService;
+import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.filestore.FileStorages;
 import com.openexchange.filestore.QuotaFileStorageService;
 
@@ -72,6 +74,8 @@ public class FileStorageActivator implements BundleActivator {
     private volatile ServiceTracker<FileStorageService, FileStorageService> fsTracker;
     private volatile ServiceTracker<QuotaFileStorageService, QuotaFileStorageService> qfsTracker;
     private volatile ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker;
+    private volatile TrackingFileStorageUnregisterListenerRegistry listenerRegistry;
+    private volatile ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration;
 
     /**
      * Initializes a new {@link FileStorageActivator}.
@@ -92,9 +96,15 @@ public class FileStorageActivator implements BundleActivator {
             ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver> resolverTracker = new ServiceTracker<FileStorage2EntitiesResolver, FileStorage2EntitiesResolver>(context, FileStorage2EntitiesResolver.class, new ResolverTrackerCustomizer(context));
             this.resolverTracker = resolverTracker;
 
+            TrackingFileStorageUnregisterListenerRegistry listenerRegistry = new TrackingFileStorageUnregisterListenerRegistry(context);
+            this.listenerRegistry = listenerRegistry;
+
             fsTracker.open();
             qfsTracker.open();
             resolverTracker.open();
+            listenerRegistry.open();
+
+            listenerRegistryRegistration = context.registerService(FileStorageUnregisterListenerRegistry.class, listenerRegistry, null);
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);
             logger.error("Failed to start {}", context.getBundle().getSymbolicName(), e);
@@ -105,6 +115,12 @@ public class FileStorageActivator implements BundleActivator {
     @Override
     public void stop(BundleContext context) throws Exception {
         try {
+            ServiceRegistration<FileStorageUnregisterListenerRegistry> listenerRegistryRegistration = this.listenerRegistryRegistration;
+            if (null != listenerRegistryRegistration) {
+                listenerRegistryRegistration.unregister();
+                this.listenerRegistryRegistration = null;
+            }
+
             ServiceTracker<FileStorageService, FileStorageService> fsTracker = this.fsTracker;
             if (null != fsTracker) {
                 fsTracker.close();
@@ -121,6 +137,12 @@ public class FileStorageActivator implements BundleActivator {
             if (null != resolverTracker) {
                 resolverTracker.close();
                 this.resolverTracker = null;
+            }
+
+            TrackingFileStorageUnregisterListenerRegistry listenerRegistry = this.listenerRegistry;
+            if (null != listenerRegistry) {
+                listenerRegistry.close();
+                this.listenerRegistry = null;
             }
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageActivator.class);

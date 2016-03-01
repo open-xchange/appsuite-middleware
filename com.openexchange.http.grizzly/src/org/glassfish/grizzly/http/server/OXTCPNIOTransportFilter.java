@@ -86,15 +86,58 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
 
     // -----------------------------------------------------------------------------------------------------------------------------
 
-    private final long readTimeoutMillis;
-    private final long writeTimeoutMillis;
-    private final TCPNIOTransport transport;
+    private static interface ConnectionPreparer {
 
-    public OXTCPNIOTransportFilter(final TCPNIOTransport transport, long readTimeoutMillis, long writeTimeoutMillis) {
+        void prepareConnection(TCPNIOConnection connection);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
+    private final TCPNIOTransport transport;
+    private final ConnectionPreparer connectionPreparer;
+
+    public OXTCPNIOTransportFilter(final TCPNIOTransport transport, final long readTimeoutMillis, final long writeTimeoutMillis) {
         super();
         this.transport = transport;
-        this.readTimeoutMillis = readTimeoutMillis;
-        this.writeTimeoutMillis = writeTimeoutMillis;
+
+        if (readTimeoutMillis <= 0) {
+            if (writeTimeoutMillis <= 0) {
+                connectionPreparer = new ConnectionPreparer() {
+
+                    @Override
+                    public void prepareConnection(TCPNIOConnection connection) {
+                        // Do nothing
+                    }
+                };
+            } else {
+                connectionPreparer = new ConnectionPreparer() {
+
+                    @Override
+                    public void prepareConnection(TCPNIOConnection connection) {
+                        connection.setWriteTimeout(writeTimeoutMillis, TimeUnit.MILLISECONDS);
+                    }
+                };
+            }
+        } else {
+            if (writeTimeoutMillis <= 0) {
+                connectionPreparer = new ConnectionPreparer() {
+
+                    @Override
+                    public void prepareConnection(TCPNIOConnection connection) {
+                        connection.setReadTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS);
+                    }
+                };
+            } else {
+                connectionPreparer = new ConnectionPreparer() {
+
+                    @Override
+                    public void prepareConnection(TCPNIOConnection connection) {
+                        connection.setReadTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS);
+                        connection.setWriteTimeout(writeTimeoutMillis, TimeUnit.MILLISECONDS);
+                    }
+                };
+            }
+        }
     }
 
     @Override
@@ -102,12 +145,7 @@ public final class OXTCPNIOTransportFilter extends BaseFilter {
         final TCPNIOConnection connection = (TCPNIOConnection) ctx.getConnection();
 
         // Set read/write timeout (if set)
-        if (readTimeoutMillis > 0) {
-            connection.setReadTimeout(readTimeoutMillis, TimeUnit.MILLISECONDS);
-        }
-        if (writeTimeoutMillis > 0) {
-            connection.setWriteTimeout(writeTimeoutMillis, TimeUnit.MILLISECONDS);
-        }
+        connectionPreparer.prepareConnection(connection);
 
         final boolean isBlocking = ctx.getTransportContext().isBlocking();
 

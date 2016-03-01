@@ -123,6 +123,15 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
     }
 
     /**
+     * Gets the currently highest-ranked service from this service listing
+     *
+     * @return The highest-ranked service or <code>null</code> (if service listing is empty)
+     */
+    protected S getHighestRanked() {
+        return empty ? null : services.get(0).service;
+    }
+
+    /**
      * Gets the rank-wise sorted service list
      *
      * @return The rank-wise sorted service list
@@ -156,7 +165,7 @@ public class RankingAwareNearRegistryServiceTracker<S> extends ServiceTracker<S,
 
     @Override
     public void removedService(final ServiceReference<S> reference, final S service) {
-        if (services.remove(new RankedService<S>(service, getRanking(reference)))) {
+        if (services.remove(new RankedService<S>(service, getRanking(reference, defaultRanking)))) {
             empty = services.isEmpty();
             onServiceRemoved(service);
         }

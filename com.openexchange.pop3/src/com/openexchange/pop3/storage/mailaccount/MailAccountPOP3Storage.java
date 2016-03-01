@@ -65,7 +65,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.Vector;
 import javax.mail.FetchProfile;
 import javax.mail.Flags;
 import javax.mail.Folder;
@@ -615,11 +614,11 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     /*
                      * Empty?
                      */
-                    if (0 == messageCount) {
+                    if (messageCount <= 0) {
                         // Nothing to synchronize
                         return;
                     }
-                    final Vector<POP3Message> messageCache = getMessageCache(inbox);
+                    final POP3Message[] messageCache = getMessageCache(inbox);
                     final TIntObjectMap<String> seqnum2uidl;
                     {
                         /*
@@ -635,8 +634,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                             final String uidl = inbox.getUID(message);
                             seqnum2uidl.put(message.getMessageNumber(), uidl);
                         }
-                        messageCache.clear();
-                        messageCache.setSize(messageCount);
+                        clear(messageCache);
                     }
                     /*
                      * Block-wise processing
@@ -650,8 +648,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
                     while (start <= messageCount) {
                         final int num = add2Storage(inbox, start, blockSize, uidlNotSupported, messageCount, seqnum2uidl);
                         start += num;
-                        messageCache.clear();
-                        messageCache.setSize(messageCount);
+                        clear(messageCache);
                     }
                     /*
                      * Expunge if necessary
@@ -1046,6 +1043,14 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         return subarray;
     }
 
+    private void clear(POP3Message[] messageCache) {
+        if (null != messageCache) {
+            for (int i = messageCache.length; i-- > 0;) {
+                messageCache[i] = null;
+            }
+        }
+    }
+
     private static final Field messageCacheField;
     static {
         Field f;
@@ -1061,11 +1066,11 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
     }
 
     @SuppressWarnings("unchecked")
-    private static Vector<POP3Message> getMessageCache(final POP3Folder inbox) throws OXException {
+    private static POP3Message[] getMessageCache(final POP3Folder inbox) throws OXException {
         try {
             final Field messageCacheField = MailAccountPOP3Storage.messageCacheField;
             if (null != messageCacheField) {
-                return (Vector<POP3Message>) messageCacheField.get(inbox);
+                return (POP3Message[]) messageCacheField.get(inbox);
             }
             throw new NoSuchFieldException("message_cache");
         } catch (final SecurityException e) {

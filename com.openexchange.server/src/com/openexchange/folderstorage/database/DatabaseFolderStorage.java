@@ -53,7 +53,6 @@ import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtili
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
-import static com.openexchange.groupware.container.FolderObject.SYSTEM_MODULE;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
@@ -536,12 +535,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con, storageParameters);
                 final int userId = storageParameters.getUserId();
                 final boolean isShared = parent.isShared(userId);
-                final boolean isSystem = (SYSTEM_MODULE == parent.getModule());
+                final boolean isSystem = FolderObject.SYSTEM_TYPE == parent.getType();
                 final List<OCLPermission> parentPermissions = parent.getPermissions();
                 /*
                  * Create permission list
                  */
-                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 0 : parentPermissions.size()) + 1);
+                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 1 : parentPermissions.size()) + 1);
                 if (isShared) {
                     permissions.add(newMaxPermissionFor(parent.getCreatedBy()));
                     permissions.add(newStandardPermissionFor(userId));

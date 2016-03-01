@@ -76,7 +76,9 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -379,10 +381,25 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (cascadePermissions) {
                         boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
                         checkOpenedStorage(storage, openedStorages);
-                        List<String> ids = new ArrayList<String>();
+                        List<String> subfolderIDs = new ArrayList<String>();
                         try {
-                            gatherSubfolders(folder, storage, treeId, ids, ignoreWarnings);
-                            cascadeFolderPermissions(folder, storage, treeId, ids);
+                            gatherSubfolders(folder, storage, treeId, subfolderIDs, ignoreWarnings);
+                            if (0 < subfolderIDs.size()) {
+                                /*
+                                 * prepare target permissions: remove any anonymous link permission entities
+                                 */
+                                List<Permission> permissions = new ArrayList<Permission>(folder.getPermissions().length);
+                                for (Permission permission : folder.getPermissions()) {
+                                    if (false == permission.isGroup()) {
+                                        GuestInfo guest = comparedPermissions.getGuestInfo(permission.getEntity());
+                                        if (null != guest && RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                                            continue;
+                                        }
+                                    }
+                                    permissions.add(permission);
+                                }
+                                updatePermissions(storage, treeId, subfolderIDs, permissions.toArray(new Permission[permissions.size()]));
+                            }
                         } catch (OXException e) {
                             if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
                                 addWarning(e);
@@ -505,19 +522,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
-     * Cascade folder permissions
+     * Updates the permissions for multiple folders.
      *
-     * @param folder The folder
      * @param storage The folder storage
      * @param treeId The tree identifier
+     * @param folderIDs The identifiers of the folders to update the permissions
+     * @param permissions The target permissions to apply for all folders
      * @throws OXException If applying the permissions fails.
      */
-    private void cascadeFolderPermissions(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
-        for (String id : ids) {
+    private void updatePermissions(FolderStorage storage, String treeId, List<String> folderIDs, Permission[] permissions) throws OXException {
+        for (String id : folderIDs) {
             UpdateFolder toUpdate = new UpdateFolder();
             toUpdate.setTreeID(treeId);
             toUpdate.setID(id);
-            toUpdate.setPermissions(folder.getPermissions());
+            toUpdate.setPermissions(permissions);
             storage.updateFolder(toUpdate, storageParameters);
         }
     }

@@ -51,6 +51,7 @@ package com.openexchange.filestore;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
+import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -62,6 +63,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum FileStorageCodes implements DisplayableOXExceptionCode {
+
     /** An IO error occurred: %s */
     IOERROR("An IO error occurred: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
@@ -92,6 +94,22 @@ public enum FileStorageCodes implements DisplayableOXExceptionCode {
     INVALID_LENGTH("The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 20),
     /** No such file storage: %1$s */
     NO_SUCH_FILE_STORAGE("No such file storage: %1$s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 21),
+    /** An end of stream has been reached unexpectedly during reading input. */
+    CONNECTION_CLOSED("An end of stream has been reached unexpectedly during reading input.", FileStorageStrings.CONNECTION_CLOSED_MSG, Category.CATEGORY_CONNECTIVITY, 22),
+
+    /**
+     * "Wrong filestore %1$d for context %2$d needing filestore %3$d.
+     */
+    FILESTORE_MIXUP("Wrong file store %1$d for context %2$d. Correct file store: %3$d.", MESSAGE, Category.CATEGORY_ERROR, 201),
+    /**
+     * Cannot create URI from "%1$s".
+     */
+    URI_CREATION_FAILED("Cannot create URI from \"%1$s\".", MESSAGE, Category.CATEGORY_ERROR, 304),
+    /**
+     * SQL Problem: "%s".
+     */
+    SQL_PROBLEM("SQL problem: \"%s\".", SQL_ERROR_MSG, Category.CATEGORY_ERROR, 306),
+
     ;
 
     private static final String PREFIX = "FLS";

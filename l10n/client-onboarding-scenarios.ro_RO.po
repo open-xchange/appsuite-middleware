@@ -1,0 +1,140 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: client-onboarding\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2016-02-27 19:50+0100\n"
+"Last-Translator: daiana <xdaiana@yahoo.com>\n"
+"Language-Team: Romanian <ro@bureau-cornavin.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: \n"
+"X-Generator: Poedit 1.6.9\n"
+"Plural-Forms: nplurals=3; plural=(n==1?0:(((n%100>19)||((n%100==0)&&(n!=0)))?"
+"2:1));\n"
+"Language: ro_RO\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Aplicația Drive"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "Sincronizați-vă fișierele cu aplicația noastră Drive."
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "Poștă electronică + calendar + agendă de contacte"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"Pentru a vă sincroniza datele de e-mail, calendar, sarcini și agendă de "
+"contacte descărcați și instalați aplicația noastră."
+
+# Drive App
+msgid "Drive App"
+msgstr "Aplicația Drive"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "Sincronizați-vă fișierele cu aplicația noastră Drive."
+
+# Mail App
+msgid "Mail App"
+msgstr "Aplicația Mail"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "Sincronizați-vă poșta electronică cu aplicația noastră Mail."
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "Calendar + agendă de contacte"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr ""
+"Sincronizați calendarul și agenda de contacte cu dispozitivul dumneavoastră."
+
+# OX Sync
+msgid "OX Sync"
+msgstr "Sincronizare OX"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "Sincronizați toate întâlnirile și contactele"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Pentru a configura manual calendarul și conturile agendei de contacte "
+"utilizați următoarele informații:"
+
+# Updater
+msgid "Updater"
+msgstr "Aplicație de actualizare"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+"La executarea fișierului descărcat se va lansa un asistent de instalare. "
+"Urmați instrucțiunile și instalați aplicația de actualizare. Se va instala "
+"cea mai recentă versiune a clientului Windows®. Aplicația de actualizare vă "
+"va informa dacă există actualizări. Puteți descărca aceste actualizări "
+"utilizând aceeași aplicație."
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr "Conector pentru Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"Sincronizarea poștei electronice, calendarului, contactelor și sarcinilor, "
+"precum și a dosarelor publice, partajate și sistem cu clienți Microsoft "
+"Outlook®."
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr ""
+"Sincronizați poșta electronică, calendarul și agenda de contacte cu "
+"dispozitivul dumneavoastră."
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Pentru a configura manual poșta electronică, calendarul și conturile agendei "
+"de contacte utilizați următoarele informații:"
+
+# Mail
+msgid "Mail"
+msgstr "Poștă electronică"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "Sincronizați-vă poșta electronică cu aplicația Apple Mail."
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"Pentru a vă configura manual contul de e-mail utilizați următoarele "
+"informații:"

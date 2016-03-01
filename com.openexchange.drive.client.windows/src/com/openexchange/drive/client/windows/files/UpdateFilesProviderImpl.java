@@ -88,25 +88,20 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
     private static final String DRIVE_ICON = "drive.ico";
 
 
-    public static UpdateFilesProviderImpl getInstance() throws OXException {
+    public static UpdateFilesProviderImpl getInstance() {
         if (instance == null) {
             instance = new UpdateFilesProviderImpl();
         }
         return instance;
     }
 
-    /**
-     * Initializes a new {@link UpdateFilesProviderImpl}.
-     * 
-     * @throws OXException
-     */
-    private UpdateFilesProviderImpl() throws OXException {
+    private UpdateFilesProviderImpl() {
         super();
         loaders = new HashMap<String, FileSystemResourceLoader>();
     }
 
     /**
-     * Initialize this UpdatesFilesProvider with again with the old path
+     * Initialize this UpdatesFilesProvider again with the old path
      * 
      * @return this
      * @throws OXException
@@ -116,11 +111,11 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
     }
 
     /**
-     * Checks which branding's are available and creates all necessary FileSystemResourceLoader
+     * Tests which branding's are available and creates all necessary FileSystemResourceLoader
      * 
-     * @param path the path to look for branding's
-     * @return
-     * @throws OXException
+     * @param path The path to look for branding's
+     * @return this
+     * @throws OXException if branding folder is missing
      */
     public UpdateFilesProvider init(String path) throws OXException {
         synchronized (loaders) {
@@ -186,14 +181,14 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
 
     @Override
     public boolean contains(String branding, String name) throws OXException {
-        if (!isValid(branding)) {
+        if (!contains(branding)) {
             return false;
         }
         return loaders.get(branding).getAvailableFiles().contains(name);
     }
 
     @Override
-    public boolean isValid(String branding) {
+    public boolean contains(String branding) {
         return loaders.containsKey(branding);
     }
 
@@ -232,8 +227,12 @@ public class UpdateFilesProviderImpl implements UpdateFilesProvider {
     }
 
     @Override
-    public String getMD5(String branding, String name) throws IOException, OXException {
-        return loaders.get(branding).getMD5(name);
+    public String getMD5(String branding, String name) throws OXException {
+        try {
+            return loaders.get(branding).getMD5(name);
+        } catch (IOException e) {
+            throw new OXException(e);
+        }
     }
 
     @Override

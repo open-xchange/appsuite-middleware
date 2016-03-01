@@ -1478,15 +1478,13 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 try {
                     if (renameMe.isOpen()) {
                         renameMe.close(false);
-                    } else {
-                        // Enforce close
-                        IMAPCommandsCollection.forceCloseCommand(renameMe);
                     }
-                    final long start = System.currentTimeMillis();
+
+                    long start = System.currentTimeMillis();
                     IMAPCommandsCollection.renameFolder(renameMe, renameFolder);
+                    long duration = System.currentTimeMillis() - start;
                     success = true;
-                    // success = moveMe.renameTo(renameFolder);
-                    mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    mailInterfaceMonitor.addUseTime(duration);
                 } catch (final MessagingException e) {
                     /*
                      * Rename failed
@@ -3322,19 +3320,18 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
     }
 
     private boolean doesExist(IMAPFolder imapFolder, boolean readOnly) throws OXException, MessagingException {
-        final String fullName = imapFolder.getFullName();
-        boolean exists = STR_INBOX.equals(fullName) || (readOnly ? getLISTEntry(fullName, imapFolder).exists() : imapFolder.exists());
+        String fullName = imapFolder.getFullName();
+        if (STR_INBOX.equals(fullName)) {
+            return true;
+        }
+
+        if (!readOnly) {
+            return imapFolder.exists();
+        }
+
+        boolean exists = getLISTEntry(fullName, imapFolder).exists();
         if (!exists) {
-            try {
-                imapFolder.open(IMAPFolder.READ_ONLY);
-                exists = true;
-            } catch (javax.mail.FolderNotFoundException e) {
-                exists = false;
-            } finally {
-                if (exists) {
-                    imapFolder.close(false);
-                }
-            }
+            exists = imapFolder.exists();
         }
         return exists;
     }

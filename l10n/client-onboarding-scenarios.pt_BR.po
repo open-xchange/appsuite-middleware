@@ -1,0 +1,136 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2016-02-23 18:24-0300\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"POT-Creation-Date: \n"
+"Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
+"Language-Team: \n"
+"Language: pt_BR\n"
+"X-Generator: Poedit 1.8.7\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Aplicativo Drive"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "Sincronize seus arquivos com nosso aplicativo Drive."
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "E-mail + calendário + livro de endereços"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"Para sincronizar seus dados de e-mail, calendário, tarefa e livro de "
+"endereços, baixe e instale nosso aplicativo para área de trabalho."
+
+# Drive App
+msgid "Drive App"
+msgstr "App Drive"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "Sincronize seus arquivos com nosso app Drive."
+
+# Mail App
+msgid "Mail App"
+msgstr "App de e-mail"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "Sincronize seus e-mails com nosso app de e-mail."
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "Calendário + livro de endereços"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr ""
+"Sincronize seu dados de calendário e livro de endereços com seu dispositivo."
+
+# OX Sync
+msgid "OX Sync"
+msgstr "OX Sync"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "Sincronize todos os seus compromissos e contatos"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Para configurar manualmente suas contas de calendário e livro de endereços, "
+"use a informação a seguir."
+
+# Updater
+msgid "Updater"
+msgstr "Atualizador"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+"Ao executar o arquivo baixado, um assistente de instalação será lançado. "
+"Siga as instruções e instale o atualizador. Instala a última versão do "
+"software cliente para Windows®. O atualizador informa automaticamente sobre "
+"novas atualizações. Você pode baixar as atualizações pelo atualizador."
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr "Conector para o Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"Sincronização de e-mails, calendário, contatos e tarefas, junto com pastas "
+"públicas, compartilhadas e do sistema para clientes Microsoft Outlook®."
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr ""
+"Sincronize seus dados de e-mail, calendário e livro de endereços com seu "
+"dispositivo."
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Para configurar manualmente suas contas de e-mail, calendário e livro de "
+"endereços, use a informação a seguir."
+
+# Mail
+msgid "Mail"
+msgstr "E-mail"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "Sincronize seu e-mail com o Apple Mail App."
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"Para configurar manualmente sua conta de e-mail, use as seguintes informações"

@@ -1,0 +1,132 @@
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+#
+# Jacob Sparre Andersen <jacob@bureau-cornavin.com>, 2016.
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2016-02-25 18:32+0100\n"
+"Last-Translator: Jacob Sparre Andersen <jacob@bureau-cornavin.com>\n"
+"Language-Team: Danish <jacob@jacob-sparre.dk>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: da\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Lokalize 1.5\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Drive-programmet"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "Synkronisér dine filer med vores Drive-program."
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "E-mail + Kalender + Adressebog"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+"For at synkronisere din e-mail, kalender, opgaver og adressebog, hent og "
+"installér vores skrivebordsprogram."
+
+# Drive App
+msgid "Drive App"
+msgstr "Drive-app"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "Synkronisér dine filer med vores Drive-app."
+
+# Mail App
+msgid "Mail App"
+msgstr "E-mail-app"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "Synkronisér din e-post med vores E-mail-app."
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "Kalender + Adressebog"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr "Synkronisér din kalender og din adressebog med din enhed."
+
+# OX Sync
+msgid "OX Sync"
+msgstr "OX Sync"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "Synkronisér alle dine aftaler og kontakter"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+"Brug venligst de følgende oplysninger til selv at sætte dine kalender- og "
+"adressebogskonti op."
+
+# Updater
+msgid "Updater"
+msgstr "Opdaterer"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+"Når du kører den hentede fil, vil den starte en installationsguide. Følg "
+"instruktionerne og installér opdatereren.  Installerer de seneste udgaver af "
+"Windows®-klientsoftware.  Opdatereren vil automatisk informere om nye "
+"opdateringer.  Du kan henter opdateringerne inde fra opdatereren."
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr "Forbindelse til Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"Synkronisering af e-mails, kalender, kontakter og opgaver, samt offentlige, "
+"delte og systemmapper med Microsoft Outlook®-klienter."
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr "Synkronisér din e-mail, kalender og adressebog med din enhed."
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+"Brug venligst de følgende oplysninger til selv at sætte dine e-mail-, "
+"kalender- og adressebogskonti op."
+
+# Mail
+msgid "Mail"
+msgstr "E-mail"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "Synkronisér din e-post med Apple Mail App."
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+"Brug venligst de følgende oplysninger til selv at sætte din e-mail-konto op"
+
