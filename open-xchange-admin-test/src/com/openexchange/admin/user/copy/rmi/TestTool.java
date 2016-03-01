@@ -68,19 +68,27 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
  */
 public class TestTool {
 
-    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials, int filestoreId) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
         Context ctx = null;
         int ctxId = getRandomContextId();
         boolean created = false;
         while (!created) {
             try {
-                ctx = ci.create(AbstractRMITest.newContext(prefix + ctxId, ctxId), admin, accessCombinationName, superAdminCredentials);
+                Context newContext = AbstractRMITest.newContext(prefix + ctxId, ctxId);
+                if (filestoreId > 0) {
+                    newContext.setFilestoreId(filestoreId);
+                }
+                ctx = ci.create(newContext, admin, accessCombinationName, superAdminCredentials);
                 created = true;
             } catch (ContextExistsException e) {
                 ctxId = getRandomContextId();
             }
         }
         return ctx;
+    }
+
+    public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
+        return createContext(ci, prefix, admin, accessCombinationName, superAdminCredentials, -1);
     }
 
     private static int getRandomContextId() {

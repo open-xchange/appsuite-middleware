@@ -179,8 +179,8 @@ public class RoundtripTest extends AbstractRMITest {
         }
 
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
-        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
-        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
+        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials, 7);
+        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials, 7);
 
         ui = getUserInterface();
         final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
