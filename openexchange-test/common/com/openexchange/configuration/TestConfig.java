@@ -88,7 +88,9 @@ public class TestConfig extends AbstractConfig {
         /**
          * googletest.properties
          */
-        GOOGLE_PROPS("googlePropertiesFile");
+        GOOGLE_PROPS("googlePropertiesFile"),
+
+        FILESTORE("filestoreId");
 
         /**
          * Name of the property in the test.properties file.

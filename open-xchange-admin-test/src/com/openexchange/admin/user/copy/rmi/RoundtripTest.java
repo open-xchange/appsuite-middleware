@@ -166,6 +166,7 @@ public class RoundtripTest extends AbstractRMITest {
     @Override
     public void setUp() throws Exception {
         super.setUp();
+        AJAXConfig.init();
         superAdminCredentials = AbstractTest.DummyMasterCredentials();
         ci = getContextInterface();
         Context[] contexts = ci.list("UserMove*", superAdminCredentials);
@@ -179,8 +180,8 @@ public class RoundtripTest extends AbstractRMITest {
         }
 
         admin = newUser("oxadmin", "secret", "Admin User", "Admin", "User", "oxadmin@netline.de");
-        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials, 7);
-        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials, 7);
+        srcCtx = TestTool.createContext(ci, "UserMoveSourceCtx_", admin, "all", superAdminCredentials);
+        dstCtx = TestTool.createContext(ci, "UserMoveDestinationCtx_", admin, "all", superAdminCredentials);
 
         ui = getUserInterface();
         final User test = newUser("user", "secret", "Test User", "Test", "User", "test.user@netline.de");
@@ -189,7 +190,6 @@ public class RoundtripTest extends AbstractRMITest {
         test.setSmtpServer("devel-mail.netline.de");
         srcUser = ui.create(srcCtx, test, getCredentials());
 
-        AJAXConfig.init();
         userSession = performLogin("user@" + srcCtx.getName() , "secret");
         userClient = new AJAXClient(userSession, false);
 

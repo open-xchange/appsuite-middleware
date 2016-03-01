@@ -59,6 +59,8 @@ import com.openexchange.admin.rmi.exceptions.ContextExistsException;
 import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
 import com.openexchange.admin.rmi.exceptions.InvalidDataException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
+import com.openexchange.configuration.TestConfig;
+import com.openexchange.configuration.TestConfig.Property;
 
 
 /**
@@ -88,7 +90,13 @@ public class TestTool {
     }
 
     public static Context createContext(OXContextInterface ci, String prefix, User admin, String accessCombinationName, Credentials superAdminCredentials) throws RemoteException, StorageException, InvalidCredentialsException, InvalidDataException {
-        return createContext(ci, prefix, admin, accessCombinationName, superAdminCredentials, -1);
+        int filestoreId;
+        try {
+            filestoreId = Integer.parseInt(TestConfig.getProperty(Property.FILESTORE));
+        } catch (Exception e) {
+            filestoreId = -1;
+        }
+        return createContext(ci, prefix, admin, accessCombinationName, superAdminCredentials, filestoreId);
     }
 
     private static int getRandomContextId() {
