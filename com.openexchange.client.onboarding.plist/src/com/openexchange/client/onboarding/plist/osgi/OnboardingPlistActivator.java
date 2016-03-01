@@ -56,6 +56,7 @@ import com.openexchange.client.onboarding.plist.download.PlistLinkProviderImpl;
 import com.openexchange.client.onboarding.plist.internal.PListSignerImpl;
 import com.openexchange.client.onboarding.plist.servlet.PListDownloadServlet;
 import com.openexchange.client.onboarding.service.OnboardingService;
+import com.openexchange.client.onboarding.service.SMSBucketService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -86,7 +87,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class,
-                                DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class };
+ DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class, SMSBucketService.class };
     }
 
     @Override

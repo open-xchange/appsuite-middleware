@@ -47,27 +47,57 @@
  *
  */
 
-package com.openexchange.client.onboarding;
+package com.openexchange.client.onboarding.service;
 
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
 
 /**
- * {@link OnboardingSMSConstants}
+ * {@link SMSBucketService} provides a user based token-bucket for sms tokens
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class OnboardingSMSConstants {
+public interface SMSBucketService {
 
-    public static final String SMS_USER_LIMIT_REFRESH_INTERVAL = "com.openexchange.client.onboarding.sms.userlimit.refreshInterval";
+    /**
+     * Retrieves the number of available sms tokens for the given user and reduce the amount by one.
+     * 
+     * @param session The user session
+     * @return The previous amount of sms tokens
+     * @throws OXException if it was unable to retrieve the sms token
+     */
+    public int getSMSToken(Session session) throws OXException;
 
-    public static final String SMS_USER_LIMIT_ENABLED = "com.openexchange.client.onboarding.sms.userlimit.enabled";
+    /**
+     * Reset the number of sms tokens of all users to the to the configured value in com.openexchange.client.onboarding.sms.userlimit.
+     */
+    public void refillAllBuckets();
 
-    public static final String SMS_USER_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.userlimit";
+    /**
+     * Reset the number of sms tokens of all user within the given context to the to the configured value in com.openexchange.client.onboarding.sms.userlimit.
+     * 
+     * @param contextId The context id
+     */
+    public void refillBucket(int contextId);
 
-    public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
+    /**
+     * Starts a periodic task which refreshes all buckets
+     * 
+     * @throws OXException if starting fails
+     */
+    public void startRefreshTask() throws OXException;
 
-    public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
+    /**
+     * Starts a periodic task which refreshes the buckets of the given context
+     * 
+     * @param contextId The context id
+     * @throws OXException if starting fails
+     */
+    void startRefreshTask(int contextId) throws OXException;
 
-    public static final String SMS_DEFAULT_COUNTRY = "com.openexchange.client.onboarding.sms.defaultCountry";
-
+    /**
+     * Stops all refresh tasks
+     */
+    public void stopRefreshTasks();
 }

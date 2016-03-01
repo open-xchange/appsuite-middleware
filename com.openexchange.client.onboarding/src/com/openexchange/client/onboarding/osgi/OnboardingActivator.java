@@ -58,9 +58,11 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.internal.OnboardingConfig;
 import com.openexchange.client.onboarding.internal.OnboardingServiceImpl;
+import com.openexchange.client.onboarding.internal.SMSBucketServiceImpl;
 import com.openexchange.client.onboarding.rmi.RemoteOnboardingService;
 import com.openexchange.client.onboarding.rmi.impl.RemoteOnboardingServiceImpl;
 import com.openexchange.client.onboarding.service.OnboardingService;
+import com.openexchange.client.onboarding.service.SMSBucketService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -73,6 +75,7 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.session.Session;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.uadetector.UserAgentParser;
@@ -98,7 +101,7 @@ public class OnboardingActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { UserService.class, ConfigViewFactory.class, ConfigurationService.class, MimeTypeMap.class, UserAgentParser.class, ContextService.class,
-            TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class };
+ TranslatorFactory.class, ServerConfigService.class, CapabilityService.class, NotificationMailFactory.class, TimerService.class };
     }
 
     @Override
@@ -155,12 +158,19 @@ public class OnboardingActivator extends HousekeepingActivator {
             props.put("RMIName", RemoteOnboardingService.RMI_NAME);
             registerService(Remote.class, new RemoteOnboardingServiceImpl(serviceImpl), props);
         }
+
+        SMSBucketService smsBucketService = new SMSBucketServiceImpl();
+        registerService(SMSBucketService.class, smsBucketService);
+        smsBucketService.startRefreshTask();
     }
 
     @Override
     protected void stopBundle() throws Exception {
         super.stopBundle();
-
+        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+        if (smsBucketService != null) {
+            smsBucketService.stopRefreshTasks();
+        }
         OnboardingServiceImpl registry = this.registry;
         if (null != registry) {
             this.registry = null;
