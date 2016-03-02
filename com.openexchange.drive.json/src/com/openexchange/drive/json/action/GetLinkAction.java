@@ -87,6 +87,7 @@ public class GetLinkAction extends AbstractDriveAction {
                 jsonResult.put("expiry_date", expiryDate.getTime());
             }
             jsonResult.putOpt("password", shareLink.getGuest().getPassword());
+            jsonResult.put("checksum", shareLink.getTarget().getChecksum());
             return new AJAXRequestResult(jsonResult, "json");
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());

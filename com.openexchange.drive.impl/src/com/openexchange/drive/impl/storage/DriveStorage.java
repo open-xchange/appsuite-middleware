@@ -131,6 +131,13 @@ public class DriveStorage {
     }
 
     /**
+     * Invalidates any cached directories in the current session.
+     */
+    public void invalidateCache() {
+        knownFolders.clear();
+    }
+
+    /**
      * Gets the user's permission for a specific folder.
      *
      * @param path The path to the folder to get the own permissions for

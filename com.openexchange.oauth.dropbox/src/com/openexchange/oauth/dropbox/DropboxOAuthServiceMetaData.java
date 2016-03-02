@@ -154,7 +154,7 @@ public final class DropboxOAuthServiceMetaData extends AbstractScribeAwareOAuthS
                 }
             }
             if (Strings.isEmpty(reason)) {
-                reason = "Dropbox signaled HTTP error: " + e.error;
+                reason = new StringBuilder("Dropbox signaled HTTP error: ").append(e.error).toString();
             }
 
             throw OAuthExceptionCodes.DENIED_BY_PROVIDER.create(e, reason);

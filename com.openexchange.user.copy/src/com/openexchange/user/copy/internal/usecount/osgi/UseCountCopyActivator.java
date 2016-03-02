@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,42 @@
  *
  */
 
-package com.openexchange.quota;
+package com.openexchange.user.copy.internal.usecount.osgi;
 
-import java.util.List;
-import com.openexchange.osgi.annotation.SingletonService;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceRegistration;
+import com.openexchange.user.copy.CopyUserTaskService;
+import com.openexchange.user.copy.internal.usecount.UseCountCopyTask;
+
 
 /**
- * Open-Xchange consists of a set of modules that serve user requests.
- * Every module that allows users to store data may provide limits for a
- * certain amount of storage and a certain number of items that it will handle
- * for each user. In other words, every module can have user-specific quotas
- * for storage size and items. Those quotas may be set by definition or
- * by configuration and can also be unlimited. The responsibility to
- * enforce quotas lies within the modules themselves, but they can announce
- * their quotas via this service. That enables a client to provide a
- * combined overview over all quotas. Each module that wants to contribute
- * to this service has to implement a {@link QuotaProvider}.
+ * {@link UseCountCopyActivator}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.1
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.1
  */
-@SingletonService
-public interface QuotaService {
+public class UseCountCopyActivator implements BundleActivator {
+
+    private ServiceRegistration<CopyUserTaskService> serviceRegistration;
 
     /**
-     * Gets all currently known {@link QuotaProvider}s.
-     *
-     * @return A list of providers. Never <code>null</code> but possibly empty.
+     * Initializes a new {@link UseCountCopyActivator}.
      */
-    List<QuotaProvider> getAllProviders();
+    public UseCountCopyActivator() {
+        super();
+    }
 
-    /**
-     * Gets the provider for a specific module, if available.
-     *
-     * @param moduleID The modules unique identifier.
-     * @return The modules provider or <code>null</code>, if unknown.
-     */
-    QuotaProvider getProvider(String moduleID);
+    @Override
+    public void start(BundleContext context) throws Exception {
+        serviceRegistration = context.registerService(CopyUserTaskService.class, new UseCountCopyTask(), null);
+    }
+
+    @Override
+    public void stop(BundleContext context) throws Exception {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+        }
+    }
 
 }

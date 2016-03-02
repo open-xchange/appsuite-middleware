@@ -47,52 +47,93 @@
  *
  */
 
-package com.openexchange.snippet.mime;
+package com.openexchange.snippet.rdb.groupware;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.DefaultAccountQuota;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaType;
+import com.openexchange.quota.groupware.AmountQuotas;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
-import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
+import com.openexchange.snippet.rdb.Services;
+
 
 /**
- * {@link MimeSnippetService} - The "filestore" using snippet service.
- * <p>
- * <b>&nbsp;&nbsp;How SnippetService selection works</b>
- * <hr>
- * <p>
- * The check if "filestore" capability is available/permitted as per CapabilityService is performed through examining
- * "MimeSnippetService.neededCapabilities()" method in "SnippetAction.getSnippetService()".
- * <p>
- * Available SnippetServices are sorted rank-wise, with RdbSnippetService having default (0) ranking and MimeSnippetService with a rank of
- * 10. Thus MimeSnippetService is preferred provided that "filestore" capability is indicated by CapabilityService.
- * <p>
- * If missing, RdbSnippetService is selected.
+ * {@link RdbSnippetQuotaProvider}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public final class MimeSnippetService implements SnippetService {
+public class RdbSnippetQuotaProvider implements QuotaProvider {
 
-    private final QuotaProvider quotaProvider;
+    private static final String MODULE_ID = "rdb_snippet";
+    private static final String PROP_NAME = "com.openexchange.snippet.quota.limit";
+
+    private final AtomicReference<SnippetService> snippetServiceRef;
 
     /**
-     * Initializes a new {@link MimeSnippetService}.
+     * Initializes a new {@link RdbSnippetQuotaProvider}.
      */
-    public MimeSnippetService(QuotaProvider quotaProvider) {
+    public RdbSnippetQuotaProvider() {
         super();
-        this.quotaProvider = quotaProvider;
+        this.snippetServiceRef = new AtomicReference<SnippetService>(null);
+    }
+
+    /**
+     * Sets the associated snippet service
+     *
+     * @param quotaProvider The snippet service to set
+     */
+    public void setSnippetService(SnippetService snippetService) {
+        this.snippetServiceRef.set(snippetService);
     }
 
     @Override
-    public SnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session, quotaProvider);
+    public String getModuleID() {
+        return MODULE_ID;
     }
 
     @Override
-    public List<String> neededCapabilities() {
-        return Collections.singletonList("filestore");
+    public String getDisplayName() {
+        return "Snippet";
+    }
+
+    private Quota getAmountQuota(Session session, ConfigViewFactory viewFactory) throws OXException {
+        long limit = AmountQuotas.getConfiguredLimitByPropertyName(session, PROP_NAME, viewFactory);
+        if (limit <= Quota.UNLIMITED) {
+            return Quota.UNLIMITED_AMOUNT;
+        }
+        long usage = snippetServiceRef.get().getManagement(session).getOwnSnippetsCount();
+        return new Quota(QuotaType.AMOUNT, limit, usage);
+    }
+
+    @Override
+    public AccountQuota getFor(Session session, String accountID) throws OXException {
+        if (!accountID.equals("0")) {
+            throw QuotaExceptionCodes.UNKNOWN_ACCOUNT.create(accountID, MODULE_ID);
+        }
+
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
+        if (viewFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
+        }
+
+        Quota amountQuota = getAmountQuota(session, viewFactory);
+        return new DefaultAccountQuota(accountID, getDisplayName()).addQuota(amountQuota);
+    }
+
+    @Override
+    public List<AccountQuota> getFor(Session session) throws OXException {
+        return Collections.singletonList(getFor(session, "0"));
     }
 
 }

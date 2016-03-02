@@ -4301,6 +4301,12 @@ msgid ""
 "refers to all shares of one user in this context."
 msgstr ""
 
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:80
+msgid ""
+"Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
+"delete some signatures in order to create new ones."
+msgstr ""
+
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
 msgid "Could not send stanza to resource. Resource was offline: %1$s"

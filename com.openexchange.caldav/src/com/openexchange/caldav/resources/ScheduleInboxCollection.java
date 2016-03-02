@@ -53,6 +53,7 @@ import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import javax.servlet.http.HttpServletResponse;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
 import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
@@ -161,7 +162,7 @@ public class ScheduleInboxCollection extends DAVCollection implements FilteringR
 
     @Override
     public AbstractResource getChild(String name) throws WebdavProtocolException {
-        return null;
+        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
     }
 
     @Override
