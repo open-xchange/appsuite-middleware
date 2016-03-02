@@ -47,21 +47,21 @@
  *
  */
 
-package com.openexchange.client.onboarding;
+package com.openexchange.sms.tools;
 
 
 /**
- * {@link OnboardingSMSConstants}
+ * {@link SMSConstants}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class OnboardingSMSConstants {
+public class SMSConstants {
 
-    public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
+    public static final String SMS_USER_LIMIT_REFRESH_INTERVAL = "com.openexchange.sms.userlimit.refreshInterval";
 
-    public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
+    public static final String SMS_USER_LIMIT_ENABLED = "com.openexchange.sms.userlimit.enabled";
 
-    public static final String SMS_DEFAULT_COUNTRY = "com.openexchange.client.onboarding.sms.defaultCountry";
+    public static final String SMS_USER_LIMIT_PROPERTY = "com.openexchange.sms.userlimit";
 
 }

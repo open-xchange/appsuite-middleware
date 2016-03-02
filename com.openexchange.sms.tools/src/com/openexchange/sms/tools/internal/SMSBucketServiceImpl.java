@@ -47,22 +47,22 @@
  *
  */
 
-package com.openexchange.client.onboarding.internal;
+package com.openexchange.sms.tools.internal;
 
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.openexchange.client.onboarding.OnboardingSMSConstants;
-import com.openexchange.client.onboarding.osgi.Services;
-import com.openexchange.client.onboarding.service.SMSBucketService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sms.tools.SMSBucketService;
+import com.openexchange.sms.tools.SMSConstants;
+import com.openexchange.sms.tools.osgi.Services;
 import com.openexchange.timer.ScheduledTimerTask;
 import com.openexchange.timer.TimerService;
 
@@ -117,7 +117,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
-        return Integer.valueOf(view.get(OnboardingSMSConstants.SMS_USER_LIMIT_PROPERTY, String.class));
+        return Integer.valueOf(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class));
     }
 
     @Override
@@ -142,7 +142,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
         if (config == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
-        int interval = config.getIntProperty(OnboardingSMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, 1440);
+        int interval = config.getIntProperty(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, 1440);
         tasks.add(timerService.scheduleAtFixedRate(new RefreshSMSBucketsTask(this), interval, interval, TimeUnit.MINUTES));
         LOG.info("Started general SMSBucketRefreshTask with interval " + interval);
     }
@@ -160,7 +160,7 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
         ConfigView view = config.getView(-1, contextId);
-        int interval = view.get(OnboardingSMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, Integer.class);
+        int interval = view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, Integer.class);
         tasks.add(timerService.scheduleAtFixedRate(new RefreshSMSBucketsTask(this, contextId), interval, interval, TimeUnit.MINUTES));
         LOG.info("Started SMSBucketRefreshTask for context " + contextId + " with interval " + interval);
     }
@@ -215,6 +215,15 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             }
         }
 
+    }
+
+    @Override
+    public boolean isEnabled() throws OXException {
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        if (config == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+        }
+        return config.getBoolProperty(SMSConstants.SMS_USER_LIMIT_ENABLED, true);
     }
 
 }

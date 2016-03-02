@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.client.onboarding.service;
+package com.openexchange.sms.tools;
 
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
@@ -100,4 +100,10 @@ public interface SMSBucketService {
      * Stops all refresh tasks
      */
     public void stopRefreshTasks();
+
+    /**
+     * @return true if SMSUserLimit is enabled, false otherwise
+     * @throws OXException
+     */
+    public boolean isEnabled() throws OXException;
 }

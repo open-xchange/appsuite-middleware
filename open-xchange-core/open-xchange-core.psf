@@ -161,6 +161,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.share.handler.ical"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.share.handler.download"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.sms"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.sms.tools"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.snippet"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.snippet.json"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.snippet.mime"/>

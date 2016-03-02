@@ -56,7 +56,6 @@ import com.openexchange.client.onboarding.plist.download.PlistLinkProviderImpl;
 import com.openexchange.client.onboarding.plist.internal.PListSignerImpl;
 import com.openexchange.client.onboarding.plist.servlet.PListDownloadServlet;
 import com.openexchange.client.onboarding.service.OnboardingService;
-import com.openexchange.client.onboarding.service.SMSBucketService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.dispatcher.DispatcherPrefixService;
@@ -64,6 +63,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.user.UserService;
 
 

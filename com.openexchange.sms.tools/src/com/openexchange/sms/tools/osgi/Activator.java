@@ -47,21 +47,43 @@
  *
  */
 
-package com.openexchange.client.onboarding;
+package com.openexchange.sms.tools.osgi;
 
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sms.tools.SMSBucketService;
+import com.openexchange.sms.tools.internal.SMSBucketServiceImpl;
+import com.openexchange.timer.TimerService;
 
 /**
- * {@link OnboardingSMSConstants}
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class OnboardingSMSConstants {
+public class Activator extends HousekeepingActivator {
 
-    public static final String SMS_RATE_LIMIT_PROPERTY = "com.openexchange.client.onboarding.sms.ratelimit";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, TimerService.class };
+    }
 
-    public static final String SMS_LAST_SEND_TIMESTAMP = "com.openexchange.client.onboarding.sms.lastSendTimestamp";
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this);
+        SMSBucketService smsBucketService = new SMSBucketServiceImpl();
+        registerService(SMSBucketService.class, smsBucketService);
+        smsBucketService.startRefreshTask();
 
-    public static final String SMS_DEFAULT_COUNTRY = "com.openexchange.client.onboarding.sms.defaultCountry";
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+        if (smsBucketService != null) {
+            smsBucketService.stopRefreshTasks();
+        }
+    }
 
 }

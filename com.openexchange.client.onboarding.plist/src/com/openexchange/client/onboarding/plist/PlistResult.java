@@ -72,8 +72,6 @@ import com.openexchange.client.onboarding.download.DownloadLinkProvider;
 import com.openexchange.client.onboarding.download.DownloadOnboardingStrings;
 import com.openexchange.client.onboarding.notification.mail.OnboardingProfileCreatedNotificationMail;
 import com.openexchange.client.onboarding.plist.osgi.Services;
-import com.openexchange.client.onboarding.service.SMSBucketService;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -93,6 +91,7 @@ import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.tools.SMSBucketService;
 
 /**
  * {@link PlistResult} - A plist result.
@@ -369,12 +368,9 @@ public class PlistResult implements Result {
             }
         }
 
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        if (config == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-        if (config.getBoolProperty(OnboardingSMSConstants.SMS_USER_LIMIT_ENABLED, true)) {
-            int ramainingSMS = Services.getService(SMSBucketService.class).getSMSToken(session);
+        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+        if (smsBucketService.isEnabled()) {
+            int ramainingSMS = smsBucketService.getSMSToken(session);
             if (ramainingSMS == 0) {
                 throw OnboardingExceptionCodes.SMS_LIMIT_REACHED.create();
             }
