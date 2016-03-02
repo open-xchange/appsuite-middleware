@@ -670,8 +670,10 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     protected static final String OPT_ADD_GUI_SETTING_LONG = "addguipreferences";
     protected static final String OPT_REMOVE_GUI_SETTING_LONG = "removeguipreferences";
 
-    protected CLIOption configOption = null;
-    protected CLIOption removeConfigOption = null;
+    // The CLIOption instances for "config" and "remove-config" options are only for the purpose to mention these options for a "--help" invocation
+    // Their values are set through AdminParser's dynamic options!
+    protected CLIOption configOption_NO_READ = null;
+    protected CLIOption removeConfigOption_NO_READ = null;
     protected static final String OPT_CONFIG_LONG = "config";
     protected static final String OPT_REMOVE_CONFIG_LONG = "remove-config";
 
@@ -1853,11 +1855,15 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
     }
 
     protected final void setConfigOption(final AdminParser adminParser){
-        this.configOption = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
+        // The CLIOption instances for "config" and "remove-config" options are only for the purpose to mention these options for a "--help" invocation
+        // Their values are set through AdminParser's dynamic options!
+        this.configOption_NO_READ = setLongOpt(adminParser, OPT_CONFIG_LONG, "Add user/context specific configuration, e. g. '--config/com.openexchange.oauth.twitter=false|true'", false, false);
     }
 
     protected final void setRemoveConfigOption(final AdminParser adminParser){
-        this.removeConfigOption = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
+        // The CLIOption instances for "config" and "remove-config" options are only for the purpose to mention these options for a "--help" invocation
+        // Their values are set through AdminParser's dynamic options!
+        this.removeConfigOption_NO_READ = setLongOpt(adminParser, OPT_REMOVE_CONFIG_LONG, "Remove user/context specific configuration, e. g. '--remove-config/com.openexchange.oauth.twitter'", false, false);
     }
 
     /**
@@ -2532,17 +2538,21 @@ public abstract class UserAbstraction extends ObjectNamingAbstraction {
                 usr.removeGuiPreferences(removeguival);
             }
         }
-        final Boolean spamfilter = (Boolean)parser.getOptionValue(this.spamFilterOption);
-        if (null != spamfilter) {
-            usr.setGui_spam_filter_enabled(spamfilter);
-        }
 
+        {
+            Boolean spamfilter = (Boolean)parser.getOptionValue(this.spamFilterOption);
+            if (null != spamfilter) {
+                usr.setGui_spam_filter_enabled(spamfilter);
+            }
+        }
 
         {
             String value = (String)parser.getOptionValue(email1Option);
             if (null != value) {
                 // On the command line an empty string can be used to clear that specific attribute.
-                if ("".equals(value)) { value = null; }
+                if (value.length() == 0) {
+                    value = null;
+                }
                 usr.setEmail1(value);
             }
         }
