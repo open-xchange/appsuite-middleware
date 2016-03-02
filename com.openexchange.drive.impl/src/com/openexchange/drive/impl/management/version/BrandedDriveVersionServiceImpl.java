@@ -73,7 +73,7 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
 
     @Override
     public String getSoftMinimumVersion(String branding) {
-        if (!driveVersions.containsKey(branding)) {
+        if (driveVersions == null || !driveVersions.containsKey(branding)) {
             return null;
         }
         return driveVersions.get(branding).getSoft();
@@ -81,7 +81,7 @@ public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionServic
 
     @Override
     public String getHardMinimumVersion(String branding) {
-        if (!driveVersions.containsKey(branding)) {
+        if (driveVersions == null || !driveVersions.containsKey(branding)) {
             return null;
         }
         return driveVersions.get(branding).getHard();
