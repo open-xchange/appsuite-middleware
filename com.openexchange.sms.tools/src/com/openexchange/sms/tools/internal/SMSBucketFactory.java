@@ -47,35 +47,27 @@
  *
  */
 
-package com.openexchange.sms.tools.osgi;
+package com.openexchange.sms.tools.internal;
 
-import com.hazelcast.core.HazelcastInstance;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.hazelcast.serialization.CustomPortableFactory;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sms.tools.SMSBucketService;
-import com.openexchange.sms.tools.internal.SMSBucketFactory;
-import com.openexchange.sms.tools.internal.SMSBucketServiceImpl;
+import com.hazelcast.nio.serialization.Portable;
+import com.openexchange.hazelcast.serialization.AbstractCustomPortableFactory;
 
 /**
- * {@link Activator}
+ * {@link SMSBucketFactory}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class Activator extends HousekeepingActivator {
+public class SMSBucketFactory extends AbstractCustomPortableFactory {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigViewFactory.class, ConfigurationService.class, HazelcastInstance.class };
+    public Portable create() {
+        return new SMSBucket();
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        SMSBucketService smsBucketService = new SMSBucketServiceImpl();
-        registerService(SMSBucketService.class, smsBucketService);
-        registerService(CustomPortableFactory.class, new SMSBucketFactory());
+    public int getClassId() {
+        return 500;
     }
+
 }

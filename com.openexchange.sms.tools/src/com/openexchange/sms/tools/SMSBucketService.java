@@ -70,38 +70,6 @@ public interface SMSBucketService {
     public int getSMSToken(Session session) throws OXException;
 
     /**
-     * Reset the number of sms tokens of all users to the to the configured value in com.openexchange.client.onboarding.sms.userlimit.
-     */
-    public void refillAllBuckets();
-
-    /**
-     * Reset the number of sms tokens of all user within the given context to the to the configured value in com.openexchange.client.onboarding.sms.userlimit.
-     * 
-     * @param contextId The context id
-     */
-    public void refillBucket(int contextId);
-
-    /**
-     * Starts a periodic task which refreshes all buckets
-     * 
-     * @throws OXException if starting fails
-     */
-    public void startRefreshTask() throws OXException;
-
-    /**
-     * Starts a periodic task which refreshes the buckets of the given context
-     * 
-     * @param contextId The context id
-     * @throws OXException if starting fails
-     */
-    void startRefreshTask(int contextId) throws OXException;
-
-    /**
-     * Stops all refresh tasks
-     */
-    public void stopRefreshTasks();
-
-    /**
      * @return true if SMSUserLimit is enabled, false otherwise
      * @throws OXException
      */

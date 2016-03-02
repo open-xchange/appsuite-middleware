@@ -49,11 +49,8 @@
 
 package com.openexchange.sms.tools.internal;
 
-import java.util.ArrayList;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -63,8 +60,6 @@ import com.openexchange.session.Session;
 import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.sms.tools.SMSConstants;
 import com.openexchange.sms.tools.osgi.Services;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 
 
 /**
@@ -75,38 +70,47 @@ import com.openexchange.timer.TimerService;
  */
 public class SMSBucketServiceImpl implements SMSBucketService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SMSBucketService.class);
-    private ConcurrentHashMap<Integer, ConcurrentHashMap<Integer, Integer>> map;
-    private ArrayList<ScheduledTimerTask> tasks;
+    private IMap<String, SMSBucket> map;
+    private static final String HZ_MAP_NAME = "SMS_Bucket";
 
     /**
      * Initializes a new {@link SMSBucketServiceImpl}.
+     * 
+     * @throws OXException
      */
-    public SMSBucketServiceImpl() {
+    public SMSBucketServiceImpl() throws OXException {
         super();
-        map = new ConcurrentHashMap<>();
-        tasks = new ArrayList<>();
-
+        HazelcastInstance hz = Services.getService(HazelcastInstance.class);
+        if (hz == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        }
+        map = hz.getMap(HZ_MAP_NAME);
     }
 
     @Override
     public int getSMSToken(Session session) throws OXException {
-        if (!map.containsKey(session.getContextId())) {
-            map.putIfAbsent(session.getContextId(), new ConcurrentHashMap<Integer, Integer>());
+        String userIdentifier = session.getContextId()+"/"+session.getUserId();
+        
+        if (!map.containsKey(userIdentifier)) {
+            map.putIfAbsent(userIdentifier, new SMSBucket(getUserLimit(session)));
         }
-        ConcurrentHashMap<Integer, Integer> userMap = map.get(session.getContextId());
-        if (!userMap.containsKey(session.getUserId())) {
-            int tokens = getUserLimit(session);
-            userMap.putIfAbsent(session.getUserId(), tokens - 1);
-            return tokens;
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        if (config == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
         }
+        int refreshInterval = config.getIntProperty(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, 1440);
+        
         for (;;) {
-            int result = userMap.get(session.getUserId()).intValue();
-            if (result == 0) {
+            SMSBucket oldBucket = map.get(userIdentifier);
+            SMSBucket newBucket = oldBucket.clone();
+            int amount = newBucket.removeToken(refreshInterval);
+
+            if (amount == -1) {
                 return 0;
             }
-            if (userMap.replace(session.getUserId(), result, result - 1)) {
-                return result;
+
+            if (map.replace(userIdentifier, oldBucket, newBucket)) {
+                return amount;
             }
         }
     }
@@ -118,103 +122,6 @@ public class SMSBucketServiceImpl implements SMSBucketService {
         }
         ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
         return Integer.valueOf(view.get(SMSConstants.SMS_USER_LIMIT_PROPERTY, String.class));
-    }
-
-    @Override
-    public void refillAllBuckets() {
-        map.clear();
-    }
-
-    @Override
-    public void refillBucket(int contextId) {
-        map.get(contextId).clear();
-    }
-
-    @Override
-    public void startRefreshTask() throws OXException {
-
-        TimerService timerService = Services.getService(TimerService.class);
-        if (timerService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(TimerService.class.getName());
-        }
-        
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        if (config == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
-        }
-        int interval = config.getIntProperty(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, 1440);
-        tasks.add(timerService.scheduleAtFixedRate(new RefreshSMSBucketsTask(this), interval, interval, TimeUnit.MINUTES));
-        LOG.info("Started general SMSBucketRefreshTask with interval " + interval);
-    }
-    
-    @Override
-    public void startRefreshTask(int contextId) throws OXException {
-
-        TimerService timerService = Services.getService(TimerService.class);
-        if (timerService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(TimerService.class.getName());
-        }
-        
-        ConfigViewFactory config = Services.getService(ConfigViewFactory.class);
-        if (config == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
-        }
-        ConfigView view = config.getView(-1, contextId);
-        int interval = view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, Integer.class);
-        tasks.add(timerService.scheduleAtFixedRate(new RefreshSMSBucketsTask(this, contextId), interval, interval, TimeUnit.MINUTES));
-        LOG.info("Started SMSBucketRefreshTask for context " + contextId + " with interval " + interval);
-    }
-
-    @Override
-    public void stopRefreshTasks() {
-        for (ScheduledTimerTask task : tasks) {
-            task.cancel();
-        }
-
-        tasks.clear();
-    }
-
-    private class RefreshSMSBucketsTask implements Runnable {
-
-        private SMSBucketService service;
-        private Integer context;
-
-        /**
-         * Initializes a new {@link SMSBucketServiceImpl.RefreshSMSBucketsTask}.
-         * 
-         * @throws OXException
-         */
-        public RefreshSMSBucketsTask(SMSBucketService service) throws OXException {
-            super();
-            this.service = service;
-            if (this.service == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SMSBucketService.class.getName());
-            }
-        }
-        
-        /**
-         * Initializes a new {@link SMSBucketServiceImpl.RefreshSMSBucketsTask}.
-         * 
-         * @throws OXException
-         */
-        public RefreshSMSBucketsTask(SMSBucketService service, int context) throws OXException {
-            super();
-            this.service = service;
-            if (this.service == null) {
-                throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(SMSBucketService.class.getName());
-            }
-            this.context=context;
-        }
-
-        @Override
-        public void run() {
-            if (context == null) {
-                service.refillAllBuckets();
-            } else {
-                service.refillBucket(context);
-            }
-        }
-
     }
 
     @Override
