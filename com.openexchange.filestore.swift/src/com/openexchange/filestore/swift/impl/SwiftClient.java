@@ -52,13 +52,17 @@ package com.openexchange.filestore.swift.impl;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.LockSupport;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
@@ -91,12 +95,17 @@ public class SwiftClient {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(SwiftClient.class);
 
+    /**
+     * The delimiter character to separate the prefix from the keys
+     */
+    public static final char DELIMITER = '/';
+
     private final String filestoreId;
     private final String userName;
     private final AuthInfo authValue;
     private final EndpointPool endpoints;
     private final HttpClient httpClient;
-    private final String containerName;
+    private final String prefix;
     private final int contextId;
     private final int userId;
     private final TokenStorage tokenStorage;
@@ -122,13 +131,13 @@ public class SwiftClient {
         this.userId = userId;
         this.tokenStorage = tokenStorage;
 
-        // E.g. "57462_ctx_5_user_store" or "57462_ctx_store"
-        StringBuilder sb = new StringBuilder(32).append(contextId).append("_ctx");
+        // E.g. "57462ctx5userstore" or "57462ctxstore"
+        StringBuilder sb = new StringBuilder(32).append(contextId).append("ctx");
         if (userId > 0) {
-            sb.append(userId).append("_user");
+            sb.append(userId).append("user");
         }
-        sb.append("_store");
-        containerName = sb.toString();
+        sb.append("store");
+        prefix = sb.toString();
     }
 
     /**
@@ -150,12 +159,12 @@ public class SwiftClient {
     }
 
     /**
-     * Gets the container name
+     * Gets the prefix
      *
-     * @return The container name
+     * @return The prefix
      */
-    public String getContainerName() {
-        return containerName;
+    public String getPrefix() {
+        return prefix;
     }
 
     /**
@@ -165,32 +174,47 @@ public class SwiftClient {
      */
     public void deleteContainer() throws OXException {
         Token token = getOrAcquireNewTokenIfExpired();
-        deleteContainer(token, 0);
+        List<String> objects = listContainerFiles(token, 0);
+        for (String name : objects) {
+            delete(name, token, 0);
+        }
     }
 
-    private void deleteContainer(Token token, int retryCount) throws OXException {
-        HttpDelete delete = null;
-        HttpResponse response = null;
+    private List<String> listContainerFiles(Token token, int retryCount) throws OXException {
         Endpoint endpoint = getEndpoint();
+        HttpGet get = null;
+        HttpResponse response = null;
         try {
-            delete = new HttpDelete(endpoint.getContainerUrl(containerName));
-            delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
-            response = httpClient.execute(delete);
+            List<NameValuePair> queryString = Utils.toQueryString(Utils.mapFor("format", "json", "prefix", prefix + DELIMITER, "delimiter", Character.toString(DELIMITER)));
+            get = new HttpGet(Utils.buildUri(endpoint.getContainerUrl(), queryString));
+            get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
+
+            response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_NO_CONTENT == status) {
-                // Successfully deleted
-                return;
+            if (HttpServletResponse.SC_OK == status) {
+                // Successful
+                JSONArray jResponse = new JSONArray(new InputStreamReader(response.getEntity().getContent(), Charsets.UTF_8));
+                int length = jResponse.length();
+                List<String> ids = new ArrayList<String>(length);
+                for (int i = length, c = 0; i-- > 0;) {
+                    ids.add(jResponse.getJSONObject(c++).getString("name"));
+                }
+            }
+            if (HttpServletResponse.SC_NO_CONTENT == status) {
+                // Successful, but empty
+                return Collections.emptyList();
+            }
+            if (HttpServletResponse.SC_NOT_FOUND == status) {
+                // Such a container does not exist
+                return Collections.emptyList();
             }
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
                 // Token expired intermittently
                 Token newToken = acquireNewToken(token);
-                Utils.close(delete, response);
-                deleteContainer(newToken, retryCount);
-                return;
+                Utils.close(get, response);
+                return listContainerFiles(newToken, retryCount);
             }
-            if (HttpServletResponse.SC_NOT_FOUND != status) {
-                throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
-            }
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(response.getStatusLine());
         } catch (IOException e) {
             OXException error = handleCommunicationError(endpoint, token, e);
             if (null == error) {
@@ -203,13 +227,14 @@ public class SwiftClient {
 
                 long nanosToWait = TimeUnit.NANOSECONDS.convert((nextRetry * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
                 LockSupport.parkNanos(nanosToWait);
-                deleteContainer(token, nextRetry);
-                return;
+                return listContainerFiles(token, nextRetry);
             }
 
             throw error;
+        } catch (JSONException e) {
+            throw SwiftExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            Utils.close(delete, response);
+            Utils.close(get, response);
         }
     }
 
@@ -231,7 +256,7 @@ public class SwiftClient {
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            get = new HttpGet(endpoint.getContainerUrl(containerName));
+            get = new HttpGet(endpoint.getContainerUrl());
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
@@ -277,7 +302,7 @@ public class SwiftClient {
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            put = new HttpPut(endpoint.getContainerUrl(containerName));
+            put = new HttpPut(endpoint.getContainerUrl());
             put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(put);
             int status = response.getStatusLine().getStatusCode();
@@ -335,7 +360,7 @@ public class SwiftClient {
         Endpoint endpoint = getEndpoint();
         try {
             UUID id = UUID.randomUUID();
-            put = new HttpPut(endpoint.getObjectUrl(containerName, id));
+            put = new HttpPut(endpoint.getObjectUrl(prefix, id));
             put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             put.setEntity(new InputStreamEntity(data, length));
             response = httpClient.execute(put);
@@ -403,7 +428,7 @@ public class SwiftClient {
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            get = new HttpGet(endpoint.getObjectUrl(containerName, id));
+            get = new HttpGet(endpoint.getObjectUrl(prefix, id));
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
@@ -460,15 +485,15 @@ public class SwiftClient {
         }
 
         Token token = getOrAcquireNewTokenIfExpired();
-        return delete(id, token, 0);
+        return delete(Utils.addPrefix(prefix, id), token, 0);
     }
 
-    private boolean delete(UUID id, Token token, int retryCount) throws OXException {
+    private boolean delete(String id, Token token, int retryCount) throws OXException {
         HttpDelete delete = null;
         HttpResponse response = null;
         Endpoint endpoint = getEndpoint();
         try {
-            delete = new HttpDelete(endpoint.getObjectUrl(containerName, id));
+            delete = new HttpDelete(endpoint.getObjectUrl(id));
             delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
@@ -518,7 +543,7 @@ public class SwiftClient {
 
         Token token = getOrAcquireNewTokenIfExpired();
         for (UUID id : ids) {
-            delete(id, token, 0);
+            delete(Utils.addPrefix(prefix, id), token, 0);
         }
     }
 

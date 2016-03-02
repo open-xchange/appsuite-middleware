@@ -234,7 +234,7 @@ public class SwiftFileStorage implements FileStorage {
             client.deleteContainer();
         } catch (Exception e) {
             Logger logger = org.slf4j.LoggerFactory.getLogger(SwiftFileStorage.class);
-            logger.warn("Failed to delete container {}", client.getContainerName(), e);
+            logger.warn("Failed to delete objects prefixed with {}", client.getPrefix(), e);
         }
     }
 

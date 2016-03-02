@@ -54,10 +54,12 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -79,6 +81,7 @@ import org.slf4j.LoggerFactory;
 import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.java.util.UUIDs;
 
 /**
  * {@link Utils}
@@ -91,11 +94,94 @@ class Utils {
 
     private static final Logger LOG = LoggerFactory.getLogger(Utils.class);
 
+    /** The delimiter character to separate the prefix from the keys */
+    private static final char DELIMITER = SwiftClient.DELIMITER;
+
     /**
      * Initializes a new {@link Utils}.
      */
     private Utils() {
         super();
+    }
+
+    /**
+     * Creates a new arbitrary key (an unformatted string representation of a new random UUID), optionally prepended with the configured
+     * prefix and delimiter.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @return A new UID string, optionally with prefix and delimiter, e.g. <code>[prefix]/067e61623b6f4ae2a1712470b63dff00</code>.
+     */
+    static String generateKey(String prefix) {
+        String uuid = UUIDs.getUnformattedString(UUID.randomUUID());
+        return new StringBuilder(prefix.length() + 33).append(prefix).append(DELIMITER).append(uuid).toString();
+    }
+
+    /**
+     * Prepends the configured prefix and delimiter character sequence to the supplied name.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @param name The name to prepend the prefix
+     * @return The name with prefix
+     */
+    static String addPrefix(String prefix, UUID name) {
+        return new StringBuilder(prefix.length() + 33).append(prefix).append(DELIMITER).append(UUIDs.getUnformattedString(name)).toString();
+    }
+
+    /**
+     * Prepends the configured prefix and delimiter character sequence to the supplied name.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @param name The name to prepend the prefix
+     * @return The name with prefix
+     */
+    static String addPrefix(String prefix, String name) {
+        return new StringBuilder(prefix.length() + name.length() + 1).append(prefix).append(DELIMITER).append(name).toString();
+    }
+
+    /**
+     * Prepends the configured prefix and delimiter character sequence to the supplied names.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @param names The names to prepend the prefix
+     * @return The names with prefix in an array
+     */
+    static String[] addPrefix(String prefix, Collection<? extends String> names) {
+        String[] keys = new String[names.size()];
+        int i = 0;
+        for (String name : names) {
+            keys[i++] = addPrefix(prefix, name);
+        }
+        return keys;
+    }
+
+    /**
+     * Prepends the configured prefix and delimiter character sequence to the supplied names.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @param names The names to prepend the prefix
+     * @return The names with prefix in an array
+     */
+    static String[] addPrefix(String prefix, String[] names) {
+        String[] keys = new String[names.length];
+        for (int i = 0; i < names.length; i++) {
+            keys[i] = addPrefix(prefix, names[i]);
+        }
+        return keys;
+    }
+
+    /**
+     * Strips the prefix and delimiter character sequence to the supplied key.
+     *
+     * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
+     * @param key The key to strip the prefix from
+     * @return The key without prefix
+     */
+    static String removePrefix(String prefix, String key) {
+        int idx = prefix.length() + 1;
+        if (idx > key.length() || false == key.startsWith(new StringBuilder(prefix.length() + 1).append(prefix).append(DELIMITER).toString(), 0)) {
+            throw new IllegalArgumentException(key);
+        }
+        return key.substring(idx);
     }
 
     /**
