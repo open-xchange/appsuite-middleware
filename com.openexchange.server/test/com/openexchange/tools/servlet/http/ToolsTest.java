@@ -49,6 +49,7 @@
 
 package com.openexchange.tools.servlet.http;
 
+import static org.junit.Assert.assertTrue;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import org.junit.Assert;
 import org.junit.Before;
@@ -59,6 +60,9 @@ import org.mockito.MockitoAnnotations;
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
+import com.openexchange.html.SimHtmlService;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
  * {@link ToolsTest}
@@ -178,4 +182,12 @@ public class ToolsTest {
 
         Tools.checkNonExistence(request, AJAXServlet.PARAMETER_IGNORE, AJAXServlet.PARAMETER_MAIL, AJAXServlet.PARAMETER_PASSWORD, AJAXServlet.PARAMETER_SESSION);
     }
+
+    @Test
+    public void testForBug44409() {
+        ServerServiceRegistry.getInstance().addService(HtmlService.class, new SimHtmlService());
+        String errorPage = Tools.getErrorPage(403, null, "SES-0203 Categories=TRY_AGAIN Message='Your session <script>alert('XSS')</script>' expired. Please start a new browser session.' exceptionID=1-3");
+        assertTrue("Not properly encoded for HTML:\n" + errorPage, errorPage.indexOf("<script>") < 0);
+    }
+
 }

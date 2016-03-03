@@ -67,7 +67,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
-import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
+import com.openexchange.mobile.configuration.generator.osgi.Services;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
@@ -95,7 +95,7 @@ public class MobileConfigSigner extends Writer {
     }
 
     protected List<String> getCommand() throws ConfigurationException {
-        ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        ConfigurationService service = Services.optService(ConfigurationService.class);
         if (null == service) {
             throw new ConfigurationException("No configuration service found");
         }
@@ -137,6 +137,7 @@ public class MobileConfigSigner extends Writer {
         final ThreadPoolService service = ThreadPools.getThreadPool();
         final Future<Integer> submit = service.submit(new AbstractTask<Integer>() {
 
+            @Override
             public Integer call() throws Exception {
                 final int waitFor;
                 try {
@@ -154,7 +155,7 @@ public class MobileConfigSigner extends Writer {
 
         });
         try {
-            final Integer property = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.OpensslTimeout);
+            final Integer property = MobileConfigProperties.getProperty(Property.OpensslTimeout);
             submit.get(property, TimeUnit.MILLISECONDS);
         } catch (final InterruptedException e) {
             // Restore the interrupted status; see http://www.ibm.com/developerworks/java/library/j-jtp05236/index.html

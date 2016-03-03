@@ -55,6 +55,7 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.ajax.login.AutoLoginTools.reAuthenticate;
 import static com.openexchange.ajax.login.AutoLoginTools.tryAutologin;
+import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +91,7 @@ public class FormLogin implements LoginRequestHandler {
         try {
             doFormLogin(req, resp);
         } catch (OXException e) {
-            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
+            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
             resp.setContentType(CONTENTTYPE_HTML);
             resp.getWriter().write(errorPage);
         }
