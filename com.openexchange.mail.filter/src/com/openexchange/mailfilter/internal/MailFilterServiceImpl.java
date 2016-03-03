@@ -393,6 +393,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag.getFlag(), rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
+                removeNestedRules(clientRules);
+
                 return clientRules;
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
@@ -428,7 +430,9 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 if (splittedRules.getFlaggedRules() != null) {
                     return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
                 }
-                return splittedRules.getRules();
+                List<Rule> splitRules = splittedRules.getRules();
+                removeNestedRules(splitRules);
+                return splitRules;
             } catch (SieveException e) {
                 throw MailFilterExceptionCode.SIEVE_ERROR.create(e, e.getMessage());
             } catch (ParseException e) {
@@ -580,6 +584,39 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 }
             }
         }
+    }
+
+    /**
+     * Removes any nested rules from the specified Rule list
+     * 
+     * @param rules The rule list
+     */
+    private void removeNestedRules(List<Rule> rules) {
+        Iterator<Rule> iterator = rules.iterator();
+        while (iterator.hasNext()) {
+            Rule rule = iterator.next();
+            IfCommand ifCommand = rule.getIfCommand();
+            List<?> actionCommands = ifCommand.getActionCommands();
+            if (containsNestedRule(actionCommands)) {
+                iterator.remove();
+            }
+        }
+    }
+
+    /**
+     * Checks if the specified list of commands contains a rule
+     * 
+     * @param commands The list of commands
+     * @return true if at least one of the commands is a rule; false otherwise
+     */
+    private boolean containsNestedRule(List<?> commands) {
+        for (Object o : commands) {
+            if (o instanceof Rule) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

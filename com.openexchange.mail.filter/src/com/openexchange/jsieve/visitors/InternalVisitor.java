@@ -147,6 +147,11 @@ public class InternalVisitor implements SieveParserVisitor {
                         ifCommand.setTestcommand(command);
                     } else if (jjtAccept instanceof ArrayList) {
                         final ArrayList command = (ArrayList) jjtAccept;
+                        for (Object o : command) {
+                            if (o instanceof Rule) {
+                                throw new SieveException("Nested 'if' commands are not supported by this implementation");
+                            }
+                        }
                         ifCommand.setActionCommands(command);
                     }
                 }
