@@ -73,7 +73,7 @@ public class Activator extends HousekeepingActivator {
 
     public static final String ALIAS = "/servlet/mobileconfig";
 
-    private volatile boolean registered;
+    private boolean registered;
 
     /**
      * Initializes a new {@link Activator}.
