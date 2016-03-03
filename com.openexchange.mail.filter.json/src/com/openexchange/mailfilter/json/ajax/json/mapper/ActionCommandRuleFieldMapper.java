@@ -49,7 +49,9 @@
 
 package com.openexchange.mailfilter.json.ajax.json.mapper;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +109,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttributeName()
      */
     @Override
@@ -117,7 +119,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#isNull(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -127,7 +129,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#getAttribute(com.openexchange.jsieve.commands.Rule)
      */
     @Override
@@ -151,7 +153,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.mailfilter.json.ajax.json.RuleFieldMapper#setAttribute(com.openexchange.jsieve.commands.Rule, java.lang.Object)
      */
     @Override
@@ -161,18 +163,93 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         }
 
         IfCommand ifCommand = rule.getIfCommand();
+
         // Delete all existing actions, this is especially needed if this is used by update
         ifCommand.setActionCommands(null);
+
+        // Parse action commands
         JSONArray array = (JSONArray) attribute;
-        for (int i = 0; i < array.length(); i++) {
+        int length = array.length();
+        List<ActionCommand> actionCommands = new ArrayList<ActionCommand>(length);
+        for (int i = 0; i < length; i++) {
             JSONObject object = array.getJSONObject(i);
             String id = object.getString(GeneralField.id.name());
             CommandParser<ActionCommand> parser = parsers.get(id);
             if (parser == null) {
                 throw new JSONException("Unknown action command while creating object: " + id);
             }
-            ActionCommand actionCommand = parser.parse(object);
-            ifCommand.addActionCommand(actionCommand);
+            actionCommands.add(parser.parse(object));
         }
+
+        // Sanitize/sort them
+        sort(actionCommands);
+
+        // Add 'em
+        ifCommand.setActionCommands(actionCommands);
     }
+
+    // ---------------------------------------------------------------------------------------------------------------------
+
+    /**
+     * Sorts specified action commands associated with an <tt>"if"</tt> command.
+     * <p>
+     * Ensures a <tt>"fileinto"</tt> happens after any message-modifying command (e.g. <tt>"addflag"</tt>, <tt>"addheader"</tt>, <tt>"deleteheader"</tt>)
+     * while trying to maintain the order of other commands.
+     *
+     * @param actionCommands The action commands to sort
+     * @return The sorted action commands
+     */
+    protected static List<ActionCommand> sort(List<ActionCommand> actionCommands) {
+        if (null == actionCommands) {
+            return actionCommands;
+        }
+
+        int size = actionCommands.size();
+        if (size <= 1) {
+            return actionCommands;
+        }
+
+        int msize = size - 1;
+        boolean keepOn = true;
+        int start = 0;
+        while (keepOn) {
+            keepOn = false;
+
+            for (int i = start; i <= msize; i++) {
+                ActionCommand actionCommand1 = actionCommands.get(i);
+                if (isFileInto(actionCommand1)) {
+                    if (i < msize) {
+                        int swap = -1;
+                        for (int j = i+1; j <= msize; j++) {
+                            ActionCommand actionCommand2 = actionCommands.get(j);
+                            if (isMessageOp(actionCommand2)) {
+                                swap = j;
+                                j = size;
+                            }
+                        }
+
+                        if (swap >= 0) {
+                            actionCommands.add(i, actionCommands.remove(swap));
+                            keepOn = true;
+                            start = i + 1;
+                            i = size;
+                        }
+                    }
+                }
+            }
+        }
+
+        return actionCommands;
+    }
+
+    private static boolean isFileInto(ActionCommand actionCommand) {
+        return ActionCommand.Commands.FILEINTO.equals(actionCommand.getCommand());
+    }
+
+    private static final EnumSet<ActionCommand.Commands> MESSAGE_OPS = EnumSet.of(ActionCommand.Commands.ADDFLAG, ActionCommand.Commands.ADDHEADER, ActionCommand.Commands.DELETEHEADER);
+
+    private static boolean isMessageOp(ActionCommand actionCommand) {
+        return MESSAGE_OPS.contains(actionCommand.getCommand());
+    }
+
 }
