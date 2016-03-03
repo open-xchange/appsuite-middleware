@@ -56,6 +56,7 @@ import java.security.PrivilegedExceptionAction;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -223,8 +224,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 changeIncomingVacationRule(rule);
 
                 int nextuid = insertIntoPosition(rule, rules, clientrulesandrequire);
-
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
+                writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
                 writeScript(sieveHandler, activeScript, writeback);
 
@@ -260,13 +261,16 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 }
 
                 String script = fixParsingError(sieveHandler.getScript(activeScript));
+
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+
                 ClientRulesAndRequire clientRulesAndReq = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientRulesAndReq.getRules(), uid);
                 changeIncomingVacationRule(rightRule.rule);
                 clientRulesAndReq.getRules().set(rightRule.position, rule);
 
                 String writeback = sieveTextFilter.writeback(clientRulesAndReq, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
+                writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 LOGGER.debug("The following sieve script will be written:\n{}", writeback);
 
                 writeScript(sieveHandler, activeScript, writeback);
@@ -304,11 +308,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 List<Rule> rules = clientrulesandrequire.getRules();
                 RuleAndPosition deletedrule = getRightRuleForUniqueId(rules, uid);
-                if(deletedrule == null) {
+                if (deletedrule == null) {
                     throw MailFilterExceptionCode.BAD_POSITION.create(uid);
                 }
                 rules.remove(deletedrule.position);
+
                 String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
+                writeback = sieveTextFilter.rewriteRequire(writeback, script);
                 writeScript(sieveHandler, activeScript, writeback);
             } catch (UnsupportedEncodingException e) {
                 throw MailFilterExceptionCode.UNSUPPORTED_ENCODING.create(e);
@@ -382,6 +388,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+                removeErroneusRules(rules);
+
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag.getFlag(), rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
@@ -413,9 +421,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 LOGGER.debug("The following sieve script will be parsed:\n{}", script);
                 SieveTextFilter sieveTextFilter = new SieveTextFilter(credentials);
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+                removeErroneusRules(rules);
+
                 ClientRulesAndRequire splittedRules = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
-                if(splittedRules.getFlaggedRules() != null) {
+                if (splittedRules.getFlaggedRules() != null) {
                     return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
                 }
                 return splittedRules.getRules();
@@ -448,7 +458,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     String script = sieveHandler.getScript(activeScript);
                     RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
 
-                    ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire( rules.getRulelist(), null, rules.isError());
+                    ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
 
                     List<Rule> clientrules = clientrulesandrequire.getRules();
                     for (int i = 0; i < uids.length; i++) {
@@ -460,6 +470,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     }
 
                     String writeback = sieveTextFilter.writeback(clientrulesandrequire, new HashSet<String>(sieveHandler.getCapabilities().getSieve()));
+                    writeback = sieveTextFilter.rewriteRequire(writeback, script);
                     writeScript(sieveHandler, activeScript, writeback);
                 } else {
                     throw MailFilterExceptionCode.NO_ACTIVE_SCRIPT.create();
@@ -497,12 +508,13 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
                 String script = fixParsingError(sieveHandler.getScript(activeScript));
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
+
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), null, rules.isError());
                 List<Rule> clientrules = clientrulesandrequire.getRules();
                 RuleAndPosition rightRule = getRightRuleForUniqueId(clientrules, uid);
 
                 // no rule found
-                if(rightRule == null) {
+                if (rightRule == null) {
                     return null;
                 }
 
@@ -544,13 +556,30 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     private List<Rule> exclude(Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
         List<Rule> ret = new ArrayList<Rule>();
-        for(FilterType flag : exclusionFlags) {
+        for (FilterType flag : exclusionFlags) {
             flagged.remove(flag);
         }
-        for(List<Rule> l : flagged.values()) {
+        for (List<Rule> l : flagged.values()) {
             ret.addAll(l);
         }
         return ret;
+    }
+
+    /**
+     * Removes the erroneous rules from the list
+     * 
+     * @param rules rule list
+     */
+    private void removeErroneusRules(RuleListAndNextUid rules) {
+        if (rules.isError()) {
+            Iterator<Rule> ruleIter = rules.getRulelist().iterator();
+            while (ruleIter.hasNext()) {
+                Rule rule = ruleIter.next();
+                if (!Strings.isEmpty(rule.getErrormsg())) {
+                    ruleIter.remove();
+                }
+            }
+        }
     }
 
     /**
@@ -638,14 +667,12 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Check own vacation
+     * 
      * @param arguments
      * @return
      */
     private boolean checkOwnVacation(List<Object> arguments) {
-        return null != arguments
-            && null != arguments.get(0) && arguments.get(0) instanceof TagArgument && ":is".equals(((TagArgument)arguments.get(0)).getTag())
-            && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument)arguments.get(1)).getTag())
-            && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>)arguments.get(2)).get(0));
+        return null != arguments && null != arguments.get(0) && arguments.get(0) instanceof TagArgument && ":is".equals(((TagArgument) arguments.get(0)).getTag()) && null != arguments.get(1) && arguments.get(1) instanceof TagArgument && ":domain".equals(((TagArgument) arguments.get(1)).getTag()) && null != arguments.get(2) && arguments.get(2) instanceof List<?> && "From".equals(((List<?>) arguments.get(2)).get(0));
     }
 
     /**
@@ -786,8 +813,6 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
         return nextuid;
     }
-
-    // --------------------------------------------------------------------------------------------------------------------- //
 
     private static final class Key {
 
