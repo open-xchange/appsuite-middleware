@@ -65,20 +65,33 @@ public class Endpoint {
     private final AtomicReference<Token> tokenRef;
     private final String endpointUri;
     private final String baseUri;
+    private final Object lock;
     private final int hash;
 
     /**
      * Initializes a new {@link Endpoint}.
      *
      * @param endpointUri The API end-point including version, tenant and container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
+     * @param baseUri The base URI including version and tenant, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
      */
-    public Endpoint(String endpointUri) {
+    Endpoint(String endpointUri, String baseUri, Object lock) {
         super();
         this.endpointUri = endpointUri;
+        this.baseUri = baseUri;
+        this.lock = lock;
         tokenRef = new AtomicReference<Token>();
-        int pos = endpointUri.lastIndexOf('/');
-        baseUri = endpointUri.substring(0, pos);
         hash = 31 * 1 + endpointUri.hashCode();
+    }
+
+    /**
+     * Gets the lock associated with end-point's base URI (tenant scope).
+     * <p>
+     * Every end-point with the same base URI refers to the same lock instance.
+     *
+     * @return The lock
+     */
+    public Object getLock() {
+        return lock;
     }
 
     /**

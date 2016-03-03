@@ -112,8 +112,9 @@ public class EndpointPool {
         blacklist = new ArrayList<Endpoint>(size);
         counter = new AtomicInteger(size);
 
+        EndpointFactory endpointFactory = EndpointFactory.getInstance();
         for (String endpointUri : endpointUris) {
-            available.add(new Endpoint(endpointUri));
+            available.add(endpointFactory.createEndpointFor(endpointUri));
         }
 
         LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);

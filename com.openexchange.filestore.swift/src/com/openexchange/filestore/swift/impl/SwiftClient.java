@@ -606,68 +606,71 @@ public class SwiftClient {
         return null == token || token.isExpired() ? acquireNewTokenFor(token, endpoint) : token;
     }
 
-    private synchronized Token acquireNewTokenFor(Token expiredToken, Endpoint endpoint) throws OXException {
-        // Check if already newly acquired
-        {
-            Token current = endpoint.getToken();
-            if (expiredToken != current) {
-                // Another thread acquired a new token in the meantime
-                return current;
-            }
-        }
-
-        // Invalidate token
-        endpoint.invalidateToken();
-
-        // Check possible valid one held in storage
-        String id = endpoint.getId();
-        {
-            Token storedToken = tokenStorage.get(id);
-            if (null != storedToken && !storedToken.isExpired() && (!storedToken.getId().equals(null == expiredToken ? null : expiredToken.getId()))) {
-                return applyToken(storedToken, endpoint);
-            }
-        }
-
-        // Try to acquire lock
-        if (false == tokenStorage.lock(id)) {
-            // Failed to get lock; await concurrent token acquisition to complete (using exponential back-off)
+    private Token acquireNewTokenFor(Token expiredToken, Endpoint endpoint) throws OXException {
+        Object lock = endpoint.getLock();
+        synchronized (lock) {
+            // Check if already newly acquired
             {
-                LOG.info("Awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
-                int retry = 1;
-                do {
-                    if (retry > 1) {
-                        LOG.info("Still awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
-                    }
-                    long nanosToWait = TimeUnit.NANOSECONDS.convert((retry++ * 1000) + ((long)(Math.random() * 1000)), TimeUnit.MILLISECONDS);
-                    LockSupport.parkNanos(nanosToWait);
-                } while (tokenStorage.isLocked(id));
+                Token current = endpoint.getToken();
+                if (expiredToken != current) {
+                    // Another thread acquired a new token in the meantime
+                    return current;
+                }
             }
 
-            // Grab new token and check its validity
-            Token newToken = tokenStorage.get(id);
-            if (null == newToken || newToken.isExpired()) {
-                // Overall retry...
-                return acquireNewTokenFor(expiredToken, endpoint);
+            // Invalidate token
+            endpoint.invalidateToken();
+
+            // Check possible valid one held in storage
+            String id = endpoint.getId();
+            {
+                Token storedToken = tokenStorage.get(id);
+                if (null != storedToken && !storedToken.isExpired() && (!storedToken.getId().equals(null == expiredToken ? null : expiredToken.getId()))) {
+                    return applyToken(storedToken, endpoint);
+                }
             }
 
-            // Accept & set the new token
-            return applyToken(newToken, endpoint);
-        }
+            // Try to acquire lock
+            if (false == tokenStorage.lock(id)) {
+                // Failed to get lock; await concurrent token acquisition to complete (using exponential back-off)
+                {
+                    LOG.info("Awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                    int retry = 1;
+                    do {
+                        if (retry > 1) {
+                            LOG.info("Still awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                        }
+                        long nanosToWait = TimeUnit.NANOSECONDS.convert((retry++ * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                        LockSupport.parkNanos(nanosToWait);
+                    } while (tokenStorage.isLocked(id));
+                }
 
-        // Acquired lock...
-        LOG.info("Acquiring new token for Swift end-point \"{}\"...", endpoint.getBaseUrl());
-        try {
-            // Request new token
-            Token newToken = doAcquireNewToken();
-            LOG.info("Acquired new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                // Grab new token and check its validity
+                Token newToken = tokenStorage.get(id);
+                if (null == newToken || newToken.isExpired()) {
+                    // Overall retry...
+                    return acquireNewTokenFor(expiredToken, endpoint);
+                }
 
-            // Store it
-            tokenStorage.store(newToken, id);
+                // Accept & set the new token
+                return applyToken(newToken, endpoint);
+            }
 
-            // Apply it
-            return applyToken(newToken, endpoint);
-        } finally {
-            tokenStorage.unlock(id);
+            // Acquired lock...
+            LOG.info("Acquiring new token for Swift end-point \"{}\"...", endpoint.getBaseUrl());
+            try {
+                // Request new token
+                Token newToken = doAcquireNewToken();
+                LOG.info("Acquired new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+
+                // Store it
+                tokenStorage.store(newToken, id);
+
+                // Apply it
+                return applyToken(newToken, endpoint);
+            } finally {
+                tokenStorage.unlock(id);
+            }
         }
     }
 
