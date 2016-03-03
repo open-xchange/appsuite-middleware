@@ -54,6 +54,7 @@ import static com.openexchange.ajax.AJAXServlet.PARAMETER_SESSION;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER;
 import static com.openexchange.ajax.AJAXServlet.PARAMETER_USER_ID;
 import static com.openexchange.ajax.login.LoginTools.updateIPAddress;
+import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -102,7 +103,7 @@ public class FormLogin implements LoginRequestHandler {
         try {
             doFormLogin(req, resp);
         } catch (OXException e) {
-            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
+            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
             resp.setContentType(CONTENTTYPE_HTML);
             resp.getWriter().write(errorPage);
         }
