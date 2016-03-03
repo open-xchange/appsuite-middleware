@@ -128,12 +128,21 @@ public class ExecuteAction extends AbstractOnboardingAction {
         // Return result
         String format = resultObject.getFormat();
         if (null == format) {
-            return new AJAXRequestResult(resultObject.getObject());
+            if (resultObject.hasWarnings()) {
+                AJAXRequestResult result = new AJAXRequestResult(resultObject.getObject());
+                result.addWarnings(resultObject.getWarnings());
+            } else {
+                return new AJAXRequestResult(resultObject.getObject());
+            }
         }
         if ("file".equals(format)) {
             requestData.setFormat(format);
         }
-        return new AJAXRequestResult(resultObject.getObject(), format);
+        AJAXRequestResult result = new AJAXRequestResult(resultObject.getObject(), format);
+        if (resultObject.hasWarnings()) {
+            result.addWarnings(resultObject.getWarnings());
+        }
+        return result;
     }
 
 }

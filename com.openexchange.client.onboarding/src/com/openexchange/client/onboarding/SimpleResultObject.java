@@ -49,6 +49,9 @@
 
 package com.openexchange.client.onboarding;
 
+import java.util.ArrayList;
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link SimpleResultObject}
@@ -60,6 +63,7 @@ public class SimpleResultObject implements ResultObject {
 
     private final Object object;
     private final String format;
+    private ArrayList<OXException> warnings;
 
     /**
      * Initializes a new {@link SimpleResultObject}.
@@ -81,6 +85,28 @@ public class SimpleResultObject implements ResultObject {
     @Override
     public String getFormat() {
         return format;
+    }
+
+    @Override
+    public boolean hasWarnings() {
+        if (warnings == null || warnings.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    @Override
+    public void addWarning(OXException warning) {
+        if (warnings == null) {
+            warnings = new ArrayList<>(1);
+        }
+
+        warnings.add(warning);
     }
 
 }

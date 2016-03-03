@@ -79,15 +79,18 @@ public final class OnboardingExceptionMessages implements LocalizableStrings {
     public static final String EXECUTION_FAILED_MSG = "Execution failed. Please choose another option.";
 
     // Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.
-    public final static String SENT_QUOTA_EXCEEDED_MSG = "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.";
+    public static final String SENT_QUOTA_EXCEEDED_MSG = "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds.";
 
     // You reached the maximum number of sms. Please try again later.
-    public final static String SMS_LIMIT_REACHED_MSG = "You reached the maximum number of sms. Please try again later.";
+    public static final String SMS_LIMIT_REACHED_MSG = "You reached the maximum number of sms. Please try again later.";
+
+    // No more SMS could be sent
+    public static final String LAST_SMS_SENT = "No more SMS could be sent";
 
     // The download link is invalid.
-    public final static String INVALID_DOWNLOAD_LINK_MSG = "The download link is invalid.";
+    public static final String INVALID_DOWNLOAD_LINK_MSG = "The download link is invalid.";
 
     // The download link is invalid.
-    public final static String INVALID_PHONE_NUMBER_MSG = "The phone number %1$s is invalid.";
+    public static final String INVALID_PHONE_NUMBER_MSG = "The phone number %1$s is invalid.";
 
 }

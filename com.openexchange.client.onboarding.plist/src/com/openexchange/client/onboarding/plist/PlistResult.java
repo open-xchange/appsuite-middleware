@@ -53,6 +53,8 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.client.onboarding.BuiltInProvider;
@@ -242,8 +244,7 @@ public class PlistResult implements Result {
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
         long ratelimit = getSMSRateLimit(session);
-        checkSMSLimit(session, ratelimit);
-
+        int smsRemaining = checkSMSLimit(session, ratelimit);
         String untranslatedText;
         {
             List<OnboardingProvider> providers = request.getScenario().getProviders(session);
@@ -281,8 +282,13 @@ public class PlistResult implements Result {
 
         smsService.sendMessage(new String[] { number }, text);
         setRateLimitTime(ratelimit, session);
+        ResultObject resultObject;
+        resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
+        if (smsRemaining == 1) {
+            resultObject.addWarning(OnboardingExceptionCodes.LAST_SMS_SENT.create());
+        }
 
-        ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
+
         return resultObject;
     }
 
@@ -359,7 +365,7 @@ public class PlistResult implements Result {
         return property.get().longValue();
     }
 
-    private void checkSMSLimit(Session session, long ratelimit) throws OXException {
+    private int checkSMSLimit(Session session, long ratelimit) throws OXException {
         if (ratelimit > 0) {
             Long lastSMSSend = (Long) session.getParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP);
 
@@ -368,13 +374,15 @@ public class PlistResult implements Result {
             }
         }
 
+        int remainingSMS = -1;
         SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
         if (smsBucketService.isEnabled()) {
-            int ramainingSMS = smsBucketService.getSMSToken(session);
-            if (ramainingSMS == 0) {
+            remainingSMS = smsBucketService.getSMSToken(session);
+            if (remainingSMS == 0) {
                 throw OnboardingExceptionCodes.SMS_LIMIT_REACHED.create();
             }
         }
+        return remainingSMS;
     }
 
     private void setRateLimitTime(long rateLimit, Session session) {

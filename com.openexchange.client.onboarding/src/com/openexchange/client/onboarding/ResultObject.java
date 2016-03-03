@@ -49,6 +49,8 @@
 
 package com.openexchange.client.onboarding;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ResultObject} - The result object for an {@link Result on-boarding result}.
@@ -71,5 +73,26 @@ public interface ResultObject {
      * @return The format or <code>null</code>
      */
     public String getFormat();
+
+    /**
+     * Indicates if the the ResulObject has warnings
+     * 
+     * @return true if the ResultObject has warnings, false otherwise
+     */
+    public boolean hasWarnings();
+
+    /**
+     * Retrieves the warnings of this ResultObject
+     * 
+     * @return The warnings or null if {@link #hasWarnings} returns false
+     */
+    public List<OXException> getWarnings();
+
+    /**
+     * Add a warning to this ResultObject
+     * 
+     * @param warning The warning
+     */
+    public void addWarning(OXException warning);
 
 }
