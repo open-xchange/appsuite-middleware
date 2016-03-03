@@ -119,7 +119,7 @@ public class S3FileStorage implements FileStorage {
      * @param amazonS3 The underlying S3 client
      * @param encrypted Whether S3 client has encryption enabled or not
      * @param bucketName The bucket name to use
-     * @param prefix The prefix to use
+     * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
      * @throws OXException
      */
     public S3FileStorage(AmazonS3Client amazonS3, boolean encrypted, String bucketName, String prefix) {

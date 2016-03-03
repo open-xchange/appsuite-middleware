@@ -54,6 +54,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.LockSupport;
 import jonelo.jacksum.algorithm.MD;
 import org.json.JSONObject;
 import com.openexchange.drive.impl.DriveConstants;
@@ -209,11 +210,30 @@ public class DriveMetadata extends DefaultFile {
 
     private byte[] getDocumentData() throws OXException {
         if (null == document) {
-            JSONObject jsonMetadata = new JsonDirectoryMetadata(session, folder).build();
-            //new JSONInputStream(buildMetadata(), Charsets.UTF_8_NAME)
-            document = jsonMetadata.toString().getBytes(Charsets.UTF_8);
+            document = generateDocumentData();
         }
         return document;
+    }
+
+    private byte[] generateDocumentData() throws OXException {
+        int retryCount = 0;
+        while (true) {
+            try {
+                JSONObject jsonMetadata = new JsonDirectoryMetadata(session, folder).build();
+                return jsonMetadata.toString().getBytes(Charsets.UTF_8);
+            } catch (OXException e) {
+                if (retryCount < DriveConstants.MAX_RETRIES) {
+                    retryCount++;
+                    int delay = DriveConstants.RETRY_BASEDELAY * retryCount;
+                    session.trace("Got exception during generation of .drive-meta file (" + e.getMessage() + "), trying again in " +
+                        delay + "ms" + (1 == retryCount ? "..." : " (" + retryCount + '/' + DriveConstants.MAX_RETRIES + ")..."));
+                    LockSupport.parkNanos(delay * 1000000L);
+                    continue;
+                }
+                LOG.warn("Unexpected exception during generation of .drive-meta file", e);
+                throw e;
+            }
+        }
     }
 
     private long getContentsSequenceNumber() throws OXException {

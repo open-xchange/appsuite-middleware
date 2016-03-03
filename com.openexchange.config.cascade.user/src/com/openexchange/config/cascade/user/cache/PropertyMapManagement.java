@@ -109,11 +109,9 @@ public final class PropertyMapManagement {
      * @param session The session
      */
     public void dropFor(final Session session) {
-        final ConcurrentMap<Integer, PropertyMap> contextMap = map.get(Integer.valueOf(session.getContextId()));
-        if (null != contextMap) {
-            contextMap.remove(Integer.valueOf(session.getUserId()));
+        if (null != session) {
+            dropFor(session.getUserId(), session.getContextId());
         }
-        LOG.debug("Cleaned user-sensitive property cache for user {} in context {}", session.getUserId(), session.getContextId());
     }
 
     /**

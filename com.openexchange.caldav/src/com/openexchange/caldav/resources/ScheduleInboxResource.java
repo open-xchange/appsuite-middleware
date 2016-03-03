@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,82 +47,28 @@
  *
  */
 
-package com.openexchange.drive.impl.management.version;
+package com.openexchange.caldav.resources;
 
-import java.util.HashMap;
-import com.openexchange.drive.BrandedDriveVersionService;
-
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.resources.DAVResource;
+import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
- * {@link BrandedDriveVersionServiceImpl}
+ * {@link ScheduleInboxResource}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionService {
+public class ScheduleInboxResource extends DAVResource {
 
-    static BrandedDriveVersionServiceImpl instance = null;
-    private HashMap<String, VersionWrapper> driveVersions;
-
-    static public BrandedDriveVersionServiceImpl getInstance() {
-        if (null == instance) {
-            instance = new BrandedDriveVersionServiceImpl();
-        }
-        return instance;
-    }
-
-    @Override
-    public String getSoftMinimumVersion(String branding) {
-        if (driveVersions == null || !driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getSoft();
-    }
-
-    @Override
-    public String getHardMinimumVersion(String branding) {
-        if (driveVersions == null || !driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getHard();
-    }
-
-    @Override
-    public void putBranding(String branding, String minSoftVersion, String minHardVersion) {
-        if (null == driveVersions) {
-            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.VersionWrapper>();
-        }
-        if (null == branding || null == minSoftVersion || null == minHardVersion || branding.isEmpty() || minSoftVersion.isEmpty() || minHardVersion.isEmpty()) {
-            return;
-        }
-        driveVersions.put(branding, new VersionWrapper(minSoftVersion, minHardVersion));
-    }
-
-    @Override
-    public void clearAll() {
-        if (driveVersions != null) {
-            driveVersions.clear();
-        }
-    }
-    
-    private class VersionWrapper {
-
-        private String soft;
-        private String hard;
-
-        public VersionWrapper(String soft, String hard) {
-            super();
-            this.soft = soft;
-            this.hard = hard;
-        }
-
-        String getSoft() {
-            return soft;
-        }
-
-        String getHard() {
-            return hard;
-        }
+    /**
+     * Initializes a new {@link ScheduleInboxResource}.
+     *
+     * @param factory The factory
+     * @param url The WebDAV path
+     */
+    public ScheduleInboxResource(DAVFactory factory, WebdavPath url) {
+        super(factory, url);
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2014 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,32 @@
  *
  */
 
-package com.openexchange.drive.impl.management.version;
+package com.openexchange.dav.caldav.bugs;
 
-import java.util.HashMap;
-import com.openexchange.drive.BrandedDriveVersionService;
-
+import org.apache.jackrabbit.webdav.client.methods.DeleteMethod;
+import org.junit.Assert;
+import org.junit.Test;
+import com.openexchange.dav.caldav.CalDAVTest;
 
 /**
- * {@link BrandedDriveVersionServiceImpl}
+ * {@link Bug44304Test}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * NPE at c.o.webdav.protocol.helpers.AbstractWebdavFactory.mixin
+ *
+ * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.1
  */
-public class BrandedDriveVersionServiceImpl implements BrandedDriveVersionService {
+public class Bug44304Test extends CalDAVTest {
 
-    static BrandedDriveVersionServiceImpl instance = null;
-    private HashMap<String, VersionWrapper> driveVersions;
-
-    static public BrandedDriveVersionServiceImpl getInstance() {
-        if (null == instance) {
-            instance = new BrandedDriveVersionServiceImpl();
-        }
-        return instance;
-    }
-
-    @Override
-    public String getSoftMinimumVersion(String branding) {
-        if (driveVersions == null || !driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getSoft();
-    }
-
-    @Override
-    public String getHardMinimumVersion(String branding) {
-        if (driveVersions == null || !driveVersions.containsKey(branding)) {
-            return null;
-        }
-        return driveVersions.get(branding).getHard();
-    }
-
-    @Override
-    public void putBranding(String branding, String minSoftVersion, String minHardVersion) {
-        if (null == driveVersions) {
-            driveVersions = new HashMap<String, BrandedDriveVersionServiceImpl.VersionWrapper>();
-        }
-        if (null == branding || null == minSoftVersion || null == minHardVersion || branding.isEmpty() || minSoftVersion.isEmpty() || minHardVersion.isEmpty()) {
-            return;
-        }
-        driveVersions.put(branding, new VersionWrapper(minSoftVersion, minHardVersion));
-    }
-
-    @Override
-    public void clearAll() {
-        if (driveVersions != null) {
-            driveVersions.clear();
-        }
-    }
-    
-    private class VersionWrapper {
-
-        private String soft;
-        private String hard;
-
-        public VersionWrapper(String soft, String hard) {
-            super();
-            this.soft = soft;
-            this.hard = hard;
-        }
-
-        String getSoft() {
-            return soft;
-        }
-
-        String getHard() {
-            return hard;
+	@Test
+    public void testDeleteScheduleInboxResource() throws Exception {
+	    DeleteMethod delete = null;
+        try {
+            String href = "/caldav/schedule-inbox/BD9B8F1B-78ED-4768-BE8C-3AB687AC2A90.ics";
+            delete = new DeleteMethod(getBaseUri() + href);
+            Assert.assertEquals("response code wrong", 204, getWebDAVClient().executeMethod(delete));
+        } finally {
+            release(delete);
         }
     }
 

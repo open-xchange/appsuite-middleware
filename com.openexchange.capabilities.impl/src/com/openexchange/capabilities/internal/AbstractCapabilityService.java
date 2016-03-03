@@ -587,7 +587,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Map<String, ComposedConfigProperty<String>> all = view.all();
             for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                 final String propName = entry.getKey();
-                if (propName.startsWith("com.openexchange.capability.")) {
+                if (propName.startsWith("com.openexchange.capability.", 0)) {
                     boolean value = Boolean.parseBoolean(entry.getValue().get());
                     String name = toLowerCase(propName.substring(28));
                     if (value) {

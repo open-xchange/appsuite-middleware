@@ -442,7 +442,7 @@ public class AdminParser extends CLIParser {
             }
 
             // show all missing opts
-            if (sb.toString().length() > 0) {
+            if (sb.length() > 0) {
                 sb.deleteCharAt(sb.length() - 1);
                 throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
             }

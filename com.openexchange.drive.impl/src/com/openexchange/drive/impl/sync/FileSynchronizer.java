@@ -74,8 +74,8 @@ import com.openexchange.drive.impl.internal.PathNormalizer;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.internal.UploadHelper;
 import com.openexchange.drive.impl.management.DriveConfig;
+import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
-import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
@@ -186,16 +186,17 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * modified on server, let client download the file
                  */
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+
+                result.addActionForClient(createDownloadAction(comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 return 1;
             }
         case NEW:
             /*
              * new on server, let client download the file
              */
-            result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+            result.addActionForClient(createDownloadAction(comparison.getClientVersion(),
+                ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
             return 1;
         default:
             return 0;
@@ -219,8 +220,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 OXException e = DriveExceptionCodes.NO_DELETE_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
                 LOG.warn("Client change refused for {}", comparison.getServerVersion(), e);
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(createDownloadAction(comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), comparison.getServerVersion(), comparison,
                     path, e, false));
                 return 2;
@@ -275,7 +276,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                  */
                 OXException e = DriveExceptionCodes.NO_MODIFY_FILE_PERMISSION.create(comparison.getServerVersion().getName(), path);
                 LOG.warn("Client change refused for " + comparison.getServerVersion(), e);
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(), serverFileVersion, comparison, path));
+                result.addActionForClient(createDownloadAction(comparison.getClientVersion(), serverFileVersion, comparison));
                 result.addActionForClient(new ErrorFileAction(comparison.getClientVersion(), serverFileVersion, comparison, path, e, false));
                 return 2;
             } else if (mayCreate()) {
@@ -297,8 +298,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 UploadFileAction uploadAction = new UploadFileAction(null, renamedVersion, comparison, path, 0);
                 uploadActions.add(uploadAction);
                 result.addActionForClient(uploadAction);
-                result.addActionForClient(new DownloadFileAction(session, null,
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(createDownloadAction(null, ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 return 4;
             } else {
                 /*
@@ -311,8 +311,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * ... then download the server version afterwards
                  */
-                result.addActionForClient(new DownloadFileAction(session, null,
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(createDownloadAction(null, ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 return 3;
             }
         case NEW:
@@ -393,8 +392,8 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * server's metadata file always wins, let client re-download the file
                  */
-                result.addActionForClient(new DownloadFileAction(session, comparison.getClientVersion(),
-                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison, path));
+                result.addActionForClient(createDownloadAction(comparison.getClientVersion(),
+                    ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 return 1;
             }  else if (comparison.getClientVersion().getChecksum().equalsIgnoreCase(comparison.getServerVersion().getChecksum()) &&
                 comparison.getClientVersion().getName().equalsIgnoreCase(comparison.getServerVersion().getName()) &&
@@ -427,16 +426,14 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 /*
                  * ... and download the server version aftwerwards
                  */
-                File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-                result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
+                result.addActionForClient(createDownloadAction(null, ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
                 return 3;
             }
         } else if (Change.DELETED == comparison.getClientChange() && (Change.MODIFIED == comparison.getServerChange() || Change.NEW == comparison.getServerChange())) {
             /*
              * delete-edit conflict, let client download server version
              */
-            File serverFile = ServerFileVersion.valueOf(comparison.getServerVersion(), path, session).getFile();
-            result.addActionForClient(new DownloadFileAction(session, null, comparison.getServerVersion(), comparison, path, serverFile));
+            result.addActionForClient(createDownloadAction(null, ServerFileVersion.valueOf(comparison.getServerVersion(), path, session), comparison));
             return 1;
         } else if ((Change.NEW == comparison.getClientChange() || Change.MODIFIED == comparison.getClientChange()) && Change.DELETED == comparison.getServerChange()) {
             /*
@@ -513,6 +510,35 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
             folderPermission = session.getStorage().getOwnPermission(path);
         }
         return folderPermission;
+    }
+
+    /**
+     * Creates a new DOWNLOAD file action using the supplied parameters, implicitly validating the checksum again for any slipstreamed
+     * <code>.drive-meta</code> file.
+     *
+     * @param fileVersion The original file version
+     * @param newVersion The new file version
+     * @param comparison The underlying comparison
+     * @return The download file action
+     */
+    private DownloadFileAction createDownloadAction(FileVersion fileVersion, ServerFileVersion newVersion, ThreeWayComparison<FileVersion> comparison) throws OXException {
+        if (null != newVersion) {
+            if (session.getDriveSession().useDriveMeta() && DriveMetadata.class.isInstance(newVersion.getFile())) {
+                DriveMetadata metadata = (DriveMetadata) newVersion.getFile();
+                String fileMD5Sum = metadata.getFileMD5Sum();
+                if (false == newVersion.getChecksum().equals(fileMD5Sum)) {
+                    /*
+                     * stored checksum no longer valid, invalidate any affected checksums & propagate new checksum in client action
+                     */
+                    session.trace("Checksum " + newVersion.getChecksum() + " different from actual checksum " +
+                        fileMD5Sum + " of .drive-meta file, invalidating stored checksums.");
+                    session.getChecksumStore().removeFileChecksums(DriveUtils.getFileID(metadata));
+                    session.getChecksumStore().removeDirectoryChecksum(new FolderID(metadata.getFolderId()));
+                    newVersion = new ServerFileVersion(metadata, ChecksumProvider.getChecksum(session, metadata));
+                }
+            }
+        }
+        return new DownloadFileAction(session, fileVersion, newVersion, comparison, path);
     }
 
     /**

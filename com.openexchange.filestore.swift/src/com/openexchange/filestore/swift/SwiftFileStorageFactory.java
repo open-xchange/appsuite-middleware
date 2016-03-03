@@ -126,6 +126,7 @@ public class SwiftFileStorageFactory implements FileStorageProvider {
 
     @Override
     public SwiftFileStorage getFileStorage(final URI uri) throws OXException {
+        // Expect something like "swift://myswift/57462_ctx_3_user_store"
         Future<SwiftFileStorage> f = storages.get(uri);
         if (null == f) {
             FutureTask<SwiftFileStorage> ft = new FutureTask<SwiftFileStorage>(new Callable<SwiftFileStorage>() {
