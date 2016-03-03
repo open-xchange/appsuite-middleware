@@ -101,40 +101,40 @@ public class Bug44131Test extends CalDAVTest {
     }
 
     @Test
-	public void testAccessDeletedException() throws Exception {
-		/*
-		 * fetch sync token for later synchronization
-		 */
-		SyncToken syncToken = new SyncToken(fetchSyncToken());
-		/*
-		 * create appointment series on server as user b with user c
-		 */
-		String uid = randomUID();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
-	    Appointment appointment = new Appointment();
-	    appointment.setUid(uid);
-	    appointment.setTitle("Bug43521Test");
-	    appointment.setIgnoreConflicts(true);
+    public void testAccessDeletedException() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with user c
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug44131Test");
+        appointment.setIgnoreConflicts(true);
         appointment.setRecurrenceType(Appointment.DAILY);
         appointment.setInterval(1);
-	    appointment.setStartDate(calendar.getTime());
-	    calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
         appointment.setEndDate(calendar.getTime());
         appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
         appointment.setParentFolderID(manager2.getPrivateFolder());
         manager2.insert(appointment);
-		Date clientLastModified = manager2.getLastModification();
+        Date clientLastModified = manager2.getLastModification();
         /*
          * create change exception on server as user b, and invite user a there
          */
-		Appointment exception = new Appointment();
-		exception.setTitle("Bug43521Test_edit");
-		exception.setObjectID(appointment.getObjectID());
-		exception.setRecurrencePosition(2);
-		exception.setLastModified(clientLastModified);
-		exception.setParentFolderID(appointment.getParentFolderID());
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug44131Test_edit");
+        exception.setObjectID(appointment.getObjectID());
+        exception.setRecurrencePosition(2);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
         exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
         exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
         exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
@@ -170,7 +170,198 @@ public class Bug44131Test extends CalDAVTest {
         List<String> hrefs = syncCollection(syncToken).getHrefsStatusNotFound();
         assertTrue("no resource deletions reported on sync collection", 0 < hrefs.size());
         assertTrue("href of change exception not found", hrefs.contains(iCalResource.getHref()));
-	}
+    }
+
+    @Test
+    public void testAccessExceptionAsRemovedParticipant() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with user c
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug44131Test");
+        appointment.setIgnoreConflicts(true);
+        appointment.setRecurrenceType(Appointment.DAILY);
+        appointment.setInterval(1);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.setParentFolderID(manager2.getPrivateFolder());
+        manager2.insert(appointment);
+        Date clientLastModified = manager2.getLastModification();
+        /*
+         * create change exception on server as user b, and invite user a there
+         */
+        Appointment exception = new Appointment();
+        exception.setTitle("Bug44131Test_edit");
+        exception.setObjectID(appointment.getObjectID());
+        exception.setRecurrencePosition(2);
+        exception.setLastModified(clientLastModified);
+        exception.setParentFolderID(appointment.getParentFolderID());
+        exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        manager2.update(exception);
+        clientLastModified = manager2.getLastModification();
+        /*
+         * verify appointment exception on client as user a
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", exception.getTitle(), iCalResource.getVEvent().getSummary());
+        /*
+         * remove user a from appointment exception again on server as user b
+         */
+        exception.removeParticipants();
+        exception.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        exception.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        exception.setLastModified(clientLastModified);
+        manager2.update(exception);
+        clientLastModified = getManager().getLastModification();
+        /*
+         * try to access the deleted exception again on client as user a
+         */
+        GetMethod get = null;
+        try {
+            get = new GetMethod(getBaseUri() + iCalResource.getHref());
+            Assert.assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(get));
+        } finally {
+            release(get);
+        }
+        /*
+         * check that the resource deletion is also indicated via sync-collection
+         */
+        List<String> hrefs = syncCollection(syncToken).getHrefsStatusNotFound();
+        assertTrue("no resource deletions reported on sync collection", 0 < hrefs.size());
+        assertTrue("href of change exception not found", hrefs.contains(iCalResource.getHref()));
+    }
+
+    @Test
+    public void testAccessDeletedAppointment() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with users a & c
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug44131Test");
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.setParentFolderID(manager2.getPrivateFolder());
+        manager2.insert(appointment);
+        /*
+         * verify appointment on client as user a
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", appointment.getTitle(), iCalResource.getVEvent().getSummary());
+        /*
+         * delete appointment on server as user b
+         */
+        manager2.delete(appointment);
+        /*
+         * try to access the deleted appointment again on client as user a
+         */
+        GetMethod get = null;
+        try {
+            get = new GetMethod(getBaseUri() + iCalResource.getHref());
+            Assert.assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(get));
+        } finally {
+            release(get);
+        }
+        /*
+         * check that the resource deletion is also indicated via sync-collection
+         */
+        List<String> hrefs = syncCollection(syncToken).getHrefsStatusNotFound();
+        assertTrue("no resource deletions reported on sync collection", 0 < hrefs.size());
+        assertTrue("href of change exception not found", hrefs.contains(iCalResource.getHref()));
+    }
+
+    @Test
+    public void testAccessAppointmentAsRemovedParticipant() throws Exception {
+        /*
+         * fetch sync token for later synchronization
+         */
+        SyncToken syncToken = new SyncToken(fetchSyncToken());
+        /*
+         * create appointment series on server as user b with users a & c
+         */
+        String uid = randomUID();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(TimeTools.D("last month in the morning", TimeZone.getTimeZone("Europe/Berlin")));
+        Appointment appointment = new Appointment();
+        appointment.setUid(uid);
+        appointment.setTitle("Bug44131Test");
+        appointment.setIgnoreConflicts(true);
+        appointment.setStartDate(calendar.getTime());
+        calendar.add(Calendar.HOUR_OF_DAY, 1);
+        appointment.setEndDate(calendar.getTime());
+        appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(getClient().getValues().getUserId()));
+        appointment.setParentFolderID(manager2.getPrivateFolder());
+        manager2.insert(appointment);
+        Date clientLastModified = manager2.getLastModification();
+        /*
+         * verify appointment on client as user a
+         */
+        Map<String, String> eTags = syncCollection(syncToken).getETagsStatusOK();
+        assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
+        List<ICalResource> calendarData = calendarMultiget(eTags.keySet());
+        ICalResource iCalResource = assertContains(uid, calendarData);
+        assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
+        assertEquals("SUMMARY wrong", appointment.getTitle(), iCalResource.getVEvent().getSummary());
+        /*
+         * remove user a from appointment exception again on server as user b
+         */
+        appointment.removeParticipants();
+        appointment.addParticipant(new UserParticipant(manager2.getClient().getValues().getUserId()));
+        appointment.addParticipant(new UserParticipant(new AJAXClient(User.User3).getValues().getUserId()));
+        appointment.setLastModified(clientLastModified);
+        manager2.update(appointment);
+        /*
+         * try to access the deleted appointment again on client as user a
+         */
+        GetMethod get = null;
+        try {
+            get = new GetMethod(getBaseUri() + iCalResource.getHref());
+            Assert.assertEquals("response code wrong", StatusCodes.SC_NOT_FOUND, getWebDAVClient().executeMethod(get));
+        } finally {
+            release(get);
+        }
+        /*
+         * check that the resource deletion is also indicated via sync-collection
+         */
+        List<String> hrefs = syncCollection(syncToken).getHrefsStatusNotFound();
+        assertTrue("no resource deletions reported on sync collection", 0 < hrefs.size());
+        assertTrue("href of change exception not found", hrefs.contains(iCalResource.getHref()));
+    }
 
 }
 
