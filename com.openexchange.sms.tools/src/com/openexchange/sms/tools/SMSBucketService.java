@@ -70,8 +70,10 @@ public interface SMSBucketService {
     public int getSMSToken(Session session) throws OXException;
 
     /**
+     * Checks if the user sms limit is enabled for the given user
+     * @param session The user session
      * @return true if SMSUserLimit is enabled, false otherwise
      * @throws OXException
      */
-    public boolean isEnabled() throws OXException;
+    public boolean isEnabled(Session session) throws OXException;
 }

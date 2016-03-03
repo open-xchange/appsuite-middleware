@@ -182,4 +182,13 @@ public class SMSBucket extends AbstractCustomPortable {
         clone.counter = this.counter;
         return clone;
     }
+
+    /**
+     * Retrieves the maximum number of tokens in this bucket
+     * 
+     * @return The size
+     */
+    public int getBucketSize() {
+        return timestamps.length;
+    }
 }

@@ -51,7 +51,6 @@ package com.openexchange.sms.tools.internal;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -90,15 +89,26 @@ public class SMSBucketServiceImpl implements SMSBucketService {
     @Override
     public int getSMSToken(Session session) throws OXException {
         String userIdentifier = session.getContextId()+"/"+session.getUserId();
-        
+        int limit = getUserLimit(session);
         if (!map.containsKey(userIdentifier)) {
-            map.putIfAbsent(userIdentifier, new SMSBucket(getUserLimit(session)));
+            map.putIfAbsent(userIdentifier, new SMSBucket(limit));
+        } else {
+            SMSBucket bucket = map.get(userIdentifier);
+            if (bucket.getBucketSize() != limit) {
+                map.replace(userIdentifier, bucket, new SMSBucket(limit));
+            }
         }
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        if (config == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+        ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
+        if (configFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
-        int refreshInterval = config.getIntProperty(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, 1440);
+        ConfigView view =configFactory.getView(session.getUserId(), session.getContextId());
+        int refreshInterval = 0;
+        try {
+            refreshInterval = Integer.valueOf(view.get(SMSConstants.SMS_USER_LIMIT_REFRESH_INTERVAL, String.class));
+        } catch (NumberFormatException e) {
+            throw new OXException(e);
+        }
         
         for (;;) {
             SMSBucket oldBucket = map.get(userIdentifier);
@@ -125,12 +135,13 @@ public class SMSBucketServiceImpl implements SMSBucketService {
     }
 
     @Override
-    public boolean isEnabled() throws OXException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        if (config == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigurationService.class.getName());
+    public boolean isEnabled(Session session) throws OXException {
+        ConfigViewFactory configFactory = Services.getService(ConfigViewFactory.class);
+        if (configFactory == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getName());
         }
-        return config.getBoolProperty(SMSConstants.SMS_USER_LIMIT_ENABLED, true);
+        ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
+        return view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class);
     }
 
 }

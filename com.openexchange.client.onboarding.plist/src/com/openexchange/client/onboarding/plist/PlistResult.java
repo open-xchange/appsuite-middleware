@@ -376,7 +376,7 @@ public class PlistResult implements Result {
 
         int remainingSMS = -1;
         SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
-        if (smsBucketService.isEnabled()) {
+        if (smsBucketService.isEnabled(session)) {
             remainingSMS = smsBucketService.getSMSToken(session);
             if (remainingSMS == 0) {
                 throw OnboardingExceptionCodes.SMS_LIMIT_REACHED.create();
