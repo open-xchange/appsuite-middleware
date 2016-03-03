@@ -50,6 +50,7 @@
 package com.openexchange.ajax.login;
 
 import static com.openexchange.ajax.AJAXServlet.CONTENTTYPE_HTML;
+import static com.openexchange.tools.servlet.http.Tools.filter;
 import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -94,7 +95,7 @@ public class RedeemToken implements LoginRequestHandler {
         try {
             doRedeemToken(req, resp);
         } catch (OXException e) {
-            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", e.getMessage());
+            String errorPage = conf.getErrorPageTemplate().replace("ERROR_MESSAGE", filter(e.getMessage()));
             resp.setContentType(CONTENTTYPE_HTML);
             resp.getWriter().write(errorPage);
         }

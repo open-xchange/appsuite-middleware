@@ -50,7 +50,7 @@
 package com.openexchange.mobile.configuration.generator.configuration;
 
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.mobile.configuration.generator.osgi.Services;
 
 
 /**
@@ -73,34 +73,38 @@ public class MobileConfigProperties {
      * @throws ConfigurationException
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Object> T getProperty(final ServiceRegistry registry, final PropertyInterface prop) throws ConfigurationException {
-        final ConfigurationService configuration = registry.getService(ConfigurationService.class);
+    public static <T extends Object> T getProperty(PropertyInterface prop) throws ConfigurationException {
+        ConfigurationService configuration = Services.optService(ConfigurationService.class);
         if (null == configuration) {
             throw new ConfigurationException("No configuration service found");
         }
+
         // Copy because otherwise compiler complains... :-(
-        final Class<? extends Object> clazz = prop.getClazz();
-        final String completePropertyName = prop.getName();
-        final String property = configuration.getProperty(completePropertyName);
-        if (null != property && property.length() != 0) {
-            if (String.class.equals(clazz)) {
-                // no conversion done just output
-                return (T) clazz.cast(property);
-            } else if (Integer.class.equals(clazz)) {
-                try {
-                    return (T) clazz.cast(Integer.valueOf(property));
-                } catch (final NumberFormatException e) {
-                    throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
-                }
-            } else if (Boolean.class.equals(clazz)) {
-                return (T) clazz.cast(Boolean.valueOf(property));
-            } else {
-                return null;
-            }
-        } else {
+        Class<? extends Object> clazz = prop.getClazz();
+        String completePropertyName = prop.getName();
+        String property = configuration.getProperty(completePropertyName);
+        if (null == property || property.length() == 0) {
             return null;
         }
 
+        if (String.class.equals(clazz)) {
+            // no conversion done just output
+            return (T) clazz.cast(property);
+        }
+
+        if (Integer.class.equals(clazz)) {
+            try {
+                return (T) clazz.cast(Integer.valueOf(property));
+            } catch (final NumberFormatException e) {
+                throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
+            }
+        }
+
+        if (Boolean.class.equals(clazz)) {
+            return (T) clazz.cast(Boolean.valueOf(property));
+        }
+
+        return null;
     }
 
     /**
@@ -114,27 +118,32 @@ public class MobileConfigProperties {
      */
     @SuppressWarnings("unchecked")
     public static <T extends Object> T getProperty(final ConfigurationService configuration, final PropertyInterface prop) throws ConfigurationException {
-        final Class<? extends Object> clazz = prop.getClazz();
-        final String completePropertyName = prop.getName();
-        final String property = configuration.getProperty(completePropertyName);
-        if (null != property && property.length() != 0) {
-            if (String.class.equals(clazz)) {
-                // no conversion done just output
-                return (T) clazz.cast(property);
-            } else if (Integer.class.equals(clazz)) {
-                try {
-                    return (T) clazz.cast(Integer.valueOf(property));
-                } catch (final NumberFormatException e) {
-                    throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
-                }
-            } else if (Boolean.class.equals(clazz)) {
-                return (T) clazz.cast(Boolean.valueOf(property));
-            } else {
-                return null;
-            }
-        } else {
+        Class<? extends Object> clazz = prop.getClazz();
+        String completePropertyName = prop.getName();
+        String property = configuration.getProperty(completePropertyName);
+
+        if (null == property || property.length() == 0) {
             return null;
         }
+
+        if (String.class.equals(clazz)) {
+            // no conversion done just output
+            return (T) clazz.cast(property);
+        }
+
+        if (Integer.class.equals(clazz)) {
+            try {
+                return (T) clazz.cast(Integer.valueOf(property));
+            } catch (final NumberFormatException e) {
+                throw new ConfigurationException("The value given in the property " + completePropertyName + " is no integer value");
+            }
+        }
+
+        if (Boolean.class.equals(clazz)) {
+            return (T) clazz.cast(Boolean.valueOf(property));
+        }
+
+        return null;
     }
 
     /**
@@ -145,14 +154,15 @@ public class MobileConfigProperties {
      *
      * @throws ConfigurationException
      */
-    public static void check(final ServiceRegistry registry, final PropertyInterface[] props, final String bundlename) throws ConfigurationException {
-        final ConfigurationService configuration = registry.getService(ConfigurationService.class);
+    public static void check(PropertyInterface[] props, String bundlename) throws ConfigurationException {
+        ConfigurationService configuration = Services.optService(ConfigurationService.class);
         if (null == configuration) {
             throw new ConfigurationException("No configuration service found");
         }
-        final StringBuilder sb = new StringBuilder();
+
+        StringBuilder sb = new StringBuilder(512);
         sb.append("\nLoading global " + bundlename + " properties...\n");
-        for (final PropertyInterface prop : props) {
+        for (PropertyInterface prop : props) {
             final Object property = getProperty(configuration, prop);
             sb.append('\t');
             sb.append(prop.getName());
@@ -163,17 +173,17 @@ public class MobileConfigProperties {
                 throw new ConfigurationException("Property " + prop.getName() + " not set but required.");
             }
             if (Required.Value.CONDITION.equals(prop.getRequired().getValue())) {
-                final Condition[] condition = prop.getRequired().getCondition();
+                Condition[] condition = prop.getRequired().getCondition();
                 if (null == condition || condition.length == 0) {
                     throw new ConfigurationException("Property " + prop.getName() + " claims to have condition but condition not set.");
-                } else {
-                    for (final Condition cond : condition) {
-                        final PropertyInterface property3 = cond.getProperty();
-                        final Object property2 = getProperty(configuration, property3);
-                        final Object value = cond.getValue();
-                        if (value.equals(property2) && null == property) {
-                            throw new ConfigurationException("Property " + prop.getName() + " must be set if " + property3.getName() + " is set to " + value);
-                        }
+                }
+
+                for (Condition cond : condition) {
+                    PropertyInterface property3 = cond.getProperty();
+                    Object property2 = getProperty(configuration, property3);
+                    Object value = cond.getValue();
+                    if (value.equals(property2) && null == property) {
+                        throw new ConfigurationException("Property " + prop.getName() + " must be set if " + property3.getName() + " is set to " + value);
                     }
                 }
             }

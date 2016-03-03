@@ -8,9 +8,11 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mobile.configuration.generator.osgi.Activator
 Import-Package: com.openexchange.config,
  com.openexchange.exception,
+ com.openexchange.html,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.templating,
  com.openexchange.threadpool,
  com.openexchange.tools.servlet.http,
