@@ -54,6 +54,8 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -301,12 +303,13 @@ class Utils {
      * If the account details can be retrieved (server responds with status <code>200</code> or <code>206</code>) the end-point is
      * considered available; otherwise it's not.
      *
-     * @param baseUrl The base URL of the end-point; e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>
+     * @param endpoint The end-point to check; e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>
      * @param token The authentication token
      * @param httpClient The HTTP client to use
      * @return <code>true</code>/<code>false</code> if the end-point is unavailable; or <code>null</code> to ignore this check
      */
-    static Boolean endpointUnavailable(String baseUrl, Token token, HttpClient httpClient) {
+    static Boolean endpointUnavailable(Endpoint endpoint, HttpClient httpClient) {
+        Token token = endpoint.getToken();
         if (null == token) {
             return null;
         }
@@ -314,11 +317,11 @@ class Utils {
         HttpGet get = null;
         HttpResponse response = null;
         try {
-            get = new HttpGet(buildUri(baseUrl, toQueryString(mapFor("format", "json"))));
+            get = new HttpGet(buildUri(endpoint.getContainerUrl(), toQueryString(mapFor("format", "json", "limit", "1"))));
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
-            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_PARTIAL_CONTENT == status) {
+            if (HttpServletResponse.SC_OK == status || HttpServletResponse.SC_NO_CONTENT == status) {
                 return Boolean.FALSE;
             }
             if (HttpServletResponse.SC_UNAUTHORIZED == status) {
@@ -333,4 +336,43 @@ class Utils {
 
         return Boolean.TRUE;
     }
+
+    /**
+     * Gets the MD5 sum for specified string.
+     *
+     * @param string The string
+     * @return The MD5 sum
+     */
+    public static String getMD5Sum(String string) {
+        if (null == string) {
+            return string;
+        }
+
+        try {
+            MessageDigest md5 = MessageDigest.getInstance("MD5");
+            byte[] digest = md5.digest(string.getBytes(Charsets.UTF_8));
+            return asHex(digest);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+    }
+
+    private static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
+
+    /**
+     * Turns array of bytes into string representing each byte as unsigned hex number.
+     *
+     * @param hash Array of bytes to convert to hex-string
+     * @return Generated hex string
+     */
+    private static String asHex(final byte[] hash) {
+        final int length = hash.length;
+        final char[] buf = new char[length * 2];
+        for (int i = 0, x = 0; i < length; i++) {
+            buf[x++] = HEX_CHARS[(hash[i] >>> 4) & 0xf];
+            buf[x++] = HEX_CHARS[hash[i] & 0xf];
+        }
+        return new String(buf);
+    }
+
 }
