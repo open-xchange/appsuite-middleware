@@ -58,7 +58,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.httpclient.HttpStatus;
 import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
@@ -410,37 +409,7 @@ public abstract class SessionServlet extends AJAXServlet {
      * @return A simple error page
      */
     public static String getErrorPage(int sc, String msg, String desc) {
-        String msg0 = null == msg ? HttpStatus.getStatusText(sc) : msg;
-
-        StringBuilder sb = new StringBuilder(512);
-        String lineSep = System.getProperty("line.separator");
-        sb.append("<!DOCTYPE html>").append(lineSep);
-        sb.append("<html><head>").append(lineSep);
-        {
-            sb.append("<title>").append(sc);
-            if (null != msg0) {
-                sb.append(' ').append(msg0);
-            }
-            sb.append("</title>").append(lineSep);
-        }
-
-        sb.append("</head><body>").append(lineSep);
-
-        sb.append("<h1>");
-        if (null == msg0) {
-            sb.append(sc);
-        } else {
-            sb.append(msg0);
-        }
-        sb.append("</h1>").append(lineSep);
-
-        String desc0 = null == desc ? msg0 : desc;
-        if (null != desc0) {
-            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
-        }
-
-        sb.append("</body></html>").append(lineSep);
-        return sb.toString();
+        return Tools.getErrorPage(sc, msg, desc);
     }
 
     // --------------------------------------------------------------------------------------------------------------------- //

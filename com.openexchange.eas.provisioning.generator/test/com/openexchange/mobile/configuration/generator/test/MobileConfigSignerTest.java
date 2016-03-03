@@ -13,7 +13,8 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mobile.configuration.generator.MobileConfigSigner;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
-import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
+import com.openexchange.mobile.configuration.generator.osgi.Services;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.threadpool.SimThreadPoolService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -30,8 +31,11 @@ public class MobileConfigSignerTest {
         service.stringProperties.put(Property.CertFile.getName(), "define");
         service.stringProperties.put(Property.KeyFile.getName(), "define");
         service.stringProperties.put(Property.OpensslTimeout.getName(), "2000");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ThreadPoolService.class, new SimThreadPoolService());
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        serviceLookup.add(ThreadPoolService.class, new SimThreadPoolService());
+        Services.setServiceLookup(serviceLookup);
     }
 
     @Test

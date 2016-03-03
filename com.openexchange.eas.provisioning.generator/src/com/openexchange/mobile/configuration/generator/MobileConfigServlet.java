@@ -73,12 +73,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
 import com.openexchange.mobile.configuration.generator.osgi.Activator;
-import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
+import com.openexchange.mobile.configuration.generator.osgi.Services;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.tools.servlet.http.Tools;
@@ -139,7 +140,7 @@ public class MobileConfigServlet extends HttpServlet {
     private static final long serialVersionUID = 7913468326542861986L;
 
     public static String write(final String email, final String host, final String username, final String domain) throws OXException {
-        final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
+        final TemplateService service = Services.getService(TemplateService.class);
         final OXTemplate loadTemplate = service.loadTemplate("winMobileTemplate.tmpl");
         final AllocatingStringWriter writer = new AllocatingStringWriter();
         loadTemplate.process(generateHashMap(email, host, username, domain), writer);
@@ -154,7 +155,7 @@ public class MobileConfigServlet extends HttpServlet {
      * @throws ConfigurationException
      */
     protected static String[] splitUsernameAndDomain(final String username) throws ConfigurationException {
-        final String domain_user = MobileConfigProperties.getProperty(MobileConfigServiceRegistry.getServiceRegistry(), Property.DomainUser);
+        final String domain_user = MobileConfigProperties.getProperty(Property.DomainUser);
         final String separator = domain_user.replaceAll("\\$USER|\\$DOMAIN", "");
         final String[] split = username.split(Pattern.quote(separator));
         if (split.length > 2) {
@@ -163,14 +164,14 @@ public class MobileConfigServlet extends HttpServlet {
 
         if (split.length == 1) {
             return new String[] { split[0], "defaultcontext" };
-        } else {
-            if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
-                return split;
-            } else {
-                // change position in array...
-                return new String[] { split[1], split[0] };
-            }
         }
+
+        if (domain_user.indexOf("$USER") < domain_user.indexOf("$DOMAIN")) {
+            return split;
+        }
+
+        // change position in array...
+        return new String[] { split[1], split[0] };
     }
 
     private static HashMap<String, String> generateHashMap(final String email, final String host, final String username, final String domain) {
@@ -197,7 +198,7 @@ public class MobileConfigServlet extends HttpServlet {
     public void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         resp.setCharacterEncoding("UTF-8");
         Tools.disableCaching(resp);
-        final ConfigurationService service = MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class);
+        final ConfigurationService service = Services.getService(ConfigurationService.class);
         if (null == service) {
             LOG.error("A configuration exception occurred, which should not happen: No configuration service found");
             printError(req, resp, ErrorMessage.MSG_INTERNAL_ERROR);
@@ -362,10 +363,12 @@ public class MobileConfigServlet extends HttpServlet {
             writer.println("<body>");
             writer.println("<table>");
             writer.println("<tr>");
+
+            HtmlService htmlService = Services.getService(HtmlService.class);
             if (Locale.ENGLISH.equals(locale)) {
-                writer.println("<td><h1>" + String.valueOf(msg.getEnglish()) + "</h1></td>");
+                writer.println("<td><h1>" + htmlService.encodeForHTML(String.valueOf(msg.getEnglish())) + "</h1></td>");
             } else if (Locale.GERMAN.equals(locale)) {
-                writer.println("<td><h1>" + String.valueOf(msg.getGerman()) + "</h1></td>");
+                writer.println("<td><h1>" + htmlService.encodeForHTML(String.valueOf(msg.getGerman())) + "</h1></td>");
             }
             writer.println("</tr>");
             writer.println("</table>");
@@ -423,13 +426,11 @@ public class MobileConfigServlet extends HttpServlet {
 
     private void writeMobileConfig(final PrintWriter printWriter, final OutputStream outStream, final String email, final String host, final String username, final String domain) throws IOException, OXException {
         try {
-            final TemplateService service = MobileConfigServiceRegistry.getServiceRegistry().getService(TemplateService.class);
-            final OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
-            final Boolean property = MobileConfigProperties.getProperty(
-                MobileConfigServiceRegistry.getServiceRegistry().getService(ConfigurationService.class),
-                Property.SignConfig);
-            if (property) {
-                final MobileConfigSigner writer = new MobileConfigSigner(outStream);
+            TemplateService service = Services.getService(TemplateService.class);
+            OXTemplate loadTemplate = service.loadTemplate("iPhoneTemplate.tmpl");
+            Boolean property = MobileConfigProperties.getProperty(Services.getService(ConfigurationService.class), Property.SignConfig);
+            if (null != property && property.booleanValue()) {
+                MobileConfigSigner writer = new MobileConfigSigner(outStream);
                 try {
                     loadTemplate.process(generateHashMap(email, host, username, domain), writer);
                 } finally {
