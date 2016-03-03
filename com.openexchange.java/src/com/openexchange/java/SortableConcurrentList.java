@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -179,6 +180,7 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
      * @throws UnsupportedOperationException if the specified list's list-iterator does not support the <tt>set</tt> operation.
      * @see Comparator
      */
+    @Override
     public void sort(Comparator<? super E> c) {
         List<E> expected;
         List<E> list;
@@ -188,4 +190,34 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
             Collections.sort(list, c);
         } while (!ref.compareAndSet(expected, list));
     }
+
+    /**
+     * Returns a string representation of this collection.  The string
+     * representation consists of a list of the collection's elements in the
+     * order they are returned by its iterator, enclosed in square brackets
+     * (<tt>"[]"</tt>).  Adjacent elements are separated by the characters
+     * <tt>", "</tt> (comma and space).  Elements are converted to strings as
+     * by {@link String#valueOf(Object)}.
+     *
+     * @return a string representation of this collection
+     */
+    @Override
+    public String toString() {
+        Iterator<E> it = iterator();
+        if (! it.hasNext()) {
+            return "[]";
+        }
+
+        StringBuilder sb = new StringBuilder(32);
+        sb.append('[');
+        for (;;) {
+            E e = it.next();
+            sb.append(e == this ? "(this Collection)" : e);
+            if (! it.hasNext()) {
+                return sb.append(']').toString();
+            }
+            sb.append(',').append(' ');
+        }
+    }
+
 }
