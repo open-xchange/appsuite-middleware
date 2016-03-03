@@ -91,6 +91,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     private transient MimeMessageFiller filler;
     private final Set<InternetAddress> recipients;
     private UserSettingMail mailSettings;
+    private String csid;
 
     /**
      * Default constructor
@@ -100,6 +101,24 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.session = session;
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
+    }
+
+    /**
+     * Gets the identifier of the associated composition space
+     *
+     * @return The identifier of the associated composition space
+     */
+    public String getCsid() {
+        return csid;
+    }
+
+    /**
+     * Sets the identifier of the associated composition space
+     *
+     * @param csid The identifier of the associated composition space to set
+     */
+    public void setCsid(String csid) {
+        this.csid = csid;
     }
 
     /**
