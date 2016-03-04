@@ -154,15 +154,7 @@ public enum OnboardingExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Invalid link type %1$s in scenario configuration for %2$s
      */
-    INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION("Invalid link type %1$s in scenario configuration for %2$s", null, Category.CATEGORY_CONFIGURATION, 23),
-    /**
-     * You reached the maximum number of sms. Please try again later.
-     */
-    SMS_LIMIT_REACHED("You reached the maximum number of sms. Please try again later.", OnboardingExceptionMessages.SMS_LIMIT_REACHED_MSG, Category.CATEGORY_USER_INPUT, 24),
-    /**
-     * No more SMS could be sent
-     */
-    LAST_SMS_SENT("No more SMS could be sent", OnboardingExceptionMessages.LAST_SMS_SENT, Category.CATEGORY_USER_INPUT, 25),
+    INVALID_LINK_TYPE_IN_SCENARIO_CONFIGURATION("Invalid link type %1$s in scenario configuration for %2$s", null, Category.CATEGORY_CONFIGURATION, 23)
     ;
 
     /** The error code prefix for on-boarding module */

@@ -53,8 +53,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.client.onboarding.BuiltInProvider;
@@ -93,6 +91,7 @@ import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.tools.SMSBucketExceptionCodes;
 import com.openexchange.sms.tools.SMSBucketService;
 
 /**
@@ -284,8 +283,8 @@ public class PlistResult implements Result {
 
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
-        if (smsRemaining == 1) {
-            resultObject.addWarning(OnboardingExceptionCodes.LAST_SMS_SENT.create());
+        if (smsRemaining == 2) {
+            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create());
         }
 
 
@@ -379,7 +378,7 @@ public class PlistResult implements Result {
         if (smsBucketService.isEnabled(session)) {
             remainingSMS = smsBucketService.getSMSToken(session);
             if (remainingSMS == 0) {
-                throw OnboardingExceptionCodes.SMS_LIMIT_REACHED.create();
+                throw SMSBucketExceptionCodes.SMS_LIMIT_REACHED.create();
             }
         }
         return remainingSMS;
