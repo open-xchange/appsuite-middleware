@@ -59,6 +59,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.file.storage.rdb"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.filestore"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.filestore.impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.filestore.utils"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.find"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.find.basic"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,release-7.8.1,com.openexchange.find.json"/>

@@ -49,7 +49,6 @@
 
 package com.openexchange.filestore.s3.internal;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.DigestInputStream;
@@ -58,107 +57,86 @@ import java.security.NoSuchAlgorithmException;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorageCodes;
-import com.openexchange.java.Streams;
 
 /**
- * {@link ChunkedUpload}
+ * {@link S3ChunkedUpload}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ChunkedUpload implements Closeable {
+public class S3ChunkedUpload extends com.openexchange.filestore.utils.ChunkedUpload<DigestInputStream, S3UploadChunk> {
 
     private static final int CIPHER_BLOCK_SIZE = 16;
 
-    private final DigestInputStream digestStream;
+    private static DigestInputStream digestStreamFor(InputStream data, boolean encrypted) throws OXException {
+        try {
+            DigestInputStream digestStream = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
+            if (encrypted) {
+                // Disable updating digest if encrypted
+                digestStream.on(false);
+            }
+            return digestStream;
+        } catch (NoSuchAlgorithmException e) {
+            throw FileStorageCodes.IOERROR.create(e);
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------- //
+
     private final boolean encrypted;
-    private boolean hasNext;
 
     /**
-     * Initializes a new {@link ChunkedUpload}.
+     * Initializes a new {@link S3ChunkedUpload}.
      *
      * @param data The underlying input stream
      * @param encrypted Whether encryption is enabled
      * @throws OXException If initialization fails
      */
-    public ChunkedUpload(InputStream data, boolean encrypted) throws OXException {
-        super();
+    public S3ChunkedUpload(InputStream data, boolean encrypted) throws OXException {
+        super(digestStreamFor(data, encrypted), S3UploadChunk.MIN_CHUNK_SIZE);
         this.encrypted = encrypted;
-        try {
-            this.digestStream = new DigestInputStream(data, MessageDigest.getInstance("MD5"));
-            if (encrypted) {
-                // Disable updating digest if encrypted
-                digestStream.on(false);
-            }
-        } catch (NoSuchAlgorithmException e) {
-            throw FileStorageCodes.IOERROR.create(e);
-        }
-        hasNext = true;
-    }
-
-    /**
-     * Gets the next upload chunk.
-     *
-     * @return The next upload chunk
-     * @throws OXException
-     */
-    public UploadChunk next() throws OXException {
-        try {
-            ThresholdFileHolder fileHolder = new ThresholdFileHolder();
-            byte[] buffer = new byte[0xFFFF]; // 64k
-            for (int read; (read = digestStream.read(buffer, 0, buffer.length)) > 0;) {
-                fileHolder.write(buffer, 0, read);
-                if (fileHolder.getCount() >= UploadChunk.MIN_CHUNK_SIZE) {
-                    // chunk size reached
-                    if (!encrypted) {
-                        byte[] digest = digestStream.getMessageDigest().digest();
-                        return new UploadChunk(fileHolder, digest);
-                    }
-
-                    // chunk sizes for encrypted multipart uploads must be multiples of the cipher block size (16) with the exception of the last part.
-                    int res = (int) (fileHolder.getCount() % CIPHER_BLOCK_SIZE);
-                    if (0 == res) {
-                        return new UploadChunk(fileHolder, null);
-                    }
-
-                    // Try to read missing bytes to have multiples of the cipher block size (16)
-                    res = CIPHER_BLOCK_SIZE - res;
-                    byte[] buf = new byte[res];
-                    int rd = digestStream.read(buf, 0, res);
-                    if (rd >= res) {
-                        fileHolder.write(buf, 0, rd);
-                        return new UploadChunk(fileHolder, null);
-                    }
-
-                    // No more data available - fall-through
-                    hasNext = false;
-                    return new UploadChunk(fileHolder, null);
-                }
-            }
-
-            // end of input reached
-            hasNext = false;
-            if (encrypted) {
-                return new UploadChunk(fileHolder, null);
-            }
-            byte[] digest = digestStream.getMessageDigest().digest();
-            return new UploadChunk(fileHolder, digest);
-        } catch (IOException e) {
-            throw FileStorageCodes.IOERROR.create(e, e.getMessage());
-        }
-    }
-
-    /**
-     * Gets a value indicating whether further chunks are available or not.
-     *
-     * @return <code>true</code> if there are more, <code>false</code>, otherwise
-     */
-    public boolean hasNext() {
-        return hasNext;
     }
 
     @Override
-    public void close() throws IOException {
-        Streams.close(digestStream);
+    protected S3UploadChunk createChunkWith(ThresholdFileHolder fileHolder, boolean eofReached) throws OXException {
+        if (eofReached) {
+            if (encrypted) {
+                return new S3UploadChunk(fileHolder, null);
+            }
+
+            DigestInputStream digestStream = getInputStream();
+            byte[] digest = digestStream.getMessageDigest().digest();
+            return new S3UploadChunk(fileHolder, digest);
+        }
+
+        if (!encrypted) {
+            DigestInputStream digestStream = getInputStream();
+            byte[] digest = digestStream.getMessageDigest().digest();
+            return new S3UploadChunk(fileHolder, digest);
+        }
+
+        // chunk sizes for encrypted multipart uploads must be multiples of the cipher block size (16) with the exception of the last part.
+        int res = (int) (fileHolder.getCount() % CIPHER_BLOCK_SIZE);
+        if (0 == res) {
+            return new S3UploadChunk(fileHolder, null);
+        }
+
+        // Try to read missing bytes to have multiples of the cipher block size (16)
+        try {
+            DigestInputStream digestStream = getInputStream();
+            res = CIPHER_BLOCK_SIZE - res;
+            byte[] buf = new byte[res];
+            int rd = digestStream.read(buf, 0, res);
+            if (rd >= res) {
+                fileHolder.write(buf, 0, rd);
+                return new S3UploadChunk(fileHolder, null);
+            }
+
+            // No more data available - fall-through
+            setHasNext(false);
+            return new S3UploadChunk(fileHolder, null);
+        } catch (IOException e) {
+            throw FileStorageCodes.IOERROR.create(e);
+        }
     }
 
 }
