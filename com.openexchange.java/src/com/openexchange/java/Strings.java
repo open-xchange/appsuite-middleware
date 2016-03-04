@@ -125,6 +125,23 @@ public class Strings {
     /**
      * Builds up a string from passed objects.
      *
+     * @param strings The strings
+     * @return The string build up from concatenating strings
+     */
+    public static String concat(String... strings) {
+        if (null == strings || 0 == strings.length) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        for (String str : strings) {
+            sb.append(str == null ? "null" : str);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Builds up a string from passed objects.
+     *
      * @param delimiter The delimiter string
      * @param objects The objects
      * @return The string build up from concatenating objects' string representation
