@@ -202,6 +202,12 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** The maximum number of files (%1$d) is exceeded in directory \"%2$s\". Please remove some files and try again. */
     TOO_MANY_FILES(TOO_MANY_FILES_MSG, TOO_MANY_FILES_MSG, Category.CATEGORY_CAPACITY, 36),
 
+    /** The token \"%1$s\" is already registered. */
+    TOKEN_ALREADY_REGISTERED(TOKEN_ALREADY_REGISTERED_MSG, TOKEN_ALREADY_REGISTERED_MSG, Category.CATEGORY_CONFLICT, 37),
+
+    /** Client connection lost unexpectedly */
+    CLIENT_CONNECTION_LOST("Client connection lost unexpectedly", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONNECTIVITY, 38),
+
     ;
 
     private static final String PREFIX = "DRV";
