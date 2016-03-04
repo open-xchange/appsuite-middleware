@@ -154,6 +154,13 @@ public class UploadAction extends AbstractDriveAction {
             syncResult = driveService.upload(session, path, uploadStream, originalFile, newFile, contentType, offset, totalLength, created, modified);
         } catch (IOException e) {
             throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+        } catch (OXException e) {
+            if ("DRV-0038".equals(e.getErrorCode())) {
+                // The connected client closed the connection unexpectedly
+                org.slf4j.LoggerFactory.getLogger(UploadAction.class).debug("", e);
+                return AJAXRequestResult.EMPTY_REQUEST_RESULT;
+            }
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
             Streams.close(uploadStream);
         }

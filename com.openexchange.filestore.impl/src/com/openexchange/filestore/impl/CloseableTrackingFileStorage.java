@@ -82,12 +82,10 @@ public class CloseableTrackingFileStorage implements FileStorage {
         try {
             return delegate.saveNewFile(file);
         } catch (OXException e) {
-            Throwable cause = e.getCause();
-            if ((cause instanceof java.io.EOFException) || (cause instanceof java.util.concurrent.TimeoutException)) {
+            if (indicatesConnectionClosed(e.getCause())) {
                 // End of stream has been reached unexpectedly during reading input
-                throw FileStorageCodes.CONNECTION_CLOSED.create(cause, new Object[0]);
+                throw FileStorageCodes.CONNECTION_CLOSED.create(e.getCause(), new Object[0]);
             }
-
             throw e;
         } finally {
             Streams.close(file);
@@ -160,6 +158,23 @@ public class CloseableTrackingFileStorage implements FileStorage {
         InputStream in = delegate.getFile(name, offset, length);
         OXThreadMarkers.rememberCloseableIfHttpRequestProcessing(in);
         return in;
+    }
+
+    /**
+     * Gets a value indicating whether the supplied exception cause indicates that the end of stream has been reached unexpectedly while
+     * reading from the input or not.
+     *
+     * @param cause The cause to check
+     * @return <code>true</code>, if an unexpected connection close is indicated by the cause, <code>false</code>, otherwise
+     */
+    private static boolean indicatesConnectionClosed(Throwable cause) {
+        if (null != cause) {
+            if (cause instanceof java.io.EOFException || cause instanceof java.util.concurrent.TimeoutException) {
+                return true;
+            }
+            return indicatesConnectionClosed(cause.getCause());
+        }
+        return false;
     }
 
 }
