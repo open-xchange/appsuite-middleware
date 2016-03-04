@@ -303,7 +303,7 @@ class Utils {
      * If the account details can be retrieved (server responds with status <code>200</code> or <code>206</code>) the end-point is
      * considered available; otherwise it's not.
      *
-     * @param endpoint The end-point to check; e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>
+     * @param endpoint The end-point to check; e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer"</code>
      * @param token The authentication token
      * @param httpClient The HTTP client to use
      * @return <code>true</code>/<code>false</code> if the end-point is unavailable; or <code>null</code> to ignore this check
@@ -317,7 +317,7 @@ class Utils {
         HttpGet get = null;
         HttpResponse response = null;
         try {
-            get = new HttpGet(buildUri(endpoint.getContainerUrl(), toQueryString(mapFor("format", "json", "limit", "1"))));
+            get = new HttpGet(buildUri(endpoint.getContainerUri(), toQueryString(mapFor("format", "json", "limit", "1"))));
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();

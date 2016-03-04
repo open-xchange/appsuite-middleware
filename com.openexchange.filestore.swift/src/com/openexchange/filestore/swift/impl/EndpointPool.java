@@ -161,7 +161,7 @@ public class EndpointPool {
      * Checks if this end-point pool has any working/available end-point left.
      *
      * @param contextId The context identifier
-     * @param userId The user idenifier
+     * @param userId The user identifier
      * @return <code>true</code> if there is any available end-point; otherwise <code>false</code>
      */
     public boolean hasAny(int contextId, int userId) {

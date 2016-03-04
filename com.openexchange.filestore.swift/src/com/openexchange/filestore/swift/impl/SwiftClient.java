@@ -199,7 +199,7 @@ public class SwiftClient {
                 parameters.put("marker", marker);
             }
             List<NameValuePair> queryString = Utils.toQueryString(parameters);
-            get = new HttpGet(Utils.buildUri(endpoint.getContainerUrl(), queryString));
+            get = new HttpGet(Utils.buildUri(endpoint.getContainerUri(), queryString));
             get.setHeader(new BasicHeader("X-Auth-Token", endpoint.getToken().getId()));
 
             response = httpClient.execute(get);
@@ -269,7 +269,7 @@ public class SwiftClient {
         HttpResponse response = null;
         try {
             Token token = endpoint.getToken();
-            get = new HttpGet(endpoint.getContainerUrl());
+            get = new HttpGet(endpoint.getContainerUri());
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(get);
             int status = response.getStatusLine().getStatusCode();
@@ -315,7 +315,7 @@ public class SwiftClient {
         HttpResponse response = null;
         try {
             Token token = endpoint.getToken();
-            put = new HttpPut(endpoint.getContainerUrl());
+            put = new HttpPut(endpoint.getContainerUri());
             put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(put);
             int status = response.getStatusLine().getStatusCode();
@@ -373,7 +373,7 @@ public class SwiftClient {
         try {
             Token token = endpoint.getToken();
             UUID id = UUID.randomUUID();
-            put = new HttpPut(endpoint.getObjectUrl(prefix, id));
+            put = new HttpPut(endpoint.getObjectUri(prefix, id));
             put.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             put.setEntity(new InputStreamEntity(data, length));
             response = httpClient.execute(put);
@@ -441,7 +441,7 @@ public class SwiftClient {
         HttpResponse response = null;
         try {
             Token token = endpoint.getToken();
-            get = new HttpGet(endpoint.getObjectUrl(prefix, id));
+            get = new HttpGet(endpoint.getObjectUri(prefix, id));
             get.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             if (0 < rangeStart || 0 < rangeEnd) {
                 get.addHeader("Range", "bytes=" + rangeStart + "-" + rangeEnd);
@@ -506,7 +506,7 @@ public class SwiftClient {
         HttpResponse response = null;
         try {
             Token token = endpoint.getToken();
-            delete = new HttpDelete(endpoint.getObjectUrl(id));
+            delete = new HttpDelete(endpoint.getObjectUri(id));
             delete.setHeader(new BasicHeader("X-Auth-Token", token.getId()));
             response = httpClient.execute(delete);
             int status = response.getStatusLine().getStatusCode();
@@ -634,13 +634,13 @@ public class SwiftClient {
             if (false == tokenStorage.lock(id)) {
                 // Failed to get lock; await concurrent token acquisition to complete (using exponential back-off)
                 {
-                    LOG.info("Awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                    LOG.info("Awaiting new token for Swift object store \"{}\"", endpoint.getBaseUri());
                     int retry = 1;
                     do {
                         if (retry > 1) {
-                            LOG.info("Still awaiting new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                            LOG.info("Still waiting for new token for Swift object store \"{}\"", endpoint.getBaseUri());
                         }
-                        long nanosToWait = TimeUnit.NANOSECONDS.convert((retry++ * 1000) + ((long) (Math.random() * 1000)), TimeUnit.MILLISECONDS);
+                        long nanosToWait = TimeUnit.NANOSECONDS.convert((retry++ * 100) + ((long) (Math.random() * 100)), TimeUnit.MILLISECONDS);
                         LockSupport.parkNanos(nanosToWait);
                     } while (tokenStorage.isLocked(id));
                 }
@@ -657,11 +657,11 @@ public class SwiftClient {
             }
 
             // Acquired lock...
-            LOG.info("Acquiring new token for Swift end-point \"{}\"...", endpoint.getBaseUrl());
+            LOG.info("Acquiring new token for Swift object store \"{}\"...", endpoint.getBaseUri());
             try {
                 // Request new token
                 Token newToken = doAcquireNewToken();
-                LOG.info("Acquired new token for Swift end-point \"{}\"", endpoint.getBaseUrl());
+                LOG.info("Acquired new token for Swift object store \"{}\"", endpoint.getBaseUri());
 
                 // Store it
                 tokenStorage.store(newToken, id);
