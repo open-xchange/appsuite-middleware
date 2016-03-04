@@ -97,8 +97,8 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
                 assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMS", response.getException().getPrefix());
             } else {
                 // SMS should run into user limit
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 24, response.getException().getCode());
-                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "ONBRD", response.getException().getPrefix());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", 1, response.getException().getCode());
+                assertEquals("Unexpected response from the server! Response does contain a wrong exception.", "SMSLIMIT", response.getException().getPrefix());
             }
         }
     }
@@ -115,7 +115,7 @@ public class PlistSMSUserLimitTest extends AbstractPlistSMSTest {
             assertNotNull("Response is empty!", response);
             assertNotNull("Unexpected response from the server! Response does not contain an exception.", response.getException());
 
-            if (response.getException().getCode() == 24 && response.getException().getPrefix().equals("ONBRD")) {
+            if (response.getException().getCode() == 1 && response.getException().getPrefix().equals("SMSLIMIT")) {
                 break;
             }
 
