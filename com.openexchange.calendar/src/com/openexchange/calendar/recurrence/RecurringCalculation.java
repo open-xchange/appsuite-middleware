@@ -504,9 +504,9 @@ public class RecurringCalculation {
                     && (!recColl.isException(normalized_start_of_series, changeExceptions, deleteExceptions))) {
                     if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                         recColl.fillMap(rs, calc.getTimeInMillis(), diff, recurrence_calculator, ds_count);
-                    }
-                    if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
-                        break;
+                        if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                            break;
+                        }
                     }
                 }
                 ds_count++;
@@ -632,7 +632,7 @@ public class RecurringCalculation {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             recColl.fillMap(rs, range, diff, recurrence_calculator, ds_count);
                         }
-                        if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                        if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break loop;
                         }
                         //}
@@ -721,7 +721,7 @@ public class RecurringCalculation {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                                 recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                             }
-                            if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                            if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
                             }
                             //}
@@ -899,7 +899,7 @@ public class RecurringCalculation {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                         }
-                        if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                        if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
                         }
                         //}
@@ -975,7 +975,7 @@ public class RecurringCalculation {
                             if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                                 recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                             }
-                            if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                            if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                                 break;
                             }
                             //}
@@ -1129,7 +1129,7 @@ public class RecurringCalculation {
                         if (!contains_occurrence || calc_until ||(contains_occurrence && ds_count <= occurrence_value)) {
                             recColl.fillMap(rs, start_of_series, diff, recurrence_calculator, ds_count);
                         }
-                        if (ds_count > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
+                        if (rs.size() > PMAXTC || pos == ds_count || (contains_occurrence && ds_count == occurrence_value)) {
                             break;
                         }
                         //}
