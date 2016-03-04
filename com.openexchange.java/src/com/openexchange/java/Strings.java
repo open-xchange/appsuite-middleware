@@ -123,7 +123,7 @@ public class Strings {
     }
 
     /**
-     * Builds up a string from passed objects.
+     * Builds up a string from passed strings.
      *
      * @param strings The strings
      * @return The string build up from concatenating strings
