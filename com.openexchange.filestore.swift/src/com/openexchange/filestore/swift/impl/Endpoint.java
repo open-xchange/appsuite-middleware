@@ -50,6 +50,8 @@
 package com.openexchange.filestore.swift.impl;
 
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.filestore.swift.impl.token.Token;
 import com.openexchange.java.util.UUIDs;
 
 /**
@@ -60,18 +62,61 @@ import com.openexchange.java.util.UUIDs;
  */
 public class Endpoint {
 
-    private final String endpoint;
+    private final AtomicReference<Token> tokenRef;
+    private final String endpointUri;
+    private final String baseUri;
+    private final Object lock;
     private final int hash;
 
     /**
      * Initializes a new {@link Endpoint}.
      *
-     * @param endpoint The API end-point, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
+     * @param endpointUri The API end-point including version, tenant and container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
+     * @param baseUri The base URI including version and tenant, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
      */
-    public Endpoint(String endpoint) {
+    Endpoint(String endpointUri, String baseUri, Object lock) {
         super();
-        this.endpoint = endpoint;
-        hash = 31 * 1 + ((endpoint == null) ? 0 : endpoint.hashCode());
+        this.endpointUri = endpointUri;
+        this.baseUri = baseUri;
+        this.lock = lock;
+        tokenRef = new AtomicReference<Token>();
+        hash = 31 * 1 + endpointUri.hashCode();
+    }
+
+    /**
+     * Gets the lock associated with end-point's base URI (tenant scope).
+     * <p>
+     * Every end-point with the same base URI refers to the same lock instance.
+     *
+     * @return The lock
+     */
+    public Object getLock() {
+        return lock;
+    }
+
+    /**
+     * Gets the token currently in use for this end-point.
+     *
+     * @return The token or <code>null</code>
+     */
+    public Token getToken() {
+        return tokenRef.get();
+    }
+
+    /**
+     * Sets a token to use for this end-point.
+     *
+     * @param token The token to set
+     */
+    public void setToken(Token token) {
+        tokenRef.set(token);
+    }
+
+    /**
+     * Invalidates the current token to use for this end-point.
+     */
+    public void invalidateToken() {
+        tokenRef.set(null);
     }
 
     /**
@@ -80,7 +125,25 @@ public class Endpoint {
      * @return The URL; always with trailing slash
      */
     public StringBuilder getFullUrl() {
-        return new StringBuilder(endpoint).append('/');
+        return new StringBuilder(endpointUri).append('/');
+    }
+
+    /**
+     * Gets the base URL for this end-point, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
+     *
+     * @return The URL; always without trailing slash
+     */
+    public String getBaseUrl() {
+        return baseUri;
+    }
+
+    /**
+     * Gets the identifier associated with this end-point's base URI
+     *
+     * @return The identifier
+     */
+    public String getId() {
+        return Utils.getMD5Sum(baseUri);
     }
 
     /**
@@ -89,7 +152,7 @@ public class Endpoint {
      * @return The URL; always without trailing slash
      */
     public String getContainerUrl() {
-        return endpoint;
+        return endpointUri;
     }
 
     /**
@@ -124,18 +187,9 @@ public class Endpoint {
         return getFullUrl().append(id).toString();
     }
 
-    /**
-     * Gets the base URL, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
-     *
-     * @return The URL; always with trailing slash
-     */
-    public String getBaseUrl() {
-        return endpoint;
-    }
-
     @Override
     public String toString() {
-        return endpoint;
+        return endpointUri;
     }
 
     @Override
@@ -152,11 +206,11 @@ public class Endpoint {
             return false;
         }
         Endpoint other = (Endpoint) obj;
-        if (endpoint == null) {
-            if (other.endpoint != null) {
+        if (endpointUri == null) {
+            if (other.endpointUri != null) {
                 return false;
             }
-        } else if (!endpoint.equals(other.endpoint)) {
+        } else if (!endpointUri.equals(other.endpointUri)) {
             return false;
         }
         return true;

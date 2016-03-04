@@ -83,10 +83,10 @@ public class EndpointPool {
     static final Logger LOG = LoggerFactory.getLogger(EndpointPool.class);
 
     private final ReadWriteLock lock = new ReentrantReadWriteLock();
-    private final List<String> available;
-    private final List<String> blacklist;
+    private final List<Endpoint> available;
+    private final List<Endpoint> blacklist;
     private final AtomicInteger counter;
-    private final String filestoreId;
+    final String filestoreId;
     private final AtomicReference<Token> tokenRef;
     private volatile ScheduledTimerTask heartbeat;
 
@@ -94,23 +94,28 @@ public class EndpointPool {
      * Initializes a new {@link EndpointPool}.
      *
      * @param filestoreId The file storage identifier
-     * @param endpointUrls A list of end-point URLs to manage; must not be empty; URLs must always end with a trailing slash
+     * @param endpointUris A list of end-point URIs to manage; must not be empty; URIs must always end with a trailing slash
      * @param httpClient
      * @param heartbeatInterval
      * @param timerService
      */
-    public EndpointPool(String filestoreId, List<String> endpointUrls, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
+    public EndpointPool(String filestoreId, List<String> endpointUris, HttpClient httpClient, int heartbeatInterval, TimerService timerService) {
         super();
-        int size = endpointUrls.size();
+        int size = endpointUris.size();
         if (size <= 0) {
             throw new IllegalArgumentException("Paramater 'hosts' must not be empty");
         }
 
         this.filestoreId = filestoreId;
         tokenRef = new AtomicReference<Token>();
-        available = new ArrayList<>(endpointUrls);
-        blacklist = new ArrayList<>(size);
+        available = new ArrayList<Endpoint>(size);
+        blacklist = new ArrayList<Endpoint>(size);
         counter = new AtomicInteger(size);
+
+        EndpointFactory endpointFactory = EndpointFactory.getInstance();
+        for (String endpointUri : endpointUris) {
+            available.add(endpointFactory.createEndpointFor(endpointUri));
+        }
 
         LOG.debug("Swift end-point pool [{}]: Scheduling heartbeat timer task", filestoreId);
         heartbeat = timerService.scheduleWithFixedDelay(new Heartbeat(httpClient), heartbeatInterval, heartbeatInterval);
@@ -126,18 +131,25 @@ public class EndpointPool {
     public Endpoint get(int contextId, int userId) {
         lock.readLock().lock();
         try {
-            if (available.isEmpty()) {
+            int size = available.size();
+            if (size <= 0) {
                 return null;
             }
 
+            // Is there only one in pool?
+            if (size == 1) {
+                return available.get(0);
+            }
+
+            // Round-robin the next one
             int next = counter.incrementAndGet();
             if (next < 0) {
-                int newNext = available.size();
+                int newNext = size;
                 counter.compareAndSet(next, newNext);
                 next = newNext;
             }
 
-            Endpoint endpoint = new Endpoint(available.get(next % available.size()));
+            Endpoint endpoint = available.get(next % size);
             LOG.debug("Swift end-point pool [{}]: Returning endpoint {}", filestoreId, endpoint);
             return endpoint;
         } finally {
@@ -165,15 +177,15 @@ public class EndpointPool {
     /**
      * Removes an end-point from the list of available ones and adds it to the blacklist.
      *
-     * @param url The base URL of the end-point
-     *  @return <code>true</code> if there is any available end-point; otherwise <code>false</code>
+     * @param endpoint The end-point to add to black-list
+     * @return <code>true</code> if there is any available end-point; otherwise <code>false</code>
      */
-    public boolean blacklist(String url) {
+    public boolean blacklist(Endpoint endpoint) {
         lock.writeLock().lock();
         try {
-            if (available.remove(url)) {
-                LOG.warn("Swift end-point pool [{}]: Endpoint {} is added to blacklist", filestoreId, url);
-                blacklist.add(url);
+            if (available.remove(endpoint)) {
+                LOG.warn("Swift end-point pool [{}]: Endpoint {} is added to blacklist", filestoreId, endpoint);
+                blacklist.add(endpoint);
             }
             return !available.isEmpty();
         } finally {
@@ -184,14 +196,14 @@ public class EndpointPool {
     /**
      * Removes an end-point from the blacklist and adds it back to list of available ones.
      *
-     * @param url The base URL of the end-point
+     * @param endpoint The end-point to remove from black-list
      */
-    public void unblacklist(String url) {
+    public void unblacklist(Endpoint endpoint) {
         lock.writeLock().lock();
         try {
-            if (blacklist.remove(url)) {
-                LOG.info("Swift end-point pool [{}]: Endpoint {} is removed from blacklist", filestoreId, url);
-                available.add(url);
+            if (blacklist.remove(endpoint)) {
+                LOG.info("Swift end-point pool [{}]: Endpoint {} is removed from blacklist", filestoreId, endpoint);
+                available.add(endpoint);
             }
         } finally {
             lock.writeLock().unlock();
@@ -214,7 +226,7 @@ public class EndpointPool {
      *
      * @return The currently blacklisted end-points
      */
-    List<String> getBlacklist() {
+    List<Endpoint> getBlacklist() {
         lock.readLock().lock();
         try {
             return new ArrayList<>(blacklist);
@@ -246,7 +258,7 @@ public class EndpointPool {
         @Override
         public void run() {
             try {
-                List<String> blacklist = getBlacklist();
+                List<Endpoint> blacklist = getBlacklist();
                 int size = blacklist.size();
                 if (size <= 0) {
                     LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist is empty, nothing to do", filestoreId);
@@ -254,8 +266,8 @@ public class EndpointPool {
                 }
 
                 LOG.debug("Swift end-point pool [{}]: Heartbeat - blacklist contains {} endpoints", filestoreId, Integer.valueOf(size));
-                for (String endpoint : blacklist) {
-                    Boolean unavailable = Utils.endpointUnavailable(endpoint, tokenRef.get(), httpClient);
+                for (Endpoint endpoint : blacklist) {
+                    Boolean unavailable = Utils.endpointUnavailable(endpoint, httpClient);
                     if (null != unavailable) {
                         if (unavailable.booleanValue()) {
                             LOG.warn("Swift end-point pool [{}]: Endpoint {} is still unavailable", filestoreId, endpoint);

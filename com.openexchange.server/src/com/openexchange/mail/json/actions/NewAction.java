@@ -242,7 +242,7 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, csid, warnings);
                 UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
                 checkAndApplyLineWrapAfter(request, usm);
@@ -279,7 +279,7 @@ public final class NewAction extends AbstractMailAction {
                  * ... and send message
                  */
                 String protocol = request.isSecure() ? "https://" : "http://";
-                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), csid, warnings);
                 if (newMessageId) {
                     for (ComposedMailMessage composedMail : composedMails) {
                         if (null != composedMail) {
