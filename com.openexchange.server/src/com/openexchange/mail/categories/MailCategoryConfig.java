@@ -58,7 +58,7 @@ import java.util.Map;
  * {@link MailCategoryConfig}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.2
  */
 public class MailCategoryConfig {
 
