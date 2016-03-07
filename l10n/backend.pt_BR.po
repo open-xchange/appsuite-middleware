@@ -1,4 +1,4 @@
-# Luiz Fernando Ranghetti <luiz@bureau-cornavin.com>, 2013.
+# Luiz Fernando Ranghetti <luiz@bureau-cornavin.com>, 2013, 2016.
 # Bianca Oliveira <bianca@bureau-cornavin.com>, 2013, 2014, 2015.
 # Aracele Torres <aracele@bureau-cornavin.com>, 2013, 2014, 2015, 2016.
 msgid ""
@@ -6,14 +6,14 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-02-26 11:57-0300\n"
-"Last-Translator: Luiz Fernando Ranghetti <elchevive@opensuse.org>\n"
-"Language-Team: Portuguese <>\n"
+"PO-Revision-Date: 2016-02-29 09:16-0300\n"
+"Last-Translator: Luiz Fernando Ranghetti <elchevive68@gmail.com>\n"
+"Language-Team: Portuguese <kde-i18n-pt_BR@kde.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Lokalize 2.0\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. The client send a ticket within the browser request and the verification of this ticket failed.
@@ -826,7 +826,7 @@ msgstr "Todos os horários serão exibidos no fuso horário %1$s"
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:298
 msgid ""
 "%1$s has %2$s the appointment, but would like to make a counter proposal: "
-msgstr "%1$s %2$s o compromisso, mas gostaria de fazer uma contrapoposta: "
+msgstr "%1$s %2$s o compromisso, mas gostaria de fazer uma contraproposta: "
 
 #. TODO: Mah/Cisco, please describe what is meant with the wording 'chair'
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/Messages.java:301
@@ -914,7 +914,7 @@ msgstr "Android"
 #. The display name for an Apple Mac
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:84
 msgid "Mac"
-msgstr "%1$s seconds."
+msgstr "Mac"
 
 #. The display name for an Apple iPad
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingStrings.java:88
@@ -1794,7 +1794,7 @@ msgid ""
 "The maximum number of synchronizable directories (%1$d) is exceeded. Please "
 "remove some directories and try again, or select another root folder."
 msgstr ""
-"O número máximo de diretórios sincronizáveis (%1$d) foi excedido. Exlcua "
+"O número máximo de diretórios sincronizáveis (%1$d) foi excedido. Exclua "
 "alguns diretórios e tente novamente ou selecione outro diretório raiz."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
@@ -1803,7 +1803,7 @@ msgid ""
 "remove some files and try again."
 msgstr ""
 "O número máximo de arquivos (%1$d) foi excedido no diretório \"%2$s\". "
-"Exlcua alguns arquivos e tente novamente."
+"Exclua alguns arquivos e tente novamente."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:95
 msgid "The token \"%1$s\" is already registered."
@@ -2139,7 +2139,7 @@ msgid ""
 "cannot log information to a bucket in another location."
 msgstr ""
 "Cruzar registro de localização não é permitido. Cestos em uma localização "
-"geográficanão podem registrar as informações para um cesto em outro local."
+"geográfica não podem registrar as informações para um cesto em outro local."
 
 #. Your proposed upload is smaller than the minimum allowed object size.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore.s3/src/com/openexchange/filestore/s3/internal/S3ExceptionMessages.java:89
@@ -2265,7 +2265,7 @@ msgid ""
 "openexchange.filestore.s3.[filestoreID].signerOverride is properly "
 "configured for this filestore."
 msgstr ""
-"O armazenamento S3 respodeu com \"Requisição inválida\". Verifique se o com."
+"O armazenamento S3 respondeu com \"Requisição inválida\". Verifique se o com."
 "openexchange.filestore.s3.[filestoreID].signerOverride está configurado "
 "apropriadamente para este armazenamento."
 
@@ -4147,7 +4147,7 @@ msgid ""
 "You do not have the appropriate permissions to open folder %1$s due to "
 "missing read access"
 msgstr ""
-"Você não tem as permissões apropriadas para abrir a pasta %1$s devido àfalta "
+"Você não tem as permissões apropriadas para abrir a pasta %1$s devido à falta "
 "de acesso de leitura"
 
 #. *
