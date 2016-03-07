@@ -379,16 +379,17 @@ public class ChecksumProvider {
     private static FileChecksum find(Collection<? extends FileChecksum> checksums, File file, boolean considerSequenceNumber) {
         FileChecksum matchingChecksum = null;
         for (FileChecksum checksum : checksums) {
-            String fileID = checksum.getFileID().toUniqueID();
-            String folderID = new FolderID(
-                checksum.getFileID().getService(), checksum.getFileID().getAccountId(), checksum.getFileID().getFolderId()).toUniqueID();
-            if (fileID.equals(file.getId()) && folderID.equals(file.getFolderId()) &&
-                (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion()))) {
-                if (checksum.getSequenceNumber() == file.getSequenceNumber()) {
-                    return checksum; // perfect match
-                }
-                if (false == considerSequenceNumber) {
-                    matchingChecksum = checksum; // match with different sequence number
+            if (checksum.getFileID().toUniqueID().equals(file.getId())) {
+                String folderID = new FolderID(
+                    checksum.getFileID().getService(), checksum.getFileID().getAccountId(), checksum.getFileID().getFolderId()).toUniqueID();
+                if (folderID.equals(file.getFolderId()) &&
+                    (null == checksum.getVersion() ? null == file.getVersion() : checksum.getVersion().equals(file.getVersion()))) {
+                    if (checksum.getSequenceNumber() == file.getSequenceNumber()) {
+                        return checksum; // perfect match
+                    }
+                    if (false == considerSequenceNumber) {
+                        matchingChecksum = checksum; // match with different sequence number
+                    }
                 }
             }
         }
