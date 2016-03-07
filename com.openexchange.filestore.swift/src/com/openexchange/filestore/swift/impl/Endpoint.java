@@ -71,16 +71,21 @@ public class Endpoint {
     /**
      * Initializes a new {@link Endpoint}.
      *
-     * @param endpointUri The API end-point including version, tenant and container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
-     * @param baseUri The base URI including version and tenant, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
+     * @param baseUri The base URI including version and tenant, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456"</code>.
+     * @param containerName The container name; e.g. <code>"MyContainer"</code>
+     * @param lock The tenant-scoped lock associated with this end-point
      */
-    Endpoint(String endpointUri, String baseUri, Object lock) {
+    Endpoint(String baseUri, String containerName, Object lock) {
         super();
-        this.endpointUri = endpointUri;
+        this.endpointUri = baseUri + '/' + containerName;
         this.baseUri = baseUri;
         this.lock = lock;
         tokenRef = new AtomicReference<Token>();
         hash = 31 * 1 + endpointUri.hashCode();
+    }
+
+    private StringBuilder constructUri() {
+        return new StringBuilder(endpointUri).append('/');
     }
 
     /**
@@ -120,25 +125,17 @@ public class Endpoint {
     }
 
     /**
-     * Gets the URL for the container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer/"</code>.
+     * Gets the base URI for this end-point, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456"</code>.
      *
-     * @return The URL; always with trailing slash
+     * @return The URI; always without trailing slash
      */
-    public StringBuilder getFullUrl() {
-        return new StringBuilder(endpointUri).append('/');
-    }
-
-    /**
-     * Gets the base URL for this end-point, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"</code>.
-     *
-     * @return The URL; always without trailing slash
-     */
-    public String getBaseUrl() {
+    public String getBaseUri() {
         return baseUri;
     }
 
     /**
-     * Gets the identifier associated with this end-point's base URI
+     * Gets the identifier associated with this end-point's base URI.<br>
+     * (which is the HEX presentation for the MD5 sum of the base URI)
      *
      * @return The identifier
      */
@@ -147,44 +144,44 @@ public class Endpoint {
     }
 
     /**
-     * Gets the URL for the container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
+     * Gets the URI for the container, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer"</code>.
      *
-     * @return The URL; always without trailing slash
+     * @return The URI; always without trailing slash
      */
-    public String getContainerUrl() {
+    public String getContainerUri() {
         return endpointUri;
     }
 
     /**
-     * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
+     * Gets the URI for the given object, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
      *
      * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
      * @param id The object identifier
-     * @return The URL; always without trailing slash
+     * @return The URI; always without trailing slash
      */
-    public String getObjectUrl(String prefix, UUID id) {
-        return getFullUrl().append(Utils.addPrefix(prefix, UUIDs.getUnformattedString(id))).toString();
+    public String getObjectUri(String prefix, UUID id) {
+        return getObjectUri(prefix, UUIDs.getUnformattedString(id));
     }
 
     /**
-     * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
+     * Gets the URI for the given object, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
      *
      * @param prefix The prefix to use; e.g. <code>"57462ctxstore"</code>
      * @param id The object identifier
-     * @return The URL; always without trailing slash
+     * @return The URI; always without trailing slash
      */
-    public String getObjectUrl(String prefix, String id) {
-        return getFullUrl().append(Utils.addPrefix(prefix, id)).toString();
+    public String getObjectUri(String prefix, String id) {
+        return constructUri().append(Utils.addPrefix(prefix, id)).toString();
     }
 
     /**
-     * Gets the URL for the given object, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
+     * Gets the URI for the given object, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer/57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>.
      *
-     * @param id The object identifier; e.g. <code>"57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>
-     * @return The URL; always without trailing slash
+     * @param prefixedName The already prefixed object name; e.g. <code>"57462ctxstore/411615f4a607432fa2e12cc18b8c5f9c"</code>
+     * @return The URI; always without trailing slash
      */
-    public String getObjectUrl(String id) {
-        return getFullUrl().append(id).toString();
+    public String getObjectUri(String prefixedName) {
+        return constructUri().append(prefixedName).toString();
     }
 
     @Override

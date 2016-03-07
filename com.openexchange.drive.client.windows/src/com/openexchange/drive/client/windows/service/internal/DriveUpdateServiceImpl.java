@@ -57,6 +57,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.drive.client.windows.files.UpdateFilesProvider;
 import com.openexchange.drive.client.windows.service.BrandingService;
@@ -146,22 +147,23 @@ public class DriveUpdateServiceImpl implements DriveUpdateService {
         if (!isValid(branding)) {
             throw UpdaterExceptionCodes.BRANDING_ERROR.create(branding);
         }
-        HashMap<String, Object> values = new HashMap<String, Object>();
-        values.put("OX_SERVERURL", quote(serverUrl));
-        values.put("OX_USERNAME", quote(username));
+
+        Map<String, Object> values = new HashMap<String, Object>(12);
+        values.put("OX_SERVERURL", StringEscapeUtils.escapeXml(quote(serverUrl)));
+        values.put("OX_USERNAME", StringEscapeUtils.escapeXml(quote(username)));
         String exeFileName = getExeFileName(branding);
         String msiFileName = getMsiFileName(branding);
         try {
-            values.put("URL", Utils.getFileUrl(serverUrl, exeFileName));
+            values.put("URL", StringEscapeUtils.escapeXml(Utils.getFileUrl(serverUrl, exeFileName)));
             values.put("MD5", provider.getMD5(branding, exeFileName));
-            values.put("MSI_URL", Utils.getFileUrl(serverUrl, msiFileName));
+            values.put("MSI_URL", StringEscapeUtils.escapeXml(Utils.getFileUrl(serverUrl, msiFileName)));
             values.put("MSI_MD5", provider.getMD5(branding, msiFileName));
             values.put("ICON", loadIcon(branding));
 
             BrandingConfig conf = BrandingConfig.getBranding(branding);
 
             Properties prop = conf.getProperties();
-            values.put(Constants.BRANDING_NAME, prop.get(Constants.BRANDING_NAME));
+            values.put(Constants.BRANDING_NAME, StringEscapeUtils.escapeXml(prop.get(Constants.BRANDING_NAME).toString()));
             values.put(Constants.BRANDING_VERSION, prop.get(Constants.BRANDING_VERSION));
             values.put(Constants.BRANDING_RELEASE, prop.get(Constants.BRANDING_RELEASE));
         } catch (IOException e) {

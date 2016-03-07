@@ -58,6 +58,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.resources.RootCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -242,8 +243,9 @@ public class GroupwareCarddavFactory extends DAVFactory {
      * @param value The overridden value
      */
     public void setOverrideNextSyncToken(String value) {
+        String attributeName = getOverrideNextSyncTokenAttributeName();
         try {
-            getService(UserService.class).setUserAttribute(getOverrideNextSyncTokenAttributeName(), value, getUser().getId(), getContext());
+            getService(UserService.class).setAttribute(attributeName, value, getUser().getId(), getContext());
         } catch (OXException e) {
             LOG.error("", e);
         }
@@ -255,10 +257,32 @@ public class GroupwareCarddavFactory extends DAVFactory {
      * @return The value of the overridden sync-token, or <code>null</code> if not set
      */
     public String getOverrideNextSyncToken() {
-        try {
-            return getService(UserService.class).getUserAttribute(getOverrideNextSyncTokenAttributeName(), getUser().getId(), getContext());
-        } catch (OXException e) {
-            LOG.error("", e);
+        User user = getUser();
+        String attributeName = getOverrideNextSyncTokenAttributeName();
+        Map<String, Set<String>> attributes = user.getAttributes();
+        if (null != attributes) {
+            /*
+             * pick up & correct any legacy user attribute first
+             */
+            Set<String> matchingAttributes = attributes.get("attr_" + attributeName);
+            if (null != matchingAttributes && 0 < matchingAttributes.size()) {
+                String value = matchingAttributes.iterator().next();
+                try {
+                    UserService userService = getService(UserService.class);
+                    userService.setAttribute(attributeName, value, user.getId(), getContext());
+                    userService.setAttribute("attr_" + attributeName, null, user.getId(), getContext());
+                } catch (OXException e) {
+                    LOG.error("", e);
+                }
+                return value;
+            }
+            /*
+             * get matching attribute value
+             */
+            matchingAttributes = attributes.get(attributeName);
+            if (null != matchingAttributes && 0 < matchingAttributes.size()) {
+                return matchingAttributes.iterator().next();
+            }
         }
         return null;
     }

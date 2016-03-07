@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.utils;
 
 import java.io.Closeable;
 import java.io.EOFException;
@@ -59,24 +59,59 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.java.Streams;
 
 /**
- * {@link ChunkedUpload}
+ * {@link ChunkedUpload} - Provides the data of passed input stream in chunks (aligned to {@link UploadChunk#MIN_CHUNK_SIZE}).
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class ChunkedUpload implements Closeable {
+public abstract class ChunkedUpload<I extends InputStream, C extends UploadChunk> implements Closeable {
 
-    private final InputStream inputStream;
+    /**
+     * The default minimum allowed chunk size for multipart uploads, which is 5MB.
+     */
+    public static final long DEFAULT_MIN_CHUNK_SIZE = 5 * 1024 * 1024;
+
+    private final long minChunkSize;
+    private final I inputStream;
     private boolean hasNext;
+
+    /**
+     * Initializes a new {@link ChunkedUpload} with {@link #DEFAULT_MIN_CHUNK_SIZE default minimum chunk size}.
+     *
+     * @param data The underlying input stream
+     */
+    protected ChunkedUpload(I data) {
+        this(data, DEFAULT_MIN_CHUNK_SIZE);
+    }
 
     /**
      * Initializes a new {@link ChunkedUpload}.
      *
      * @param data The underlying input stream
      */
-    public ChunkedUpload(InputStream data) {
+    protected ChunkedUpload(I data, long minChunkSize) {
         super();
         this.inputStream = data;
+        this.minChunkSize = minChunkSize;
         hasNext = true;
+    }
+
+    /**
+     * Gets the input stream from which data is read
+     *
+     * @return The input stream
+     */
+    protected I getInputStream() {
+        return inputStream;
+    }
+
+    /**
+     * Sets the <code>hasNext</code> flag.
+     *
+     * @param The <code>hasNext</code> flag to set
+     */
+    protected void setHasNext(boolean hasNext) {
+        this.hasNext = hasNext;
     }
 
     /**
@@ -85,32 +120,40 @@ public class ChunkedUpload implements Closeable {
      * @return The next upload chunk
      * @throws OXException If next chunk cannot be returned due to an I/O error or because end of stream was already reached ({@link #hasNext()} signals <code>false</code>)
      */
-    public UploadChunk next() throws OXException {
+    public C next() throws OXException {
         if (false == hasNext) {
             throw FileStorageCodes.IOERROR.create(new EOFException("End of input reached"));
         }
+
         try {
             ThresholdFileHolder fileHolder = new ThresholdFileHolder();
             byte[] buffer = new byte[0xFFFF]; // 64k
-            int read;
-            while (0 < (read = inputStream.read(buffer, 0, buffer.length))) {
+            for (int read; (read = inputStream.read(buffer, 0, buffer.length)) > 0;) {
                 fileHolder.write(buffer, 0, read);
-                if (fileHolder.getCount() >= UploadChunk.MIN_CHUNK_SIZE) {
-                    /*
-                     * chunk size reached
-                     */
-                    return new UploadChunk(fileHolder);
+                if (fileHolder.getCount() >= minChunkSize) {
+                    // Chunk size reached
+                    return createChunkWith(fileHolder, false);
                 }
             }
             /*
              * end of input reached
              */
             hasNext = false;
-            return new UploadChunk(fileHolder);
+            return createChunkWith(fileHolder, true);
         } catch (IOException e) {
             throw FileStorageCodes.IOERROR.create(e);
         }
     }
+
+    /**
+     * Invoked when specified minimum chunk size is reached when reading data from passed input stream.
+     *
+     * @param fileHolder The file holder holding chunk's data
+     * @param eofReached <code>true</code> if end of stream has been reached; otherwise <code>false</code>
+     * @return The upload chunk to return
+     * @throws OXException If an I/O error occurs
+     */
+    protected abstract C createChunkWith(ThresholdFileHolder fileHolder, boolean eofReached) throws OXException;
 
     /**
      * Gets a value indicating whether further chunks are available or not.

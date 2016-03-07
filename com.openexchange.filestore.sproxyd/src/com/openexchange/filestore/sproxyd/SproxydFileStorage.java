@@ -63,6 +63,8 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.impl.SproxydClient;
+import com.openexchange.filestore.utils.DefaultChunkedUpload;
+import com.openexchange.filestore.utils.UploadChunk;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
@@ -283,10 +285,10 @@ public class SproxydFileStorage implements FileStorage {
      */
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean success = false;
-        ChunkedUpload chunkedUpload = null;
+        DefaultChunkedUpload chunkedUpload = null;
         List<UUID> scalityIds = new ArrayList<UUID>();
         try {
-            chunkedUpload = new ChunkedUpload(data);
+            chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
             while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = chunkedUpload.next();

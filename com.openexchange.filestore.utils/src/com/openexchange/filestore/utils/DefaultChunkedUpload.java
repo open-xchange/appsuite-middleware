@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,76 +47,42 @@
  *
  */
 
-package com.openexchange.filestore.s3.internal;
+package com.openexchange.filestore.utils;
 
-import java.io.Closeable;
-import java.io.IOException;
 import java.io.InputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
-import com.openexchange.tools.encoding.Base64;
-
 
 /**
- * {@link UploadChunk}
+ * {@link DefaultChunkedUpload} - The default implementation for {@link ChunkedUpload}.
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class UploadChunk implements Closeable {
+public class DefaultChunkedUpload extends ChunkedUpload<InputStream, UploadChunk> {
 
     /**
-     * The minimum allowed chunk size for AWS multipart uploads, which is 5MB according to
-     * http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
-     */
-    static final int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
-
-    private final String md5digest;
-    private final ThresholdFileHolder fileHolder;
-
-    /**
-     * Initializes a new {@link UploadChunk} served by the supplied file holder.
+     * Initializes a new {@link DefaultChunkedUpload}.
      *
-     * @param fileHolder The underlying file holder
-     * @param md5digest The message digest
+     * @param data  The input stream to read from
+     * @param minChunkSize The minimum chunk size
      */
-    public UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
-        super();
-        this.fileHolder = fileHolder;
-        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
+    public DefaultChunkedUpload(InputStream data, long minChunkSize) {
+        super(data, minChunkSize);
     }
 
     /**
-     * Gets the size.
+     * Initializes a new {@link DefaultChunkedUpload} with {@link ChunkedUpload#DEFAULT_MIN_CHUNK_SIZE default minimum chunk size}.
      *
-     * @return the size
+     * @param data The input stream to read from
      */
-    public long getSize() {
-        return fileHolder.getCount();
-    }
-
-    /**
-     * Gets the data.
-     *
-     * @return The data
-     * @throws OXException
-     */
-    public InputStream getData() throws OXException {
-        return fileHolder.getClosingStream();
-    }
-
-    /**
-     * Gets the MD5 digest,
-     *
-     * @return The MD5 digest or <code>null</code>
-     */
-    public String getMD5Digest() {
-        return md5digest;
+    public DefaultChunkedUpload(InputStream data) {
+        super(data);
     }
 
     @Override
-    public void close() throws IOException {
-        Streams.close(fileHolder);
+    protected UploadChunk createChunkWith(ThresholdFileHolder fileHolder, boolean eofReached) throws OXException {
+        return new UploadChunk(fileHolder);
     }
 
 }

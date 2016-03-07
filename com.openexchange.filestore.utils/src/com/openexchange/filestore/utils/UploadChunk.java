@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.filestore.sproxyd;
+package com.openexchange.filestore.utils;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -57,18 +57,15 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 
 /**
- * {@link UploadChunk}
+ * {@link UploadChunk} - Represents an upload chunk.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
 public class UploadChunk implements Closeable {
 
-    /**
-     * The minimum allowed chunk size for multipart uploads, which is 5MB.
-     */
-    static final int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
-
-    private final ThresholdFileHolder fileHolder;
+    /** The backing file holder */
+    protected final ThresholdFileHolder fileHolder;
 
     /**
      * Initializes a new {@link UploadChunk} served by the supplied file holder.

@@ -63,9 +63,9 @@ public class EndpointFactory {
     private static final EndpointFactory INSTANCE = new EndpointFactory();
 
     /**
-     * Gets the instance
+     * Gets the singleton instance
      *
-     * @return The instance
+     * @return The singleton instance
      */
     public static EndpointFactory getInstance() {
         return INSTANCE;
@@ -81,15 +81,17 @@ public class EndpointFactory {
     }
 
     /**
-     * Creates an end-point for specified URI; including version, tenant and container, e.g. <code>"https://my.clouddrive.invalid/v1/MyCloudFS_aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee/MyContainer"</code>.
+     * Creates an end-point for specified URI; including version, tenant and container, e.g. <code>"https://swift.store.invalid/v1/CloudFS_123456/MyContainer"</code>.
      *
      * @param endpointUri The end-point URI
      * @return The created end-point instance
      */
     public Endpoint createEndpointFor(String endpointUri) {
+        // Extract base URI
         int pos = endpointUri.lastIndexOf('/');
         String baseUri = endpointUri.substring(0, pos);
 
+        // Get tenant-associated lock for this JVM
         Object lock = locks.get(baseUri);
         if (null == lock) {
             Object newLock = new Object();
@@ -99,7 +101,11 @@ public class EndpointFactory {
             }
         }
 
-        return new Endpoint(endpointUri, baseUri, lock);
+        // Extract container name
+        String containerName = endpointUri.substring(pos + 1);
+
+        // Create & return end-point
+        return new Endpoint(baseUri, containerName, lock);
     }
 
 }

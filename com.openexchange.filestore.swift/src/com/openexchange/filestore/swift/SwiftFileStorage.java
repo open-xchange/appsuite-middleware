@@ -70,6 +70,8 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.swift.chunkstorage.Chunk;
 import com.openexchange.filestore.swift.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.swift.impl.SwiftClient;
+import com.openexchange.filestore.utils.DefaultChunkedUpload;
+import com.openexchange.filestore.utils.UploadChunk;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
@@ -359,10 +361,10 @@ public class SwiftFileStorage implements FileStorage {
      */
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean deleteUploadedChunks = true;
-        ChunkedUpload chunkedUpload = null;
+        DefaultChunkedUpload chunkedUpload = null;
         List<UUID> swiftIds = new ArrayList<UUID>();
         try {
-            chunkedUpload = new ChunkedUpload(data);
+            chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
             if (!chunkedUpload.hasNext()) {
                 return off;

@@ -1819,7 +1819,26 @@ public class SMTPTransport extends Transport {
 	    // send the addresses to the SMTP server
 	    sendCommand(cmd);
 	    // check the server's response for address validity
-	    retCode = readServerResponse();
+	    try {
+	        retCode = readServerResponse();
+	    } catch (MessagingException e) {
+	        Exception cause = e.getNextException();
+	        if (cause instanceof java.net.SocketTimeoutException) {
+	            Address[] unsent;
+	            {	                
+	                int rest = addresses.length - (i + 1);
+	                if (rest > 0) {
+	                    unsent = new Address[rest];
+	                    System.arraycopy(addresses, i + 1, unsent, 0, rest);
+	                } else {
+	                    unsent = new Address[0];
+	                }
+	            }
+	            
+                throw new SMTPSendTimedoutException(ia, unsent, cmd, (java.net.SocketTimeoutException) cause);
+            }
+	        throw e;
+	    }
 	    switch (retCode) {
 	    case 250: case 251:
 		valid.add(ia);

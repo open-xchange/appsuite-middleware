@@ -177,7 +177,7 @@ public class AddGuestPermissionTest extends ShareTest {
          * Reload subfolders
          */
         subLevel1 = getFolder(api, subLevel1.getObjectID());
-        subLevel2 = getFolder(api, subLevel1.getObjectID());
+        subLevel2 = getFolder(api, subLevel2.getObjectID());
         /*
          * check permissions
          */

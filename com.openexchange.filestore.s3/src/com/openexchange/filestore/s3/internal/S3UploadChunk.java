@@ -47,61 +47,46 @@
  *
  */
 
-package com.openexchange.filestore.swift;
+package com.openexchange.filestore.s3.internal;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Streams;
+import com.openexchange.filestore.utils.UploadChunk;
+import com.openexchange.tools.encoding.Base64;
+
 
 /**
- * {@link UploadChunk}
+ * {@link S3UploadChunk} - An AWS upload chunk.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class UploadChunk implements Closeable {
+public class S3UploadChunk extends UploadChunk {
 
     /**
-     * The minimum allowed chunk size for multipart uploads, which is 5MB.
+     * The minimum allowed chunk size for AWS multipart uploads, which is 5MB according to
+     * http://docs.aws.amazon.com/AmazonS3/latest/API/mpUploadComplete.html
      */
     static final int MIN_CHUNK_SIZE = 5 * 1024 * 1024;
 
-    private final ThresholdFileHolder fileHolder;
+    private final String md5digest;
 
     /**
-     * Initializes a new {@link UploadChunk} served by the supplied file holder.
+     * Initializes a new {@link S3UploadChunk} served by the supplied file holder.
      *
      * @param fileHolder The underlying file holder
+     * @param md5digest The message digest
      */
-    public UploadChunk(ThresholdFileHolder fileHolder) {
-        super();
-        this.fileHolder = fileHolder;
+    public S3UploadChunk(ThresholdFileHolder fileHolder, byte[] md5digest) {
+        super(fileHolder);
+        this.md5digest = null == md5digest ? null : Base64.encode(md5digest);
     }
 
     /**
-     * Gets the size.
+     * Gets the MD5 digest,
      *
-     * @return the size
+     * @return The MD5 digest or <code>null</code>
      */
-    public long getSize() {
-        return fileHolder.getCount();
-    }
-
-    /**
-     * Gets the data.
-     *
-     * @return The data
-     * @throws OXException
-     */
-    public InputStream getData() throws OXException {
-        return fileHolder.getClosingStream();
-    }
-
-    @Override
-    public void close() throws IOException {
-        Streams.close(fileHolder);
+    public String getMD5Digest() {
+        return md5digest;
     }
 
 }

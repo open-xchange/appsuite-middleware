@@ -147,6 +147,7 @@ postFix() {
     ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
 
     # SoftwareChange_Request-2285
+    MOD_PASSWDS=0
     TMPFILE=$(mktemp)
     while read LINE; do
         case "$LINE" in
@@ -162,13 +163,17 @@ postFix() {
                 if [ -n "${PARTS[0]}" ] && [ -n "${PARTS[1]}" ]
                 then
                     echo ${PARTS[0]}:crypt:${PARTS[1]}
+                    MOD_PASSWDS=$(($MOD_PASSWDS+1))
                 else
                     echo $LINE
                 fi
                 ;;
         esac
     done < /opt/open-xchange/etc/mpasswd >$TMPFILE
-    cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    if [ ${MOD_PASSWDS} -gt 0 ]
+    then
+        cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    fi
     rm $TMPFILE
 
     # SoftwareChange_Request-2323

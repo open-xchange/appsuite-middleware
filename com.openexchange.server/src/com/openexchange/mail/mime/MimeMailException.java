@@ -61,6 +61,7 @@ import javax.mail.MessagingException;
 import javax.mail.SendFailedException;
 import javax.mail.Store;
 import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.log.LogProperties;
@@ -73,6 +74,7 @@ import com.openexchange.tools.exceptions.ExceptionUtils;
 import com.sun.mail.iap.CommandFailedException;
 import com.sun.mail.smtp.SMTPAddressFailedException;
 import com.sun.mail.smtp.SMTPSendFailedException;
+import com.sun.mail.smtp.SMTPSendTimedoutException;
 import com.sun.mail.smtp.SMTPSenderFailedException;
 
 /**
@@ -273,6 +275,12 @@ public class MimeMailException extends OXException {
                 return MimeMailExceptionCode.READ_ONLY_FOLDER.create(e, appendInfo(e.getMessage(), folder));
             } else if (e instanceof javax.mail.search.SearchException) {
                 return MimeMailExceptionCode.SEARCH_ERROR.create(e, appendInfo(e.getMessage(), folder));
+            } else if (e instanceof com.sun.mail.smtp.SMTPSendTimedoutException) {
+                // Encountered timeout while trying to send a message to a recipient
+                SMTPSendTimedoutException timedoutException = (SMTPSendTimedoutException) e;
+                String cmd = timedoutException.getCommand();
+                InternetAddress addr = timedoutException.getAddr();
+                return MimeMailExceptionCode.SEND_TIMED_OUT_ERROR.create(e, addr.toUnicodeString(), cmd);
             } else if (e instanceof com.sun.mail.smtp.SMTPSenderFailedException) {
                 SMTPSenderFailedException failedException = (SMTPSenderFailedException) e;
                 SmtpInfo smtpInfo = getSmtpInfo(failedException);

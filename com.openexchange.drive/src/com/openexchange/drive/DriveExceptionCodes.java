@@ -206,6 +206,9 @@ public enum DriveExceptionCodes implements DisplayableOXExceptionCode {
     /** The token \"%1$s\" is already registered. */
     TOKEN_ALREADY_REGISTERED(TOKEN_ALREADY_REGISTERED_MSG, TOKEN_ALREADY_REGISTERED_MSG, Category.CATEGORY_CONFLICT, 37),
 
+    /** Client connection lost unexpectedly */
+    CLIENT_CONNECTION_LOST("Client connection lost unexpectedly", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONNECTIVITY, 38),
+
     ;
 
     private static final String PREFIX = "DRV";

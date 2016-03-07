@@ -377,6 +377,12 @@ public class DriveServiceImpl implements DriveService {
         try {
             createdFile = new UploadHelper(syncSession).perform(path, originalVersion, newVersion, uploadStream, contentType, offset, totalLength, created, modified);
         } catch (OXException e) {
+            if ("FLS-0022".equals(e.getErrorCode())) {
+                // The connected client closed the connection unexpectedly
+                LOG.debug("Client connection lost during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
+                    e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
+                throw DriveExceptionCodes.CLIENT_CONNECTION_LOST.create(e);
+            }
             LOG.warn("Got exception during upload ({})\nSession: {}, path: {}, original version: {}, new version: {}, offset: {}, total length: {}",
                 e.getMessage(), syncSession, path, originalVersion, newVersion, offset, totalLength, e);
             if (DriveUtils.indicatesQuotaExceeded(e)) {

@@ -322,10 +322,14 @@ public enum MimeMailExceptionCode implements DisplayableOXExceptionCode {
      * Image attachments are not supported
      */
     IMAGE_ATTACHMENTS_UNSUPPORTED("Image attachments are not supported", CATEGORY_ERROR, 1032),
-    /*
+    /**
      * The message could not be sent due to a temporary failure: %1$s
      */
     TEMPORARY_FAILURE("The message could not be sent due to a temporary failure: %1$s", CATEGORY_ERROR, 1028, MimeMailExceptionMessage.TEMPORARY_FAILURE),
+    /**
+     * Encountered a read timeout while trying to send to the following recipient: %1$s (%2$s) (<i>arbitrary server information</i>)
+     */
+    SEND_TIMED_OUT_ERROR("Message could not be sent: %1$s (%2$s)", CATEGORY_ERROR, 1033, MimeMailExceptionMessage.SEND_TIMED_OUT_ERROR_MSG_DISPLAY),
 
     ;
 

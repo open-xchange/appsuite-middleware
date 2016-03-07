@@ -77,7 +77,7 @@ import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
 
 /**
- * 
+ *
  * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
@@ -85,22 +85,27 @@ import com.openexchange.userconf.UserConfigurationService;
  */
 public class Activator extends HousekeepingActivator {
 
-
-    private static final Class<?>[] NEEDED_SERVICES = { TemplateService.class, ConfigurationService.class, ContextService.class, UserService.class,
-        UserConfigurationService.class, HttpService.class, CapabilityService.class, DispatcherPrefixService.class, ConfigViewFactory.class, BrandedDriveVersionService.class };
-
     private String downloadServletAlias;
     private String updateServletAlias;
     private String installServletAlias;
     private ServiceRegistration<Remote> serviceRegistration;
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return NEEDED_SERVICES;
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
     }
 
     @Override
-    protected void startBundle() throws Exception {
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { TemplateService.class, ConfigurationService.class, ContextService.class, UserService.class,
+            UserConfigurationService.class, HttpService.class, CapabilityService.class, DispatcherPrefixService.class,
+            ConfigViewFactory.class, BrandedDriveVersionService.class };
+    }
+
+    @Override
+    protected synchronized void startBundle() throws Exception {
         Services.setServiceLookup(this);
         DriveUpdateService updateService = new DriveUpdateServiceImpl();
 
@@ -135,7 +140,7 @@ public class Activator extends HousekeepingActivator {
     }
 
     @Override
-    protected void stopBundle() throws Exception {
+    protected synchronized void stopBundle() throws Exception {
         if (serviceRegistration != null) {
             serviceRegistration.unregister();
             serviceRegistration = null;
@@ -144,12 +149,15 @@ public class Activator extends HousekeepingActivator {
         if (httpService != null) {
             if (downloadServletAlias != null) {
                 httpService.unregister(downloadServletAlias);
+                downloadServletAlias = null;
             }
             if (updateServletAlias != null) {
                 httpService.unregister(updateServletAlias);
+                updateServletAlias = null;
             }
             if (installServletAlias != null) {
                 httpService.unregister(installServletAlias);
+                installServletAlias = null;
             }
         }
         Services.setServiceLookup(null);

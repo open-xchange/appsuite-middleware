@@ -3878,17 +3878,26 @@ public class CalendarMySQL implements CalendarSqlImp {
                     closeSQLStuff(pidm);
                 }
                 try {
-                    pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, intfield02, cid, pflag, uid, filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     pidm.setTimestamp(1, SQLTools.toTimestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, System.currentTimeMillis());
                     pidm.setInt(4, uid);
-                    pidm.setInt(5, cdao.getGlobalFolderID());
+                    if (FolderObject.PUBLIC != cdao.getFolderType()) {
+                        pidm.setInt(5, 0);
+                    } else {
+                        pidm.setInt(5, cdao.getGlobalFolderID());
+                    }
                     pidm.setInt(6, cdao.getObjectID());
-                    pidm.setInt(7, cid);
-                    pidm.setInt(8, I(cdao.getPrivateFlag()));
+                    pidm.setInt(7, edao.getRecurrenceID());
+                    pidm.setInt(8, cid);
+                    pidm.setInt(9, I(cdao.getPrivateFlag()));
+                    pidm.setString(10, edao.getUid());
+                    pidm.setString(11, edao.getFilename());
                     pidm.addBatch();
-                    pidm.executeBatch();
+                    int[] a = pidm.executeBatch();
+                    System.out.println(a);
+
                 } finally {
                     COLLECTION.closePreparedStatement(pidm);
                 }
@@ -3903,7 +3912,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pid.setInt(1, cdao.getObjectID());
                     cleanStatement.setInt(2, element.getIdentifier());
                     pid.setInt(2, element.getIdentifier());
-                    if (cdao.getGlobalFolderID() == 0) {
+                    if (FolderObject.PUBLIC != cdao.getFolderType()) {
                         pid.setInt(3, element.getPersonalFolderId());
                     } else {
                         pid.setInt(3, -2);

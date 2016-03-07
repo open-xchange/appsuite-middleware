@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 3
+%define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -192,6 +192,7 @@ if [ ${1:-0} -eq 2 ]; then
     ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
 
     # SoftwareChange_Request-2285
+    MOD_PASSWDS=0
     TMPFILE=$(mktemp)
     while read LINE; do
         case "$LINE" in
@@ -207,13 +208,17 @@ if [ ${1:-0} -eq 2 ]; then
                 if [ -n "${PARTS[0]}" ] && [ -n "${PARTS[1]}" ]
                 then
                     echo ${PARTS[0]}:crypt:${PARTS[1]}
+                    MOD_PASSWDS=$(($MOD_PASSWDS+1))
                 else
                     echo $LINE
                 fi
                 ;;
         esac
     done < /opt/open-xchange/etc/mpasswd >$TMPFILE
-    cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    if [ ${MOD_PASSWDS} -gt 0 ]
+    then
+      cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    fi
     rm $TMPFILE
 
     # SoftwareChange_Request-2323
@@ -258,6 +263,8 @@ fi
 %doc com.openexchange.admin.rmi/javadoc
 
 %changelog
+* Fri Mar 04 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview for 7.8.1 release
 * Sat Feb 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Third candidate for 7.8.1 release
 * Wed Feb 03 2016 Marcus Klein <marcus.klein@open-xchange.com>

@@ -575,7 +575,7 @@ public class UserTest extends AbstractTest {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         Filestore fs = null;
-        Credentials master = new Credentials("oxadminmaster", "secret");
+        Credentials master = DummyMasterCredentials();
 
         // create new user
         final OXUserInterface oxu = getUserClient();
@@ -583,31 +583,43 @@ public class UserTest extends AbstractTest {
         final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
         OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
         try {
-        final User createduser = oxu.create(ctx, urs, client_access, cred);
+            final User createduser = oxu.create(ctx, urs, client_access, cred);
 
-        //create new filestore
-            fs = new Filestore();
-        fs.setMaxContexts(10);
-        fs.setSize(1024l);
-        fs.setUrl("file:///");
+            //test if filestore already exists
+            Filestore[] filestores = oxutil.listFilestore("file:///", master, true);
+            if (filestores != null && filestores.length != 0) {
+                if (filestores.length != 1) {
+                    fail("Unexpected failure. Multiple filestores already exists.");
+                } else {
+                    fs = filestores[0];
+                }
+            }
 
-        fs = oxutil.registerFilestore(fs, master);
-        //move user to new filestore
+            if (fs == null) {
+                //create new filestore
+                fs = new Filestore();
+                fs.setMaxContexts(10);
+                fs.setSize(1024l);
+                fs.setUrl("file:///");
+
+                fs = oxutil.registerFilestore(fs, master);
+            }
+            //move user to new filestore
             oxu.moveFromContextToUserFilestore(ctx, urs, fs, 10, cred);
             Thread.sleep(500); //wait for move
 
-        final User[] srv_response = oxu.listUsersWithOwnFilestore(ctx, cred, fs.getId());
+            final User[] srv_response = oxu.listUsersWithOwnFilestore(ctx, cred, fs.getId());
 
-        assertTrue("Expected list size > 0 ", srv_response.length > 0);
+            assertTrue("Expected list size > 0 ", srv_response.length > 0);
 
-        boolean founduser = false;
-        for (final User element : srv_response) {
-            if (element.getId().intValue() == createduser.getId().intValue()) {
-                founduser = true;
+            boolean founduser = false;
+            for (final User element : srv_response) {
+                if (element.getId().intValue() == createduser.getId().intValue()) {
+                    founduser = true;
+                }
             }
-        }
 
-        assertTrue("Expected to find added user in user list", founduser);
+            assertTrue("Expected to find added user in user list", founduser);
         } finally {
             oxu.delete(ctx, urs, cred);
             if (fs != null) {

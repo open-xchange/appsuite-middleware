@@ -166,10 +166,10 @@ public class S3FileStorage implements FileStorage {
          * perform chunked upload as needed
          */
         String key = generateKey(true);
-        ChunkedUpload chunkedUpload = null;
-        UploadChunk chunk = null;
+        S3ChunkedUpload chunkedUpload = null;
+        S3UploadChunk chunk = null;
         try {
-            chunkedUpload = new ChunkedUpload(file, encrypted);
+            chunkedUpload = new S3ChunkedUpload(file, encrypted);
             chunk = chunkedUpload.next();
             if (false == chunkedUpload.hasNext()) {
                 /*
@@ -528,7 +528,7 @@ public class S3FileStorage implements FileStorage {
      * @param chunk The chunk to store
      * @return The put object result passed from the client
      */
-    private PutObjectResult uploadSingle(String key, UploadChunk chunk) throws OXException {
+    private PutObjectResult uploadSingle(String key, S3UploadChunk chunk) throws OXException {
         try {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(chunk.getSize());
@@ -549,7 +549,7 @@ public class S3FileStorage implements FileStorage {
      * @param lastPart <code>true</code> if this is the last part, <code>false</code>, otherwise
      * @return The put object result passed from the client
      */
-    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, UploadChunk chunk, boolean lastPart) throws OXException  {
+    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException  {
         try {
             UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
                 .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
