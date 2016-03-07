@@ -94,7 +94,10 @@ public abstract class VersionMapper<T extends DriveVersion> implements Iterable<
             this.originalVersions = originalVersions;
             for (T originalVersion : originalVersions) {
                 String normalizedKey = PathNormalizer.normalize(getKey(originalVersion));
-                getOrCreate(normalizedKey).setOriginalVersion(originalVersion);
+                ThreeWayComparison<T> twc = getOrCreate(normalizedKey);
+                if (null == twc.getOriginalVersion()) {
+                    twc.setOriginalVersion(originalVersion);
+                }
             }
         }
         if (null == clientVersions) {

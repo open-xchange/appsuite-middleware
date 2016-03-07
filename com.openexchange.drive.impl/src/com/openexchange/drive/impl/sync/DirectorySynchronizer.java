@@ -122,6 +122,18 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
+        if (null != mapper.getMappingProblems().getDuplicateClientVersions()) {
+            for (DirectoryVersion clientVersion : mapper.getMappingProblems().getDuplicateClientVersions()) {
+                /*
+                 * indicate duplicate version as error with quarantine flag
+                 */
+                ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
+                twc.setClientVersion(clientVersion);
+                OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
+                LOG.warn("Duplicate directory version indicated by client: {}", clientVersion, e);
+                syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
+            }
+        }
         return syncResult;
     }
 
