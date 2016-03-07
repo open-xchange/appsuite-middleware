@@ -753,6 +753,7 @@ public final class SieveTextFilter {
         boolean newline = true;
         boolean comment = false;
         boolean commentremoved = false;
+        boolean inQuotes = false;
         for (int i = 0; i < sb.length();) {
             final char c = sb.charAt(i);
             if (c == '\n') {
@@ -768,6 +769,7 @@ public final class SieveTextFilter {
                 // The comment flag is important because otherwise
                 // you could struggle about '"' in comments
                 dontparse = !dontparse;
+                inQuotes = !inQuotes;
                 nextchar = false;
                 i++;
             } else if (!commentremoved && !comment && c == 't') {
@@ -786,7 +788,7 @@ public final class SieveTextFilter {
                 nextchar = true;
                 newline = false;
             } else if (dontparse && c == '.') {
-                if (sb.charAt(i - 1) == '\n' && sb.charAt(i + 1) == '\r') {
+                if (sb.charAt(i - 1) == '\n' && sb.charAt(i + 1) == '\r' && !inQuotes) {
                     dontparse = false;
                 }
                 nextchar = false;
