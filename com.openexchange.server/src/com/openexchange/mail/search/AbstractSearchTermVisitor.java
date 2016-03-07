@@ -95,6 +95,11 @@ public abstract class AbstractSearchTermVisitor implements SearchTermVisitor {
     }
 
     @Override
+    public void visit(UserFlagTerm term) {
+        // Nothing to do
+    }
+
+    @Override
     public void visit(final FromTerm term) {
         // Nothing to do
     }
