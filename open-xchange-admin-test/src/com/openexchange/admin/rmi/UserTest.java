@@ -575,7 +575,7 @@ public class UserTest extends AbstractTest {
         final Credentials cred = DummyCredentials();
         final Context ctx = getTestContextObject(cred);
         Filestore fs = null;
-        Credentials master = new Credentials("oxadminmaster", "secret");
+        Credentials master = DummyMasterCredentials();
 
         // create new user
         final OXUserInterface oxu = getUserClient();
