@@ -64,6 +64,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -174,12 +175,11 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final Map<String, String> args = getPublicationArguments(req);
             final String module = args.get(MODULE);
 
-            final HtmlService htmlService = MicroformatServlet.htmlService;
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
-                String sanitize = htmlService.sanitize(module, null, false, null, null);
-                writer.println("The publication has either been revoked in the meantime or module \"" + sanitize + "\" is unknown.");
+                String escaped = StringEscapeUtils.escapeHtml(module);
+                writer.println("The publication has either been revoked in the meantime or module \"" + escaped + "\" is unknown.");
                 writer.flush();
                 return;
             }
@@ -188,6 +188,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             if (publication == null || !publication.isEnabled()) {
                 resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
                 final PrintWriter writer = resp.getWriter();
+                final HtmlService htmlService = MicroformatServlet.htmlService;
                 writer.println("Unknown site " + (null == htmlService ? "" : htmlService.encodeForHTML(args.get(SITE))));
                 writer.flush();
                 return;
