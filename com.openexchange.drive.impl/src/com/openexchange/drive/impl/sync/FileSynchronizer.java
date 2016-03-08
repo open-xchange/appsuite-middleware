@@ -155,6 +155,18 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
             }
         }
+        if (null != mapper.getMappingProblems().getDuplicateClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getDuplicateClientVersions()) {
+                /*
+                 * indicate as error with quarantine flag
+                 */
+                ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
+                twc.setClientVersion(clientVersion);
+                OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
+                LOG.warn("Duplicate file version indicated by client: {}", clientVersion, e);
+                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
+            }
+        }
         return syncResult;
     }
 
