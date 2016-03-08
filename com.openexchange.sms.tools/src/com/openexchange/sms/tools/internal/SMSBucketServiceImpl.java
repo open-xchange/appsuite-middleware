@@ -87,6 +87,20 @@ public class SMSBucketServiceImpl implements SMSBucketService {
         map = hz.getMap(HZ_MAP_NAME);
     }
 
+    /**
+     * Initializes a new {@link SMSBucketServiceImpl} for testing purposes.
+     * 
+     * @throws OXException
+     */
+    public SMSBucketServiceImpl(HazelcastInstance hzInstance) throws OXException {
+        super();
+        HazelcastInstance hz = hzInstance;
+        if (hz == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(HazelcastInstance.class.getName());
+        }
+        map = hz.getMap(HZ_MAP_NAME);
+    }
+
     @Override
     public int getSMSToken(Session session) throws OXException {
         String userIdentifier = session.getContextId()+"/"+session.getUserId();

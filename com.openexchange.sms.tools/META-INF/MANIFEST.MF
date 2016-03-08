@@ -6,7 +6,8 @@ Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.sms.tools.osgi.Activator
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.hazelcast.core,
+Import-Package: com.hazelcast.config,
+ com.hazelcast.core,
  com.hazelcast.nio.serialization,
  com.openexchange.config,
  com.openexchange.config.cascade,
@@ -16,6 +17,7 @@ Import-Package: com.hazelcast.core,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,
+ com.openexchange.tools.session,
  org.osgi.framework;version="1.3.0",
  org.slf4j;version="1.7.5"
 Export-Package: com.openexchange.sms.tools
