@@ -52,10 +52,12 @@ package com.openexchange.publish.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.tools.PublicationSession;
@@ -84,8 +86,8 @@ public class IDBasedFileAccessDocumentLoader implements PublicationDataLoaderSer
      * {@inheritDoc}
      */
     @Override
-    public Collection<? extends Object> load(Publication publication) throws OXException {
-        ArrayList<InputStream> documents = new ArrayList<InputStream>();
+    public Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException {
+        List<InputStream> documents = new ArrayList<InputStream>();
 
         if (publication != null) {
             Session session = new PublicationSession(publication);

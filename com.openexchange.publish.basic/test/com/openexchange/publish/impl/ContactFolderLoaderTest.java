@@ -101,7 +101,7 @@ public class ContactFolderLoaderTest extends TestCase {
     }
 
     public void testLoadFolder() throws OXException {
-        final Collection<? extends Object> collection = contactLoader.load(publication);
+        final Collection<? extends Object> collection = contactLoader.load(publication, null);
 
         assertNotNull("Collection was null", collection);
 

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,42 +47,41 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.publish;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import com.openexchange.exception.OXException;
-import com.openexchange.publish.EscapeMode;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.PublicationDataLoaderService;
-import com.openexchange.publish.PublicationErrorMessage;
-
+import org.apache.commons.lang.StringEscapeUtils;
+import com.openexchange.java.Strings;
 
 /**
- * {@link CompositeLoaderService}
+ * {@link Publications} - Utility class for publication module.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class CompositeLoaderService implements PublicationDataLoaderService {
+public class Publications {
 
-    private final Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
-
-    @Override
-    public Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException {
-        return getSubLoader(publication.getModule()).load(publication, escapeMode);
-    }
-
-    private PublicationDataLoaderService getSubLoader(String module) throws OXException {
-        if(!subLoaders.containsKey(module)) {
-            throw PublicationErrorMessage.NO_LOADER_FOUND_EXCEPTION.create(module);
+    /**
+     * Escapes the specified value according to given mode.
+     *
+     * @param value The value to escape
+     * @param escapeMode The escape mode to apply
+     * @return The escaped value
+     */
+    public static String escape(String value, EscapeMode escapeMode) {
+        if (Strings.isEmpty(value) || null == escapeMode || EscapeMode.NONE == escapeMode) {
+            return value;
         }
-        return subLoaders.get(module);
-    }
 
-    public void registerLoader(String module, PublicationDataLoaderService service) {
-        subLoaders.put(module, service);
+        switch (escapeMode) {
+            case HTML:
+                return StringEscapeUtils.escapeHtml(value);
+            case NONE:
+                return value;
+            case XML:
+                return StringEscapeUtils.escapeXml(value);
+            default:
+                return value;
+        }
     }
 
 }

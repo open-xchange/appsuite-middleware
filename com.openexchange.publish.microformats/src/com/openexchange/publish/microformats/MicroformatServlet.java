@@ -52,6 +52,9 @@ package com.openexchange.publish.microformats;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -77,6 +80,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ExceptionUtils;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.Services;
@@ -201,16 +205,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 return;
             }
 
-            final Collection<? extends Object> loaded = dataLoader.load(publication);
-
-            final HashMap<String, Object> variables = new HashMap<String, Object>();
-            final User user = getUser(publication);
-            final Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
+            Collection<? extends Object> loaded = dataLoader.load(publication, EscapeMode.HTML);
+            User user = getUser(publication);
+            Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
 
             // Sanitize publication
             sanitizePublication(publication);
 
             // Compose variables for template processing
+            Map<String, Object> variables = new HashMap<String, Object>(12, 0.9F);
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             {
@@ -333,6 +336,26 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return site;
         }
         return AJAXUtility.encodeUrl(site, true, false);
+    }
+
+    private static <T> T getProxy(Class<? extends T> intf, final T obj) {
+        return (T) Proxy.newProxyInstance(obj.getClass().getClassLoader(), new Class[] { intf }, new InvocationHandler() {
+
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                String meth = method.getName();
+                if (!meth.startsWith("get")) {
+                    return method.invoke(obj, args);
+                }
+
+                Object retval = method.invoke(obj, args);
+                if (!(retval instanceof String)) {
+                    return retval;
+                }
+
+                return StringEscapeUtils.escapeHtml(retval.toString());
+            }
+        });
     }
 
 }

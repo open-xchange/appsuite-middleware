@@ -67,8 +67,9 @@ public interface PublicationDataLoaderService {
      * Loads the data associated with specified publication
      *
      * @param publication The publication
+     * @param escapeMode The escape mode to apply
      * @return The data
      * @throws OXException If load operation fails
      */
-    Collection<? extends Object> load(Publication publication) throws OXException;
+    Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException;
 }
