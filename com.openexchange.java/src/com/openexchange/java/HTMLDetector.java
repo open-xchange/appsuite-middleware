@@ -115,7 +115,7 @@ public final class HTMLDetector {
         if ((lc.indexOf("<body>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<script>") >= 0)) {
+        if ((lc.indexOf("<script") >= 0)) {
             return true;
         }
         if ((lc.indexOf("javascript") >= 0)) {
@@ -170,7 +170,7 @@ public final class HTMLDetector {
         if ((lc.indexOf("body>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<script>") >= 0)) {
+        if ((lc.indexOf("<script") >= 0)) {
             return true;
         }
         if ((lc.indexOf("javascript") >= 0)) {
@@ -247,7 +247,7 @@ public final class HTMLDetector {
         if (containsHTMLTag(sequence, "body")) {
             return true;
         }
-        if (containsHTMLTag(sequence, "script")) {
+        if (containsIgnoreCase(sequence, "<script")) {
             return true;
         }
         if (containsIgnoreCase(sequence, "javascript")) {
@@ -400,7 +400,7 @@ public final class HTMLDetector {
         if (containsHTMLTag(b, "body")) {
             return true;
         }
-        if (containsHTMLTag(b, "script")) {
+        if (containsIgnoreCase(b, "<script")) {
             return true;
         }
         if (containsIgnoreCase(b, "javascript")) {
