@@ -226,7 +226,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private InputStream loadContent(final Publication publication) throws OXException {
-        final Collection<? extends Object> load = dataLoader.load(publication);
+        Collection<? extends Object> load = dataLoader.load(publication, null);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
         }
