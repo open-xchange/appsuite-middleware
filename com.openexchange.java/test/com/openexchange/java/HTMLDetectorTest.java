@@ -100,4 +100,34 @@ public class HTMLDetectorTest {
 
         org.junit.Assert.assertTrue("HTMLDetector should have found html.", containsHTMLTags);
     }
+
+    @Test
+    public final void testDetectStartingScriptTag_Bug44584() {
+        try {
+            final byte[] svgImage = ("<svg\n" +
+                "   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
+                "   xmlns=\"http://www.w3.org/2000/svg\"\n" +
+                "   xmlns:xlink=\"http://www.w3.org/1999/xlink\"\n" +
+                "   version=\"1.0\"\n" +
+                "   x=\"0\"\n" +
+                "   y=\"0\"\n" +
+                "   width=\"194\"\n" +
+                "   height=\"200\"\n" +
+                "   id=\"Face\">\n" +
+                "\n" +
+                "   <script type=\"text/ecmascript\">\n" +
+                "  <![CDATA[\n" +
+                " alert(\"XSS Vulnerability\");\n" +
+                "  ]]>\n" +
+                " </script>\n" +
+                "</svg>").getBytes();
+
+            boolean containsHTMLTags = HTMLDetector.containsHTMLTags(new ByteArrayInputStream(svgImage), false);
+
+            org.junit.Assert.assertTrue("HTMLDetector should have found \"onload\" JavaScript event handler.", containsHTMLTags);
+        } catch (IOException e) {
+            e.printStackTrace();
+            org.junit.Assert.fail(e.getMessage());
+        }
+    }
 }
