@@ -160,7 +160,7 @@ public class UploadAction extends AbstractDriveAction {
                 org.slf4j.LoggerFactory.getLogger(UploadAction.class).debug("", e);
                 return AJAXRequestResult.EMPTY_REQUEST_RESULT;
             }
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+            throw e;
         } finally {
             Streams.close(uploadStream);
         }
