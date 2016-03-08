@@ -212,7 +212,7 @@ public class RdbTaskStorage extends TaskStorage {
     public TaskIterator search(final Context ctx, final int userId, final TaskSearchObject search, final int orderBy, final Order order, final int[] columns, final List<Integer> all, final List<Integer> own, final List<Integer> shared) throws OXException {
         final StringBuilder sql = new StringBuilder();
         sql.append("SELECT ");
-        sql.append(SQL.getFields(columns, true));
+        sql.append(SQL.getFields(columns, true, true, null));
         sql.append(" FROM task JOIN task_folder USING (cid,id) ");
         sql.append("WHERE task.cid=? AND ");
         sql.append(SQL.allFoldersWhere(all, own, shared));
