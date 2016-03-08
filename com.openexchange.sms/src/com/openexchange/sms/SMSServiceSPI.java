@@ -60,12 +60,13 @@ import com.openexchange.exception.OXException;
 public interface SMSServiceSPI {
 
     /**
-     * Send a SMS message to multiple recipients.
-     * Use com.openexchange.sms.SMSExceptionCode in case of errors.
+     * Send an SMS message to multiple recipients.<br>
+     * Use {@link com.openexchange.sms.SMSExceptionCode} in case of errors.
      *
-     * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. +49 123 4567890
+     * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. <code>"+49 123 4567890"</code>
      * @param message The message to send
-     * @throws OXException On error
+     * @param session The session of the user sending the SMS
+     * @throws OXException If SMS cannot be sent
      */
     void sendMessage(String[] recipients, String message) throws OXException;
 
