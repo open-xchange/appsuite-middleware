@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the Open-Xchange, Inc. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2004-2020 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,69 +47,40 @@
  *
  */
 
-package com.openexchange.publish.impl;
+package com.openexchange.publish;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
-
-import junit.framework.TestCase;
-
-import com.openexchange.exception.OXException;
-import com.openexchange.groupware.container.Contact;
-import com.openexchange.groupware.contexts.SimContext;
-import com.openexchange.publish.Publication;
-import com.openexchange.publish.services.SimContactService;
-
+import org.apache.commons.lang.StringEscapeUtils;
+import com.openexchange.java.Strings;
 
 /**
- * {@link ContactFolderLoaderTest}
+ * {@link Publications} - Utility class for publication module.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
- *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class ContactFolderLoaderTest extends TestCase {
-    private ContactFolderLoader contactLoader;
-    private int cid;
-    private int folderId;
-    private int id1;
-    private int id2;
-    private int id3;
-    private Publication publication;
+public class Publications {
 
-    @Override
-    public void setUp() {
+    /**
+     * Escapes the specified value according to given mode.
+     *
+     * @param value The value to escape
+     * @param escapeMode The escape mode to apply
+     * @return The escaped value
+     */
+    public static String escape(String value, EscapeMode escapeMode) {
+        if (Strings.isEmpty(value) || null == escapeMode || EscapeMode.NONE == escapeMode) {
+            return value;
+        }
 
-    	final SimContactService contactService = new SimContactService();
-
-        cid = 1;
-        folderId = 12;
-        id1 = 1337;
-        id2 = 1338;
-        id3 = 1339;
-
-        publication = new Publication();
-        publication.setEntityId(String.valueOf(folderId));
-        publication.setContext(new SimContext(cid));
-
-        contactService.simulateContact(cid, folderId, id1, "Hans");
-        contactService.simulateContact(cid, folderId, id2, "Peter");
-        contactService.simulateDistributionList(cid, folderId, id3, "DistriList");
-
-        contactLoader = new ContactFolderLoader(contactService);
-    }
-
-    public void testLoadFolder() throws OXException {
-        final Collection<? extends Object> collection = contactLoader.load(publication, null);
-
-        assertNotNull("Collection was null", collection);
-
-        assertEquals("Folder should contain two contacts", 2, collection.size());
-        final Set<Integer> expectedIds = new HashSet<Integer>(Arrays.asList(id1, id2));
-        for (final Object object : collection) {
-            final Contact contact = (Contact) object;
-            assertTrue("Did not expect: "+contact.getObjectID(), expectedIds.remove(contact.getObjectID()));
+        switch (escapeMode) {
+            case HTML:
+                return StringEscapeUtils.escapeHtml(value);
+            case NONE:
+                return value;
+            case XML:
+                return StringEscapeUtils.escapeXml(value);
+            default:
+                return value;
         }
     }
 

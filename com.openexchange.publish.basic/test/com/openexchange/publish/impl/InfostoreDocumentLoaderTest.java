@@ -96,7 +96,7 @@ public class InfostoreDocumentLoaderTest extends TestCase {
     }
 
     public void testLoadDocument() throws OXException, IOException {
-        Collection<? extends Object> loaded = loader.load(publication);
+        Collection<? extends Object> loaded = loader.load(publication, null);
         assertNotNull("Loaded was null!", loaded);
         assertEquals("Expected one document", 1, loaded.size());
         InputStream is = (InputStream) loaded.iterator().next();

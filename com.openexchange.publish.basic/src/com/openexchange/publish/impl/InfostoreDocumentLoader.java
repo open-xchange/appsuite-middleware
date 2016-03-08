@@ -52,8 +52,10 @@ package com.openexchange.publish.impl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.InfostoreFacade;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.tools.session.ServerSessionAdapter;
@@ -78,8 +80,8 @@ public class InfostoreDocumentLoader implements PublicationDataLoaderService {
     }
 
     @Override
-    public Collection<? extends Object> load(Publication publication) throws OXException {
-        ArrayList<InputStream> documents = new ArrayList<InputStream>();
+    public Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException {
+        List<InputStream> documents = new ArrayList<InputStream>();
         InputStream document = infostore.getDocument(
             Integer.parseInt(publication.getEntityId()),
             InfostoreFacade.CURRENT_VERSION,
