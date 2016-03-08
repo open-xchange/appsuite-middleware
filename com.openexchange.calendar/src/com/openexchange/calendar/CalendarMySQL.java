@@ -194,10 +194,6 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String PDM_ORDER_BY = " ORDER BY ";
 
-    private static final String PDM_GROUP_BY_PD_INTFIELD01 = " GROUP BY pd.intfield01 ";
-
-    private static final String PDM_GROUP_BY_INTFIELD01 = " GROUP BY intfield01";
-
     private static final String PD_FID_IS_NULL = " AND pd.fid = 0 ";
 
     private static final String PD_CREATED_FROM_IS = " AND pd.created_from = ";
@@ -581,7 +577,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                 sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
             }
         } else {
-            sb.append(PDM_GROUP_BY_PD_INTFIELD01);
             sb.append(ORDER_BY);
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -766,7 +761,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
 
-        sb.append(PDM_GROUP_BY_INTFIELD01);
         sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -790,7 +784,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -812,7 +805,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
