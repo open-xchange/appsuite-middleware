@@ -68,7 +68,7 @@ import com.openexchange.session.Session;
 
 /**
  * Unit tests for {@link IDBasedFileAccessDocumentLoader}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -113,7 +113,7 @@ public class IDBasedFileAccessDocumentLoaderTest {
     public void testLoad_NoDocumentFound_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
 
-        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(publication);
+        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(publication, null);
 
         Assert.assertEquals(0, load.size());
     }
@@ -122,7 +122,7 @@ public class IDBasedFileAccessDocumentLoaderTest {
     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
 
-        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(null);
+        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(null, null);
 
         Assert.assertEquals(0, load.size());
     }
@@ -132,7 +132,7 @@ public class IDBasedFileAccessDocumentLoaderTest {
         PowerMockito.when(this.idBasedFileAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFileAccess);
         PowerMockito.when(this.idBasedFileAccess.getDocument(Matchers.anyString(), Matchers.anyString())).thenReturn(this.inputStream);
 
-        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(this.publication);
+        Collection<? extends Object> load = this.idBasedFileAccessDocumentLoader.load(this.publication, null);
 
         Assert.assertTrue(load.contains(this.inputStream));
     }
