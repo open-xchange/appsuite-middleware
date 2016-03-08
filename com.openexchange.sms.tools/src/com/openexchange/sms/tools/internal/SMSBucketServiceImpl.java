@@ -56,6 +56,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
+import com.openexchange.sms.tools.SMSBucketExceptionCodes;
 import com.openexchange.sms.tools.SMSBucketService;
 import com.openexchange.sms.tools.SMSConstants;
 import com.openexchange.sms.tools.osgi.Services;
@@ -116,7 +117,8 @@ public class SMSBucketServiceImpl implements SMSBucketService {
             int amount = newBucket.removeToken(refreshInterval);
 
             if (amount == -1) {
-                return 0;
+                int hours = (int) Math.ceil(refreshInterval / 60d);
+                throw SMSBucketExceptionCodes.SMS_LIMIT_REACHED.create(hours);
             }
 
             if (map.replace(userIdentifier, oldBucket, newBucket)) {
@@ -142,6 +144,14 @@ public class SMSBucketServiceImpl implements SMSBucketService {
         }
         ConfigView view = configFactory.getView(session.getUserId(), session.getContextId());
         return view.get(SMSConstants.SMS_USER_LIMIT_ENABLED, boolean.class);
+    }
+
+    @Override
+    public int getRefreshInterval(Session session) throws OXException {
+        ConfigViewFactory factory = Services.getService(ConfigViewFactory.class);
+        ConfigView view = factory.getView(session.getUserId(), session.getContextId());
+        int hours = (int) Math.ceil(Integer.valueOf(view.property("com.openexchange.sms.userlimit.refreshInterval", String.class).get()) / 60d);
+        return hours;
     }
 
 }

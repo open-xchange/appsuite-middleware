@@ -67,10 +67,10 @@ public class SMSBucketExceptionMessages implements LocalizableStrings {
         super();
     }
 
-    // You reached the maximum number of sms. Please try again later.
-    public static final String SMS_LIMIT_REACHED_MSG = "You have exceeded the maximum number of sms allowed. Please try again after 24 hours";
+    // You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
+    public static final String SMS_LIMIT_REACHED_MSG = "You have exceeded the maximum number of sms allowed. Please try again after %1$s hours";
 
-    // No more SMS could be sent
-    public static final String NEXT_TO_LAST_SMS_SENT = "SMS limits apply. You can only send one more message in the next 24 hours";
+    // SMS limits apply. You can only send one more message in the next %1$s hours
+    public static final String NEXT_TO_LAST_SMS_SENT = "SMS limits apply. You can only send one more message in the next %1$s hours";
 
 }

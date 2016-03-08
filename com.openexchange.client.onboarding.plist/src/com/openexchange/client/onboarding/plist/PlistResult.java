@@ -284,7 +284,9 @@ public class PlistResult implements Result {
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
-            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create());
+            SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+            int hours = smsBucketService.getRefreshInterval(session);
+            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
         }
 
 
@@ -377,9 +379,6 @@ public class PlistResult implements Result {
         SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
         if (smsBucketService.isEnabled(session)) {
             remainingSMS = smsBucketService.getSMSToken(session);
-            if (remainingSMS == 0) {
-                throw SMSBucketExceptionCodes.SMS_LIMIT_REACHED.create();
-            }
         }
         return remainingSMS;
     }

@@ -65,14 +65,14 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum SMSBucketExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * You reached the maximum number of sms. Please try again later.
+     * You have exceeded the maximum number of sms allowed. Please try again after %1$s hours.
      */
-    SMS_LIMIT_REACHED("You have exceeded the maximum number of sms allowed. Please try again after 24 hours.", SMSBucketExceptionMessages.SMS_LIMIT_REACHED_MSG, Category.CATEGORY_USER_INPUT, 01),
+    SMS_LIMIT_REACHED("You have exceeded the maximum number of sms allowed. Please try again after %1$s hours.", SMSBucketExceptionMessages.SMS_LIMIT_REACHED_MSG, Category.CATEGORY_USER_INPUT, 01),
 
     /**
-     * No more SMS could be sent
+     * SMS limits apply. You can only send one more message in the next %1$s hours.
      */
-    NEXT_TO_LAST_SMS_SENT("SMS limits apply. You can only send one more message in the next 24 hours.", SMSBucketExceptionMessages.NEXT_TO_LAST_SMS_SENT, Category.CATEGORY_USER_INPUT, 02);
+    NEXT_TO_LAST_SMS_SENT("SMS limits apply. You can only send one more message in the next %1$s hours.", SMSBucketExceptionMessages.NEXT_TO_LAST_SMS_SENT, Category.CATEGORY_USER_INPUT, 02);
 
     /** The error code prefix for on-boarding module */
     public static final String PREFIX = "SMSLIMIT";

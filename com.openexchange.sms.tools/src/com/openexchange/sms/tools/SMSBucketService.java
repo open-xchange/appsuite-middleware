@@ -65,7 +65,7 @@ public interface SMSBucketService {
      * 
      * @param session The user session
      * @return The previous amount of sms tokens
-     * @throws OXException if it was unable to retrieve the sms token
+     * @throws OXException if it was unable to retrieve the sms token or if the sms limit is reached
      */
     public int getSMSToken(Session session) throws OXException;
 
@@ -76,4 +76,13 @@ public interface SMSBucketService {
      * @throws OXException
      */
     public boolean isEnabled(Session session) throws OXException;
+
+    /**
+     * Retrieves the refresh interval in hours rounded up
+     * 
+     * @param session The user session
+     * @return The time in hours rounded up
+     * @throws OXException if it was unable to retrieve the interval
+     */
+    public int getRefreshInterval(Session session) throws OXException;
 }
