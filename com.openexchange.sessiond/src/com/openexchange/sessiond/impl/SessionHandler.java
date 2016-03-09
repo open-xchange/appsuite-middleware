@@ -235,7 +235,7 @@ public final class SessionHandler {
         /*
          * remove local sessions from storage (if available), too
          */
-        final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+        final SessionStorageService storageService = Services.optService(SessionStorageService.class);
         if (null == storageService) {
             LOG.info("Local removal of user sessions: User={}, Context={}", Integer.valueOf(userId), Integer.valueOf(contextId));
             return retval;
@@ -275,7 +275,7 @@ public final class SessionHandler {
      * @param contextIds - Set with context ids to be removed
      */
     private static void removeRemoteContextSessions(final Set<Integer> contextIds) throws OXException {
-        HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+        HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
 
         if (hazelcastInstance != null) {
             LOG.debug("Trying to remove sessions for context ids {} from remote nodes", Strings.concat(", ", contextIds));
@@ -332,7 +332,7 @@ public final class SessionHandler {
      * @return timeout (in seconds) or 0 for no timeout
      */
     private static int getRemoteContextSessionsExecutionTimeout() {
-        final ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        final ConfigurationService configurationService = Services.optService(ConfigurationService.class);
         if (configurationService == null) {
             LOG.info("ConfigurationService not available. No execution timeout for remote processing of context sessions invalidation available. Fallback to no timeout.");
             return 0;
@@ -457,7 +457,7 @@ public final class SessionHandler {
      * @return A map containing the result for each member. If execution failed or timed out, the entry for a member will be <code>null</code>!
      */
     private static <T> Map<Member, T> executeGlobalTask(Callable<T> callable) {
-        HazelcastInstance hazelcastInstance = Services.getService(HazelcastInstance.class);
+        HazelcastInstance hazelcastInstance = Services.optService(HazelcastInstance.class);
         if (hazelcastInstance == null) {
             LOG.warn("Cannot find HazelcastInstance for remote execution of callable {}.", callable);
             return Collections.emptyMap();
@@ -510,7 +510,7 @@ public final class SessionHandler {
      */
     private static int getRemoteSessionTaskTimeout() {
         int defaultValue = 300;
-        ConfigurationService configurationService = Services.getService(ConfigurationService.class);
+        ConfigurationService configurationService = Services.optService(ConfigurationService.class);
         if (configurationService == null) {
             LOG.info("ConfigurationService not available. No execution timeout for remote processing of session tasks available. Fallback to no timeout.");
             return defaultValue;
@@ -528,7 +528,7 @@ public final class SessionHandler {
          * Check context existence
          */
         {
-            ContextService cs = Services.getService(ContextService.class);
+            ContextService cs = Services.optService(ContextService.class);
             if (null != cs) {
                 try {
                     cs.loadContext(contextId);
@@ -586,7 +586,7 @@ public final class SessionHandler {
         }
         boolean hasForContext = sessionData.hasForContext(contextId);
         if (!hasForContext && considerSessionStorage) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Task<Boolean> c = new AbstractTask<Boolean>() {
@@ -621,7 +621,7 @@ public final class SessionHandler {
         }
         List<SessionControl> retval = sessionData.getUserSessions(userId, contextId);
         if (considerSessionStorage) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Task<Session[]> c = new AbstractTask<Session[]>() {
@@ -676,7 +676,7 @@ public final class SessionHandler {
         }
         SessionControl retval = sessionData.getAnyActiveSessionForUser(userId, contextId, includeLongTerm);
         if (retval == null && includeStorage) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Task<Session> c = new AbstractTask<Session>() {
@@ -706,7 +706,7 @@ public final class SessionHandler {
         }
         Session retval = sessionData.findFirstSessionForUser(userId, contextId, matcher, ignoreLongTerm);
         if (null == retval && !ignoreStorage) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (null != storageService) {
                 try {
                     Task<Session> c = new AbstractTask<Session>() {
@@ -866,7 +866,7 @@ public final class SessionHandler {
      */
     public static boolean putIntoSessionStorage(SessionImpl session, boolean addIfAbsent, boolean asyncPutToSessionStorage) {
         if (useSessionStorage(session)) {
-            SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 for (SessionSerializationInterceptor interceptor : interceptors) {
                     interceptor.serialize(session);
@@ -978,7 +978,7 @@ public final class SessionHandler {
                 throw SessionExceptionCodes.MAX_SESSION_PER_USER_EXCEPTION.create(I(userId), I(contextId));
             }
             if (considerSessionStorage) {
-                final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+                final SessionStorageService storageService = Services.optService(SessionStorageService.class);
                 if (storageService != null) {
                     try {
                         Task<Integer> c = new AbstractTask<Integer>() {
@@ -1016,7 +1016,7 @@ public final class SessionHandler {
                 }
             }
             if (considerSessionStorage) {
-                final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+                final SessionStorageService storageService = Services.optService(SessionStorageService.class);
                 if (storageService != null) {
                     if (maxSessPerClient > 0) {
                         try {
@@ -1051,7 +1051,7 @@ public final class SessionHandler {
         }
         sessionData.checkAuthId(login, authId);
         /*
-        SessionStorageService storageService = Services.getService(SessionStorageService.class);
+        SessionStorageService storageService = Services.optService(SessionStorageService.class);
         if (storageService != null) {
             try {
                 storageService.checkAuthId(login, authId);
@@ -1106,7 +1106,7 @@ public final class SessionHandler {
          */
         final SessionImpl currentSession = sessionControl.getSession();
         currentSession.setPassword(newPassword);
-        final SessionStorageService sessionStorage = Services.getService(SessionStorageService.class);
+        final SessionStorageService sessionStorage = Services.optService(SessionStorageService.class);
         if (null != sessionStorage && useSessionStorage(currentSession)) {
             Task<Void> c = new AbstractTask<Void>() {
 
@@ -1167,7 +1167,7 @@ public final class SessionHandler {
             try {
                 session.setLocalIp(localIp, false);
                 if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
                     if (sessionStorageService != null) {
                         AbstractTask<Void> c = new AbstractTask<Void>() {
 
@@ -1214,7 +1214,7 @@ public final class SessionHandler {
             try {
                 session.setClient(client, false);
                 if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
                     if (sessionStorageService != null) {
                         AbstractTask<Void> c = new AbstractTask<Void>() {
 
@@ -1261,7 +1261,7 @@ public final class SessionHandler {
             try {
                 session.setHash(hash, false);
                 if (useSessionStorage(session)) {
-                    final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+                    final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
                     if (sessionStorageService != null) {
                         AbstractTask<Void> c = new AbstractTask<Void>() {
 
@@ -1304,7 +1304,7 @@ public final class SessionHandler {
         }
         SessionControl sessionControl = sessionData.getSessionByRandomToken(randomToken);
         if (null == sessionControl) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Task<Session> c = new AbstractTask<Session>() {
@@ -1390,7 +1390,7 @@ public final class SessionHandler {
         }
         SessionControl sessionControl = considerLocalStorage ? sessionData.getSession(sessionId) : null;
         if (considerSessionStorage && null == sessionControl) {
-            SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     SessionImpl unwrappedSession = getSessionFrom(sessionId, timeout(), storageService);
@@ -1419,7 +1419,7 @@ public final class SessionHandler {
         /*-
          * Ensure session is available in session storage
         if (null != sessionControl) {
-            storeSession(sessionControl.getSession(), Services.getService(SessionStorageService.class), true);
+            storeSession(sessionControl.getSession(), Services.optService(SessionStorageService.class), true);
         }
          */
         return sessionControl;
@@ -1455,7 +1455,7 @@ public final class SessionHandler {
         }
         SessionControl sessionControl = sessionData.getSessionByAlternativeId(altId);
         if (null == sessionControl && lookupSessionStorage) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 try {
                     Task<Session> c = new AbstractTask<Session>() {
@@ -1487,7 +1487,7 @@ public final class SessionHandler {
      */
     public static SessionControl getCachedSession(final String sessionId) {
         LOG.debug("getCachedSession <{}>", sessionId);
-        final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+        final SessionStorageService storageService = Services.optService(SessionStorageService.class);
         if (storageService != null) {
             try {
                 Task<Session> c = new AbstractTask<Session>() {
@@ -1522,7 +1522,7 @@ public final class SessionHandler {
         }
         List<SessionControl> retval = sessionData.getShortTermSessions();
         if (retval == null) {
-            final SessionStorageService storageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService storageService = Services.optService(SessionStorageService.class);
             if (storageService != null) {
                 Task<List<Session>> c = new AbstractTask<List<Session>>() {
 
@@ -1640,7 +1640,7 @@ public final class SessionHandler {
      * @param optEventAdmin The optional {@link EventAdmin} instance
      */
     public static void postSessionStored(Session session, final EventAdmin optEventAdmin) {
-        EventAdmin eventAdmin = optEventAdmin == null ? Services.getService(EventAdmin.class) : optEventAdmin;
+        EventAdmin eventAdmin = optEventAdmin == null ? Services.optService(EventAdmin.class) : optEventAdmin;
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1651,7 +1651,7 @@ public final class SessionHandler {
     }
 
     private static void postSessionCreation(Session session) {
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1662,7 +1662,7 @@ public final class SessionHandler {
     }
 
     private static void postSessionRestauration(Session session) {
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1675,7 +1675,7 @@ public final class SessionHandler {
     private static void postSessionRemoval(final SessionImpl session) {
         if (useSessionStorage(session)) {
             // Asynchronous remove from session storage
-            final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
 
@@ -1695,7 +1695,7 @@ public final class SessionHandler {
         }
 
         // Asynchronous post of event
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1743,7 +1743,7 @@ public final class SessionHandler {
     protected static void postContainerRemoval(List<SessionControl> sessionControls, boolean removeFromSessionStorage) {
         if (removeFromSessionStorage) {
             // Asynchronous remove from session storage
-            final SessionStorageService sessionStorageService = Services.getService(SessionStorageService.class);
+            final SessionStorageService sessionStorageService = Services.optService(SessionStorageService.class);
             if (sessionStorageService != null) {
                 final List<SessionControl> tSessionControls = new ArrayList<SessionControl>(sessionControls);
                 ThreadPools.getThreadPool().submit(new AbstractTask<Void>() {
@@ -1771,7 +1771,7 @@ public final class SessionHandler {
         }
 
         // Asynchronous post of event
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             Map<String, Session> eventMap = new HashMap<String, Session>();
@@ -1799,7 +1799,7 @@ public final class SessionHandler {
 
     private static void postSessionDataRemoval(List<SessionControl> controls) {
         // Post event
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             Map<String, Session> eventMap = new HashMap<String, Session>();
@@ -1826,7 +1826,7 @@ public final class SessionHandler {
     }
 
     static void postSessionReactivation(Session session) {
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1843,7 +1843,7 @@ public final class SessionHandler {
      * @param session The session that was touched
      */
     static void postSessionTouched(Session session) {
-        EventAdmin eventAdmin = Services.getService(EventAdmin.class);
+        EventAdmin eventAdmin = Services.optService(EventAdmin.class);
         if (eventAdmin != null) {
             Dictionary<String, Object> dic = new Hashtable<String, Object>(2);
             dic.put(SessiondEventConstants.PROP_SESSION, session);
@@ -1981,7 +1981,7 @@ public final class SessionHandler {
             synchronized (SessionHandler.class) {
                 tmp = timeout;
                 if (null == tmp) {
-                    ConfigurationService service = Services.getService(ConfigurationService.class);
+                    ConfigurationService service = Services.optService(ConfigurationService.class);
                     int defaultTimeout = 3000;
                     tmp = Integer.valueOf(null == service ? defaultTimeout : service.getIntProperty("com.openexchange.sessiond.sessionstorage.timeout", defaultTimeout));
                     timeout = tmp;
