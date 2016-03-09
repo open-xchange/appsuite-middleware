@@ -70,7 +70,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
-        String[] categories = getCategoryNames();
+        String[] categories = getCategoryNames(session);
         if (categories == null || categories.length == 0) {
             return new ArrayList<>();
         }
@@ -87,7 +87,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     
     @Override
     public String[] getAllFlags(Session session, boolean onlyEnabled) throws OXException {
-        String[] categories = getCategoryNames();
+        String[] categories = getCategoryNames(session);
         if (categories == null || categories.length == 0) {
             return new String[0];
         }
@@ -158,9 +158,17 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return null;
     }
 
-    private String[] getCategoryNames() {
-        //TODO get Category names
-        return null;
+    private String[] getCategoryNames(Session session) throws OXException {
+        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
+        if(categoriesString==null || categoriesString.isEmpty()){
+            return new String[0];
+        }
+        
+        String result[] = categoriesString.replace(" ", "").split(",");
+        if(result==null){
+            return new String[0];
+        }
+        return result;
     }
 
 }

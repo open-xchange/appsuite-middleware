@@ -67,6 +67,11 @@ public class MailCategoriesConstants {
      * The possible categories translation languages property name
      */
     public static final String MAIL_CATEGORIES_LANGUAGES = "com.openexchange.mail.categories.languages";
+    
+    /**
+     * The category identifiers property name
+     */
+    public static final String MAIL_CATEGORIES_IDENTIFIERS = "com.openexchange.mail.categories.identifiers";
 
     /**
      * The prefix for all mail categories configuration properties
