@@ -85,6 +85,7 @@ EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
 READEREINGINE_CACHE_DIR=/var/spool/open-xchange/documentconverter/readerengine.cache
 PROCS='
+    cat /proc/cpuinfo;
     df;
     dmesg;
     free;
