@@ -506,16 +506,16 @@ public final class HTMLDetector {
             throw new IndexOutOfBoundsException(Integer.toString(endIndex - beginIndex));
         }
 
-        final int[] failure = computeFailure(pattern);
+        if (data.length == 0) {
+            return -1;
+        }
+
+        int[] failure = computeFailure(pattern);
         if (failure == null) {
             throw new IllegalArgumentException("pattern is null");
         }
 
         int j = 0;
-        if (data.length == 0) {
-            return -1;
-        }
-
         for (int i = beginIndex; i < endIndex; i++) {
             while (j > 0 && pattern[j] != data[i]) {
                 j = failure[j - 1];
@@ -540,8 +540,8 @@ public final class HTMLDetector {
         if (pattern == null) {
             return null;
         }
-        final int[] failure = new int[pattern.length];
 
+        int[] failure = new int[pattern.length];
         int j = 0;
         for (int i = 1; i < pattern.length; i++) {
             while (j > 0 && pattern[j] != pattern[i]) {
