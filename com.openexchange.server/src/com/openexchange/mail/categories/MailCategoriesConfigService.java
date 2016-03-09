@@ -65,21 +65,41 @@ public interface MailCategoriesConfigService {
      * Retrieves all category configurations for given user
      * 
      * @param session The user session
-     * @param onlyEnabled If true only return enabled or forced configurations
+     * @param onlyEnabled If true only returns enabled or forced configurations
      * @return A list of category configurations
      * @throws OXException
      */
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException;
+    
+    /**
+     * Retrieves all category flags for given user
+     * 
+     * @param session The user session
+     * @param onlyEnabled If true only returns enabled or forced categories
+     * @return String array of category flags
+     * @throws OXException
+     */
+    public String[] getAllFlags(Session session, boolean onlyEnabled) throws OXException;
 
     /**
      * Retrieves the category configuration for the given user
      * 
      * @param session The user session
-     * @param name The name of the configuration
+     * @param category The category identifier
      * @return The category configuration or null if no configuration exists for given category
      * @throws OXException
      */
     public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException;
+    
+    /**
+     * Retrieves the category flag for the given user
+     * 
+     * @param session The user session
+     * @param category The category identifier
+     * @return The category flag or null if no configuration exists for given category
+     * @throws OXException
+     */
+    public String getFlagByCategory(Session session, String category) throws OXException;
 
     /**
      * Retrieves the category configuration with the given flag for the given user

@@ -90,7 +90,6 @@ import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
-import com.openexchange.mail.categories.CachedMailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConfigServiceImpl;
 import com.openexchange.mail.compose.CompositionSpace;
@@ -244,9 +243,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
 
-        CachedMailCategoriesConfigService mailCategoriesConfigService = new CachedMailCategoriesConfigService(new MailCategoriesConfigServiceImpl());
-        registerService(Reloadable.class, mailCategoriesConfigService);
-        registerService(MailCategoriesConfigService.class, mailCategoriesConfigService);
+        MailCategoriesConfigService mailCategoriesConfigService = new MailCategoriesConfigServiceImpl();
         this.addService(MailCategoriesConfigService.class, mailCategoriesConfigService);
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };

@@ -351,13 +351,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                                 if (category_filter.equals("General")) {
                                     // Special case with unkeyword
-                                    List<MailCategoryConfig> enabledMailCategoryConfigs = categoriesService.getAllCategories(req.getSession(), true);
-                                    String categoryNames[] = new String[enabledMailCategoryConfigs.size()];
-                                    int x = 0;
-                                    for (MailCategoryConfig conf : enabledMailCategoryConfigs) {
-                                        categoryNames[x] = conf.getFlag();
-                                        x++;
-                                    }
+                                    String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true);
                                     if (searchTerm != null) {
                                         searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
                                     } else {
@@ -365,14 +359,14 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                     }
                                 } else {
                                     // Normal case with keyword
-                                    MailCategoryConfig config = categoriesService.getConfigByCategory(req.getSession(), category_filter);
-                                    if (config == null) {
+                                    String flag = categoriesService.getFlagByCategory(req.getSession(), category_filter);
+                                    if (flag == null) {
                                         throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
                                     }
                                     if (searchTerm != null) {
-                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(config.getFlag(), true));
+                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
                                     } else {
-                                        searchTerm = new UserFlagTerm(config.getFlag(), true);
+                                        searchTerm = new UserFlagTerm(flag, true);
                                     }
                                 }
                             }

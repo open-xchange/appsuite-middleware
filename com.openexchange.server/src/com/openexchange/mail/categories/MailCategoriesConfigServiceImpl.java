@@ -84,6 +84,27 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
         return result;
     }
+    
+    @Override
+    public String[] getAllFlags(Session session, boolean onlyEnabled) throws OXException {
+        String[] categories = getCategoryNames();
+        if (categories == null || categories.length == 0) {
+            return new String[0];
+        }
+        String[] result = new String[categories.length];
+        int x=0;
+        for (String category : categories) {
+            boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+            if(!active){
+                boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                if(!forced){
+                    continue;    
+                }
+            }
+            result[x++]=MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);;
+        }
+        return result;
+    }
 
     @Override
     public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException {
@@ -100,6 +121,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
 
         return result;
+    }
+    
+    @Override
+    public String getFlagByCategory(Session session, String category) throws OXException {
+        return MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
     }
 
     private Map<Locale, String> getLocalizedNames(Session session, String category) throws OXException {
