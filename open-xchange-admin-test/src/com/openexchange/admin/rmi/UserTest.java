@@ -53,7 +53,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
@@ -68,9 +67,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
-
+import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
-
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.User;
@@ -83,8 +81,6 @@ import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.admin.rmi.extensions.OXCommonExtension;
 import com.openexchange.java.util.TimeZones;
-
-import junit.framework.JUnit4TestAdapter;
 
 /**
  *
@@ -120,7 +116,7 @@ public class UserTest extends AbstractTest {
         final Class clazz = ret.getClass();
         for(final Method m : clazz.getMethods() ) {
             final String name = m.getName();
-            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties") 
+            if( !name.equals("getClass") && !name.equals("getPermissionBits") && !name.equals("getProperties")
                 && !name.equals("getProperty") && (name.startsWith("is") || name.startsWith("get")) ) {
                 //System.out.println("*******" + name);
                 boolean res = (Boolean)m.invoke(ret, null);
@@ -362,9 +358,9 @@ public class UserTest extends AbstractTest {
             fail("Expected to get user data");
         }
     }
-    
+
     /**
-     * Tests if fix for bug 18866 still works. 
+     * Tests if fix for bug 18866 still works.
      */
     @Test
     public void testPublicFolderEditableForUser() throws Exception {
@@ -401,7 +397,7 @@ public class UserTest extends AbstractTest {
     }
 
     /**
-     * Tests if fix for bug 18866 still works. 
+     * Tests if fix for bug 18866 still works.
      */
     @Test
     public void testPublicFolderEditableForAdmin() throws Exception {
@@ -844,6 +840,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setMail_folder_trash_name");
         notallowed.add("setMail_folder_confirmed_ham_name");
         notallowed.add("setMail_folder_confirmed_spam_name");
+        notallowed.add("setMail_folder_archive_full_name");
         notallowed.add("setGUI_Spam_filter_capabilities_enabled");
         notallowed.add("setPassword_expired");
         notallowed.add("setMailenabled");
@@ -1782,7 +1779,7 @@ public class UserTest extends AbstractTest {
         // Remove value
         return retval;
     }
-    
+
     @Test
     public void testExists() throws Exception {
 
@@ -1812,7 +1809,7 @@ public class UserTest extends AbstractTest {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
+
         assertTrue("created user does not exist",existingexists);
     }
 
