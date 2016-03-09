@@ -876,8 +876,38 @@ public final class Tools {
             return message;
         }
 
+        int i = 0;
+        for (int k = length; k-- > 0;) {
+            char c = message.charAt(i);
+            switch (c) {
+            case '<':
+                k = 0;
+                break;
+            case '>':
+                k = 0;
+                break;
+            case '&':
+                k = 0;
+                break;
+            case '"':
+                k = 0;
+                break;
+            default:
+                i++;
+            }
+        }
+
+        if (i >= length) {
+            // Nothing to escape
+            return message;
+        }
+
         StringBuilder result = new StringBuilder(length + 50);
-        for (int k = length, i = 0; k-- > 0;) {
+        if (i > 0) {
+            result.append(message, 0, i);
+        }
+
+        for (int k = length - i; k-- > 0;) {
             char c = message.charAt(i++);
             switch (c) {
             case '<':
