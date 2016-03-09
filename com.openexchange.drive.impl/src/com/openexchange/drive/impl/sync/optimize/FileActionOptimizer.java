@@ -50,6 +50,7 @@
 package com.openexchange.drive.impl.sync.optimize;
 
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.comparison.VersionMapper;
 
 
@@ -81,6 +82,17 @@ public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVe
         } else {
             return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied file version represents the virtual <code>.drive-meta</code> file or not.
+     *
+     * @param session The sync session
+     * @param fileVersion The file version to check
+     * @return <code>true</code> if the file version represents a <code>.drive-meta</code> file, <code>false</code>, otherwise
+     */
+    protected static boolean isDriveMeta(FileVersion fileVersion) {
+        return null != fileVersion && DriveConstants.METADATA_FILENAME.equals(fileVersion.getName());
     }
 
 }
