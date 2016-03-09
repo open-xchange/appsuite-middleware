@@ -75,6 +75,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
     private final int flags;
     private final boolean failOnError;
     private final boolean preserveReceivedDate;
+    private boolean strictParsing = true;
 
     public ImportMailRequest(String folder, int flags, boolean failOnError, InputStream... rfc822) {
         this(folder, flags, failOnError, false, rfc822);
@@ -95,6 +96,11 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
 
     public ImportMailRequest(String folder, int flags, Charset charset, String... mails) {
         this(folder, flags, true, toStreams(charset, mails));
+    }
+    
+    public ImportMailRequest setStrictParsing(boolean strictParsing) {
+        this.strictParsing = strictParsing;
+        return this;
     }
 
     public boolean isFailOnError() {
@@ -118,6 +124,7 @@ public class ImportMailRequest extends AbstractMailRequest<ImportMailResponse> {
         list.add(new URLParameter(Mail.PARAMETER_FOLDERID, folder));
         list.add(new URLParameter("force", "true"));
         list.add(new URLParameter("preserveReceivedDate", preserveReceivedDate));
+        list.add(new URLParameter("strictParsing", strictParsing));
         if (flags >= 0) {
             list.add(new URLParameter(Mail.PARAMETER_FLAGS, flags));
         }
