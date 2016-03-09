@@ -75,8 +75,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             return new ArrayList<>();
         }
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
-        for (String name : categories) {
-            MailCategoryConfig config = getConfigByCategory(session, name);
+        for (String category : categories) {
+            MailCategoryConfig config = getConfigByCategory(session, category);
             if (onlyEnabled && (config.isActive() || config.isForced())) {
                 continue;
             }
@@ -88,6 +88,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException {
         Builder builder = new Builder();
+        builder.category(category);
         builder.name(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session));
         builder.active(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
         builder.force(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));

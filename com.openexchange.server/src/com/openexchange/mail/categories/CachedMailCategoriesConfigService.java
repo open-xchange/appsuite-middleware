@@ -53,10 +53,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.util.Map.Entry;
 import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
@@ -82,11 +80,9 @@ public class CachedMailCategoriesConfigService implements MailCategoriesConfigSe
      * 
      * @throws OXException
      */
-    public CachedMailCategoriesConfigService(CachedMailCategoriesConfigService delegate, Properties properties) throws OXException {
+    public CachedMailCategoriesConfigService(MailCategoriesConfigService delegate) throws OXException {
         super();
         this.delegate = delegate;
-        initCache(properties);
-
     }
 
     @Override
@@ -115,7 +111,7 @@ public class CachedMailCategoriesConfigService implements MailCategoriesConfigSe
     }
 
     @Override
-    public MailCategoryConfig getConfigByCategory(Session session, String name) throws OXException {
+    public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException {
         Cache cache = getCache();
         MailCategoriesConfigCacheEntry cacheEntry = (MailCategoriesConfigCacheEntry) cache.get(cache.newCacheKey(session.getContextId(), session.getUserId()));
         if (cacheEntry == null) {
@@ -125,9 +121,9 @@ public class CachedMailCategoriesConfigService implements MailCategoriesConfigSe
             }
             MailCategoriesConfigCacheEntry entry = new MailCategoriesConfigCacheEntry(configs);
             cache.put(cache.newCacheKey(session.getContextId(), session.getUserId()), entry, true);
-            return entry.getByName(name);
+            return entry.getByCategory(category);
         }
-        return cacheEntry.getByName(name);
+        return cacheEntry.getByCategory(category);
     }
 
     @Override
@@ -143,17 +139,7 @@ public class CachedMailCategoriesConfigService implements MailCategoriesConfigSe
             cache.put(cache.newCacheKey(session.getContextId(), session.getUserId()), entry, true);
             return entry.getByFlag(flag);
         }
-        return cacheEntry.getByName(flag);
-    }
-
-    private void initCache(Properties properties) throws OXException {
-        Properties customProperties = new Properties();
-        for (Entry<Object, Object> entry : properties.entrySet()) {
-            if (null != entry.getKey() && String.class.isInstance(entry.getKey())) {
-                customProperties.put(((String) entry.getKey()).replace("[REGIONNAME]", REGION), entry.getValue());
-            }
-        }
-        ServerServiceRegistry.getInstance().getService(CacheService.class).loadConfiguration(customProperties);
+        return cacheEntry.getByFlag(flag);
     }
 
     private Cache getCache() throws OXException {

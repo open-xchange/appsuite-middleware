@@ -67,6 +67,7 @@ public class MailCategoryConfig {
      */
     public static class Builder {
 
+        private String category;
         private String flag;
         private boolean force;
         private boolean active;
@@ -81,6 +82,17 @@ public class MailCategoryConfig {
         }
 
         /**
+         * Sets the category identifier.
+         *
+         * @param category The category identifier
+         * @return This builder
+         */
+        public Builder category(String category) {
+            this.category = category;
+            return this;
+        }
+
+        /**
          * Sets the flag name.
          *
          * @param flag The flag name
@@ -90,6 +102,7 @@ public class MailCategoryConfig {
             this.flag = flag;
             return this;
         }
+
 
         /**
          * Sets the <code>force</code> flag.
@@ -167,13 +180,14 @@ public class MailCategoryConfig {
          * @return The new {@link MailCategoryConfig} instance
          */
         public MailCategoryConfig build() {
-            return new MailCategoryConfig(flag, force, active, name, names);
+            return new MailCategoryConfig(category, flag, force, active, name, names);
         }
 
     }// End of class Builder
 
     // ----------------------------------------------------------------------------------------------------------
 
+    private final String category;
     private final String flag;
     private final boolean force;
     private final boolean active;
@@ -183,13 +197,23 @@ public class MailCategoryConfig {
     /**
      * Initializes a new {@link MailCategoryConfig}.
      */
-    MailCategoryConfig(String flag, boolean force, boolean active, String name, Map<Locale, String> names) {
+    MailCategoryConfig(String category, String flag, boolean force, boolean active, String name, Map<Locale, String> names) {
         super();
+        this.category = category;
         this.flag = flag;
         this.force = force;
         this.active = active;
         this.name = name;
         this.names = null == names ? Collections.<Locale, String> emptyMap() : names;
+    }
+
+    /**
+     * Gets the category identifier
+     * 
+     * @return The category name
+     */
+    public String getCategory() {
+        return category;
     }
 
     /**

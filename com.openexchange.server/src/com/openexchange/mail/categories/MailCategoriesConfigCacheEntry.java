@@ -82,8 +82,8 @@ public class MailCategoriesConfigCacheEntry implements Serializable{
      */
     public MailCategoriesConfigCacheEntry(Collection<MailCategoryConfig> configs) {
         super();
-        configs = new ArrayList<>();
-        configs.addAll(configs);
+        this.configs = new ArrayList<>();
+        this.configs.addAll(configs);
     }
 
     public void add(MailCategoryConfig config) {
@@ -98,9 +98,9 @@ public class MailCategoriesConfigCacheEntry implements Serializable{
         configs.remove(config);
     }
 
-    public MailCategoryConfig getByName(String name) {
+    public MailCategoryConfig getByCategory(String name) {
         for (MailCategoryConfig config : configs) {
-            if (config.getName().equals(name)) {
+            if (config.getCategory().equals(name)) {
                 return config;
             }
         }

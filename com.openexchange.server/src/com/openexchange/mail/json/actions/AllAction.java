@@ -79,15 +79,22 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.categories.MailCategories;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.MailCategoriesConstants;
+import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
+import com.openexchange.mail.json.osgi.MailJSONActivator;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -105,7 +112,8 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
     @Parameter(name = "columns", description = "A comma-separated list of columns to return. Each column is specified by a numeric column identifier. Column identifiers for appointments are defined in Detailed mail data. The alias \\\"all\\\" uses the predefined columnset [600, 601]."),
     @Parameter(name = "sort", optional=true, description = "The identifier of a column which determines the sort order of the response or the string \u201cthread\u201d to return thread-sorted messages. If this parameter is specified and holds a column number, then the parameter order must be also specified."),
-    @Parameter(name = "order", optional=true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified.")
+    @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."), 
+    @Parameter(name = "filter", optional = true, description = "The identifier of a category if only mails of the given category should be returned. Allows the use of 'none' if the mails shouldn't be filtered.")
 }, responseDescription = "Response (not IMAP: with timestamp): An array with mail data. Each array element describes one mail and is itself an array. The elements of each array contain the information specified by the corresponding identifiers in the columns parameter.")
 public final class AllAction extends AbstractMailAction implements MailRequestSha1Calculator {
 
@@ -322,8 +330,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                     } catch (NumberFormatException e) {
                         throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
                     }
-
-                    if (filterApplied) {
+                    String category_filter = req.getParameter("filter");
+                    if (filterApplied || category_filter != null) {
                         mailInterface.openFor(folderId);
                         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = mailInterface.getMailAccess();
 
@@ -332,6 +340,42 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
                             SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */: new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
                             searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
+
+                            // Check if mail categories are enabled
+
+                            if (MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, req.getSession()) && category_filter != null && !category_filter.equals("none")) {
+                                MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getService(MailCategoriesConfigService.class);
+                                if (categoriesService == null) {
+                                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
+                                }
+
+                                if (category_filter.equals("General")) {
+                                    // Special case with unkeyword
+                                    List<MailCategoryConfig> enabledMailCategoryConfigs = categoriesService.getAllCategories(req.getSession(), true);
+                                    String categoryNames[] = new String[enabledMailCategoryConfigs.size()];
+                                    int x = 0;
+                                    for (MailCategoryConfig conf : enabledMailCategoryConfigs) {
+                                        categoryNames[x] = conf.getFlag();
+                                        x++;
+                                    }
+                                    if (searchTerm != null) {
+                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
+                                    } else {
+                                        searchTerm = new UserFlagTerm(categoryNames, false);
+                                    }
+                                } else {
+                                    // Normal case with keyword
+                                    MailCategoryConfig config = categoriesService.getConfigByCategory(req.getSession(), category_filter);
+                                    if (config == null) {
+                                        throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
+                                    }
+                                    if (searchTerm != null) {
+                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(config.getFlag(), true));
+                                    } else {
+                                        searchTerm = new UserFlagTerm(config.getFlag(), true);
+                                    }
+                                }
+                            }
                         }
 
                         FullnameArgument fa = prepareMailFolderParam(folderId);
