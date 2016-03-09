@@ -384,39 +384,33 @@ public final class HTMLDetector {
         if (off < 0 || len < 0 || len > sequence.length - off) {
             throw new IndexOutOfBoundsException();
         }
-        final byte[] b;
-        if (off > 0 || sequence.length != len) {
-            b = new byte[len];
-            System.arraycopy(sequence, off, b, 0, len);
-        } else {
-            b = sequence;
-        }
-        if (containsHTMLTag(b, "html")) {
+
+        if (containsHTMLTag(sequence, off, len, "html")) {
             return true;
         }
-        if (containsHTMLTag(b, "head")) {
+        if (containsHTMLTag(sequence, off, len, "head")) {
             return true;
         }
-        if (containsHTMLTag(b, "body")) {
+        if (containsHTMLTag(sequence, off, len, "body")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<script")) {
+        if (containsIgnoreCase(sequence, off, len, "<script")) {
             return true;
         }
-        if (containsIgnoreCase(b, "javascript")) {
+        if (containsIgnoreCase(sequence, off, len, "javascript")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<img")) {
+        if (containsIgnoreCase(sequence, off, len, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<object")) {
+        if (containsIgnoreCase(sequence, off, len, "<object")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<embed")) {
+        if (containsIgnoreCase(sequence, off, len, "<embed")) {
             return true;
         }
         for (final String jsEventHandler : JS_EVENT_HANDLER) {
-            if (containsIgnoreCase(b, jsEventHandler)) {
+            if (containsIgnoreCase(sequence, off, len, jsEventHandler)) {
                 return true;
             }
         }
@@ -453,14 +447,7 @@ public final class HTMLDetector {
         if (off < 0 || len < 0 || len > sequence.length - off) {
             throw new IndexOutOfBoundsException();
         }
-        final byte[] b;
-        if (off > 0 || sequence.length != len) {
-            b = new byte[len];
-            System.arraycopy(sequence, off, b, 0, len);
-        } else {
-            b = sequence;
-        }
-        return containsIgnoreCase(b, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
+        return containsIgnoreCase(sequence, off, len, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
     }
 
     /**
