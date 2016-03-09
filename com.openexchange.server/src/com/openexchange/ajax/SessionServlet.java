@@ -49,8 +49,11 @@
 
 package com.openexchange.ajax;
 
+import static com.google.common.net.HttpHeaders.RETRY_AFTER;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,6 +65,7 @@ import org.json.JSONException;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.requesthandler.Dispatchers;
 import com.openexchange.ajax.requesthandler.responseRenderers.APIResponseRenderer;
+import com.openexchange.annotation.NonNull;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
@@ -69,6 +73,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Reply;
@@ -79,6 +84,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.MIMEParse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -99,6 +105,9 @@ public abstract class SessionServlet extends AJAXServlet {
 
     /** White-list file identifier */
     public static final String SESSION_WHITELIST_FILE = "noipcheck.cnf";
+
+    /** The <code>"Accept"</code> header */
+    private static final @NonNull String ACCEPT = "Accept";
 
     // ------------------------------------------------------------------------------------------------------------------------------
 
@@ -357,10 +366,22 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
 
-            // Check expected output format
-            if (Dispatchers.isApiOutputExpectedFor(req)) {
-                // API response
-                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+            // Output
+            outputOXException(e, statusCode, reasonPhrase, req, resp);
+        }
+    }
+
+    private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // Check expected output format
+        if (isJsonResponseExpected(req, true) && Dispatchers.isApiOutputExpectedFor(req)) {
+            // API response
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            resp.setHeader("Content-Disposition", "inline");
+            APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
+        } else {
+            // No JSON response; either JavaScript call-back or regular HTML error (page)
+            if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
+                writeErrorAsJsCallback(e, req, resp);
             } else {
                 // No JSON response; either JavaScript call-back or regular HTML error (page)
                 if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
@@ -372,6 +393,30 @@ public abstract class SessionServlet extends AJAXServlet {
                 }
             }
         }
+    }
+
+    private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
+
+    /**
+     * Checks if the <code>"Accept"</code> header of specified HTTP request signals to expect JSON data.
+     *
+     * @param request The HTTP request
+     * @param interpretMissingAsTrue <code>true</code> to interpret a missing/empty <code>"Accept"</code> header as <code>true</code>; otherwise <code>false</code>
+     * @return <code>true</code> if JSON data is expected; otherwise <code>false</code>
+     */
+    public static boolean isJsonResponseExpected(HttpServletRequest request, boolean interpretMissingAsTrue) {
+        if (null == request) {
+            return false;
+        }
+
+        // E.g. "Accept: application/json, text/javascript, ..."
+        String acceptHdr = request.getHeader(ACCEPT);
+        if (Strings.isEmpty(acceptHdr)) {
+            return interpretMissingAsTrue;
+        }
+
+        float[] qualities = MIMEParse.qualities(JSON_TYPES, acceptHdr);
+        return qualities[0] == 1.0f || qualities[1] == 1.0f;
     }
 
     /**
