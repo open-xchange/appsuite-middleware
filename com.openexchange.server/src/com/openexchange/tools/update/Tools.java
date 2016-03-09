@@ -606,6 +606,15 @@ public final class Tools {
         }
     }
 
+    /**
+     * Gets the type of the denoted column in given table.
+     *
+     * @param con The connection to use
+     * @param table The table name
+     * @param column The column name
+     * @return The type or <code>null</code> if such a column does not exist
+     * @throws SQLException If an SQL error occurs
+     */
     public static final String getColumnTypeName(final Connection con, final String table, final String column) throws SQLException {
         if (!columnExists(con, table, column)) {
             return null;
@@ -616,6 +625,7 @@ public final class Tools {
         try {
             rs = metaData.getColumns(null, null, table, column);
             while (rs.next()) {
+                // TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
                 typeName = rs.getString(6);
             }
         } finally {
@@ -624,6 +634,14 @@ public final class Tools {
         return typeName;
     }
 
+    /**
+     * Checks for existence of denoted table.
+     *
+     * @param con The connection to use
+     * @param table The table to check
+     * @return <code>true</code> if such a table exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
     public static final boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
@@ -644,7 +662,7 @@ public final class Tools {
      * @param table The table name
      * @param column The column name
      * @return <code>true</code> if specified column exists; otherwise <code>false</code>
-     * @throws SQLException If a SQL error occurs
+     * @throws SQLException If an SQL error occurs
      */
     public static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
@@ -904,7 +922,8 @@ public final class Tools {
     public static void checkAndModifyColumns(final Connection con, final String tableName, boolean ignore, final Column... cols) throws SQLException {
         final List<Column> toDo = new ArrayList<Column>(cols.length);
         for (final Column col : cols) {
-            if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
+            String columnTypeName = getColumnTypeName(con, tableName, col.getName());
+            if ((null != columnTypeName) && (false == col.getDefinition().contains(columnTypeName))) {
                 toDo.add(col);
             }
         }
