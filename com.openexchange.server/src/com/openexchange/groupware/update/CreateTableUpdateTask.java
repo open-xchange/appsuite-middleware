@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * {@link CreateTableUpdateTask}
+ * {@link CreateTableUpdateTask} - Wraps an existing {@link CreateTableService} instance as an update task.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
