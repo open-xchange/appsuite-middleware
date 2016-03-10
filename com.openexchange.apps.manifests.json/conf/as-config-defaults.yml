@@ -13,7 +13,7 @@ default:
 
     forgotPassword: false
 
-    copyright: '(c) 2015 Open-Xchange.'
+    copyright: '(c) 2016 Open-Xchange.'
 
     staySignedIn: true
 
