@@ -121,7 +121,8 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
+    /** The logger constant */
+    final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 
@@ -1855,11 +1856,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         stmt.setInt(1, id);
                         result = stmt.executeQuery();
 
-                        if (false == result.next()) {
-                            return false;
-                        } else {
-                            return true;
-                        }
+                        return Boolean.valueOf(result.next());
                     } catch (PoolException e) {
                         log.error("Pool Error", e);
                         throw new StorageException(e);
