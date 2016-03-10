@@ -62,6 +62,7 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -143,8 +144,8 @@ abstract class AbstractStandardFolderItemValue extends AbstractWarningAwareReadO
             // Check for possible warnings
             addWarnings(mailInterface.getWarnings());
         } catch (OXException e) {
-            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                // Admin has no mail access
+            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+                // Admin/user has no mail access
                 setting.setSingleValue(null);
             } else if (MailExceptionCode.containsSocketError(e)) {
                 // A socket error we cannot recover from

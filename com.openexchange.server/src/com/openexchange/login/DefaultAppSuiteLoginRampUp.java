@@ -60,7 +60,9 @@ import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.tools.JSONCoercion;
+import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.AbstractTask;
@@ -119,6 +121,14 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
         this.services = services;
     }
 
+    static void handleOXException(OXException e, String key) {
+        if (OXExceptions.isCategory(Category.CATEGORY_PERMISSION_DENIED, e)) {
+            LOG.debug("Permission error during {} ramp-up", key, e);
+        } else {
+            LOG.error("Error during {} ramp-up", key, e);
+        }
+    }
+
     /** The ramp-up keys. Keep order! */
     private static final RampUpKey[] KEYS = RampUpKey.values();
 
@@ -141,7 +151,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return folderlist;
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.FOLDER_LIST.key, x);
+                    handleOXException(x, RampUpKey.FOLDER_LIST.key);
                 }
                 return null;
             }
@@ -159,13 +169,13 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     folder.put("1", ox.perform(request().session(session).module("folders").action("get").params("id", "1", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.warn("Ramp-up call failed", x);
+                    handleOXException(x, RampUpKey.FOLDER.key);
                 }
                 try {
                     folder.put("default0/INBOX", ox.perform(request().session(session).module("folders").action("get").params("id", "default0/INBOX", "tree", "1", "altNames", "true", "timezone", "UTC").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.FOLDER.key, x);
+                    handleOXException(x, RampUpKey.FOLDER.key);
                 }
                 return folder;
             }
@@ -186,7 +196,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return jslobs;
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.JSLOBS.key, x);
+                    handleOXException(x, RampUpKey.JSLOBS.key);
                 }
                 return null;
             }
@@ -201,7 +211,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return ox.perform(manifestRequest, null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.SERVER_CONFIG.key, x);
+                    handleOXException(x, RampUpKey.SERVER_CONFIG.key);
                 }
                 return null;
             }
@@ -220,20 +230,20 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     oauth.put("services", ox.perform(request().session(session).module("oauth/services").action("all").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.OAUTH.key, x);
+                    handleOXException(x, RampUpKey.OAUTH.key);
                 }
                 try {
                     oauth.put("accounts", ox.perform(request().session(session).module("oauth/accounts").action("all").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.OAUTH.key, x);
+                    handleOXException(x, RampUpKey.OAUTH.key);
                 }
 
                 try {
                     oauth.put("secretCheck", ox.perform(request().session(session).module("recovery/secret").action("check").format("json").build(loginRequest), null, session).getResultObject());
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.OAUTH.key, x);
+                    handleOXException(x, RampUpKey.OAUTH.key);
                 }
                 return oauth;
             }
@@ -247,7 +257,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return ox.perform(request().session(session).module("user").action("get").params("timezone", "utc", "id", Integer.toString(session.getUserId())).format("json").build(loginRequest), null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.USER.key, x);
+                    handleOXException(x, RampUpKey.USER.key);
                 }
                 return null;
             }
@@ -261,7 +271,7 @@ public abstract class DefaultAppSuiteLoginRampUp implements LoginRampUpService {
                     return ox.perform(request().session(session).module("account").action("all").format("json").params("columns", "1001,1002,1003,1004,1005,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1036,1037,1038,1039,1040,1041,1042,1043").build(loginRequest), null, session).getResultObject();
                 } catch (OXException x) {
                     // Omit result on error. Let the UI deal with this
-                    LOG.error("Error during {} ramp-up", RampUpKey.ACCOUNTS.key, x);
+                    handleOXException(x, RampUpKey.ACCOUNTS.key);
                 }
                 return null;
             }
