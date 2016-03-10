@@ -51,6 +51,7 @@ package com.openexchange.mail.categories;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
@@ -229,6 +230,24 @@ public final class MailCategories {
 
         String value = property.get();
         return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+    }
+    
+    
+    /**
+     * Activates or deactivates the given category
+     * 
+     * @param category The category identifier
+     * @param activate Flag indicating if the category should be activated or deactivated
+     * @param session The user session
+     * @throws OXException
+     */
+    public static void activateProperty(String category, boolean activate, Session session) throws OXException{
+        ConfigViewFactory viewFactory = getConfigViewFactory();
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        
+        ConfigProperty<String> property = view.property("user", MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.class);
+        property.set(String.valueOf(activate));
+        
     }
 
 }

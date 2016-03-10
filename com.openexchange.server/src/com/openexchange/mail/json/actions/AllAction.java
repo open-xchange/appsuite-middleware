@@ -82,7 +82,6 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategories;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
-import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;

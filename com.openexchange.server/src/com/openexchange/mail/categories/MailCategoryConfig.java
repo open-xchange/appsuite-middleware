@@ -190,7 +190,7 @@ public class MailCategoryConfig {
     private final String category;
     private final String flag;
     private final boolean force;
-    private final boolean active;
+    private boolean active;
     private final String name;
     private final Map<Locale, String> names;
 
@@ -241,6 +241,15 @@ public class MailCategoryConfig {
      */
     public boolean isActive() {
         return force || active;
+    }
+    
+    /**
+     * Sets the active flag
+     * 
+     * @param active
+     */
+    public void setActive(boolean active){
+        this.active=active;
     }
 
     /**

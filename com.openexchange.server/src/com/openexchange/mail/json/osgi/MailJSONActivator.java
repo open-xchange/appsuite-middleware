@@ -96,6 +96,7 @@ import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
+import com.openexchange.mail.json.converters.MailCategoriesConfigConverter;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -245,6 +246,8 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         MailCategoriesConfigService mailCategoriesConfigService = new MailCategoriesConfigServiceImpl();
         this.addService(MailCategoriesConfigService.class, mailCategoriesConfigService);
+        
+        registerService(ResultConverter.class, MailCategoriesConfigConverter.getInstance());
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));

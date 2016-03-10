@@ -141,7 +141,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         for(String language: languages){
             String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME + "." + language, null, session);
             if (translation != null && !translation.isEmpty()) {
-                result.put(Locale.forLanguageTag(language), translation);
+                result.put(new Locale(language), translation);
             }
         }
         return result;
@@ -169,6 +169,21 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             return new String[0];
         }
         return result;
+    }
+
+    @Override
+    public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException {
+        List<MailCategoryConfig> allConfigs = getAllCategories(session, false);
+        
+        for(MailCategoryConfig config: allConfigs){
+            for(String configToChange: categories){
+                if(configToChange.equals(config.getCategory())){
+                    MailCategories.activateProperty(config.getCategory(), activate, session);
+                    config.setActive(activate);
+                }
+            }
+        }
+        return allConfigs;
     }
 
 }

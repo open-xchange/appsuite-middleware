@@ -110,5 +110,16 @@ public interface MailCategoriesConfigService {
      * @throws OXException
      */
     public MailCategoryConfig getConfigByFlag(Session session, String flag) throws OXException;
+    
+    /**
+     * Activates or deactivates given categories
+     * 
+     * @param categories An array of category identifiers
+     * @param enable Boolean flag indicating activation or deactivation
+     * @param session The user session
+     * @return A list of all category configurations
+     * @throws OXException 
+     */
+    public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException;
 
 }
