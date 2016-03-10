@@ -2089,9 +2089,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Collections.sort(list, Collections.reverseOrder(new DBWeightComparator(totalUnits, totalWeight)));
         final Iterator<DatabaseHandle> iter = list.iterator();
         DatabaseHandle retval = null;
-        while (iter.hasNext() && null == retval) {
-            final DatabaseHandle db = iter.next();
-            final int dbPoolId = i(db.getId());
+        while (null == retval && iter.hasNext()) {
+            DatabaseHandle db = iter.next();
+            int dbPoolId = i(db.getId());
             try {
                 final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
                 cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
