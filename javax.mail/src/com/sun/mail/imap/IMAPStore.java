@@ -797,7 +797,7 @@ public class IMAPStore extends Store
         StampAndError sae = map.get(key);
         if (sae != null) {
             if ((System.currentTimeMillis() - sae.stamp) <= authTimeout) {
-                throw sae.error;
+                throw new AuthenticationFailedException(sae.error.getMessage(), sae.error.getNextException());
             }
             map.remove(key);
         }
