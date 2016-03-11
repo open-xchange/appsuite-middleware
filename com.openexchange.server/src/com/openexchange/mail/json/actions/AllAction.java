@@ -350,7 +350,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                                 if (category_filter.equals("General")) {
                                     // Special case with unkeyword
-                                    String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true);
+                                    String categoryNames[] = categoriesService.getAllFlags(req.getSession(), true, false);
                                     if (searchTerm != null) {
                                         searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(categoryNames, false));
                                     } else {
@@ -362,10 +362,30 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                                     if (flag == null) {
                                         throw MailExceptionCode.INVALID_PARAMETER_VALUE.create(category_filter);
                                     }
-                                    if (searchTerm != null) {
-                                        searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
+                                    
+                                    // test if category is a system category
+                                    if(categoriesService.isSystemCategory(category_filter, req.getSession())){
+                                        // Add active user categories as unkeywords
+                                        String[] unkeywords = categoriesService.getAllFlags(req.getSession(), true, true);
+                                        if(unkeywords.length!=0){
+                                            if (searchTerm != null) {
+                                                searchTerm = new ANDTerm(searchTerm, new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false)));
+                                            } else {
+                                                searchTerm = new ANDTerm(new UserFlagTerm(flag, true), new UserFlagTerm(unkeywords, false));
+                                            }
+                                        } else {
+                                            if (searchTerm != null) {
+                                                searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
+                                            } else {
+                                                searchTerm = new UserFlagTerm(flag, true);
+                                            } 
+                                        }
                                     } else {
-                                        searchTerm = new UserFlagTerm(flag, true);
+                                        if (searchTerm != null) {
+                                            searchTerm = new ANDTerm(searchTerm, new UserFlagTerm(flag, true));
+                                        } else {
+                                            searchTerm = new UserFlagTerm(flag, true);
+                                        }
                                     }
                                 }
                             }

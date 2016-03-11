@@ -69,9 +69,14 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_LANGUAGES = "com.openexchange.mail.categories.languages";
     
     /**
-     * The category identifiers property name
+     * The system category identifiers property name
      */
     public static final String MAIL_CATEGORIES_IDENTIFIERS = "com.openexchange.mail.categories.identifiers";
+    
+    /**
+     * The user category identifiers property name
+     */
+    public static final String MAIL_USER_CATEGORIES_IDENTIFIERS = "com.openexchange.mail.user.categories.identifiers";
 
     /**
      * The prefix for all mail categories configuration properties

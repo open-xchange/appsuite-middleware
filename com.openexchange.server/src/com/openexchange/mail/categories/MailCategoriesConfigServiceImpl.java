@@ -71,13 +71,21 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
         String[] categories = getCategoryNames(session);
-        if (categories == null || categories.length == 0) {
+        String[] userCategories = getUserCategoryNames(session);
+        if (categories.length == 0 && userCategories.length==0) {
             return new ArrayList<>();
         }
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
         for (String category : categories) {
             MailCategoryConfig config = getConfigByCategory(session, category);
-            if (onlyEnabled && (config.isActive() || config.isForced())) {
+            if (onlyEnabled && config.isActive()) {
+                continue;
+            }
+            result.add(config);
+        }
+        for (String category : userCategories) {
+            MailCategoryConfig config = getUserConfigByCategory(session, category);
+            if (onlyEnabled && config.isActive()) {
                 continue;
             }
             result.add(config);
@@ -86,24 +94,49 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
     
     @Override
-    public String[] getAllFlags(Session session, boolean onlyEnabled) throws OXException {
-        String[] categories = getCategoryNames(session);
-        if (categories == null || categories.length == 0) {
-            return new String[0];
-        }
-        String[] result = new String[categories.length];
-        int x=0;
-        for (String category : categories) {
-            boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-            if(!active){
-                boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
-                if(!forced){
-                    continue;    
-                }
+    public String[] getAllFlags(Session session, boolean onlyEnabled, boolean onlyUserCategories) throws OXException {
+        if (onlyUserCategories) {
+            String[] userCategories = getUserCategoryNames(session);
+            if (userCategories.length == 0) {
+                return new String[0];
             }
-            result[x++]=MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);;
+            ArrayList<String> result = new ArrayList<>(userCategories.length);
+            for (String category : userCategories) {
+                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                if (!active) {
+                    continue;
+                }
+                result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            }
+
+            return result.toArray(new String[result.size()]);
+        } else {
+            String[] categories = getCategoryNames(session);
+            String[] userCategories = getUserCategoryNames(session);
+            if (categories.length == 0 && userCategories.length==0) {
+                return new String[0];
+            }
+            ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
+            for (String category : categories) {
+                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                if (!active) {
+                    boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                    if (!forced) {
+                        continue;
+                    }
+                }
+               result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            }
+            for (String category : userCategories) {
+                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                if (!active) {
+                    continue;
+                }
+               result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+            }
+
+            return result.toArray(new String[result.size()]);
         }
-        return result;
     }
 
     @Override
@@ -115,6 +148,21 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         builder.force(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session));
         builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         builder.addLocalizedNames(getLocalizedNames(session, category));
+        MailCategoryConfig result = builder.build();
+        if (result.getFlag() == null) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
+        }
+
+        return result;
+    }
+    
+    @Override
+    public MailCategoryConfig getUserConfigByCategory(Session session, String category) throws OXException {
+        Builder builder = new Builder();
+        builder.category(category);
+        builder.name(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session));
+        builder.active(MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session));
+        builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         MailCategoryConfig result = builder.build();
         if (result.getFlag() == null) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
@@ -170,6 +218,19 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
         return result;
     }
+    
+    private String[] getUserCategoryNames(Session session) throws OXException {
+        String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
+        if(categoriesString==null || categoriesString.isEmpty()){
+            return new String[0];
+        }
+        
+        String result[] = categoriesString.replace(" ", "").split(",");
+        if(result==null){
+            return new String[0];
+        }
+        return result;
+    }
 
     @Override
     public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException {
@@ -184,6 +245,18 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
         }
         return allConfigs;
+    }
+
+    @Override
+    public boolean isSystemCategory(String category, Session session) throws OXException {
+        String[] systemCategories = getCategoryNames(session);
+        for(String systemCategory: systemCategories){
+            if(category.equals(systemCategory)){
+                return true;
+            }
+        }
+        
+        return false;
     }
 
 }
