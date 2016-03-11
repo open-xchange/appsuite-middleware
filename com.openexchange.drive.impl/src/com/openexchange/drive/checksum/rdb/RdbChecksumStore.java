@@ -734,10 +734,10 @@ public class RdbChecksumStore implements ChecksumStore {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, user);
+            stmt.setInt(parameterIndex++, view);
             for (int i = 0; i < folderIDs.length; i++) {
                 stmt.setString(parameterIndex++, reverse(escapeFolder(folderIDs[i])));
             }
-            stmt.setInt(parameterIndex++, view);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 DirectoryChecksum directoryChecksum = new DirectoryChecksum();

@@ -97,7 +97,7 @@ public class SQL {
             "checksum BINARY(16) NOT NULL," +
             "BIGINT(20) NOT NULL DEFAULT 0," +
             "PRIMARY KEY (cid, uuid)," +
-            "INDEX (cid, user, folder)," +
+            "INDEX (cid, user, view, folder)," +
             "INDEX (cid, checksum)" +
         ") ENGINE=InnoDB DEFAULT CHARSET=ascii;";
     }
@@ -114,7 +114,8 @@ public class SQL {
             new DirectoryChecksumsReIndexTask(),
             new FileChecksumsReIndexTask(),
             new DirectoryChecksumsAddViewColumnTask(),
-            new DirectoryChecksumsAddUsedColumnTask()
+            new DirectoryChecksumsAddUsedColumnTask(),
+            new DirectoryChecksumsReIndexTaskV2()
         };
     };
 
@@ -215,13 +216,13 @@ public class SQL {
 
     /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums
-     * WHERE cid=? AND user=? AND folder IN (?,?,...) AND view=?;"
+     * WHERE cid=? AND user=? AND view=? AND folder IN (?,?,...);"
      */
     public static final String SELECT_DIRECTORY_CHECKSUMS_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,LOWER(HEX(checksum)) FROM directoryChecksums ");
-        stringBuilder.append("WHERE cid=? AND user=? AND folder");
-        return appendPlaceholders(stringBuilder, length).append(" AND view=?;").toString();
+        stringBuilder.append("WHERE cid=? AND user=? AND view=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 
     /**
