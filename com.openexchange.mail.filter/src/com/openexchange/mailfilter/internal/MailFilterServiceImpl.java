@@ -100,6 +100,8 @@ import com.openexchange.mailfilter.services.Services;
 public final class MailFilterServiceImpl implements MailFilterService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MailFilterServiceImpl.class);
+    
+    private static final String CATEGORY_FLAG = "category";
 
     private static final class RuleAndPosition {
 
@@ -393,6 +395,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag.getFlag(), rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
+                removeCategoryRules(clientRules);
                 removeNestedRules(clientRules);
 
                 return clientRules;
@@ -410,6 +413,17 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 closeSieveHandler(sieveHandler);
             }
         }
+    }
+    
+    private void removeCategoryRules(List<Rule> rules) {
+        
+       Iterator<Rule> iterator = rules.iterator();
+       while(iterator.hasNext()){
+           Rule r = iterator.next();
+           if(r.getRuleComment().getFlags()!=null && r.getRuleComment().getFlags().contains(CATEGORY_FLAG)){
+               iterator.remove();
+           }
+       }
     }
 
     @Override
@@ -431,6 +445,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
                     return exclude(splittedRules.getFlaggedRules(), exclusionFlags);
                 }
                 List<Rule> splitRules = splittedRules.getRules();
+                removeCategoryRules(splitRules);
                 removeNestedRules(splitRules);
                 return splitRules;
             } catch (SieveException e) {
