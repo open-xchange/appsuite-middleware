@@ -281,6 +281,10 @@ public final class LogProperties {
          * com.openexchange.login.version
          */
         LOGIN_VERSION("com.openexchange.login.version"),
+        /**
+         * com.openexchange.hostname
+         */
+        HOSTNAME("com.openexchange.hostname"),
 
         ;
 
