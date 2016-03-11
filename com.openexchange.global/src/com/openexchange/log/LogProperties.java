@@ -302,6 +302,10 @@ public final class LogProperties {
          * com.openexchange.system.tempfile
          */
         TEMP_FILE("com.openexchange.system.tempfile"),
+        /**
+         * com.openexchange.hostname
+         */
+        HOSTNAME("com.openexchange.hostname"),
 
         ;
 
