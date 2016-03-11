@@ -85,6 +85,7 @@ import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.search.Order;
+import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.image.ImageLocation;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegistry;
@@ -92,6 +93,7 @@ import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConfigServiceImpl;
+import com.openexchange.mail.categories.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -246,8 +248,8 @@ public final class MailJSONActivator extends AJAXModuleActivator {
 
         MailCategoriesConfigService mailCategoriesConfigService = new MailCategoriesConfigServiceImpl();
         this.addService(MailCategoriesConfigService.class, mailCategoriesConfigService);
-        
         registerService(ResultConverter.class, MailCategoriesConfigConverter.getInstance());
+        registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(mailCategoriesConfigService));
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));
