@@ -177,13 +177,14 @@ public class DriveServiceImpl implements DriveService {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
+        List<ServerDirectoryVersion> serverVersions;
         int retryCount = 0;
         while (true) {
             /*
              * get server directories
              */
             final SyncSession driveSession = new SyncSession(session);
-            List<ServerDirectoryVersion> serverVersions;
+            ;
             try {
                 serverVersions = driveSession.getServerDirectories(maxDirectories);
             } catch (OXException e) {
@@ -229,9 +230,15 @@ public class DriveServiceImpl implements DriveService {
                 throw e;
             }
             /*
-             * start cleaner run if applicable
+             * start background cleanup tasks after empty sync results if applicable
              */
             if (syncResult.isEmpty()) {
+                List<DirectoryChecksum> directoryChecksums = new ArrayList<DirectoryChecksum>(serverVersions.size());
+                for (ServerDirectoryVersion serverVersion : serverVersions) {
+                    directoryChecksums.add(serverVersion.getDirectoryChecksum());
+                }
+                int touched = driveSession.getChecksumStore().touchDirectoryChecksums(directoryChecksums);
+                driveSession.trace("Successfully touched " + touched + " stored directory checksums.");
                 TempCleaner.cleanUpIfNeeded(driveSession);
             }
             /*

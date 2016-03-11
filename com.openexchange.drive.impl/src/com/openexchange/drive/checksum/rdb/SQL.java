@@ -95,6 +95,7 @@ public class SQL {
             "sequence BIGINT(20) DEFAULT NULL," +
             "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
+            "BIGINT(20) NOT NULL DEFAULT 0," +
             "PRIMARY KEY (cid, uuid)," +
             "INDEX (cid, user, folder)," +
             "INDEX (cid, checksum)" +
@@ -112,7 +113,8 @@ public class SQL {
             new DirectoryChecksumsAddUserAndETagColumnTask(),
             new DirectoryChecksumsReIndexTask(),
             new FileChecksumsReIndexTask(),
-            new DirectoryChecksumsAddViewColumnTask()
+            new DirectoryChecksumsAddViewColumnTask(),
+            new DirectoryChecksumsAddUsedColumnTask()
         };
     };
 
@@ -173,19 +175,22 @@ public class SQL {
         "WHERE cid=? AND checksum=UNHEX(?);";
 
     public static final String INSERT_DIRECTORY_CHECKSUM_STMT =
-        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum) " +
-        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?));";
+        "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) " +
+        "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?);";
 
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
-        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?) " +
+        "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?),used=? " +
         "WHERE cid=? AND uuid=UNHEX(?);";
 
-    public static final String UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT =
-        "UPDATE directoryChecksums SET folder=REVERSE(?) " +
-        "WHERE cid=? AND folder=REVERSE(?);";
+    /** UPDATE directoryChecksums SET used=? WHERE cid=? AND uuid IN (?,?,...);" */
+    public static final String TOUCH_DIRECTORY_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("UPDATE directoryChecksums SET used=? WHERE cid=? AND uuid");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
 
-    public static final String DELETE_DIRECTORY_CHECKSUM_STMT =
-        "DELETE FROM directoryChecksums " +
+    public static final String UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT =
+        "UPDATE directoryChecksums SET folder=REVERSE(?),used=? " +
         "WHERE cid=? AND folder=REVERSE(?);";
 
     /**

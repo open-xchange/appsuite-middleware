@@ -146,4 +146,12 @@ public interface DirectoryChecksumStore {
      */
     List<DirectoryChecksum> getDirectoryChecksums(int userID, List<FolderID> folderIDs, int view) throws OXException;
 
+    /**
+     * Touches a list of directory checksums by resetting their <code>used</code>-column to the current timestamp.
+     *
+     * @param directoryChecksums The directory checksums to touch
+     * @return The number of updated rows
+     */
+    int touchDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException;
+
 }
