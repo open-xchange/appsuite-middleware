@@ -29,7 +29,7 @@ package com.openexchange.find.basic;
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
