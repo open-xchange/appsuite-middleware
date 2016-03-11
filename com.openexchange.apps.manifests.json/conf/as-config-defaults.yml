@@ -13,7 +13,7 @@ default:
 
     forgotPassword: false
 
-    copyright: '(c) 2016 Open-Xchange.'
+    copyright: '(c) 2016-2020 OX Software GmbH.'
 
     staySignedIn: true
 
