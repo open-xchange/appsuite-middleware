@@ -4,7 +4,7 @@ Bundle-Name: JSON Interface for interacting with the chinese room
 Bundle-SymbolicName: com.openexchange.realtime.example.chineseRoom.json
 Bundle-Version: 7.2.0
 Bundle-Activator: com.openexchange.realtime.example.chineseroom.json.osgi.ChineseJSONActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.base,

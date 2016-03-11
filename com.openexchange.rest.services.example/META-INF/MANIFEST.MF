@@ -4,7 +4,7 @@ Bundle-Name: Test
 Bundle-SymbolicName: com.openexchange.rest.services.example
 Bundle-Version: 7.6.0
 Bundle-Activator: com.openexchange.rest.services.example.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: 
  com.openexchange.ajax.requesthandler,
