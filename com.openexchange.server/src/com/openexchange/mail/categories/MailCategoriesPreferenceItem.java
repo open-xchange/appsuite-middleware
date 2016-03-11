@@ -100,19 +100,21 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService{
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 JSONObject item = new JSONObject(2);
                 try {
-                    item.put("tabbed_inbox", MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session));
-                    
-                    List<MailCategoryConfig> configs = service.getAllCategories(session, false);
-                    JSONArray categories = new JSONArray();
-                    for(MailCategoryConfig config: configs){
-                        JSONObject categoryJSON = new JSONObject(3);
-                        categoryJSON.put("filter", config.getCategory());
-                        String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
-                        categoryJSON.put("name", name);
-                        categoryJSON.put("active", config.isActive());
-                        categories.put(categoryJSON);
+                    boolean mailCategoriesEnabled =  MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
+                    item.put("tabbed_inbox", mailCategoriesEnabled);
+                    if (mailCategoriesEnabled) {
+                        List<MailCategoryConfig> configs = service.getAllCategories(session, false);
+                        JSONArray categories = new JSONArray();
+                        for (MailCategoryConfig config : configs) {
+                            JSONObject categoryJSON = new JSONObject(3);
+                            categoryJSON.put("filter", config.getCategory());
+                            String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
+                            categoryJSON.put("name", name);
+                            categoryJSON.put("active", config.isActive());
+                            categories.put(categoryJSON);
+                        }
+                        item.put("inbox_tabs", categories);
                     }
-                    item.put("inbox_tabs", categories);
                     setting.setSingleValue(item);
                 } catch (JSONException e) {
                    throw JSlobExceptionCodes.JSON_ERROR.create(e.getMessage());
