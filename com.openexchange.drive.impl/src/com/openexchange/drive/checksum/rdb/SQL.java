@@ -95,7 +95,7 @@ public class SQL {
             "sequence BIGINT(20) DEFAULT NULL," +
             "etag VARCHAR(255) DEFAULT NULL," +
             "checksum BINARY(16) NOT NULL," +
-            "BIGINT(20) NOT NULL DEFAULT 0," +
+            "used BIGINT(20) NOT NULL DEFAULT 0," +
             "PRIMARY KEY (cid, uuid)," +
             "INDEX (cid, user, view, folder)," +
             "INDEX (cid, checksum)" +
