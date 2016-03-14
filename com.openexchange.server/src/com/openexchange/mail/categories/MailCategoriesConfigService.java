@@ -155,11 +155,21 @@ public interface MailCategoriesConfigService {
     public void addUserCategory(String category, String flag, String name, Session session) throws OXException;
     
     /**
-     * Removes a user category 
+     * Updates the name of a user category
+     * 
+     * @param category The category identifier
+     * @param name The category name
+     * @param session The user session
+     * @throws OXException if a category with this identifier does not exist
+     */
+    public void updateUserCategoryName(String category, String name, Session session) throws OXException;
+
+    /**
+     * Removes a user category
      * 
      * @param category The category identifier
      * @param session The user session
-     * @throws OXException if a category with this identifier already exists
+     * @throws OXException if a category with this identifier does not exist
      */
     public void removeUserCategory(String category, Session session) throws OXException;
 

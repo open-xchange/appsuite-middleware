@@ -59,7 +59,6 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
 import com.openexchange.session.Session;
-import edu.emory.mathcs.backport.java.util.Collections;
 
 
 /**
@@ -299,6 +298,19 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
         MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
         MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
+    }
+
+    @Override
+    public void updateUserCategoryName(String category, String name, Session session) throws OXException {
+        String[] userCategories = getUserCategoryNames(session);
+        for (String oldCategory : userCategories) {
+            if (oldCategory.equals(category)) {
+                MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
+                return;
+            }
+        }
+        throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
+
     }
 
 }
