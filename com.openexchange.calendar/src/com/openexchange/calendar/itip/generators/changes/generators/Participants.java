@@ -146,9 +146,9 @@ public class Participants implements ChangeDescriptionGenerator{
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
 
-        List<Integer> userIds = new ArrayList<Integer>();
-        List<Integer> groupIds = new ArrayList<Integer>();
-        List<Integer> resourceIds = new ArrayList<Integer>();
+        Set<Integer> userIds = new HashSet<Integer>();
+        Set<Integer> groupIds = new HashSet<Integer>();
+        Set<Integer> resourceIds = new HashSet<Integer>();
 
         Map<Integer,ChangeType> userChange = new HashMap<Integer, ChangeType>();
         Map<Integer,ChangeType> resourceChange = new HashMap<Integer, ChangeType>();
@@ -271,7 +271,7 @@ public class Participants implements ChangeDescriptionGenerator{
         return changes;
     }
 
-    private void investigateChanges(Difference difference, List<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
+    private void investigateChanges(Difference difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
 
         for(Change change : difference.getChanged()) {
             if (change instanceof ConfirmationChange) {
@@ -302,9 +302,37 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
+        
+        if (difference.getAdded() != null) {
+            for (Object added : difference.getAdded()) {
+                if (added instanceof UserParticipant) {
+                    UserParticipant up = (UserParticipant) added;
+                    int id = up.getIdentifier();
+                    userIds.add(id);
+                    userChange.put(id, ChangeType.ADD);
+                } else if (added instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant ep = (ExternalUserParticipant) added;
+                    externalChange.put(ep.getEmailAddress(), ChangeType.ADD);
+                }
+            }
+        }
+        
+        if (difference.getRemoved() != null) {
+            for (Object removed : difference.getRemoved()) {
+                if (removed instanceof UserParticipant) {
+                    UserParticipant up = (UserParticipant) removed;
+                    int id = up.getIdentifier();
+                    userIds.add(id);
+                    userChange.put(id, ChangeType.REMOVE);
+                } else if (removed instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant ep = (ExternalUserParticipant) removed;
+                    externalChange.put(ep.getEmailAddress(), ChangeType.REMOVE);
+                }
+            }
+        }
     }
 
-    private void investigateSetOperation(Difference difference, List<Integer> userIds, List<Integer> groupIds, List<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Object> list) {
+    private void investigateSetOperation(Difference difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Object> list) {
         for(Object added : list) {
             if (added instanceof UserParticipant) {
                 UserParticipant up = (UserParticipant) added;
