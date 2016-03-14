@@ -84,6 +84,7 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.SnippetUtils;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link ImportAction}
@@ -205,10 +206,11 @@ public final class ImportAction extends SnippetAction {
         snippet.setMisc(new JSONObject(3).put("insertion", "below").put("content-type", "text/html"));
 
         // Process images in an <img> HTML tag and add it as an attachment
-        new SnippetProcessor(snippetRequest.getSession()).processExternalImages(snippet);
+        ServerSession session = snippetRequest.getSession();
+        new SnippetProcessor(session).processExternalImages(snippet);
 
         // Create via management
-        String id = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession()).createSnippet(snippet);
+        String id = getSnippetService(session).getManagement(session).createSnippet(snippet);
         return new AJAXRequestResult(id, "string");
     }
 
