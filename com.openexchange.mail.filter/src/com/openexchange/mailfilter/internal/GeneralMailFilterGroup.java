@@ -63,14 +63,14 @@ import com.openexchange.jsieve.commands.Rule;
  */
 public class GeneralMailFilterGroup implements MailFilterGroup {
 
-    private final int userOrder[];
+    private final int[] userOrder;
     
     /**
      * Initializes a new {@link MailFilterGroup}.
      */
     public GeneralMailFilterGroup(int uids[]) {
         super();
-        this.userOrder=uids;
+        this.userOrder = uids;
     }
 
     @Override
