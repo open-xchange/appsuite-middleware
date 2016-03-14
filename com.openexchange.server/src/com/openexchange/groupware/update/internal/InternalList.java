@@ -57,6 +57,7 @@ import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardIdsTask;
 import com.openexchange.groupware.update.tasks.AddPrimaryKeyVcardPrincipalTask;
 import com.openexchange.groupware.update.tasks.AddSnippetAttachmentPrimaryKeyUpdateTask;
+import com.openexchange.groupware.update.tasks.AddStartTLSColumnForMailAccountTablesTask;
 import com.openexchange.groupware.update.tasks.AddUUIDForDListTables;
 import com.openexchange.groupware.update.tasks.AddUUIDForInfostoreReservedPaths;
 import com.openexchange.groupware.update.tasks.AddUUIDForUpdateTaskTable;
@@ -581,13 +582,13 @@ public final class InternalList {
         // +++++++++++++++++++++++++++++++++ Version 7.8.1 starts here. +++++++++++++++++++++++++++++++++
 
         list.add(new DropVersionTableTask());
-        
-        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and migrates all UUIDs for each alias entry 
+
+        // Checks if the 'uuid' column exists in the 'user_alias' table. If absent, adds the column and migrates all UUIDs for each alias entry
         list.add(new MigrateUUIDsForUserAliasTable());
 
         // Removes the aliases from the user attributes table. They are stored in the table `user_alias` with version 7.8.0
         list.add(new RemoveAliasInUserAttributesTable());
-        
+
         // Create object_use_count table
         list.add(new CreateObjectUseCountTableTask());
 
@@ -599,9 +600,13 @@ public final class InternalList {
 
         // Checks and drops obsolete tables possibly created for managing POP3 accounts
         list.add(new com.openexchange.groupware.update.tasks.POP3CheckAndDropObsoleteTablesTaskV2());
-        
+
         //(Re-)adds department index in prg_contacts for "auto-complete" queries
         list.add(new com.openexchange.groupware.update.tasks.ContactsAddDepartmentIndex4AutoCompleteSearch());
+
+        // +++++++++++++++++++++++++++++++++ Version 7.8.2 starts here. +++++++++++++++++++++++++++++++++
+
+        list.add(new AddStartTLSColumnForMailAccountTablesTask());
 
         return list.toArray(new UpdateTaskV2[list.size()]);
     }
