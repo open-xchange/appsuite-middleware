@@ -84,7 +84,7 @@ public class MailCategoriesConstants {
     public static final String MAIL_CATEGORIES_PREFIX = "com.openexchange.mail.categories.";
 
     /**
-     * The english fallback name parameter name suffix
+     * The en_US fall-back name parameter name suffix
      */
     public static final String MAIL_CATEGORIES_NAME = ".name";
 
