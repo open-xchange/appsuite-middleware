@@ -49,6 +49,7 @@
 
 package com.openexchange.mailfilter.internal;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
@@ -71,16 +72,14 @@ public class CategoriesMailFilterGroup implements MailFilterGroup{
 
         @Override
         public int compare(Rule o1, Rule o2) {
-            if (o1 == null && o2 == null) {
-                return 0;
-            }
             if (o1 == null) {
-                return -1;
-            }
-            if (o2 == null) {
+                return o2 == null ? 0 : -1;
+            } else if (o2 == null) {
                 return 1;
             }
-            return Integer.valueOf(o1.getRuleComment().getUniqueid()).compareTo(Integer.valueOf(o2.getRuleComment().getUniqueid()));
+            int uniqueid1 = o1.getRuleComment().getUniqueid();
+            int uniqueid2 = o2.getRuleComment().getUniqueid();
+            return (uniqueid1 < uniqueid2) ? -1 : ((uniqueid1 == uniqueid2) ? 0 : 1);
         }
     };
     
@@ -95,10 +94,11 @@ public class CategoriesMailFilterGroup implements MailFilterGroup{
     @Override
     public List<Rule> getOrderedRules(List<Rule> rules) throws OXException {
         Iterator<Rule> iterator = rules.iterator();
-        List<Rule> result = new LinkedList<>();
-        while(iterator.hasNext()){
+        List<Rule> result = new ArrayList<Rule>(rules.size());
+        while (iterator.hasNext()) {
             Rule rule = iterator.next();
-            if(rule.getRuleComment().getFlags()!=null && rule.getRuleComment().getFlags().contains(CATEGORY_FLAG)){
+            List<String> flags = rule.getRuleComment().getFlags();
+            if (flags != null && flags.contains(CATEGORY_FLAG)) {
                 result.add(rule);
                 iterator.remove();
             }

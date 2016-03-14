@@ -416,14 +416,14 @@ public final class MailFilterServiceImpl implements MailFilterService {
     }
     
     private void removeCategoryRules(List<Rule> rules) {
-        
-       Iterator<Rule> iterator = rules.iterator();
-       while(iterator.hasNext()){
-           Rule r = iterator.next();
-           if(r.getRuleComment().getFlags()!=null && r.getRuleComment().getFlags().contains(CATEGORY_FLAG)){
-               iterator.remove();
-           }
-       }
+        Iterator<Rule> iterator = rules.iterator();
+        while (iterator.hasNext()) {
+            Rule r = iterator.next();
+            List<String> flags = r.getRuleComment().getFlags();
+            if (flags != null && flags.contains(CATEGORY_FLAG)) {
+                iterator.remove();
+            }
+        }
     }
 
     @Override
@@ -511,8 +511,8 @@ public final class MailFilterServiceImpl implements MailFilterService {
         }
     }
     
-    private List<MailFilterGroup> getMailFilterGroups(int ids[]){
-        ArrayList<MailFilterGroup> result  =new ArrayList<>(2);
+    private List<MailFilterGroup> getMailFilterGroups(int[] ids) {
+        ArrayList<MailFilterGroup> result = new ArrayList<>(2);
         result.add(new CategoriesMailFilterGroup());
         result.add(new GeneralMailFilterGroup(ids));
         return result;
