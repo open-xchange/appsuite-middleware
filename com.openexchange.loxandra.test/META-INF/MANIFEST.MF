@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Loxandra Test Bundle
 Bundle-SymbolicName: com.openexchange.loxandra.test
 Bundle-Version: 6.21.0.0
 Bundle-Activator: com.openexchange.loxandra.test.TestActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.groupware.contact,
  com.openexchange.log,

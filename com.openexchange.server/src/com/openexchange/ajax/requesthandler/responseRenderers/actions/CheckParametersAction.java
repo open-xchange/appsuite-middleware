@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2015 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -56,6 +56,7 @@ import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer;
 import com.openexchange.ajax.requesthandler.responseRenderers.FileResponseRenderer.FileResponseRendererActionException;
+import com.openexchange.java.Strings;
 
 /**
  * {@link CheckParametersAction} Check certain parameters
@@ -84,7 +85,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
         }
         data.setContentType(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_TYPE), true));
         data.setContentTypeByParameter(false);
-        if (null == data.getContentType()) {
+        if (null == data.getContentType() || Strings.isEmpty(data.getContentType())) {
             if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
                 data.setContentType(IDataWrapper.SAVE_AS_TYPE);
             } else {
@@ -103,7 +104,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
             }
         }
         data.setContentDisposition(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_DISPOSITION)));
-        if (null == data.getContentDisposition()) {
+        if (null == data.getContentDisposition() || Strings.isEmpty(data.getContentDisposition())) {
             if (IDataWrapper.VIEW.equalsIgnoreCase(data.getDelivery())) {
                 data.setContentDisposition("inline");
             } else if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {

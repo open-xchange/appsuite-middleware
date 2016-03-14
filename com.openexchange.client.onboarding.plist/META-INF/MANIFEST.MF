@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The On-Boarding Bundle for composing plist profiles
 Bundle-SymbolicName: com.openexchange.client.onboarding.plist
 Bundle-Version: 7.8.1
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.ctc.wstx.cfg;version="4.2.0",
@@ -47,6 +47,7 @@ Import-Package: com.ctc.wstx.api;version="4.2.0",
  com.openexchange.server,
  com.openexchange.session,
  com.openexchange.sms,
+ com.openexchange.sms.tools,
  com.openexchange.tools,
  com.openexchange.tools.encoding,
  com.openexchange.tools.servlet.http,

@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -60,12 +60,13 @@ import com.openexchange.exception.OXException;
 public interface SMSServiceSPI {
 
     /**
-     * Send a SMS message to multiple recipients.
-     * Use com.openexchange.sms.SMSExceptionCode in case of errors.
+     * Send an SMS message to multiple recipients.<br>
+     * Use {@link com.openexchange.sms.SMSExceptionCode} in case of errors.
      *
-     * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. +49 123 4567890
+     * @param recipients An array contains recipients' phone numbers in E.123 format, e.g. <code>"+49 123 4567890"</code>
      * @param message The message to send
-     * @throws OXException On error
+     * @param session The session of the user sending the SMS
+     * @throws OXException If SMS cannot be sent
      */
     void sendMessage(String[] recipients, String message) throws OXException;
 

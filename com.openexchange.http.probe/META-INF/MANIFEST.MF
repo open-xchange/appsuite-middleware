@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Http Health Probe Bundle
 Bundle-SymbolicName: com.openexchange.http.probe
 Bundle-Version: 7.0.2
 Bundle-Activator: com.openexchange.http.probe.osgi.HealthProbeActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
  com.openexchange.exception,

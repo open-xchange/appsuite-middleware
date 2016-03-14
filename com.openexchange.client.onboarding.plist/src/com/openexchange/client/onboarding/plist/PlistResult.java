@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -91,6 +91,8 @@ import com.openexchange.plist.PListWriter;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.sms.SMSServiceSPI;
+import com.openexchange.sms.tools.SMSBucketExceptionCodes;
+import com.openexchange.sms.tools.SMSBucketService;
 
 /**
  * {@link PlistResult} - A plist result.
@@ -241,8 +243,7 @@ public class PlistResult implements Result {
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
         long ratelimit = getSMSRateLimit(session);
-        checkSMSRateLimit(session, ratelimit);
-
+        int smsRemaining = checkSMSLimit(session, ratelimit);
         String untranslatedText;
         {
             List<OnboardingProvider> providers = request.getScenario().getProviders(session);
@@ -277,11 +278,18 @@ public class PlistResult implements Result {
         }
 
         number = sanitizeNumber(number);
-
-        smsService.sendMessage(new String[] { number }, text);
         setRateLimitTime(ratelimit, session);
+        smsService.sendMessage(new String[] { number }, text);
 
-        ResultObject resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
+        ResultObject resultObject;
+        resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
+        if (smsRemaining == 2) {
+            SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+            int hours = smsBucketService.getRefreshInterval(session);
+            resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
+        }
+
+
         return resultObject;
     }
 
@@ -358,15 +366,21 @@ public class PlistResult implements Result {
         return property.get().longValue();
     }
 
-    private void checkSMSRateLimit(Session session, long ratelimit) throws OXException {
+    private int checkSMSLimit(Session session, long ratelimit) throws OXException {
         if (ratelimit > 0) {
             Long lastSMSSend = (Long) session.getParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP);
 
             if ((lastSMSSend != null) && ((lastSMSSend.longValue() + ratelimit) > System.currentTimeMillis())) {
                 throw OnboardingExceptionCodes.SENT_QUOTA_EXCEEDED.create(Long.valueOf(ratelimit / 1000));
             }
-
         }
+
+        int remainingSMS = -1;
+        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
+        if (smsBucketService.isEnabled(session)) {
+            remainingSMS = smsBucketService.getSMSToken(session);
+        }
+        return remainingSMS;
     }
 
     private void setRateLimitTime(long rateLimit, Session session) {

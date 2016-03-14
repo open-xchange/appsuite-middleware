@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -59,6 +59,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -68,6 +70,7 @@ import com.openexchange.configuration.ServerConfig;
 import com.openexchange.http.deferrer.CustomRedirectURLDetermination;
 import com.openexchange.http.deferrer.impl.DefaultDeferringURLService;
 import com.openexchange.java.Strings;
+import com.openexchange.tools.servlet.http.Tools;
 
 /**
  * {@link DeferrerServlet}
@@ -88,25 +91,47 @@ public class DeferrerServlet extends HttpServlet {
         // Create a new HttpSession if it's missing
         req.getSession(true);
 
-        // Get the URL to defer to
-        // Redirect
-        final String redirectURL = determineRedirectURL(req);
-        if (redirectURL == null) {
+        // Determine the URL
+        RedirectUri redirectUri = determineRedirectURL(req);
+        if (redirectUri == null) {
             return;
         }
+
+        // Get the URL to defer/to redirect
+        String redirectURL = redirectUri.redirectUri;
+
+        // Check URI in case grabbed from parameter
+        if (RedirectUri.Type.PARAMETER == redirectUri.type) {
+            if (!isRelative(redirectURL)) {
+                Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Specified location must not be absolute.");
+                return;
+            }
+
+            if (!isServerRelative(redirectURL)) {
+                String referer = purgeHost(req.getHeader("referer"));
+                if (referer == null) {
+                    Tools.sendErrorPage(resp, HttpServletResponse.SC_BAD_REQUEST, "Missing \"referer\" header");
+                    return;
+                }
+
+                redirectURL = assumeRelative(referer, redirectURL);
+            }
+        }
+
         char concat = '?';
         if (redirectURL.indexOf('?') >= 0) {
             concat = '&';
         }
 
-        final Map<String, String> params = parseQueryStringFromUrl(redirectURL);
-        final StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
-        for (final Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
-            final String name = (String) parameterNames.nextElement();
+        Map<String, String> params = parseQueryStringFromUrl(redirectURL);
+        StringBuilder builder = new StringBuilder(encodeUrl(redirectURL, true, false));
+        for (Enumeration<?> parameterNames = req.getParameterNames(); parameterNames.hasMoreElements();) {
+            String name = (String) parameterNames.nextElement();
             if ("redirect".equals(name) || params.containsKey(name)) {
                 continue;
             }
-            final String parameter = req.getParameter(name);
+
+            String parameter = req.getParameter(name);
             builder.append(concat);
             concat = '&';
             builder.append(name).append('=').append(encodeUrl(parameter, true, true));
@@ -114,14 +139,16 @@ public class DeferrerServlet extends HttpServlet {
         resp.sendRedirect(builder.toString());
     }
 
-    private String determineRedirectURL(final HttpServletRequest req) {
+    private RedirectUri determineRedirectURL(final HttpServletRequest req) {
         for (final CustomRedirectURLDetermination determination : CUSTOM_HANDLERS) {
             final String url = determination.getURL(req);
             if (url != null) {
-                return prepareCustomRedirectURL(url);
+                return new RedirectUri(prepareCustomRedirectURL(url), RedirectUri.Type.REGISTERED);
             }
         }
-        return req.getParameter("redirect");
+
+        String redirectUri = req.getParameter("redirect");
+        return null == redirectUri ? null : new RedirectUri(redirectUri, RedirectUri.Type.PARAMETER);
     }
 
     /**
@@ -204,6 +231,35 @@ public class DeferrerServlet extends HttpServlet {
             }
         }
         return map;
+    }
+
+    private static final Pattern PROTOCOL_PATTERN = Pattern.compile("^(\\w*:)?//");
+
+    private boolean isRelative(final String location) {
+        final Matcher matcher = PROTOCOL_PATTERN.matcher(location);
+        return !matcher.find();
+    }
+
+    private static final Pattern HOST_PATTERN = Pattern.compile("^(\\w*:)?//\\w*/");
+
+    private String purgeHost(final String location) {
+        if (location == null) {
+            return null;
+        }
+        return HOST_PATTERN.matcher(location).replaceAll("");
+    }
+
+    private boolean isServerRelative(final String location) {
+        return location.length() > 0 && location.charAt(0) == '/';
+    }
+
+    private String assumeRelative(String referer, String location) {
+        int index = referer.lastIndexOf('/');
+        if (index >= 0) {
+            return "/" + referer.substring(0, index) + "/" + location;
+        }
+
+        return "/" + referer + "/" + location;
     }
 
 }

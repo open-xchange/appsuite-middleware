@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,6 +49,8 @@
 
 package com.openexchange.client.onboarding;
 
+import java.util.List;
+import com.openexchange.exception.OXException;
 
 /**
  * {@link ResultObject} - The result object for an {@link Result on-boarding result}.
@@ -71,5 +73,26 @@ public interface ResultObject {
      * @return The format or <code>null</code>
      */
     public String getFormat();
+
+    /**
+     * Indicates if the the ResulObject has warnings
+     * 
+     * @return true if the ResultObject has warnings, false otherwise
+     */
+    public boolean hasWarnings();
+
+    /**
+     * Retrieves the warnings of this ResultObject
+     * 
+     * @return The warnings or null if {@link #hasWarnings} returns false
+     */
+    public List<OXException> getWarnings();
+
+    /**
+     * Add a warning to this ResultObject
+     * 
+     * @param warning The warning
+     */
+    public void addWarning(OXException warning);
 
 }

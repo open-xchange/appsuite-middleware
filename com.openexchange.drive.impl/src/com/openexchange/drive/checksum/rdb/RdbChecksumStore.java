@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,10 +49,7 @@
 
 package com.openexchange.drive.checksum.rdb;
 
-import static com.openexchange.drive.checksum.rdb.SQL.escapeFile;
-import static com.openexchange.drive.checksum.rdb.SQL.escapeFolder;
-import static com.openexchange.drive.checksum.rdb.SQL.unescapeFile;
-import static com.openexchange.drive.checksum.rdb.SQL.unescapeFolder;
+import static com.openexchange.drive.checksum.rdb.SQL.*;
 import static com.openexchange.java.Strings.reverse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -426,6 +423,37 @@ public class RdbChecksumStore implements ChecksumStore {
         }
     }
 
+    @Override
+    public int touchDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException {
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            int touched = 0;
+            for (int i = 0; i < directoryChecksums.size(); i += INSERT_CHUNK_SIZE) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(directoryChecksums.size(), i + INSERT_CHUNK_SIZE) - i;
+                String[] uuids = new String[length];
+                for (int j = 0; j < length; j++) {
+                    String uuid = directoryChecksums.get(i + j).getUuid();
+                    if (null == uuid) {
+                        throw new IllegalArgumentException("Touching directory checksums requires an existing UUID");
+                    }
+                    uuids[j] = uuid;
+                }
+                /*
+                 * touch chunk
+                 */
+                touched += touchDirectoryChecksums(connection, contextID, uuids);
+            }
+            return touched;
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+
     private static String newUid() {
         return UUIDs.getUnformattedString(UUID.randomUUID());
     }
@@ -646,6 +674,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setLong(6, directoryChecksum.getSequenceNumber());
             stmt.setString(7, directoryChecksum.getETag());
             stmt.setString(8, directoryChecksum.getChecksum());
+            stmt.setLong(9, System.currentTimeMillis());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -662,6 +691,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(4, directoryChecksum.getChecksum());
             stmt.setInt(5, cid);
             stmt.setString(6, directoryChecksum.getUuid());
+            stmt.setLong(7, System.currentTimeMillis());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -675,6 +705,7 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(1, escapeFolder(newFolder));
             stmt.setInt(2, cid);
             stmt.setString(3, escapeFolder(folder));
+            stmt.setLong(4, System.currentTimeMillis());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -703,10 +734,10 @@ public class RdbChecksumStore implements ChecksumStore {
             int parameterIndex = 1;
             stmt.setInt(parameterIndex++, cid);
             stmt.setInt(parameterIndex++, user);
+            stmt.setInt(parameterIndex++, view);
             for (int i = 0; i < folderIDs.length; i++) {
                 stmt.setString(parameterIndex++, reverse(escapeFolder(folderIDs[i])));
             }
-            stmt.setInt(parameterIndex++, view);
             ResultSet resultSet = SQL.logExecuteQuery(stmt);
             while (resultSet.next()) {
                 DirectoryChecksum directoryChecksum = new DirectoryChecksum();
@@ -723,6 +754,21 @@ public class RdbChecksumStore implements ChecksumStore {
             DBUtils.closeSQLStuff(stmt);
         }
         return directoryChecksums;
+    }
+
+    private static int touchDirectoryChecksums(Connection connection, int cid, String[] uuids) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.TOUCH_DIRECTORY_CHECKSUMS_STMT(uuids.length));
+            stmt.setLong(1, System.currentTimeMillis());
+            stmt.setInt(2, cid);
+            for (int i = 0; i < uuids.length; i++) {
+                stmt.setBytes(i + 3, SQL.getBytes(uuids[i]));
+            }
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
     }
 
 }

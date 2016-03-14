@@ -35,4 +35,4 @@ Import-Package: com.openexchange.caching,
  org.osgi.framework.wiring,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH

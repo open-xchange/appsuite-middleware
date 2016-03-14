@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2016 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,16 +50,14 @@
 package com.openexchange.ajax.onboarding.tests;
 
 import java.io.UnsupportedEncodingException;
-import java.rmi.server.UID;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import org.json.JSONObject;
 import com.google.common.io.BaseEncoding;
-import com.openexchange.ajax.framework.AbstractAJAXSession;
 import com.openexchange.ajax.onboarding.actions.ExecuteRequest;
 import com.openexchange.ajax.onboarding.actions.OnboardingTestResponse;
-import com.openexchange.ajax.user.actions.SetAttributeRequest;
-import com.openexchange.ajax.user.actions.SetAttributeResponse;
 import com.openexchange.exception.OXException;
 
 /**
@@ -68,7 +66,7 @@ import com.openexchange.exception.OXException;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.1
  */
-public class PlistSMSTest extends AbstractAJAXSession {
+public class PlistSMSTest extends AbstractPlistSMSTest {
 
     private String name;
     private static final String SLASH = "/";
@@ -77,18 +75,6 @@ public class PlistSMSTest extends AbstractAJAXSession {
         super(name);
         this.name = name;
     }
-
-    private static final String UID = new UID((short) 1).toString();
-
-    @Override
-    public void setUp() throws Exception {
-        super.setUp();
-        SetAttributeRequest req = new SetAttributeRequest(client.getValues().getUserId(), "user_sms_link_secret", UID, false);
-        SetAttributeResponse response = client.execute(req);
-        assertNotNull(response);
-    }
-
-    private static final String[] SCENARIOS = new String[] { "apple.iphone/mailsync", "apple.iphone/eassync", "apple.iphone/davsync" };
 
     public void testExecute() throws Exception {
         String jsonString = "{\"sms\":\"+49276183850\"}";
@@ -205,5 +191,12 @@ public class PlistSMSTest extends AbstractAJAXSession {
             } while (two_halfs++ < 1);
         }
         return buf.toString();
+    }
+
+    @Override
+    protected Map<String, String> getNeededConfigurations() {
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("com.openexchange.sms.userlimit.enabled", String.valueOf(false));
+        return map;
     }
 }
