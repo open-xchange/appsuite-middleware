@@ -173,4 +173,13 @@ public interface MailCategoriesConfigService {
      */
     public void removeUserCategory(String category, Session session) throws OXException;
 
+    /**
+     * Returns true if the mail categories feature is enabled for the given user
+     * 
+     * @param session The user session
+     * @return true if enabled, otherwise false
+     * @throws OXException
+     */
+    public boolean isEnabled(Session session) throws OXException;
+
 }

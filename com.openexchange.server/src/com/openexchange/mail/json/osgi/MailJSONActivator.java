@@ -92,13 +92,11 @@ import com.openexchange.mail.attachment.storage.DefaultMailAttachmentStorageRegi
 import com.openexchange.mail.attachment.storage.MailAttachmentStorage;
 import com.openexchange.mail.attachment.storage.MailAttachmentStorageRegistry;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.MailCategoriesConfigServiceImpl;
-import com.openexchange.mail.categories.MailCategoriesPreferenceItem;
+import com.openexchange.mail.categories.internal.MailCategoriesPreferenceItem;
 import com.openexchange.mail.compose.CompositionSpace;
 import com.openexchange.mail.config.MailReloadable;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.MailActionFactory;
-import com.openexchange.mail.json.converters.MailCategoriesConfigConverter;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.json.converters.MailJSONConverter;
 import com.openexchange.mail.transport.config.TransportProperties;
@@ -136,6 +134,11 @@ public final class MailJSONActivator extends AJAXModuleActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { ContactService.class, ContactStorage.class, ConfigurationService.class };
+    }
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class<?>[] { MailCategoriesConfigService.class };
     }
 
     @Override
@@ -246,10 +249,10 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
 
-        MailCategoriesConfigService mailCategoriesConfigService = new MailCategoriesConfigServiceImpl();
-        this.addService(MailCategoriesConfigService.class, mailCategoriesConfigService);
-        registerService(ResultConverter.class, MailCategoriesConfigConverter.getInstance());
-        registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(mailCategoriesConfigService));
+        MailCategoriesConfigService mailCategoriesConfigService = getService(MailCategoriesConfigService.class);
+        if (mailCategoriesConfigService != null) {
+            registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(mailCategoriesConfigService));
+        }
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));

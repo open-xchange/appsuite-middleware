@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
 import java.util.List;
 import org.json.JSONArray;
@@ -61,8 +61,10 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.jslob.JSlobExceptionCodes;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
  * {@link MailCategoriesPreferenceItem}
@@ -100,7 +102,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService{
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 JSONObject item = new JSONObject(2);
                 try {
-                    boolean mailCategoriesEnabled =  MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
+                    boolean mailCategoriesEnabled = service.isEnabled(session);
                     item.put("tabbed_inbox", mailCategoriesEnabled);
                     if (mailCategoriesEnabled) {
                         List<MailCategoryConfig> configs = service.getAllCategories(session, false);
@@ -117,7 +119,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService{
                     }
                     setting.setSingleValue(item);
                 } catch (JSONException e) {
-                   throw JSlobExceptionCodes.JSON_ERROR.create(e.getMessage());
+                    throw OXJSONExceptionCodes.JSON_WRITE_ERROR.create();
                 }
             }
         };

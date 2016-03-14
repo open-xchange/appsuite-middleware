@@ -79,9 +79,7 @@ import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageExt;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.categories.MailCategories;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.json.ColumnCollection;
 import com.openexchange.mail.json.MailRequest;
@@ -93,7 +91,6 @@ import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
-import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -341,12 +338,8 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                             // Check if mail categories are enabled
-
-                            if (MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, req.getSession()) && category_filter != null && !category_filter.equals("none")) {
-                                MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getService(MailCategoriesConfigService.class);
-                                if (categoriesService == null) {
-                                    throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
-                                }
+                            MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getService(MailCategoriesConfigService.class);
+                            if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
 
                                 if (category_filter.equals("General")) {
                                     // Special case with unkeyword

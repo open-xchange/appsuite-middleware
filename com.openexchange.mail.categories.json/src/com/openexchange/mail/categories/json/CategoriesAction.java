@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.json.actions;
+package com.openexchange.mail.categories.json;
 
 import java.util.List;
 import org.apache.commons.lang.Validate;
@@ -60,9 +60,7 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.mail.categories.MailCategories;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,7 +72,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "categories", description = "Enable or disable mail catgeories.", parameters = {
+@Action(method = RequestMethod.PUT, name = "switch", description = "Enable or disable mail catgeories.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category_ids", description = "A list of category identifiers."),
     @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),
@@ -100,9 +98,12 @@ public class CategoriesAction implements AJAXActionService {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
-            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
+            throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
-        if (!MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, Boolean.FALSE, session).booleanValue()) {
+        MailCategoriesConfigService categoriesConfigService = LOOKUP.getService(MailCategoriesConfigService.class);
+        Validate.notNull(categoriesConfigService);
+
+        if (!categoriesConfigService.isEnabled(session)) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
@@ -112,9 +113,6 @@ public class CategoriesAction implements AJAXActionService {
         }
 
         boolean enable = AJAXRequestDataTools.parseBoolParameter(PARAMETER_ENABLE, requestData);
-
-        MailCategoriesConfigService categoriesConfigService = LOOKUP.getService(MailCategoriesConfigService.class);
-        Validate.notNull(categoriesConfigService);
         List<MailCategoryConfig> configs = categoriesConfigService.changeConfigurations(ids, enable, session);
 
         final AJAXRequestResult result = new AJAXRequestResult(configs, "mailCategoriesConfig");

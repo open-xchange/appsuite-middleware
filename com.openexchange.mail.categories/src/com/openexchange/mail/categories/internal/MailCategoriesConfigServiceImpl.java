@@ -47,16 +47,17 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import com.openexchange.configuration.ConfigurationExceptionCodes;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
 import com.openexchange.session.Session;
 
@@ -151,7 +152,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         builder.addLocalizedNames(getLocalizedNames(session, category));
         MailCategoryConfig result = builder.build();
         if (result.getFlag() == null) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
+            throw MailCategoriesExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
         }
 
         return result;
@@ -166,7 +167,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         builder.flag(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         MailCategoryConfig result = builder.build();
         if (result.getFlag() == null) {
-            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
+            throw MailCategoriesExceptionCodes.INVALID_CONFIGURATION.create(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG);
         }
 
         return result;
@@ -311,6 +312,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
         throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
 
+    }
+
+    @Override
+    public boolean isEnabled(Session session) throws OXException {
+        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
     }
 
 }

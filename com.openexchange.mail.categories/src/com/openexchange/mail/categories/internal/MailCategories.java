@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -56,8 +56,7 @@ import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.mail.categories.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -76,9 +75,9 @@ public final class MailCategories {
     }
 
     private static ConfigViewFactory getConfigViewFactory() throws OXException {
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         if (null == viewFactory) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
         }
         return viewFactory;
     }

@@ -62,13 +62,13 @@ import com.openexchange.documentation.annotations.Module;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.json.actions.AbstractMailAction;
 import com.openexchange.mail.json.actions.AllAction;
 import com.openexchange.mail.json.actions.AllSeenAction;
 import com.openexchange.mail.json.actions.ArchiveAction;
 import com.openexchange.mail.json.actions.ArchiveFolderAction;
 import com.openexchange.mail.json.actions.AutosaveAction;
 import com.openexchange.mail.json.actions.BounceAction;
-import com.openexchange.mail.json.actions.CategoriesAction;
 import com.openexchange.mail.json.actions.ClearAction;
 import com.openexchange.mail.json.actions.CopyAction;
 import com.openexchange.mail.json.actions.DeleteAction;
@@ -138,7 +138,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
 
     // ----------------------------------------------------------------------------------------------
 
-    private final Map<String, AJAXActionService> actions;
+    private final Map<String, AbstractMailAction> actions;
 
     /**
      * Initializes a new {@link MailActionFactory}.
@@ -147,7 +147,7 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
      */
     private MailActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(32, 0.9f, 1);
+        actions = new ConcurrentHashMap<String, AbstractMailAction>(32, 0.9f, 1);
         actions.put("all", new AllAction(services));
         actions.put("threadedAll", new SimpleThreadStructureAction(services));
         actions.put("get", new GetAction(services));
@@ -183,8 +183,6 @@ public class MailActionFactory implements AJAXActionServiceFactory, AJAXStateHan
         actions.put("autosave", new AutosaveAction(services));
 
         actions.put("all_seen", new AllSeenAction(services));
-        
-        actions.put("categories", new CategoriesAction(services));
     }
 
     @Override

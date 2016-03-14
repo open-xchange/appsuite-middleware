@@ -47,78 +47,28 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailCategoriesConfigCacheEntry}
+ * {@link MailCategoriesExceptionStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesConfigCacheEntry implements Serializable{
+public class MailCategoriesExceptionStrings implements LocalizableStrings {
+    
+    
+    // The user category %1$s already exists.
+    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
 
-    /**
-     * serialVersionUID
-     */
-    private static final long serialVersionUID = -1758614391595901306L;
+    // The user category %1$s does not exist.
+    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
 
-    private List<MailCategoryConfig> configs;
+    // Invalid configuration: %1$s
+    public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
 
-    /**
-     * Initializes a new {@link MailCategoriesConfigCacheEntry}.
-     */
-    public MailCategoriesConfigCacheEntry() {
-        super();
-        configs = new ArrayList<>();
-    }
-
-    /**
-     * Initializes a new {@link MailCategoriesConfigCacheEntry}.
-     */
-    public MailCategoriesConfigCacheEntry(Collection<MailCategoryConfig> configs) {
-        super();
-        this.configs = new ArrayList<>();
-        this.configs.addAll(configs);
-    }
-
-    public void add(MailCategoryConfig config) {
-        configs.add(config);
-    }
-
-    public void addAll(Collection<MailCategoryConfig> configs) {
-        configs.addAll(configs);
-    }
-
-    public void removeConfig(MailCategoryConfig config) {
-        configs.remove(config);
-    }
-
-    public MailCategoryConfig getByCategory(String name) {
-        for (MailCategoryConfig config : configs) {
-            if (config.getCategory().equals(name)) {
-                return config;
-            }
-        }
-        return null;
-    }
-
-    public MailCategoryConfig getByFlag(String flag) {
-        for (MailCategoryConfig config : configs) {
-            if (config.getFlag().equals(flag)) {
-                return config;
-            }
-        }
-        return null;
-    }
-
-    public List<MailCategoryConfig> getAll() {
-        return configs;
-    }
-
-
+    // The required service %1$s is temporary not available. Please try again later.
+    public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
 }

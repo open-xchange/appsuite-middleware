@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -71,7 +71,22 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The user category %1$s does not exist.
      */
-    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST)
+    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST),
+
+    /**
+     * Invalid configuration: %1$s
+     */
+    INVALID_CONFIGURATION("Invalid configuration: %1$s", CATEGORY_USER_INPUT, 3, MailCategoriesExceptionStrings.INVALID_CONFIGURATION),
+
+    /**
+     * A JSON error occurred: %1$s
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 4, null),
+
+    /**
+     * The required service %1$s is temporary not available. Please try again later.
+     */
+    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 5, MailCategoriesExceptionStrings.SERVICE_UNAVAILABLE_MSG),
     
     ;
 
