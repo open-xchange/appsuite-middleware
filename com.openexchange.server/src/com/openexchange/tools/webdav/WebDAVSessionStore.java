@@ -129,14 +129,26 @@ public class WebDAVSessionStore {
         }
     }
 
-    private static Session login(LoginRequest loginRequest) throws OXException {
+    /**
+     * Performs the login.
+     *
+     * @param loginRequest The login request to use
+     * @return The associated session
+     * @throws OXException If login attempt fails
+     */
+    static Session login(LoginRequest loginRequest) throws OXException {
         LOG.debug("WebDAV Login: {}...", loginRequest.getLogin());
         Session session = LoginPerformer.getInstance().doLogin(loginRequest).getSession();
         LOG.debug("Added WebDAV session {}", session);
         return session;
     }
 
-    private static void logout(Session session) {
+    /**
+     * Performs the logout.
+     *
+     * @param session The session to log-out
+     */
+    static void logout(Session session) {
         LOG.debug("WebDAV Logout: {}...", session);
         try {
             Session removedSession = LoginPerformer.getInstance().doLogout(session.getSessionID());
