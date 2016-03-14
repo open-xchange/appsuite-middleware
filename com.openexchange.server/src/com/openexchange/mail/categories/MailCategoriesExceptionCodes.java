@@ -66,7 +66,12 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * The user category %1$s already exists.
      */
-    USER_CATEGORY_ALREADY_EXISTS("The user category %1$s already exists.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_ALREADY_EXISTS)
+    USER_CATEGORY_ALREADY_EXISTS("The user category %1$s already exists.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_ALREADY_EXISTS),
+
+    /**
+     * The user category %1$s does not exist.
+     */
+    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST)
     
     ;
 

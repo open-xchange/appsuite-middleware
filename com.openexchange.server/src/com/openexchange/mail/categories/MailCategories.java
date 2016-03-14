@@ -251,14 +251,14 @@ public final class MailCategories {
     }
     
     /**
-     * Add or update a user attribute
+     * Sets a user attribute
      * 
      * @param property The name of the property
      * @param value The new value of the property
      * @param session The user session
      * @throws OXException
      */
-    public static void putProperty(String property, String value, Session session) throws OXException{
+    public static void setProperty(String property, String value, Session session) throws OXException{
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
         

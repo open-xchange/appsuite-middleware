@@ -63,4 +63,6 @@ public class MailCategoriesExceptionStrings implements LocalizableStrings {
     // The user category %1$s already exists.
     public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
 
+    // The user category %1$s does not exist.
+    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
 }

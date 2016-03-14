@@ -263,16 +263,41 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     public void addUserCategory(String category, String flag, String name, Session session) throws OXException {
         String[] userCategories = getUserCategoryNames(session);
         String newCategoriesList = category;
-        for(String oldCatgeory: userCategories){
-            if(oldCatgeory.equals(category)){
+        for (String oldCategory : userCategories) {
+            if (oldCategory.equals(category)) {
                 throw MailCategoriesExceptionCodes.USER_CATEGORY_ALREADY_EXISTS.create(category);
             }
-            newCategoriesList+=","+oldCatgeory;
+            newCategoriesList += "," + oldCategory;
         }
-        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
-        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.valueOf(true), session);
-        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
-        MailCategories.putProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.valueOf(true), session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList, session);
+    }
+
+    @Override
+    public void removeUserCategory(String category, Session session) throws OXException {
+        String[] userCategories = getUserCategoryNames(session);
+        String newCategoriesList = null;
+        boolean exists = false;
+        for (String oldCategory : userCategories) {
+            if (oldCategory.equals(category)) {
+                exists=true;
+                continue;
+            }
+            if (newCategoriesList == null) {
+                newCategoriesList = oldCategory;
+                continue;
+            }
+            newCategoriesList += "," + oldCategory;
+        }
+        if(!exists) {
+            throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
+        }
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList, session);
     }
 
 }
