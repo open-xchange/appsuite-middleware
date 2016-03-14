@@ -53,11 +53,13 @@ import java.util.List;
 import org.apache.commons.lang.Validate;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategories;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
@@ -100,20 +102,21 @@ public class CategoriesAction implements AJAXActionService {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
-        if (!MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session)){
+        if (!MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, Boolean.FALSE, session).booleanValue()) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
-        
-        String idsString = requestData.getParameter(PARAMETER_CATEGORY_IDS);
-        Validate.notEmpty(idsString);
-        String ids[] = idsString.split(",");
-        Validate.notEmpty(ids);
-        boolean enable = Boolean.valueOf(requestData.getParameter(PARAMETER_ENABLE));
-        
+
+        String[] ids = Strings.splitByComma(requestData.requireParameter(PARAMETER_CATEGORY_IDS));
+        if (null == ids || ids.length == 0) {
+            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_CATEGORY_IDS);
+        }
+
+        boolean enable = AJAXRequestDataTools.parseBoolParameter(PARAMETER_ENABLE, requestData);
+
         MailCategoriesConfigService categoriesConfigService = LOOKUP.getService(MailCategoriesConfigService.class);
         Validate.notNull(categoriesConfigService);
         List<MailCategoryConfig> configs = categoriesConfigService.changeConfigurations(ids, enable, session);
-        
+
         final AJAXRequestResult result = new AJAXRequestResult(configs, "mailCategoriesConfig");
         return result;
     }
