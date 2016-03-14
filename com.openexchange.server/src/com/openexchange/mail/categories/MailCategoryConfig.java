@@ -269,5 +269,10 @@ public class MailCategoryConfig {
     public Map<Locale, String> getNames() {
         return names;
     }
+    
+    @Override
+    public String toString(){
+        return getCategory();
+    }
 
 }

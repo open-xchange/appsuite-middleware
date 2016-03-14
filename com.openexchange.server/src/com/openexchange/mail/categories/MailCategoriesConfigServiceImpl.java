@@ -259,4 +259,20 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return false;
     }
 
+    @Override
+    public void addUserCategory(String category, String flag, String name, Session session) throws OXException {
+        String[] userCategories = getUserCategoryNames(session);
+        String newCategoriesList = category;
+        for(String oldCatgeory: userCategories){
+            if(oldCatgeory.equals(category)){
+                throw MailCategoriesExceptionCodes.USER_CATEGORY_ALREADY_EXISTS.create(category);
+            }
+            newCategoriesList+=","+oldCatgeory;
+        }
+        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_NAME, name, session);
+        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.valueOf(true), session);
+        MailCategories.putProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_FLAG, flag, session);
+        MailCategories.putProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList, session);
+    }
+
 }

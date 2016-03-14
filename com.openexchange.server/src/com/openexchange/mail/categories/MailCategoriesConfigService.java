@@ -142,5 +142,16 @@ public interface MailCategoriesConfigService {
      * @throws OXException 
      */
     public boolean isSystemCategory(String category, Session session) throws OXException;
+    
+    /**
+     * Add a new user category 
+     * 
+     * @param category The category identifier
+     * @param flag The category flag
+     * @param name The category name
+     * @param session The user session
+     * @throws OXException if a category with this identifier already exists
+     */
+    public void addUserCategory(String category, String flag, String name, Session session) throws OXException;
 
 }
