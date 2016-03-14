@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -53,6 +53,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.PublicationErrorMessage;
@@ -69,8 +70,8 @@ public class CompositeLoaderService implements PublicationDataLoaderService {
     private final Map<String, PublicationDataLoaderService> subLoaders = new HashMap<String, PublicationDataLoaderService>();
 
     @Override
-    public Collection<? extends Object> load(Publication publication) throws OXException {
-        return getSubLoader(publication.getModule()).load(publication);
+    public Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException {
+        return getSubLoader(publication.getModule()).load(publication, escapeMode);
     }
 
     private PublicationDataLoaderService getSubLoader(String module) throws OXException {

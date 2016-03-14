@@ -200,9 +200,9 @@ public class IMAPStore extends Store
     public static final String ID_ENVIRONMENT = "environment";
 
     private static final class StampAndError {
-        final CommandFailedException error;
+        final AuthenticationFailedException error;
         final long stamp;
-        StampAndError(final CommandFailedException error, final long stamp) {
+        StampAndError(AuthenticationFailedException error, long stamp) {
             super();
             this.error = error;
             this.stamp = stamp;
@@ -787,6 +787,32 @@ public class IMAPStore extends Store
         return null == clientParameters ? null : clientParameters.get(name);
     }
 
+    private void checkFailedAuths(String host, int port, String u, String pw) throws AuthenticationFailedException {
+        if (authTimeout <= 0 || null == host || null == u || null == pw) {
+            return;
+        }
+        
+        ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
+        String key = new StringBuilder(u).append(':').append(pw).append('@').append(host).append(':').append(port).toString();
+        StampAndError sae = map.get(key);
+        if (sae != null) {
+            if ((System.currentTimeMillis() - sae.stamp) <= authTimeout) {
+                throw new AuthenticationFailedException(sae.error.getMessage(), sae.error.getNextException());
+            }
+            map.remove(key);
+        }
+    }
+
+    private void rememberFailedAuths(String host, int port, String u, String pw, AuthenticationFailedException failedAuth) {
+        if (authTimeout <= 0 || null == host || null == u || null == pw) {
+            return;
+        }
+        
+        ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
+        String key = new StringBuilder(u).append(':').append(pw).append('@').append(host).append(':').append(port).toString();
+        map.put(key, new StampAndError(failedAuth, System.currentTimeMillis()));
+    }
+
     /**
      * Implementation of protocolConnect().  Will create a connection
      * to the server and authenticate the user using the mechanisms
@@ -827,6 +853,9 @@ public class IMAPStore extends Store
 	if (port == -1) {
 	    port = defaultPort;
 	}
+
+	// Check for known failed authentication attempt
+	checkFailedAuths(host, port, user, password);
 
 	try {
             boolean poolEmpty;
@@ -873,8 +902,10 @@ public class IMAPStore extends Store
             protocol.disconnect();
         }
 	    protocol = null;
-	    throw new AuthenticationFailedException(
+	    AuthenticationFailedException e = new AuthenticationFailedException(
 					cex.getResponse().getRest(), cex);
+	    rememberFailedAuths(host, port, user, password, e);
+	    throw e;
 	} catch (ProtocolException pex) { // any other exception
 	    // failure in login command, close connection to server
 	    if (protocol != null) {
@@ -912,24 +943,8 @@ public class IMAPStore extends Store
            );
     }
 
-    private void checkFailedAuths(String u, String pw) throws ProtocolException {
-        if (authTimeout <= 0) {
-            return;
-        }
-        final ConcurrentMap<String, StampAndError> map = FAILED_AUTHS;
-        final String key = new StringBuilder(u).append('@').append(pw).toString();
-        final StampAndError sae = map.get(key);
-        if (sae != null) {
-            if ((System.currentTimeMillis() - sae.stamp) <= authTimeout) {
-                throw sae.error;
-            }
-            map.remove(key);
-        }
-    }
-
     protected void login(IMAPProtocol p, String u, String pw)
 		throws ProtocolException {
-    checkFailedAuths(u, pw);
 	// turn on TLS if it's been enabled or required and is supported
 	// and we're not already using SSL
 	if ((enableStartTLS || requireStartTLS) && !p.isSSL()) {

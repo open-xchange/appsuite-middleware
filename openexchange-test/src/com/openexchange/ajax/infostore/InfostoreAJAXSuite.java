@@ -9,6 +9,7 @@ import com.openexchange.ajax.infostore.test.AppendDocumentTest;
 import com.openexchange.ajax.infostore.test.Bug27722Test;
 import com.openexchange.ajax.infostore.test.Bug32004Test;
 import com.openexchange.ajax.infostore.test.Bug40142Test;
+import com.openexchange.ajax.infostore.test.Bug44622Test;
 import com.openexchange.ajax.infostore.test.CheckNameActionTest;
 import com.openexchange.ajax.infostore.test.CreateAndDeleteInfostoreTest;
 import com.openexchange.ajax.infostore.test.CreateFileWithIllegalCharactersTest;
@@ -48,6 +49,7 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(CheckNameActionTest.class);
         tests.addTestSuite(FilestorageAccountTest.class);
         tests.addTestSuite(AppendDocumentTest.class);
+        tests.addTestSuite(Bug44622Test.class);
         return tests;
     }
 }

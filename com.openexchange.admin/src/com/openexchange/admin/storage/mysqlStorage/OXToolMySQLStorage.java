@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -121,7 +121,8 @@ import com.openexchange.threadpool.ThreadPools;
  */
 public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefaultValues {
 
-    private final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
+    /** The logger constant */
+    final static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(OXToolMySQLStorage.class);
 
     private static final String FALLBACK_LANGUAGE_CREATE = "en";
 
@@ -562,7 +563,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.sqlStorage.OXToolSQLStorage#existsResourceAddress(com.openexchange.admin.rmi.dataobjects.Context, java.lang.String)
      */
     @Override
@@ -1801,17 +1802,12 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
     }
 
     private boolean hasUsers(int id) throws StorageException {
-        Connection con;
-        try {
-            con = cache.getReadConnectionForConfigDB();
-        } catch (final PoolException e) {
-            log.error("", e);
-            throw new StorageException(e);
-        }
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         Set<PoolAndSchema> pools = new LinkedHashSet<PoolAndSchema>();
         try {
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT DISTINCT write_db_pool_id, db_schema FROM context_server2db_pool WHERE server_id=?");
             stmt.setInt(1, cache.getServerId());
             rs = stmt.executeQuery();
@@ -1819,7 +1815,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                 pools.add(new PoolAndSchema(rs.getInt(1), rs.getString(2)));
             }
         } catch (PoolException e) {
-            log.error("SQL Error", e);
+            log.error("Pooling Error", e);
             throw new StorageException(e);
         } catch (SQLException e) {
             log.error("SQL Error", e);
@@ -1828,6 +1824,14 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             closeSQLStuff(rs, stmt);
             rs = null;
             stmt = null;
+
+            if (null != con) {
+                try {
+                    cache.pushReadConnectionForConfigDB(con);
+                } catch (PoolException e) {
+                    log.error("Failed to push back read-only connection to configdb.", e);
+                }
+            }
         }
 
         return hasUsers(pools, id);
@@ -1852,11 +1856,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
                         stmt.setInt(1, id);
                         result = stmt.executeQuery();
 
-                        if (false == result.next()) {
-                            return false;
-                        } else {
-                            return true;
-                        }
+                        return Boolean.valueOf(result.next());
                     } catch (PoolException e) {
                         log.error("Pool Error", e);
                         throw new StorageException(e);
@@ -2782,7 +2782,7 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.admin.storage.interfaces.OXToolStorageInterface#fetchSlaveUsersOfMasterFilestore(com.openexchange.admin.rmi.dataobjects.Context, int)
      */
     @Override
@@ -2840,13 +2840,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
         ResultSet result = null;
         try {
             con = cache.getReadConnectionForConfigDB();
-            
+
             // Fetch the schema name
             stmt = con.prepareStatement("SELECT db_schema FROM context_server2db_pool WHERE cid = ?");
             stmt.setInt(1, contextId);
-            
+
             result = stmt.executeQuery();
-            
+
             String schemaName;
             if (result.next()) {
                 schemaName = result.getString(1);
@@ -2855,13 +2855,13 @@ public class OXToolMySQLStorage extends OXToolSQLStorage implements OXMySQLDefau
             }
             stmt.close();
             result.close();
-            
+
             // Count the contexts that the schema contains
             stmt = con.prepareStatement("SELECT COUNT(cid) FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schemaName);
-            
+
             result = stmt.executeQuery();
-            
+
             if (result.next()) {
                 int count = result.getInt(1);
                 return count == 1;

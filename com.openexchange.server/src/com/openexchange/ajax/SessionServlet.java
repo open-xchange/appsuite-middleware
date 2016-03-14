@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,8 @@ package com.openexchange.ajax;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -82,6 +84,7 @@ import com.openexchange.sessiond.SessionExceptionCodes;
 import com.openexchange.sessiond.SessiondService;
 import com.openexchange.sessiond.impl.ThreadLocalSessionHolder;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.servlet.http.MIMEParse;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.servlet.ratelimit.RateLimitedException;
 import com.openexchange.tools.session.ServerSession;
@@ -364,8 +367,10 @@ public abstract class SessionServlet extends AJAXServlet {
 
     private void outputOXException(OXException e, int statusCode, String reasonPhrase, HttpServletRequest req, HttpServletResponse resp) throws IOException {
         // Check expected output format
-        if (Dispatchers.isApiOutputExpectedFor(req)) {
+        if (isJsonResponseExpected(req, true) && Dispatchers.isApiOutputExpectedFor(req)) {
             // API response
+            resp.setContentType(CONTENTTYPE_JAVASCRIPT);
+            resp.setHeader("Content-Disposition", "inline");
             APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
         } else {
             // No JSON response; either JavaScript call-back or regular HTML error (page)
@@ -418,6 +423,8 @@ public abstract class SessionServlet extends AJAXServlet {
         }
     }
 
+    private static final List<String> JSON_TYPES = Arrays.asList("application/json", "text/javascript");
+
     /**
      * Checks if the <code>"Accept"</code> header of specified HTTP request signals to expect JSON data.
      *
@@ -436,8 +443,8 @@ public abstract class SessionServlet extends AJAXServlet {
             return interpretMissingAsTrue;
         }
 
-        acceptHdr = Strings.asciiLowerCase(acceptHdr);
-        return (acceptHdr.indexOf("application/json") >= 0) || (acceptHdr.indexOf("text/javascript") >= 0);
+        float[] qualities = MIMEParse.qualities(JSON_TYPES, acceptHdr);
+        return qualities[0] == 1.0f || qualities[1] == 1.0f;
     }
 
     /**

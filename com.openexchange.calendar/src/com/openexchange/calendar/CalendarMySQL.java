@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -193,10 +193,6 @@ public class CalendarMySQL implements CalendarSqlImp {
     private static final String PDM_OR = " OR ";
 
     private static final String PDM_ORDER_BY = " ORDER BY ";
-
-    private static final String PDM_GROUP_BY_PD_INTFIELD01 = " GROUP BY pd.intfield01 ";
-
-    private static final String PDM_GROUP_BY_INTFIELD01 = " GROUP BY intfield01";
 
     private static final String PD_FID_IS_NULL = " AND pd.fid = 0 ";
 
@@ -581,7 +577,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                 sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
             }
         } else {
-            sb.append(PDM_GROUP_BY_PD_INTFIELD01);
             sb.append(ORDER_BY);
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -766,7 +761,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
 
-        sb.append(PDM_GROUP_BY_INTFIELD01);
         sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -790,7 +784,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -812,7 +805,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));

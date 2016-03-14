@@ -233,7 +233,19 @@ if [ ${1:-0} -eq 2 ]; then
     ox_update_permissions "/opt/open-xchange/etc/mpasswd" root:open-xchange 640
 
     # SoftwareChange_Request-2535
-    ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    # ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    # Bug 44000
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    if ox_exists_property drive $pfile
+    then
+        defin=$(ox_read_property drive $pfile)
+        if [ "$defin" = "globaladdressbookdisabled,infostore,deniedportal" ]
+        then
+            ox_set_property drive infostore,deniedportal,readcreatesharedfolders,editpublicfolders $pfile
+        fi
+    else
+        ox_add_property drive infostore,deniedportal,readcreatesharedfolders,editpublicfolders $pfile
+    fi
 
     # SoftwareChange_Request-2699
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties

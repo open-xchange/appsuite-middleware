@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -75,7 +75,7 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 /**
  * Unit tests for {@link IDBasedFolderAccessFolderLoader}
- * 
+ *
  * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
  * @since 7.4.1
  */
@@ -136,7 +136,7 @@ public class IDBasedFolderAccessFolderLoaderTest {
 
     @Test
     public void testLoad_PublicationNull_ReturnEmptyCollection() throws OXException {
-        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(null);
+        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(null, null);
 
         Assert.assertEquals(0, load.size());
     }
@@ -147,7 +147,7 @@ public class IDBasedFolderAccessFolderLoaderTest {
         PowerMockito.when(this.idBasedFolderAccessFactory.createAccess((Session) Matchers.any())).thenReturn(this.idBasedFolderAccess);
         PowerMockito.when(this.idBasedFolderAccess.getFolder(Matchers.anyString())).thenReturn(this.fileStorageFolder);
 
-        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication);
+        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication, null);
 
         Assert.assertEquals(0, load.size());
     }
@@ -164,7 +164,7 @@ public class IDBasedFolderAccessFolderLoaderTest {
         SearchIterator<File> searchIterator = new InfostoreSearchIterator(iterator);
         PowerMockito.when(this.timedResult.results()).thenReturn(searchIterator);
 
-        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication);
+        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication, null);
 
         Assert.assertEquals(0, load.size());
     }
@@ -183,7 +183,7 @@ public class IDBasedFolderAccessFolderLoaderTest {
         PowerMockito.when(searchIterator.hasNext()).thenReturn(true, false);
         PowerMockito.when(this.timedResult.results()).thenReturn(searchIterator);
 
-        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication);
+        Collection<? extends Object> load = this.idBasedFolderAccessFolderLoader.load(this.publication, null);
 
         Assert.assertEquals(1, load.size());
     }

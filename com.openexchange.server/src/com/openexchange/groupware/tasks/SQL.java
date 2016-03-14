@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -211,7 +211,7 @@ public final class SQL {
     }
 
     /**
-     * @return all fields colon seperated for using in SELECT and INSERT
+     * @return all fields colon separated for using in SELECT and INSERT
      * statements.
      */
     static String getAllFields() {
@@ -222,7 +222,7 @@ public final class SQL {
      * @param columns attributes of a task that should be selected.
      * @param folder <code>true</code> if the folder must be selected in
      * searches.
-     * @return all fields that are specified in the columns colon seperated for
+     * @return all fields that are specified in the columns colon separated for
      * using in SELECT and INSERT statements.
      * @throws OXException if a mapping for a column isn't implemented.
      */
@@ -235,15 +235,24 @@ public final class SQL {
      * @param folder <code>true</code> if the folder must be selected in
      * searches.
      * @param prefix reference table prefix for column names
-     * @return all fields that are specified in the columns colon seperated for
+     * @return all fields that are specified in the columns colon separated for
      * using in SELECT and INSERT statements.
      * @throws OXException if a mapping for a column isn't implemented.
      */
-    static String getFields(final int[] columns, final boolean folder, String prefix) throws OXException {
-        if (prefix == null)
-            prefix = "";
-        else
-            prefix += ".";
+    static String getFields(int[] columns, boolean folder, String prefix) throws OXException {
+        return getFields(columns, folder, false, prefix);
+    }
+
+    /**
+     * @param columns attributes of a task that should be selected.
+     * @param folder <code>true</code> if the folder must be selected in searches.
+     * @param withGroupBy <code>true</code> If query uses a <code>"GROUP BY"</code> clause; otherwise <code>false</code>
+     * @param prefix reference table prefix for column names
+     * @return all fields that are specified in the columns colon separated for using in SELECT and INSERT statements.
+     * @throws OXException if a mapping for a column isn't implemented.
+     */
+    static String getFields(int[] columns, boolean folder, boolean withGroupBy, String prefix) throws OXException {
+        String prfix = (prefix == null) ? "" : prefix + ".";
 
         final StringBuilder builder = new StringBuilder();
         for (final int i : columns) {
@@ -257,14 +266,18 @@ public final class SQL {
                     break;
                 case FolderChildObject.FOLDER_ID:
                     if (folder) {
-                        builder.append("folder,");
+                        if (withGroupBy) {
+                            builder.append("MIN(folder) AS folder,");
+                        } else {
+                            builder.append("folder,");
+                        }
                     }
                     break;
                 default:
                     throw TaskExceptionCode.UNKNOWN_ATTRIBUTE.create(I(i));
                 }
             } else {
-                builder.append(prefix);
+                builder.append(prfix);
                 builder.append(mapper.getDBColumnName());
                 builder.append(',');
             }

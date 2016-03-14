@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2013 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH.
  *     Mail: info@open-xchange.com
  *
  *
@@ -50,6 +50,7 @@
 package com.openexchange.drive.impl.sync.optimize;
 
 import com.openexchange.drive.FileVersion;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.comparison.VersionMapper;
 
 
@@ -81,6 +82,17 @@ public abstract class FileActionOptimizer extends AbstractActionOptimizer<FileVe
         } else {
             return null == v1.getName() ? null == v2.getName() : v1.getName().equals(v2.getName());
         }
+    }
+
+    /**
+     * Gets a value indicating whether the supplied file version represents the virtual <code>.drive-meta</code> file or not.
+     *
+     * @param session The sync session
+     * @param fileVersion The file version to check
+     * @return <code>true</code> if the file version represents a <code>.drive-meta</code> file, <code>false</code>, otherwise
+     */
+    protected static boolean isDriveMeta(FileVersion fileVersion) {
+        return null != fileVersion && DriveConstants.METADATA_FILENAME.equals(fileVersion.getName());
     }
 
 }
