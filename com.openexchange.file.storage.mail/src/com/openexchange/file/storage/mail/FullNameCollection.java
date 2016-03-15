@@ -47,51 +47,65 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import com.openexchange.file.storage.mail.FullName.Type;
+import com.openexchange.mail.utils.MailFolderUtility;
 
 /**
- * {@link FileTimedResult}
+ * {@link FullNameCollection}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public class FullNameCollection implements Iterable<FullName> {
+
+    /** The full name of the virtual attachment folder containing all attachments */
+    public final String fullNameAll;
+
+    /** The full name of the virtual attachment folder containing received attachments */
+    public final String fullNameReceived;
+
+    /** The full name of the virtual attachment folder containing sent attachments */
+    public final String fullNameSent;
 
     /**
-     * Initializes a new {@link FileTimedResult} from given collection.
+     * Initializes a new {@link FullNameCollection}.
      *
-     * @param collection The collection
+     * @param fullNameAll The full name of the virtual attachment folder containing all attachments
+     * @param fullNameReceived The full name of the virtual attachment folder containing received attachments
+     * @param fullNameSent The full name of the virtual attachment folder containing sent attachments
      */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
+    public FullNameCollection(String fullNameAll, String fullNameReceived, String fullNameSent) {
+        super();
+        this.fullNameAll = fullNameAll;
+        this.fullNameReceived = fullNameReceived;
+        this.fullNameSent = fullNameSent;
     }
 
     @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
+    public Iterator<FullName> iterator() {
+        List<FullName> fullNames = new ArrayList<FullName>(3);
+        fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
+        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
+        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        return fullNames.iterator();
+    }
+
+    /**
+     * Gets the {@link List} view for this collection.
+     *
+     * @return The list
+     */
+    public List<FullName> asList() {
+        List<FullName> fullNames = new ArrayList<FullName>(3);
+        fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
+        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
+        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        return fullNames;
     }
 
 }

@@ -47,51 +47,54 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import java.util.Collections;
+import java.util.Map;
+import com.openexchange.file.storage.FileStorageAccount;
+import com.openexchange.file.storage.FileStorageService;
 
 /**
- * {@link FileTimedResult}
+ * {@link MailDriveFileStorageAccount} - The special account for Mail Drive.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public final class MailDriveFileStorageAccount implements FileStorageAccount {
+
+    private static final long serialVersionUID = 8675168697186715107L;
+
+    private static final String ACCOUNT_ID = MailDriveConstants.ACCOUNT_ID;
+    private static final String ACCOUNT_DISPLAY_NAME = MailDriveConstants.ACCOUNT_DISPLAY_NAME;
+
+    // --------------------------------------------------------------------------------------------------------------
+
+    private final MailDriveFileStorageService service;
 
     /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
+     * Initializes a new {@link FileStorageAccountImplementation}.
      */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
+    MailDriveFileStorageAccount(MailDriveFileStorageService service) {
+        this.service = service;
     }
 
     @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
+    public String getId() {
+        return ACCOUNT_ID;
     }
 
+    @Override
+    public FileStorageService getFileStorageService() {
+        return service;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return ACCOUNT_DISPLAY_NAME;
+    }
+
+    @Override
+    public Map<String, Object> getConfiguration() {
+        return Collections.emptyMap();
+    }
 }

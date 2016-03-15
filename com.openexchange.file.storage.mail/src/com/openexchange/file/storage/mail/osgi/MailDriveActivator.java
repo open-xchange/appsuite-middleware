@@ -47,51 +47,64 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail.osgi;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import org.slf4j.Logger;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.context.ContextService;
+import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
+import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.mail.MailDriveFileStorageService;
+import com.openexchange.mime.MimeTypeMap;
+import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.sessiond.SessiondService;
+import com.openexchange.timer.TimerService;
+import com.openexchange.user.UserService;
 
 /**
- * {@link FileTimedResult}
+ * {@link MailDriveActivator} - Activator for Mail Drive bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public final class MailDriveActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
+     * Initializes a new {@link MailDriveActivator}.
      */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
+    public MailDriveActivator() {
+        super();
     }
 
     @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class,
+            MimeTypeMap.class, TimerService.class, ConfigViewFactory.class, ContextService.class, UserService.class };
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        Logger logger = org.slf4j.LoggerFactory.getLogger(MailDriveActivator.class);
+        try {
+            Services.setServices(this);
+
+            MailDriveFileStorageService service = MailDriveFileStorageService.newInstance();
+            registerService(FileStorageService.class, service, null);
+        } catch (final Exception e) {
+            logger.error("", e);
+            throw e;
+        }
+    }
+
+    @Override
+    public <S> void registerService(final Class<S> clazz, final S service) {
+        super.registerService(clazz, service);
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServices(null);
     }
 
 }

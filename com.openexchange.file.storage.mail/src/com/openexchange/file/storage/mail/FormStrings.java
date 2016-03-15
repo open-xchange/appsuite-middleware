@@ -47,51 +47,20 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FileTimedResult}
+ * {@link FormStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public class FormStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
-     */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
+    public static final String ACCOUNT_LABEL = "Select an existing account";
+
+    public FormStrings() {
+        super();
     }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
-    }
-
-    @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
-    }
-
 }

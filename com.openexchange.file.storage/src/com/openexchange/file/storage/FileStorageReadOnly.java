@@ -49,49 +49,14 @@
 
 package com.openexchange.file.storage;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
 
 /**
- * {@link FileTimedResult}
+ * {@link FileStorageReadOnly} - Associated file storage only supports read-only access.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public interface FileStorageReadOnly {
 
-    /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
-     */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
-
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
-    }
-
-    @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
-    }
-
+    // Marker interface
 }

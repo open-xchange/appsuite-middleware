@@ -47,51 +47,26 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link FileTimedResult}
+ * {@link MailDriveStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public class MailDriveStrings implements LocalizableStrings {
 
-    /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
-     */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
+    private MailDriveStrings() {
+        super();
     }
 
-    /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
-     */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
+    public static final String NAME_ATTACHMENTS_ALL = "All attachments";
 
-    /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
-     */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
-    }
+    public static final String NAME_ATTACHMENTS_RECEIVED = "Received attachments";
 
-    @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
-    }
+    public static final String NAME_ATTACHMENTS_SENT = "Sent attachments";
 
 }

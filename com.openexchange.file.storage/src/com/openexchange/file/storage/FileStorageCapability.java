@@ -131,5 +131,16 @@ public enum FileStorageCapability {
      */
     MULTI_MOVE,
 
+    /**
+     * File storage only supports read-only access
+     */
+    READ_ONLY,
+
+    /**
+     * File storage is backed by a mail store
+     */
+    MAIL_STORE,
+
+
     ;
 }

@@ -47,51 +47,37 @@
  *
  */
 
-package com.openexchange.file.storage;
+package com.openexchange.file.storage.mail;
 
-import java.util.Collection;
-import com.openexchange.groupware.results.AbstractTimedResult;
-import com.openexchange.tools.iterator.ArrayIterator;
-import com.openexchange.tools.iterator.SearchIterator;
-import com.openexchange.tools.iterator.SearchIteratorAdapter;
+import com.openexchange.file.storage.FileStorageConstants;
 
 /**
- * {@link FileTimedResult}
+ * {@link MailDriveConstants} - Provides useful constants for Mail Drive file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class FileTimedResult extends AbstractTimedResult<File> {
+public final class MailDriveConstants implements FileStorageConstants {
 
     /**
-     * Initializes a new {@link FileTimedResult} from given collection.
-     *
-     * @param collection The collection
+     * Initializes a new {@link MailDriveConstants}.
      */
-    public FileTimedResult(final Collection<File> collection) {
-        super(new SearchIteratorAdapter<File>(collection.iterator(), collection.size()));
+    private MailDriveConstants() {
+        super();
     }
 
     /**
-     * Initializes a new {@link FileTimedResult} from given array.
-     *
-     * @param array The array
+     * The identifier for Mail Drive file storage service.
      */
-    public FileTimedResult(final File[] array) {
-        super(new ArrayIterator<File>(array));
-    }
+    public static final String ID = "maildrive";
 
     /**
-     * Initializes a new {@link FileTimedResult} from given search iterator.
-     *
-     * @param iter The search iterator
+     * The special account identifier <code>"0"</code>.
      */
-    public FileTimedResult(final SearchIterator<File> iter) {
-        super(iter);
-    }
+    public static final String ACCOUNT_ID = "0";
 
-    @Override
-    protected long extractTimestamp(final File object) {
-        return 0;
-    }
+    /**
+     * The account display name <code>"Mail Drive"</code>.
+     */
+    public static final String ACCOUNT_DISPLAY_NAME = "Mail Drive";
 
 }

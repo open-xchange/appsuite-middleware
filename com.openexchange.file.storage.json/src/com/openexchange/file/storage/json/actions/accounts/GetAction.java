@@ -99,21 +99,40 @@ public class GetAction extends AbstractFileStorageAccountAction {
 
         FileStorageAccountAccess access = fsService.getAccountAccess(account.getId(), session);
         FileStorageFolder rootFolder = access.getRootFolder();
-        //check filestorage capabilities
-        Set<String> caps = new HashSet<String>();
-        if (access instanceof CapabilityAware) {
 
-            if (((CapabilityAware) access).supports(FileStorageCapability.FILE_VERSIONS)) {
+        // Check file storage capabilities
+        Set<String> caps = new HashSet<String>(8, 0.9f);
+        if (access instanceof CapabilityAware) {
+            CapabilityAware capabilityAware = (CapabilityAware) access;
+
+            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.FILE_VERSIONS.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.EXTENDED_METADATA)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.EXTENDED_METADATA.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.LOCKS.name());
+            }
+
+            supported = capabilityAware.supports(FileStorageCapability.READ_ONLY);
+            if (null != supported && supported.booleanValue()) {
+                caps.add(FileStorageCapability.READ_ONLY.name());
+            }
+
+            supported = capabilityAware.supports(FileStorageCapability.MAIL_STORE);
+            if (null != supported && supported.booleanValue()) {
+                caps.add(FileStorageCapability.MAIL_STORE.name());
             }
         }
         return new AJAXRequestResult(writer.write(account, rootFolder, caps));
