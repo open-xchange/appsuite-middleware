@@ -128,7 +128,7 @@ public class AnalyzeContextBatch implements Callable<Void>, Serializable {
                     Orchestration.getInstance().abort(uuid, reportType);
                     continue;
                 } catch (Exception e) {
-                    LOG.error("Unexpected error while context report generation!");
+                    LOG.error("Unexpected error while context report generation!", e);
                 }
             }
         } finally {
