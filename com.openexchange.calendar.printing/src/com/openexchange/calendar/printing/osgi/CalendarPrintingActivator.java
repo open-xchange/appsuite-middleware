@@ -94,7 +94,7 @@ public class CalendarPrintingActivator extends AbstractSessionServletActivator {
         registerService(TemplateHelperFactory.class, new CalendarTemplateHelperFactory(this));
 
         final CapabilityService capabilityService = getService(CapabilityService.class);
-        capabilityService.declareCapability("printing");
+        capabilityService.declareCapability("calendar-printing");
     }
 
     @Override
