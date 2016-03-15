@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Copyright (C) 2016-2016 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,81 +47,35 @@
  *
  */
 
-package com.openexchange.unifiedinbox.config;
+package com.openexchange.mail.api;
 
-import com.openexchange.mail.api.IMailProperties;
-import com.openexchange.mail.api.MailCapabilities;
-import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.api.UrlInfo;
 
 /**
- * {@link UnifiedInboxConfig}
+ * {@link UrlInfo}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:jan.bauerdick@open-xchange.com">Jan Bauerdick</a>
+ * @since v7.8.2
  */
-public final class UnifiedInboxConfig extends MailConfig {
+public final class UrlInfo {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UnifiedInboxConfig.class);
-
-    private IMailProperties mailProperties;
+    private final String serverURL;
+    private final boolean startTls;
 
     /**
-     * Default constructor
+     * Initializes a new {@link UrlInfo}.
      */
-    public UnifiedInboxConfig() {
+    public UrlInfo(String serverURL, boolean startTls) {
         super();
+        this.serverURL = serverURL;
+        this.startTls = startTls;
     }
 
-    @Override
-    public MailCapabilities getCapabilities() {
-        return MailCapabilities.EMPTY_CAPS;
+    public String getServerURL() {
+        return serverURL;
     }
 
-    @Override
-    public int getPort() {
-        return -1;
-    }
-
-    @Override
-    public void setPort(final int pop3Port) {
-        // Nothing to set
-    }
-
-    @Override
-    public String getServer() {
-        return "localhost";
-    }
-
-    @Override
-    public void setServer(final String pop3Server) {
-        // Nothing to set
-    }
-
-    @Override
-    public boolean isSecure() {
-        return false;
-    }
-
-    @Override
-    public void setSecure(final boolean secure) {
-        // Nothing to set
-    }
-
-    @Override
-    protected void parseServerURL(final UrlInfo urlInfo) {
-        // Nothing to parse
-        login = "dummy";
-        password = "secret";
-    }
-
-    @Override
-    public IMailProperties getMailProperties() {
-        return mailProperties;
-    }
-
-    @Override
-    public void setMailProperties(final IMailProperties mailProperties) {
-        this.mailProperties = mailProperties;
+    public boolean isStartTls() {
+        return startTls;
     }
 
 }

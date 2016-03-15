@@ -54,6 +54,7 @@ import java.net.URISyntaxException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.MailCapabilities;
+import com.openexchange.mail.api.UrlInfo;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.utils.MailPasswordUtil;
@@ -123,16 +124,17 @@ public final class SMTPConfig extends TransportConfig {
     }
 
     @Override
-    protected void parseServerURL(final String serverURL) throws OXException {
+    protected void parseServerURL(final UrlInfo urlInfo) throws OXException {
         final URI uri;
         try {
-            uri = URIParser.parse(serverURL, URIDefaults.SMTP);
+            uri = URIParser.parse(urlInfo.getServerURL(), URIDefaults.SMTP);
         } catch (final URISyntaxException e) {
-            throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, serverURL);
+            throw SMTPExceptionCode.URI_PARSE_FAILED.create(e, urlInfo.getServerURL());
         }
         secure = PROTOCOL_SMTP_SECURE.equals(uri.getScheme());
         smtpServer = uri.getHost();
         smtpPort = uri.getPort();
+        startTls = urlInfo.isStartTls();
     }
 
     @Override

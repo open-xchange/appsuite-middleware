@@ -242,7 +242,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
     protected javax.mail.Session getSMTPSession() throws OXException {
         SMTPConfig smtpConfig = getTransportConfig();
-        return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isRequireTls() || smtpConfig.getTransportProperties().isEnforceSecureConnection()));
+        return getSMTPSession(smtpConfig, accountId > 0 && (smtpConfig.isStartTls() || smtpConfig.isRequireTls() || smtpConfig.getTransportProperties().isEnforceSecureConnection()));
     }
 
     protected void processAddressHeader(final MimeMessage mimeMessage) throws OXException, MessagingException {

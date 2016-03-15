@@ -258,7 +258,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls FROM user_mail_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
@@ -277,6 +277,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 mailAccount.setPassword(pw);
             }
             mailAccount.setPrimaryAddress(result.getString(5));
+            mailAccount.setMailStartTls(result.getBoolean(25));
             /*
              * Default folder names
              */
@@ -355,7 +356,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         PreparedStatement stmt = null;
         ResultSet result = null;
         try {
-            stmt = con.prepareStatement("SELECT name, url, login, password, send_addr, default_flag, personal, replyTo FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
+            stmt = con.prepareStatement("SELECT name, url, login, password, send_addr, default_flag, personal, replyTo, starttls FROM user_transport_account WHERE cid = ? AND id = ? AND user = ?");
             stmt.setLong(1, contextId);
             stmt.setLong(2, id);
             stmt.setLong(3, userId);
@@ -386,6 +387,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 if (!result.wasNull()) {
                     mailAccount.setReplyTo(replyTo);
                 }
+                mailAccount.setTransportStartTls(result.getBoolean(9));
                 /*
                  * Fill properties
                  */
@@ -2173,7 +2175,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
         try {
             // Mail data
             {
-                stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                stmt = con.prepareStatement("INSERT INTO user_mail_account (cid, id, user, name, url, login, password, primary_addr, default_flag, trash, sent, drafts, spam, confirmed_spam, confirmed_ham, spam_handler, unified_inbox, trash_fullname, sent_fullname, drafts_fullname, spam_fullname, confirmed_spam_fullname, confirmed_ham_fullname, personal, replyTo, archive, archive_fullname, starttls) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
                 // Encrypt password
                 String encryptedPassword;
@@ -2247,6 +2249,9 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 setOptionalString(stmt, pos++, mailAccount.getArchive());
                 setOptionalString(stmt, pos++, mailAccount.getArchiveFullname());
 
+                // starttls flag
+                stmt.setInt(pos++, mailAccount.isMailStartTls() ? 1 : 0);
+
                 // Execute update
                 stmt.executeUpdate();
                 closeSQLStuff(null, stmt);
@@ -2256,7 +2261,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
             // Transport data
             String transportURL = mailAccount.generateTransportServerURL();
             if (null != transportURL) {
-                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo) VALUES (?,?,?,?,?,?,?,?,?,?,?)");
+                stmt = con.prepareStatement("INSERT INTO user_transport_account (cid, id, user, name, url, login, password, send_addr, default_flag, personal, replyTo, starttls) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
 
                 // Encrypt password
                 String encryptedTransportPassword;
@@ -2297,6 +2302,7 @@ public final class RdbMailAccountStorage implements MailAccountStorageService {
                 } else {
                     stmt.setString(pos++, replyTo);
                 }
+                stmt.setInt(pos++, mailAccount.isTransportStartTls() ? 1 : 0);
 
                 // Execute update
                 stmt.executeUpdate();

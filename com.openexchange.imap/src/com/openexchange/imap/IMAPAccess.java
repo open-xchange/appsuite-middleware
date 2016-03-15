@@ -584,7 +584,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             javax.mail.Session imapSession;
             {
-                boolean forceSecure = imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection();
+                boolean forceSecure = imapConfig.isStartTls() || imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection();
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, JavaIMAPStore.class, forceSecure);
             }
             /*
@@ -715,7 +715,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
              */
             {
                 final Class<? extends IMAPStore> clazz = useIMAPStoreCache() ? IMAPStoreCache.getInstance().getStoreClass() : JavaIMAPStore.class;
-                boolean forceSecure = accountId > 0 && (imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection());
+                boolean forceSecure = accountId > 0 && (imapConfig.isStartTls() || imapConfig.isRequireTls() || imapConfProps.isEnforceSecureConnection());
                 imapSession = setConnectProperties(config, imapConfProps.getImapTimeout(), imapConfProps.getImapConnectionTimeout(), imapProps, clazz, forceSecure);
             }
             /*
@@ -870,6 +870,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
             imapSession.getProperties().put("mail.imap.propagate.clientipaddress", clientIp);
         }
         imapSession.getProperties().put("mail.imap.failOnNOFetch", "true");
+
         /*
          * Cache failed authentication attempts
          */

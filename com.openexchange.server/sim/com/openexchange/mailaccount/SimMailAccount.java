@@ -395,4 +395,16 @@ public class SimMailAccount implements MailAccount {
         // nothing to do
     }
 
+    @Override
+    public boolean isMailStartTls() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isTransportStartTls() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
 }

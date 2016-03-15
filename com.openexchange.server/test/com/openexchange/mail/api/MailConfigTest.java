@@ -125,7 +125,7 @@ public final class MailConfigTest extends TestCase {
                 }
 
                 @Override
-                protected void parseServerURL(String serverURL) throws OXException {
+                protected void parseServerURL(UrlInfo urlInfo) throws OXException {
                     // Nothing
                 }
             };

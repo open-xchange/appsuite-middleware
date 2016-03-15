@@ -200,6 +200,13 @@ public class MailAccountParser extends DataParser {
                 }
             }
 
+            if (json.hasAndNotNull(MailAccountFields.MAIL_STARTTLS)) {
+                boolean mailStartTls = json.optBoolean(MailAccountFields.MAIL_STARTTLS, account.isMailStartTls());
+                if (mailStartTls != account.isMailStartTls()) {
+                    account.setMailStartTls(mailStartTls);
+                }
+            }
+
             attributes.add(Attribute.MAIL_URL_LITERAL);
             attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
         } else {
@@ -246,6 +253,13 @@ public class MailAccountParser extends DataParser {
                 final boolean transportSecure = json.optBoolean(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
                 if (transportSecure != account.isTransportSecure()) {
                     account.setTransportSecure(transportSecure);
+                }
+            }
+
+            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_STARTTLS)) {
+                boolean transportStartTls = json.optBoolean(MailAccountFields.TRANSPORT_STARTTLS, account.isTransportStartTls());
+                if (transportStartTls != account.isTransportStartTls()) {
+                    account.setTransportStartTls(transportStartTls);
                 }
             }
 

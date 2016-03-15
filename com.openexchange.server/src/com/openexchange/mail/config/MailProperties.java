@@ -202,6 +202,10 @@ public final class MailProperties implements IMailProperties {
 
     private List<IPRange> ranges;
 
+    private boolean mailStartTls;
+
+    private boolean transportStartTls;
+
     /**
      * Initializes a new {@link MailProperties}
      */
@@ -299,6 +303,8 @@ public final class MailProperties implements IMailProperties {
         enforceSecureConnection = false;
         defaultArchiveDays = 90;
         ranges = Collections.emptyList();
+        mailStartTls = false;
+        transportStartTls = false;
     }
 
     private void loadProperties0() throws OXException {
@@ -743,6 +749,11 @@ public final class MailProperties implements IMailProperties {
             }
         }
 
+        {
+            this.mailStartTls = configuration.getBoolProperty("com.openexchange.mail.mailStartTls", false);
+            this.transportStartTls = configuration.getBoolProperty("com.openexchange.mail.transportStartTls", false);
+        }
+
         logBuilder.append("Global mail properties successfully loaded!");
         LOG.info(logBuilder.toString());
     }
@@ -1105,6 +1116,14 @@ public final class MailProperties implements IMailProperties {
      */
     public Collection<IPRange> getDisabledRateLimitRanges() {
         return ranges;
+    }
+
+    public boolean isMailStartTls() {
+        return mailStartTls;
+    }
+
+    public boolean isTransportStartTls() {
+        return transportStartTls;
     }
 
 }

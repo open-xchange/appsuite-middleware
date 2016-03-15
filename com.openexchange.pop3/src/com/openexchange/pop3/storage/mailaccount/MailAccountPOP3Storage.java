@@ -584,7 +584,7 @@ public class MailAccountPOP3Storage implements POP3Storage, IMailStoreAware {
         POP3Store pop3Store = null;
         try {
             POP3Config pop3Config = pop3Access.getPOP3Config();
-            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
+            boolean forceSecure = pop3AccountId > 0 && (pop3Config.isStartTls() || pop3Config.isRequireTls() || pop3Config.getMailProperties().isEnforceSecureConnection());
             final POP3StoreResult result = POP3StoreConnector.getPOP3Store(pop3Config, pop3Access.getMailProperties(), false, session, !expunge, forceSecure);
             pop3Store = result.getPop3Store();
             boolean uidlNotSupported = false;

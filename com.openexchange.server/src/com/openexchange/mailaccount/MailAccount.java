@@ -387,4 +387,18 @@ public interface MailAccount extends Serializable {
      * @param value The transport property value
      */
     public void addTransportProperty(String name, String value);
+
+    /**
+     * Checks if STARTTLS should be used to connect to mail server
+     * 
+     * @return
+     */
+    public boolean isMailStartTls();
+
+    /**
+     * Checks if STARTTLS should be used to connect to transport server
+     * 
+     * @return
+     */
+    public boolean isTransportStartTls();
 }

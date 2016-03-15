@@ -116,7 +116,7 @@ public final class MailProviderRegistry {
              */
             provider = null;
         }
-        final String mailServerURL = MailConfig.getMailServerURL(session, accountId);
+        final String mailServerURL = MailConfig.getMailServerURL(session, accountId).getServerURL();
         final String protocol;
         if (mailServerURL == null) {
             LOG.warn("Missing mail server URL. Mail server URL not set in account {} for user {} in context {}. Using fallback protocol {}", accountId, session.getUserId(), session.getContextId(), MailProperties.getInstance().getDefaultMailProvider());

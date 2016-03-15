@@ -344,6 +344,16 @@ public class MailAccountValidateRequest implements AJAXRequest<MailAccountValida
             public void addTransportProperty(final String name, final String value) {
                 acc.addTransportProperty(name, value);
             }
+
+            @Override
+            public boolean isMailStartTls() {
+                return acc.isMailStartTls();
+            }
+
+            @Override
+            public boolean isTransportStartTls() {
+                return acc.isTransportStartTls();
+            }
         };
     }
 }
