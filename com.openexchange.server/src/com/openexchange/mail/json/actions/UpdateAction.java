@@ -91,6 +91,8 @@ public final class UpdateAction extends AbstractMailAction {
         super(services);
     }
 
+    private static final String SYSTEM_PREFIX = "\\";
+
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
@@ -121,7 +123,10 @@ public final class UpdateAction extends AbstractMailAction {
                 setUserFlags = new String[setUserFlagsArray.length()];
                 int x = 0;
                 for (Object o : setUserFlagsArray.asList()) {
-                    setUserFlags[x++] = (String) o;
+                    if (o.toString().startsWith(SYSTEM_PREFIX)) {
+                        throw MailExceptionCode.INVALID_FLAG_WITH_LEADING_BACKSLASH.create(o.toString());
+                    }
+                    setUserFlags[x++] = o.toString();
                 }
             }
 
@@ -131,7 +136,10 @@ public final class UpdateAction extends AbstractMailAction {
                 clearUserFlags = new String[clearUserFlagsArray.length()];
                 int x = 0;
                 for (Object o : clearUserFlagsArray.asList()) {
-                    clearUserFlags[x++] = (String) o;
+                    if (o.toString().startsWith(SYSTEM_PREFIX)) {
+                        throw MailExceptionCode.INVALID_FLAG_WITH_LEADING_BACKSLASH.create(o.toString());
+                    }
+                    clearUserFlags[x++] = o.toString();
                 }
             }
 

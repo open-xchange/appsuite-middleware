@@ -210,4 +210,7 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // Invalid parameter value: %1$s
     public static final String INVALID_PARAMETER_VALUE_MSG = "Invalid parameter value: %1$s";
 
+    // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+    public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
+
 }
