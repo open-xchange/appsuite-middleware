@@ -1,3 +1,9 @@
+open-xchange-oauth-provider (7.8.1-5) stable; urgency=medium
+
+  * Fifth preview for 7.8.1 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 15 Mar 2016 12:39:18 +0100
+
 open-xchange-oauth-provider (7.8.1-4) stable; urgency=medium
 
   * Fourth preview for 7.8.1 release

@@ -1,3 +1,9 @@
+open-xchange-xing-json (7.8.1-5) stable; urgency=medium
+
+  * Fifth preview for 7.8.1 release
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Tue, 15 Mar 2016 12:39:45 +0100
+
 open-xchange-xing-json (7.8.1-4) stable; urgency=medium
 
   * Fourth preview for 7.8.1 release
