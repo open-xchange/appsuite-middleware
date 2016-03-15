@@ -67,7 +67,7 @@ import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link CategoriesAction}
+ * {@link SwitchAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
@@ -77,7 +77,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "category_ids", description = "A list of category identifiers."),
     @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),
     }, responseDescription = "Response: An array with category configurations")
-public class CategoriesAction implements AJAXActionService {
+public class SwitchAction implements AJAXActionService {
     
     private static final String ACTION = "categories";
     private static final String PARAMETER_CATEGORY_IDS = "category_ids";
@@ -86,9 +86,9 @@ public class CategoriesAction implements AJAXActionService {
     private final ServiceLookup LOOKUP;
     
     /**
-     * Initializes a new {@link CategoriesAction}.
+     * Initializes a new {@link SwitchAction}.
      */
-    public CategoriesAction(ServiceLookup services) {
+    public SwitchAction(ServiceLookup services) {
         super();
         LOOKUP = services;
 
