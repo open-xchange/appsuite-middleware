@@ -49,14 +49,18 @@
 
 package com.openexchange.file.storage.mail.find;
 
+import static com.openexchange.find.facet.Facets.newSimpleBuilder;
+import static com.openexchange.java.SimpleTokenizer.tokenize;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.mail.MailDriveConstants;
 import com.openexchange.find.AbstractFindRequest;
@@ -66,6 +70,18 @@ import com.openexchange.find.FindExceptionCode;
 import com.openexchange.find.Module;
 import com.openexchange.find.SearchRequest;
 import com.openexchange.find.SearchResult;
+import com.openexchange.find.basic.drive.FileSize;
+import com.openexchange.find.basic.drive.FileType;
+import com.openexchange.find.common.CommonConstants;
+import com.openexchange.find.common.CommonFacetType;
+import com.openexchange.find.common.CommonStrings;
+import com.openexchange.find.drive.DriveFacetType;
+import com.openexchange.find.drive.DriveStrings;
+import com.openexchange.find.facet.DefaultFacet;
+import com.openexchange.find.facet.Facet;
+import com.openexchange.find.facet.FacetValue;
+import com.openexchange.find.facet.Facets;
+import com.openexchange.find.facet.Filter;
 import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.java.ConcurrentPriorityQueue;
@@ -118,7 +134,7 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
         if (null == registration) {
             Dictionary<String, Object> props = new Hashtable<>(2);
-            props.put(Constants.SERVICE_RANKING, Integer.valueOf(this.ranking));
+            props.put(org.osgi.framework.Constants.SERVICE_RANKING, Integer.valueOf(this.ranking));
             registration = context.registerService(ModuleSearchDriver.class, this, props);
         }
 
@@ -196,9 +212,108 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             return delegate().autocomplete(autocompleteRequest, session);
         }
 
+        String prefix = autocompleteRequest.getPrefix();
+        int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
 
-        // TODO Auto-generated method stub
-        return null;
+        List<Facet> facets = new LinkedList<Facet>();
+        if (Strings.isNotEmpty(prefix) && prefix.length() >= minimumSearchCharacters) {
+            List<String> prefixTokens = tokenize(prefix, minimumSearchCharacters);
+            if (prefixTokens.isEmpty()) {
+                prefixTokens = Collections.singletonList(prefix);
+            }
+
+            facets.add(newSimpleBuilder(CommonFacetType.GLOBAL)
+                .withSimpleDisplayItem(prefix)
+                .withFilter(Filter.of(Constants.FIELD_GLOBAL, prefixTokens))
+                .build());
+
+            facets.add(newSimpleBuilder(MailDriveFacetType.FILE_NAME)
+                .withFormattableDisplayItem(MailDriveStrings.SEARCH_IN_FILE_NAME, prefix)
+                .withFilter(Filter.of(Constants.FIELD_FILE_NAME, prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(MailDriveFacetType.FROM)
+                .withFormattableDisplayItem(MailDriveStrings.SEARCH_IN_FROM, prefix)
+                .withFilter(Filter.of(Constants.FIELD_FROM, prefixTokens))
+                .build());
+            facets.add(newSimpleBuilder(MailDriveFacetType.TO)
+                .withFormattableDisplayItem(MailDriveStrings.SEARCH_IN_TO, prefix)
+                .withFilter(Filter.of(Constants.FIELD_TO, prefixTokens))
+                .build());
+        }
+
+        addFileTypeFacet(facets);
+
+        addFileSizeFacet(facets);
+        addDateFacet(facets);
+
+        return new AutocompleteResult(facets);
+    }
+
+    private void addFileTypeFacet(List<Facet> facets) {
+        String fieldFileType = Constants.FIELD_FILE_TYPE;
+        DefaultFacet fileTypeFacet = Facets.newExclusiveBuilder(MailDriveFacetType.FILE_TYPE)
+            .addValue(FacetValue.newBuilder(FileType.AUDIO.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_AUDIO)
+                .withFilter(Filter.of(fieldFileType, FileType.AUDIO.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.DOCUMENTS.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_DOCUMENTS)
+                .withFilter(Filter.of(fieldFileType, FileType.DOCUMENTS.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.IMAGES.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_IMAGES)
+                .withFilter(Filter.of(fieldFileType, FileType.IMAGES.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.OTHER.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_OTHER)
+                .withFilter(Filter.of(fieldFileType, FileType.OTHER.getIdentifier()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileType.VIDEO.getIdentifier())
+                .withLocalizableDisplayItem(DriveStrings.FILE_TYPE_VIDEO)
+                .withFilter(Filter.of(fieldFileType, FileType.VIDEO.getIdentifier()))
+                .build())
+            .build();
+        facets.add(fileTypeFacet);
+    }
+
+    private void addFileSizeFacet(List<Facet> facets) {
+        String fieldFileSize = Constants.FIELD_FILE_SIZE;
+        facets.add(Facets.newExclusiveBuilder(DriveFacetType.FILE_SIZE)
+            .addValue(FacetValue.newBuilder(FileSize.MB1.getSize())
+                .withSimpleDisplayItem(FileSize.MB1.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB1.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.MB10.getSize())
+                .withSimpleDisplayItem(FileSize.MB10.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB10.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.MB100.getSize())
+                .withSimpleDisplayItem(FileSize.MB100.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.MB100.getSize()))
+                .build())
+            .addValue(FacetValue.newBuilder(FileSize.GB1.getSize())
+                .withSimpleDisplayItem(FileSize.GB1.getSize())
+                .withFilter(Filter.of(fieldFileSize, FileSize.GB1.getSize()))
+                .build())
+            .build());
+    }
+
+    private void addDateFacet(List<Facet> facets) {
+        String fieldDate = CommonConstants.FIELD_DATE;
+        facets.add(Facets.newExclusiveBuilder(CommonFacetType.DATE)
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_WEEK)
+                .withLocalizableDisplayItem(CommonStrings.LAST_WEEK)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_WEEK))
+                .build())
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_MONTH)
+                .withLocalizableDisplayItem(CommonStrings.LAST_MONTH)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_MONTH))
+                .build())
+            .addValue(FacetValue.newBuilder(CommonConstants.QUERY_LAST_YEAR)
+                .withLocalizableDisplayItem(CommonStrings.LAST_YEAR)
+                .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
+                .build())
+            .build());
     }
 
     @Override
