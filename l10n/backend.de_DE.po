@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-08 12:40+0100\n"
+"PO-Revision-Date: 2016-03-15 09:55+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -8393,6 +8393,16 @@ msgstr "Es trat ein Fehler auf. Wir konnten keine E-Mail an \"%2$s\" senden."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:68
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "Es trat ein Fehler auf. Wir konnten Ihre Benachrichtigungsmail nicht senden."
+
+#. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
+msgid "You have exceeded the maximum number of sms allowed. Please try again after %1$s hours"
+msgstr "Sie haben die maximal erlaubte Anzahl an SMS überschritten. Bitte versuchen Sie es nach %1$s Stunden erneut."
+
+#. SMS limits apply. You can only send one more message in the next %1$s hours
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
+msgid "SMS limits apply. You can only send one more message in the next %1$s hours"
+msgstr "Es gelten SMS-Limits. Sie können nur noch eine weitere Nachricht in den nächsten %1$s Stunden senden."
 
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64

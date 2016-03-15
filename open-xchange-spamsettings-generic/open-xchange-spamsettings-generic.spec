@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:        @OXVERSION@
-%define        ox_release 4
+%define        ox_release 5
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -59,6 +59,8 @@ ant -lib build/lib -Dbasedir=build -Dhtdoc=%{docroot} -DdestDir=%{buildroot} -Dp
 /opt/open-xchange/bundles/*
 
 %changelog
+* Tue Mar 15 2016 Carsten Hoeger <choeger@open-xchange.com>
+Fifth preview for 7.8.1 release
 * Fri Mar 04 2016 Carsten Hoeger <choeger@open-xchange.com>
 Fourth preview for 7.8.1 release
 * Sat Feb 20 2016 Carsten Hoeger <choeger@open-xchange.com>
