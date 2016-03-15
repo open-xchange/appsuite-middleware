@@ -56,6 +56,7 @@ import com.openexchange.context.ContextService;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
+import com.openexchange.file.storage.mail.find.MailDriveDriver;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.sessiond.SessiondService;
@@ -88,9 +89,12 @@ public final class MailDriveActivator extends HousekeepingActivator {
         try {
             Services.setServices(this);
 
+            rememberTracker(new MailDriveDriver(context, 10));
+            openTrackers();
+
             MailDriveFileStorageService service = MailDriveFileStorageService.newInstance();
             registerService(FileStorageService.class, service, null);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             logger.error("", e);
             throw e;
         }
