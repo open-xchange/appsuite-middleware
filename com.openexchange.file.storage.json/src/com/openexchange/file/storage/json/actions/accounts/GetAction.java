@@ -102,17 +102,25 @@ public class GetAction extends AbstractFileStorageAccountAction {
         //check filestorage capabilities
         Set<String> caps = new HashSet<String>();
         if (access instanceof CapabilityAware) {
+            CapabilityAware capabilityAware = (CapabilityAware) access;
 
-            if (((CapabilityAware) access).supports(FileStorageCapability.FILE_VERSIONS)) {
+            Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.FILE_VERSIONS.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.EXTENDED_METADATA)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.EXTENDED_METADATA.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.RANDOM_FILE_ACCESS)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
             }
-            if (((CapabilityAware) access).supports(FileStorageCapability.LOCKS)) {
+
+            supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+            if (null != supported && supported.booleanValue()) {
                 caps.add(FileStorageCapability.LOCKS.name());
             }
         }
