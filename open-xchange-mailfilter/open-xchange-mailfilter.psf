@@ -3,7 +3,5 @@
 <provider id="org.eclipse.egit.core.GitProvider">
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.filter"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.filter.json"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.categories"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,com.openexchange.mail.categories.json"/>
 </provider>
 </psf>

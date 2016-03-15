@@ -76,7 +76,6 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 %dir /opt/open-xchange/etc/
 %config(noreplace) %attr(640,root,open-xchange) /opt/open-xchange/etc/mailfilter.properties
-%config(noreplace) /opt/open-xchange/etc/mail-categories.properties
 
 %changelog
 * Fri Mar 04 2016 Marcus Klein <marcus.klein@open-xchange.com>
