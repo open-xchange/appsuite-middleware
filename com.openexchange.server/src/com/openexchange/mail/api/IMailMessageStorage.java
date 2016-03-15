@@ -364,6 +364,19 @@ public interface IMailMessageStorage {
      * @throws OXException If system flags cannot be updated
      */
     public void updateMessageFlags(String folder, String[] mailIds, int flags, boolean set) throws OXException;
+    
+    /**
+     * 
+     * Like {@link #updateMessageFlags(String, String[], int, boolean)} but also updates user flags
+     * 
+     * @param folder The folder full name
+     * @param mailIds The mail ids
+     * @param flags The bit pattern for the system flags to alter
+     * @param userFlags An array of user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If flags cannot be updated
+     */
+    public void updateMessageFlags(String folder, String[] mailIds, int flags, String[] userFlags, boolean set) throws OXException;
 
     /**
      * Gets all new and modified messages in specified folder.

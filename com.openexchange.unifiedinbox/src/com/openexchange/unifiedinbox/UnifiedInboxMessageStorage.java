@@ -1814,8 +1814,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
     }
 
+    private static final String[] EMPTY_FLAGS = new String[0];
+
     @Override
     public void updateMessageFlags(String fullName, String[] mailIds, final int flags, final boolean set) throws OXException {
+        updateMessageFlags(fullName, mailIds, flags, EMPTY_FLAGS, set);
+    }
+
+    @Override
+    public void updateMessageFlags(String fullName, String[] mailIds, final int flags, final String[] userFlags, final boolean set) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -1846,7 +1853,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 String folder = e.getKey();
                                 List<String> uids = e.getValue();
                                 // Update flags
-                                mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
+                                mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, userFlags, set);
                             }
                         } catch (OXException e) {
                             getLogger().debug("", e);

@@ -82,6 +82,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
+import org.apache.commons.lang.ArrayUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
@@ -3367,8 +3368,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return MimeMessageConverter.convertMailMessage(m, behavior);
     }
 
+
     @Override
     public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, final boolean set) throws OXException {
+        updateMessageFlagsLong(fullName, msgUIDs, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
+    }
+
+    @Override
+    public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
             // Nothing to do
             return;
@@ -3468,6 +3475,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug("IMAP server {} does not support user flags. Skipping read-ack flag.", imapConfig.getImapServerSocketAddress());
                     }
                 }
+
+                for (String userFlag : userFlags) {
+                    affectedFlags.add(userFlag);
+                }
+
+                applyFlags = ArrayUtils.isEmpty(userFlags) ? applyFlags : true;
+
                 if (applyFlags) {
                     final long start = System.currentTimeMillis();
                     new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
@@ -3499,6 +3513,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public void updateMessageFlags(final String fullName, final int flagsArg, final boolean set) throws OXException {
+        updateMessageFlags(fullName, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
+    }
+
+    @Override
+    public void updateMessageFlags(final String fullName, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
         if (null == fullName) {
             // Nothing to do
             return;
@@ -3596,6 +3615,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug("IMAP server {0} does not support user flags. Skipping read-ack flag.", imapConfig.getImapServerSocketAddress());
                     }
                 }
+
+                for (String userFlag : userFlags) {
+                    affectedFlags.add(userFlag);
+                }
+
+                applyFlags = ArrayUtils.isEmpty(userFlags) ? applyFlags : true;
                 if (applyFlags) {
                     final long start = System.currentTimeMillis();
                     new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();

@@ -271,6 +271,11 @@ public final class POP3MessageStorage extends MailMessageStorage implements ISim
         pop3MessageStorage.updateMessageFlags(folder, mailIds, flags, set);
     }
 
+    @Override
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, String[] userFlags, final boolean set) throws OXException {
+        pop3MessageStorage.updateMessageFlags(folder, mailIds, flags, userFlags, set);
+    }
+
     /**
      * Sets account ID and name in given instances of {@link MailMessage}.
      *
