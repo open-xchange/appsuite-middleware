@@ -94,6 +94,19 @@ public class FileConverter implements ResultConverter {
              * write single file result
              */
             resultObject = writer.write(infostoreRequest, (File) resultObject);
+        } else if (TimedResult.class.isInstance(resultObject)) {
+            /*
+             * write timed files result
+             */
+            SearchIterator<File> searchIterator = null;
+            try {
+                TimedResult<File> timedResult = (TimedResult<File>) resultObject;
+                result.setTimestamp(new Date(timedResult.sequenceNumber()));
+                searchIterator = timedResult.results();
+                resultObject = writer.write(infostoreRequest, searchIterator);
+            } finally {
+                SearchIterators.close(searchIterator);
+            }
         } else if (SearchIterator.class.isInstance(resultObject)) {
             /*
              * write search iterator result
@@ -123,19 +136,6 @@ public class FileConverter implements ResultConverter {
             } finally {
                 SearchIterators.close(newAndModifiedIterator);
                 SearchIterators.close(deletedIterator);
-            }
-        } else if (TimedResult.class.isInstance(resultObject)) {
-            /*
-             * write timed files result
-             */
-            SearchIterator<File> searchIterator = null;
-            try {
-                TimedResult<File> timedResult = (TimedResult<File>) resultObject;
-                result.setTimestamp(new Date(timedResult.sequenceNumber()));
-                searchIterator = timedResult.results();
-                resultObject = writer.write(infostoreRequest, searchIterator);
-            } finally {
-                SearchIterators.close(searchIterator);
             }
         } else {
             throw new UnsupportedOperationException("unknown result object");
