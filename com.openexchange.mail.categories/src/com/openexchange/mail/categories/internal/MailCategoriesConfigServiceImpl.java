@@ -80,14 +80,14 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         List<MailCategoryConfig> result = new ArrayList<>(categories.length);
         for (String category : categories) {
             MailCategoryConfig config = getConfigByCategory(session, category);
-            if (onlyEnabled && config.isActive()) {
+            if (onlyEnabled && !config.isActive()) {
                 continue;
             }
             result.add(config);
         }
         for (String category : userCategories) {
             MailCategoryConfig config = getUserConfigByCategory(session, category);
-            if (onlyEnabled && config.isActive()) {
+            if (onlyEnabled && !config.isActive()) {
                 continue;
             }
             result.add(config);
@@ -104,9 +104,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
             ArrayList<String> result = new ArrayList<>(userCategories.length);
             for (String category : userCategories) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-                if (!active) {
-                    continue;
+                if (onlyEnabled) {
+                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                    if (!active) {
+                        continue;
+                    }
                 }
                 result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
@@ -120,19 +122,23 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
             ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
             for (String category : categories) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-                if (!active) {
-                    boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
-                    if (!forced) {
-                        continue;
+                if (onlyEnabled) {
+                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                    if (!active) {
+                        boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                        if (!forced) {
+                            continue;
+                        }
                     }
                 }
                result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
             for (String category : userCategories) {
-                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-                if (!active) {
-                    continue;
+                if (onlyEnabled) {
+                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                    if (!active) {
+                        continue;
+                    }
                 }
                result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
