@@ -69,6 +69,7 @@ public enum MailDriveFacetType implements FacetType {
     FILE_TYPE(MailDriveStrings.FACET_FILE_TYPE),
     FROM(MailDriveStrings.FACET_FROM),
     TO(MailDriveStrings.FACET_TO),
+    SUBJECT(MailDriveStrings.FACET_SUBJECT),
     FILE_SIZE(MailDriveStrings.FACET_FILE_SIZE)
     ;
 

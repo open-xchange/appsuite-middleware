@@ -127,13 +127,13 @@ public final class MailDriveFileStorageService implements AccountAware {
         return Collections.emptySet();
     }
 
-    private UserPermissionBits getUserPermissionBits(Session session) throws OXException {
+    private UserPermissionBits getUserPermissionBits(Session session, int userId, int contextId) throws OXException {
         if (session instanceof ServerSession) {
             ServerSession serverSession = (ServerSession) session;
             return serverSession.getUserPermissionBits();
         }
 
-        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(session.getUserId(), session.getContextId());
+        return UserPermissionBitsStorage.getInstance().getUserPermissionBits(userId, contextId);
     }
 
     /**
@@ -144,7 +144,19 @@ public final class MailDriveFileStorageService implements AccountAware {
      * @throws OXException If check fails
      */
     public boolean hasMailDriveAccess(Session session) throws OXException {
-        return getUserPermissionBits(session).hasWebMail() && isEnabledFor(session);
+        return getUserPermissionBits(session, session.getUserId(), session.getContextId()).hasWebMail() && isEnabledFor(session);
+    }
+
+    /**
+     * Checks if session-associated user has Mail Drive access.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if Mail Drive is accessible; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean hasMailDriveAccess(int userId, int contextId) throws OXException {
+        return getUserPermissionBits(null, userId, contextId).hasWebMail() && isEnabledFor(userId, contextId);
     }
 
     /**
@@ -169,17 +181,36 @@ public final class MailDriveFileStorageService implements AccountAware {
     }
 
     @Override
-    public MailDriveAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
+    public MailDriveAccountAccess getAccountAccess(String accountId, Session session) throws OXException {
         return new MailDriveAccountAccess(getFullNameCollectionFor(session), this, session);
     }
 
-    private FullNameCollection getFullNameCollectionFor(Session session) throws OXException {
+    /**
+     * Gets the collection of full names for virtual attachment folders associated with specified session.
+     *
+     * @param session The session providing user data
+     * @return The collection of full names for virtual attachment folders
+     * @throws OXException If collection of full names for virtual attachment folders cannot be returned
+     */
+    public FullNameCollection getFullNameCollectionFor(Session session) throws OXException {
+        return getFullNameCollectionFor(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Gets the collection of full names for virtual attachment folders associated with specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return The collection of full names for virtual attachment folders
+     * @throws OXException If collection of full names for virtual attachment folders cannot be returned
+     */
+    public FullNameCollection getFullNameCollectionFor(int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
         if (null == viewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
 
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ConfigView view = viewFactory.getView(userId, contextId);
 
         String fullNameAll;
         {
@@ -211,13 +242,32 @@ public final class MailDriveFileStorageService implements AccountAware {
         return new FullNameCollection(fullNameAll, fullNameReceived, fullNameSent);
     }
 
-    private boolean isEnabledFor(Session session) throws OXException {
+    /**
+     * Checks if Mail Drive is enabled for session-associated user.
+     *
+     * @param session The session providing user data
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean isEnabledFor(Session session) throws OXException {
+        return isEnabledFor(session.getUserId(), session.getContextId());
+    }
+
+    /**
+     * Checks if Mail Drive is enabled for specified user.
+     *
+     * @param userId The user identifier
+     * @param contextId The context identifier
+     * @return <code>true</code> if enabled; otherwise <code>false</code>
+     * @throws OXException If check fails
+     */
+    public boolean isEnabledFor(int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = Services.getOptionalService(ConfigViewFactory.class);
         if (null == viewFactory) {
             throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
         }
 
-        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        ConfigView view = viewFactory.getView(userId, contextId);
         String propName = "com.openexchange.file.storage.mail.enabled";
         ComposedConfigProperty<Boolean> property = view.property(propName, Boolean.class);
 

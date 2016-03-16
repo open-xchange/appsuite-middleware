@@ -69,6 +69,9 @@ public class MailDriveStrings implements LocalizableStrings {
     // Search in To recipient.
     public static final String FACET_TO = "To";
 
+    // Search in original mail subject
+    public static final String FACET_SUBJECT = "Subject";
+
     // Search in file type.
     public static final String FACET_FILE_TYPE = "File type";
 
@@ -91,5 +94,10 @@ public class MailDriveStrings implements LocalizableStrings {
     // Displayed as: [Search for] 'user input' in To recipient.
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String SEARCH_IN_TO = "in To recipient";
+
+    // Context: Searching in drive.
+    // Displayed as: [Search for] 'user input' in subject.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String SEARCH_IN_SUBJECT = "in subject";
 
 }

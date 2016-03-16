@@ -47,76 +47,78 @@
  *
  */
 
-package com.openexchange.file.storage.mail.osgi;
+package com.openexchange.file.storage.mail.settings;
 
 import org.slf4j.Logger;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.context.ContextService;
-import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
-import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
-import com.openexchange.file.storage.mail.find.MailDriveDriver;
-import com.openexchange.file.storage.mail.settings.AllAttachmentsFolder;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.settings.IValueHandler;
 import com.openexchange.groupware.settings.PreferencesItemService;
+import com.openexchange.groupware.settings.ReadOnlyValue;
+import com.openexchange.groupware.settings.Setting;
+import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.jslob.ConfigTreeEquivalent;
-import com.openexchange.mime.MimeTypeMap;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.sessiond.SessiondService;
-import com.openexchange.timer.TimerService;
-import com.openexchange.user.UserService;
+import com.openexchange.session.Session;
 
 /**
- * {@link MailDriveActivator} - Activator for Mail Drive bundle.
+ * {@link AllAttachmentsFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public final class MailDriveActivator extends HousekeepingActivator {
+public class AllAttachmentsFolder implements PreferencesItemService, ConfigTreeEquivalent {
+
+    /** The logger constant */
+    static final Logger LOG = org.slf4j.LoggerFactory.getLogger(AllAttachmentsFolder.class);
+
+    /** The Mail Drive service */
+    final MailDriveFileStorageService mailDriveService;
 
     /**
-     * Initializes a new {@link MailDriveActivator}.
+     * Initializes a new {@link AllAttachmentsFolder}.
      */
-    public MailDriveActivator() {
+    public AllAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
         super();
+        this.mailDriveService = mailDriveService;
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { FileStorageAccountManagerLookupService.class, ConfigurationService.class, SessiondService.class,
-            MimeTypeMap.class, TimerService.class, ConfigViewFactory.class, ContextService.class, UserService.class };
+    public String[] getPath() {
+        return new String[] { "modules", "mail", "allattachments" };
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        Logger logger = org.slf4j.LoggerFactory.getLogger(MailDriveActivator.class);
-        try {
-            Services.setServices(this);
+    public IValueHandler getSharedValue() {
+        return new ReadOnlyValue() {
 
-            MailDriveFileStorageService service = MailDriveFileStorageService.newInstance();
-            rememberTracker(new MailDriveDriver(service, context, 10));
-            openTrackers();
+            @Override
+            public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
+                setting.setSingleValue(mailDriveService.getFullNameCollectionFor(session).fullNameAll);
+            }
 
-            registerService(FileStorageService.class, service, null);
+            @Override
+            public boolean isAvailable(UserConfiguration userConfig) {
+                try {
+                    return userConfig.hasWebMail() && mailDriveService.isEnabledFor(userConfig.getUserId(), userConfig.getContext().getContextId());
+                } catch (OXException e) {
+                    // Failed to check
+                    LOG.error("Failewd to check Mail Drive availability", e);
+                    return false;
+                }
+            }
 
-            AllAttachmentsFolder setting = new AllAttachmentsFolder(service);
-            registerService(PreferencesItemService.class, setting, null);
-            registerService(ConfigTreeEquivalent.class, setting, null);
-        } catch (Exception e) {
-            logger.error("", e);
-            throw e;
-        }
+        };
     }
 
     @Override
-    public <S> void registerService(final Class<S> clazz, final S service) {
-        super.registerService(clazz, service);
+    public String getConfigTreePath() {
+        return "modules/mail/allattachments";
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServices(null);
+    public String getJslobPath() {
+        return "io.ox/mail//allattachments";
     }
-
 }

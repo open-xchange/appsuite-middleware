@@ -86,9 +86,13 @@ public final class MailDriveFindConstants {
     /** The field for file size */
     public static final String FIELD_FILE_SIZE = "file_size";
 
+    /** The field for subject */
+    public static final String FIELD_SUBJECT = "subject";
+
     // ---------------------------------------------------------------------------------------------------------- //
 
     /** The fields to query for */
     public static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_FILE_NAME, FIELD_FROM, FIELD_TO });
+
 
 }

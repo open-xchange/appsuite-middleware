@@ -193,7 +193,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
                         throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(id, folderId);
                     }
 
-                    return new MailDriveFile(folderId, id, userId, getRootFolderId()).parseMessage(message);
+                    return new MailDriveFile(folderId, id, userId, getRootFolderId()).parseMessage((IMAPMessage) message);
                 } finally {
                     folder.close(false);
                 }

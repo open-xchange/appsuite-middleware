@@ -49,12 +49,18 @@
 
 package com.openexchange.file.storage.mail;
 
+import static com.openexchange.mail.json.writer.MessageWriter.getAddressesAsArray;
+import static com.openexchange.mail.mime.converters.MimeMessageConverter.getAddressHeader;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import javax.mail.Message;
 import javax.mail.MessagingException;
+import javax.mail.internet.InternetAddress;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFile;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
@@ -62,7 +68,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mime.MimeTypeMap;
+import com.sun.mail.imap.IMAPMessage;
 
 /**
  * {@link MailDriveFile}
@@ -108,7 +116,7 @@ public final class MailDriveFile extends DefaultFile {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing message fails
      */
-    public MailDriveFile parseMessage(Message message) throws MessagingException, OXException {
+    public MailDriveFile parseMessage(IMAPMessage message) throws MessagingException, OXException {
         return parseMessage(message, null);
     }
 
@@ -121,10 +129,10 @@ public final class MailDriveFile extends DefaultFile {
      * @throws MessagingException If a messaging error occurs
      * @throws OXException If parsing Mail Drive file fails
      */
-    public MailDriveFile parseMessage(Message message, List<Field> fields) throws MessagingException, OXException {
+    public MailDriveFile parseMessage(IMAPMessage message, List<Field> fields) throws MessagingException, OXException {
         if (null != message) {
             try {
-                final String name = message.getFileName();
+                final String name = message.getSubject();
                 setTitle(name);
                 setFileName(name);
                 final Set<Field> set = null == fields || fields.isEmpty() ? EnumSet.allOf(Field.class) : EnumSet.copyOf(fields);
@@ -177,11 +185,41 @@ public final class MailDriveFile extends DefaultFile {
                 if (set.contains(Field.VERSION_COMMENT)) {
                     setVersionComment(null);
                 }
+
+                // Compose "meta" field
+                Map<String, Object> meta = new HashMap<String, Object>(2);
+                meta.put("mail", mailMetadata(message));
+                setMeta(meta);
             } catch (final RuntimeException e) {
                 throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
             }
         }
         return this;
+    }
+
+    private Map<String, Object> mailMetadata(IMAPMessage message) throws MessagingException {
+        Map<String, Object> map = new LinkedHashMap<String, Object>(6);
+        {
+            String originalSubject = MimeMessageUtility.getHeader("X-Original-Subject", null, message);
+            map.put("subject", null == originalSubject ? JSONObject.NULL : MimeMessageUtility.decodeMultiEncodedHeader(originalSubject));
+        }
+        {
+            Long origUid = (Long) message.getItem("X-REAL-UID");
+            map.put("id",null == origUid ? JSONObject.NULL : origUid.toString());
+        }
+        {
+            String origFolder = (String) message.getItem("X-MAILBOX");
+            map.put("id",null == origFolder ? JSONObject.NULL : origFolder);
+        }
+        {
+            InternetAddress[] fromHeaders = getAddressHeader("From", message);
+            map.put("from", fromHeaders == null || fromHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(fromHeaders).asList());
+        }
+        {
+            InternetAddress[] toHeaders = getAddressHeader("To", message);
+            map.put("to", toHeaders == null || toHeaders.length == 0 ? JSONObject.NULL : getAddressesAsArray(toHeaders).asList());
+        }
+        return map;
     }
 
 }

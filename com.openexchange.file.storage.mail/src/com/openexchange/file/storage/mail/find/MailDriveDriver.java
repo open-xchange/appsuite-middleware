@@ -301,6 +301,10 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 .withFormattableDisplayItem(MailDriveStrings.SEARCH_IN_TO, prefix)
                 .withFilter(Filter.of(MailDriveFindConstants.FIELD_TO, prefixTokens))
                 .build());
+            facets.add(newSimpleBuilder(MailDriveFacetType.SUBJECT)
+                .withFormattableDisplayItem(MailDriveStrings.SEARCH_IN_SUBJECT, prefix)
+                .withFilter(Filter.of(MailDriveFindConstants.FIELD_SUBJECT, prefixTokens))
+                .build());
         }
 
         addFileTypeFacet(facets);
@@ -385,17 +389,14 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             return delegate().search(searchRequest, session);
         }
 
-        // Initialize...
-        MailDriveAccountAccess accountAccess = mailDriveService.getAccountAccess(MailDriveConstants.ACCOUNT_ID, session);
-
         // Determine the full names to search in
         List<FullName> fullNames;
         {
             String folderId = searchRequest.getFolderId();
             if (null == folderId) {
-                fullNames = accountAccess.getFullNameCollection().asList();
+                fullNames = mailDriveService.getFullNameCollectionFor(session).asList();
             } else {
-                FullName fullName = MailDriveAccountAccess.optFolderId(folderId, accountAccess.getFullNameCollection());
+                FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
                 if (null == fullName) {
                     throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
                 }
@@ -510,6 +511,11 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 break;
 
             case FROM:
+                fieldOP = OP.OR;
+                queryOP = OP.AND;
+                break;
+
+            case SUBJECT:
                 fieldOP = OP.OR;
                 queryOP = OP.AND;
                 break;
@@ -700,6 +706,8 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
             return new FromStringTerm(query);
         } else if (MailDriveFindConstants.FIELD_TO.equals(field)) {
             return new RecipientStringTerm(RecipientType.TO, query);
+        } else if (MailDriveFindConstants.FIELD_SUBJECT.equals(field)) {
+            return new HeaderTerm("X-Original-Subject", query);
         } else if (MailDriveFindConstants.FIELD_FILE_TYPE.equals(field)) {
             return buildFileTypeTerm(query);
         } else if (MailDriveFindConstants.FIELD_FILE_SIZE.equals(field)) {
