@@ -118,10 +118,9 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
      * Parses specified full name.
      *
      * @param fullName The full name
-     * @param accountDisplayName The account's display name
      * @throws OXException If parsing fails
      */
-    public MailDriveFolder parseFullName(FullName fullName, String accountDisplayName, Session session) throws OXException {
+    public MailDriveFolder parseFullName(FullName fullName, Session session) throws OXException {
         try {
             rootFolder = fullName.isDefaultFolder();
             b_rootFolder = true;
@@ -129,7 +128,7 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
             if (rootFolder) {
                 id = _ROOT_FULLNAME;
                 setParentId(null);
-                setName(null == accountDisplayName ? "" : accountDisplayName);
+                setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME));
                 setSubfolders(true);
                 setSubscribedSubfolders(true);
                 permission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
@@ -155,6 +154,8 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_RECEIVED);
             case SENT:
                 return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.NAME_ATTACHMENTS_SENT);
+            case DEFAULT:
+                return StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME);
             default:
                 return null;
         }

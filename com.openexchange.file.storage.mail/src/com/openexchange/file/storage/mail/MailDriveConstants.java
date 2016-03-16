@@ -76,9 +76,4 @@ public final class MailDriveConstants implements FileStorageConstants {
      */
     public static final String ACCOUNT_ID = "0";
 
-    /**
-     * The account display name <code>"Mail Drive"</code>.
-     */
-    public static final String ACCOUNT_DISPLAY_NAME = "Mail Drive";
-
 }

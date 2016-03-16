@@ -63,10 +63,16 @@ public class MailDriveStrings implements LocalizableStrings {
         super();
     }
 
+    // The name for the virtual folder containing all attachments from all messages
     public static final String NAME_ATTACHMENTS_ALL = "All attachments";
 
+    // The name for the virtual folder containing all attachments of received messages
     public static final String NAME_ATTACHMENTS_RECEIVED = "Received attachments";
 
+    // The name for the virtual folder containing all attachments of sent messages
     public static final String NAME_ATTACHMENTS_SENT = "Sent attachments";
+
+    // The account display name
+    public static final String ACCOUNT_DISPLAY_NAME = "Mail Drive";
 
 }

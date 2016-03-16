@@ -217,7 +217,7 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameAll";
             ComposedConfigProperty<String> propertyAll = view.property(propName, String.class);
             if (!propertyAll.isDefined() || Strings.isEmpty((fullNameAll = propertyAll.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
             }
         }
 
@@ -226,7 +226,7 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameReceived";
             ComposedConfigProperty<String> propertyReceived = view.property(propName, String.class);
             if (!propertyReceived.isDefined() || Strings.isEmpty((fullNameReceived = propertyReceived.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
             }
         }
 
@@ -235,11 +235,11 @@ public final class MailDriveFileStorageService implements AccountAware {
             String propName = "com.openexchange.file.storage.mail.fullNameSent";
             ComposedConfigProperty<String> propertySent = view.property(propName, String.class);
             if (!propertySent.isDefined() || Strings.isEmpty((fullNameSent = propertySent.get()))) {
-                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_ID);
             }
         }
 
-        return new FullNameCollection(fullNameAll, fullNameReceived, fullNameSent);
+        return new FullNameCollection(fullNameAll.trim(), fullNameReceived.trim(), fullNameSent.trim());
     }
 
     /**

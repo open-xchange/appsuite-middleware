@@ -68,7 +68,6 @@ import com.openexchange.session.Session;
 public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess implements FileStorageFolderAccess {
 
     private final int userId;
-    private final String accountDisplayName;
 
     /**
      * Initializes a new {@link MailDriveFolderAccess}.
@@ -79,11 +78,10 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
     public MailDriveFolderAccess(FullNameCollection fullNameCollection, Session session) {
         super(fullNameCollection, session);
         userId = session.getUserId();
-        accountDisplayName = MailDriveConstants.ACCOUNT_DISPLAY_NAME;
     }
 
     protected MailDriveFolder parsedFolder(FullName fullName) throws OXException {
-        return new MailDriveFolder(userId).parseFullName(fullName, accountDisplayName, session);
+        return new MailDriveFolder(userId).parseFullName(fullName, session);
     }
 
     @Override
