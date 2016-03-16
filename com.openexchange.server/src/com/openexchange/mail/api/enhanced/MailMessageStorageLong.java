@@ -480,6 +480,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
+    @Override
+    public abstract int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException;
+
     /**
      * An <b>optional</b> method that updates the color label of the messages specified by given mail IDs located in given folder.
      * <p>

@@ -89,6 +89,7 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
         super();
         actions = new ConcurrentHashMap<String, AJAXActionService>(10, 0.9f, 1);
         actions.put("switch", new SwitchAction(services));
+        actions.put("unread", new UnreadAction(services));
     }
 
     @Override

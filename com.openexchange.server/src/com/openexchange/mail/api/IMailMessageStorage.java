@@ -397,4 +397,14 @@ public interface IMailMessageStorage {
      * @throws OXException If mails cannot be returned
      */
     public MailMessage[] getDeletedMessages(final String folder, final MailField[] fields) throws OXException;
+
+    /**
+     * Gets the number of unread messages in the given folder which match the given search term.
+     * 
+     * @param folder The folder full name
+     * @param searchTerm The search term to filter messages; may be <code>null</code> to obtain all messages
+     * @return The number of unread messages.
+     * @throws OXException If unread count cannot be returned
+     */
+    int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException;
 }

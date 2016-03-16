@@ -49,54 +49,57 @@
 
 package com.openexchange.mail.categories.json;
 
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.List;
 import org.apache.commons.lang.Validate;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link SwitchAction} activates or deactivates mail categories
+ * {@link UnreadAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "switch", description = "Enable or disable mail catgeories.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "category_ids", description = "A list of category identifiers."),
-    @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),
-    }, responseDescription = "Response: An array with category configurations")
-public class SwitchAction implements AJAXActionService {
-    
-    private static final String ACTION = "categories";
-    private static final String PARAMETER_CATEGORY_IDS = "category_ids";
-    private static final String PARAMETER_ENABLE = "enable";
+@Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = { 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
+}, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
+public class UnreadAction implements AJAXActionService {
 
+    private static final String ACTION = "categories";
     private final ServiceLookup LOOKUP;
-    
     /**
      * Initializes a new {@link SwitchAction}.
      */
-    public SwitchAction(ServiceLookup services) {
+    public UnreadAction(ServiceLookup services) {
         super();
         LOOKUP = services;
 
     }
-    
-    
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String folderId = requestData.checkParameter("folder");
+
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
@@ -107,16 +110,42 @@ public class SwitchAction implements AJAXActionService {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
-        String[] ids = Strings.splitByComma(requestData.requireParameter(PARAMETER_CATEGORY_IDS));
-        if (null == ids || ids.length == 0) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_CATEGORY_IDS);
+        FullnameArgument fa = prepareMailFolderParam(folderId);
+        JSONObject resultObject = new JSONObject();
+        MailServletInterface msi = MailServletInterface.getInstance(session);
+        msi.openFor(folderId);
+        IMailMessageStorage mailStorage = msi.getMailAccess().getMessageStorage();
+
+        List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true);
+        String[] flags = new String[categories.size()];
+        int x = 0;
+        for (MailCategoryConfig category : categories) {
+            flags[x++] = category.getFlag();
+        }
+        String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
+        try {
+            SearchTerm<?> searchTerm = null;
+            // General case
+            searchTerm = new UserFlagTerm(flags, false);
+            int unread = mailStorage.getUnreadCount(fa.getFullname(), searchTerm);
+            resultObject.put("General", unread);
+
+            for (MailCategoryConfig category : categories) {
+
+                if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
+                    searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
+                } else {
+                    searchTerm = new UserFlagTerm(category.getFlag(), true);
+                }
+                unread = mailStorage.getUnreadCount(fa.getFullName(), searchTerm);
+                resultObject.put(category.getCategory(), unread);
+            }
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
 
-        boolean enable = AJAXRequestDataTools.parseBoolParameter(PARAMETER_ENABLE, requestData);
-        List<MailCategoryConfig> configs = categoriesConfigService.changeConfigurations(ids, enable, session);
-
-        final AJAXRequestResult result = new AJAXRequestResult(configs, "mailCategoriesConfig");
-        return result;
+        return new AJAXRequestResult(resultObject, "json");
     }
+
 
 }

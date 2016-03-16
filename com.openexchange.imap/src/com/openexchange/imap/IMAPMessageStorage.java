@@ -158,8 +158,10 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
+import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -1694,6 +1696,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         return searchMessages(fullName, indexRange, sortField, order, searchTerm, mailFields, null);
+    }
+
+    @Override
+    public int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException {
+        try {
+            openReadOnly(folder);
+        } catch (OXException e) {
+            if (IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) {
+                return 0;
+            }
+            throw e;
+        }
+        try {
+            SearchTerm<?> unseenSearchTerm = new ANDTerm(searchTerm, new FlagTerm(MailMessage.FLAG_SEEN, false));
+            return IMAPSearch.searchMessages(imapFolder, unseenSearchTerm, imapConfig).length;
+        } catch (MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return 0;
+            }
+            throw handleMessagingException(folder, e);
+        }
     }
 
     @Override
