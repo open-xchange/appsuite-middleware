@@ -67,6 +67,7 @@ import com.openexchange.user.UserService;
  * {@link MailDriveActivator} - Activator for Mail Drive bundle.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class MailDriveActivator extends HousekeepingActivator {
 

@@ -57,6 +57,7 @@ import java.util.List;
  * {@link MailDriveFindConstants}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class MailDriveFindConstants {
 

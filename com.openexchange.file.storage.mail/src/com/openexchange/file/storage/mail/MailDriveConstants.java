@@ -55,6 +55,7 @@ import com.openexchange.file.storage.FileStorageConstants;
  * {@link MailDriveConstants} - Provides useful constants for Mail Drive file storage.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class MailDriveConstants implements FileStorageConstants {
 

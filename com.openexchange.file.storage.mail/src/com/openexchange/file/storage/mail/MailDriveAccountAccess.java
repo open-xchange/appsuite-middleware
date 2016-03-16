@@ -68,6 +68,7 @@ import com.openexchange.session.Session;
  * {@link MailDriveAccountAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class MailDriveAccountAccess implements FileStorageAccountAccess, CapabilityAware {
 

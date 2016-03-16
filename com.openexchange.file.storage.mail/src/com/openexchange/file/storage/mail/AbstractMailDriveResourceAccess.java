@@ -70,6 +70,7 @@ import com.sun.mail.imap.IMAPStore;
  * {@link AbstractMailDriveResourceAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public abstract class AbstractMailDriveResourceAccess {
 

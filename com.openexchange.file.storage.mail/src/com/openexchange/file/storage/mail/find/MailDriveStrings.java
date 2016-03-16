@@ -56,6 +56,7 @@ import com.openexchange.i18n.LocalizableStrings;
  * {@link MailDriveStrings}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public class MailDriveStrings implements LocalizableStrings {
 
@@ -74,28 +75,7 @@ public class MailDriveStrings implements LocalizableStrings {
     // Search in file size
     public static final String FACET_FILE_SIZE = "File size";
 
-    // -------------------------- i18n strings for file types ---------------------------- //
-
-    public static final String FILE_TYPE_IMAGES = "Images";
-
-    public static final String FILE_TYPE_AUDIO = "Audio";
-
-    public static final String FILE_TYPE_VIDEO = "Video";
-
-    public static final String FILE_TYPE_DOCUMENTS = "Documents";
-
-    public static final String FILE_TYPE_OTHER = "Other";
-
     // ---------------------------------------------------------------------------------- //
-
-    // Public folders
-    public static final String FOLDER_TYPE_PUBLIC = "Public folders";
-
-    // Private folders
-    public static final String FOLDER_TYPE_PRIVATE = "Private folders";
-
-    // Shared folders
-    public static final String FOLDER_TYPE_SHARED = "Shared folders";
 
     // Context: Searching in drive.
     // Displayed as: [Search for] 'user input' in file name.

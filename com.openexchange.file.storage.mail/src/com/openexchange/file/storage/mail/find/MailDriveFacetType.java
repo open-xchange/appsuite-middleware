@@ -61,6 +61,7 @@ import com.openexchange.java.Strings;
  * {@link MailDriveFacetType} - Facet types for the Mail Drive module.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public enum MailDriveFacetType implements FacetType {
 

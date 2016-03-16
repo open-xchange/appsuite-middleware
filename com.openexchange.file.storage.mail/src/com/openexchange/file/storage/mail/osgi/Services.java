@@ -57,6 +57,7 @@ import com.openexchange.server.ServiceLookup;
  * {@link Services} - Provides static access to {@link ServiceLookup} reference.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class Services {
 

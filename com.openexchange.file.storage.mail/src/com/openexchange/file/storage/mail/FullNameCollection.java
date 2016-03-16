@@ -59,7 +59,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
  * {@link FullNameCollection}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.2
  */
 public class FullNameCollection implements Iterable<FullName> {
 

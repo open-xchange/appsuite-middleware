@@ -94,6 +94,7 @@ import com.sun.mail.imap.IMAPStore;
  * {@link MailDriveFileAccess}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public class MailDriveFileAccess extends AbstractMailDriveResourceAccess implements FileStorageFileAccess, FileStorageSequenceNumberProvider, FileStorageReadOnly, FileStorageMailStore {
 

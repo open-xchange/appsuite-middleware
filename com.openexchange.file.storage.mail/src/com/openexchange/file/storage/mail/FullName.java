@@ -53,7 +53,7 @@ package com.openexchange.file.storage.mail;
  * {@link FullName}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
- * @since v7.8.1
+ * @since v7.8.2
  */
 public class FullName {
 

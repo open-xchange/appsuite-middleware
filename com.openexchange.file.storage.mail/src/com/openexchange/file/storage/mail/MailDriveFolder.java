@@ -69,6 +69,7 @@ import com.openexchange.user.UserService;
  * {@link MailDriveFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
 public final class MailDriveFolder extends DefaultFileStorageFolder implements TypeAware {
 
