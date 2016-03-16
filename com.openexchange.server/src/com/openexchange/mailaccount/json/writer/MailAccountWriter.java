@@ -103,7 +103,10 @@ public final class MailAccountWriter implements MailAccountFields {
         Attribute.TRANSPORT_SECURE_LITERAL,
         Attribute.TRANSPORT_SERVER_LITERAL,
         Attribute.TRANSPORT_URL_LITERAL,
-        Attribute.TRANSPORT_AUTH_LITERAL);
+        Attribute.TRANSPORT_AUTH_LITERAL,
+        
+        Attribute.MAIL_STARTTLS_LITERAL,
+        Attribute.TRANSPORT_STARTTLS_LITERAL);
 
     private static volatile Boolean hideDetailsForDefaultAccount;
     private static boolean hideDetailsForDefaultAccount() {

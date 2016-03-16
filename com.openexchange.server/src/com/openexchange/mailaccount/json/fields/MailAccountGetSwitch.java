@@ -284,4 +284,14 @@ public class MailAccountGetSwitch implements AttributeSwitch {
     public Object addresses() {
         return account.getProperties().get("addresses");
     }
+
+    @Override
+    public Object mailStartTls() {
+        return account.isMailStartTls();
+    }
+
+    @Override
+    public Object transportStartTls() {
+        return account.isTransportStartTls();
+    }
 }

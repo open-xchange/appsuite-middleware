@@ -114,6 +114,8 @@ public enum Attribute {
     ARCHIVE_FULLNAME_LITERAL(MailAccountFields.ARCHIVE_FULLNAME, 1042),
     // Transport auth information
     TRANSPORT_AUTH_LITERAL(MailAccountFields.TRANSPORT_AUTH, 1043),
+    MAIL_STARTTLS_LITERAL(MailAccountFields.MAIL_STARTTLS, 1044),
+    TRANSPORT_STARTTLS_LITERAL(MailAccountFields.TRANSPORT_STARTTLS, 1045),
 
     ;
 
@@ -260,6 +262,10 @@ public enum Attribute {
         case META:
             // Ignore for virtual attribute
             return null;
+        case MAIL_STARTTLS_LITERAL:
+            return switcher.mailStartTls();
+        case TRANSPORT_STARTTLS_LITERAL:
+            return switcher.transportStartTls();
         default:
             throw new IllegalArgumentException(getName());
         }
