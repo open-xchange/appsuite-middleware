@@ -2047,8 +2047,8 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, Session session) throws MessagingException {
-        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, session);
+    public static Message[] getUnreadMessages(IMAPFolder folder, MailField[] fields, MailSortField sortField, OrderDirection orderDir, boolean fastFetch, int limit, Session session, int accountId) throws MessagingException {
+        return getUnreadMessages(folder, fields, sortField, orderDir, fastFetch, limit, false, session, accountId);
     }
 
     /**
@@ -2062,7 +2062,7 @@ public final class IMAPCommandsCollection {
      * @return All unseen messages in specified folder
      * @throws MessagingException
      */
-    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final Session session) throws MessagingException {
+    public static Message[] getUnreadMessages(final IMAPFolder folder, final MailField[] fields, final MailSortField sortField, final OrderDirection orderDir, final boolean fastFetch, final int limit, final boolean ignoreDeleted, final Session session, final int accountId) throws MessagingException {
         final IMAPFolder imapFolder = folder;
         final Message[] val = (Message[]) imapFolder.doCommand(new IMAPFolder.ProtocolCommand() {
 
@@ -2083,7 +2083,7 @@ public final class IMAPCommandsCollection {
                             IMAPStore imapStore = (IMAPStore) folder.getStore();
                             if (imapStore.hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY(session) && imapStore.hasCapability("SORT=DISPLAY"));
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, imapStore.hasCapability("SORT=DISPLAY") && IMAPMessageStorage.allowSORTDISPLAY(session, accountId));
                                 if (tmp.length > 256) {
                                     /*
                                      * Sort all

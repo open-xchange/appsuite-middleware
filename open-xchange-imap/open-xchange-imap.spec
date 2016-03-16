@@ -7,7 +7,7 @@ BuildRequires: ant-nodeps
 BuildRequires: open-xchange-core
 BuildRequires: java-devel >= 1.6.0
 Version:       @OXVERSION@
-%define        ox_release 7
+%define        ox_release 8
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -80,6 +80,9 @@ if [ ${1:-0} -eq 2 ]; then
 
     # SoftwareChange_Request-2093
     ox_add_property com.openexchange.imap.namespacePerUser "true" $PFILE
+
+    # SoftwareChange_Request-3134
+    ox_add_property com.openexchange.imap.fallbackOnFailedSORT false $PFILE
 fi
 
 %clean
@@ -95,6 +98,8 @@ fi
 /opt/open-xchange/osgi/bundle.d/*
 
 %changelog
+* Tue Mar 08 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2016-03-14 (3147)
 * Mon Feb 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-02-29 (3120)
 * Wed Feb 03 2016 Marcus Klein <marcus.klein@open-xchange.com>

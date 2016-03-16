@@ -78,6 +78,7 @@ import com.openexchange.ajax.helper.BrowserDetector;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.exception.OXException;
+import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.Charsets;
 import com.openexchange.mail.mime.MimeMailException;
@@ -771,7 +772,7 @@ public final class Tools {
         {
             sb.append("<title>").append(statusCode);
             if (null != msg0) {
-                sb.append(' ').append(msg0);
+                sb.append(' ').append(filter(msg0));
             }
             sb.append("</title>").append(lineSep);
         }
@@ -782,17 +783,80 @@ public final class Tools {
         if (null == msg0) {
             sb.append(statusCode);
         } else {
-            sb.append(msg0);
+            sb.append(filter(msg0));
         }
         sb.append("</h1>").append(lineSep);
 
         String desc0 = null == desc ? msg0 : desc;
         if (null != desc0) {
-            sb.append("<p>").append(desc0).append("</p>").append(lineSep);
+            sb.append("<p>").append(filter(desc0)).append("</p>").append(lineSep);
         }
 
         sb.append("</body></html>").append(lineSep);
         return sb.toString();
+    }
+
+    /**
+     * Generates an empty HTML page for given arguments.
+     *
+     * @return An empty HTML page
+     */
+    public static String getEmptyPage() {
+        StringBuilder sb = new StringBuilder(128);
+        String lineSep = System.getProperty("line.separator");
+        sb.append("<!DOCTYPE html>").append(lineSep);
+        sb.append("<html><head>").append(lineSep);
+        sb.append("<title>A blank HTML page</title>").append(lineSep);
+        sb.append("<meta charset=\"utf-8\" />").append(lineSep);
+        sb.append("</head><body>").append(lineSep);
+        sb.append("</body></html>").append(lineSep);
+        return sb.toString();
+    }
+
+    /**
+     * Filter the specified message string for characters that are sensitive
+     * in HTML. This avoids potential attacks caused by including JavaScript
+     * codes in the request URL that is often reported in error messages.
+     *
+     * @param message The message string to be filtered
+     * @return The filtered message
+     */
+    public static String filter(String message) {
+        HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+        return null == htmlService ? filter0(message) : htmlService.encodeForHTML(message);
+    }
+
+    private static String filter0(String message) {
+        if (message == null) {
+            return null;
+        }
+
+        int length = message.length();
+        if (length <= 0) {
+            return message;
+        }
+
+        StringBuilder result = new StringBuilder(length + 50);
+        for (int k = length, i = 0; k-- > 0;) {
+            char c = message.charAt(i++);
+            switch (c) {
+            case '<':
+                result.append("&lt;");
+                break;
+            case '>':
+                result.append("&gt;");
+                break;
+            case '&':
+                result.append("&amp;");
+                break;
+            case '"':
+                result.append("&quot;");
+                break;
+            default:
+                result.append(c);
+            }
+        }
+        return (result.toString());
     }
 
     // ---------------------------------------------------------------------------------------------------------------------------------

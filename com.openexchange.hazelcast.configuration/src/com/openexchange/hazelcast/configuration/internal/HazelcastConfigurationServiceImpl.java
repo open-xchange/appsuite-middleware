@@ -142,6 +142,17 @@ public class HazelcastConfigurationServiceImpl implements HazelcastConfiguration
     }
 
     /**
+     * Gets the Hazelcast cofiguration.
+     *
+     * @return The Hazelcast cofiguration or <code>null</code>
+     */
+    public Config getConfigDirect() {
+        return config;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------------
+
+    /**
      * Loads and configures the hazelcast configuration.
      *
      * @return The config
