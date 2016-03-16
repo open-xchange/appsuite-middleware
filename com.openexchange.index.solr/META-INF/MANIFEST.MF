@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Index Bundle
 Bundle-SymbolicName: com.openexchange.index.solr
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.index.solr.osgi.SolrIndexActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.config.cascade,

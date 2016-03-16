@@ -4,7 +4,7 @@ Bundle-Name: Calendar Module
 Bundle-SymbolicName: com.openexchange.calendar
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: cern.colt,
  cern.colt.bitvector,

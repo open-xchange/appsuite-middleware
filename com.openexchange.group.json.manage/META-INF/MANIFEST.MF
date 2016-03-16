@@ -4,7 +4,7 @@ Bundle-Name: Group manage requests
 Bundle-SymbolicName: com.openexchange.group.json.manage
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.group.servlet.osgi.GroupManageActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,

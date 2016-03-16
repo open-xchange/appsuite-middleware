@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Events Bundle
 Bundle-SymbolicName: com.openexchange.drive.events
 Bundle-Version: 7.6.2
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.events.osgi.DriveEventsActivator
 Bundle-ClassPath: .

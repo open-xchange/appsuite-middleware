@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The sessionstorage utility bundle for Hazelcast serialization
 Bundle-SymbolicName: com.openexchange.sessionstorage.hazelcast.serialization
 Bundle-Version: 7.6.2
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.hazelcast.config,
  com.hazelcast.core,

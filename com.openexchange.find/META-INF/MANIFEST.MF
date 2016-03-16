@@ -4,7 +4,7 @@ Bundle-Name: com.openexchange.find
 Bundle-SymbolicName: com.openexchange.find
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.find.osgi.FindActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.base,
  com.google.common.cache,

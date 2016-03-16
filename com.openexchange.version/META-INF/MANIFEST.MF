@@ -7,7 +7,7 @@ OXVersion: 7.6.2
 OXBuildDate: release-7.6.2
 OXRevision: 50
 Bundle-Activator: com.openexchange.version.osgi.VersionActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Import-Package: org.osgi.framework,

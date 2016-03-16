@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Preview Bundle
 Bundle-SymbolicName: com.openexchange.preview
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.preview.osgi.PreviewActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion,
  com.openexchange.exception,

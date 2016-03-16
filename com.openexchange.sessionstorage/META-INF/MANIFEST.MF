@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange sessionstorage bundle
 Bundle-SymbolicName: com.openexchange.sessionstorage
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.sessionstorage.osgi.SessionStorageActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.exception,

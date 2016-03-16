@@ -4,7 +4,7 @@ Bundle-Name: User Level Configuration Information
 Bundle-SymbolicName: com.openexchange.config.cascade.user
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.config.cascade.user.osgi.UserConfigCascadeActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.googlecode.concurrentlinkedhashmap,
  com.openexchange.caching,

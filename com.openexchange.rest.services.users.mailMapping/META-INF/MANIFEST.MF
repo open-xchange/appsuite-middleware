@@ -4,7 +4,7 @@ Bundle-Name: MailMapping REST API
 Bundle-SymbolicName: com.openexchange.rest.services.users.mailMapping
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.rest.services.users.mailmapping.osgi.MailMappingActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.context,

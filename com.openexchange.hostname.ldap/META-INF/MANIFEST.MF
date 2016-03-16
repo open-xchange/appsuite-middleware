@@ -4,7 +4,7 @@ Bundle-Name: Hostname Service for LDAP
 Bundle-SymbolicName: com.openexchange.hostname.ldap
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.hostname.ldap.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.cache,
  com.openexchange.caching,
