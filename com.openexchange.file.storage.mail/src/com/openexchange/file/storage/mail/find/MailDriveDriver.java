@@ -161,13 +161,11 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
 
     /**
      * Initializes a new {@link MailDriveDriver}.
-     *
-     * @param initialDelegate The iniial delegate instance
      */
-    public MailDriveDriver(MailDriveFileStorageService mailDriveService, BundleContext context, int ranking) {
+    public MailDriveDriver(MailDriveFileStorageService mailDriveService, BundleContext context) {
         super(context, ModuleSearchDriver.class, null);
         trackedDrivers = new ConcurrentPriorityQueue<RankedService<ModuleSearchDriver>>();
-        myRanking = ranking;
+        myRanking = ModuleSearchDriver.RANKING_SUPERIOR;
         this.mailDriveService = mailDriveService;
     }
 

@@ -94,7 +94,7 @@ public final class MailDriveActivator extends HousekeepingActivator {
             Services.setServices(this);
 
             MailDriveFileStorageService service = MailDriveFileStorageService.newInstance();
-            rememberTracker(new MailDriveDriver(service, context, 10));
+            rememberTracker(new MailDriveDriver(service, context));
             openTrackers();
 
             registerService(FileStorageService.class, service, null);
