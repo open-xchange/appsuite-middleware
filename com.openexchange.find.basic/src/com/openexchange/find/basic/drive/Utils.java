@@ -245,7 +245,7 @@ public final class Utils {
         }
 
         if (Constants.FIELD_GLOBAL.equals(field)) {
-            final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(3);
+            final List<SearchTerm<?>> terms = new ArrayList<SearchTerm<?>>(4);
             terms.add(new FileNameTerm(query));
             terms.add(new TitleTerm(query, true, true));
             terms.add(new DescriptionTerm(query, true, true));
@@ -387,7 +387,14 @@ public final class Utils {
 
     private final static Pattern pattern = Pattern.compile("([<>=]) ([\\d.]+)([GMK]B)", Pattern.CASE_INSENSITIVE);
 
-    private static long parseFilesizeQuery(String query) throws OXException {
+    /**
+     * Parses the file size.
+     *
+     * @param query The query to parse the file size from
+     * @return The file size in bytes
+     * @throws OXException If parsing fails
+     */
+    public static long parseFilesizeQuery(String query) throws OXException {
         Matcher matcher = pattern.matcher(query);
         if (matcher.find()) {
             String number = matcher.group(2);
@@ -408,7 +415,14 @@ public final class Utils {
         throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
-    private static ComparisonType parseComparisonType(final String query) throws OXException {
+    /**
+     * Parses the comparison type.
+     *
+     * @param query The query to parse from
+     * @return The comparison type
+     * @throws OXException If parse attempt fails
+     */
+    public static ComparisonType parseComparisonType(final String query) throws OXException {
         Matcher matcher = pattern.matcher(query);
         if (matcher.find()) {
             String comparison = matcher.group(1);
@@ -423,7 +437,14 @@ public final class Utils {
         throw FindExceptionCode.PARSING_ERROR.create(query);
     }
 
-    private static Pair<Comparison, Long> parseDateQuery(final String query) throws OXException {
+    /**
+     * Parses a date query.
+     *
+     * @param query The date query to parse
+     * @return The parsed date query
+     * @throws OXException If parse attempt fails
+     */
+    public static Pair<Comparison, Long> parseDateQuery(final String query) throws OXException {
         if (Strings.isEmpty(query)) {
             throw FindExceptionCode.UNSUPPORTED_FILTER_QUERY.create(query, CommonConstants.FIELD_DATE);
         }

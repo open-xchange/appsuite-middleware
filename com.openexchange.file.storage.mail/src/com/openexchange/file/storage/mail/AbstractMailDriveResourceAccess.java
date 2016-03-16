@@ -53,7 +53,6 @@ import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.imap.IMAPFolderStorage;
 import com.openexchange.imap.IMAPMessageStorage;
 import com.openexchange.mail.api.IMailFolderStorage;
@@ -62,7 +61,6 @@ import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.IMailMessageStorageDelegator;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
-import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mail.utils.StorageUtility;
 import com.openexchange.session.Session;
 import com.sun.mail.imap.IMAPFolder;
@@ -83,9 +81,6 @@ public abstract class AbstractMailDriveResourceAccess {
 
     /** The full names of the virtual attachment folders */
     protected final FullNameCollection fullNameCollection;
-
-    /** The IMAP store */
-    private volatile IMAPStore imapStore;
 
     /**
      * Initializes a new {@link AbstractMailDriveResourceAccess}.
@@ -146,7 +141,8 @@ public abstract class AbstractMailDriveResourceAccess {
      * Checks validity of given folder identifier.
      *
      * @param folderId The folder identifier to check
-     * @throws OXException
+     * @return The associated full name
+     * @throws OXException If folder identifier is invalid
      */
     protected FullName checkFolderId(String folderId) throws OXException {
         FullName fullName = optFolderId(folderId);
@@ -157,29 +153,13 @@ public abstract class AbstractMailDriveResourceAccess {
     }
 
     /**
-     * Checks validity of given folder identifier.
+     * Checks given folder identifier.
      *
      * @param folderId The folder identifier to check
+     * @return The associated full name or <code>null</code> if folder identifier is invalid
      */
     protected FullName optFolderId(String folderId) {
-        if (ROOT_FULLNAME.equals(folderId)) {
-            return new FullName(ROOT_FULLNAME, Type.DEFAULT, folderId);
-        }
-
-        String fullName = MailFolderUtility.prepareMailFolderParam(folderId).getFullName();
-        if (0 == fullName.length()) {
-            return new FullName(fullName, Type.DEFAULT, folderId);
-        }
-        if (fullNameCollection.fullNameAll.equals(fullName)) {
-            return new FullName(fullName, Type.ALL, folderId);
-        }
-        if (fullNameCollection.fullNameReceived.equals(fullName)) {
-            return new FullName(fullName, Type.RECEIVED, folderId);
-        }
-        if (fullNameCollection.fullNameSent.equals(fullName)) {
-            return new FullName(fullName, Type.SENT, folderId);
-        }
-        return null;
+        return MailDriveAccountAccess.optFolderId(folderId, fullNameCollection);
     }
 
     /**
@@ -190,7 +170,7 @@ public abstract class AbstractMailDriveResourceAccess {
      * @return The IMAP folder
      * @throws MessagingException If IMAP folder cannot be returned
      */
-    protected IMAPFolder getIMAPFolderFor(final FullName fullName, IMAPStore imapStore) throws MessagingException {
+    protected static IMAPFolder getIMAPFolderFor(final FullName fullName, IMAPStore imapStore) throws MessagingException {
         String fn = fullName.getFullName();
         return (IMAPFolder) (fn.length() == 0 ? imapStore.getDefaultFolder() : imapStore.getFolder(fn));
     }
@@ -202,13 +182,8 @@ public abstract class AbstractMailDriveResourceAccess {
      * @return The connected IMAP store
      * @throws OXException If connected IMAP store cannot be returned
      */
-    protected IMAPStore getIMAPStore(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
-        IMAPStore imapStore = this.imapStore;
-        if (null == imapStore) {
-            imapStore = getImapMessageStorageFrom(mailAccess).getImapStore();
-            this.imapStore = imapStore;
-        }
-        return imapStore;
+    protected static IMAPStore getIMAPStore(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+        return getImapMessageStorageFrom(mailAccess).getImapStore();
     }
 
     /**
@@ -218,7 +193,7 @@ public abstract class AbstractMailDriveResourceAccess {
      * @return The connected {@code IMAPFolderStorage} instance
      * @throws OXException If connected {@code IMAPFolderStorage} instance cannot be returned
      */
-    protected IMAPFolderStorage getImapFolderStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static IMAPFolderStorage getImapFolderStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         IMailFolderStorage fstore = mailAccess.getFolderStorage();
         if (!(fstore instanceof IMAPFolderStorage)) {
             if (!(fstore instanceof IMailFolderStorageDelegator)) {
@@ -239,7 +214,7 @@ public abstract class AbstractMailDriveResourceAccess {
      * @return The connected {@code IMAPMessageStorage} instance
      * @throws OXException If connected {@code IMAPMessageStorage} instance cannot be returned
      */
-    protected IMAPMessageStorage getImapMessageStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
+    public static IMAPMessageStorage getImapMessageStorageFrom(MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess) throws OXException {
         IMailMessageStorage mstore = mailAccess.getMessageStorage();
         if (!(mstore instanceof IMAPMessageStorage)) {
             if (!(mstore instanceof IMailMessageStorageDelegator)) {

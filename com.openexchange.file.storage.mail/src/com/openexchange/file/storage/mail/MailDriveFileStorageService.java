@@ -61,12 +61,12 @@ import com.openexchange.datatypes.genericonf.ReadOnlyDynamicFormDescription;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
 import com.openexchange.file.storage.FileStorageAccount;
-import com.openexchange.file.storage.FileStorageAccountAccess;
 import com.openexchange.file.storage.FileStorageAccountManager;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.groupware.userconfiguration.UserPermissionBitsStorage;
+import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -168,7 +168,7 @@ public final class MailDriveFileStorageService implements AccountAware {
     }
 
     @Override
-    public FileStorageAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
+    public MailDriveAccountAccess getAccountAccess(final String accountId, final Session session) throws OXException {
         return new MailDriveAccountAccess(getFullNameCollectionFor(session), this, session);
     }
 
@@ -179,25 +179,35 @@ public final class MailDriveFileStorageService implements AccountAware {
         }
 
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        String propName = "com.openexchange.file.storage.mail.fullNameAll";
-        ComposedConfigProperty<String> propertyAll = view.property(propName, String.class);
-        if (propertyAll.isDefined()) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+
+        String fullNameAll;
+        {
+            String propName = "com.openexchange.file.storage.mail.fullNameAll";
+            ComposedConfigProperty<String> propertyAll = view.property(propName, String.class);
+            if (!propertyAll.isDefined() || Strings.isEmpty((fullNameAll = propertyAll.get()))) {
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+            }
         }
 
-        propName = "com.openexchange.file.storage.mail.fullNameReceived";
-        ComposedConfigProperty<String> propertyReceived = view.property(propName, String.class);
-        if (propertyReceived.isDefined()) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+        String fullNameReceived;
+        {
+            String propName = "com.openexchange.file.storage.mail.fullNameReceived";
+            ComposedConfigProperty<String> propertyReceived = view.property(propName, String.class);
+            if (!propertyReceived.isDefined() || Strings.isEmpty((fullNameReceived = propertyReceived.get()))) {
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+            }
         }
 
-        propName = "com.openexchange.file.storage.mail.fullNameSent";
-        ComposedConfigProperty<String> propertySent = view.property(propName, String.class);
-        if (propertySent.isDefined()) {
-            throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+        String fullNameSent;
+        {
+            String propName = "com.openexchange.file.storage.mail.fullNameSent";
+            ComposedConfigProperty<String> propertySent = view.property(propName, String.class);
+            if (!propertySent.isDefined() || Strings.isEmpty((fullNameSent = propertySent.get()))) {
+                throw FileStorageExceptionCodes.MISSING_CONFIG.create(propName, MailDriveConstants.ACCOUNT_DISPLAY_NAME);
+            }
         }
 
-        return new FullNameCollection(propertyAll.get(), propertyReceived.get(), propertySent.get());
+        return new FullNameCollection(fullNameAll, fullNameReceived, fullNameSent);
     }
 
     private boolean isEnabledFor(Session session) throws OXException {

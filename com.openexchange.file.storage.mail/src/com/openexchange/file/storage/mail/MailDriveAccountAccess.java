@@ -59,7 +59,9 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderAccess;
 import com.openexchange.file.storage.FileStorageService;
+import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.session.Session;
 
 /**
@@ -68,6 +70,8 @@ import com.openexchange.session.Session;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class MailDriveAccountAccess implements FileStorageAccountAccess, CapabilityAware {
+
+    private static final String ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
 
     private final FullNameCollection fullNameCollection;
     private final Session session;
@@ -84,6 +88,43 @@ public final class MailDriveAccountAccess implements FileStorageAccountAccess, C
         this.fullNameCollection = fullNameCollection;
         this.service = service;
         this.session = session;
+    }
+
+    /**
+     * Gets the collection of full names for virtual attachment folders.
+     *
+     * @return The collection of full names for virtual attachment folders
+     */
+    public FullNameCollection getFullNameCollection() {
+        return fullNameCollection;
+    }
+
+    /**
+     * Checks given folder identifier.
+     *
+     * @param folderId The folder identifier to check
+     * @param fullNameCollection The collection of full names for virtual attachment folders
+     * @return The associated full name or <code>null</code> if folder identifier is invalid
+     */
+    public static FullName optFolderId(String folderId, FullNameCollection fullNameCollection) {
+        if (ROOT_FULLNAME.equals(folderId)) {
+            return new FullName(ROOT_FULLNAME, Type.DEFAULT, folderId);
+        }
+
+        String fullName = MailFolderUtility.prepareMailFolderParam(folderId).getFullName();
+        if (0 == fullName.length()) {
+            return new FullName(fullName, Type.DEFAULT, folderId);
+        }
+        if (fullNameCollection.fullNameAll.equals(fullName)) {
+            return new FullName(fullName, Type.ALL, folderId);
+        }
+        if (fullNameCollection.fullNameReceived.equals(fullName)) {
+            return new FullName(fullName, Type.RECEIVED, folderId);
+        }
+        if (fullNameCollection.fullNameSent.equals(fullName)) {
+            return new FullName(fullName, Type.SENT, folderId);
+        }
+        return null;
     }
 
     @Override

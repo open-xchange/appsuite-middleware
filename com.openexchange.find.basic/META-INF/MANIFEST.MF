@@ -82,5 +82,6 @@ Import-Package: com.davekoelle,
  org.osgi.util.tracker,
  org.slf4j
 Bundle-ActivationPolicy: lazy
-Export-Package: com.openexchange.find.basic.drive
+Export-Package: com.openexchange.find.basic.common,
+ com.openexchange.find.basic.drive
 Bundle-ClassPath: .

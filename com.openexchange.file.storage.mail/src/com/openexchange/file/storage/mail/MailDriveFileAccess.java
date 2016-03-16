@@ -297,7 +297,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     }
 
     /** The fetch profile for a virtual folder */
-    protected static final FetchProfile FETCH_PROFILE_GET_FOR_VIRTUAL = new FetchProfile() {
+    public static final FetchProfile FETCH_PROFILE_GET_FOR_VIRTUAL = new FetchProfile() {
         // Unnamed block
         {
             add(FetchProfile.Item.SIZE);
@@ -671,7 +671,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
      * @param sort The sort order, or <code>null</code> if not specified
      * @param order The sort direction
      */
-    protected static void sort(List<File> files, Field sort, SortDirection order) {
+    public static void sort(List<File> files, Field sort, SortDirection order) {
         if (null != sort && 1 < files.size()) {
             Collections.sort(files, order.comparatorBy(sort));
         }

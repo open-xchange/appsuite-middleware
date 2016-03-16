@@ -54,20 +54,20 @@ import java.util.List;
 
 
 /**
- * {@link Constants}
+ * {@link MailDriveFindConstants}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class Constants {
+public final class MailDriveFindConstants {
 
     /**
-     * Initializes a new {@link Constants}.
+     * Initializes a new {@link MailDriveFindConstants}.
      */
-    private Constants() {
+    private MailDriveFindConstants() {
         super();
     }
 
-    /** The virtual "global" field for file name, title and From/To */
+    /** The virtual "global" field for file name and From/To */
     public static final String FIELD_GLOBAL = "global";
 
     /** The field for file name */
