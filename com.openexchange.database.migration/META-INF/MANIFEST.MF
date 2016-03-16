@@ -80,4 +80,4 @@ Import-Package: com.openexchange.config,
  org.slf4j
 Export-Package: com.openexchange.database.migration,
  com.openexchange.database.migration.resource.accessor
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH

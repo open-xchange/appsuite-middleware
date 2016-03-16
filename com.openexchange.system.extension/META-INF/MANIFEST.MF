@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange System Extension Bundle
 Bundle-Description: Open-Xchange Extension Bundle exporting Sun classes
 Bundle-SymbolicName: com.openexchange.system.extension
 Bundle-Version: 7.8.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Fragment-Host: system.bundle;extension:=framework
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Export-Package: sun.security,

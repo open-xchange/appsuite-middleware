@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Loxandra Hector Bundle
 Bundle-SymbolicName: com.openexchange.nosql.cassandra.hector
 Bundle-Version: 6.21.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.eaio.util.lang,
  com.eaio.uuid,
