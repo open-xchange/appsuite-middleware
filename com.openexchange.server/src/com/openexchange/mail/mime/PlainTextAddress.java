@@ -49,16 +49,22 @@
 
 package com.openexchange.mail.mime;
 
-import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
 import javax.mail.internet.InternetAddress;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 
 /**
- * {@link PlainTextAddress} - A plain text internet address without a personal part.
+ * {@link PlainTextAddress} - A plain-text internet address without a personal part.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class PlainTextAddress extends InternetAddress {
+
+    private static final long serialVersionUID = -3276144799717449603L;
+
+    private static final String TYPE = "rfc822";
 
     /**
      * Creates a newly allocated array of {@link PlainTextAddress} generated from specified addresses.
@@ -66,7 +72,7 @@ public final class PlainTextAddress extends InternetAddress {
      * @param addresses The source addresses as an array of {@link String}
      * @return A newly allocated array of {@link PlainTextAddress}
      */
-    public static PlainTextAddress[] getAddresses(final String[] addresses) {
+    public static PlainTextAddress[] getAddresses(String[] addresses) {
         if ((addresses == null) || (addresses.length == 0)) {
             return new PlainTextAddress[0];
         }
@@ -77,12 +83,27 @@ public final class PlainTextAddress extends InternetAddress {
         return retval;
     }
 
-    private static final long serialVersionUID = -3276144799717449603L;
+    /**
+     * Parses specified address list (split by comma) and generates <code>PlainTextAddress</code> instances for each "token".
+     *
+     * @param addressList The address list
+     * @return The <code>PlainTextAddress</code> instances
+     */
+    public static InternetAddress[] parseAddresses(String addressList) {
+        if (Strings.isEmpty(addressList)) {
+            return new PlainTextAddress[0];
+        }
+        String[] addrs = Strings.splitByCommaNotInQuotes(addressList);
+        List<InternetAddress> l = new ArrayList<InternetAddress>(addrs.length);
+        for (String addr : addrs) {
+            l.add(new PlainTextAddress(addr));
+        }
+        return l.toArray(new InternetAddress[l.size()]);
+    }
 
-    private static final String TYPE = "rfc822";
+    // ----------------------------------------------------------------------------------------------------------------------------- //
 
-    private final String address;
-
+    private final String plainAddress;
     private final int hashCode;
 
     /**
@@ -91,8 +112,8 @@ public final class PlainTextAddress extends InternetAddress {
      * @param address The plain text address
      */
     public PlainTextAddress(final String address) {
-        this.address = MimeMessageUtility.decodeMultiEncodedHeader(address);
-        hashCode = address.toLowerCase(Locale.ENGLISH).hashCode();
+        this.plainAddress = MimeMessageUtility.decodeMultiEncodedHeader(address);
+        hashCode = Strings.asciiLowerCase(address).hashCode();
     }
 
     @Override
@@ -102,12 +123,12 @@ public final class PlainTextAddress extends InternetAddress {
 
     @Override
     public String toString() {
-        return address;
+        return plainAddress;
     }
 
     @Override
     public String getAddress() {
-        return address;
+        return plainAddress;
     }
 
     @Override
@@ -119,7 +140,7 @@ public final class PlainTextAddress extends InternetAddress {
     public boolean equals(final Object address) {
         if (address instanceof InternetAddress) {
             final InternetAddress ia = (InternetAddress) address;
-            return this.address.equalsIgnoreCase(ia.getAddress());
+            return this.plainAddress.equalsIgnoreCase(ia.getAddress());
         }
         return false;
     }
@@ -131,7 +152,7 @@ public final class PlainTextAddress extends InternetAddress {
 
     @Override
     public String toUnicodeString() {
-        return MimeMessageUtility.decodeMultiEncodedHeader(address);
+        return plainAddress;
     }
 
 }

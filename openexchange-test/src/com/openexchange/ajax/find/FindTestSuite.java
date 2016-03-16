@@ -49,9 +49,6 @@
 
 package com.openexchange.ajax.find;
 
-import junit.extensions.TestSetup;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 import com.openexchange.ajax.find.common.Bug32060Test;
 import com.openexchange.ajax.find.contacts.Bug33447Test;
 import com.openexchange.ajax.find.contacts.Bug33576Test;
@@ -61,10 +58,14 @@ import com.openexchange.ajax.find.mail.BasicMailTest;
 import com.openexchange.ajax.find.mail.Bug35442Test;
 import com.openexchange.ajax.find.mail.Bug36522Test;
 import com.openexchange.ajax.find.mail.Bug39105Test;
+import com.openexchange.ajax.find.mail.Bug42970Test;
 import com.openexchange.ajax.find.tasks.FindTasksAutocompleteTests;
 import com.openexchange.ajax.find.tasks.FindTasksQueryTests;
 import com.openexchange.ajax.find.tasks.FindTasksTestEnvironment;
 import com.openexchange.ajax.find.tasks.FindTasksTestsFilterCombinations;
+import junit.extensions.TestSetup;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 
 /**
@@ -101,6 +102,7 @@ public final class FindTestSuite {
         tests.addTestSuite(Bug36522Test.class);
         tests.addTestSuite(Bug35442Test.class);
         tests.addTestSuite(Bug39105Test.class);
+        tests.addTestSuite(Bug42970Test.class);
 
         TestSetup setup = new TestSetup(tests) {
             @Override

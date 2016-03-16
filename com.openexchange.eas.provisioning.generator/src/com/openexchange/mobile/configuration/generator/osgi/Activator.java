@@ -55,13 +55,12 @@ import javax.servlet.ServletException;
 import org.osgi.service.http.HttpService;
 import org.osgi.service.http.NamespaceException;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.html.HtmlService;
 import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.MobileConfigProperties;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
-import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.templating.TemplateService;
 import com.openexchange.threadpool.ThreadPoolService;
 
@@ -85,36 +84,24 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class };
+        return new Class<?>[] { ConfigurationService.class, TemplateService.class, ThreadPoolService.class, HttpService.class, HtmlService.class };
     }
 
     @Override
     protected void handleAvailability(final Class<?> clazz) {
         LOG.info("Re-available service: {}", clazz.getName());
-        MobileConfigServiceRegistry.getServiceRegistry().addService(clazz, getService(clazz));
         register();
     }
 
     @Override
     protected void handleUnavailability(final Class<?> clazz) {
         LOG.warn("Absent service: {}", clazz.getName());
-        MobileConfigServiceRegistry.getServiceRegistry().removeService(clazz);
         unregister();
     }
 
     @Override
     protected void startBundle() throws Exception {
-        {
-            ServiceRegistry registry = MobileConfigServiceRegistry.getServiceRegistry();
-            registry.clearRegistry();
-            Class<?>[] classes = getNeededServices();
-            for (int i = 0; i < classes.length; i++) {
-                final Object service = getService(classes[i]);
-                if (null != service) {
-                    registry.addService(classes[i], service);
-                }
-            }
-        }
+        Services.setServiceLookup(this);
         // Check configuration
         checkConfiguration();
         // Test encoding:
@@ -128,13 +115,13 @@ public class Activator extends HousekeepingActivator {
     }
 
     private void checkConfiguration() throws ConfigurationException {
-        MobileConfigProperties.check(MobileConfigServiceRegistry.getServiceRegistry(), Property.values(), "Mobileconfig");
+        MobileConfigProperties.check(Property.values(), "Mobileconfig");
     }
 
     @Override
     protected void stopBundle() throws Exception {
         unregister();
-        MobileConfigServiceRegistry.getServiceRegistry().clearRegistry();
+        Services.setServiceLookup(null);
         super.stopBundle();
     }
 
@@ -142,6 +129,10 @@ public class Activator extends HousekeepingActivator {
      * Registers the servlet.
      */
     private synchronized void register() {
+        if (registered) {
+            return;
+        }
+
         HttpService service = getService(HttpService.class);
         if (null == service) {
             return;
@@ -162,6 +153,10 @@ public class Activator extends HousekeepingActivator {
      * Unregisters the servlet.
      */
     private synchronized void unregister() {
+        if (!registered) {
+            return;
+        }
+
         HttpService service = getService(HttpService.class);
         if (null != service) {
             boolean registered = this.registered;

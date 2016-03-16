@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2016 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,48 +47,25 @@
  *
  */
 
-package com.openexchange.find.basic.mail;
+package com.openexchange.file.storage;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import com.openexchange.exception.OXException;
+import com.openexchange.session.Session;
+
 
 /**
- * {@link Constants}
+ * {@link LoginAwareFileStorageServiceExtension}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.6.0
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.1
  */
-public class Constants {
+public interface LoginAwareFileStorageServiceExtension {
 
-    final static String FIELD_FROM = "from";
-
-    final static String FIELD_TO = "to";
-
-    final static String FIELD_CC = "cc";
-
-    final static String FIELD_BCC = "bcc";
-
-    final static String FIELD_SUBJECT = "subject";
-
-    final static String FIELD_BODY = "body";
-
-    final static String FIELD_FOLDER = "folder";
-
-    static final List<String> FROM_FIELDS = asList(FIELD_FROM);
-
-    static final List<String> TO_FIELDS = Arrays.asList(new String[] { FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FROM_AND_TO_FIELDS = Arrays.asList(new String[] { FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> FOLDERS_FIELDS = Arrays.asList(new String[] { FIELD_FOLDER });
-
-    static final List<String> QUERY_FIELDS = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC });
-
-    static final List<String> QUERY_FIELDS_BODY = Arrays.asList(new String[] { FIELD_SUBJECT, FIELD_FROM, FIELD_TO, FIELD_CC, FIELD_BCC, FIELD_BODY });
-
-    static List<String> asList(String str) {
-        return Collections.singletonList(str);
-    }
+    /**
+     * Tests the connection to the filestorage.
+     * 
+     * @throws OXException If connecting fails.
+     */
+    public void testConnection(FileStorageAccount account, Session session) throws OXException;
 
 }

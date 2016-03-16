@@ -7,7 +7,8 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.mobile.configuration.generator.MobileConfigServlet;
 import com.openexchange.mobile.configuration.generator.configuration.ConfigurationException;
 import com.openexchange.mobile.configuration.generator.configuration.Property;
-import com.openexchange.mobile.configuration.generator.services.MobileConfigServiceRegistry;
+import com.openexchange.mobile.configuration.generator.osgi.Services;
+import com.openexchange.server.SimpleServiceLookup;
 
 
 @SuppressWarnings("serial")
@@ -17,7 +18,10 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     public void testSplitUsernameAndDomain() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        Services.setServiceLookup(serviceLookup);
 
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
         Assert.assertEquals("Value at index 0 wrong", "seppel", splitUsernameAndDomain[0]);
@@ -28,7 +32,10 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     public void testSplitUsernameAndDomain2() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN@$USER");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        Services.setServiceLookup(serviceLookup);
 
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
         Assert.assertEquals("Value at index 0 wrong", "ox.de", splitUsernameAndDomain[0]);
@@ -39,7 +46,10 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     public void testSplitUsernameAndDomain3() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        Services.setServiceLookup(serviceLookup);
 
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel@ox.de");
         Assert.assertEquals("Value at index 0 wrong", "seppel@ox.de", splitUsernameAndDomain[0]);
@@ -50,7 +60,10 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     public void testSplitUsernameAndDomain4() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$DOMAIN|$USER");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        Services.setServiceLookup(serviceLookup);
 
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel|ox.de");
         Assert.assertEquals("Value at index 0 wrong", "ox.de", splitUsernameAndDomain[0]);
@@ -61,7 +74,10 @@ public class MobileConfigServletTest extends MobileConfigServlet  {
     public void testSplitUsernameAndDomain5() throws ConfigurationException {
         final SimConfigurationService service = new SimConfigurationService();
         service.stringProperties.put(Property.DomainUser.getName(), "$USER@$DOMAIN");
-        MobileConfigServiceRegistry.getServiceRegistry().addService(ConfigurationService.class, service);
+
+        SimpleServiceLookup serviceLookup = new SimpleServiceLookup();
+        serviceLookup.add(ConfigurationService.class, service);
+        Services.setServiceLookup(serviceLookup);
 
         final String[] splitUsernameAndDomain = splitUsernameAndDomain("seppel");
         Assert.assertEquals("Value at index 0 wrong", "seppel", splitUsernameAndDomain[0]);

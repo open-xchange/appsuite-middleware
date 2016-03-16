@@ -69,6 +69,7 @@ import java.util.Date;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.Enumeration;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -2820,16 +2821,19 @@ public final class MimeMessageConverter {
             return QuotedInternetAddress.parseHeader(addresses, true);
         } catch (final AddressException e) {
             LOG.debug("Internet addresses could not be properly parsed. Using plain addresses' string representation instead.", e);
-            return new InternetAddress[] { new PlainTextAddress(addresses) };
+            return PlainTextAddress.parseAddresses(addresses);
         }
     }
 
     private static InternetAddress[] getAddressesOnParseError(final String[] addrs) {
-        final InternetAddress[] retval = new InternetAddress[addrs.length];
+        List<InternetAddress> list = new LinkedList<InternetAddress>();
         for (int i = 0; i < addrs.length; i++) {
-            retval[i] = new PlainTextAddress(addrs[i]);
+            InternetAddress[] plainAddresses = PlainTextAddress.parseAddresses(addrs[i]);
+            if (null != plainAddresses && plainAddresses.length > 0) {
+                list.addAll(Arrays.asList(plainAddresses));
+            }
         }
-        return retval;
+        return list.toArray(new InternetAddress[list.size()]);
     }
 
     /**

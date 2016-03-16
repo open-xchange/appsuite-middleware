@@ -67,6 +67,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
+import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
 import com.openexchange.exception.OXException;
@@ -228,6 +229,17 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                             directoryChecksumsToInvalidate.put(contextID, folderIDs);
                         }
                         folderIDs.add(invalidation.getFolderID());
+                    }
+                    /*
+                     * invalidate any .drive-meta checksums for parent directory, too
+                     */
+                    if (null != invalidation.getFolderID()) {
+                        Set<FileID> fileIDs = fileChecksumsToInvalidate.get(contextID);
+                        if (null == fileIDs) {
+                            fileIDs = new HashSet<FileID>();
+                            fileChecksumsToInvalidate.put(contextID, fileIDs);
+                        }
+                        fileIDs.add(new FileID(invalidation.getFolderID().toUniqueID() + '/' + DriveConstants.METADATA_FILENAME));
                     }
                     /*
                      * invalidate checksum of file in case of deletion or update

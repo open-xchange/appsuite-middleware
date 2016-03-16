@@ -49,6 +49,7 @@
 
 package com.openexchange.find.basic.mail;
 
+import static com.openexchange.find.basic.mail.Constants.FIELD_BCC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_BODY;
 import static com.openexchange.find.basic.mail.Constants.FIELD_CC;
 import static com.openexchange.find.basic.mail.Constants.FIELD_FROM;
@@ -137,6 +138,7 @@ import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.BccTerm;
 import com.openexchange.mail.search.BodyTerm;
 import com.openexchange.mail.search.CatenatingTerm;
 import com.openexchange.mail.search.CcTerm;
@@ -685,6 +687,8 @@ public class BasicMailDriver extends AbstractContactFacetingModuleSearchDriver {
             return new ToTerm(query);
         } else if (FIELD_CC.equals(field)) {
             return new CcTerm(query);
+        } else if (FIELD_BCC.equals(field)) {
+            return new BccTerm(query);
         } else if (FIELD_SUBJECT.equals(field)) {
             return new SubjectTerm(query);
         } else if (FIELD_BODY.equals(field)) {
