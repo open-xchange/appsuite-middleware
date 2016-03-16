@@ -4,7 +4,7 @@ Bundle-Name: Capabilities JSON Interface
 Bundle-SymbolicName: com.openexchange.capabilities.json
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.capabilities.json.osgi.CapabilitiesJSONActivator
-Bundle-Vendor: Open-Xchange Inc
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,

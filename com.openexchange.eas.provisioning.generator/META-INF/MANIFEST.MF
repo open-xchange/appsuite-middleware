@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Mobility Provisioning Configuration Generator
 Bundle-SymbolicName: com.openexchange.eas.provisioning.generator
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.mobile.configuration.generator.osgi.Activator
 Import-Package: com.openexchange.config,

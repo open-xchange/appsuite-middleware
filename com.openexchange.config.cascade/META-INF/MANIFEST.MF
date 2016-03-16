@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: A Cascading Configuration System
 Bundle-SymbolicName: com.openexchange.config.cascade
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,

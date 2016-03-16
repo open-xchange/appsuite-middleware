@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Drive Events Subscription Bundle
 Bundle-SymbolicName: com.openexchange.drive.events.subscribe
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-Activator: com.openexchange.drive.events.subscribe.osgi.SubscribeActivator
 Bundle-ClassPath: .

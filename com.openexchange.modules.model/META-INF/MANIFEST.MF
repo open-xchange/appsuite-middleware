@@ -3,6 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Simple Modelling Tools
 Bundle-SymbolicName: com.openexchange.modules.model
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.modules.model

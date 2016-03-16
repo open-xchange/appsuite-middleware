@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Sql Builder Plug-in
 Bundle-SymbolicName: com.openexchange.sql
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.sql.builder,
  com.openexchange.sql.grammar,

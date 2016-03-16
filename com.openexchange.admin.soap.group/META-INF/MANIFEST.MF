@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Admin SOAP Group Bundle
 Bundle-SymbolicName: com.openexchange.admin.soap.group
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.rmi,
  com.openexchange.admin.rmi.dataobjects,

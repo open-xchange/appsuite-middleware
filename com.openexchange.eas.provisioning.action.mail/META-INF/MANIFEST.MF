@@ -4,7 +4,7 @@ Bundle-Name: Mobility Configuration eMail transport
 Bundle-SymbolicName: com.openexchange.eas.provisioning.action.mail
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.mobile.configuration.json.action.email.osgi.ActionActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.exception,

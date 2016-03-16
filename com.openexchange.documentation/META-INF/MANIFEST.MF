@@ -4,7 +4,7 @@ Bundle-Name: Self-documenting API
 Bundle-SymbolicName: com.openexchange.documentation
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.documentation.osgi.DocumentationActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,

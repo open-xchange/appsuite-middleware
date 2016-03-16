@@ -4,7 +4,7 @@ Bundle-Name: HTTP-API for subscribe Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.json
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.subscribe.json.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,

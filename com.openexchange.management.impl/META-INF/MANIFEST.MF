@@ -34,4 +34,4 @@ Import-Package: com.openexchange.config,
  org.osgi.util.tracker,
  org.slf4j
 Export-Package: com.openexchange.management.console
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH

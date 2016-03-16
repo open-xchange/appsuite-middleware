@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Admin Usercopy
 Bundle-SymbolicName: com.openexchange.admin.user.copy
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.admin.user.copy.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.rmi.dataobjects,

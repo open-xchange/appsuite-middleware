@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Realtime Stanza Handling
 Bundle-SymbolicName: com.openexchange.realtime.handle
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.realtime.handle.osgi.StanzaHandlerActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.i18n,

@@ -4,7 +4,7 @@ Bundle-Name: Slim JSON interface for App Manifests
 Bundle-SymbolicName: com.openexchange.apps.manifests.json
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.apps.manifests.json.osgi.ManifestJSONActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,

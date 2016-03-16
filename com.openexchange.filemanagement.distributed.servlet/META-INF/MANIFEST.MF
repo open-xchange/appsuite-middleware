@@ -4,7 +4,7 @@ Bundle-Name: Servlet for distributed File Management
 Bundle-SymbolicName: com.openexchange.filemanagement.distributed.servlet
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.filemanagement.distributed.servlet.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.dispatcher,

@@ -4,7 +4,7 @@ Bundle-Name: Microformats Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish.microformats
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.publish.microformats.osgi.ServletActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,

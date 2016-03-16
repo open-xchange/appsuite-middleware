@@ -4,7 +4,7 @@ Bundle-Name: Transaction APIs
 Bundle-SymbolicName: com.openexchange.tx
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.tx.osgi.TransactionActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,

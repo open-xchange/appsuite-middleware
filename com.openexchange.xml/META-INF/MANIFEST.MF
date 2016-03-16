@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: JDOM Parser
 Bundle-SymbolicName: com.openexchange.xml
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.osgi,
  com.openexchange.osgi.annotation,
