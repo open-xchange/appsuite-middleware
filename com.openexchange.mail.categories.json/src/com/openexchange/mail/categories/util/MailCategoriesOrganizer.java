@@ -82,6 +82,7 @@ public class MailCategoriesOrganizer {
     public static void organizeExistingMails(Session session, String folder, SearchTerm<?> searchTerm, String flag, boolean set) throws OXException {
 
         MailServletInterface servletInterface = MailServletInterface.getInstance(session);
+        try {
         servletInterface.openFor(folder);
         IMailMessageStorage messageStorage = servletInterface.getMailAccess().getMessageStorage();
         FullnameArgument fa = prepareMailFolderParam(folder);
@@ -92,6 +93,11 @@ public class MailCategoriesOrganizer {
             mailIds[x++] = message.getMailId();
         }
         messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
+        } finally {
+            if (servletInterface != null) {
+                servletInterface.close(true);
+            }
+        }
     }
 
 }

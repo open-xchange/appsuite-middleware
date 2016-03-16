@@ -113,6 +113,7 @@ public class UnreadAction implements AJAXActionService {
         FullnameArgument fa = prepareMailFolderParam(folderId);
         JSONObject resultObject = new JSONObject();
         MailServletInterface msi = MailServletInterface.getInstance(session);
+        try {
         msi.openFor(folderId);
         IMailMessageStorage mailStorage = msi.getMailAccess().getMessageStorage();
 
@@ -145,6 +146,11 @@ public class UnreadAction implements AJAXActionService {
         }
 
         return new AJAXRequestResult(resultObject, "json");
+        } finally {
+            if (msi != null) {
+                msi.close(true);
+            }
+        }
     }
 
 
