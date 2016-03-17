@@ -331,6 +331,7 @@ public final class NewAction extends AbstractMailAction {
                     final AJAXRequestResult result = new AJAXRequestResult(responseObj, "json");
                     return result;
                 }
+
                 // Normal transport
                 if (!newMessageId && draftTypes.contains(sendType)) {
                     for (final ComposedMailMessage cm : composedMails) {
@@ -371,9 +372,8 @@ public final class NewAction extends AbstractMailAction {
                         cm.setSendType(sendType);
                     }
                 }
-                /*
-                 * User settings
-                 */
+
+                // User settings
                 final UserSettingMail usm = session.getUserSettingMail();
                 usm.setNoSave(true);
                 {
@@ -407,9 +407,8 @@ public final class NewAction extends AbstractMailAction {
                     }
                 }
                 userSettingMail = usm;
-                /*
-                 * Check
-                 */
+
+                // ------------------------------------ Send the messages --------------------------------------
                 HttpServletRequest servletRequest = request.optHttpServletRequest();
                 String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
                 msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
@@ -427,9 +426,8 @@ public final class NewAction extends AbstractMailAction {
                 }
 
                 warnings.addAll(mailInterface.getWarnings());
-                /*
-                 * Trigger contact collector
-                 */
+
+                // Trigger contact collector
                 try {
                     ServerUserSetting setting = ServerUserSetting.getInstance();
                     if (setting.isContactCollectOnMailTransport(session.getContextId(), session.getUserId()).booleanValue()) {
