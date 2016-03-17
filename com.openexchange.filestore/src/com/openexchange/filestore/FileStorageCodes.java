@@ -51,6 +51,7 @@ package com.openexchange.filestore;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
+import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
