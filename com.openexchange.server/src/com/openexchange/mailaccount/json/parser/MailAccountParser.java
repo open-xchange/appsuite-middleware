@@ -168,6 +168,13 @@ public class MailAccountParser extends DataParser {
             account.setPassword(parseString(json, MailAccountFields.PASSWORD));
             attributes.add(Attribute.PASSWORD_LITERAL);
         }
+        if (json.hasAndNotNull(MailAccountFields.MAIL_STARTTLS)) {
+            boolean mailStartTls = json.optBoolean(MailAccountFields.MAIL_STARTTLS, account.isMailStartTls());
+            if (mailStartTls != account.isMailStartTls()) {
+                account.setMailStartTls(mailStartTls);
+                attributes.add(Attribute.MAIL_STARTTLS_LITERAL);
+            }
+        }
         // Expect URL or separate fields for protocol, server, port, and secure
         if (json.hasAndNotNull(MailAccountFields.MAIL_URL)) {
             account.parseMailServerURL(parseString(json, MailAccountFields.MAIL_URL).trim());
@@ -200,13 +207,6 @@ public class MailAccountParser extends DataParser {
                 }
             }
 
-            if (json.hasAndNotNull(MailAccountFields.MAIL_STARTTLS)) {
-                boolean mailStartTls = json.optBoolean(MailAccountFields.MAIL_STARTTLS, account.isMailStartTls());
-                if (mailStartTls != account.isMailStartTls()) {
-                    account.setMailStartTls(mailStartTls);
-                }
-            }
-
             attributes.add(Attribute.MAIL_URL_LITERAL);
             attributes.addAll(Attribute.MAIL_URL_ATTRIBUTES);
         } else {
@@ -223,6 +223,13 @@ public class MailAccountParser extends DataParser {
             }
             if (null != account.getMailServer()) {
                 account.setMailServer(account.getMailServer().trim());
+            }
+        }
+        if (json.hasAndNotNull(MailAccountFields.TRANSPORT_STARTTLS)) {
+            boolean transportStartTls = json.optBoolean(MailAccountFields.TRANSPORT_STARTTLS, account.isTransportStartTls());
+            if (transportStartTls != account.isTransportStartTls()) {
+                account.setTransportStartTls(transportStartTls);
+                attributes.add(Attribute.TRANSPORT_STARTTLS_LITERAL);
             }
         }
         if (json.hasAndNotNull(MailAccountFields.TRANSPORT_URL)) {
@@ -253,13 +260,6 @@ public class MailAccountParser extends DataParser {
                 final boolean transportSecure = json.optBoolean(MailAccountFields.TRANSPORT_SECURE, account.isTransportSecure());
                 if (transportSecure != account.isTransportSecure()) {
                     account.setTransportSecure(transportSecure);
-                }
-            }
-
-            if (json.hasAndNotNull(MailAccountFields.TRANSPORT_STARTTLS)) {
-                boolean transportStartTls = json.optBoolean(MailAccountFields.TRANSPORT_STARTTLS, account.isTransportStartTls());
-                if (transportStartTls != account.isTransportStartTls()) {
-                    account.setTransportStartTls(transportStartTls);
                 }
             }
 

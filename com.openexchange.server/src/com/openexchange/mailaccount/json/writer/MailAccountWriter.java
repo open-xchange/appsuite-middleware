@@ -103,10 +103,7 @@ public final class MailAccountWriter implements MailAccountFields {
         Attribute.TRANSPORT_SECURE_LITERAL,
         Attribute.TRANSPORT_SERVER_LITERAL,
         Attribute.TRANSPORT_URL_LITERAL,
-        Attribute.TRANSPORT_AUTH_LITERAL,
-        
-        Attribute.MAIL_STARTTLS_LITERAL,
-        Attribute.TRANSPORT_STARTTLS_LITERAL);
+        Attribute.TRANSPORT_AUTH_LITERAL);
 
     private static volatile Boolean hideDetailsForDefaultAccount;
     private static boolean hideDetailsForDefaultAccount() {
@@ -209,6 +206,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(MAIL_SECURE, account.isMailSecure());
             json.put(MAIL_SERVER, account.getMailServer());
             json.put(MAIL_URL, account.generateMailServerURL());
+            json.put(MAIL_STARTTLS, account.isMailStartTls());
 
             {
                 TransportAuth transportAuth = account.getTransportAuth();
@@ -221,6 +219,7 @@ public final class MailAccountWriter implements MailAccountFields {
             json.put(TRANSPORT_SECURE, account.isTransportSecure());
             json.put(TRANSPORT_SERVER, account.getTransportServer());
             json.put(TRANSPORT_URL, account.generateTransportServerURL());
+            json.put(TRANSPORT_STARTTLS, account.isTransportStartTls());
 
             json.put(TRANSPORT_LOGIN, account.getTransportLogin());
             // json.put(TRANSPORT_PASSWORD, account.getTransportPassword());

@@ -66,8 +66,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
         Attribute.TRANSPORT_URL_LITERAL,
         Attribute.TRANSPORT_LOGIN_LITERAL,
         Attribute.TRANSPORT_PASSWORD_LITERAL,
-        Attribute.TRANSPORT_STARTTLS_LITERAL,
-        Attribute.MAIL_STARTTLS_LITERAL));
+        Attribute.TRANSPORT_STARTTLS_LITERAL));
 
     private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
         Attribute.POP3_DELETE_WRITE_THROUGH_LITERAL,
@@ -396,14 +395,12 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
     public Object mailStartTls() {
         bob.append("starttls = ?,");
         valid = true;
-        return false;
+        return null;
     }
 
     @Override
     public Object transportStartTls() {
-        bob.append("starttls = ?,");
-        valid = true;
-        return false;
+        return null;
     }
 
 }

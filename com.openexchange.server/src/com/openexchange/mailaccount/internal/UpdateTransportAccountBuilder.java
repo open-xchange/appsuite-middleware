@@ -69,7 +69,6 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
         Attribute.PRIMARY_ADDRESS_LITERAL,
         Attribute.PERSONAL_LITERAL,
         Attribute.REPLY_TO_LITERAL,
-        Attribute.MAIL_STARTTLS_LITERAL,
         Attribute.TRANSPORT_STARTTLS_LITERAL);
 
     private static final Set<Attribute> PROPERTY_ATTRIBUTES = EnumSet.of(
@@ -365,8 +364,6 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
     @Override
     public Object mailStartTls() {
-        bob.append("starttls = ?,");
-        valid = true;
         return null;
     }
 
