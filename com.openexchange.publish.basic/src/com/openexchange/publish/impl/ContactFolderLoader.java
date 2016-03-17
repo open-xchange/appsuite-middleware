@@ -114,6 +114,8 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
 
     private static class EscapingContact extends Contact {
 
+        private static final long serialVersionUID = 7925325989240435735L;
+
         private final Contact contact;
         private final EscapeMode escapeMode;
 
@@ -1059,11 +1061,6 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         }
 
         @Override
-        public String getVCardId() {
-            return escape(contact.getVCardId());
-        }
-
-        @Override
         public void setDisplayName(String display_name) {
             contact.setDisplayName(display_name);
         }
@@ -1604,11 +1601,6 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         }
 
         @Override
-        public void setVCardId(String vCardId) {
-            contact.setVCardId(vCardId);
-        }
-
-        @Override
         public void removeDisplayName() {
             contact.removeDisplayName();
         }
@@ -2141,11 +2133,6 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         @Override
         public void removeAddressOther() {
             contact.removeAddressOther();
-        }
-
-        @Override
-        public void removeVCardId() {
-            contact.removeVCardId();
         }
 
         @Override
@@ -2686,11 +2673,6 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
         @Override
         public boolean containsAddressOther() {
             return contact.containsAddressOther();
-        }
-
-        @Override
-        public boolean containsVCardId() {
-            return contact.containsVCardId();
         }
 
         @Override
