@@ -134,7 +134,7 @@ public class UpdateTransportAccountBuilder implements AttributeSwitch {
 
     @Override
     public String toString() {
-        return getUpdateQuery();
+        return bob.toString();
     }
 
     @Override
