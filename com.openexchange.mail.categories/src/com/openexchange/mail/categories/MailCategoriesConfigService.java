@@ -181,5 +181,14 @@ public interface MailCategoriesConfigService {
      * @throws OXException
      */
     public boolean isEnabled(Session session) throws OXException;
+    
+    /**
+     * Returns true if the given user is allowed to create own categories
+     * 
+     * @param session The user session
+     * @return true if allowed, otherwise false
+     * @throws OXException
+     */
+    public boolean isAllowedToCreateUserCategories(Session session) throws OXException;
 
 }

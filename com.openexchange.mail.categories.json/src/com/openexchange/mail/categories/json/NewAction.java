@@ -58,6 +58,8 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
@@ -65,6 +67,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.util.MailCategoriesOrganizer;
 import com.openexchange.mail.search.SearchTerm;
@@ -74,6 +77,7 @@ import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -107,6 +111,16 @@ public class NewAction implements AJAXActionService {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        
+        ConfigViewFactory viewFactory = LOOKUP.getService(ConfigViewFactory.class);
+        if(viewFactory==null){
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getSimpleName());
+        }
+        ConfigView view = viewFactory.getView(requestData.getSession().getUserId(), requestData.getSession().getContextId());
+        Boolean enabled = view.get(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, Boolean.class);
+        if(!enabled){
+            throw AjaxExceptionCodes.DISABLED_ACTION.create("new");
+        }
 
         String flag = requestData.getParameter("flag");
         String category = requestData.getParameter("category");

@@ -57,6 +57,7 @@ import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
 import com.openexchange.session.Session;
@@ -333,6 +334,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public boolean isEnabled(Session session) throws OXException {
         return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
+    }
+    
+    @Override
+    public boolean isAllowedToCreateUserCategories(Session session) throws OXException{
+        return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, false, session);
     }
 
 }

@@ -105,6 +105,8 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService{
                     boolean mailCategoriesEnabled = service.isEnabled(session);
                     item.put("tabbed_inbox", mailCategoriesEnabled);
                     if (mailCategoriesEnabled) {
+                        boolean mailUserCategoriesEnabled = service.isAllowedToCreateUserCategories(session);
+                        item.put("user_can_create_categories", mailUserCategoriesEnabled);
                         List<MailCategoryConfig> configs = service.getAllCategories(session, false);
                         JSONArray categories = new JSONArray();
                         for (MailCategoryConfig config : configs) {
