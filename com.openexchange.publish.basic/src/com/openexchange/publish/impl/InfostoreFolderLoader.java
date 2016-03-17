@@ -106,6 +106,8 @@ public class InfostoreFolderLoader implements PublicationDataLoaderService {
 
     private static final class EscapingDocumentMetadata implements DocumentMetadata {
 
+        private static final long serialVersionUID = 5986952103981970745L;
+
         private final DocumentMetadata documentMetadata;
         private final EscapeMode escapeMode;
 
