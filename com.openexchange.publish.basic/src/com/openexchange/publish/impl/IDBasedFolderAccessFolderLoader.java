@@ -62,7 +62,6 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.infostore.FileMetadata;
-import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.publish.EscapeMode;
@@ -122,6 +121,8 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
     // -----------------------------------------------------------------------------------------------------------------------------
 
     private static final class EscapingDocumentMetadata implements DocumentMetadata {
+
+        private static final long serialVersionUID = -3488647212373469569L;
 
         private final DocumentMetadata documentMetadata;
         private final EscapeMode escapeMode;
@@ -374,46 +375,6 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
         @Override
         public void setMeta(Map<String, Object> properties) {
             documentMetadata.setMeta(properties);
-        }
-
-        @Override
-        public List<ObjectPermission> getObjectPermissions() {
-            return documentMetadata.getObjectPermissions();
-        }
-
-        @Override
-        public void setObjectPermissions(List<ObjectPermission> objectPermissions) {
-            documentMetadata.setObjectPermissions(objectPermissions);
-        }
-
-        @Override
-        public boolean isShareable() {
-            return documentMetadata.isShareable();
-        }
-
-        @Override
-        public void setShareable(boolean shareable) {
-            documentMetadata.setShareable(shareable);
-        }
-
-        @Override
-        public int getOriginalId() {
-            return documentMetadata.getOriginalId();
-        }
-
-        @Override
-        public void setOriginalId(int id) {
-            documentMetadata.setOriginalId(id);
-        }
-
-        @Override
-        public long getOriginalFolderId() {
-            return documentMetadata.getOriginalFolderId();
-        }
-
-        @Override
-        public void setOriginalFolderId(long id) {
-            documentMetadata.setOriginalFolderId(id);
         }
     }
 
