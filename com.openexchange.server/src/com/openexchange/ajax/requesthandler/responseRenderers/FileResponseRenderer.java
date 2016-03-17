@@ -51,7 +51,6 @@ package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import static com.openexchange.java.Streams.close;
 import static com.openexchange.java.Strings.isEmpty;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.Closeable;
@@ -67,11 +66,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
-
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
@@ -261,7 +258,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             String contentType = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
             boolean contentTypeByParameter = false;
-            if (null == contentType) {
+            if (Strings.isEmpty(contentType)) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
                     contentType = SAVE_AS_TYPE;
                 } else {
@@ -280,7 +277,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
             }
             String contentDisposition = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
-            if (null == contentDisposition) {
+            if (Strings.isEmpty(contentDisposition)) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
                     contentDisposition = "inline";
                 } else if (DOWNLOAD.equalsIgnoreCase(delivery)) {
