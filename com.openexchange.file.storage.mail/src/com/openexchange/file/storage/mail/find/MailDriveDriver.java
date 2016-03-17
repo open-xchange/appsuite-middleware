@@ -61,6 +61,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import javax.mail.Folder;
 import javax.mail.Message;
 import javax.mail.Message.RecipientType;
@@ -124,9 +125,12 @@ import com.openexchange.find.spi.ModuleSearchDriver;
 import com.openexchange.find.spi.SearchConfiguration;
 import com.openexchange.find.util.TimeFrame;
 import com.openexchange.imap.IMAPMessageStorage;
+import com.openexchange.imap.sort.IMAPSort;
+import com.openexchange.imap.sort.IMAPSort.SortPartialResult;
 import com.openexchange.java.ConcurrentPriorityQueue;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.Pair;
+import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
@@ -137,6 +141,7 @@ import com.openexchange.tools.session.ServerSession;
 import com.sun.mail.imap.IMAPFolder;
 import com.sun.mail.imap.IMAPMessage;
 import com.sun.mail.imap.IMAPStore;
+import com.sun.mail.imap.SortTerm;
 
 /**
  * {@link MailDriveDriver}
@@ -313,6 +318,232 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         return new AutocompleteResult(facets);
     }
 
+    @Override
+    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
+        String accountId = searchRequest.getAccountId();
+        if (false == isMailDriveAccount(accountId)) {
+            return delegate().search(searchRequest, session);
+        }
+
+        // Determine the full names to search in
+        List<FullName> fullNames;
+        {
+            String folderId = searchRequest.getFolderId();
+            if (null == folderId) {
+                fullNames = mailDriveService.getFullNameCollectionFor(session).asList();
+            } else {
+                FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
+                if (null == fullName) {
+                    throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
+                }
+                fullNames = Collections.singletonList(fullName);
+            }
+        }
+
+        // The search fields
+        List<Field> fields = DEFAULT_FIELDS;
+        int[] columns = searchRequest.getColumns().getIntColumns();
+        if (columns.length > 0) {
+            fields = Field.get(columns);
+        }
+        if (!fields.contains(Field.TITLE)) {
+            fields.add(Field.TITLE);
+        }
+
+        // Get search term
+        SearchTerm searchTerm = prepareSearchTerm(searchRequest);
+
+        // Start/end range
+        int start = searchRequest.getStart();
+        int end = searchRequest.getStart() + searchRequest.getSize();
+
+        // Establish mail access
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        IMAPMessageStorage messageStorage = null;
+        List<File> files = null;
+        boolean sorted = false;
+        boolean sliced = false;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+
+            messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
+
+            boolean hasEsort;
+            {
+                Map<String, String> caps = messageStorage.getImapConfig().asMap();
+                hasEsort = (caps.containsKey("ESORT") && (caps.containsKey("CONTEXT=SEARCH") || caps.containsKey("CONTEXT=SORT")));
+            }
+
+            IMAPStore imapStore = messageStorage.getImapStore();
+
+            int userId = session.getUserId();
+            String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
+
+            files = new LinkedList<File>();
+            if (fullNames.size() > 1) {
+                // Search over multiple virtual attachments folders
+                int realStart = 0; // <-- In case of searching in multiple folders, start must always be 0 (zero).
+                for (FullName fullName : fullNames) {
+                    IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName.getFullName());
+                    imapFolder.open(Folder.READ_ONLY);
+                    try {
+                        if (imapFolder.getMessageCount() > 0) {
+                            // Check for ESORT
+                            Message[] messages;
+                            if (hasEsort) {
+                                messages = performEsort(getSortTermsBy(searchRequest), searchTerm, realStart, end, imapFolder);
+
+                                // Check if ESORT succeeded
+                                if (null == messages) {
+                                    messages = imapFolder.search(searchTerm);
+                                }
+                            } else {
+                                messages = imapFolder.search(searchTerm);
+                            }
+
+                            // Fetch messages
+                            imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+
+                            int i = 0;
+                            for (int k = messages.length; k-- > 0;) {
+                                IMAPMessage message = (IMAPMessage) messages[i++];
+                                long uid = message.getUID();
+                                if (uid < 0) {
+                                    uid = imapFolder.getUID(message);
+                                }
+                                files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                            }
+                        }
+                    } finally {
+                        imapFolder.close(false);
+                    }
+                }
+            } else {
+                // Only one virtual attachments folder to search in
+                FullName fullName = fullNames.get(0);
+                IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName.getFullName());
+                imapFolder.open(Folder.READ_ONLY);
+                try {
+                    if (imapFolder.getMessageCount() > 0) {
+                        // Check for ESORT
+                        Message[] messages;
+                        if (hasEsort) {
+                            messages = performEsort(getSortTermsBy(searchRequest), searchTerm, start, end, imapFolder);
+
+                            // Check if ESORT succeeded
+                            if (null == messages) {
+                                messages = imapFolder.search(searchTerm);
+                            } else {
+                                sorted = true;
+                                sliced = true;
+                            }
+                        } else {
+                            messages = imapFolder.search(searchTerm);
+                        }
+
+                        // Fetch messages
+                        imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
+
+                        int i = 0;
+                        for (int k = messages.length; k-- > 0;) {
+                            IMAPMessage message = (IMAPMessage) messages[i++];
+                            long uid = message.getUID();
+                            if (uid < 0) {
+                                uid = imapFolder.getUID(message);
+                            }
+                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
+                        }
+                    }
+                } finally {
+                    imapFolder.close(false);
+                }
+            }
+        } catch (MessagingException e) {
+            throw messageStorage.handleMessagingException(e);
+        } catch (RuntimeException e) {
+            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            MailAccess.closeInstance(mailAccess);
+        }
+
+        // Check whether to sort manually
+        if (false == sorted) {
+            MailDriveFileAccess.sort(files, Field.TITLE, SortDirection.DEFAULT);
+        }
+
+        // Check whether to slice manually
+        if (false == sliced) {
+            int size = files.size();
+            if ((start) > size) {
+                // Out of range
+                files = Collections.emptyList();
+            } else {
+                // Reset end index if out of range
+                int toIndex = end;
+                if (toIndex >= size) {
+                    toIndex = size;
+                }
+                files = files.subList(start, toIndex);
+            }
+        }
+
+        if (files.isEmpty()) {
+            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
+        }
+
+        List<Document> results = new ArrayList<Document>(files.size());
+        for (File file : files) {
+            results.add(new FileDocument(file));
+        }
+        return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
+    }
+
+    private SortTerm[] getSortTermsBy(SearchRequest searchRequest) {
+        /*-
+         * Sort attachments by name
+         * SORT (SUBJECT) ...
+         *
+         * Sort attachments by received date
+         * SORT (ARRIVAL) ...
+         *
+         * Sort attachments by size
+         * SORT (SIZE) ...
+         */
+
+        SortTerm sortTerm = SortTerm.SUBJECT;
+        return new SortTerm[] {sortTerm};
+    }
+
+    private Message[] performEsort(SortTerm[] sortTerms, SearchTerm searchTerm, int startIndex, int endIndex, IMAPFolder imapFolder) throws MessagingException {
+        SortPartialResult result = IMAPSort.sortReturnPartial(sortTerms, searchTerm, new IndexRange(startIndex, endIndex), imapFolder);
+        switch (result.reason) {
+            case SUCCESS:
+                {
+                    int[] seqNums = result.seqnums;
+                    if (null != seqNums) {
+                        // SORT RETURN PARTIAL command succeeded
+                        return imapFolder.getMessages(seqNums);
+                    }
+                }
+                break;
+            case COMMAND_FAILED:
+                break;
+            case FOLDER_CLOSED:
+                {
+                    // Apparently, SORT RETURN PARTIAL command failed
+                    try {    imapFolder.close(false);    } catch (Exception x) { /*Ignore*/ }
+                    try {    imapFolder.open(IMAPFolder.READ_ONLY);    } catch (Exception x) { /*Ignore*/ }
+                }
+                break;
+            default:
+                break;
+        }
+        return null;
+    }
+
+    // ------------------------------------------------ Facets stuff ----------------------------------------------------------------- //
+
     private void addFileTypeFacet(List<Facet> facets) {
         String fieldFileType = MailDriveFindConstants.FIELD_FILE_TYPE;
         DefaultFacet fileTypeFacet = Facets.newExclusiveBuilder(MailDriveFacetType.FILE_TYPE)
@@ -378,119 +609,6 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
                 .withFilter(Filter.of(fieldDate, CommonConstants.QUERY_LAST_YEAR))
                 .build())
             .build());
-    }
-
-    @Override
-    public SearchResult search(SearchRequest searchRequest, ServerSession session) throws OXException {
-        String accountId = searchRequest.getAccountId();
-        if (false == isMailDriveAccount(accountId)) {
-            return delegate().search(searchRequest, session);
-        }
-
-        // Determine the full names to search in
-        List<FullName> fullNames;
-        {
-            String folderId = searchRequest.getFolderId();
-            if (null == folderId) {
-                fullNames = mailDriveService.getFullNameCollectionFor(session).asList();
-            } else {
-                FullName fullName = MailDriveAccountAccess.optFolderId(folderId, mailDriveService.getFullNameCollectionFor(session));
-                if (null == fullName) {
-                    throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderId, MailDriveConstants.ACCOUNT_ID, MailDriveConstants.ID, session.getUserId(), session.getContextId());
-                }
-                fullNames = Collections.singletonList(fullName);
-            }
-        }
-
-        // The search fields
-        List<Field> fields = DEFAULT_FIELDS;
-        int[] columns = searchRequest.getColumns().getIntColumns();
-        if (columns.length > 0) {
-            fields = Field.get(columns);
-        }
-        if (!fields.contains(Field.TITLE)) {
-            fields.add(Field.TITLE);
-        }
-
-        // Get search term
-        SearchTerm searchTerm = prepareSearchTerm(searchRequest);
-
-        // Establish mail access
-        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
-        IMAPMessageStorage messageStorage = null;
-        List<File> files = null;
-        try {
-            mailAccess = MailAccess.getInstance(session);
-            mailAccess.connect();
-
-            messageStorage = AbstractMailDriveResourceAccess.getImapMessageStorageFrom(mailAccess);
-            IMAPStore imapStore = messageStorage.getImapStore();
-
-            int userId = session.getUserId();
-            String rootFolderId = MailFolder.DEFAULT_FOLDER_ID;
-
-            files = new LinkedList<File>();
-            for (FullName fullName : fullNames) {
-                IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(fullName.getFullName());
-                imapFolder.open(Folder.READ_ONLY);
-                try {
-                    if (imapFolder.getMessageCount() > 0) {
-                        Message[] messages = imapFolder.search(searchTerm);
-                        imapFolder.fetch(messages, FETCH_PROFILE_GET_FOR_VIRTUAL);
-
-                        int i = 0;
-                        for (int k = messages.length; k-- > 0;) {
-                            IMAPMessage message = (IMAPMessage) messages[i++];
-                            long uid = message.getUID();
-                            if (uid < 0) {
-                                uid = imapFolder.getUID(message);
-                            }
-                            files.add(new MailDriveFile(fullName.getFolderId(), Long.toString(uid), userId, rootFolderId).parseMessage(message, fields));
-                        }
-                    }
-
-                } finally {
-                    imapFolder.close(false);
-                }
-            }
-        } catch (MessagingException e) {
-            throw messageStorage.handleMessagingException(e);
-        } catch (RuntimeException e) {
-            throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            MailAccess.closeInstance(mailAccess);
-        }
-
-        // Sort
-        MailDriveFileAccess.sort(files, Field.TITLE, SortDirection.DEFAULT);
-
-        // Slice...
-        int start = searchRequest.getStart();
-        int end = searchRequest.getStart() + searchRequest.getSize();
-        {
-            int size = files.size();
-            if ((start) > size) {
-                // Out of range
-                files = Collections.emptyList();
-            } else {
-                // Reset end index if out of range
-                int toIndex = end;
-                if (toIndex >= size) {
-                    toIndex = size;
-                }
-                files = files.subList(start, toIndex);
-            }
-        }
-
-        if (files.isEmpty()) {
-            return new SearchResult(-1, searchRequest.getStart(), Collections.<Document> emptyList(), searchRequest.getActiveFacets());
-        }
-
-        List<Document> results = new ArrayList<Document>(files.size());
-        for (File file : files) {
-            results.add(new FileDocument(file));
-        }
-        return new SearchResult(-1, searchRequest.getStart(), results, searchRequest.getActiveFacets());
     }
 
     // ------------------------------------------------ Parsing stuff ----------------------------------------------------------------- //
@@ -691,6 +809,18 @@ public class MailDriveDriver extends ServiceTracker<ModuleSearchDriver, ModuleSe
         if (Strings.isEmpty(field) || Strings.isEmpty(query)) {
             return null;
         }
+
+        /*-
+         * Search for attachments
+         * by filename: SEARCH SUBJECT ...
+         * by sender: SEARCH FROM ...
+         * by subject: SEARCH HEADER X-Original-Subject ...
+         * by type
+         * SEARCH HEADER Content-Type ...
+         * or e.g. SEARCH BODYSTRUCTURE (TYPE ... SUBTYPE ...)
+         * by size: SEARCH LARGER ... SMALLER ...
+         * by received date: SEARCH SINCE ... BEFORE ..
+         */
 
         if (MailDriveFindConstants.FIELD_GLOBAL.equals(field)) {
             List<SearchTerm> terms = new ArrayList<SearchTerm>(4);

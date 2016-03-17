@@ -461,7 +461,20 @@ public final class IMAPSort {
         return new ImapSortResult(seqNums, rangeApplied, sortedByLocalPart);
     }
 
-    private static SortPartialResult sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
+    /**
+     * Performs an extended sort according to <a href="https://tools.ietf.org/html/rfc5267#section-3">ESORT extension</a>; e.g.
+     * <pre>
+     * UID SORT RETURN (PARTIAL 23500:24000) (REVERSE DATE) UTF-8 UNDELETED UNKEYWORD $Junk
+     * </pre>
+     *
+     * @param sortTerms The sort terms to sort by; e.g. <code>"REVERSE ARRIVAL"</code>
+     * @param jmsSearchTerm The JavaMail search term
+     * @param indexRange The index range (end exclusive); e.g. get first 500 messages <code>IndexRange(0, 500)</code>
+     * @param imapFolder The IMAP folder to sort/search in
+     * @return The partial result
+     * @throws MessagingException If ESORT fails
+     */
+    public static SortPartialResult sortReturnPartial(final SortTerm[] sortTerms, final javax.mail.search.SearchTerm jmsSearchTerm, IndexRange indexRange, IMAPFolder imapFolder) throws MessagingException {
         try {
             final String atom = new StringBuilder(16).append(indexRange.start + 1).append(':').append(indexRange.end).toString();
             return (SortPartialResult) imapFolder.doCommand(new ProtocolCommand() {
@@ -781,14 +794,19 @@ public final class IMAPSort {
         }
     }
 
-    private static enum SortPartialReason {
+    /** Specifies the result reason */
+    public static enum SortPartialReason {
         SUCCESS, COMMAND_FAILED, FOLDER_CLOSED;
     }
 
-    private static final class SortPartialResult {
+    /** The result for an issued ESORT */
+    public static final class SortPartialResult {
 
-        final int[] seqnums;
-        final SortPartialReason reason;
+        /** The sequence numbers of sorted (and matching) messages */
+        public final int[] seqnums;
+
+        /** The result reason */
+        public final SortPartialReason reason;
 
         SortPartialResult(int[] seqnums, SortPartialReason reason) {
             super();
