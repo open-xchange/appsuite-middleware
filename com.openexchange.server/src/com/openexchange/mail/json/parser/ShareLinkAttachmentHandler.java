@@ -201,7 +201,7 @@ public final class ShareLinkAttachmentHandler extends DefaultAttachmentHandler i
             try {
                 return folderAccess.createFolder(folder);
             } catch (OXException e) {
-                if ("FLD-1014".equals(e.getErrorCode()) || "FLD-0012".equals(e.getErrorCode())) {
+                if (e.equalsCode(1014, "FLD") || e.equalsCode(12, "FLD")) {
                     // A duplicate folder exists
                     folder.setName(FileStorageUtility.enhance(folder.getName(), counter++));
                     continue;
