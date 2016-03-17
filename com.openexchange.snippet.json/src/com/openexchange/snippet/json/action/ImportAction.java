@@ -211,7 +211,7 @@ public final class ImportAction extends SnippetAction {
 
         // Create via management
         String id = getSnippetService(session).getManagement(session).createSnippet(snippet);
-        return new AJAXRequestResult(id, "string");
+        return new AJAXRequestResult(new JSONObject(2).put("id", id), "json");
     }
 
     @Override
