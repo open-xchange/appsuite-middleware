@@ -120,10 +120,8 @@ public abstract class ListCore extends UserAbstraction {
             }
 
             sysexit(0);
-
         } catch (Exception e) {
-            printError(e.getMessage(), parser);
-            sysexit(1);
+            printErrors(null, ctxid, e, parser);
         }
     }
 
