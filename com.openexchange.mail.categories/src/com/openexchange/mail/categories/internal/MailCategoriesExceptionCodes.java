@@ -88,6 +88,11 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
      */
     SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 5, MailCategoriesExceptionStrings.SERVICE_UNAVAILABLE_MSG),
     
+    /**
+     * Unable to create category. Missing parameter %1$s.
+     */
+    MISSING_PARAMETER("Unable to create category. Missing parameter %1$s.", Category.CATEGORY_USER_INPUT, 6, MailCategoriesExceptionStrings.MISSING_PARAMETER),
+
     ;
 
     private static final String PREFIX = "CATEGORIES";

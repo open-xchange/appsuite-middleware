@@ -265,6 +265,16 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public void addUserCategory(String category, String flag, String name, Session session) throws OXException {
+        if (Strings.isEmpty(category)) {
+            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("category");
+        }
+        if (Strings.isEmpty(flag)) {
+            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("flag");
+        }
+        if (Strings.isEmpty(name)) {
+            throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("name");
+        }
+
         String[] userCategories = getUserCategoryNames(session);
         StringBuilder newCategoriesList = new StringBuilder((userCategories.length << 3) + 8).append(category);
         for (String oldCategory : userCategories) {

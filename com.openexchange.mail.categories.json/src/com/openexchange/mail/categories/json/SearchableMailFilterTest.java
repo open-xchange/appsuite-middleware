@@ -1,0 +1,166 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.categories.json;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import com.openexchange.jsieve.commands.Command;
+import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.jsieve.commands.RuleComment;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.ORTerm;
+import com.openexchange.mail.search.SearchTerm;
+
+/**
+ * {@link SearchableMailFilterTest}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
+ */
+public class SearchableMailFilterTest {
+    
+    private List<SearchableMailFilterTest> subtests;
+    private boolean hasSubtests=false;
+    private boolean isAND=true;
+    private String header;
+    private String value;
+    private String flag;
+    
+    private static final String SUBTESTS_STR = "conditions";
+    private static final String OPERATOR_STR = "operator";
+    private static final String HEADER_STR = "header";
+    private static final String VALUE_STR = "value";
+    
+    /**
+     * Initializes a new {@link SearchableMailFilterTest}.
+     * @throws JSONException 
+     */
+    public SearchableMailFilterTest(JSONObject json, String flag) throws JSONException {
+        super();
+        this.flag = flag;
+        if(json.has(SUBTESTS_STR)){
+            JSONArray array = (JSONArray) json.get(SUBTESTS_STR);
+            if(json.has(OPERATOR_STR)){
+                if(json.getString(OPERATOR_STR).equalsIgnoreCase("or")){
+                    isAND=false;
+                }
+            }
+            for(Object subObject: array.asList()) {
+                if(!(subObject instanceof JSONObject)){
+                    throw new JSONException("conditions element is not a JSONObject!");
+                } else {
+                    JSONObject subTest = (JSONObject) subObject;
+                    addCondition(new SearchableMailFilterTest(subTest, flag));
+                }
+            }
+            return;
+        }
+        this.header = json.getString(HEADER_STR);
+        this.value = json.getString(VALUE_STR);
+
+    }
+    
+    private void addCondition(SearchableMailFilterTest condition) {
+        if(this.subtests==null){
+            subtests = new ArrayList<>();
+            subtests.add(condition);
+            hasSubtests=true;
+        } else {
+            subtests.add(condition);
+        }
+    }
+    
+    public SearchTerm<?> getSearchTerm(){
+        if(hasSubtests){
+            SearchTerm<?> result = null;
+            if(isAND) {
+                for(SearchableMailFilterTest test: subtests){
+                    if(result==null){
+                        result = test.getSearchTerm();
+                    } else {
+                        result = new ANDTerm(result, test.getSearchTerm());
+                    }
+                }
+            } else {
+                for(SearchableMailFilterTest test: subtests){
+                    if(result==null){
+                        result = test.getSearchTerm();
+                    } else {
+                        result = new ORTerm(result, test.getSearchTerm());
+                    }
+                }
+            }
+            return result;
+        } else {
+            return new HeaderTerm(header, value);
+        }
+    }
+    
+    public Rule getRule() {
+        ArrayList<Command> commands = new ArrayList<>(Collections.singleton(getCommand()));
+        int linenumber = 0;
+        boolean commented=true;
+        RuleComment comment = new RuleComment(flag);
+        comment.setFlags(Collections.singletonList("category"));
+        Rule result = new Rule(comment, commands, linenumber, commented);
+            
+        return result;
+    }
+    
+    private Command getCommand() {
+        return null;
+    }
+
+}

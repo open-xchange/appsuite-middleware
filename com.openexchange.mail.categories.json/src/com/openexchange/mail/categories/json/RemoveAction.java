@@ -47,31 +47,60 @@
  *
  */
 
-package com.openexchange.mail.categories.internal;
+package com.openexchange.mail.categories.json;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailCategoriesExceptionStrings}
+ * {@link RemoveAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesExceptionStrings implements LocalizableStrings {
+@Action(method = RequestMethod.PUT, name = "remove", description = "Removes a mail user category.", parameters = { 
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+    @Parameter(name = "category", description = "The category identifier"), 
+    @Parameter(name = "removeFilter", description = "A optional flag indicating if corresponding filters should also be removed."),
+}, responseDescription = "Response: Empty, if category was successfully removed.")
+public class RemoveAction implements AJAXActionService {
+
+    private final ServiceLookup LOOKUP;
     
+    /**
+     * Initializes a new {@link SwitchAction}.
+     */
+    public RemoveAction(ServiceLookup services) {
+        super();
+        LOOKUP = services;
+
+    }
     
-    // The user category %1$s already exists.
-    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
+    @Override
+    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        String category = requestData.getParameter("category");
+        if(Strings.isEmpty(category)){
+            throw AjaxExceptionCodes.IMVALID_PARAMETER.create("category");
+        }
+        MailCategoriesConfigService categoriesService = LOOKUP.getService(MailCategoriesConfigService.class);
+        if(categoriesService==null){
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
+        }
+        categoriesService.removeUserCategory(category, session);
+        
+        //TODO remove sieve script
+        return new AJAXRequestResult();
+    }
 
-    // The user category %1$s does not exist.
-    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
-
-    // Invalid configuration: %1$s
-    public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
-
-    // The required service %1$s is temporary not available. Please try again later.
-    public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
-
-    // Unable to create category. Missing parameter %1$s.
-    public static final String MISSING_PARAMETER = "Unable to create category. Missing parameter %1$s.";
 }
