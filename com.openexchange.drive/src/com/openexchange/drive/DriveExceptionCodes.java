@@ -78,6 +78,7 @@ import static com.openexchange.drive.DriveExceptionMessages.PATH_NOT_FOUND_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.QUOTA_REACHED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.REPEATED_SYNC_PROBLEMS_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.SERVER_BUSY_MSG;
+import static com.openexchange.drive.DriveExceptionMessages.TOKEN_ALREADY_REGISTERED_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_DIRECTORIES_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.TOO_MANY_FILES_MSG;
 import static com.openexchange.drive.DriveExceptionMessages.UPLOADED_FILE_CHECKSUM_ERROR_MSG;
