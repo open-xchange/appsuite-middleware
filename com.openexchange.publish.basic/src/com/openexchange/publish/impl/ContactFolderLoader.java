@@ -114,6 +114,8 @@ public class ContactFolderLoader implements PublicationDataLoaderService {
 
     private static class EscapingContact extends Contact {
 
+        private static final long serialVersionUID = 7925325989240435735L;
+
         private final Contact contact;
         private final EscapeMode escapeMode;
 

@@ -85,7 +85,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
         }
         data.setContentType(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_TYPE), true));
         data.setContentTypeByParameter(false);
-        if (null == data.getContentType() || Strings.isEmpty(data.getContentType())) {
+        if (Strings.isEmpty(data.getContentType())) {
             if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
                 data.setContentType(IDataWrapper.SAVE_AS_TYPE);
             } else {
@@ -104,7 +104,7 @@ public class CheckParametersAction implements IFileResponseRendererAction {
             }
         }
         data.setContentDisposition(AJAXUtility.encodeUrl(data.getRequest().getParameter(IDataWrapper.PARAMETER_CONTENT_DISPOSITION)));
-        if (null == data.getContentDisposition() || Strings.isEmpty(data.getContentDisposition())) {
+        if (Strings.isEmpty(data.getContentDisposition())) {
             if (IDataWrapper.VIEW.equalsIgnoreCase(data.getDelivery())) {
                 data.setContentDisposition("inline");
             } else if (IDataWrapper.DOWNLOAD.equalsIgnoreCase(data.getDelivery())) {
