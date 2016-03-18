@@ -92,6 +92,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     private final Set<InternetAddress> recipients;
     private UserSettingMail mailSettings;
     private boolean appendToSentFolder;
+    private boolean transportToRecipients;
     private String csid;
 
     /**
@@ -103,6 +104,7 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
         appendToSentFolder = true;
+        transportToRecipients = true;
     }
 
     /**
@@ -157,6 +159,24 @@ public abstract class ComposedMailMessage extends MailMessage {
      */
     public void setAppendToSentFolder(boolean appendToSentFolder) {
         this.appendToSentFolder = appendToSentFolder;
+    }
+
+    /**
+     * Checks if this composed message is supposed to be actually transported.
+     *
+     * @return <code>true</code> if it should be transported; otherwise <code>false</code>
+     */
+    public boolean isTransportToRecipients() {
+        return transportToRecipients;
+    }
+
+    /**
+     * Sets if this composed message is supposed to be actually transported.
+     *
+     * @param transportToRecipients <code>true</code> if it should be transported; otherwise <code>false</code>
+     */
+    public void setTransportToRecipients(boolean transportToRecipients) {
+        this.transportToRecipients = transportToRecipients;
     }
 
     /**

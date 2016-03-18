@@ -160,6 +160,7 @@ import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.converters.MimeMessageConverter;
 import com.openexchange.mail.mime.dataobjects.MimeRawSource;
 import com.openexchange.mail.mime.processing.MimeForward;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.NonInlineForwardPartHandler;
@@ -3154,20 +3155,25 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             Collection<InternetAddress> validRecipients = null;
             long startTransport = System.currentTimeMillis();
             try {
-                MailProperties properties = MailProperties.getInstance();
-                String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
-                if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
-                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
-                    int rateLimit = properties.getRateLimit();
-                    LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
-                    rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
-                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
-                    setRateLimitTime(rateLimit);
+                if (composedMail.isTransportToRecipients()) {
+                    MailProperties properties = MailProperties.getInstance();
+                    String remoteAddr = null == remoteAddress ? session.getLocalIp() : remoteAddress;
+                    if (isWhitelistedFromRateLimit(remoteAddr, properties.getDisabledRateLimitRanges())) {
+                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                    } else if (!properties.getRateLimitPrimaryOnly() || MailAccount.DEFAULT_ID == accountId) {
+                        int rateLimit = properties.getRateLimit();
+                        LOG.debug("Checking rate limit {} for request with IP {} ({}) from user {} in context {}", rateLimit, remoteAddr, null == remoteAddress ? "from session" : "from request", session.getUserId(), session.getContextId());
+                        rateLimitChecks(composedMail, rateLimit, properties.getMaxToCcBcc());
+                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                        setRateLimitTime(rateLimit);
+                    } else {
+                        sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                    }
+                    mailSent = true;
                 } else {
-                    sentMail = transport.sendMailMessage(composedMail, type, null, statusInfo);
+                    javax.mail.Address[] poison = new javax.mail.Address[] { MimeMessageUtility.POISON_ADDRESS };
+                    sentMail = transport.sendMailMessage(composedMail, type, poison, statusInfo);
                 }
-                mailSent = true;
             } catch (OXException e) {
                 if (!MimeMailExceptionCode.SEND_FAILED_EXT.equals(e) && !MimeMailExceptionCode.SEND_FAILED_MSG_ERROR.equals(e)) {
                     throw e;
