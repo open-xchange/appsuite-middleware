@@ -91,6 +91,7 @@ public abstract class ComposedMailMessage extends MailMessage {
     private transient MimeMessageFiller filler;
     private final Set<InternetAddress> recipients;
     private UserSettingMail mailSettings;
+    private boolean appendToSentFolder;
     private String csid;
 
     /**
@@ -101,6 +102,7 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.session = session;
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
+        appendToSentFolder = true;
     }
 
     /**
@@ -137,6 +139,24 @@ public abstract class ComposedMailMessage extends MailMessage {
      */
     public UserSettingMail getMailSettings() {
         return mailSettings;
+    }
+
+    /**
+     * Checks if this composed message is supposed to be appended to standard sent folder.
+     *
+     * @return <code>true</code> if it should be appended to standard sent folder; otherwise <code>false</code>
+     */
+    public boolean isAppendToSentFolder() {
+        return appendToSentFolder;
+    }
+
+    /**
+     * Sets if this composed message is supposed to be appended to standard sent folder.
+     *
+     * @param appendToSentFolder <code>true</code> if it should be appended to standard sent folder; otherwise <code>false</code>
+     */
+    public void setAppendToSentFolder(boolean appendToSentFolder) {
+        this.appendToSentFolder = appendToSentFolder;
     }
 
     /**

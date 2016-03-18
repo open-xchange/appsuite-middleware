@@ -3262,7 +3262,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
                 mailAccess.addWarnings(Collections.singletonList(MailExceptionCode.FLAG_FAIL.create(e, new Object[0])));
             }
             UserSettingMail usm = null == optUserSetting ? UserSettingMailStorage.getInstance().getUserSettingMail(session.getUserId(), ctx) : optUserSetting;
-            if (usm.isNoCopyIntoStandardSentFolder()) {
+            if (usm.isNoCopyIntoStandardSentFolder() || false == composedMail.isAppendToSentFolder()) {
                 /*
                  * No copy in sent folder
                  */
