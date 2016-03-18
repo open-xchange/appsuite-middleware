@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.categories.json;
 
-import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import java.util.List;
 import org.apache.commons.lang.Validate;
 import org.json.JSONException;
@@ -80,7 +79,6 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = { 
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
-    @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
 public class UnreadAction extends AbstractCategoriesAction {
 
@@ -94,7 +92,6 @@ public class UnreadAction extends AbstractCategoriesAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String folderId = requestData.checkParameter("folder");
 
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
@@ -106,11 +103,11 @@ public class UnreadAction extends AbstractCategoriesAction {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
-        FullnameArgument fa = prepareMailFolderParam(folderId);
+        FullnameArgument fa = new FullnameArgument("INBOX");
         JSONObject resultObject = new JSONObject();
         MailServletInterface msi = MailServletInterface.getInstance(session);
         try {
-        msi.openFor(folderId);
+            msi.openFor(fa.getFullName());
         IMailMessageStorage mailStorage = msi.getMailAccess().getMessageStorage();
 
         List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true);

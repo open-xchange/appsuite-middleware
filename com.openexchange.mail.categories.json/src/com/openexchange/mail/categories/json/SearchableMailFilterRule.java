@@ -81,7 +81,7 @@ import com.openexchange.mail.search.SearchTerm;
  */
 public class SearchableMailFilterRule {
 
-    private static final String SUBTESTS_STR = "conditions";
+    private static final String SUBTESTS_STR = "subrules";
     private static final String OPERATOR_STR = "operator";
     private static final String HEADER_STR = "header";
     private static final String VALUE_STR = "value";

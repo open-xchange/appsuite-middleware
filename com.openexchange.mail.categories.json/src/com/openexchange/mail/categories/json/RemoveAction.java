@@ -76,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = { 
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
     @Parameter(name = "category", description = "The category identifier"), 
-}, responseDescription = "Response: If successfull a success message, otherwise a exception")
+}, responseDescription = "Response: If successfull a success message, otherwise an exception")
 public class RemoveAction extends AbstractCategoriesAction {
 
     /**
