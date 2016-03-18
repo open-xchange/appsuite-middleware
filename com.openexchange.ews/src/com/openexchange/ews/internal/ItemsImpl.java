@@ -176,9 +176,7 @@ public class ItemsImpl extends Common implements Items {
         port.findItem(request, getRequestVersion(), responseHolder, getVersionHolder());
         FindItemResponseMessageType responseMessage = (FindItemResponseMessageType)getResponseMessage(responseHolder);
         check(responseMessage);
-        return null != responseMessage.getRootFolder() && null != responseMessage.getRootFolder().getItems() &&
-            null != responseMessage.getRootFolder().getItems() ?
-                responseMessage.getRootFolder().getItems().getItemOrMessageOrCalendarItem() : null;
+        return null != responseMessage.getRootFolder() && null != responseMessage.getRootFolder().getItems() ? responseMessage.getRootFolder().getItems().getItemOrMessageOrCalendarItem() : null;
     }
 
 }
