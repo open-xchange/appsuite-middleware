@@ -56,6 +56,7 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.Strings;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
@@ -75,7 +76,7 @@ import com.openexchange.tools.session.ServerSession;
 @Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = { 
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
     @Parameter(name = "category", description = "The category identifier"), 
-}, responseDescription = "Response: Empty, if category was successfully removed.")
+}, responseDescription = "Response: If successfull a success message, otherwise a exception")
 public class RemoveAction extends AbstractCategoriesAction {
 
     /**
@@ -95,7 +96,6 @@ public class RemoveAction extends AbstractCategoriesAction {
         if(categoriesService==null){
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
         }
-        categoriesService.removeUserCategory(category, session);
         
         MailFilterService mailFilterService = LOOKUP.getService(MailFilterService.class);
         if (mailFilterService == null) {
@@ -111,7 +111,9 @@ public class RemoveAction extends AbstractCategoriesAction {
             }
         }
 
-        return new AJAXRequestResult();
+        categoriesService.removeUserCategory(category, session);
+        String result = StringHelper.valueOf(getLocaleFor(session)).getString(ResultStrings.SUCCESSFULLY_DELETED);
+        return new AJAXRequestResult(result);
     }
 
 }

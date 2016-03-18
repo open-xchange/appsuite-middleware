@@ -114,7 +114,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                             JSONArray categories = new JSONArray();
                             for (MailCategoryConfig config : configs) {
                                 JSONObject categoryJSON = new JSONObject(3);
-                                categoryJSON.put("filter", config.getCategory());
+                                categoryJSON.put("category", config.getCategory());
                                 String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
                                 categoryJSON.put("name", name);
                                 categoryJSON.put("active", config.isActive());

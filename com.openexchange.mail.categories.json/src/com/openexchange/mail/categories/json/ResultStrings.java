@@ -47,45 +47,19 @@
  *
  */
 
-package com.openexchange.mail.categories.osgi;
+package com.openexchange.mail.categories.json;
 
-import java.util.Dictionary;
-import java.util.Hashtable;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.ajax.requesthandler.ResultConverter;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.json.MailCategoriesActionFactory;
-import com.openexchange.mail.categories.json.MailCategoriesConfigConverter;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.user.UserService;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * {@link ResultStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class ResultStrings implements LocalizableStrings {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { MailCategoriesConfigService.class, ConfigurationService.class, MailFilterService.class, ConfigViewFactory.class, UserService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        registerModule(MailCategoriesActionFactory.initMailCategoriesActionFactory(this), "mail/categories");
-        registerService(ResultConverter.class, MailCategoriesConfigConverter.getInstance());
-    }
-
-    void registerModule(AJAXActionServiceFactory factory, String module) {
-        final Dictionary<String, Object> properties = new Hashtable<String, Object>(4);
-        properties.put("module", module);
-        properties.put("multiple", "true");
-        registerService(AJAXActionServiceFactory.class, factory, properties);
-    }
+    // Category successfully deleted
+    public static final String SUCCESSFULLY_DELETED = "Category successfully deleted";
 
 }

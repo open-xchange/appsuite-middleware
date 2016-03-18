@@ -49,6 +49,7 @@
 
 package com.openexchange.mail.categories.json;
 
+import java.util.Locale;
 import javax.security.auth.Subject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -58,6 +59,8 @@ import com.openexchange.mailfilter.Credentials;
 import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.tools.session.ServerSession;
+import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractCategoriesAction}
@@ -78,7 +81,7 @@ public abstract class AbstractCategoriesAction implements AJAXActionService {
 
     }
 
-    public Credentials getCredentials(Session session, AJAXRequestData request) throws OXException {
+    protected Credentials getCredentials(Session session, AJAXRequestData request) throws OXException {
         final ConfigurationService config = LOOKUP.getService(ConfigurationService.class);
         final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
         final String loginName;
@@ -92,6 +95,25 @@ public abstract class AbstractCategoriesAction implements AJAXActionService {
         final int contextId = session.getContextId();
         final Subject subject = (Subject) session.getParameter("kerberosSubject");
         return new Credentials(loginName, password, userId, contextId, null, subject);
+    }
+
+    /**
+     * Gets the locale for session-associated user.
+     *
+     * @param session The session
+     * @return The locale
+     * @throws OXException If locale cannot be returned
+     */
+    protected Locale getLocaleFor(Session session) throws OXException {
+        if (null == session) {
+            return null;
+        }
+
+        if (session instanceof ServerSession) {
+            return ((ServerSession) session).getUser().getLocale();
+        }
+        UserService service = LOOKUP.getService(UserService.class);
+        return service.getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 
 }
