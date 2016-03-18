@@ -2402,7 +2402,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 int contextID = i(entry.getKey());
                 Set<Integer> guestIDs = filterGuests(contextID, entry.getValue());
                 if (null != guestIDs && 0 < guestIDs.size()) {
-                    ServerServiceRegistry.getServize(ShareService.class).scheduleGuestCleanup(contextID, I2i(guestIDs));
+                    ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+                    if (null != shareService) {
+                        shareService.scheduleGuestCleanup(contextID, I2i(guestIDs));
+                    }
                 }
             }
         }

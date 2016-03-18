@@ -70,11 +70,9 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareService;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -225,8 +223,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder, shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {

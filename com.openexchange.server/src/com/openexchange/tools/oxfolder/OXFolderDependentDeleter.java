@@ -127,7 +127,7 @@ public class OXFolderDependentDeleter {
          * schedule cleanup for affected guest users as needed
          */
         List<Integer> guestIDs = filterGuests(con, context, new ArrayList<Integer>(affectedEntities));
-        if (0 < guestIDs.size()) {
+        if (false == guestIDs.isEmpty()) {
             ServerServiceRegistry.getInstance().getService(ShareService.class, true).scheduleGuestCleanup(context.getContextId(), I2i(guestIDs));
         }
     }
