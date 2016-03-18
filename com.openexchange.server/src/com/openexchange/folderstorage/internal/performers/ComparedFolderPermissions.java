@@ -57,6 +57,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.GuestPermission;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.groupware.ComparedPermissions;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.session.Session;
@@ -76,7 +77,7 @@ import com.openexchange.share.recipient.RecipientType;
 public class ComparedFolderPermissions extends ComparedPermissions<Permission, GuestPermission> {
 
     private final Session session;
-    private final ShareService shareService;
+    private ShareService shareService;
     private final Map<Integer, GuestInfo> guestInfos;
 
     /**
@@ -85,12 +86,10 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @param session The session or <code>null</code>; no guest information can be loaded then.
      * @param newPermissions The new permissions
      * @param originalPermissions The original permissions
-     * @param shareService The share service
      */
-    public ComparedFolderPermissions(Session session, Permission[] newPermissions, Permission[] originalPermissions, ShareService shareService) throws OXException {
+    public ComparedFolderPermissions(Session session, Permission[] newPermissions, Permission[] originalPermissions) throws OXException {
         super(newPermissions, originalPermissions);
         this.session = session;
-        this.shareService = shareService;
         guestInfos = new HashMap<>();
         calc();
     }
@@ -101,11 +100,19 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
      * @param session The session
      * @param newFolder The modified object sent by the client; not <code>null</code>
      * @param origFolder The original object loaded from the storage; not <code>null</code>
-     * @param shareService The share service
      * @throws OXException If errors occur when loading additional data for the comparison
      */
-    public ComparedFolderPermissions(Session session, Folder newFolder, Folder origFolder, ShareService shareService) throws OXException {
-        this(session, newFolder.getPermissions(), origFolder.getPermissions(), shareService);
+    public ComparedFolderPermissions(Session session, Folder newFolder, Folder origFolder) throws OXException {
+        this(session, newFolder.getPermissions(), origFolder.getPermissions());
+    }
+
+    private ShareService getShareService() throws OXException {
+        ShareService shareService = this.shareService;
+        if (null == shareService) {
+            shareService = FolderStorageServices.requireService(ShareService.class);
+            this.shareService = shareService;
+        }
+        return shareService;
     }
 
     @Override
@@ -176,7 +183,7 @@ public class ComparedFolderPermissions extends ComparedPermissions<Permission, G
 
         GuestInfo guestInfo = guestInfos.get(guestId);
         if (guestInfo == null) {
-            guestInfo = shareService.getGuestInfo(session, guestId);
+            guestInfo = getShareService().getGuestInfo(session, guestId);
             if (guestInfo == null) {
                 guestInfo = NO_GUEST;
             }
