@@ -59,6 +59,7 @@ import org.apache.jsieve.parser.generated.Token;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
 import com.openexchange.jsieve.commands.IfCommand;
@@ -66,6 +67,7 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.categories.exception.MailCategoriesJSONExceptionCodes;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
@@ -119,6 +121,47 @@ public class SearchableMailFilterRule {
         }
         this.header = json.getString(HEADER_STR);
         this.value = json.getString(VALUE_STR);
+
+    }
+
+    /**
+     * Initializes a new {@link SearchableMailFilterRule}.
+     * 
+     * @param oldRule
+     */
+    @SuppressWarnings("unchecked")
+    public SearchableMailFilterRule(TestCommand command, String flag) throws OXException {
+        if (command == null) {
+            throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+        }
+        this.flag = flag;
+
+        if (command.getTestCommands() != null && !command.getTestCommands().isEmpty()) {
+            // Any or All test
+            if (command.getCommand().equals(Commands.ALLOF)) {
+                isAND = true;
+            }
+
+            for (TestCommand com : command.getTestCommands()) {
+                this.addSubRule(new SearchableMailFilterRule(com, flag));
+            }
+
+        } else {
+            // header command
+            if (!command.getCommand().equals(Commands.HEADER)) {
+                throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+            }
+
+            List<Object> argList = command.getArguments();
+            if (argList == null || argList.isEmpty() || argList.size() != 3) {
+                throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+            }
+
+            List<String> list = (List<String>) argList.get(1);
+            this.header = list.get(0);
+            list = (List<String>) argList.get(2);
+            this.value = list.get(0);
+        }
 
     }
 

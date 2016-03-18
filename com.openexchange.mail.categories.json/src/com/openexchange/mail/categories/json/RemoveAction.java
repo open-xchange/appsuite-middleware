@@ -72,10 +72,9 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "remove", description = "Removes a mail user category.", parameters = { 
+@Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = { 
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
     @Parameter(name = "category", description = "The category identifier"), 
-    @Parameter(name = "removeFilter", description = "A optional flag indicating if corresponding filters should also be removed."),
 }, responseDescription = "Response: Empty, if category was successfully removed.")
 public class RemoveAction extends AbstractCategoriesAction {
 

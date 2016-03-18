@@ -71,7 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "switch", description = "Enable or disable mail catgeories.", parameters = {
+@Action(method = RequestMethod.GET, name = "switch", description = "Enable or disable mail catgeories.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category_ids", description = "A list of category identifiers."),
     @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),

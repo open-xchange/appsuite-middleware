@@ -47,62 +47,19 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories.exception;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
-import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailCategoriesActionFactory}
+ * {@link MailCategoriesJSONExceptionStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
+public class MailCategoriesJSONExceptionStrings implements LocalizableStrings {
 
-    private static final AtomicReference<MailCategoriesActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailCategoriesActionFactory>();
-
-    public static MailCategoriesActionFactory initMailCategoriesActionFactory(final ServiceLookup services) {
-        try {
-        MailCategoriesActionFactory actionFactory = new MailCategoriesActionFactory(services);
-        INSTANCE_REFERENCE.set(actionFactory);
-        return actionFactory;
-        } catch (Throwable t) {
-            throw t;
-        }
-    }
-
-    private final Map<String, AbstractCategoriesAction> actions;
-
-    /**
-     * Initializes a new {@link MailCategoriesActionFactory}.
-     *
-     * @param services The service look-up
-     */
-    private MailCategoriesActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
-        actions.put("switch", new SwitchAction(services));
-        actions.put("unread", new UnreadAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("remove", new RemoveAction(services));
-        actions.put("update", new UpdateAction(services));
-    }
-
-    @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
-
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
-    }
+    // Reorganizing of mails failed. Please try again later.
+    public static final String UNABLE_TO_ORGANIZE = "Reorganizing of mails failed. Please try again later.";
 
 }
