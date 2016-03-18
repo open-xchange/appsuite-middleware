@@ -381,6 +381,11 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     @Override
     public List<Rule> listRules(Credentials credentials, FilterType flag) throws OXException {
+        return listRules(credentials, flag.getFlag());
+    }
+
+    @Override
+    public List<Rule> listRules(Credentials credentials, String flag) throws OXException {
         Object lock = lockFor(credentials);
         synchronized (lock) {
             SieveHandler sieveHandler = SieveHandlerFactory.getSieveHandler(credentials);
@@ -392,10 +397,12 @@ public final class MailFilterServiceImpl implements MailFilterService {
                 RuleListAndNextUid rules = sieveTextFilter.readScriptFromString(script);
                 removeErroneusRules(rules);
 
-                ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag.getFlag(), rules.isError());
+                ClientRulesAndRequire clientrulesandrequire = sieveTextFilter.splitClientRulesAndRequire(rules.getRulelist(), flag, rules.isError());
                 List<Rule> clientRules = clientrulesandrequire.getRules();
                 changeOutgoingVacationRule(clientRules);
-                removeCategoryRules(clientRules);
+                if (!flag.equals("category")) {
+                    removeCategoryRules(clientRules);
+                }
                 removeNestedRules(clientRules);
 
                 return clientRules;

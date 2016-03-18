@@ -33,6 +33,7 @@ Import-Package: com.openexchange.ajax.requesthandler,
  javax.servlet.http,
  org.apache.commons.lang;version="2.6.0",
  org.apache.jsieve,
+ org.apache.jsieve.parser.generated,
  org.json,
  org.osgi.framework,
  org.slf4j

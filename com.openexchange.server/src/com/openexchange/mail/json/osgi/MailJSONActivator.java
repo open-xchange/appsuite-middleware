@@ -249,10 +249,7 @@ public final class MailJSONActivator extends AJAXModuleActivator {
         registerService(Reloadable.class, MailReloadable.getInstance());
         registerService(Reloadable.class, TransportReloadable.getInstance());
 
-        MailCategoriesConfigService mailCategoriesConfigService = getService(MailCategoriesConfigService.class);
-        if (mailCategoriesConfigService != null) {
-            registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(mailCategoriesConfigService));
-        }
+        registerService(PreferencesItemService.class, new MailCategoriesPreferenceItem(this));
 
         final ContactField[] fields = new ContactField[] { ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.FOLDER_ID, ContactField.NUMBER_OF_IMAGES };
         registerService(AJAXResultDecorator.class, new DecoratorImpl(converter, fields));

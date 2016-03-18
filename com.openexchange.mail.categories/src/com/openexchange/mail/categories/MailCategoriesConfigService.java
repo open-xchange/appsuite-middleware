@@ -191,4 +191,12 @@ public interface MailCategoriesConfigService {
      */
     public boolean isAllowedToCreateUserCategories(Session session) throws OXException;
 
+    /**
+     * Generates a flag for the given category
+     * 
+     * @param category The category identifier
+     * @return The flag
+     */
+    public String generateFlag(String category);
+
 }

@@ -63,6 +63,7 @@ import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -72,52 +73,57 @@ import com.openexchange.tools.servlet.OXJSONExceptionCodes;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesPreferenceItem implements PreferencesItemService{
+public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
-    private final MailCategoriesConfigService service;
-    
+    private final ServiceLookup lookupService;
+
     /**
      * Initializes a new {@link MailCategoriesPreferenceItem}.
      */
-    public MailCategoriesPreferenceItem(MailCategoriesConfigService configService) {
+    public MailCategoriesPreferenceItem(ServiceLookup lookupService) {
         super();
-        this.service=configService;
+        this.lookupService = lookupService;
     }
-    
+
     @Override
     public String[] getPath() {
-       return new String[] { "modules","mail", "categories" };
+        return new String[] { "modules", "mail", "categories" };
     }
 
     @Override
     public IValueHandler getSharedValue() {
         return new ReadOnlyValue() {
-            
+
             @Override
             public boolean isAvailable(UserConfiguration userConfig) {
                 return userConfig.hasWebMail();
             }
-            
+
             @Override
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
-                JSONObject item = new JSONObject(2);
+                JSONObject item = new JSONObject(3);
                 try {
-                    boolean mailCategoriesEnabled = service.isEnabled(session);
-                    item.put("tabbed_inbox", mailCategoriesEnabled);
-                    if (mailCategoriesEnabled) {
-                        boolean mailUserCategoriesEnabled = service.isAllowedToCreateUserCategories(session);
-                        item.put("user_can_create_categories", mailUserCategoriesEnabled);
-                        List<MailCategoryConfig> configs = service.getAllCategories(session, false);
-                        JSONArray categories = new JSONArray();
-                        for (MailCategoryConfig config : configs) {
-                            JSONObject categoryJSON = new JSONObject(3);
-                            categoryJSON.put("filter", config.getCategory());
-                            String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
-                            categoryJSON.put("name", name);
-                            categoryJSON.put("active", config.isActive());
-                            categories.put(categoryJSON);
+                    MailCategoriesConfigService service = lookupService.getService(MailCategoriesConfigService.class);
+                    if (service != null) {
+                        boolean mailCategoriesEnabled = service.isEnabled(session);
+                        item.put("tabbed_inbox", mailCategoriesEnabled);
+                        if (mailCategoriesEnabled) {
+                            boolean mailUserCategoriesEnabled = service.isAllowedToCreateUserCategories(session);
+                            item.put("user_can_create_categories", mailUserCategoriesEnabled);
+                            List<MailCategoryConfig> configs = service.getAllCategories(session, false);
+                            JSONArray categories = new JSONArray();
+                            for (MailCategoryConfig config : configs) {
+                                JSONObject categoryJSON = new JSONObject(3);
+                                categoryJSON.put("filter", config.getCategory());
+                                String name = config.getNames().containsKey(user.getLocale()) ? config.getNames().get(user.getLocale()) : config.getName();
+                                categoryJSON.put("name", name);
+                                categoryJSON.put("active", config.isActive());
+                                categories.put(categoryJSON);
+                            }
+                            item.put("inbox_tabs", categories);
                         }
-                        item.put("inbox_tabs", categories);
+                    } else {
+                        item.put("tabbed_inbox", false);
                     }
                     setting.setSingleValue(item);
                 } catch (JSONException e) {

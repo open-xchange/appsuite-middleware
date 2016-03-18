@@ -78,7 +78,7 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
         }
     }
 
-    private final Map<String, AJAXActionService> actions;
+    private final Map<String, AbstractCategoriesAction> actions;
 
     /**
      * Initializes a new {@link MailCategoriesActionFactory}.
@@ -87,7 +87,7 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
      */
     private MailCategoriesActionFactory(final ServiceLookup services) {
         super();
-        actions = new ConcurrentHashMap<String, AJAXActionService>(10, 0.9f, 1);
+        actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
         actions.put("switch", new SwitchAction(services));
         actions.put("unread", new UnreadAction(services));
         actions.put("new", new NewAction(services));

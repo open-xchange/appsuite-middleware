@@ -52,57 +52,67 @@ package com.openexchange.mail.categories.json;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import org.apache.jsieve.SieveException;
+import org.apache.jsieve.TagArgument;
+import org.apache.jsieve.parser.generated.Token;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
+import com.openexchange.jsieve.commands.IfCommand;
 import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 
 /**
- * {@link SearchableMailFilterTest}
+ * {@link SearchableMailFilterRule}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class SearchableMailFilterTest {
-    
-    private List<SearchableMailFilterTest> subtests;
-    private boolean hasSubtests=false;
-    private boolean isAND=true;
-    private String header;
-    private String value;
-    private String flag;
-    
+public class SearchableMailFilterRule {
+
     private static final String SUBTESTS_STR = "conditions";
     private static final String OPERATOR_STR = "operator";
     private static final String HEADER_STR = "header";
     private static final String VALUE_STR = "value";
-    
+
+    private List<SearchableMailFilterRule> subRules;
+    private boolean hasSubRules = false;
+    private boolean isAND = false;
+    private String header;
+    private String value;
+    private String flag;
+
     /**
-     * Initializes a new {@link SearchableMailFilterTest}.
-     * @throws JSONException 
+     * Initializes a new {@link SearchableMailFilterRule}.
+     * 
+     * @throws JSONException
      */
-    public SearchableMailFilterTest(JSONObject json, String flag) throws JSONException {
+    @SuppressWarnings("unchecked")
+    public SearchableMailFilterRule(JSONObject json, String flag) throws JSONException {
         super();
         this.flag = flag;
-        if(json.has(SUBTESTS_STR)){
+        if (json.has(SUBTESTS_STR)) {
             JSONArray array = (JSONArray) json.get(SUBTESTS_STR);
-            if(json.has(OPERATOR_STR)){
-                if(json.getString(OPERATOR_STR).equalsIgnoreCase("or")){
-                    isAND=false;
+            if (json.has(OPERATOR_STR)) {
+                if (json.getString(OPERATOR_STR).equalsIgnoreCase("and")) {
+                    isAND = true;
                 }
             }
-            for(Object subObject: array.asList()) {
-                if(!(subObject instanceof JSONObject)){
+            for (Object subObject : array.asList()) {
+                if (!(subObject instanceof Map)) {
                     throw new JSONException("conditions element is not a JSONObject!");
                 } else {
-                    JSONObject subTest = (JSONObject) subObject;
-                    addCondition(new SearchableMailFilterTest(subTest, flag));
+                    JSONObject subTest = new JSONObject((Map<String, ? extends Object>) subObject);
+                    addSubRule(new SearchableMailFilterRule(subTest, flag));
                 }
             }
             return;
@@ -111,34 +121,34 @@ public class SearchableMailFilterTest {
         this.value = json.getString(VALUE_STR);
 
     }
-    
-    private void addCondition(SearchableMailFilterTest condition) {
-        if(this.subtests==null){
-            subtests = new ArrayList<>();
-            subtests.add(condition);
-            hasSubtests=true;
+
+    private void addSubRule(SearchableMailFilterRule rule) {
+        if (this.subRules == null) {
+            subRules = new ArrayList<>();
+            subRules.add(rule);
+            hasSubRules = true;
         } else {
-            subtests.add(condition);
+            subRules.add(rule);
         }
     }
-    
-    public SearchTerm<?> getSearchTerm(){
-        if(hasSubtests){
+
+    public SearchTerm<?> getSearchTerm() {
+        if (hasSubRules) {
             SearchTerm<?> result = null;
-            if(isAND) {
-                for(SearchableMailFilterTest test: subtests){
-                    if(result==null){
-                        result = test.getSearchTerm();
+            if (isAND) {
+                for (SearchableMailFilterRule subRule : subRules) {
+                    if (result == null) {
+                        result = subRule.getSearchTerm();
                     } else {
-                        result = new ANDTerm(result, test.getSearchTerm());
+                        result = new ANDTerm(result, subRule.getSearchTerm());
                     }
                 }
             } else {
-                for(SearchableMailFilterTest test: subtests){
-                    if(result==null){
-                        result = test.getSearchTerm();
+                for (SearchableMailFilterRule subRule : subRules) {
+                    if (result == null) {
+                        result = subRule.getSearchTerm();
                     } else {
-                        result = new ORTerm(result, test.getSearchTerm());
+                        result = new ORTerm(result, subRule.getSearchTerm());
                     }
                 }
             }
@@ -147,20 +157,55 @@ public class SearchableMailFilterTest {
             return new HeaderTerm(header, value);
         }
     }
-    
-    public Rule getRule() {
-        ArrayList<Command> commands = new ArrayList<>(Collections.singleton(getCommand()));
+
+    public Rule getRule() throws SieveException {
+        ArrayList<Object> argList = new ArrayList<>();
+        List<String> flagList = new ArrayList<>();
+        flagList.add(flag);
+        argList.add(flagList);
+        ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
+        IfCommand ifCommand = new IfCommand(getCommand(), Collections.singletonList(addFlagAction));
+        ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
         int linenumber = 0;
-        boolean commented=true;
+        boolean commented = false;
         RuleComment comment = new RuleComment(flag);
         comment.setFlags(Collections.singletonList("category"));
         Rule result = new Rule(comment, commands, linenumber, commented);
-            
         return result;
     }
-    
-    private Command getCommand() {
-        return null;
+
+    private TestCommand getCommand() throws SieveException {
+        if (hasSubRules) {
+
+            ArrayList<TestCommand> subCommands = new ArrayList<>(subRules.size());
+            for (SearchableMailFilterRule subtest : subRules) {
+                subCommands.add(subtest.getCommand());
+            }
+            if (isAND) {
+                return new TestCommand(Commands.ALLOF, new ArrayList<>(), subCommands);
+            } else {
+                return new TestCommand(Commands.ANYOF, new ArrayList<>(), subCommands);
+            }
+        } else {
+
+            final List<Object> argList = new ArrayList<Object>();
+            argList.add(createTagArgument("contains"));
+            argList.add(Collections.singletonList(header));
+            argList.add(Collections.singletonList(value));
+            return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+        }
+    }
+
+    /**
+     * Creates a {@link TagArgument} from the specified string value
+     * 
+     * @param value The value of the {@link TagArgument}
+     * @return the {@link TagArgument}
+     */
+    private static final TagArgument createTagArgument(String value) {
+        Token token = new Token();
+        token.image = ":" + value;
+        return new TagArgument(token);
     }
 
 }

@@ -51,7 +51,6 @@ package com.openexchange.mail.categories.json;
 
 import java.util.List;
 import org.apache.commons.lang.Validate;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -77,21 +76,18 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "category_ids", description = "A list of category identifiers."),
     @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),
     }, responseDescription = "Response: An array with category configurations")
-public class SwitchAction implements AJAXActionService {
+public class SwitchAction extends AbstractCategoriesAction {
     
     private static final String ACTION = "categories";
     private static final String PARAMETER_CATEGORY_IDS = "category_ids";
     private static final String PARAMETER_ENABLE = "enable";
 
-    private final ServiceLookup LOOKUP;
     
     /**
      * Initializes a new {@link SwitchAction}.
      */
     public SwitchAction(ServiceLookup services) {
-        super();
-        LOOKUP = services;
-
+        super(services);
     }
     
     

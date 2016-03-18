@@ -49,70 +49,49 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.List;
+import javax.security.auth.Subject;
+import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.session.Session;
 
 /**
- * {@link RemoveAction}
+ * {@link AbstractCategoriesAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "remove", description = "Removes a mail user category.", parameters = { 
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
-    @Parameter(name = "category", description = "The category identifier"), 
-    @Parameter(name = "removeFilter", description = "A optional flag indicating if corresponding filters should also be removed."),
-}, responseDescription = "Response: Empty, if category was successfully removed.")
-public class RemoveAction extends AbstractCategoriesAction {
+public abstract class AbstractCategoriesAction implements AJAXActionService {
+
+    protected final ServiceLookup LOOKUP;
 
     /**
      * Initializes a new {@link SwitchAction}.
      */
-    public RemoveAction(ServiceLookup services) {
-        super(services);
-    }
-    
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String category = requestData.getParameter("category");
-        if(Strings.isEmpty(category)){
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("category");
-        }
-        MailCategoriesConfigService categoriesService = LOOKUP.getService(MailCategoriesConfigService.class);
-        if(categoriesService==null){
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
-        }
-        categoriesService.removeUserCategory(category, session);
-        
-        MailFilterService mailFilterService = LOOKUP.getService(MailFilterService.class);
-        if (mailFilterService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailFilterService.class);
-        }
-        Credentials creds = getCredentials(session, requestData);
-        List<Rule> rules = mailFilterService.listRules(creds, "category");
-        String flag = categoriesService.generateFlag(category);
-        for (Rule rule : rules) {
-            if (rule.getRuleComment().getRulename().equals(flag)) {
-                mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
-                break;
-            }
-        }
+    public AbstractCategoriesAction(ServiceLookup services) {
+        super();
+        LOOKUP = services;
 
-        return new AJAXRequestResult();
+    }
+
+    public Credentials getCredentials(Session session, AJAXRequestData request) throws OXException {
+        final ConfigurationService config = LOOKUP.getService(ConfigurationService.class);
+        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        final String loginName;
+        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
+            loginName = session.getLogin();
+        } else {
+            loginName = session.getLoginName();
+        }
+        final String password = session.getPassword();
+        final int userId = session.getUserId();
+        final int contextId = session.getContextId();
+        final Subject subject = (Subject) session.getParameter("kerberosSubject");
+        return new Credentials(loginName, password, userId, contextId, null, subject);
     }
 
 }

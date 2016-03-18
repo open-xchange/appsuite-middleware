@@ -54,7 +54,6 @@ import java.util.List;
 import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
@@ -83,17 +82,14 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
     @Parameter(name = "folder", description = "Object ID of the folder, whose contents are queried."),
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
-public class UnreadAction implements AJAXActionService {
+public class UnreadAction extends AbstractCategoriesAction {
 
     private static final String ACTION = "categories";
-    private final ServiceLookup LOOKUP;
     /**
      * Initializes a new {@link SwitchAction}.
      */
     public UnreadAction(ServiceLookup services) {
-        super();
-        LOOKUP = services;
-
+        super(services);
     }
 
     @Override

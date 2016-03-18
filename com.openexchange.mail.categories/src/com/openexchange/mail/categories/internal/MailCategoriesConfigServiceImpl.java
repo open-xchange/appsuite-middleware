@@ -71,6 +71,8 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigService {
 
+    private final static String FLAG_PREFIX = "ox_";
+
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
         String[] categories = getCategoryNames(session);
@@ -339,6 +341,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public boolean isAllowedToCreateUserCategories(Session session) throws OXException{
         return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, false, session);
+    }
+
+    @Override
+    public String generateFlag(String category) {
+        StringBuilder builder = new StringBuilder(FLAG_PREFIX);
+        builder.append(category.hashCode());
+        return builder.toString();
     }
 
 }
