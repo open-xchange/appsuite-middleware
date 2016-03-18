@@ -89,11 +89,6 @@ public final class StringBufferStringer implements Stringer {
     }
 
     @Override
-    public int hashCode() {
-        return sb.hashCode();
-    }
-
-    @Override
     public void ensureCapacity(int minimumCapacity) {
         sb.ensureCapacity(minimumCapacity);
     }
@@ -106,11 +101,6 @@ public final class StringBufferStringer implements Stringer {
     @Override
     public void setLength(int newLength) {
         sb.setLength(newLength);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return sb.equals(obj);
     }
 
     @Override

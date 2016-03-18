@@ -454,7 +454,7 @@ public class ResellerAdmin extends EnforceableDataObject implements PasswordMech
             if (other.restrictions != null) {
                 return false;
             }
-        } else if (!restrictions.equals(other.restrictions)) {
+        } else if (!Arrays.equals(restrictions, other.restrictions)) {
             return false;
         }
         if (restrictionsset != other.restrictionsset) {
