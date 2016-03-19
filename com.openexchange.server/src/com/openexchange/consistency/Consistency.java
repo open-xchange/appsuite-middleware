@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -338,8 +339,9 @@ public abstract class Consistency implements ConsistencyMBean {
             }
             DBUtils.closeSQLStuff(rs, stmt);
             stmt = null;
-            for (final String schema : schemaMap.keySet()) {
-                List<Integer> ctxs = schemaMap.get(schema);
+            for (final Entry<String, List<Integer>> schemaEntry : schemaMap.entrySet()) {
+                String schema = schemaEntry.getKey();
+                List<Integer> ctxs = schemaEntry.getValue();
                 Integer poolid = schemaPoolMap.get(schema);
                 poolCon = databaseService.get(poolid.intValue(), schema);
                 String contextids = "";

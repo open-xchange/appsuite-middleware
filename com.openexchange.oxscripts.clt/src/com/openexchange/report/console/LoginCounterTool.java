@@ -55,6 +55,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.management.MBeanServerConnection;
 import javax.management.MBeanServerInvocationHandler;
@@ -243,11 +244,12 @@ public final class LoginCounterTool {
             andAggregated);
 
 
-            for (String client : logins.keySet()) {
+            for (Entry<String, Integer> clientEntry : logins.entrySet()) {
+                String client = clientEntry.getKey();
                 if (client.equals(LoginCounterMBean.SUM)) {
                     continue;
                 }
-                Integer number = logins.get(client);
+                Integer number = clientEntry.getValue();
                 System.out.println(client + ": " + number);
             }
 

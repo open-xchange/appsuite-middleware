@@ -61,6 +61,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.MBeanException;
 import com.openexchange.database.DatabaseService;
@@ -156,10 +157,10 @@ public class LoginCounterImpl implements LoginCounterService {
          */
         int sum = 0;
         final Map<String, Integer> results = new HashMap<String, Integer>();
-        for (final String schema : schemaMap.keySet()) {
+        for (final Entry<String, Integer> schemaEntry : schemaMap.entrySet()) {
             final Set<UserContextId> countedUsers = new HashSet<UserContextId>();
-            final int readPool = schemaMap.get(schema).intValue();
-            final Connection connection = dbService.get(readPool, schema);
+            final int readPool = schemaEntry.getValue().intValue();
+            final Connection connection = dbService.get(readPool, schemaEntry.getKey());
             PreparedStatement stmt = null;
             ResultSet rs = null;
             try {

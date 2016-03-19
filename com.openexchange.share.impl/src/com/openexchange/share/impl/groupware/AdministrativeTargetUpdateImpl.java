@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderStorage;
@@ -139,14 +140,15 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
     }
 
     private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, FolderObject> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
-        for (int module : objectsByModule.keySet()) {
+        for (Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
+            int module = moduleEntry.getKey().intValue();
             ModuleHandler handler = handlers.get(module);
-            List<ShareTarget> targetList = objectsByModule.get(module);
+            List<ShareTarget> targetList = moduleEntry.getValue();
             for (ShareTarget target : targetList) {
                 FolderObject folder = foldersById.get(target.getFolder());
                 if (folder == null) {
                     try {
-                        folder = folderAccess.getFolderObject(Integer.valueOf(target.getFolder()));
+                        folder = folderAccess.getFolderObject(Integer.parseInt(target.getFolder()));
                         foldersById.put(target.getFolder(), folder);
                     } catch (NumberFormatException e) {
                         throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
@@ -168,7 +170,7 @@ public class AdministrativeTargetUpdateImpl extends AbstractTargetUpdate {
             if (null != Module.getForFolderConstant(folderTarget.getModule())) {
                 FolderObject folder;
                 try {
-                    folder = folderAccess.getFolderObject(Integer.valueOf(folderTarget.getFolder()));
+                    folder = folderAccess.getFolderObject(Integer.parseInt(folderTarget.getFolder()));
                 } catch (NumberFormatException e) {
                     throw ShareExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
                 }

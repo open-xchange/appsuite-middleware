@@ -29,7 +29,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Map.Entry;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 
@@ -69,8 +69,8 @@ public final class MIMEParse {
         @Override
         public String toString() {
             StringBuffer s = new StringBuffer("('" + type + "', '" + subType + "', {");
-            for (String k : params.keySet()) {
-                s.append("'" + k + "':'" + params.get(k) + "',");
+            for (Entry<String, String> e : params.entrySet()) {
+                s.append("'" + e.getKey() + "':'" + e.getValue() + "',");
             }
             return s.append("})").toString();
         }

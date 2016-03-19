@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.AbstractFolder;
@@ -151,9 +152,10 @@ public class TargetUpdateImpl extends AbstractTargetUpdate {
 
     private void loadObjectTargets(Map<Integer, List<ShareTarget>> objectsByModule, Map<String, UserizedFolder> foldersById, boolean checkPermissions, Map<ShareTarget, TargetProxy> proxies) throws OXException {
         FolderService folderService = getFolderService();
-        for (int module : objectsByModule.keySet()) {
+        for (Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
+            int module = moduleEntry.getKey().intValue();
             ModuleHandler handler = handlers.get(module);
-            List<ShareTarget> targetList = objectsByModule.get(module);
+            List<ShareTarget> targetList = moduleEntry.getValue();
             for (ShareTarget target : targetList) {
                 UserizedFolder folder = foldersById.get(target.getFolder());
                 if (folder == null) {

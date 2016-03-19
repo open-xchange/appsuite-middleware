@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -87,7 +88,7 @@ import com.openexchange.filestore.FileStorageCodes;
 
 /**
  * Provides the integration of the consistency tool in the OSGi OX.
- * 
+ *
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
  */
@@ -185,9 +186,9 @@ public class OsgiOXConsistency extends Consistency {
         for (Context ctx : ctxs) {
             entities.add(new EntityImpl(ctx));
         }
-        for (Context ctx : users.keySet()) {
-            for (User user : users.get(ctx)) {
-                entities.add(new EntityImpl(ctx, user));
+        for (Entry<Context, List<User>> ctxEntry : users.entrySet()) {
+            for (User user : ctxEntry.getValue()) {
+                entities.add(new EntityImpl(ctxEntry.getKey(), user));
             }
         }
 
@@ -285,7 +286,7 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Returns a list with {@link Context} objects loaded from the {@link ContextStorage} using the specified context identifiers
-     * 
+     *
      * @param list a list with context identifiers
      * @return a list with {@link Context} objects loaded from the {@link ContextStorage}
      * @throws OXException
@@ -301,7 +302,7 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Returns a list with {@link Context} objects loaded from the {@link ContextStorage} using the specified context identifiers
-     * 
+     *
      * @param list a list with context identifiers
      * @return a list with {@link Context} objects loaded from the {@link ContextStorage}
      * @throws OXException
@@ -317,7 +318,7 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Returns a map with {@link Context} and {@link User} objects loaded from the {@link ContextStorage} and {@link UserStorage} using the specified context and user identifiers
-     * 
+     *
      * @param list a list with context and user identifiers
      * @return a list with {@link Context} and {@link User} objects loaded from the {@link ContextStorage} and {@link UserStorage}
      * @throws OXException
@@ -327,9 +328,9 @@ public class OsgiOXConsistency extends Consistency {
         UserStorage usrStor = UserStorage.getInstance();
 
         Map<Context, List<User>> usr = new HashMap<Context, List<User>>();
-        for (Integer ctxId : users.keySet()) {
-            Context context = ctxStor.getContext(ctxId);
-            User[] usrArray = usrStor.getUser(context, toArray(users.get(ctxId)));
+        for (Entry<Integer, List<Integer>> ctxIdEntry : users.entrySet()) {
+            Context context = ctxStor.getContext(ctxIdEntry.getKey().intValue());
+            User[] usrArray = usrStor.getUser(context, toArray(ctxIdEntry.getValue()));
             List<User> usrList = new ArrayList<User>(usrArray.length);
             Collections.addAll(usrList, usrArray);
             usr.put(context, usrList);
@@ -340,7 +341,7 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Returns a map with {@link Context} and {@link User} objects that are using the file storage with the specified identifier
-     * 
+     *
      * @param filestoreId the file storage identifier
      * @return a map with {@link Context} and {@link User} objects that are using the file storage with the specified identifier
      * @throws OXException
@@ -352,7 +353,7 @@ public class OsgiOXConsistency extends Consistency {
 
     /**
      * Converts the specified list of integers to an array of integers
-     * 
+     *
      * @param list the list of integers
      * @return an array of integers
      */

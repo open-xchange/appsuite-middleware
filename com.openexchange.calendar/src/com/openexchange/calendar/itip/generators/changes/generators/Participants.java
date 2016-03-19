@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.calendar.AppointmentDiff;
@@ -255,9 +256,9 @@ public class Participants implements ChangeDescriptionGenerator{
             }
         }
 
-        for(Integer id : resourceChange.keySet()) {
-            Resource resource = resources.getResource(id.intValue(), ctx);
-            ChangeType changeType = resourceChange.get(id);
+        for (Entry<Integer, ChangeType> entry : resourceChange.entrySet()) {
+            Resource resource = resources.getResource(entry.getKey().intValue(), ctx);
+            ChangeType changeType = entry.getValue();
             if (changeType == null) {
                 continue;
             }
@@ -302,7 +303,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
-        
+
         if (difference.getAdded() != null) {
             for (Object added : difference.getAdded()) {
                 if (added instanceof UserParticipant) {
@@ -316,7 +317,7 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
-        
+
         if (difference.getRemoved() != null) {
             for (Object removed : difference.getRemoved()) {
                 if (removed instanceof UserParticipant) {
