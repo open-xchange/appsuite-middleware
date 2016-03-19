@@ -77,7 +77,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.GuestInfo;
-import com.openexchange.share.ShareService;
 import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
@@ -230,8 +229,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder, shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {

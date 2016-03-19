@@ -211,7 +211,7 @@ public class SortableConcurrentList<E extends Comparable<E>> extends ConcurrentL
         sb.append('[');
         for (;;) {
             E e = it.next();
-            sb.append(e == this ? "(this Collection)" : e);
+            sb.append(e);
             if (! it.hasNext()) {
                 return sb.append(']').toString();
             }

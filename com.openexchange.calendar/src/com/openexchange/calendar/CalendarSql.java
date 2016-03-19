@@ -1462,7 +1462,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (searchObj == null || cfo == null) {
             return false;
         }
-        if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().size() < 0) {
+        if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().isEmpty()) {
             return false;
         }
 

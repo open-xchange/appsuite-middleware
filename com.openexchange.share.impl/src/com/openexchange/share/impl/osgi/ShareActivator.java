@@ -157,13 +157,13 @@ public class ShareActivator extends HousekeepingActivator {
             public void removedService(ServiceReference<CryptoService> serviceReference, CryptoService service) {
                 ServiceRegistration<ShareService> shareRegistration = this.shareRegistration;
                 if (null != shareRegistration) {
-                    shareRegistration.unregister();
                     this.shareRegistration = null;
+                    shareRegistration.unregister();
                 }
                 ServiceRegistration<EventHandler> cleanUpRegistration = this.cleanUpRegistration;
                 if (null != cleanUpRegistration) {
-                    cleanUpRegistration.unregister();
                     this.cleanUpRegistration = null;
+                    cleanUpRegistration.unregister();
                 }
 
                 context.ungetService(serviceReference);

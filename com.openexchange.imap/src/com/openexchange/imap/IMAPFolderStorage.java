@@ -1637,7 +1637,7 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                                     }
                                 } else {
                                     if (!imapConfig.getACLExtension().canCreate(RightsCache.getCachedRights(destFolder, true, session, accountId))) {
-                                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, isDestRoot ? DEFAULT_FOLDER_ID : newParent);
+                                        throw IMAPException.create(IMAPException.Code.NO_CREATE_ACCESS, imapConfig, session, newParent);
                                     }
                                 }
                             } catch (final MessagingException e) {

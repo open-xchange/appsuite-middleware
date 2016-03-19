@@ -1719,14 +1719,14 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return The warnings, or an empty list if there are none
      */
     private List<OXException> collectWarningsBeforeMove(FileID sourceFileID, File sourceFile, FolderID targetFolderID, List<Field> modifiedColumns) throws OXException {
-        List<OXException> warnings = new ArrayList<OXException>();
-        if (false == Strings.isEmpty(sourceFile.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION))) {
+        List<OXException> warnings = new ArrayList<OXException>(6);
+        if (Strings.isNotEmpty(sourceFile.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION))) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
             FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
             warnings.add(FileStorageExceptionCodes.LOSS_OF_NOTES.create(sourceFile.getFileName(), getPathString(sourcePath),
                 getAccountName(this, targetFolderID), sourceFileID.toUniqueID(), targetFolderID.toUniqueID()));
         }
-        if (false == Strings.isEmpty(sourceFile.getCategories()) && (null == modifiedColumns || modifiedColumns.contains(Field.CATEGORIES))) {
+        if (Strings.isNotEmpty(sourceFile.getCategories()) && (null == modifiedColumns || modifiedColumns.contains(Field.CATEGORIES))) {
             FolderID sourceFolderID = new FolderID(sourceFileID.getService(), sourceFileID.getAccountId(), sourceFileID.getFolderId());
             FileStorageFolder[] sourcePath = getFolderAccess(sourceFolderID).getPath2DefaultFolder(sourceFolderID.getFolderId());
             warnings.add(FileStorageExceptionCodes.LOSS_OF_CATEGORIES.create(sourceFile.getFileName(), getPathString(sourcePath),
@@ -1756,23 +1756,30 @@ public abstract class AbstractCompositingIDBasedFileAccess extends AbstractCompo
      * @return The warnings, or an empty list if there are none
      */
     private List<OXException> collectWarningsBeforeSave(File file, FileStorageFileAccess fileAccess, List<Field> modifiedColumns) throws OXException {
-        List<OXException> warnings = new ArrayList<OXException>();
-        if (false == Strings.isEmpty(file.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION)) &&
-            false == FileStorageTools.supports(fileAccess, Field.DESCRIPTION)) {
-            warnings.add(FileStorageExceptionCodes.NO_NOTES_SUPPORT.create(file.getFileName(),
-                getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
+        List<OXException> warnings = new ArrayList<OXException>(4);
+        String fileName = null;
+        if (Strings.isNotEmpty(file.getDescription()) && (null == modifiedColumns || modifiedColumns.contains(Field.DESCRIPTION)) && !FileStorageTools.supports(fileAccess, Field.DESCRIPTION)) {
+            fileName = getFileNameFrom(file, fileAccess);
+            warnings.add(FileStorageExceptionCodes.NO_NOTES_SUPPORT.create(fileName, getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
         }
-        if (false == Strings.isEmpty(file.getCategories()) && (null == modifiedColumns || modifiedColumns.contains(Field.CATEGORIES)) &&
-            false == FileStorageTools.supports(fileAccess, Field.CATEGORIES)) {
-            warnings.add(FileStorageExceptionCodes.NO_CATEGORIES_SUPPORT.create(file.getFileName(),
-                getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
+        if (Strings.isNotEmpty(file.getCategories()) && (null == modifiedColumns || modifiedColumns.contains(Field.CATEGORIES)) && !FileStorageTools.supports(fileAccess, Field.CATEGORIES)) {
+            if (null == fileName) {
+                fileName = getFileNameFrom(file, fileAccess);
+            }
+            warnings.add(FileStorageExceptionCodes.NO_CATEGORIES_SUPPORT.create(fileName, getAccountName(this, fileAccess), file.getId(), file.getFolderId()));
         }
-        if (null != file.getObjectPermissions() && 0 < file.getObjectPermissions().size() &&
-            false == FileStorageTools.supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
-            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(
-                getAccountName(this, fileAccess), file.getFolderId(), session.getContextId()));
+        if (null != file.getObjectPermissions() && 0 < file.getObjectPermissions().size() && !FileStorageTools.supports(fileAccess, FileStorageCapability.OBJECT_PERMISSIONS)) {
+            warnings.add(FileStorageExceptionCodes.NO_PERMISSION_SUPPORT.create(getAccountName(this, fileAccess), file.getFolderId(), session.getContextId()));
         }
         return warnings;
+    }
+
+    private static String getFileNameFrom(File file, FileStorageFileAccess fileAccess) throws OXException {
+        String fileName = file.getFileName();
+        if (Strings.isEmpty(fileName)) {
+            fileName = fileAccess.getFileMetadata(file.getFolderId(), file.getId(), FileStorageFileAccess.CURRENT_VERSION).getFileName();
+        }
+        return fileName;
     }
 
     /**

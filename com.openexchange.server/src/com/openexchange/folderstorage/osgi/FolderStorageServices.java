@@ -51,6 +51,7 @@ package com.openexchange.folderstorage.osgi;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicReference;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -67,56 +68,6 @@ import com.openexchange.server.ServiceExceptionCode;
 public class FolderStorageServices implements ServiceTrackerCustomizer<Object, Object> {
 
     private static final FolderStorageServices INSTANCE = new FolderStorageServices();
-
-    private final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<>();
-
-    private BundleContext context;
-
-    private Class<?>[] serviceClasses;
-
-    private FolderStorageServices() {
-        super();
-    }
-
-    static FolderStorageServices init(BundleContext context, Class<?>[] services) {
-        INSTANCE.context = context;
-        INSTANCE.serviceClasses = services;
-        return INSTANCE;
-    }
-
-    @Override
-    public Object addingService(ServiceReference<Object> reference) {
-        if (context == null) {
-            return null;
-        }
-
-        Object service = context.getService(reference);
-        if (service == null) {
-            return null;
-        }
-
-        for (Class<?> clazz : serviceClasses) {
-            if (clazz.isAssignableFrom(service.getClass())) {
-                services.put(clazz, service);
-                break;
-            }
-        }
-
-        return service;
-    }
-
-    @Override
-    public void modifiedService(ServiceReference<Object> reference, Object service) {}
-
-    @Override
-    public void removedService(ServiceReference<Object> reference, Object service) {
-        for (Class<?> clazz : serviceClasses) {
-            if (clazz.isAssignableFrom(service.getClass())) {
-                services.remove(clazz, service);
-                break;
-            }
-        }
-    }
 
     /**
      * Gets the service if available.
@@ -141,4 +92,68 @@ public class FolderStorageServices implements ServiceTrackerCustomizer<Object, O
 
         return service;
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private final ConcurrentMap<Class<?>, Object> services = new ConcurrentHashMap<>();
+    private final AtomicReference<BundleContext> contextRef = new AtomicReference<BundleContext>();
+    private final AtomicReference<Class<?>[]> serviceClassesRef = new AtomicReference<Class<?>[]>();
+
+    private FolderStorageServices() {
+        super();
+    }
+
+    static FolderStorageServices init(BundleContext context, Class<?>[] services) {
+        INSTANCE.contextRef.set(context);
+        INSTANCE.serviceClassesRef.set(services);
+        return INSTANCE;
+    }
+
+    @Override
+    public Object addingService(ServiceReference<Object> reference) {
+        BundleContext context = contextRef.get();
+        if (context == null) {
+            return null;
+        }
+
+        Object service = context.getService(reference);
+        if (service == null) {
+            context.ungetService(reference);
+            return null;
+        }
+
+        Class<?>[] serviceClasses = serviceClassesRef.get();
+        for (Class<?> clazz : serviceClasses) {
+            if (clazz.isAssignableFrom(service.getClass())) {
+                services.put(clazz, service);
+                return service;
+            }
+        }
+
+        // Service is not of interest; discard it
+        context.ungetService(reference);
+        return null;
+    }
+
+    @Override
+    public void modifiedService(ServiceReference<Object> reference, Object service) {
+        // Nothing
+    }
+
+    @Override
+    public void removedService(ServiceReference<Object> reference, Object service) {
+        Class<?>[] serviceClasses = serviceClassesRef.get();
+        for (Class<?> clazz : serviceClasses) {
+            if (clazz.isAssignableFrom(service.getClass())) {
+                services.remove(clazz, service);
+                break;
+            }
+        }
+
+        BundleContext context = contextRef.get();
+        if (context != null) {
+            context.ungetService(reference);
+        }
+    }
+
 }
