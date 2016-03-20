@@ -190,8 +190,10 @@ public class ReportingMBean implements DynamicMBean {
         try {
             final Map<String, Integer> schemaMap = Tools.getAllSchemata(LOG);
             final Map<Integer, ReportContext> allctx = new HashMap<Integer, ReportContext>();
-            for (final String schema : schemaMap.keySet()) {
-                final int readPool = schemaMap.get(schema).intValue();
+            for (final Entry<String, Integer> schemaEntry : schemaMap.entrySet()) {
+                String schema = schemaEntry.getKey();
+                int readPool = schemaEntry.getValue().intValue();
+
                 final Connection connection;
                 try {
                     connection = dbService.get(readPool, schema);
@@ -211,7 +213,7 @@ public class ReportingMBean implements DynamicMBean {
                         rc.setCreated(new Date(rs.getLong(2)));
                         rc.setAdminId(I(rs.getInt(3)));
                         rc.setAdminPermission(I(rs.getInt(4)));
-                        allctx.put(I(rc.getId()), rc);
+                        allctx.put(rc.getId(), rc);
                     }
                     rs.close();
                     stmt.close();
@@ -321,8 +323,10 @@ public class ReportingMBean implements DynamicMBean {
             HashMap<Integer, Integer> macMap = new HashMap<Integer, Integer>();
             HashMap<Integer, Integer> admMap = new HashMap<Integer, Integer>();
             HashMap<Integer, Integer> disabledMap = new HashMap<Integer, Integer>();
-            for (final String schema : schemaMap.keySet()) {
-                final int readPool = schemaMap.get(schema).intValue();
+            for (final Entry<String, Integer> schemaEntry : schemaMap.entrySet()) {
+                int readPool = schemaEntry.getValue().intValue();
+                String schema = schemaEntry.getKey();
+
                 final Connection connection;
                 try {
                     connection = dbService.get(readPool, schema);

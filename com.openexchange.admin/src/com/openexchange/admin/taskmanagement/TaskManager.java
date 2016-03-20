@@ -49,6 +49,7 @@
 package com.openexchange.admin.taskmanagement;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -406,7 +407,7 @@ public class TaskManager {
      * @return The pretty-printed job list
      */
     public String getJobList(Integer cid) {
-        Iterator<Integer> jids = jobs.keySet().iterator();
+        Iterator<Entry<Integer, Extended<?>>> jids = jobs.entrySet().iterator();
         if (!jids.hasNext()) {
             return "Currently no jobs queued";
         }
@@ -417,10 +418,10 @@ public class TaskManager {
         buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
 
         while (jids.hasNext()) {
-            final Integer id = jids.next();
-            final ExtendedFutureTask<?> job = this.jobs.get(id);
+            final Entry<Integer, Extended<?>> jidEntry = jids.next();
+            final ExtendedFutureTask<?> job = jidEntry.getValue();
             if (null == cid || job.cid == cid.intValue() ) {
-                buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
+                buf.append(String.format(VFORMAT, jidEntry.getKey(), job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
             }
         }
         return buf.toString();

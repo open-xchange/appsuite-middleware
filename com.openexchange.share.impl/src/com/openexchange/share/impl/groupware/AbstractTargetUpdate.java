@@ -56,6 +56,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.ShareTarget;
@@ -140,8 +141,8 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
             touchFolders(foldersToTouch);
         }
 
-        for (int module : objectsByModule.keySet()) {
-            List<ShareTarget> targets = objectsByModule.get(module);
+        for (Entry<Integer, List<ShareTarget>> moduleEntry : objectsByModule.entrySet()) {
+            List<ShareTarget> targets = moduleEntry.getValue();
             List<TargetProxy> modified = new ArrayList<TargetProxy>(targets.size());
             List<TargetProxy> touched = new ArrayList<TargetProxy>(targets.size());
             for (ShareTarget target : targets) {
@@ -153,6 +154,7 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
                 }
             }
 
+            int module = moduleEntry.getKey().intValue();
             if (!modified.isEmpty()) {
                 ModuleHandler handler = handlers.get(module);
                 handler.updateObjects(modified, getHandlerParameters());
@@ -166,7 +168,7 @@ public abstract class AbstractTargetUpdate implements TargetUpdate {
 
     @Override
     public void close() {
-
+        // Nothing...
     }
 
     protected abstract Map<ShareTarget, TargetProxy> prepareProxies(List<ShareTarget> folderTargets, Map<Integer, List<ShareTarget>> objectsByModule) throws OXException;

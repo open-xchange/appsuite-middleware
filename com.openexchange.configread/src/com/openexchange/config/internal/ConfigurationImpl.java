@@ -967,9 +967,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // Do the same for XML files
-        for (File file : xmlFiles.keySet()) {
+        for (Entry<File, byte[]> fileEntry : xmlFiles.entrySet()) {
+            File file = fileEntry.getKey();
+            byte[] newHash = fileEntry.getValue();
             byte[] oldHash = oldXml.get(file);
-            byte[] newHash = xmlFiles.get(file);
             if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
                 result.add(file);
             }
@@ -981,9 +982,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         }
 
         // ... and one more time for YAMLs
-        for (File filename : yamlFiles.keySet()) {
+        for (Entry<File, byte[]> filenameEntry : yamlFiles.entrySet()) {
+            File filename = filenameEntry.getKey();
+            byte[] newHash = filenameEntry.getValue();
             byte[] oldHash = oldYaml.get(filename);
-            byte[] newHash = yamlFiles.get(filename);
             if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
                 result.add(filename);
             }

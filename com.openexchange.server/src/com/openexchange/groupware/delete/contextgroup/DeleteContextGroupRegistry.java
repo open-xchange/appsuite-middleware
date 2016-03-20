@@ -68,7 +68,7 @@ public class DeleteContextGroupRegistry {
 
     /**
      * Get the instance
-     * 
+     *
      * @return the instance
      */
     public static DeleteContextGroupRegistry getInstance() {
@@ -89,7 +89,7 @@ public class DeleteContextGroupRegistry {
     /**
      * The listener registry
      */
-    private ConcurrentMap<Class<? extends DeleteContextGroupListener>, DeleteContextGroupListener> listeners;
+    private final ConcurrentMap<Class<? extends DeleteContextGroupListener>, DeleteContextGroupListener> listeners;
 
     /**
      * Initialises a new {@link DeleteContextGroupRegistry}.
@@ -100,7 +100,7 @@ public class DeleteContextGroupRegistry {
 
     /**
      * Registers an instance of {@link DeleteContextGroupListener}
-     * 
+     *
      * @param listener The listener to register
      * @return true if the specified listener has been added to the registry; false otherwise
      */
@@ -110,7 +110,7 @@ public class DeleteContextGroupRegistry {
 
     /**
      * Removes the specified instance of the {@link DeleteContextGroupListener} from the registry.
-     * 
+     *
      * @param listener The listener to remove
      * @return true if the listener was removed from the registry; false otherwise.
      */
@@ -120,15 +120,15 @@ public class DeleteContextGroupRegistry {
 
     /**
      * Fire the delete context group event
-     * 
+     *
      * @param event The event to fire
      * @param readConnection The read connection to the global db
      * @param writeConnection The write connection to the global db
      * @throws OXException If an error occurs
      */
     public void fireDeleteContextGroupEvent(DeleteContextGroupEvent event, Connection readConnection, Connection writeConnection) throws OXException {
-        for (Class<? extends DeleteContextGroupListener> listener : listeners.keySet()) {
-            listeners.get(listener).deletePerformed(event, readConnection, writeConnection);
+        for (DeleteContextGroupListener listener : listeners.values()) {
+            listener.deletePerformed(event, readConnection, writeConnection);
         }
     }
 

@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.mail.internet.idn.IDNA;
@@ -1947,9 +1948,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private String mapToString(Map<Integer, List<Integer>> map) {
         StringBuilder builder = new StringBuilder();
-        for (Integer cid : map.keySet()) {
-            builder.append("\nCID: ").append(cid).append(", User IDs: ");
-            List<Integer> ids = map.get(cid);
+        for (Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
+            builder.append("\nCID: ").append(cidEntry.getKey()).append(", User IDs: ");
+            List<Integer> ids = cidEntry.getValue();
             for (Integer id : ids) {
                 builder.append(id).append(",");
             }

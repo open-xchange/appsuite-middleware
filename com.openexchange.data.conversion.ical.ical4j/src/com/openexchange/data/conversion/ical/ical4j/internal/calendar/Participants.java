@@ -59,6 +59,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
@@ -460,11 +461,12 @@ public class Participants<T extends CalendarComponent, U extends CalendarObject>
         for(final User user : users) {
             final UserParticipant up = new UserParticipant(user.getId());
             ICalParticipant icalP = null;
-            for (final String alias: getPossibleAddresses(user)) {
+            for (String alias: getPossibleAddresses(user)) {
             	String toRemove = null;
-            	for(final String mail: mails.keySet()){
-            		if(mail.equalsIgnoreCase(alias)){
-            			icalP = mails.get(mail);
+            	for ( Entry<String, Participants<T, U>.ICalParticipant> mailEntry : mails.entrySet()){
+            	    String mail = mailEntry.getKey();
+            		if (mail.equalsIgnoreCase(alias)){
+            			icalP = mailEntry.getValue();
             			toRemove = mail;
             			break;
             		}

@@ -52,18 +52,17 @@ package com.openexchange.i18n.osgi;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
-import org.slf4j.LoggerFactory;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.ConfigurationServiceHolder;
 import com.openexchange.i18n.I18nService;
@@ -186,11 +185,11 @@ public class I18nActivator extends HousekeepingActivator {
 
         }
 
-        for (final Locale locale : locales.keySet()) {
-            final List<I18nService> list = locales.get(locale);
+        for (final Entry<Locale, List<I18nService>> localeEntry : locales.entrySet()) {
+            final List<I18nService> list = localeEntry.getValue();
 
             final Dictionary<String, Object> prop = new Hashtable<String, Object>(1);
-            prop.put(I18nService.LANGUAGE, locale);
+            prop.put(I18nService.LANGUAGE, localeEntry.getKey());
 
             final I18nService i18n;
             if (list.size() == 1) {

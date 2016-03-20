@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
@@ -138,7 +139,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         // Set the ranking aware turbo filter and initialise the turbo filter cache
         turboFilterCache = new TurboFilterCache();
         mdcEnablerTurboFilter = new MDCEnablerTurboFilter();
-        
+
         // Add turbo filter cache to list
         rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
         rankingAwareTurboFilterList.addTurboFilter(mdcEnablerTurboFilter);
@@ -236,8 +237,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     public LogbackMBeanResponse modifyLogLevels(Map<String, Level> loggers) {
         LogbackMBeanResponse response = new LogbackMBeanResponse();
         StringBuilder builder = new StringBuilder();
-        for (String s : loggers.keySet()) {
-            Level l = loggers.get(s);
+        for (Entry<String, Level> levelEntry : loggers.entrySet()) {
+            Level l = levelEntry.getValue();
+            String s = levelEntry.getKey();
             loggerContext.getLogger(s).setLevel(l);
             dynamicallyModifiedLoggers.put(s, l);
             builder.setLength(0);
@@ -541,11 +543,13 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param response the response object
      */
     private static final void addLoggersToFilter(Set<String> whitelist, Map<String, Level> loggers, ExtendedMDCFilter filter, LogbackMBeanResponse response) {
-        for (String s : loggers.keySet()) {
+        for (Entry<String, Level> levelEntry : loggers.entrySet()) {
             boolean added = false;
+            String s = levelEntry.getKey();
+            Level level = levelEntry.getValue();
             for (String wl : whitelist) {
                 if (s.startsWith(wl)) {
-                    Level l = loggers.get(s);
+                    Level l = level;
                     filter.addLogger(s, l);
                     String msg = "Added logger \"" + s + "\" with level \"" + l + "\"";
                     response.addMessage(msg, MessageType.INFO);

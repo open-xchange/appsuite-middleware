@@ -99,7 +99,7 @@ public class RampUp extends AbstractLoginRequestHandler implements LoginRequestH
 
             session = sessiondService.getSession(sessionId);
             if (null == session) {
-                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No such session: " + sessionId);
+                resp.sendError(HttpServletResponse.SC_FORBIDDEN, "No such session.");
                 return;
             }
 
