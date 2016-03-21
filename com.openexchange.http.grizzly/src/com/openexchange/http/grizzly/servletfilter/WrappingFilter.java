@@ -56,6 +56,7 @@ import java.beans.PropertyChangeListener;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -82,6 +83,15 @@ import com.openexchange.log.LogProperties;
 public class WrappingFilter implements Filter {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(WrappingFilter.class);
+
+    private static final Pattern PATTERN_CRLF = Pattern.compile("\r?\n|\r|(?:%0[aA])?%0[dD]|%0[aA]");
+
+    private static String dropLinebreaks(String s) {
+        // Strip possible "\r?\n" and/or "%0A?%0D"
+        return PATTERN_CRLF.matcher(s).replaceAll("");
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     IPTools remoteIPFinder;
     private String forHeader;
@@ -121,6 +131,7 @@ public class WrappingFilter implements Filter {
         // Inspect echoHeader and when present copy it to Response
         String echoHeaderValue = httpRequest.getHeader(echoHeaderName);
         if (echoHeaderValue != null) {
+            echoHeaderValue = dropLinebreaks(echoHeaderValue);
             httpResponse.setHeader(echoHeaderName, echoHeaderValue);
         }
 

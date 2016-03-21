@@ -86,7 +86,7 @@ public class SMSBucket extends AbstractCustomPortable {
 
     /**
      * Tries to remove a token from the bucket and retrieves the number of remaining tokens
-     * 
+     *
      * @param refreshInterval The refresh interval
      * @return The number of remaining tokens, or -1 if no token is available
      */
@@ -139,19 +139,15 @@ public class SMSBucket extends AbstractCustomPortable {
     public int hashCode() {
         int prime = 53;
         int result = 1;
-        result = prime * result + timestamps.hashCode();
+        result = prime * result + Arrays.hashCode(timestamps);
         result = prime * result + counter * prime;
         return result;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
-        }
-
-        if (obj == null) {
-            return false;
         }
         if (!(obj instanceof SMSBucket)) {
             return false;
@@ -185,7 +181,7 @@ public class SMSBucket extends AbstractCustomPortable {
 
     /**
      * Retrieves the maximum number of tokens in this bucket
-     * 
+     *
      * @return The size
      */
     public int getBucketSize() {
