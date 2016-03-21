@@ -561,7 +561,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
     private List<Rule> exclude(Map<String, List<Rule>> flagged, List<FilterType> exclusionFlags) {
         List<Rule> ret = new ArrayList<Rule>();
         for (FilterType flag : exclusionFlags) {
-            flagged.remove(flag);
+            flagged.remove(flag.getFlag());
         }
         for (List<Rule> l : flagged.values()) {
             ret.addAll(l);
@@ -571,7 +571,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Removes the erroneous rules from the list
-     * 
+     *
      * @param rules rule list
      */
     private void removeErroneusRules(RuleListAndNextUid rules) {
@@ -588,7 +588,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Removes any nested rules from the specified Rule list
-     * 
+     *
      * @param rules The rule list
      */
     private void removeNestedRules(List<Rule> rules) {
@@ -605,7 +605,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Checks if the specified list of commands contains a rule
-     * 
+     *
      * @param commands The list of commands
      * @return true if at least one of the commands is a rule; false otherwise
      */
@@ -704,7 +704,7 @@ public final class MailFilterServiceImpl implements MailFilterService {
 
     /**
      * Check own vacation
-     * 
+     *
      * @param arguments
      * @return
      */
