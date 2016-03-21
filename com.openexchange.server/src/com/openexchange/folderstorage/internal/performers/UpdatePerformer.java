@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -67,6 +68,7 @@ import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -74,6 +76,7 @@ import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.objectusecount.IncrementArguments;
 import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.GuestInfo;
@@ -201,6 +204,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     }
                     if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
+                    }
+                    if (InfostoreContentType.getInstance().equals(storageFolder.getContentType()) && Strings.isNotEmpty(newName)) {
+                        FilenameValidationUtils.checkCharacters(newName);
+                        FilenameValidationUtils.checkName(newName);
                     }
                 }
             }
