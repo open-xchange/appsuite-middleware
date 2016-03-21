@@ -689,9 +689,9 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setLong(2, directoryChecksum.getSequenceNumber());
             stmt.setString(3, directoryChecksum.getETag());
             stmt.setString(4, directoryChecksum.getChecksum());
-            stmt.setInt(5, cid);
-            stmt.setString(6, directoryChecksum.getUuid());
-            stmt.setLong(7, System.currentTimeMillis());
+            stmt.setLong(5, System.currentTimeMillis());
+            stmt.setInt(6, cid);
+            stmt.setString(7, directoryChecksum.getUuid());
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
@@ -703,9 +703,9 @@ public class RdbChecksumStore implements ChecksumStore {
         try {
             stmt = connection.prepareStatement(SQL.UPDATE_DIRECTORY_CHECKSUM_FOLDER_STMT);
             stmt.setString(1, escapeFolder(newFolder));
-            stmt.setInt(2, cid);
-            stmt.setString(3, escapeFolder(folder));
-            stmt.setLong(4, System.currentTimeMillis());
+            stmt.setLong(2, System.currentTimeMillis());
+            stmt.setInt(3, cid);
+            stmt.setString(4, escapeFolder(folder));
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
