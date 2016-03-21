@@ -1,3 +1,9 @@
+open-xchange-indexing (7.6.2-51) stable; urgency=medium
+
+  * Build for patch 2016-03-29 (3186)
+
+ -- Steffen Templin <steffen.templin@open-xchange.com>  Mon, 21 Mar 2016 17:17:34 +0100
+
 open-xchange-indexing (7.6.2-50) stable; urgency=medium
 
   * Build for patch 2016-03-14 (3162)
