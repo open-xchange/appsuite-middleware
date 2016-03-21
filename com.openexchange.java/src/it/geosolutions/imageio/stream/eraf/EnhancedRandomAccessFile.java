@@ -302,8 +302,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         // If we are CREATEing a file, we must also WRITE. READ is always
         // set.
         mode |= READ;
-        if ((this.mode & CREATE) > 0)
+        if ((this.mode & CREATE) > 0) {
             this.mode |= WRITE;
+        }
 
         // To match java.io.RandomAccessFile semantics, if we want to write
         // a nonexistant file, create it first (even if CREATE not set)
@@ -316,14 +317,16 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         // same name.
         if ((this.mode & CREATE) > 0) {
             if (checkfile.exists()) {
-                if (!checkfile.delete())
+                if (!checkfile.delete()) {
                     throw new IOException("Failed to delete " + filename);
+                }
             }
         }
 
         // If only reading, check that the file exists.
-        if (this.mode == READ && !(new File(filename)).exists())
+        if (this.mode == READ && !(new File(filename)).exists()) {
             throw new FileNotFoundException(filename);
+        }
 
         // Create the underlying file object.
         String modeString = ((this.mode & WRITE) > 0) ? "rw" : "r";
@@ -416,8 +419,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         }
 
         // If the current buffer is modified, write it to disk.
-        if (bufferModified)
+        if (bufferModified) {
             flush();
+        }
 
         // need new buffer
         bufferStart = pos;
@@ -466,10 +470,11 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     public long length() throws IOException {
         long fileLength = file.length();
-        if (fileLength < dataEnd)
+        if (fileLength < dataEnd) {
             return dataEnd;
-        else
+        } else {
             return fileLength;
+        }
     }
 
     /**
@@ -573,8 +578,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     protected int readBytes(byte b[], int off, int len) throws IOException {
 
         // Check for end of file.
-        if (endOfFile)
+        if (endOfFile) {
             return -1;
+        }
 
         // See how many bytes are available in the buffer - if none,
         // seek to the file position to update the buffer and try again.
@@ -728,8 +734,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
         int count;
         while (n < len) {
             count = this.read(b, off + n, len - n);
-            if (count < 0)
+            if (count < 0) {
                 throw new EOFException();
+            }
             n += count;
         }
     }
@@ -825,8 +832,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
             // If any of the data fits within the buffer...
             int spaceInBuffer = 0;
             int copyLength = 0;
-            if (filePosition >= bufferStart)
+            if (filePosition >= bufferStart) {
                 spaceInBuffer = (int) ((bufferStart + buffer.length) - filePosition);
+            }
             if (spaceInBuffer > 0) {
 
                 // Copy as much as possible to the buffer.
@@ -922,8 +930,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     @Override
     public final boolean readBoolean() throws IOException {
         int ch = this.read();
-        if (ch < 0)
+        if (ch < 0) {
             throw new EOFException();
+        }
         return (ch != 0);
     }
 
@@ -950,8 +959,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     @Override
     public final byte readByte() throws IOException {
         int ch = this.read();
-        if (ch < 0)
+        if (ch < 0) {
             throw new EOFException();
+        }
         return (byte) (ch);
     }
 
@@ -972,8 +982,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     @Override
     public final int readUnsignedByte() throws IOException {
         int ch = this.read();
-        if (ch < 0)
+        if (ch < 0) {
             throw new EOFException();
+        }
         return ch;
     }
 
@@ -1001,15 +1012,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     @Override
     public final short readShort() throws IOException {
-        byte ch[] = new byte[2];
-        if (readBytes(ch, 0, 2) < 0)
+        byte b[] = new byte[2];
+        if (read(b, 0, 2) < 0) {
             throw new EOFException();
-        return (short) ((ch[1] << 8) + (ch[0] << 0));
-        // int ch1 = this.read();
-        // int ch2 = this.read();
-        // if ((ch1 | ch2) < 0)
-        // throw new EOFException();
-        // return (short) ((ch1 << 8) + (ch2 << 0));
+        }
+        if (bigEndian) {
+            return (short) (((b[0] & 0xFF) << 8) + (b[1] & 0xFF));
+        } else {
+            return (short) (((b[1] & 0xFF) << 8) + (b[0] & 0xFF));
+        }
     }
 
     /**
@@ -1036,15 +1047,15 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     @Override
     public final int readUnsignedShort() throws IOException {
-        byte ch[] = new byte[2];
-        if (readBytes(ch, 0, 2) < 0)
+        byte b[] = new byte[2];
+        if (read(b, 0, 2) < 0) {
             throw new EOFException();
-        return (short) ((ch[1] << 8) + (ch[0] << 0));
-        // int ch1 = this.read();
-        // int ch2 = this.read();
-        // if ((ch1 | ch2) < 0)
-        // throw new EOFException();
-        // return (ch1 << 8) + (ch2 << 0);
+        }
+        if (bigEndian) {
+            return ((b[0] & 0xFF) << 8) + (b[1] & 0xFF) & 0xFFFF;
+        } else {
+            return ((b[1] & 0xFF) << 8) + (b[0] & 0xFF) & 0xFFFF;
+        }
     }
 
     /**
@@ -1071,14 +1082,14 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     @Override
     public final char readChar() throws IOException {
         byte ch[] = new byte[2];
-        if (readBytes(ch, 0, 2) < 0)
+        if (readBytes(ch, 0, 2) < 0) {
             throw new EOFException();
-        return (char) ((ch[0] << 8) + (ch[1] << 0));
-        // int ch1 = this.read();
-        // int ch2 = this.read();
-        // if ((ch1 | ch2) < 0)
-        // throw new EOFException();
-        // return (char)((ch1 << 8) + (ch2 << 0));
+        }
+        if (bigEndian) {
+            return (char) (((ch[0] & 0xFF) << 8) + (ch[1] & 0xFF));
+        } else {
+            return (char) (((ch[1] & 0xFF) << 8) + (ch[0] & 0xFF));
+        }
     }
 
     /**
@@ -1107,8 +1118,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
     public final int readInt() throws IOException {
 
         byte ch[] = new byte[4];
-        if (readBytes(ch, 0, 4) < 0)
+        if (readBytes(ch, 0, 4) < 0) {
             throw new EOFException();
+        }
         int i0 = (ch[3] << 0), i1 = (ch[2] << 8), i2 = (ch[1] << 16), i3 = (ch[0] << 24);
         return (i3 + i2 + i1 + i0);
         // int ch1 = this.read();
@@ -1155,13 +1167,21 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
      */
     @Override
     public final long readLong() throws IOException {
-
-        byte ch[] = new byte[8];
-        if (readBytes(ch, 0, 8) < 0)
+        byte b[] = new byte[8];
+        if (read(b, 0, 8) < 0) {
             throw new EOFException();
-        return ((ch[0] << 56) + (ch[1] << 40) + (ch[2] << 40) + (ch[3] << 32)
-                + ((long) (ch[4] << 24) + (ch[5] << 16) + (ch[6] << 8) + (ch[7] << 0)) & 0xFFFFFFFFL);
-        // return ((long) (readInt()) << 32) + (readInt() & 0xFFFFFFFFL);
+        }
+        if (bigEndian) {
+            return (((b[0] & 0xFFL) << 56) + ((b[1] & 0xFFL) << 48)
+                    + ((b[2] & 0xFFL) << 40) + ((b[3] & 0xFFL) << 32)
+                    + ((b[4] & 0xFFL) << 24) + ((b[5] & 0xFFL) << 16)
+                    + ((b[6] & 0xFFL) << 8) + ((b[7] & 0xFFL)));
+        } else {
+            return (((b[7] & 0xFFL) << 56) + ((b[6] & 0xFFL) << 48)
+                    + ((b[5] & 0xFFL) << 40) + ((b[4] & 0xffL) << 32)
+                    + ((b[3] & 0xFFL) << 24) + ((b[2] & 0xFFL) << 16)
+                    + ((b[1] & 0xFFL) << 8) + ((b[0] & 0xFFL)));
+        }
     }
 
     /**
@@ -1491,8 +1511,9 @@ public class EnhancedRandomAccessFile extends Object implements DataInput,
                 utflen += 2;
             }
         }
-        if (utflen > 65535)
+        if (utflen > 65535) {
             throw new UTFDataFormatException();
+        }
 
         write((utflen >>> 8) & 0xFF);
         write((utflen >>> 0) & 0xFF);
