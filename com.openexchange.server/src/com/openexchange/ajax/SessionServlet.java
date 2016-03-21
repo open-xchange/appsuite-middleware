@@ -333,20 +333,8 @@ public abstract class SessionServlet extends AJAXServlet {
             LOG.debug("", e);
             handleSessiondException(e, req, resp);
 
-            // Check expected output format
-            if (Dispatchers.isApiOutputExpectedFor(req)) {
-                // API response
-                APIResponseRenderer.writeResponse(new Response().setException(e), Dispatchers.getActionFrom(req), req, resp);
-            } else {
-                // No JSON response; either JavaScript call-back or regular HTML error (page)
-                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
-                    writeErrorAsJsCallback(e, req, resp);
-                } else {
-                    String desc = e.getMessage();
-                    resp.setStatus(HttpServletResponse.SC_FORBIDDEN);
-                    writeErrorPage(HttpServletResponse.SC_FORBIDDEN, desc, resp);
-                }
-            }
+            // Output
+            outputOXException(e, HttpServletResponse.SC_FORBIDDEN, e.getMessage(), req, resp);
         } else {
             if (doLog) {
                 switch (e.getCategories().get(0).getLogLevel()) {
