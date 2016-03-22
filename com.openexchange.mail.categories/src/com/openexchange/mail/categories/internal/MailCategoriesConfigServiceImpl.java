@@ -79,7 +79,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
-        String[] categories = getCategoryNames(session);
+        String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
         if (categories.length == 0 && userCategories.length==0) {
             return new ArrayList<>();
@@ -124,7 +124,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
 
         // Include system categories
-        String[] categories = getCategoryNames(session);
+        String[] categories = getSystemCategoryNames(session);
         String[] userCategories = getUserCategoryNames(session);
         if (categories.length == 0 && userCategories.length==0) {
             return new String[0];
@@ -225,9 +225,9 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return null;
     }
 
-    private String[] getCategoryNames(Session session) throws OXException {
+    private String[] getSystemCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_IDENTIFIERS, null, session);
-        if(categoriesString==null || categoriesString.isEmpty()){
+        if (Strings.isEmpty(categoriesString)){
             return new String[0];
         }
 
@@ -271,7 +271,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public boolean isSystemCategory(String category, Session session) throws OXException {
-        String[] systemCategories = getCategoryNames(session);
+        String[] systemCategories = getSystemCategoryNames(session);
         for (String systemCategory : systemCategories) {
             if (category.equals(systemCategory)) {
                 return true;
