@@ -2868,7 +2868,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             String getPoolIds = "SELECT read_db_pool_id, write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
             stmt = con.prepareStatement(getPoolIds);
             stmt.setInt(1, targetClusterId);
-            stmt.executeQuery();
             rs = stmt.executeQuery();
             final int writeDbPoolId;
             final int readDbPoolId;

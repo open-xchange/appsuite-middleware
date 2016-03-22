@@ -3459,7 +3459,7 @@ public final class IMAPCommandsCollection {
      */
     private static String getSequenceId(final String prefix, final int partCount) {
         if (prefix == null) {
-            return String.valueOf(partCount);
+            return Integer.toString(partCount);
         }
         return new StringBuilder(prefix).append('.').append(partCount).toString();
     }

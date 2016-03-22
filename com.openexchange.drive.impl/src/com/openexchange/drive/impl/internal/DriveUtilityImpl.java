@@ -362,8 +362,11 @@ public class DriveUtilityImpl implements DriveUtility {
         List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
         JSONArray jsonArray = new JSONArray(folders.size());
         for (int i = 0; i < folderIDs.size(); i++) {
-            JSONObject jsonObject = new JsonDirectoryMetadata(session, folders.get(i)).build(false);
+            FileStorageFolder folder = folders.get(i);
+            JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
             jsonObject.put("checksum", checksums.get(i).getChecksum());
+            jsonObject.put("path", session.getStorage().getPath(folder.getId()));
+            jsonObject.put("name", folder.getName());
             jsonArray.put(jsonObject);
         }
         return jsonArray;

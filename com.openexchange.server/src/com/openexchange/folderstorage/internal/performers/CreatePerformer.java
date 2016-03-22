@@ -63,6 +63,7 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
@@ -136,7 +137,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      */
     public String doCreate(final Folder toCreate) throws OXException {
 
-        if (Strings.isNotEmpty(toCreate.getName())) {
+        if (InfostoreContentType.getInstance().equals(toCreate.getContentType()) && Strings.isNotEmpty(toCreate.getName())) {
             FilenameValidationUtils.checkCharacters(toCreate.getName());
             FilenameValidationUtils.checkName(toCreate.getName());
         }

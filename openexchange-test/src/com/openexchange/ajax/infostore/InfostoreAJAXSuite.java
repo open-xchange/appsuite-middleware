@@ -50,6 +50,7 @@ public class InfostoreAJAXSuite extends TestSuite {
         tests.addTestSuite(FilestorageAccountTest.class);
         tests.addTestSuite(AppendDocumentTest.class);
         tests.addTestSuite(Bug44622Test.class);
+        tests.addTestSuite(Bug44891Test.class);
         return tests;
     }
 }

@@ -142,7 +142,7 @@ public class PushMsInit {
                     }
                     int delayDuration = configService.getIntProperty("com.openexchange.push.ms.delayDuration", 120000);
                     int maxDelays = configService.getIntProperty("com.openexchange.push.ms.maxDelayDuration", 600000);
-                    delayPushQueue = new DelayPushQueue(publishTopic, delayDuration, maxDelays);
+                    delayPushQueue = new DelayPushQueue(publishTopic, delayDuration, maxDelays).start();
                     this.delayPushQueue = delayPushQueue;
                 }
             }

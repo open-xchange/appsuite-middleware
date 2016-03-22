@@ -172,7 +172,7 @@ public class AddressbookQueryReport extends PROPFINDAction {
             }
             term = compositeTerm;
         }
-        if ("yes".equals(textMatchElement.getAttribute("negate-condition").getValue())) {
+        if (null != textMatchElement.getAttribute("negate-condition") && "yes".equals(textMatchElement.getAttribute("negate-condition").getValue())) {
             CompositeSearchTerm notTerm = new CompositeSearchTerm(CompositeOperation.NOT);
             notTerm.addSearchTerm(term);
             term = notTerm;

@@ -209,8 +209,8 @@ public final class MimeType2ExtMap {
                         String mimeTypesFileName = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFileName);
                         if ((mimeTypesFileName != null) && ((mimeTypesFileName = mimeTypesFileName.trim()).length() > 0)) {
                             ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                            File file = service.getFileByName(mimeTypesFileName);
-                            if (file.exists()) {
+                            File file = null == service ? null : service.getFileByName(mimeTypesFileName);
+                            if (null != file && file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
                                     LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());

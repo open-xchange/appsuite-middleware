@@ -62,6 +62,7 @@ import com.openexchange.ajax.folder.api2.Bug16303Test;
 import com.openexchange.ajax.folder.api2.Bug17225Test;
 import com.openexchange.ajax.folder.api2.Bug17261Test;
 import com.openexchange.ajax.folder.api2.Bug29853Test;
+import com.openexchange.ajax.folder.api2.Bug44895Test;
 import com.openexchange.ajax.folder.api2.ChangePermissionsTest;
 import com.openexchange.ajax.folder.api2.ClearTest;
 import com.openexchange.ajax.folder.api2.CreateTest;
@@ -150,6 +151,7 @@ public final class FolderTestSuite {
         tests.addTestSuite(Bug29853Test.class);
         tests.addTestSuite(ChangePermissionsTest.class);
         tests.addTestSuite(Bug37211Test.class);
+        tests.addTestSuite(Bug44895Test.class);
 
         tests.addTestSuite(PermissionsCascadeTest.class);
 

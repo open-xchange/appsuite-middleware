@@ -143,9 +143,7 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
 
     @Override
     public void parse(int index, T calendarComponent, U calendarObject, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) throws ConversionError {
-        /*
-         * parse all supported kinds of attachments
-         */
+        // Parse all kinds of supported attachments
         List<Entry<URI, AttachmentMetadata>> managedAttachments = new ArrayList<Entry<URI, AttachmentMetadata>>();
         List<IFileHolder> binaryAttachments = new ArrayList<IFileHolder>();
         List<String> linkedAttachments = new ArrayList<String>();
@@ -154,33 +152,26 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
             for (Object property : attachProperties) {
                 net.fortuna.ical4j.model.property.Attach attach = (net.fortuna.ical4j.model.property.Attach) property;
                 Parameter encodingParameter = attach.getParameter(Parameter.ENCODING);
-                if (null != encodingParameter) {
-                    /*
-                     * decode as binary attachment
-                     */
+                if (null == encodingParameter) {
+                    Parameter managedIdParameter = attach.getParameter("MANAGED-ID");
+                    if (null == managedIdParameter) {
+                        // Add as plain attachment link
+                        linkedAttachments.add(attach.getValue());
+                    } else {
+                        // Decode as managed attachment
+                        managedAttachments.add(parseManagedAttachment(index, attach, warnings));
+                    }
+                } else {
+                    // Decode as binary attachment
                     IFileHolder binaryAttachment = parseBinaryAttachment(index, attach, warnings);
                     if (null != binaryAttachment) {
                         binaryAttachments.add(binaryAttachment);
                     }
-                    continue;
                 }
-                Parameter managedIdParameter = attach.getParameter("MANAGED-ID");
-                if (null != managedIdParameter) {
-                    /*
-                     * decode as managed attachment
-                     */
-                    managedAttachments.add(parseManagedAttachment(index, attach, warnings));
-                    continue;
-                }
-                /*
-                 * add as plain attachment link
-                 */
-                linkedAttachments.add(attach.getValue());
             }
         }
-        /*
-         * apply properties
-         */
+
+        // Apply properties
         calendarObject.setProperty(PROPERTY_MANAGED_ATTACHMENTS, managedAttachments);
         calendarObject.setProperty(PROPERTY_BINARY_ATTACHMENTS, binaryAttachments);
         calendarObject.setProperty(PROPERTY_LINKED_ATTACHMENTS, linkedAttachments);
@@ -229,22 +220,28 @@ public class Attach<T extends CalendarComponent, U extends CalendarObject> exten
         ThresholdFileHolder fileHolder = new ThresholdFileHolder();
         StringReader reader = null;
         InputStream inputStream = null;
+        boolean error = true;
         try {
             reader = new StringReader(value);
             inputStream = BaseEncoding.base64().decodingStream(reader);
             fileHolder.write(inputStream);
+            /*
+             * store additional metadata in fileholder
+             */
+            fileHolder.setContentType(contentType);
+            fileHolder.setName(filename);
+            error = false;
+            return fileHolder;
         } catch (OXException e) {
-            Streams.close(fileHolder);
             warnings.add(new ConversionWarning(index, Code.PARSE_EXCEPTION, e, e.getMessage()));
         } finally {
+            if (error) {
+                Streams.close(fileHolder);
+            }
             Streams.close(inputStream, reader);
         }
-        /*
-         * store additional metadata in fileholder
-         */
-        fileHolder.setContentType(contentType);
-        fileHolder.setName(filename);
-        return fileHolder;
+
+        return null;
     }
 
     private String extractFilename(net.fortuna.ical4j.model.property.Attach attach) {
