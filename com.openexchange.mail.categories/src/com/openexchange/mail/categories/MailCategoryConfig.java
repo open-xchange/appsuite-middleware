@@ -185,12 +185,27 @@ public class MailCategoryConfig {
 
     }// End of class Builder
 
+    /**
+     * Creates a copy of specified instance with given active flag applied.
+     *
+     * @param categoryConfig The instance to copy from
+     * @param active The <code>active</code> flag
+     * @return The copied instance
+     */
+    public static MailCategoryConfig copyOf(MailCategoryConfig categoryConfig, boolean active) {
+        if (null == categoryConfig) {
+            return null;
+        }
+
+        return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.names);
+    }
+
     // ----------------------------------------------------------------------------------------------------------
 
     private final String category;
     private final String flag;
     private final boolean force;
-    private boolean active;
+    private final boolean active;
     private final String name;
     private final Map<Locale, String> names;
 
@@ -209,7 +224,7 @@ public class MailCategoryConfig {
 
     /**
      * Gets the category identifier
-     * 
+     *
      * @return The category name
      */
     public String getCategory() {
@@ -242,15 +257,6 @@ public class MailCategoryConfig {
     public boolean isActive() {
         return force || active;
     }
-    
-    /**
-     * Sets the active flag
-     * 
-     * @param active
-     */
-    public void setActive(boolean active){
-        this.active=active;
-    }
 
     /**
      * Gets the en_US name.
@@ -269,7 +275,7 @@ public class MailCategoryConfig {
     public Map<Locale, String> getNames() {
         return names;
     }
-    
+
     @Override
     public String toString(){
         return getCategory();

@@ -50,6 +50,7 @@
 package com.openexchange.mail.categories.internal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -97,7 +98,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
         return result;
     }
-    
+
     @Override
     public String[] getAllFlags(Session session, boolean onlyEnabled, boolean onlyUserCategories) throws OXException {
         if (onlyUserCategories) {
@@ -166,7 +167,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         return result;
     }
-    
+
     @Override
     public MailCategoryConfig getUserConfigByCategory(Session session, String category) throws OXException {
         Builder builder = new Builder();
@@ -181,7 +182,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
         return result;
     }
-    
+
     @Override
     public String getFlagByCategory(Session session, String category) throws OXException {
         return MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
@@ -192,12 +193,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (Strings.isEmpty(languagesString)){
             return java.util.Collections.emptyMap();
         }
-        
+
         String languages[] = Strings.splitByComma(languagesString);
         if (languages==null || languages.length==0){
             return java.util.Collections.emptyMap();
         }
-        
+
         Map<Locale, String> result = new HashMap<>(languages.length);
         for(String language: languages){
             String translation = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME + "." + language, null, session);
@@ -224,11 +225,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if(categoriesString==null || categoriesString.isEmpty()){
             return new String[0];
         }
-        
+
         String result[] = Strings.splitByComma(categoriesString);
         return result==null ? new String[0] : result;
     }
-    
+
     private String[] getUserCategoryNames(Session session) throws OXException {
         String categoriesString = MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, null, session);
         if (Strings.isEmpty(categoriesString)) {
@@ -242,15 +243,21 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException {
         List<MailCategoryConfig> allConfigs = getAllCategories(session, false);
-        
-        for(MailCategoryConfig config: allConfigs){
-            for(String configToChange: categories){
-                if(configToChange.equals(config.getCategory())){
+        int size = allConfigs.size();
+        if (size <= 0) {
+            return Collections.emptyList();
+        }
+
+        List<MailCategoryConfig> retval = new ArrayList<MailCategoryConfig>(size);
+        for (MailCategoryConfig config : allConfigs) {
+            for (String configToChange : categories) {
+                if (configToChange.equals(config.getCategory())) {
                     MailCategories.activateProperty(config.getCategory(), activate, session);
-                    config.setActive(activate);
+                    retval.add(MailCategoryConfig.copyOf(config, activate));
                 }
             }
         }
+
         return allConfigs;
     }
 
@@ -262,7 +269,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -298,13 +305,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         if (userCategories.length == 0) {
             throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
         }
-        
+
         StringBuilder newCategoriesList = new StringBuilder(userCategories.length << 3);
         boolean exists = false;
         for (String oldCategory : userCategories) {
             if (oldCategory.equals(category)) {
                 exists=true;
-            } else {                
+            } else {
                 if (newCategoriesList.length() > 0) {
                     newCategoriesList.append(',');
                 }
@@ -337,7 +344,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     public boolean isEnabled(Session session) throws OXException {
         return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
     }
-    
+
     @Override
     public boolean isAllowedToCreateUserCategories(Session session) throws OXException{
         return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, false, session);
