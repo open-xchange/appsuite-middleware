@@ -47,32 +47,47 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
+package com.openexchange.authentication.driver.basic.database;
 
+import com.openexchange.authentication.Authenticated;
 import com.openexchange.authentication.AuthenticationDriver;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.authentication.BasicAuthenticationService;
+import com.openexchange.authentication.LoginInfo;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator} - The activator for database authentication service.
+ * This implementation authenticates the user against the database.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public class Activator extends HousekeepingActivator {
+public class DatabaseAuthenticationDriver implements AuthenticationDriver {
+
+    private final BasicAuthenticationService basicAuthService;
 
     /**
-     * Initializes a new {@link Activator}.
+     * Default constructor.
      */
-    public Activator() {
+    public DatabaseAuthenticationDriver(BasicAuthenticationService basicAuthService) {
         super();
+        this.basicAuthService = basicAuthService;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Authenticated handleLoginInfo(final LoginInfo loginInfo) throws OXException {
+        return basicAuthService.handleLoginInfo(loginInfo);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
+    public Authenticated handleAutoLoginInfo(LoginInfo loginInfo) throws OXException {
+        return basicAuthService.handleAutoLoginInfo(loginInfo);
     }
 
     @Override
-    protected void startBundle() throws Exception {
-        track(AuthenticationDriver.class, new AuthenticationRegisterer(context));
-        openTrackers();
+    public String getId() {
+        return "database";
     }
 
 }

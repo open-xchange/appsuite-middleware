@@ -47,20 +47,23 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
+package com.openexchange.authentication.driver.basic.database.osgi;
 
-import com.openexchange.authentication.AuthenticationDriver;
+import com.openexchange.authentication.BasicAuthenticationService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link Activator} - The activator for database authentication service.
+ * {@link DatabaseAuthenticationDriverActivator} - The activator for database authentication driver.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class DatabaseAuthenticationDriverActivator extends HousekeepingActivator {
 
     /**
-     * Initializes a new {@link Activator}.
+     * Initializes a new {@link DatabaseAuthenticationDriverActivator}.
      */
-    public Activator() {
+    public DatabaseAuthenticationDriverActivator() {
         super();
     }
 
@@ -71,7 +74,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected void startBundle() throws Exception {
-        track(AuthenticationDriver.class, new AuthenticationRegisterer(context));
+        track(BasicAuthenticationService.class, new AuthenticationDriverRegisterer(context));
         openTrackers();
     }
 

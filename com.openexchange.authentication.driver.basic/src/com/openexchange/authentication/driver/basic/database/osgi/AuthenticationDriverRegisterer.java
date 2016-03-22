@@ -47,70 +47,68 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
+package com.openexchange.authentication.driver.basic.database.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.authentication.AuthenticationDriver;
-import com.openexchange.authentication.AuthenticationService;
-import com.openexchange.authentication.database.impl.DatabaseAuthentication;
+import com.openexchange.authentication.BasicAuthenticationService;
+import com.openexchange.authentication.driver.basic.database.DatabaseAuthenticationDriver;
 
 /**
- * Dependently registers the AuthenticationService.
+ * Registers the database authentication driver.
  *
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class AuthenticationRegisterer implements ServiceTrackerCustomizer<AuthenticationDriver,AuthenticationDriver> {
+public final class AuthenticationDriverRegisterer implements ServiceTrackerCustomizer<BasicAuthenticationService,BasicAuthenticationService> {
 
     private final BundleContext context;
-
-    private volatile ServiceRegistration<AuthenticationService> registration;
+    private volatile ServiceRegistration<AuthenticationDriver> registration;
 
     /**
-     * Initializes a new {@link AuthenticationRegisterer}.
+     * Initializes a new {@link AuthenticationDriverRegisterer}.
      *
      * @param context The bundle context
      */
-    public AuthenticationRegisterer(BundleContext context) {
+    public AuthenticationDriverRegisterer(BundleContext context) {
         super();
         this.context = context;
     }
 
     @Override
-    public AuthenticationDriver addingService(ServiceReference<AuthenticationDriver> reference) {
-        String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
-        if (!"database".equals(driverId)) {
-            return null;
-        }
+    public BasicAuthenticationService addingService(ServiceReference<BasicAuthenticationService> reference) {
+        org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AuthenticationDriverRegisterer.class);
+        BasicAuthenticationService basicAuthenticationService = context.getService(reference);
 
-        AuthenticationDriver databaseAuthenticationDriver = context.getService(reference);
-        registration = context.registerService(AuthenticationService.class, new DatabaseAuthentication(databaseAuthenticationDriver), null);
-        org.slf4j.LoggerFactory.getLogger(AuthenticationRegisterer.class).info("Registered database authentication service.");
-        return databaseAuthenticationDriver;
+        DatabaseAuthenticationDriver driver = new DatabaseAuthenticationDriver(basicAuthenticationService);
+        Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+        properties.put(AuthenticationDriver.PROPERTY_ID, driver.getId());
+        registration = context.registerService(AuthenticationDriver.class, driver, properties);
+        logger.info("Registered database authentication driver.");
+
+        return basicAuthenticationService;
     }
 
     @Override
-    public void modifiedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
+    public void modifiedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
         // Nothing to do.
     }
 
     @Override
-    public void removedService(ServiceReference<AuthenticationDriver> reference, AuthenticationDriver driver) {
-        String driverId = (String) reference.getProperty(AuthenticationDriver.PROPERTY_ID);
-        if (!"database".equals(driverId)) {
+    public void removedService(ServiceReference<BasicAuthenticationService> reference, BasicAuthenticationService service) {
+        try {
+            ServiceRegistration<AuthenticationDriver> registration = this.registration;
+            if (null != registration) {
+                this.registration = null;
+                registration.unregister();
+            }
+        } finally {
             context.ungetService(reference);
-            return;
         }
-
-        ServiceRegistration<AuthenticationService> registration = this.registration;
-        if (null != registration) {
-            registration.unregister();
-            this.registration = null;
-        }
-
-        context.ungetService(reference);
     }
 
 }

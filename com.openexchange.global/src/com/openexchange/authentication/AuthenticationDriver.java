@@ -47,32 +47,27 @@
  *
  */
 
-package com.openexchange.authentication.database.osgi;
-
-import com.openexchange.authentication.AuthenticationDriver;
-import com.openexchange.osgi.HousekeepingActivator;
+package com.openexchange.authentication;
 
 /**
- * {@link Activator} - The activator for database authentication service.
+ * A authentication driver defines the methods for handling the login information.
+ * <p>
+ * E.g. the login information <code>user@domain.tld</code> is split into <code>user</code> and <code>domain.tld</code> and the context part
+ * will be used to resolve the context while the user part will be used to authenticate the user.
+ *
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public interface AuthenticationDriver extends AuthenticationService {
+
+    /** The property name for the service identifier */
+    public static final String PROPERTY_ID = "driver.id";
 
     /**
-     * Initializes a new {@link Activator}.
+     * Gets this driver's identifier.
+     *
+     * @return The identifier
      */
-    public Activator() {
-        super();
-    }
-
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return EMPTY_CLASSES;
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        track(AuthenticationDriver.class, new AuthenticationRegisterer(context));
-        openTrackers();
-    }
+    String getId();
 
 }
