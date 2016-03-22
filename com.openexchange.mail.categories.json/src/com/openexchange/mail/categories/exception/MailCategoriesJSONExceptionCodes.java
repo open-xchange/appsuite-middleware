@@ -69,7 +69,7 @@ public enum MailCategoriesJSONExceptionCodes implements DisplayableOXExceptionCo
     UNABLE_TO_ORGANIZE("Reorganizing of mails failed. Please try again later.", CATEGORY_TRY_AGAIN, 1, MailCategoriesJSONExceptionStrings.UNABLE_TO_ORGANIZE),
 
     /**
-     * Reorganizing of mails failed. Please try again later.
+     * Unable to parse TestCommand.
      */
     UNABLE_TO_PARSE_TEST_COMMAND("Unable to parse TestCommand.", CATEGORY_ERROR, 2),
 
