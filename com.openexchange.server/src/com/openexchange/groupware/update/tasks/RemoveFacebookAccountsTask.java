@@ -138,7 +138,11 @@ public class RemoveFacebookAccountsTask implements UpdateTaskV2 {
      * @param con The {@link Connection} to get the statement from
      * @throws SQLException
      */
-    private void removeMessagingAccounts(PreparedStatement stmt, Connection con) throws OXException {
+    private void removeMessagingAccounts(PreparedStatement stmt, Connection con) throws OXException, SQLException {
+        if (!Databases.tablesExist(con, "messagingAccount")) {
+            return;
+        }
+
         final List<int[]> dataList = listFacebookMessagingAccounts(stmt, con);
         for (final int[] data : dataList) {
             dropAccountByData(stmt, data, con);
