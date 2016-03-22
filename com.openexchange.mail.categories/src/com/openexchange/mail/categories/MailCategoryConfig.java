@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -67,6 +67,7 @@ public class MailCategoryConfig {
      */
     public static class Builder {
 
+        private String category;
         private String flag;
         private boolean force;
         private boolean active;
@@ -81,6 +82,17 @@ public class MailCategoryConfig {
         }
 
         /**
+         * Sets the category identifier.
+         *
+         * @param category The category identifier
+         * @return This builder
+         */
+        public Builder category(String category) {
+            this.category = category;
+            return this;
+        }
+
+        /**
          * Sets the flag name.
          *
          * @param flag The flag name
@@ -90,6 +102,7 @@ public class MailCategoryConfig {
             this.flag = flag;
             return this;
         }
+
 
         /**
          * Sets the <code>force</code> flag.
@@ -167,29 +180,40 @@ public class MailCategoryConfig {
          * @return The new {@link MailCategoryConfig} instance
          */
         public MailCategoryConfig build() {
-            return new MailCategoryConfig(flag, force, active, name, names);
+            return new MailCategoryConfig(category, flag, force, active, name, names);
         }
 
     }// End of class Builder
 
     // ----------------------------------------------------------------------------------------------------------
 
+    private final String category;
     private final String flag;
     private final boolean force;
-    private final boolean active;
+    private boolean active;
     private final String name;
     private final Map<Locale, String> names;
 
     /**
      * Initializes a new {@link MailCategoryConfig}.
      */
-    MailCategoryConfig(String flag, boolean force, boolean active, String name, Map<Locale, String> names) {
+    MailCategoryConfig(String category, String flag, boolean force, boolean active, String name, Map<Locale, String> names) {
         super();
+        this.category = category;
         this.flag = flag;
         this.force = force;
         this.active = active;
         this.name = name;
         this.names = null == names ? Collections.<Locale, String> emptyMap() : names;
+    }
+
+    /**
+     * Gets the category identifier
+     * 
+     * @return The category name
+     */
+    public String getCategory() {
+        return category;
     }
 
     /**
@@ -218,6 +242,15 @@ public class MailCategoryConfig {
     public boolean isActive() {
         return force || active;
     }
+    
+    /**
+     * Sets the active flag
+     * 
+     * @param active
+     */
+    public void setActive(boolean active){
+        this.active=active;
+    }
 
     /**
      * Gets the en_US name.
@@ -235,6 +268,11 @@ public class MailCategoryConfig {
      */
     public Map<Locale, String> getNames() {
         return names;
+    }
+    
+    @Override
+    public String toString(){
+        return getCategory();
     }
 
 }

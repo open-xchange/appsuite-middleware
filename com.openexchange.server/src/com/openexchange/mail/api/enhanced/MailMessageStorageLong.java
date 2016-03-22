@@ -480,6 +480,9 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
     @Override
     public abstract MailMessage[] searchMessages(String folder, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException;
 
+    @Override
+    public abstract int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException;
+
     /**
      * An <b>optional</b> method that updates the color label of the messages specified by given mail IDs located in given folder.
      * <p>
@@ -549,6 +552,11 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         updateMessageFlagsLong(folder, uids2longs(mailIds), flags, set);
     }
 
+    @Override
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final String[] userFlags, final boolean set) throws OXException {
+        updateMessageFlagsLong(folder, uids2longs(mailIds), flags, userFlags, set);
+    }
+
     /**
      * Updates the flags of the messages specified by given mail IDs located in given folder. If parameter <code>set</code> is
      * <code>true</code> the affected flags denoted by <code>flags</code> are added; otherwise removed.
@@ -583,6 +591,18 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
      * @throws OXException If system flags cannot be updated
      */
     public abstract void updateMessageFlagsLong(String folder, long[] mailIds, int flags, boolean set) throws OXException;
+
+    /**
+     * Like {@link #updateMessageFlagsLong(String, long[], int, boolean)} but also updates user flags
+     * 
+     * @param folder The folder full name
+     * @param mailIds The mail IDs
+     * @param flags The bit pattern for the flags to alter
+     * @param userFlags An array of user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If flags cannot be updated
+     */
+    public abstract void updateMessageFlagsLong(String folder, long[] mailIds, int flags, String[] userFlags, boolean set) throws OXException;
 
     /**
      * Converts specified UID strings to an array of <code>long</code>.

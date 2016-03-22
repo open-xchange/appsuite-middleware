@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,16 +47,17 @@
  *
  */
 
-package com.openexchange.mail.categories;
+package com.openexchange.mail.categories.internal;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ComposedConfigProperty;
+import com.openexchange.config.cascade.ConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.services.ServerServiceRegistry;
+import com.openexchange.mail.categories.MailCategoriesConstants;
+import com.openexchange.mail.categories.osgi.Services;
 import com.openexchange.session.Session;
 
 /**
@@ -75,9 +76,9 @@ public final class MailCategories {
     }
 
     private static ConfigViewFactory getConfigViewFactory() throws OXException {
-        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        ConfigViewFactory viewFactory = Services.getService(ConfigViewFactory.class);
         if (null == viewFactory) {
-            throw ServiceExceptionCode.absentService(ConfigViewFactory.class);
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class);
         }
         return viewFactory;
     }
@@ -229,6 +230,40 @@ public final class MailCategories {
 
         String value = property.get();
         return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+    }
+    
+    
+    /**
+     * Activates or deactivates the given category
+     * 
+     * @param category The category identifier
+     * @param activate Flag indicating if the category should be activated or deactivated
+     * @param session The user session
+     * @throws OXException
+     */
+    public static void activateProperty(String category, boolean activate, Session session) throws OXException{
+        ConfigViewFactory viewFactory = getConfigViewFactory();
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        
+        ConfigProperty<String> property = view.property("user", MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.class);
+        property.set(String.valueOf(activate));
+        
+    }
+    
+    /**
+     * Sets a user attribute
+     * 
+     * @param property The name of the property
+     * @param value The new value of the property
+     * @param session The user session
+     * @throws OXException
+     */
+    public static void setProperty(String property, String value, Session session) throws OXException{
+        ConfigViewFactory viewFactory = getConfigViewFactory();
+        ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
+        
+        ConfigProperty<String> confProperty = view.property("user", property, String.class);
+        confProperty.set(value);
     }
 
 }

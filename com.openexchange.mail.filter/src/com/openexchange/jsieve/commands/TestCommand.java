@@ -138,7 +138,7 @@ public class TestCommand extends Command {
     public enum Commands {
         ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null),
         ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope"),
-        EXITS("exists", 1, 1, null, null, null, null, null),
+        EXISTS("exists", 1, 1, null, null, null, null, null),
         FALSE("false", 0, 0, null, null, null, null, null),
         TRUE("true", 0, 0, null, null, null, null, null),
         NOT("not", 0, 0, null, null, null, null, null),

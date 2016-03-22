@@ -549,6 +549,16 @@ public enum MailExceptionCode implements DisplayableOXExceptionCode {
      * The message content is too big from message %1$s in mail folder %2$s
      */
     CONTENT_TOO_BIG("The message content is too big from message %1$s in mail folder %2$s", MailExceptionStrings.CONTENT_TOO_BIG_MSG, CATEGORY_ERROR, 102),
+
+    /**
+     * Invalid parameter value: %1$s
+     */
+    INVALID_PARAMETER_VALUE("Invalid parameter value: %1$s", MailExceptionStrings.INVALID_PARAMETER_VALUE_MSG, CATEGORY_USER_INPUT, 103),
+
+    /**
+     * The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+     */
+    INVALID_FLAG_WITH_LEADING_BACKSLASH("The flag name %1$s is not valid. Flags may not begin with a leading '\\'.", MailExceptionStrings.INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG, CATEGORY_USER_INPUT, 104),
     ;
 
     private static String PREFIX = "MSG";

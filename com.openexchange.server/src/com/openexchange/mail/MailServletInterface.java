@@ -567,6 +567,19 @@ public abstract class MailServletInterface implements Closeable {
     public abstract void updateMessageFlags(String folder, String[] msgUID, int flagBits, boolean flagVal) throws OXException;
 
     /**
+     * Updates message's client-alterable system flags (e.g. //SEEN or //ANSWERED) and user flags. <code>flagVal</code> determines whether the affected
+     * flags are set (<code>true</code>) or unset (<code>false</code>).
+     * 
+     * @param folder The folder full name
+     * @param mailIDs The mail IDs
+     * @param flagBits The system flag bits
+     * @param userFlags An array of user flags
+     * @param flagVal <code>true</code> to set the given flags or <code>false</code> to unset
+     * @throws OXException If flags cannot be updated
+     */
+    public abstract void updateMessageFlags(String folder, String[] mailIDs, int flagBits, String[] userFlags, boolean flagVal) throws OXException;
+
+    /**
      * Gets all updated messages in given folder
      *
      * @param folder The folder fullname

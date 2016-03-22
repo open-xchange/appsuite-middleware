@@ -82,6 +82,7 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import javax.mail.internet.ParameterList;
+import org.apache.commons.lang.ArrayUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import com.openexchange.config.ConfigurationService;
@@ -157,8 +158,10 @@ import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.mime.utils.MimeStorageUtility;
 import com.openexchange.mail.parser.MailMessageParser;
 import com.openexchange.mail.parser.handlers.MailPartHandler;
+import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.FlagTerm;
 import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.mail.search.UserFlagTerm;
 import com.openexchange.mail.text.TextFinder;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.utils.MailMessageComparator;
@@ -1693,6 +1696,27 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
     @Override
     public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] mailFields) throws OXException {
         return searchMessages(fullName, indexRange, sortField, order, searchTerm, mailFields, null);
+    }
+
+    @Override
+    public int getUnreadCount(String folder, SearchTerm<?> searchTerm) throws OXException {
+        try {
+            openReadOnly(folder);
+        } catch (OXException e) {
+            if (IMAPException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.equals(e)) {
+                return 0;
+            }
+            throw e;
+        }
+        try {
+            SearchTerm<?> unseenSearchTerm = new ANDTerm(searchTerm, new FlagTerm(MailMessage.FLAG_SEEN, false));
+            return IMAPSearch.searchMessages(imapFolder, unseenSearchTerm, imapConfig).length;
+        } catch (MessagingException e) {
+            if (ImapUtility.isInvalidMessageset(e)) {
+                return 0;
+            }
+            throw handleMessagingException(folder, e);
+        }
     }
 
     @Override
@@ -3367,8 +3391,14 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
         return MimeMessageConverter.convertMailMessage(m, behavior);
     }
 
+
     @Override
     public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, final boolean set) throws OXException {
+        updateMessageFlagsLong(fullName, msgUIDs, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
+    }
+
+    @Override
+    public void updateMessageFlagsLong(final String fullName, final long[] msgUIDs, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
         if (null == msgUIDs || 0 == msgUIDs.length) {
             // Nothing to do
             return;
@@ -3468,6 +3498,13 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug("IMAP server {} does not support user flags. Skipping read-ack flag.", imapConfig.getImapServerSocketAddress());
                     }
                 }
+
+                for (String userFlag : userFlags) {
+                    affectedFlags.add(userFlag);
+                }
+
+                applyFlags = ArrayUtils.isEmpty(userFlags) ? applyFlags : true;
+
                 if (applyFlags) {
                     final long start = System.currentTimeMillis();
                     new FlagsIMAPCommand(imapFolder, msgUIDs, affectedFlags, set, true, false).doCommand();
@@ -3499,6 +3536,11 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
 
     @Override
     public void updateMessageFlags(final String fullName, final int flagsArg, final boolean set) throws OXException {
+        updateMessageFlags(fullName, flagsArg, ArrayUtils.EMPTY_STRING_ARRAY, set);
+    }
+
+    @Override
+    public void updateMessageFlags(final String fullName, final int flagsArg, String[] userFlags, final boolean set) throws OXException {
         if (null == fullName) {
             // Nothing to do
             return;
@@ -3596,6 +3638,12 @@ public final class IMAPMessageStorage extends IMAPFolderWorker implements IMailM
                         LOG.debug("IMAP server {0} does not support user flags. Skipping read-ack flag.", imapConfig.getImapServerSocketAddress());
                     }
                 }
+
+                for (String userFlag : userFlags) {
+                    affectedFlags.add(userFlag);
+                }
+
+                applyFlags = ArrayUtils.isEmpty(userFlags) ? applyFlags : true;
                 if (applyFlags) {
                     final long start = System.currentTimeMillis();
                     new FlagsIMAPCommand(imapFolder, affectedFlags, set, true).doCommand();

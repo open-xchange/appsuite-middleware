@@ -1209,6 +1209,84 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
     }
 
     @Override
+    public int getUnreadCount(final String folder, final SearchTerm<?> searchTerm) throws OXException {
+        if (DEFAULT_FOLDER_ID.equals(folder)) {
+            throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(folder);
+        }
+        int unifiedMailAccountId = Services.getService(UnifiedInboxManagement.class).getUnifiedINBOXAccountID(session);
+
+        if (UnifiedInboxAccess.KNOWN_FOLDERS.contains(folder)) {
+            List<MailAccount> accounts = getAccounts(true, unifiedMailAccountId, session.getUserId(), session.getContextId());
+            int length = accounts.size();
+            Executor executor = ThreadPools.getThreadPool().getExecutor();
+
+            TrackingCompletionService<Integer> completionService = new UnifiedInboxCompletionService<Integer>(executor);
+            for (final MailAccount mailAccount : accounts) {
+                completionService.submit(new LoggingCallable<Integer>(session) {
+
+                    @Override
+                    public Integer call() {
+                        int accountId = mailAccount.getId();
+                        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                        String fn = null;
+                        try {
+                            mailAccess = MailAccess.getInstance(getSession(), accountId);
+                            mailAccess.connect();
+                            // Get real full name
+                            fn = UnifiedInboxUtility.determineAccountFullName(mailAccess, folder);
+                            // Check if denoted account has such a default folder
+                            if (fn == null) {
+                                return 0;
+                            }
+                            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+                            return messageStorage.getUnreadCount(folder, searchTerm);
+                        } catch (OXException e) {
+                            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
+                                getLogger().debug("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
+                            } else {
+                                getLogger().warn("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
+                            }
+                            return 0;
+                        } catch (RuntimeException e) {
+                            getLogger().warn("Couldn't get unread count from folder \"{}\" from server \"{}\" for login \"{}\".", (null == fn ? "<unknown>" : fn), mailAccount.getMailServer(), mailAccount.getLogin(), e);
+                            return 0;
+                        } finally {
+                            closeSafe(mailAccess);
+                        }
+                    }
+                });
+            }
+            // Wait for completion of each submitted task
+            try {
+                int result = 0;
+                for (int i = 0; i < length; i++) {
+                    result += completionService.take().get();
+                }
+
+                return result;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw MailExceptionCode.INTERRUPT_ERROR.create(e);
+            } catch (ExecutionException e) {
+                throw ThreadPools.launderThrowable(e, OXException.class);
+            }
+        }
+
+        FullnameArgument fa = UnifiedInboxUtility.parseNestedFullName(folder);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            int accountId = fa.getAccountId();
+            mailAccess = MailAccess.getInstance(session, accountId);
+            mailAccess.connect();
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            return messageStorage.getUnreadCount(folder, searchTerm);
+
+        } finally {
+            closeSafe(mailAccess);
+        }
+    }
+
+    @Override
     public MailMessage[] searchMessages(String fullName, IndexRange indexRange, MailSortField sortField, OrderDirection order, SearchTerm<?> searchTerm, MailField[] fields) throws OXException {
         return searchMessages(fullName, indexRange, sortField, order, searchTerm, fields, null);
     }
@@ -1814,8 +1892,15 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
         }
     }
 
+    private static final String[] EMPTY_FLAGS = new String[0];
+
     @Override
     public void updateMessageFlags(String fullName, String[] mailIds, final int flags, final boolean set) throws OXException {
+        updateMessageFlags(fullName, mailIds, flags, EMPTY_FLAGS, set);
+    }
+
+    @Override
+    public void updateMessageFlags(String fullName, String[] mailIds, final int flags, final String[] userFlags, final boolean set) throws OXException {
         if (DEFAULT_FOLDER_ID.equals(fullName)) {
             throw UnifiedInboxException.Code.FOLDER_DOES_NOT_HOLD_MESSAGES.create(fullName);
         }
@@ -1846,7 +1931,7 @@ public final class UnifiedInboxMessageStorage extends MailMessageStorage impleme
                                 String folder = e.getKey();
                                 List<String> uids = e.getValue();
                                 // Update flags
-                                mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, set);
+                                mailAccess.getMessageStorage().updateMessageFlags(folder, uids.toArray(new String[uids.size()]), flags, userFlags, set);
                             }
                         } catch (OXException e) {
                             getLogger().debug("", e);

@@ -425,6 +425,11 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     }
 
     @Override
+    public int getUnreadCount(final String folder, final SearchTerm<?> searchTerm) throws OXException {
+        return delegatee.getUnreadCount(folder, searchTerm);
+    }
+
+    @Override
     public MailMessage[] searchMessages(final String folder, final IndexRange indexRange, final MailSortField sortField, final OrderDirection order, final SearchTerm<?> searchTerm, final MailField[] fields) throws OXException {
         final MailMessage[] mails = delegatee.searchMessages(getRealFullname(folder), indexRange, sortField, order, searchTerm, fields);
         for (final MailMessage mailMessage : mails) {
@@ -460,6 +465,11 @@ public class MailAccountPOP3MessageStorage implements ISimplifiedThreadStructure
     @Override
     public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, final boolean set) throws OXException {
         delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, set);
+    }
+
+    @Override
+    public void updateMessageFlags(final String folder, final String[] mailIds, final int flags, String[] userFlags, final boolean set) throws OXException {
+        delegatee.updateMessageFlags(getRealFullname(folder), mailIds, flags, userFlags, set);
     }
 
     @Override

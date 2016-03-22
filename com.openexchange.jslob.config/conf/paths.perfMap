@@ -50,6 +50,7 @@ modules/mail/displayReceiptNotification > io.ox/mail//sendDispositionNotificatio
 modules/mail/enforcesecureconnection > io.ox/mail//enforcesecureconnection
 modules/mail/defaultarchivedays > io.ox/mail//archive/days
 modules/mail/savenocopy > io.ox/mail//saveNoCopyInSentFolder
+modules/mail/categories > io.ox/mail//categories
 
 # Migration
 gui > io.ox/migration//gui

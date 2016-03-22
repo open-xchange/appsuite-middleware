@@ -207,4 +207,10 @@ public final class MailExceptionStrings implements LocalizableStrings {
     // The content/body of the message is too big
     public static final String CONTENT_TOO_BIG_MSG = "The content of the mail is too big.";
 
+    // Invalid parameter value: %1$s
+    public static final String INVALID_PARAMETER_VALUE_MSG = "Invalid parameter value: %1$s";
+
+    // The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+    public static final String INVALID_FLAG_WITH_LEADING_BACKSLASH_MSG = "The flag name %1$s is not valid. Flags may not begin with a leading '\\'.";
+
 }

@@ -139,6 +139,16 @@ public interface MailFilterService {
     public List<Rule> listRules(final Credentials credentials, final FilterType flag) throws OXException;
 
     /**
+     * Return a list with all mail filter rules
+     *
+     * @param credentials the user's credentials
+     * @param flag instructs the method to only rules matching the specified flag (optional, can be null)
+     * @return a list with all mail filter rules
+     * @throws OXException
+     */
+    public List<Rule> listRules(final Credentials credentials, final String flag) throws OXException;
+
+    /**
      * Return a list with all mail filters except those specified in the exclusion list
      *
      * @param credentials the user's credentials

@@ -111,4 +111,15 @@ public interface IMailMessageStorageBatch extends IMailMessageStorage {
      */
     public void updateMessageFlags(String fullName, int flags, boolean set) throws OXException;
 
+    /**
+     * Like {@link #updateMessageFlags(String, int, boolean)} but also updates user flags
+     *
+     * @param fullName The folder full name
+     * @param flags The bit pattern for the flags to alter
+     * @param userFlags An array of user flags
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If system flags cannot be updated
+     */
+    public void updateMessageFlags(final String fullName, final int flagsArg, String[] userFlags, final boolean set) throws OXException;
+
 }

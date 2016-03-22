@@ -94,6 +94,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.idn.IDNA;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
+import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
@@ -3818,6 +3819,11 @@ final class MailServletInterfaceImpl extends MailServletInterface {
 
     @Override
     public void updateMessageFlags(String folder, String[] mailIDs, int flagBits, boolean flagVal) throws OXException {
+        updateMessageFlags(folder, mailIDs, flagBits, ArrayUtils.EMPTY_STRING_ARRAY, flagVal);
+    }
+
+    @Override
+    public void updateMessageFlags(String folder, String[] mailIDs, int flagBits, String[] userFlags, boolean flagVal) throws OXException {
         FullnameArgument argument = prepareMailFolderParam(folder);
         int accountId = argument.getAccountId();
         initConnection(accountId);
@@ -3828,14 +3834,27 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             if (messageStorage instanceof IMailMessageStorageBatch) {
                 IMailMessageStorageBatch batch = (IMailMessageStorageBatch) messageStorage;
                 ids = null;
-                batch.updateMessageFlags(fullName, flagBits, flagVal);
+                if (ArrayUtils.isEmpty(userFlags)) {
+                    batch.updateMessageFlags(fullName, flagBits, flagVal);
+                } else {
+                    batch.updateMessageFlags(fullName, flagBits, userFlags, flagVal);
+                }
             } else {
                 ids = getAllMessageIDs(argument);
-                messageStorage.updateMessageFlags(fullName, ids, flagBits, flagVal);
+                if (ArrayUtils.isEmpty(userFlags)) {
+                    messageStorage.updateMessageFlags(fullName, ids, flagBits, flagVal);
+                } else {
+                    messageStorage.updateMessageFlags(fullName, ids, flagBits, userFlags, flagVal);
+                }
+
             }
         } else {
             ids = mailIDs;
-            messageStorage.updateMessageFlags(fullName, ids, flagBits, flagVal);
+            if (ArrayUtils.isEmpty(userFlags)) {
+                messageStorage.updateMessageFlags(fullName, ids, flagBits, flagVal);
+            } else {
+                messageStorage.updateMessageFlags(fullName, ids, flagBits, userFlags, flagVal);
+            }
         }
         postEvent(PushEventConstants.TOPIC_ATTR, accountId, fullName, true, true, false, MORE_PROPS_UPDATE_FLAGS);
         boolean spamAction = (usm.isSpamEnabled() && ((flagBits & MailMessage.FLAG_SPAM) > 0));
