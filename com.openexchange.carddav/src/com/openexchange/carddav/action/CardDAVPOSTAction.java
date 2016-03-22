@@ -85,6 +85,8 @@ public class CardDAVPOSTAction extends POSTAction {
 
     private final GroupwareCarddavFactory factory;
 
+    private static final String MAX_SIMILARITY = "max_similarity";
+
     /**
      * Initializes a new {@link CardDAVPOSTAction}.
      *
@@ -134,7 +136,15 @@ public class CardDAVPOSTAction extends POSTAction {
             if (0 < maxSize) {
                 inputStream = new SizeExceededInputStream(inputStream, maxSize);
             }
-            importResults = collection.bulkImport(inputStream);
+            String maxSimStr = request.getHeader(MAX_SIMILARITY);
+            float maxSimilarity = 0;
+            if (maxSimStr != null) {
+                maxSimilarity = Float.valueOf(maxSimStr);
+                if (maxSimilarity > 1) {
+                    maxSimilarity = 1;
+                }
+            }
+            importResults = collection.bulkImport(inputStream, maxSimilarity);
         } catch (IOException e) {
             throw WebdavProtocolException.Code.GENERAL_ERROR.create(request.getUrl(), HttpServletResponse.SC_BAD_REQUEST, e);
         } catch (OXException e) {

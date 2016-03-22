@@ -49,6 +49,7 @@
 
 package com.openexchange.contact.similarity;
 
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 
 /**
@@ -68,5 +69,12 @@ public interface ContactSimilarityService {
      * @return The similarity score. Values: [0,1]
      */
     public float getSimilarity(Contact con1, Contact con2);
+
+    /**
+     * Retrieves all contact fields necessary for the similarity check.
+     * 
+     * @return The contact fields
+     */
+    public ContactField[] getContactFields();
 
 }
