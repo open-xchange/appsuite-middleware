@@ -54,9 +54,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
 import com.openexchange.mail.MailField;
-import com.openexchange.mail.MailServletInterface;
 import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -71,7 +72,7 @@ public class MailCategoriesOrganizer {
 
     /**
      * Searches for all mails in the given folder which matches the given search term and set or unset the given flag to them
-     * 
+     *
      * @param session The user session
      * @param folder The folder id
      * @param searchTerm The search term
@@ -80,22 +81,25 @@ public class MailCategoriesOrganizer {
      * @throws OXException If retrieving or setting fails
      */
     public static void organizeExistingMails(Session session, String folder, SearchTerm<?> searchTerm, String flag, boolean set) throws OXException {
-
-        MailServletInterface servletInterface = MailServletInterface.getInstance(session);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
-        servletInterface.openFor(folder);
-        IMailMessageStorage messageStorage = servletInterface.getMailAccess().getMessageStorage();
-        FullnameArgument fa = prepareMailFolderParam(folder);
-        MailMessage[] messages = messageStorage.searchMessages(fa.getFullName(), IndexRange.NULL, null, OrderDirection.ASC, searchTerm, new MailField[] { MailField.ID });
-        String mailIds[] = new String[messages.length];
-        int x = 0;
-        for (MailMessage message : messages) {
-            mailIds[x++] = message.getMailId();
-        }
-        messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
+            FullnameArgument fa = prepareMailFolderParam(folder);
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
+
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            MailMessage[] messages = messageStorage.searchMessages(fa.getFullName(), IndexRange.NULL, null, OrderDirection.ASC, searchTerm, new MailField[] { MailField.ID });
+            String mailIds[] = new String[messages.length];
+            for (int i = messages.length; i-- > 0;) {
+                MailMessage message = messages[i];
+                if (null != message) {
+                    mailIds[i] = message.getMailId();
+                }
+            }
+            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
         } finally {
-            if (servletInterface != null) {
-                servletInterface.close(true);
+            if (mailAccess != null) {
+                mailAccess.close();
             }
         }
     }
