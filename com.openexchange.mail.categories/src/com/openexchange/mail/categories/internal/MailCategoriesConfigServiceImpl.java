@@ -50,11 +50,14 @@
 package com.openexchange.mail.categories.internal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
@@ -118,37 +121,39 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
 
             return result.toArray(new String[result.size()]);
-        } else {
-            String[] categories = getCategoryNames(session);
-            String[] userCategories = getUserCategoryNames(session);
-            if (categories.length == 0 && userCategories.length==0) {
-                return new String[0];
-            }
-            ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
-            for (String category : categories) {
-                if (onlyEnabled) {
-                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-                    if (!active) {
-                        boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
-                        if (!forced) {
-                            continue;
-                        }
-                    }
-                }
-               result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
-            }
-            for (String category : userCategories) {
-                if (onlyEnabled) {
-                    boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
-                    if (!active) {
+        }
+
+        // Include system categories
+        String[] categories = getCategoryNames(session);
+        String[] userCategories = getUserCategoryNames(session);
+        if (categories.length == 0 && userCategories.length==0) {
+            return new String[0];
+        }
+
+        ArrayList<String> result = new ArrayList<>(categories.length + userCategories.length);
+        for (String category : categories) {
+            if (onlyEnabled) {
+                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                if (!active) {
+                    boolean forced = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FORCE, false, session);
+                    if (!forced) {
                         continue;
                     }
                 }
-               result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
             }
-
-            return result.toArray(new String[result.size()]);
+           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
         }
+        for (String category : userCategories) {
+            if (onlyEnabled) {
+                boolean active = MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, true, session);
+                if (!active) {
+                    continue;
+                }
+            }
+           result.add(MailCategories.getValueFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session));
+        }
+
+        return result.toArray(new String[result.size()]);
     }
 
     @Override
@@ -242,19 +247,22 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     @Override
     public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException {
+        if (null == categories || categories.length == 0) {
+            return Collections.emptyList();
+        }
+
         List<MailCategoryConfig> allConfigs = getAllCategories(session, false);
         int size = allConfigs.size();
         if (size <= 0) {
             return Collections.emptyList();
         }
 
+        Set<String> categoriesToChange = new HashSet<String>(Arrays.asList(categories));
         List<MailCategoryConfig> retval = new ArrayList<MailCategoryConfig>(size);
         for (MailCategoryConfig config : allConfigs) {
-            for (String configToChange : categories) {
-                if (configToChange.equals(config.getCategory())) {
-                    MailCategories.activateProperty(config.getCategory(), activate, session);
-                    retval.add(MailCategoryConfig.copyOf(config, activate));
-                }
+            if (categoriesToChange.contains(config.getCategory())) {
+                MailCategories.activateProperty(config.getCategory(), activate, session);
+                retval.add(MailCategoryConfig.copyOf(config, activate));
             }
         }
 
@@ -264,8 +272,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     @Override
     public boolean isSystemCategory(String category, Session session) throws OXException {
         String[] systemCategories = getCategoryNames(session);
-        for(String systemCategory: systemCategories){
-            if(category.equals(systemCategory)){
+        for (String systemCategory : systemCategories) {
+            if (category.equals(systemCategory)) {
                 return true;
             }
         }

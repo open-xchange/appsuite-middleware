@@ -195,7 +195,7 @@ public final class MailCategories {
      * @throws OXException If value cannot be returned
      * @throws IllegalArgumentException If session is <code>null</code>
      */
-    public static Boolean getBoolFromProperty(String propertyName, Boolean defaultValue, Session session) throws OXException {
+    public static boolean getBoolFromProperty(String propertyName, boolean defaultValue, Session session) throws OXException {
         Validate.notNull(session, "session must not be null");
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
@@ -206,7 +206,7 @@ public final class MailCategories {
         }
 
         String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
     }
 
     /**
@@ -219,7 +219,7 @@ public final class MailCategories {
      * @return The boolean value or <code>defaultValue</code>
      * @throws OXException If value cannot be returned
      */
-    public static Boolean getBoolFromProperty(String propertyName, Boolean defaultValue, int userId, int contextId) throws OXException {
+    public static boolean getBoolFromProperty(String propertyName, boolean defaultValue, int userId, int contextId) throws OXException {
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(userId, contextId);
 
@@ -229,13 +229,13 @@ public final class MailCategories {
         }
 
         String value = property.get();
-        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? Boolean.TRUE : ("false".equalsIgnoreCase(value.trim()) ? Boolean.FALSE : defaultValue));
+        return Strings.isEmpty(value) ? defaultValue : ("true".equalsIgnoreCase(value.trim()) ? true : ("false".equalsIgnoreCase(value.trim()) ? false : defaultValue));
     }
-    
-    
+
+
     /**
      * Activates or deactivates the given category
-     * 
+     *
      * @param category The category identifier
      * @param activate Flag indicating if the category should be activated or deactivated
      * @param session The user session
@@ -244,15 +244,15 @@ public final class MailCategories {
     public static void activateProperty(String category, boolean activate, Session session) throws OXException{
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        
+
         ConfigProperty<String> property = view.property("user", MailCategoriesConstants.MAIL_CATEGORIES_PREFIX+category+MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, String.class);
         property.set(String.valueOf(activate));
-        
+
     }
-    
+
     /**
      * Sets a user attribute
-     * 
+     *
      * @param property The name of the property
      * @param value The new value of the property
      * @param session The user session
@@ -261,7 +261,7 @@ public final class MailCategories {
     public static void setProperty(String property, String value, Session session) throws OXException{
         ConfigViewFactory viewFactory = getConfigViewFactory();
         ConfigView view = viewFactory.getView(session.getUserId(), session.getContextId());
-        
+
         ConfigProperty<String> confProperty = view.property("user", property, String.class);
         confProperty.set(value);
     }
