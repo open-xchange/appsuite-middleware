@@ -75,7 +75,7 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigService {
 
-    private final static String FLAG_PREFIX = "ox_";
+    private final static String FLAG_PREFIX = "$ox_";
 
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
