@@ -80,8 +80,8 @@ public abstract class OXAutoCIDStorageInterface {
     }
 
     /**
-     * Creates a new instance implementing the reseller storage factory.
-     * @return an instance implementing the reseller storage factory.
+     * Creates a new instance implementing the autocid storage factory.
+     * @return an instance implementing the autocid storage factory.
      * @throws com.openexchange.admin.rmi.exceptions.StorageException Storage exception
      */
     public static OXAutoCIDStorageInterface getInstance() throws StorageException {
