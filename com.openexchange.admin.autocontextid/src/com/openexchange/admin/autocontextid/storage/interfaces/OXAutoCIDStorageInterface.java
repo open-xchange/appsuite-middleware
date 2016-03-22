@@ -98,7 +98,7 @@ public abstract class OXAutoCIDStorageInterface {
                         throw new StorageException(e);
                     }
                 } else {
-                    final StorageException storageException = new StorageException("Property for reseller_storage not defined");
+                    final StorageException storageException = new StorageException("Property for autocid_storage not defined");
                     log.error("", storageException);
                     throw storageException;
                 }
