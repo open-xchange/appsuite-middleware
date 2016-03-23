@@ -64,6 +64,7 @@ import com.openexchange.carddav.resources.CardDAVCollection;
 import com.openexchange.carddav.resources.ContactResource;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.actions.POSTAction;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
@@ -205,15 +206,29 @@ public class CardDAVPOSTAction extends POSTAction {
         }
     }
 
-    private Element marshalErrorResponse(PropfindResponseMarshaller marshaller, PreconditionException error, String uid) {
-        Element responseElement = new Element("response", DAV_NS);
-        responseElement.addContent(new Element("href", DAV_NS));
-        responseElement.addContent(marshaller.marshalStatus(error.getStatus()));
-        Element errorElement = new Element("error", DAVProtocol.DAV_NS);
-        errorElement.addContent(error.getPreconditionElement());
-        errorElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(uid));
-        responseElement.addContent(errorElement);
-        return responseElement;
+    private Element marshalErrorResponse(PropfindResponseMarshaller marshaller, OXException error, String uid) {
+        if (error instanceof PreconditionException) {
+            PreconditionException preError = (PreconditionException) error;
+            Element responseElement = new Element("response", DAV_NS);
+            responseElement.addContent(new Element("href", DAV_NS));
+            responseElement.addContent(marshaller.marshalStatus(preError.getStatus()));
+            Element errorElement = new Element("error", DAVProtocol.DAV_NS);
+            errorElement.addContent(preError.getPreconditionElement());
+            errorElement.addContent(new Element("uid", CarddavProtocol.CALENDARSERVER_NS).setText(uid));
+            responseElement.addContent(errorElement);
+            return responseElement;
+        }
+        if (error instanceof SimilarityException) {
+            SimilarityException simError = (SimilarityException) error;
+            Element responseElement = new Element("response", DAV_NS);
+            responseElement.addContent(new Element("href", DAV_NS));
+            responseElement.addContent(marshaller.marshalStatus(simError.getStatus()));
+            Element errorElement = new Element("error", DAVProtocol.DAV_NS);
+            errorElement.addContent(simError.getElement());
+            responseElement.addContent(errorElement);
+            return responseElement;
+        }
+        return null;
     }
 
 }

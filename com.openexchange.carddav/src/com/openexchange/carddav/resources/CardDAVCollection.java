@@ -75,6 +75,7 @@ import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.SimilarityException;
 import com.openexchange.dav.reports.SyncStatus;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
@@ -163,6 +164,8 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
                     url = constructPathForChildResource(contact);
                     importResult.setHref(url);
                 }
+            } catch (SimilarityException e) {
+                importResult.setError(e);
             } catch (PreconditionException e) {
                 importResult.setError(e);
             } catch (WebdavProtocolException e) {
@@ -194,7 +197,7 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
                 float actual = service.getSimilarity(contact, other);
                 if (actual >= maxSimilarity) {
                     result.setUid(other.getUid());
-                    throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "no-uid-conflict", constructPathForChildResource(other), HttpServletResponse.SC_FORBIDDEN);
+                    throw new SimilarityException(constructPathForChildResource(other).toString(), contact.getUid(), HttpServletResponse.SC_CONFLICT);
                 }
             }
         }

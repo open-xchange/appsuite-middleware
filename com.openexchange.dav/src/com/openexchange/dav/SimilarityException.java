@@ -49,32 +49,64 @@
 
 package com.openexchange.dav;
 
-/**
- * {@link Headers}
- * 
- * Contains header name definitions.
- * 
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- */
-public final class Headers {
+import org.jdom2.Element;
+import org.jdom2.Namespace;
+import com.openexchange.exception.OXException;
 
-	/**
-	 * If-None-Match
-	 */
-	public static final String IF_NONE_MATCH = "If-None-Match";
-	
-	/**
-	 * If-Match
-	 */
-	public static final String IF_MATCH = "If-Match";
-	
-	
+/**
+ * {@link SimilarityException}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
+ */
+public class SimilarityException extends OXException {
+
     /**
-     * max_similarity
+     * serialVersionUID
      */
-    public static final String MAX_SIMILARITY = "max_similarity";
-	
-	private Headers() {
-		// prevent instantiation
-	}	
+    private static final long serialVersionUID = -8513856024355900129L;
+    
+    private static Namespace OX_NAMESPACE = Namespace.getNamespace("ox", "carddav");
+    private static final String ELEMENT_NAME = "no-similar-contact";
+    
+    private final String hrefSimilarContact;
+    private final String uidNewContact;
+    private int httpResponse;
+
+    /**
+     * Initializes a new {@link SimilarityException}.
+     * 
+     * @param hrefSimilarContact The href to the similar contact
+     * @param uidNewContact The uid of the new contact
+     */
+    public SimilarityException(String hrefSimilarContact, String uidNewContact, int httpResponse) {
+        super();
+        this.hrefSimilarContact = hrefSimilarContact;
+        this.uidNewContact = uidNewContact;
+        this.httpResponse = httpResponse;
+    }
+
+    public static Namespace getNamespace() {
+        return OX_NAMESPACE;
+    }
+
+    public String getHrefSimilarContact() {
+        return hrefSimilarContact;
+    }
+
+    public String getUidNewContact() {
+        return uidNewContact;
+    }
+    
+    public int getStatus() {
+        return httpResponse;
+    }
+    
+    public Element getElement() {
+        Element result = new Element(ELEMENT_NAME, getNamespace());
+        result.addContent(new Element("href", getNamespace()).setText(hrefSimilarContact));
+        result.addContent(new Element("uid", getNamespace()).setText(uidNewContact));
+        return result;
+    }
+
 }

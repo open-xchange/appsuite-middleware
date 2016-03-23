@@ -49,7 +49,7 @@
 
 package com.openexchange.carddav.resources;
 
-import com.openexchange.dav.PreconditionException;
+import com.openexchange.exception.OXException;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 /**
@@ -60,7 +60,7 @@ import com.openexchange.webdav.protocol.WebdavPath;
  */
 public class BulkImportResult {
 
-    private PreconditionException error;
+    private OXException error;
     private String uid;
     private WebdavPath href;
 
@@ -76,7 +76,7 @@ public class BulkImportResult {
      *
      * @return The error
      */
-    public PreconditionException getError() {
+    public OXException getError() {
         return error;
     }
 
@@ -85,7 +85,7 @@ public class BulkImportResult {
      *
      * @param error The error to set
      */
-    public void setError(PreconditionException error) {
+    public void setError(OXException error) {
         this.error = error;
     }
 
