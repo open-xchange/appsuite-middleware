@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,31 +47,65 @@
  *
  */
 
-package com.openexchange.mail.categories.osgi;
+package com.openexchange.mail.categories.impl.osgi;
 
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.internal.MailCategoriesConfigServiceImpl;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicReference;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 /**
- * {@link Activator}
+ * {@link Services} - The static service lookup.
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public final class Services {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class };
+    /**
+     * Initializes a new {@link Services}.
+     */
+    private Services() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this.context);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
+    private static final AtomicReference<BundleContext> REF = new AtomicReference<BundleContext>();
 
+    /**
+     * Sets the service lookup.
+     *
+     * @param serviceLookup The service lookup or <code>null</code>
+     */
+    public static void setServiceLookup(final BundleContext serviceLookup) {
+        REF.set(serviceLookup);
+    }
+
+    /**
+     * Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service
+     * @throws IllegalStateException If an error occurs while returning the demanded service
+     */
+    public static <S extends Object> S getService(final Class<? extends S> clazz) {
+        BundleContext bundleContext = REF.get();
+        if (null == bundleContext) {
+            throw new IllegalStateException("Missing BundleContext.");
+        }
+        ServiceReference<? extends S> reference = bundleContext.getServiceReference(clazz);
+        return bundleContext.getService(reference);
+    }
+
+    /**
+     * (Optionally) Gets the service of specified type
+     *
+     * @param clazz The service's class
+     * @return The service or <code>null</code> if absent
+     */
+    public static <S extends Object> S optService(final Class<? extends S> clazz) {
+        try {
+            return getService(clazz);
+        } catch (final IllegalStateException e) {
+            return null;
+        }
     }
 
 }

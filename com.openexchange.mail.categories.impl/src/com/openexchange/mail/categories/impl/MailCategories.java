@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.internal;
+package com.openexchange.mail.categories.impl;
 
 import org.apache.commons.lang.Validate;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -57,7 +57,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConstants;
-import com.openexchange.mail.categories.osgi.Services;
+import com.openexchange.mail.categories.impl.osgi.Services;
 import com.openexchange.session.Session;
 
 /**

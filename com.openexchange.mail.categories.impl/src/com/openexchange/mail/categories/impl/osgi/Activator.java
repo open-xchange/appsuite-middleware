@@ -47,31 +47,31 @@
  *
  */
 
-package com.openexchange.mail.categories.internal;
+package com.openexchange.mail.categories.impl.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MailCategoriesExceptionStrings}
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesExceptionStrings implements LocalizableStrings {
-    
-    
-    // The user category %1$s already exists.
-    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
+public class Activator extends HousekeepingActivator {
 
-    // The user category %1$s does not exist.
-    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { ConfigViewFactory.class };
+    }
 
-    // Invalid configuration: %1$s
-    public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
+    @Override
+    protected void startBundle() throws Exception {
+        Services.setServiceLookup(this.context);
+        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
 
-    // The required service %1$s is temporary not available. Please try again later.
-    public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
+    }
 
-    // Unable to create category. Missing parameter %1$s.
-    public static final String MISSING_PARAMETER = "Unable to create category. Missing parameter %1$s.";
 }

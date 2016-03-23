@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.internal;
+package com.openexchange.mail.categories.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
