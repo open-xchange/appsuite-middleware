@@ -49,10 +49,8 @@
 
 package com.openexchange.drive.impl.storage;
 
-import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
-import static com.openexchange.drive.impl.DriveUtils.combine;
-import static com.openexchange.drive.impl.DriveUtils.split;
+import static com.openexchange.drive.impl.DriveConstants.*;
+import static com.openexchange.drive.impl.DriveUtils.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -585,6 +583,17 @@ public class DriveStorage {
     }
 
     /**
+     * Gets all synchronized files present in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @param includeDriveMeta <code>true</code> to also include the folder's <code>.drive-meta</code> file, <code>false</code>, otherwise
+     * @return All synchronizable files in the folder
+     */
+    public List<File> getFilesInFolder(String folderID, boolean includeDriveMeta) throws OXException {
+        return getFilesInFolder(folderID, false, includeDriveMeta, null, null);
+    }
+
+    /**
      * Gets a list of files in the folder identified by the supplied ID.
      *
      * @param folderID The folder ID
@@ -595,6 +604,20 @@ public class DriveStorage {
      * @throws OXException
      */
     public List<File> getFilesInFolder(String folderID, boolean all, String pattern, List<Field> fields) throws OXException {
+        return getFilesInFolder(folderID, all, session.getDriveSession().useDriveMeta(), pattern, fields);
+    }
+
+    /**
+     * Gets a list of files in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @param all <code>true</code> to include also files excluded from synchronization, <code>false</code>, otherwise
+     * @param includeDriveMeta <code>true</code> to also include the folder's <code>.drive-meta</code> file, <code>false</code>, otherwise
+     * @param pattern The file search pattern to apply, or <code>null</code> if not used
+     * @param fields The file-fields to get, or <code>null</code> to retrieve the default fields
+     * @return The files
+     */
+    public List<File> getFilesInFolder(String folderID, boolean all, boolean includeDriveMeta, String pattern, List<Field> fields) throws OXException {
         FileStorageFolder folder = getFolderAccess().getFolder(folderID);
         if (null == folder) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
@@ -623,7 +646,7 @@ public class DriveStorage {
         /*
          * include .drive-meta as needed
          */
-        if (session.getDriveSession().useDriveMeta()) {
+        if (includeDriveMeta) {
             File driveMetaFile = new DriveMetadata(session, folder);
             if (filter.accept(driveMetaFile)) {
                 files.add(driveMetaFile);

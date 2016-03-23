@@ -54,6 +54,7 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -141,9 +142,38 @@ public class ChecksumProvider {
      * @param session The sync session
      * @param folderIDs The list of folder IDs to get the checksum for
      * @return The list of checksums, in an equal order as the passed folder IDs
-     * @throws OXException
      */
     public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs) throws OXException {
+        return getChecksums(session, folderIDs, DriveUtils.calculateView(session.getDriveSession()), session.getDriveSession().useDriveMeta());
+    }
+
+    /**
+     * Gets the MD5 checksum for a specific folder. The checksum is retrieved by first querying the checksum storage, and, if not yet
+     * known or no longer up-to-date, by calculating the checksum on demand.
+     *
+     * @param session The sync session
+     * @param folderID The folder ID to get the checksum for
+     * @param view The client view to use when determining the directory checksum
+     * @param <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
+     * @return The checksum
+     */
+    public static DirectoryChecksum getChecksum(SyncSession session, String folderID, int view, boolean useDriveMeta) throws OXException {
+        List<DirectoryChecksum> checksums = getChecksums(session, Collections.singletonList(folderID), view, useDriveMeta);
+        return null != checksums && 0 < checksums.size() ? checksums.get(0) : null;
+    }
+
+    /**
+     * Gets the MD5 checksums for the supplied folders. The checksum is retrieved by first querying the checksum storage, and, if not yet
+     * known or no longer up-to-date, by calculating the checksum on demand. Newly calculated checksums are pushed back automatically to
+     * the storage, outdated ones are removed.
+     *
+     * @param session The sync session
+     * @param folderIDs The list of folder IDs to get the checksum for
+     * @param view The client view to use when determining the directory checksums
+     * @param <code>true</code> to consider <code>.drive-meta</code> files, <code>false</code>, otherwise
+     * @return The list of checksums, in an equal order as the passed folder IDs
+    */
+    public static List<DirectoryChecksum> getChecksums(SyncSession session, List<String> folderIDs, int view, boolean useDriveMeta) throws OXException {
         StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("Directory checksums:\n") : null;
         /*
          * probe for optimized checksum retrieval
@@ -157,14 +187,13 @@ public class ChecksumProvider {
             if (null != trace) {
                 trace.append(" No folder sequence numbers supported.\n");
             }
-            checksums = calculateDirectoryChecksums(session, DriveUtils.getFolderIDs(folderIDs));
+            checksums = calculateDirectoryChecksums(session, DriveUtils.getFolderIDs(folderIDs), view, useDriveMeta);
         } else {
             /*
              * sequence numbers (at least partially) supported
              */
             List<FolderID> folderIDsSupportingSequenceNumbers = DriveUtils.getFolderIDs(foldersSupportingSequenceNumbers);
             int userID = session.getServerSession().getUserId();
-            int view = session.getExclusionFilterHash();
             checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
             List<DirectoryChecksum> storedChecksums = session.getChecksumStore().getDirectoryChecksums(userID, folderIDsSupportingSequenceNumbers, view);
             List<DirectoryChecksum> updatedChecksums = new ArrayList<DirectoryChecksum>();
@@ -175,7 +204,7 @@ public class ChecksumProvider {
                     /*
                      * calculate checksum as fallback
                      */
-                    DirectoryChecksum directoryChecksum = new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID), view);
+                    DirectoryChecksum directoryChecksum = new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID, useDriveMeta), view);
                     if (null != trace) {
                         trace.append(" Calculated: ").append(directoryChecksum).append('\n');
                     }
@@ -193,7 +222,7 @@ public class ChecksumProvider {
                         if (null != trace) {
                             trace.append(" Stored, invalid ( != " + sequenceNumber + " ): ").append(directoryChecksum).append('\n');
                         }
-                        directoryChecksum.setChecksum(calculateMD5(session, folderID));
+                        directoryChecksum.setChecksum(calculateMD5(session, folderID, useDriveMeta));
                         directoryChecksum.setSequenceNumber(sequenceNumber);
                         updatedChecksums.add(directoryChecksum);
                         if (null != trace) {
@@ -205,7 +234,7 @@ public class ChecksumProvider {
                         }
                     }
                 } else {
-                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID), view);
+                    directoryChecksum = new DirectoryChecksum(userID, folderID, sequenceNumber, calculateMD5(session, folderID, useDriveMeta), view);
                     if (null != trace) {
                         trace.append(" Newly calculated: ").append(directoryChecksum).append('\n');
                     }
@@ -239,19 +268,18 @@ public class ChecksumProvider {
         return checksum.equals(getChecksum(session, file).getChecksum());
     }
 
-    private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs) throws OXException {
-        int view = session.getExclusionFilterHash();
+    private static List<DirectoryChecksum> calculateDirectoryChecksums(SyncSession session, List<FolderID> folderIDs, int view, boolean useDriveMeta) throws OXException {
         List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>(folderIDs.size());
         for (FolderID folderID : folderIDs) {
-            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID), view));
+            checksums.add(new DirectoryChecksum(session.getServerSession().getUserId(), folderID, -1, calculateMD5(session, folderID, useDriveMeta), view));
         }
         return checksums;
     }
 
-    private static String calculateMD5(SyncSession session, FolderID folderID) throws OXException {
+    private static String calculateMD5(SyncSession session, FolderID folderID, boolean useDriveMeta) throws OXException {
         StringBuilder trace = session.isTraceEnabled() ? new StringBuilder("File checksums in folder " + folderID + ":\n") : null;
         String checksum;
-        List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID());
+        List<File> filesInFolder = session.getStorage().getFilesInFolder(folderID.toUniqueID(), useDriveMeta);
         if (null == filesInFolder || 0 == filesInFolder.size()) {
             checksum = DriveConstants.EMPTY_MD5;
             if (null != trace) {

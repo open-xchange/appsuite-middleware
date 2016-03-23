@@ -49,8 +49,7 @@
 
 package com.openexchange.drive.impl;
 
-import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
+import static com.openexchange.drive.impl.DriveConstants.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -469,6 +468,42 @@ public class DriveUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Calculates a hash code based on the (client-side) file- and directory exclusion filters and whether metadata synchronization is
+     * enabled or not, which may be used as a specific client "view" for the calculated directory checksums.
+     *
+     * @param session The drive session to get the view for
+     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined, and no metadata synchronization is off
+     */
+    public static int calculateView(DriveSession session) {
+        return calculateView(session.getDirectoryExclusions(), session.getFileExclusions(), session.useDriveMeta());
+    }
+
+    /**
+     * Calculates a hash code based on the (client-side) file- and directory exclusion filters and whether metadata synchronization is
+     * enabled or not, which may be used as a specific client "view" for the calculated directory checksums.
+     *
+     * @param directoryExclusions The directory exclusions to consider
+     * @param fileExclusions The file exclusions to consider
+     * @param useDriveMeta <code>true</code> to consider metadata synchronization, <code>false</code>, otherwise
+     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined, and no metadata synchronization is off
+     */
+    public static int calculateView(List<DirectoryPattern> directoryExclusions, List<FilePattern> fileExclusions, boolean useDriveMeta) {
+        final int prime = 31;
+        int result = useDriveMeta ? -1 : 1;
+        if (null != directoryExclusions && 0 < directoryExclusions.size()) {
+            for (DirectoryPattern directoryPattern : directoryExclusions) {
+                result = prime * result + directoryPattern.hashCode();
+            }
+        }
+        if (null != fileExclusions && 0 < fileExclusions.size()) {
+            for (FilePattern filePattern : fileExclusions) {
+                result = prime * result + filePattern.hashCode();
+            }
+        }
+        return 1 == result ? 0 : result;
     }
 
     private DriveUtils() {
