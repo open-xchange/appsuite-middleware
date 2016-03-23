@@ -15,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 26
+%define        ox_release 27
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -70,6 +70,8 @@ ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} 
 %doc com.openexchange.admin.user.copy/ChangeLog
 
 %changelog
+* Wed Mar 23 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
+Build for patch 2016-03-29 (3188)
 * Mon Mar 07 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
 Build for patch 2016-03-14 (3148)
 * Fri Feb 26 2016 Jan Bauerdick <jan.bauerdick@open-xchange.com>
