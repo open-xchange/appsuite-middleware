@@ -68,6 +68,8 @@ public class Autoconfig {
     private Boolean transportSecure;
     private String username;
     private String source;
+    private boolean mailStartTls;
+    private boolean transportStartTls;
 
     /**
      * Initializes a new ranked {@link Autoconfig}.
@@ -254,6 +256,22 @@ public class Autoconfig {
      */
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isMailStartTls() {
+        return mailStartTls;
+    }
+
+    public void setMailStartTls(boolean mailStartTls) {
+        this.mailStartTls = mailStartTls;
+    }
+
+    public boolean isTransportStartTls() {
+        return transportStartTls;
+    }
+
+    public void setTransportStartTls(boolean transportStartTls) {
+        this.transportStartTls = transportStartTls;
     }
 
     @Override

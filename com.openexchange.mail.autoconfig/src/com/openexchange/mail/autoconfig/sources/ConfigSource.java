@@ -74,4 +74,18 @@ public interface ConfigSource {
      */
     Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException;
 
+    /**
+     * Generates an {@code Autoconfig} instance for given arguments.
+     *
+     * @param emailLocalPart The local part of the Email address; <code>"<b>someone</b>@somewhere.org"</code>
+     * @param emailDomain The domain part of the Email address; <code>"someone@<b>somewhere.org</b>"</code>
+     * @param password The associated password
+     * @param user The associated user
+     * @param context The associated context
+     * @param forceSecure True if secure connection should be forced
+     * @return An {@code Autoconfig} instance or <code>null</code> if generation fails.
+     * @throws OXException If operation fails for any reason
+     */
+    Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException;
+
 }

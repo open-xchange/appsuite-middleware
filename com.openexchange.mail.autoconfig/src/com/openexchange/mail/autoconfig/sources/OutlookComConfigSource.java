@@ -79,17 +79,19 @@ public class OutlookComConfigSource extends StaticConfigSource {
     }
 
     @Override
-    protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+    protected Autoconfig getStaticAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
         final Autoconfig autoconfig = new Autoconfig();
         // IMAP
         autoconfig.setMailPort(993);
         autoconfig.setMailProtocol("imap");
         autoconfig.setMailSecure(true);
+        autoconfig.setMailStartTls(forceSecure);
         autoconfig.setMailServer("imap-mail.outlook.com");
         // Transport
         autoconfig.setTransportPort(25);
         autoconfig.setTransportProtocol("smtp");
         autoconfig.setTransportSecure(false);
+        autoconfig.setTransportStartTls(forceSecure);
         autoconfig.setTransportServer("smtp-mail.outlook.com");
         autoconfig.setUsername(emailLocalPart + '@' + emailDomain);
         return autoconfig;

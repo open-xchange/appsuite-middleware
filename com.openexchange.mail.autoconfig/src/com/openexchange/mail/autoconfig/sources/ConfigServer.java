@@ -91,6 +91,11 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    }
+
+    @Override
+    public Autoconfig getAutoconfig(final String emailLocalPart, final String emailDomain, final String password, final User user, final Context context, boolean forceSecure) throws OXException {
         URL url;
         {
             String sUrl = new StringBuilder("http://autoconfig.").append(emailDomain).append("/mail/config-v1.1.xml").toString();
@@ -152,6 +157,8 @@ public class ConfigServer extends AbstractProxyAwareConfigSource {
 
             Autoconfig autoconfig = getBestConfiguration(clientConfig, emailDomain);
             replaceUsername(autoconfig, emailLocalPart, emailDomain);
+            autoconfig.setMailStartTls(forceSecure);
+            autoconfig.setTransportStartTls(forceSecure);
             return autoconfig;
         } catch (ClientProtocolException e) {
             LOG.warn("Could not retrieve config XML.", e);

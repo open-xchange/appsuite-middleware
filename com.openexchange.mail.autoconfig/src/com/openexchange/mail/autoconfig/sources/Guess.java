@@ -92,6 +92,11 @@ public class Guess extends AbstractConfigSource {
 
     @Override
     public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context) throws OXException {
+        return getAutoconfig(emailLocalPart, emailDomain, password, user, context, true);
+    }
+
+    @Override
+    public Autoconfig getAutoconfig(String emailLocalPart, String emailDomain, String password, User user, Context context, boolean forceSecure) throws OXException {
         ConfigViewFactory configViewFactory = services.getService(ConfigViewFactory.class);
         ConfigView view = configViewFactory.getView(user.getId(), context.getContextId());
         ComposedConfigProperty<Boolean> property = view.property("com.openexchange.mail.autoconfig.allowGuess", boolean.class);
@@ -104,14 +109,14 @@ public class Guess extends AbstractConfigSource {
         Autoconfig config = new Autoconfig();
 
         final Map<String, Object> properties = new HashMap<String, Object>(2);
-        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties);
+        boolean imapSuccess = fillProtocol(URIDefaults.IMAP, emailLocalPart, emailDomain, password, config, properties, forceSecure);
         boolean generalSuccess = imapSuccess;
         if (!imapSuccess) {
-            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties) || generalSuccess;
+            generalSuccess = fillProtocol(URIDefaults.POP3, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
         }
 
         boolean preGeneralSuccess = generalSuccess;
-        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties) || generalSuccess;
+        generalSuccess = fillProtocol(URIDefaults.SMTP, emailLocalPart, emailDomain, password, config, properties, forceSecure) || generalSuccess;
 
         if (properties.containsKey("smtp.auth-supported")) {
             final Boolean smtpAuthSupported = (Boolean) properties.get("smtp.auth-supported");
@@ -122,11 +127,12 @@ public class Guess extends AbstractConfigSource {
             }
         }
 
+
         return generalSuccess ? config : null;
     }
 
-    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties) {
-        Object[] guessedHost = guessHost(protocol, emailDomain);
+    private boolean fillProtocol(URIDefaults protocol, String emailLocalPart, String emailDomain, String password, Autoconfig config, Map<String, Object> properties, boolean forceSecure) {
+        Object[] guessedHost = guessHost(protocol, emailDomain, forceSecure);
         if (guessedHost != null) {
             String host = (String) guessedHost[0];
             boolean secure = (Boolean) guessedHost[1];
@@ -148,6 +154,8 @@ public class Guess extends AbstractConfigSource {
                 config.setMailServer(host);
                 config.setUsername(login);
             }
+            config.setMailStartTls(forceSecure);
+            config.setTransportStartTls(forceSecure);
             return true;
         }
         return false;
@@ -174,7 +182,7 @@ public class Guess extends AbstractConfigSource {
         return null;
     }
 
-    private Object[] guessHost(URIDefaults protocol, String emailDomain) {
+    private Object[] guessHost(URIDefaults protocol, String emailDomain, boolean forceSecure) {
         List<String> prefixes = null;
         int altPort = 0;
         if (protocol == URIDefaults.IMAP) {
@@ -194,9 +202,9 @@ public class Guess extends AbstractConfigSource {
             String host = prefix + emailDomain;
             if (checkSave(protocol, host, protocol.getSSLPort(), true)) {
                 return new Object[] { host, true, protocol.getSSLPort() };
-            } else if (altPort > 0 && checkSave(protocol, host, altPort, false)) {
+            } else if (!forceSecure && altPort > 0 && checkSave(protocol, host, altPort, false)) {
                 return new Object[] { host, false, altPort };
-            } else if (checkSave(protocol, host, protocol.getPort(), false)) {
+            } else if (!forceSecure && checkSave(protocol, host, protocol.getPort(), false)) {
                 return new Object[] { host, false, protocol.getPort() };
             }
         }

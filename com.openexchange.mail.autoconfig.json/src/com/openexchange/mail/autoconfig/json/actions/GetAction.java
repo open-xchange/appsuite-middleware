@@ -68,6 +68,8 @@ public class GetAction extends AutoconfigAction {
 
     private static final String PASSWORD = "password";
 
+    private static final String FORCE_SECURE = "force_secure";
+
     /**
      * Initializes a new {@link GetAction}.
      *
@@ -81,8 +83,12 @@ public class GetAction extends AutoconfigAction {
     public AJAXRequestResult perform(AJAXRequestData request, ServerSession session) throws OXException {
         String mail = request.getParameter(EMAIL, String.class);
         String password = request.getParameter(PASSWORD, String.class);
+        boolean forceSecure = true;
+        if (request.containsParameter(FORCE_SECURE)) {
+            forceSecure = request.getParameter(FORCE_SECURE, Boolean.class);
+        }
         AutoconfigService autoconfigService = getAutoconfigService();
-        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext());
+        Autoconfig autoconfig = autoconfigService.getConfig(mail, password, session.getUser(), session.getContext(), forceSecure);
         return new AJAXRequestResult(autoconfig, "autoconfig");
     }
 
