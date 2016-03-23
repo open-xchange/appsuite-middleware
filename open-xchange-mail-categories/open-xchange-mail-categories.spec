@@ -1,6 +1,6 @@
 %define __jar_repack %{nil}
 
-Name:          open-xchange-drive-client-windows
+Name:          open-xchange-mail-categories
 BuildArch:     noarch
 #!BuildIgnore: post-build-checks
 %if 0%{?rhel_version} && 0%{?rhel_version} >= 700
