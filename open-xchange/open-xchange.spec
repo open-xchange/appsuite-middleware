@@ -69,6 +69,8 @@ install -m 755 %{SOURCE1} %{buildroot}/etc/init.d/open-xchange
 ln -sf /etc/init.d/open-xchange %{buildroot}%{_sbindir}/rcopen-xchange
 %endif
 
+# On Redhat and SuSE start scripts are not automatically added to system start. This is wanted behavior and standard.
+
 %post
 %if (0%{?suse_version} && 0%{?suse_version} >= 1210)
 %service_add_post open-xchange.service
