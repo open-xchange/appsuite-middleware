@@ -105,7 +105,7 @@ public class Bug44962Test extends ShareTest {
                     deleteFoldersSilently(client2, foldersToDelete);
                 }
                 client2.logout();
-                prepareUser(true, null);
+                prepareUser(true, true, null);
             }
         } finally {
             super.tearDown();
@@ -155,7 +155,7 @@ public class Bug44962Test extends ShareTest {
         inviteGuestToFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
     }
 
-    public void testInviteGuestToPimFolderWithInviteGuests() throws Exception {
+    public void testDontInviteGuestToPimFolderWithInviteGuests() throws Exception {
         inviteGuestToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
@@ -167,21 +167,50 @@ public class Bug44962Test extends ShareTest {
         inviteUserToFolder(randomPimModule(), true, Boolean.TRUE, null);
     }
 
-    public void testInviteUserToPimFolder() throws Exception {
+    public void testDontInviteUserToPimFolder() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0072");
     }
 
-    public void testInviteUserToPimFolderWithInviteGuests() throws Exception {
+    public void testDontInviteUserToPimFolderWithInviteGuests() throws Exception {
         inviteUserToFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0072");
     }
 
-    private void setReadCreateSharedFolders(boolean readCreateSharedFolders) throws Exception {
+    public void testInviteGuestToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
+        inviteGuestToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
+    }
+
+    public void testDontInviteGuestToPublicPimFolder() throws Exception {
+        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.FALSE, "SHR-0019");
+    }
+
+    public void testDontInviteGuestToPublicPimFolderWithInviteGuests() throws Exception {
+        inviteGuestToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+    }
+
+    public void testInviteUserToPublicPimFolderWithEditPublicFolders() throws Exception {
+        inviteUserToPublicFolder(randomPimModule(), true, Boolean.FALSE, null);
+    }
+
+    public void testInviteUserToPublicPimFolderWithInviteGuestsAndEditPublicFolders() throws Exception {
+        inviteUserToPublicFolder(randomPimModule(), true, Boolean.TRUE, null);
+    }
+
+    public void testDontInviteUserToPublicPimFolder() throws Exception {
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.FALSE, "FLD-0010");
+    }
+
+    public void testDontInviteUserToPublicPimFolderWithInviteGuests() throws Exception {
+        inviteUserToPublicFolder(randomPimModule(), false, Boolean.TRUE, "FLD-0010");
+    }
+
+    private void setReadCreateSharedFoldersAndEditPublicFolders(boolean readCreateSharedFolders, boolean editPublicFolders) throws Exception {
         Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
         OXUserInterface userInterface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
         com.openexchange.admin.rmi.dataobjects.Context context = new com.openexchange.admin.rmi.dataobjects.Context(client2.getValues().getContextId());
         UserModuleAccess moduleAccess = userInterface.getModuleAccess(context, user, credentials);
         moduleAccess.setReadCreateSharedFolders(readCreateSharedFolders);
+        moduleAccess.setEditPublicFolders(editPublicFolders);
         userInterface.changeModuleAccess(context, user, moduleAccess, credentials);
 	}
 
@@ -203,13 +232,13 @@ public class Bug44962Test extends ShareTest {
         }
     }
 
-    private void prepareUser(boolean readCreateSharedFolders, Boolean inviteGuests) throws Exception {
+    private void prepareUser(boolean readCreateSharedFolders, boolean editPublicFolders, Boolean inviteGuests) throws Exception {
         setInviteGuests(inviteGuests);
-        setReadCreateSharedFolders(readCreateSharedFolders);
+        setReadCreateSharedFoldersAndEditPublicFolders(readCreateSharedFolders, editPublicFolders);
     }
 
     private void inviteGuestToFolder(int module, boolean readCreateSharedFolders, Boolean inviteGuests, String expectedError) throws Exception {
-        prepareUser(readCreateSharedFolders, inviteGuests);
+        prepareUser(readCreateSharedFolders, false, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, module, getDefaultFolder(client2, module));
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
         folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
@@ -218,10 +247,34 @@ public class Bug44962Test extends ShareTest {
         executeAndCheck(updateRequest, expectedError);
     }
 
+    private void inviteGuestToPublicFolder(int module, boolean editPublicFolders, Boolean inviteGuests, String expectedError) throws Exception {
+        setReadCreateSharedFoldersAndEditPublicFolders(false, true);
+        FolderObject folder = insertPublicFolder(client2, EnumAPI.OX_NEW, module);
+        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
+        prepareUser(false, editPublicFolders, inviteGuests);
+        folder.getPermissions().add(createNamedGuestPermission(randomUID() + "@example.com", randomUID()));
+        UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
+        updateRequest.setFailOnError(false);
+        executeAndCheck(updateRequest, expectedError);
+    }
+
     private void inviteUserToFolder(int module, boolean readCreateSharedFolders, Boolean inviteGuests, String expectedError) throws Exception {
-        prepareUser(readCreateSharedFolders, inviteGuests);
+        prepareUser(readCreateSharedFolders, false, inviteGuests);
         FolderObject folder = insertPrivateFolder(client2, EnumAPI.OX_NEW, module, getDefaultFolder(client2, module));
         foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
+        OCLPermission permission = new OCLPermission(getClient().getValues().getUserId(), folder.getObjectID());
+        permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
+        folder.getPermissions().add(permission);
+        UpdateRequest updateRequest = new UpdateRequest(EnumAPI.OX_NEW, folder);
+        updateRequest.setFailOnError(false);
+        executeAndCheck(updateRequest, expectedError);
+    }
+
+    private void inviteUserToPublicFolder(int module, boolean editPublicFolders, Boolean inviteGuests, String expectedError) throws Exception {
+        setReadCreateSharedFoldersAndEditPublicFolders(false, true);
+        FolderObject folder = insertPublicFolder(client2, EnumAPI.OX_NEW, module);
+        foldersToDelete.put(Integer.valueOf(folder.getObjectID()), folder);
+        prepareUser(false, editPublicFolders, inviteGuests);
         OCLPermission permission = new OCLPermission(getClient().getValues().getUserId(), folder.getObjectID());
         permission.setAllPermission(OCLPermission.CREATE_OBJECTS_IN_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS);
         folder.getPermissions().add(permission);
