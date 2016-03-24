@@ -75,7 +75,7 @@ public interface ConfigView {
      *
      * @param property The property name
      * @param coerceTo The type to coerce to
-     * @return The coerced value
+     * @return The coerced value or <code>null</code>
      * @throws OXException If such a property does not exist
      */
     <T> T get(String property, Class<T> coerceTo) throws OXException;
