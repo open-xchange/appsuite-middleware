@@ -201,7 +201,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             fields.add(Field.VERSION);
             fields.add(Field.VERSION_COMMENT);
         }
-        List<File> files = session.getStorage().getFilesInFolder(this.folderID, false, null, fields);
+        List<File> files = session.getStorage().getFilesInFolder(this.folderID, false, false, null, fields);
         return getJSONFiles(files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()]));
     }
 

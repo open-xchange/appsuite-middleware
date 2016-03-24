@@ -551,7 +551,6 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 
 	private void initDefaultFields(final FolderObject folder) throws WebdavProtocolException {
 		initParent(folder);
-		folder.setType(FolderObject.PUBLIC);
 		folder.setModule(FolderObject.INFOSTORE);
 		if (folder.getFolderName() == null || folder.getFolderName().length() == 0) {
 			//if(url.contains("/")) {
@@ -568,6 +567,9 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 			}
 			folder.setParentFolderID(parent.id);
+			if (null != parent.folder) {
+			    folder.setType(parent.folder.getType());
+			}
 		} catch (final ClassCastException x) {
 			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
