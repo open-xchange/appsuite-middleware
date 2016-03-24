@@ -346,8 +346,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
 
         // Reorganize if demanded
-        try {
-            if (reorganize) {
+        if (reorganize) {
+            try {
                 SearchTerm<?> searchTerm = null;
                 if (mailFilterTest != null) {
                     searchTerm = mailFilterTest.getSearchTerm();
@@ -360,10 +360,10 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                         warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create());
                     }
                 }
-            }
-        } catch (OXException e) {
-            if (null != warnings) {
-                warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create(e));
+            } catch (OXException e) {
+                if (null != warnings) {
+                    warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create(e));
+                }
             }
         }
     }
@@ -452,11 +452,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 Rule newRule = null;
                 mailFilterRule = new SearchableMailFilterRule(filterDesc, flag);
                 newRule = mailFilterRule.getRule();
-                if (oldRule != null) {
-                    mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
-                } else {
+                if (oldRule == null) {
                     mailFilterService.createFilterRule(creds, newRule);
                     mailFilterService.reorderRules(creds, new int[0]);
+                } else {
+                    mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
                 }
             }
 
@@ -471,30 +471,30 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         }
 
         // Reorganize if necessary
-        try {
-            if (reorganize) {
+        if (reorganize) {
+            try {
                 SearchTerm<?> searchTerm = null;
                 if (mailFilterRule != null) {
                     searchTerm = mailFilterRule.getSearchTerm();
                 } else {
-                    if (oldRule != null) {
-                        searchTerm = new SearchableMailFilterRule(oldRule.getTestCommand(), flag).getSearchTerm();
-                    } else {
+                    if (oldRule == null) {
                         OXException warning = MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create();
                         if (null != warnings) {
                             warnings.add(warning);
                         }
                         throw warning;
                     }
+
+                    searchTerm = new SearchableMailFilterRule(oldRule.getTestCommand(), flag).getSearchTerm();
                 }
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 if (searchTerm != null) {
                     MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
                 }
-            }
-        } catch (OXException e) {
-            if (warnings != null && warnings.isEmpty()) {
-                warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create());
+            } catch (OXException e) {
+                if (warnings != null && warnings.isEmpty()) {
+                    warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create());
+                }
             }
         }
     }
