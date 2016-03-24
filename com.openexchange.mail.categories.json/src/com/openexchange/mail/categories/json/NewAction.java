@@ -112,7 +112,7 @@ public class NewAction extends AbstractCategoriesAction {
         }
         ConfigView view = viewFactory.getView(requestData.getSession().getUserId(), requestData.getSession().getContextId());
         Boolean enabled = view.get(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, Boolean.class);
-        if (null != enabled && !enabled.booleanValue()) {
+        if (null == enabled || !enabled.booleanValue()) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("new");
         }
 
