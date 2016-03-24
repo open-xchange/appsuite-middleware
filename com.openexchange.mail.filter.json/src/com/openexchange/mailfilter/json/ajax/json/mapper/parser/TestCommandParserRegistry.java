@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
 /**

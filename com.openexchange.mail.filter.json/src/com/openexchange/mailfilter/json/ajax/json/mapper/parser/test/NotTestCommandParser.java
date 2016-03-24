@@ -64,6 +64,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.NotTestField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.osgi.Services;
 
 /**

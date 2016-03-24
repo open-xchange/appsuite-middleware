@@ -60,7 +60,7 @@ import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
 import com.openexchange.mailfilter.json.ajax.json.fields.RuleField;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TestCommandParserRegistry;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.osgi.Services;
 
 /**
