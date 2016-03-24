@@ -49,8 +49,7 @@
 
 package com.openexchange.groupware.infostore.validation;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.*;
 import static org.slf4j.LoggerFactory.getLogger;
 import java.sql.Connection;
 import java.util.ArrayList;
@@ -159,14 +158,8 @@ public class ObjectPermissionValidator implements InfostoreValidator {
             }
             if (null == guestInfo) {
                 /*
-                 * internal permission entity, check "readcreatesharedfolders" flag of sharing user
+                 * internal permission entity, okay
                  */
-                if (false == session.getUserConfiguration().hasFullSharedFolderAccess()) {
-                    String name = session.getUser().getDisplayName();
-                    validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + name + " has no permission to share items.");
-                    validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(name));
-                    return false;
-                }
             } else if (RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
                 /*
                  * anonymous link permission entity, check "share_links" capability
@@ -179,14 +172,8 @@ public class ObjectPermissionValidator implements InfostoreValidator {
                 }
             } else if (RecipientType.GUEST.equals(guestInfo.getRecipientType())) {
                 /*
-                 * external guest permission entity, check "readcreatesharedfolders" flag and "invite_guests" capability
+                 * external guest permission entity, check "invite_guests" capability
                  */
-                if (false == session.getUserConfiguration().hasFullSharedFolderAccess()) {
-                    String name = session.getUser().getDisplayName();
-                    validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, "User " + name + " has no permission to share items.");
-                    validation.setException(InfostoreExceptionCodes.VALIDATION_FAILED_INAPPLICABLE_PERMISSIONS.create(name));
-                    return false;
-                }
                 if (null == capabilities || false == capabilities.contains("invite_guests")) {
                     OXException e = ShareExceptionCodes.NO_INVITE_GUEST_PERMISSION.create();
                     validation.setError(Metadata.OBJECT_PERMISSIONS_LITERAL, e.getDisplayMessage(session.getUser().getLocale()));
