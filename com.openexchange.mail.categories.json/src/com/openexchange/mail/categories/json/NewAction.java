@@ -86,10 +86,10 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Creates a new mail user category.", parameters = { 
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
-    @Parameter(name = "category", description = "The category identifier"), 
-    @Parameter(name = "name", description = "The name of the category"), 
+@Action(method = RequestMethod.PUT, name = "new", description = "Creates a new mail user category.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "category", description = "The category identifier"),
+    @Parameter(name = "name", description = "The name of the category"),
     @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized."),
 }, responseDescription = "Response: The newly created category configuration")
 public class NewAction extends AbstractCategoriesAction {
@@ -112,7 +112,7 @@ public class NewAction extends AbstractCategoriesAction {
         }
         ConfigView view = viewFactory.getView(requestData.getSession().getUserId(), requestData.getSession().getContextId());
         Boolean enabled = view.get(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, Boolean.class);
-        if (!enabled) {
+        if (null != enabled && !enabled.booleanValue()) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("new");
         }
 
@@ -148,17 +148,13 @@ public class NewAction extends AbstractCategoriesAction {
         } catch (OXException | SieveException e) {
             // undo category creation
             mailCategoriesService.removeUserCategory(category, session);
-            if (e instanceof OXException) {
-                throw (OXException) e;
-            } else {
-                throw MailFilterExceptionCode.handleSieveException((SieveException) e);
-            }
+            throw (e instanceof OXException) ? (OXException) e : MailFilterExceptionCode.handleSieveException((SieveException) e);
         }
         // reorganize if necessary
         OXException warning = null;
         try {
             String reorganize = requestData.getParameter("reorganize");
-            if (reorganize != null && Boolean.valueOf(reorganize)) {
+            if (reorganize != null && Boolean.parseBoolean(reorganize)) {
                 SearchTerm<?> searchTerm = null;
                 if (mailFilterTest != null) {
                     searchTerm = mailFilterTest.getSearchTerm();
