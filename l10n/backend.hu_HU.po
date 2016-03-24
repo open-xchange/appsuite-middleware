@@ -6,7 +6,7 @@ msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-20 22:24+0100\n"
+"PO-Revision-Date: 2016-03-23 20:49+0100\n"
 "Last-Translator: Kalman Kemenczy <kalman@bureau-cornavin.com>\n"
 "Language-Team: Hungarian <hu@bureau-cornavin.com>\n"
 "Language: hu\n"
@@ -2205,7 +2205,7 @@ msgstr "Nincs következő rész ehhez: %1$s"
 #. Signals that an end of stream has been reached unexpectedly during reading input.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/FileStorageStrings.java:71
 msgid "The connected client closed the connection unexpectedly"
-msgstr ""
+msgstr "A kapcsolódott kliens váratlanul lezárta a kapcsolatot"
 
 #. * The allowed Quota is reached.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.filestore/src/com/openexchange/filestore/QuotaFileStorageExceptionMessage.java:62
@@ -4276,7 +4276,7 @@ msgstr "A vendég felhasználók száma túllépte a kvótát, amelynek korlátj
 msgid ""
 "Quota exceeded for signatures. Quota limit: %2$s. Quota used: %1$s. Please "
 "delete some signatures in order to create new ones."
-msgstr ""
+msgstr "Az aláírások kvótáját túllépte, amelynek korlátja: %2$s. A felhasznált kvóta: %1$s.  Töröljön néhány aláírást, ha újakat szeretne létrehozni."
 
 #. Could not send stanza to resource. Resource was offline: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.realtime.dispatch/src/com/openexchange/realtime/dispatch/DispatchExceptionMessage.java:63
@@ -7533,7 +7533,7 @@ msgstr "Az üzenet nem küldhető el a levélkiszolgáló átmeneti hibája miat
 #. Timeout while trying to send to the following recipient: %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
 msgid "Timeout while trying to send to the following recipient: %1$s"
-msgstr ""
+msgstr "Időtúllépés történt %1$s címzettnek történő küldés közben."
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -8706,13 +8706,13 @@ msgstr "Hiba történt, nem tudunk értesítőleveleket küldeni."
 msgid ""
 "You have exceeded the maximum number of sms allowed. Please try again after "
 "%1$s hours"
-msgstr ""
+msgstr "Túllépte a maximálisan megengedett SMS-ek számát. Próbálja meg újra %1$s óra múlva"
 
 #. SMS limits apply. You can only send one more message in the next %1$s hours
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
 msgid ""
 "SMS limits apply. You can only send one more message in the next %1$s hours"
-msgstr ""
+msgstr "Elérte az elküldhető SMS-ek számát. A következő %1$s órában még egy SMS-t küldhet."
 
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
@@ -9575,7 +9575,7 @@ msgstr "Amerika/Ensenada"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:113
 msgid "America/Fort Nelson"
-msgstr ""
+msgstr "America/Fort Nelson"
 
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:114
 msgid "America/Fort Wayne"
