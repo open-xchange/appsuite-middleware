@@ -336,13 +336,26 @@ public class RdbChecksumStore implements ChecksumStore {
     public List<DirectoryChecksum> insertDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
-            for (DirectoryChecksum directoryChecksum : directoryChecksums) {
-                if (null != directoryChecksum.getUuid()) {
-                    throw new IllegalArgumentException("New directory checksums must not contain an UUID");
+            for (int i = 0; i < directoryChecksums.size(); i += INSERT_CHUNK_SIZE) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(directoryChecksums.size(), i + INSERT_CHUNK_SIZE) - i;
+                DirectoryChecksum[] checksums = new DirectoryChecksum[length];
+                for (int j = 0; j < length; j++) {
+                    DirectoryChecksum checksum = directoryChecksums.get(i + j);
+                    if (null != checksum.getUuid()) {
+                        throw new IllegalArgumentException("New directory checksums must not contain an UUID");
+                    }
+                    checksum.setUuid(newUid());
+                    checksums[j] = checksum;
                 }
-                directoryChecksum.setUuid(newUid());
-                if (0 == insertDirectoryChecksum(connection, contextID, directoryChecksum)) {
-                    throw DriveExceptionCodes.DB_ERROR.create("File checksum not added: " + directoryChecksum);
+                /*
+                 * insert chunk
+                 */
+                int inserted = insertDirectoryChecksums(connection, contextID, checksums);
+                if (checksums.length != inserted) {
+                    throw DriveExceptionCodes.DB_ERROR.create(String.valueOf(checksums.length - inserted) + " directory checksums not inserted");
                 }
             }
         } catch (SQLException e) {
@@ -675,6 +688,29 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setString(7, directoryChecksum.getETag());
             stmt.setString(8, directoryChecksum.getChecksum());
             stmt.setLong(9, System.currentTimeMillis());
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static int insertDirectoryChecksums(Connection connection, int cid, DirectoryChecksum[] directoryChecksums) throws SQLException, OXException {
+        long currentTimeMillis = System.currentTimeMillis();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.INSERT_DIRECTORY_CHECKSUMS_STMT(directoryChecksums.length));
+            int parameterIndex = 1;
+            for (DirectoryChecksum directoryChecksum : directoryChecksums) {
+                stmt.setString(parameterIndex++, directoryChecksum.getUuid());
+                stmt.setInt(parameterIndex++, cid);
+                stmt.setInt(parameterIndex++, directoryChecksum.getUserID());
+                stmt.setInt(parameterIndex++, directoryChecksum.getView());
+                stmt.setString(parameterIndex++, escapeFolder(directoryChecksum.getFolderID()));
+                stmt.setLong(parameterIndex++, directoryChecksum.getSequenceNumber());
+                stmt.setString(parameterIndex++, directoryChecksum.getETag());
+                stmt.setString(parameterIndex++, directoryChecksum.getChecksum());
+                stmt.setLong(parameterIndex++, currentTimeMillis);
+            }
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);

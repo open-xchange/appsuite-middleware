@@ -179,6 +179,20 @@ public class SQL {
         "INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) " +
         "VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?);";
 
+    /** INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?), ...; */
+    public static final String INSERT_DIRECTORY_CHECKSUMS_STMT(int count) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("INSERT INTO directoryChecksums (uuid,cid,user,view,folder,sequence,etag,checksum,used) ");
+        if (0 < count) {
+            stringBuilder.append("VALUES (UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?)");
+        }
+        for (int i = 1; i < count; i++) {
+            stringBuilder.append(",(UNHEX(?),?,?,?,REVERSE(?),?,?,UNHEX(?),?)");
+        }
+        stringBuilder.append(';');
+        return stringBuilder.toString();
+    }
+
     public static final String UPDATE_DIRECTORY_CHECKSUM_STMT =
         "UPDATE directoryChecksums SET folder=REVERSE(?),sequence=?,etag=?,checksum=UNHEX(?),used=? " +
         "WHERE cid=? AND uuid=UNHEX(?);";
