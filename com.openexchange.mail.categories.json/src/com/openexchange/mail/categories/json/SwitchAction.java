@@ -50,7 +50,6 @@
 package com.openexchange.mail.categories.json;
 
 import java.util.List;
-import org.apache.commons.lang.Validate;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -61,6 +60,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -77,27 +77,29 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "enable", description = "A flag indicating if given categories should be enabled or disabled."),
     }, responseDescription = "Response: An array with category configurations")
 public class SwitchAction extends AbstractCategoriesAction {
-    
+
     private static final String ACTION = "categories";
     private static final String PARAMETER_CATEGORY_IDS = "category_ids";
     private static final String PARAMETER_ENABLE = "enable";
 
-    
+
     /**
      * Initializes a new {@link SwitchAction}.
      */
     public SwitchAction(ServiceLookup services) {
         super(services);
     }
-    
-    
+
+
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
         MailCategoriesConfigService categoriesConfigService = services.getService(MailCategoriesConfigService.class);
-        Validate.notNull(categoriesConfigService);
+        if (categoriesConfigService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
+        }
 
         if (!categoriesConfigService.isEnabled(session)) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);

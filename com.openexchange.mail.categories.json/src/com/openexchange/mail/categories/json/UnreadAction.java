@@ -50,7 +50,6 @@
 package com.openexchange.mail.categories.json;
 
 import java.util.List;
-import org.apache.commons.lang.Validate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
@@ -59,14 +58,15 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.FullnameArgument;
-import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.mail.search.UserFlagTerm;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -77,12 +77,13 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = { 
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."), 
+@Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
 public class UnreadAction extends AbstractCategoriesAction {
 
     private static final String ACTION = "categories";
+
     /**
      * Initializes a new {@link SwitchAction}.
      */
@@ -92,59 +93,66 @@ public class UnreadAction extends AbstractCategoriesAction {
 
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
+
         MailCategoriesConfigService categoriesConfigService = services.getService(MailCategoriesConfigService.class);
-        Validate.notNull(categoriesConfigService);
+        if (categoriesConfigService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
+        }
 
         if (!categoriesConfigService.isEnabled(session)) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
         }
 
-        FullnameArgument fa = new FullnameArgument("INBOX");
-        JSONObject resultObject = new JSONObject();
-        MailServletInterface msi = MailServletInterface.getInstance(session);
-        try {
-            msi.openFor(fa.getFullName());
-        IMailMessageStorage mailStorage = msi.getMailAccess().getMessageStorage();
-
         List<MailCategoryConfig> categories = categoriesConfigService.getAllCategories(session, true);
+        String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
+        String[] flags = getFlagsFrom(categories);
+
+        JSONObject resultObject = new JSONObject(4);
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            mailAccess = MailAccess.getInstance(session);
+            mailAccess.connect();
+
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            try {
+                SearchTerm<?> searchTerm = null;
+
+                // General case
+                searchTerm = new UserFlagTerm(flags, false);
+                int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+                resultObject.put("General", unread);
+
+                for (MailCategoryConfig category : categories) {
+                    if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
+                        searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
+                    } else {
+                        searchTerm = new UserFlagTerm(category.getFlag(), true);
+                    }
+                    unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+                    resultObject.put(category.getCategory(), unread);
+                }
+            } catch (JSONException e) {
+                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+            }
+
+            return new AJAXRequestResult(resultObject, "json");
+        } finally {
+            if (null != mailAccess) {
+                mailAccess.close();
+            }
+        }
+    }
+
+    private String[] getFlagsFrom(List<MailCategoryConfig> categories) {
         String[] flags = new String[categories.size()];
         int x = 0;
         for (MailCategoryConfig category : categories) {
             flags[x++] = category.getFlag();
         }
-        String[] unkeywords = categoriesConfigService.getAllFlags(requestData.getSession(), true, true);
-        try {
-            SearchTerm<?> searchTerm = null;
-            // General case
-            searchTerm = new UserFlagTerm(flags, false);
-            int unread = mailStorage.getUnreadCount(fa.getFullname(), searchTerm);
-            resultObject.put("General", unread);
-
-            for (MailCategoryConfig category : categories) {
-
-                if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
-                    searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
-                } else {
-                    searchTerm = new UserFlagTerm(category.getFlag(), true);
-                }
-                unread = mailStorage.getUnreadCount(fa.getFullName(), searchTerm);
-                resultObject.put(category.getCategory(), unread);
-            }
-        } catch (JSONException e) {
-            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-        }
-
-        return new AJAXRequestResult(resultObject, "json");
-        } finally {
-            if (msi != null) {
-                msi.close(true);
-            }
-        }
+        return flags;
     }
-
 
 }
