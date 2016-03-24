@@ -567,9 +567,11 @@ public class FolderCollection extends AbstractCollection implements OXWebdavReso
 				throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 			}
 			folder.setParentFolderID(parent.id);
-			if (null != parent.folder) {
-			    folder.setType(parent.folder.getType());
-			}
+            if (null != parent.folder && FolderObject.SYSTEM_TYPE != parent.folder.getType()) {
+                folder.setType(parent.folder.getType());
+            } else {
+                folder.setType(FolderObject.PUBLIC);
+            }
 		} catch (final ClassCastException x) {
 			throw WebdavProtocolException.generalError(getUrl(), HttpServletResponse.SC_CONFLICT);
 		}
