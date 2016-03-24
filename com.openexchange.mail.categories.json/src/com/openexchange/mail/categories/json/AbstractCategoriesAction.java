@@ -49,13 +49,14 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.Locale;
+import org.json.JSONException;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
-import com.openexchange.user.UserService;
 
 /**
  * {@link AbstractCategoriesAction}
@@ -65,33 +66,35 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractCategoriesAction implements AJAXActionService {
 
+    /** The OSGi service look-up */
     protected final ServiceLookup services;
 
     /**
      * Initializes a new {@link SwitchAction}.
      */
-    public AbstractCategoriesAction(ServiceLookup services) {
+    protected AbstractCategoriesAction(ServiceLookup services) {
         super();
         this.services = services;
     }
 
-    /**
-     * Gets the locale for session-associated user.
-     *
-     * @param session The session
-     * @return The locale
-     * @throws OXException If locale cannot be returned
-     */
-    protected Locale getLocaleFor(Session session) throws OXException {
-        if (null == session) {
-            return null;
+    @Override
+    public final AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        try {
+            return doPerform(requestData, session);
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
-
-        if (session instanceof ServerSession) {
-            return ((ServerSession) session).getUser().getLocale();
-        }
-        UserService service = services.getService(UserService.class);
-        return service.getUser(session.getUserId(), session.getContextId()).getLocale();
     }
+
+    /**
+     * Performs given request.
+     *
+     * @param requestData The request data
+     * @param session The associated session
+     * @return The result
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws JSONException If a JSON error occurs
+     */
+    protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException;
 
 }

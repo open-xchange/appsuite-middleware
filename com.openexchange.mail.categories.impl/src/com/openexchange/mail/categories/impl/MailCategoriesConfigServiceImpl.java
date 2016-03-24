@@ -49,7 +49,6 @@
 
 package com.openexchange.mail.categories.impl;
 
-import static com.openexchange.mail.categories.impl.mailfilter.MailFilterUtility.getCredentials;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -59,24 +58,26 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import org.apache.jsieve.SieveException;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
+import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
-import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesFilterExceptionCodes;
+import com.openexchange.mail.categories.ReorganizeParameter;
+import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizeExceptionCodes;
 import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizer;
-import com.openexchange.mail.categories.impl.mailfilter.SearchableMailFilterRule;
 import com.openexchange.mail.categories.impl.osgi.Services;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
+import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mail.search.ANDTerm;
+import com.openexchange.mail.search.HeaderTerm;
+import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
-import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
@@ -91,6 +92,13 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailCategoriesConfigServiceImpl.class);
 
     private final static String FLAG_PREFIX = "$ox_";
+
+    private final ServiceLookup services;
+
+    public MailCategoriesConfigServiceImpl(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
 
     @Override
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException {
@@ -297,7 +305,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void addUserCategory(String category, String flag, String name, Map<String, Object> filterDesc, boolean reorganize, List<OXException> warnings, Session session) throws OXException {
+    public void addUserCategory(String category, String flag, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException {
         if (Strings.isEmpty(category)) {
             throw MailCategoriesExceptionCodes.MISSING_PARAMETER.create("category");
         }
@@ -322,68 +330,41 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
 
         // Create filter
-        boolean error = true;
-        SearchableMailFilterRule mailFilterTest = null;
-        try {
-            Rule rule = null;
-            if (filterDesc != null) {
-                mailFilterTest = new SearchableMailFilterRule(filterDesc, flag);
-                rule = mailFilterTest.getRule();
-                final MailFilterService mailFilterService = Services.getService(MailFilterService.class);
-                Credentials creds = getCredentials(session);
-                int uid = mailFilterService.createFilterRule(creds, rule);
-                mailFilterService.reorderRules(creds, new int[0]);
-                LOG.debug("Created sieve filter '{}' for user {} in context {} with id {}", category, session.getUserId(), session.getContextId(), uid);
-            }
-            error = false;
-        } catch (SieveException e) {
-            throw MailFilterExceptionCode.handleSieveException(e);
-        } finally {
-            if (error) {
-                // undo category creation
-                removeUserCategory(category, session);
+        if (null != rule) {
+            boolean error = true;
+            try {
+                setRule(session, category, rule);
+                error = false;
+            } finally {
+                if (error) {
+                    removeUserCategory(category, session);
+                }
             }
         }
 
         // Reorganize if demanded
-        if (reorganize) {
+        if (reorganize.isReorganize()) {
+            List<OXException> warnings = reorganize.getWarnings();
             try {
                 SearchTerm<?> searchTerm = null;
-                if (mailFilterTest != null) {
-                    searchTerm = mailFilterTest.getSearchTerm();
+                if (rule != null) {
+                    searchTerm = getSearchTerm(rule);
                     FullnameArgument fa = new FullnameArgument("INBOX");
                     if (searchTerm != null) {
                         MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
                     }
                 } else {
-                    if (null != warnings) {
-                        warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create());
-                    }
+                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
                 }
             } catch (OXException e) {
-                if (null != warnings) {
-                    warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create(e));
-                }
+                warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create(e));
             }
         }
     }
 
     @Override
     public void removeUserCategory(String category, Session session) throws OXException {
-        MailFilterService mailFilterService = Services.getService(MailFilterService.class);
-        if (mailFilterService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailFilterService.class);
-        }
-
-        Credentials creds = getCredentials(session);
-        List<Rule> rules = mailFilterService.listRules(creds, "category");
-        String flag = generateFlag(category);
-        for (Rule rule : rules) {
-            if (rule.getRuleComment().getRulename().equals(flag)) {
-                mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
-                break;
-            }
-        }
+        removeRule(session, category);
 
         String[] userCategories = getUserCategoryNames(session);
         if (userCategories.length == 0) {
@@ -394,7 +375,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         boolean exists = false;
         for (String oldCategory : userCategories) {
             if (oldCategory.equals(category)) {
-                exists=true;
+                exists = true;
             } else {
                 if (newCategoriesList.length() > 0) {
                     newCategoriesList.append(',');
@@ -402,9 +383,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 newCategoriesList.append(oldCategory);
             }
         }
-        if(!exists) {
+
+        if (!exists) {
             throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
         }
+
         MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
         MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
         MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
@@ -412,7 +395,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void updateUserCategory(String category, String name, Map<String, Object> filterDesc, boolean reorganize, List<OXException> warnings, Session session) throws OXException {
+    public void updateUserCategory(String category, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException {
         if (!Strings.isEmpty(name)) {
             boolean found = false;
             String[] userCategoryNames = getUserCategoryNames(session);
@@ -428,72 +411,46 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
         }
 
-        // Update filter
-        MailFilterService mailFilterService = Services.getService(MailFilterService.class);
-        if (mailFilterService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailFilterService.class);
-        }
-
-        boolean error = true;
         String flag = generateFlag(category);
-        Rule oldRule = null;
-        SearchableMailFilterRule mailFilterRule = null;
-        Credentials creds = getCredentials(session);
-        try {
-            List<Rule> rules = mailFilterService.listRules(creds, "category");
-            for (Rule rule : rules) {
-                if (rule.getRuleComment().getRulename().equals(flag)) {
-                    oldRule = rule;
-                    break;
-                }
-            }
 
-            if (filterDesc != null) {
-                Rule newRule = null;
-                mailFilterRule = new SearchableMailFilterRule(filterDesc, flag);
-                newRule = mailFilterRule.getRule();
-                if (oldRule == null) {
-                    mailFilterService.createFilterRule(creds, newRule);
-                    mailFilterService.reorderRules(creds, new int[0]);
-                } else {
-                    mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
+        // Update rule
+        if (null != rule) {
+            boolean error = true;
+            try {
+                setRule(session, category, rule);
+                error = false;
+            } finally {
+                if (error) {
+                    // undo category creation
+                    removeUserCategory(category, session);
                 }
-            }
-
-            error = false;
-        } catch (SieveException e) {
-            throw MailFilterExceptionCode.handleSieveException(e);
-        } finally {
-            if (error) {
-                // undo category creation
-                removeUserCategory(category, session);
             }
         }
 
         // Reorganize if necessary
-        if (reorganize) {
+        if (reorganize.isReorganize()) {
+            List<OXException> warnings = reorganize.getWarnings();
             try {
                 SearchTerm<?> searchTerm = null;
-                if (mailFilterRule != null) {
-                    searchTerm = mailFilterRule.getSearchTerm();
+                if (null != null) {
+                    searchTerm = getSearchTerm(rule);
                 } else {
+                    MailCategoryRule oldRule = getRule(session, category);
                     if (oldRule == null) {
-                        OXException warning = MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create();
-                        if (null != warnings) {
-                            warnings.add(warning);
-                        }
+                        OXException warning = MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create();
+                        warnings.add(warning);
                         throw warning;
                     }
 
-                    searchTerm = new SearchableMailFilterRule(oldRule.getTestCommand(), flag).getSearchTerm();
+                    searchTerm = getSearchTerm(oldRule);
                 }
                 FullnameArgument fa = new FullnameArgument("INBOX");
                 if (searchTerm != null) {
                     MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
                 }
             } catch (OXException e) {
-                if (warnings != null && warnings.isEmpty()) {
-                    warnings.add(MailCategoriesFilterExceptionCodes.UNABLE_TO_ORGANIZE.create());
+                if (warnings.isEmpty()) {
+                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
                 }
             }
         }
@@ -514,6 +471,51 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         StringBuilder builder = new StringBuilder(FLAG_PREFIX);
         builder.append(category.hashCode());
         return builder.toString();
+    }
+
+    private void setRule(Session session, String category, MailCategoryRule rule) throws OXException {
+        if (!generateFlag(category).equals(rule.getFlag())) {
+            throw MailCategoriesRuleEngineExceptionCodes.INVALID_RULE.create();
+        }
+        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
+        if (ruleEngine == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
+        }
+        ruleEngine.setRule(session, rule);
+    }
+
+    private void removeRule(Session session, String category) throws OXException {
+        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
+        if (ruleEngine == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
+        }
+        ruleEngine.removeRule(session, generateFlag(category));
+    }
+
+    private MailCategoryRule getRule(Session session, String category) throws OXException {
+        MailCategoriesRuleEngine ruleEngine = Services.getService(MailCategoriesRuleEngine.class);
+        if (ruleEngine == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailCategoriesRuleEngine.class.getSimpleName());
+        }
+        return ruleEngine.getRule(session, generateFlag(category));
+    }
+
+    private SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
+        if (!rule.hasSubRules()) {
+            return new HeaderTerm(rule.getHeader(), rule.getValue());
+        }
+
+        SearchTerm<?> result = null;
+        if (rule.isAND()) {
+            for (MailCategoryRule subRule : rule.getSubRules()) {
+                result = result == null ? getSearchTerm(subRule) : new ANDTerm(result, getSearchTerm(subRule));
+            }
+        } else {
+            for (MailCategoryRule subRule : rule.getSubRules()) {
+                result = result == null ? getSearchTerm(subRule) : new ORTerm(result, getSearchTerm(subRule));
+            }
+        }
+        return result;
     }
 
 }

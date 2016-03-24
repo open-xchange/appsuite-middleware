@@ -47,40 +47,31 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.mailfilter;
+package com.openexchange.mail.categories;
 
-import javax.security.auth.Subject;
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.exception.OXException;
-import com.openexchange.mail.categories.impl.osgi.Services;
-import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
-import com.openexchange.session.Session;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailFilterUtility}
+ * {@link MailCategoriesExceptionStrings}
  *
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailFilterUtility {
+public class MailCategoriesExceptionStrings implements LocalizableStrings {
+    
+    
+    // The user category %1$s already exists.
+    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
 
-    /**
-     * Initializes a new {@link MailFilterUtility}.
-     */
-    private MailFilterUtility() {
-        super();
-    }
+    // The user category %1$s does not exist.
+    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
 
-    public static Credentials getCredentials(Session session) throws OXException {
-        ConfigurationService config = Services.getService(ConfigurationService.class);
-        String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        String loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
-        String password = session.getPassword();
-        int userId = session.getUserId();
-        int contextId = session.getContextId();
-        Subject subject = (Subject) session.getParameter("kerberosSubject");
-        return new Credentials(loginName, password, userId, contextId, null, subject);
-    }
+    // Invalid configuration: %1$s
+    public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
 
+    // The required service %1$s is temporary not available. Please try again later.
+    public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
+
+    // Unable to create category. Missing parameter %1$s.
+    public static final String MISSING_PARAMETER = "Unable to create category. Missing parameter %1$s.";
 }

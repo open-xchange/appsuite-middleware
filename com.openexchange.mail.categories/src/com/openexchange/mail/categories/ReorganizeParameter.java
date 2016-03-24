@@ -47,57 +47,71 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import java.util.LinkedList;
+import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link RemoveAction}
+ * {@link ReorganizeParameter} - The parameter to control whether re-organize should be performed or not.
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "category", description = "The category identifier"),
-}, responseDescription = "Response: If successfull a JSON response, otherwise an exception")
-public class RemoveAction extends AbstractCategoriesAction {
+public class ReorganizeParameter {
+
+    private static final ReorganizeParameter DONT_REORGANIZE = new ReorganizeParameter(false);
 
     /**
-     * Initializes a new {@link SwitchAction}.
+     * Gets the parameter instance for given flag.
+     *
+     * @param reorganize <code>true</code> if re-organize is supposed to be performed; otherwise <code>false</code>
+     * @return
      */
-    public RemoveAction(ServiceLookup services) {
-        super(services);
+    public static ReorganizeParameter getParameterFor(boolean reorganize) {
+        return reorganize ? new ReorganizeParameter(true) : DONT_REORGANIZE;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        String category = requestData.getParameter("category");
-        if (Strings.isEmpty(category)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("category");
-        }
+    // ----------------------------------------------------------------------------------------------------------------------------
 
-        MailCategoriesConfigService categoriesService = services.getService(MailCategoriesConfigService.class);
-        if (categoriesService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
-        }
+    private final boolean reorganize;
+    private final List<OXException> warnings;
 
-        categoriesService.removeUserCategory(category, session);
-        return new AJAXRequestResult(new JSONObject(2).put("success", true));
+    /**
+     * Initializes a new {@link ReorganizeParameter}.
+     */
+    private ReorganizeParameter(boolean reorganize) {
+        super();
+        this.reorganize = reorganize;
+        this.warnings = reorganize ? new LinkedList<OXException>() : null;
+    }
+
+    /**
+     * Checks whether re-organize is supposed to be performed.
+     *
+     * @return <code>true</code> to re-organize; otherwise <code>false</code>
+     */
+    public boolean isReorganize() {
+        return reorganize;
+    }
+
+    /**
+     * Gets the optional collection to add possible warnings to.
+     *
+     * @return The collection of warnings or <code>null</code>
+     */
+    public List<OXException> getWarnings() {
+        return warnings;
+    }
+
+    /**
+     * Checks if this instance has warnings.
+     *
+     * @return <code>true</code> for warnings; otherwise <code>false</code>
+     */
+    public boolean hasWarnings() {
+        return null != warnings && !warnings.isEmpty();
     }
 
 }

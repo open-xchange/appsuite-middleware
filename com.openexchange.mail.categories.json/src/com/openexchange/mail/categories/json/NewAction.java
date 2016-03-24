@@ -49,22 +49,19 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.config.cascade.ConfigView;
-import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoryConfig;
+import com.openexchange.mail.categories.ReorganizeParameter;
+import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
@@ -74,6 +71,7 @@ import com.openexchange.tools.session.ServerSession;
  * {@link NewAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
 @Action(method = RequestMethod.PUT, name = "new", description = "Creates a new mail user category.", parameters = {
@@ -92,49 +90,43 @@ public class NewAction extends AbstractCategoriesAction {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-
-        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
-        if (viewFactory == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getSimpleName());
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+        MailCategoriesConfigService mailCategoriesService = services.getService(MailCategoriesConfigService.class);
+        if (mailCategoriesService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
         }
-        ConfigView view = viewFactory.getView(requestData.getSession().getUserId(), requestData.getSession().getContextId());
-        Boolean enabled = view.get(MailCategoriesConstants.MAIL_CATEGORIES_USER_SWITCH, Boolean.class);
-        if (null == enabled || !enabled.booleanValue()) {
+
+        if (!mailCategoriesService.isAllowedToCreateUserCategories(session)) {
             throw AjaxExceptionCodes.DISABLED_ACTION.create("new");
         }
 
         String category = requestData.getParameter("category");
         String name = requestData.getParameter("name");
-
-        // Create category
-        MailCategoriesConfigService mailCategoriesService = services.getService(MailCategoriesConfigService.class);
-        if (mailCategoriesService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
-        }
         String flag = mailCategoriesService.generateFlag(category);
 
         // Check for filter description
-        Map<String, Object> filterDesc = null;
+        MailCategoryRule rule = null;
         {
             Object data = requestData.getData();
             if (data instanceof JSONObject) {
-                filterDesc = ((JSONObject) data).asMap();
+                try {
+                    rule = MailCategoryRuleParser.parseJSON((JSONObject) data, flag);
+                } catch (JSONException e) {
+                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                }
             }
         }
 
         // Check for re-organize flag
         boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
+        ReorganizeParameter reorganizeParameter = ReorganizeParameter.getParameterFor(reorganize);
 
-        // Warnings
-        List<OXException> warnings = new LinkedList<OXException>();
-
-        mailCategoriesService.addUserCategory(category, flag, name, filterDesc, reorganize, warnings, session);
+        mailCategoriesService.addUserCategory(category, flag, name, rule, reorganizeParameter, session);
 
         MailCategoryConfig config = mailCategoriesService.getConfigByCategory(session, category);
         AJAXRequestResult result = new AJAXRequestResult(config, "mailCategoriesConfig");
-        if (!warnings.isEmpty()) {
-            result.addWarnings(warnings);
+        if (reorganizeParameter.hasWarnings()) {
+            result.addWarnings(reorganizeParameter.getWarnings());
         }
         return result;
     }

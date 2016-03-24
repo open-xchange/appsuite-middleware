@@ -47,19 +47,32 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories.ruleengine;
 
-import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link ResultStrings}
+ * {@link MailCategoriesRuleEngineExceptionStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class ResultStrings implements LocalizableStrings {
+public class MailCategoriesRuleEngineExceptionStrings {
 
-    // Category successfully deleted
-    public static final String SUCCESSFULLY_DELETED = "Category successfully deleted";
+    /**
+     * Prevent instantiation
+     */
+    private MailCategoriesRuleEngineExceptionStrings() {}
+
+    // Exception while setting rule: %1$s
+    public static final String UNABLE_TO_SET_RULE = "Exception while setting rule: %1$s";
+
+    // Exception while removing rule: %1$s
+    public static final String UNABLE_TO_REMOVE_RULE = "Exception while removing rule: %1$s";
+
+    // Unable to retrieve rule.
+    public static final String UNABLE_TO_RETRIEVE_RULE = "Unable to retrieve rule.";
+
+    // The given rule is not valid.
+    public static final String INVALID_RULE = "The given rule is not valid.";
 
 }

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.mailfilter;
+package com.openexchange.mail.categories;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,26 +56,46 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link MailCategoriesFilterExceptionCodes}
+ * {@link MailCategoriesExceptionCodes}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public enum MailCategoriesFilterExceptionCodes implements DisplayableOXExceptionCode {
+public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
+    
+    /**
+     * The user category %1$s already exists.
+     */
+    USER_CATEGORY_ALREADY_EXISTS("The user category %1$s already exists.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_ALREADY_EXISTS),
 
     /**
-     * Reorganizing of mails failed. Please try again later.
+     * The user category %1$s does not exist.
      */
-    UNABLE_TO_ORGANIZE("Reorganizing of mails failed. Please try again later.", CATEGORY_TRY_AGAIN, 1, MailCategoriesFilterExceptionStrings.UNABLE_TO_ORGANIZE),
+    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST),
 
     /**
-     * Unable to parse TestCommand.
+     * Invalid configuration: %1$s
      */
-    UNABLE_TO_PARSE_TEST_COMMAND("Unable to parse TestCommand.", CATEGORY_ERROR, 2),
+    INVALID_CONFIGURATION("Invalid configuration: %1$s", CATEGORY_USER_INPUT, 3, MailCategoriesExceptionStrings.INVALID_CONFIGURATION),
+
+    /**
+     * A JSON error occurred: %1$s
+     */
+    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 4, null),
+
+    /**
+     * The required service %1$s is temporary not available. Please try again later.
+     */
+    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 5, MailCategoriesExceptionStrings.SERVICE_UNAVAILABLE_MSG),
+    
+    /**
+     * Unable to create category. Missing parameter %1$s.
+     */
+    MISSING_PARAMETER("Unable to create category. Missing parameter %1$s.", Category.CATEGORY_USER_INPUT, 6, MailCategoriesExceptionStrings.MISSING_PARAMETER),
 
     ;
 
-    private static final String PREFIX = "ORGANIZE";
+    private static final String PREFIX = "CATEGORIES";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
@@ -117,7 +137,7 @@ public enum MailCategoriesFilterExceptionCodes implements DisplayableOXException
      * @param category category.
      * @param number number.
      */
-    private MailCategoriesFilterExceptionCodes(final String message, final Category category, final int number) {
+    private MailCategoriesExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
     }
 
@@ -129,7 +149,7 @@ public enum MailCategoriesFilterExceptionCodes implements DisplayableOXException
      * @param number
      * @param displayMessage
      */
-    private MailCategoriesFilterExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
+    private MailCategoriesExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = number;
@@ -198,4 +218,7 @@ public enum MailCategoriesFilterExceptionCodes implements DisplayableOXException
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
+
+
+
 }

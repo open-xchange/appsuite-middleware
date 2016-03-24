@@ -66,6 +66,7 @@ import com.openexchange.session.Session;
  * {@link MailCategoriesOrganizer} is a helper class to reorganize a mail folder
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
 public class MailCategoriesOrganizer {
@@ -92,9 +93,7 @@ public class MailCategoriesOrganizer {
             String mailIds[] = new String[messages.length];
             for (int i = messages.length; i-- > 0;) {
                 MailMessage message = messages[i];
-                if (null != message) {
-                    mailIds[i] = message.getMailId();
-                }
+                mailIds[i] = null == message ? null : message.getMailId();
             }
             messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
         } finally {

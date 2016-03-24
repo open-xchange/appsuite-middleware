@@ -47,31 +47,19 @@
  *
  */
 
-package com.openexchange.mail.categories.impl;
+package com.openexchange.mail.categories.impl.mailfilter;
 
 import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link MailCategoriesExceptionStrings}
+ * {@link MailCategoriesOrganizeExceptionStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesExceptionStrings implements LocalizableStrings {
-    
-    
-    // The user category %1$s already exists.
-    public static final String USER_CATEGORY_ALREADY_EXISTS = "The user category %1$s already exists.";
+public class MailCategoriesOrganizeExceptionStrings implements LocalizableStrings {
 
-    // The user category %1$s does not exist.
-    public static final String USER_CATEGORY_DOES_NOT_EXIST = "The user category %1$s does not exist.";
+    // Reorganizing of mails failed. Please try again later.
+    public static final String UNABLE_TO_ORGANIZE = "Reorganizing of mails failed. Please try again later.";
 
-    // Invalid configuration: %1$s
-    public static final String INVALID_CONFIGURATION = "Invalid configuration: %1$s";
-
-    // The required service %1$s is temporary not available. Please try again later.
-    public static final String SERVICE_UNAVAILABLE_MSG = "The required service %1$s is temporary not available. Please try again later.";
-
-    // Unable to create category. Missing parameter %1$s.
-    public static final String MISSING_PARAMETER = "Unable to create category. Missing parameter %1$s.";
 }

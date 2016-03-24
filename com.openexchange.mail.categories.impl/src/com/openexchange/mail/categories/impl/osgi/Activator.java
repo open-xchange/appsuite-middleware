@@ -53,7 +53,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
-import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -66,14 +66,20 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailFilterService.class };
+        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class };
     }
 
     @Override
     protected void startBundle() throws Exception {
-        Services.setServiceLookup(this.context);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
+        Services.setServiceLookup(this);
+        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl(this));
 
+    }
+
+    @Override
+    protected void stopBundle() throws Exception {
+        super.stopBundle();
+        Services.setServiceLookup(null);
     }
 
 }

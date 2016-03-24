@@ -47,57 +47,90 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories.ruleengine;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
-import com.openexchange.exception.OXException;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * {@link RemoveAction}
+ * {@link MailCategoryRule}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "category", description = "The category identifier"),
-}, responseDescription = "Response: If successfull a JSON response, otherwise an exception")
-public class RemoveAction extends AbstractCategoriesAction {
+public class MailCategoryRule {
+
+    private final String flag;
+    private boolean hasSubRules;
+    private List<MailCategoryRule> subRules;
+    private boolean isAND;
+    private String header;
+    private String value;
 
     /**
-     * Initializes a new {@link SwitchAction}.
+     * Initializes a new {@link MailCategoryRule} with subrules.
+     *
+     * @param flag The mail flag
+     * @param isAND A flag indicating if the subrules are AND connected or not.
      */
-    public RemoveAction(ServiceLookup services) {
-        super(services);
+    public MailCategoryRule(String flag, boolean isAND) {
+        super();
+        this.isAND = isAND;
+        this.flag = flag;
     }
 
-    @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
-        String category = requestData.getParameter("category");
-        if (Strings.isEmpty(category)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("category");
+    /**
+     * Initializes a new {@link MailCategoryRule} as a single rule.
+     *
+     * @param header The header field name
+     * @param value The value of the header field.
+     * @param flag The mail flag
+     */
+    public MailCategoryRule(String header, String value, String flag) {
+        super();
+        this.header = header;
+        this.value = value;
+        this.flag = flag;
+    }
+
+    public String getFlag() {
+        return flag;
+    }
+
+    public boolean hasSubRules() {
+        return hasSubRules;
+    }
+
+    public List<MailCategoryRule> getSubRules() {
+        return subRules;
+    }
+
+    public boolean isAND() {
+        return isAND;
+    }
+
+    public String getHeader() {
+        return header;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    /**
+     * Add a subrule to this rule.
+     *
+     * @param subRule The subrule
+     */
+    public void addSubRule(MailCategoryRule subRule) {
+        if (this.subRules == null) {
+            subRules = new ArrayList<>();
+            subRules.add(subRule);
+            hasSubRules = true;
+        } else {
+            subRules.add(subRule);
         }
 
-        MailCategoriesConfigService categoriesService = services.getService(MailCategoriesConfigService.class);
-        if (categoriesService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
-        }
-
-        categoriesService.removeUserCategory(category, session);
-        return new AJAXRequestResult(new JSONObject(2).put("success", true));
     }
 
 }

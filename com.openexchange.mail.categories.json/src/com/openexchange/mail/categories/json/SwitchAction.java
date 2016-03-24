@@ -92,7 +92,7 @@ public class SwitchAction extends AbstractCategoriesAction {
 
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }

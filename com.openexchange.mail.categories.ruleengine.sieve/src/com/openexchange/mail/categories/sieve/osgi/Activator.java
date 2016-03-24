@@ -47,19 +47,38 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.mailfilter;
+package com.openexchange.mail.categories.sieve.osgi;
 
-import com.openexchange.i18n.LocalizableStrings;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
+import com.openexchange.mail.categories.sieve.SieveMailCategoriesRuleEngine;
+import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.osgi.HousekeepingActivator;
 
 /**
- * {@link MailCategoriesFilterExceptionStrings}
+ * {@link Activator}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class MailCategoriesFilterExceptionStrings implements LocalizableStrings {
+public class Activator extends HousekeepingActivator {
 
-    // Reorganizing of mails failed. Please try again later.
-    public static final String UNABLE_TO_ORGANIZE = "Reorganizing of mails failed. Please try again later.";
+    /**
+     * Initializes a new {@link Activator}.
+     */
+    public Activator() {
+        super();
+    }
+
+    @Override
+    protected void startBundle() throws Exception {
+        registerService(MailCategoriesRuleEngine.class, new SieveMailCategoriesRuleEngine(this));
+    }
+
+    @Override
+    protected Class<?>[] getNeededServices() {
+        return new Class[] { MailFilterService.class, ConfigurationService.class };
+    }
 
 }

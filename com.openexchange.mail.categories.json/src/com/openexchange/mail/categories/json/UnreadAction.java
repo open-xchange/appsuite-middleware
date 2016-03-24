@@ -92,7 +92,7 @@ public class UnreadAction extends AbstractCategoriesAction {
     }
 
     @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
@@ -117,25 +117,21 @@ public class UnreadAction extends AbstractCategoriesAction {
             mailAccess.connect();
 
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            try {
-                SearchTerm<?> searchTerm = null;
+            SearchTerm<?> searchTerm = null;
 
-                // General case
-                searchTerm = new UserFlagTerm(flags, false);
-                int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
-                resultObject.put("General", unread);
+            // General case
+            searchTerm = new UserFlagTerm(flags, false);
+            int unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+            resultObject.put("General", unread);
 
-                for (MailCategoryConfig category : categories) {
-                    if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
-                        searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
-                    } else {
-                        searchTerm = new UserFlagTerm(category.getFlag(), true);
-                    }
-                    unread = messageStorage.getUnreadCount("INBOX", searchTerm);
-                    resultObject.put(category.getCategory(), unread);
+            for (MailCategoryConfig category : categories) {
+                if (unkeywords != null && unkeywords.length != 0 && categoriesConfigService.isSystemCategory(category.getCategory(), session)) {
+                    searchTerm = new ANDTerm(new UserFlagTerm(category.getFlag(), true), new UserFlagTerm(unkeywords, false));
+                } else {
+                    searchTerm = new UserFlagTerm(category.getFlag(), true);
                 }
-            } catch (JSONException e) {
-                throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+                unread = messageStorage.getUnreadCount("INBOX", searchTerm);
+                resultObject.put(category.getCategory(), unread);
             }
 
             return new AJAXRequestResult(resultObject, "json");

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.impl;
+package com.openexchange.mail.categories.ruleengine;
 
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
@@ -56,46 +56,36 @@ import com.openexchange.exception.OXExceptionFactory;
 import com.openexchange.exception.OXExceptionStrings;
 
 /**
- * {@link MailCategoriesExceptionCodes}
+ * {@link MailCategoriesRuleEngineExceptionCodes}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
-    
-    /**
-     * The user category %1$s already exists.
-     */
-    USER_CATEGORY_ALREADY_EXISTS("The user category %1$s already exists.", CATEGORY_USER_INPUT, 1, MailCategoriesExceptionStrings.USER_CATEGORY_ALREADY_EXISTS),
+public enum MailCategoriesRuleEngineExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * The user category %1$s does not exist.
+     * Exception while setting rule: %1$s
      */
-    USER_CATEGORY_DOES_NOT_EXIST("The user category %1$s does not exist.", CATEGORY_USER_INPUT, 2, MailCategoriesExceptionStrings.USER_CATEGORY_DOES_NOT_EXIST),
+    UNABLE_TO_SET_RULE("Exception while setting rule: %1$s", CATEGORY_ERROR, 1, MailCategoriesRuleEngineExceptionStrings.UNABLE_TO_SET_RULE),
 
     /**
-     * Invalid configuration: %1$s
+     * Exception while removing rule: %1$s
      */
-    INVALID_CONFIGURATION("Invalid configuration: %1$s", CATEGORY_USER_INPUT, 3, MailCategoriesExceptionStrings.INVALID_CONFIGURATION),
+    UNABLE_TO_REMOVE_RULE("Exception while removing rule: %1$s", CATEGORY_ERROR, 2, MailCategoriesRuleEngineExceptionStrings.UNABLE_TO_REMOVE_RULE),
 
     /**
-     * A JSON error occurred: %1$s
+     * Unable to retrieve rule.
      */
-    JSON_ERROR("A JSON error occurred: %1$s", CATEGORY_ERROR, 4, null),
+    UNABLE_TO_RETRIEVE_RULE("Unable to retrieve rule.", CATEGORY_ERROR, 3, MailCategoriesRuleEngineExceptionStrings.UNABLE_TO_RETRIEVE_RULE),
 
     /**
-     * The required service %1$s is temporary not available. Please try again later.
+     * The given rule is not valid.
      */
-    SERVICE_UNAVAILABLE("The required service %1$s is temporary not available. Please try again later.", Category.CATEGORY_TRY_AGAIN, 5, MailCategoriesExceptionStrings.SERVICE_UNAVAILABLE_MSG),
-    
-    /**
-     * Unable to create category. Missing parameter %1$s.
-     */
-    MISSING_PARAMETER("Unable to create category. Missing parameter %1$s.", Category.CATEGORY_USER_INPUT, 6, MailCategoriesExceptionStrings.MISSING_PARAMETER),
+    INVALID_RULE("The given rule is not valid.", CATEGORY_USER_INPUT, 4, MailCategoriesRuleEngineExceptionStrings.INVALID_RULE),
 
     ;
 
-    private static final String PREFIX = "CATEGORIES";
+    private static final String PREFIX = "CATRULES";
 
     /**
      * Checks if specified {@code OXException}'s prefix is equal to this {@code OXExceptionCode} enumeration.
@@ -137,7 +127,7 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
      * @param category category.
      * @param number number.
      */
-    private MailCategoriesExceptionCodes(final String message, final Category category, final int number) {
+    private MailCategoriesRuleEngineExceptionCodes(final String message, final Category category, final int number) {
         this(message, category, number, null);
     }
 
@@ -149,7 +139,7 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
      * @param number
      * @param displayMessage
      */
-    private MailCategoriesExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
+    private MailCategoriesRuleEngineExceptionCodes(final String message, final Category category, final int number, final String displayMessage) {
         this.message = message;
         this.category = category;
         this.number = number;
@@ -218,7 +208,6 @@ public enum MailCategoriesExceptionCodes implements DisplayableOXExceptionCode {
     public OXException create(final Throwable cause, final Object... args) {
         return OXExceptionFactory.getInstance().create(this, cause, args);
     }
-
 
 
 }

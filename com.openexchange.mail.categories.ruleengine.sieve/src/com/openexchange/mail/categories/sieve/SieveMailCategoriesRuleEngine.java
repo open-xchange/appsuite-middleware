@@ -1,0 +1,257 @@
+/*
+ *
+ *    OPEN-XCHANGE legal information
+ *
+ *    All intellectual property rights in the Software are protected by
+ *    international copyright laws.
+ *
+ *
+ *    In some countries OX, OX Open-Xchange, open xchange and OXtender
+ *    as well as the corresponding Logos OX Open-Xchange and OX are registered
+ *    trademarks of the OX Software GmbH group of companies.
+ *    The use of the Logos is not covered by the GNU General Public License.
+ *    Instead, you are allowed to use these Logos according to the terms and
+ *    conditions of the Creative Commons License, Version 2.5, Attribution,
+ *    Non-commercial, ShareAlike, and the interpretation of the term
+ *    Non-commercial applicable to the aforementioned license is published
+ *    on the web site http://www.open-xchange.com/EN/legal/index.html.
+ *
+ *    Please make sure that third-party modules and libraries are used
+ *    according to their respective licenses.
+ *
+ *    Any modifications to this package must retain all copyright notices
+ *    of the original copyright holder(s) for the original code used.
+ *
+ *    After any such modifications, the original and derivative code shall remain
+ *    under the copyright of the copyright holder(s) and/or original author(s)per
+ *    the Attribution and Assignment Agreement that can be located at
+ *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
+ *    given Attribution for the derivative code and a license granting use.
+ *
+ *     Copyright (C) 2016-2020 OX Software GmbH
+ *     Mail: info@open-xchange.com
+ *
+ *
+ *     This program is free software; you can redistribute it and/or modify it
+ *     under the terms of the GNU General Public License, Version 2 as published
+ *     by the Free Software Foundation.
+ *
+ *     This program is distributed in the hope that it will be useful, but
+ *     WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ *     or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *     for more details.
+ *
+ *     You should have received a copy of the GNU General Public License along
+ *     with this program; if not, write to the Free Software Foundation, Inc., 59
+ *     Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+ */
+
+package com.openexchange.mail.categories.sieve;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import javax.security.auth.Subject;
+import org.apache.jsieve.SieveException;
+import org.apache.jsieve.TagArgument;
+import org.apache.jsieve.parser.generated.Token;
+import com.openexchange.config.ConfigurationService;
+import com.openexchange.exception.OXException;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.jsieve.commands.Command;
+import com.openexchange.jsieve.commands.IfCommand;
+import com.openexchange.jsieve.commands.Rule;
+import com.openexchange.jsieve.commands.RuleComment;
+import com.openexchange.jsieve.commands.TestCommand;
+import com.openexchange.jsieve.commands.TestCommand.Commands;
+import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
+import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngineExceptionCodes;
+import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
+import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.MailFilterProperties;
+import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.server.ServiceLookup;
+import com.openexchange.session.Session;
+
+/**
+ * {@link SieveMailCategoriesRuleEngine}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
+ */
+public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
+
+    private final ServiceLookup services;
+
+    /**
+     * Initializes a new {@link SieveMailCategoriesRuleEngine}.
+     */
+    public SieveMailCategoriesRuleEngine(ServiceLookup services) {
+        super();
+        this.services = services;
+    }
+
+    @Override
+    public void setRule(Session session, MailCategoryRule rule) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Rule oldRule = null;
+        Credentials creds = getCredentials(session);
+        try {
+
+            List<Rule> rules = mailFilterService.listRules(creds, "category");
+            for (Rule tmpRule : rules) {
+                if (tmpRule.getRuleComment().getRulename().equals(rule.getFlag())) {
+                    oldRule = tmpRule;
+                    break;
+                }
+            }
+
+            Rule newRule = mailCategoryRule2SieveRule(rule);
+
+            if (oldRule != null) {
+                mailFilterService.updateFilterRule(creds, newRule, oldRule.getUniqueId());
+            } else {
+                mailFilterService.createFilterRule(creds, newRule);
+                mailFilterService.reorderRules(creds, new int[0]);
+            }
+        } catch (SieveException e) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_SET_RULE.create(e.getMessage());
+        }
+    }
+
+    @Override
+    public void removeRule(Session session, String flag) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Credentials creds = getCredentials(session);
+        List<Rule> rules = mailFilterService.listRules(creds, "category");
+        for (Rule rule : rules) {
+            if (rule.getRuleComment().getRulename().equals(flag)) {
+                mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
+                break;
+            }
+        }
+
+    }
+
+    private Credentials getCredentials(Session session) {
+        String loginName;
+        {
+            ConfigurationService config = services.getService(ConfigurationService.class);
+            String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+            loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
+        }
+        Subject subject = (Subject) session.getParameter("kerberosSubject");
+        return new Credentials(loginName, session.getPassword(), session.getUserId(), session.getContextId(), null, subject);
+    }
+
+    private Rule mailCategoryRule2SieveRule(MailCategoryRule rule) throws SieveException {
+        ArrayList<Object> argList = new ArrayList<>();
+        List<String> flagList = new ArrayList<>();
+        flagList.add(rule.getFlag());
+        argList.add(flagList);
+        ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
+        IfCommand ifCommand = new IfCommand(getCommand(rule), Collections.singletonList(addFlagAction));
+        ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
+        int linenumber = 0;
+        boolean commented = false;
+        RuleComment comment = new RuleComment(rule.getFlag());
+        comment.setFlags(Collections.singletonList("category"));
+        Rule result = new Rule(comment, commands, linenumber, commented);
+        return result;
+    }
+
+    private TestCommand getCommand(MailCategoryRule rule) throws SieveException {
+        if (!rule.hasSubRules()) {
+            List<Object> argList = new ArrayList<Object>(4);
+            argList.add(createTagArgument("contains"));
+            argList.add(Collections.singletonList(rule.getHeader()));
+            argList.add(Collections.singletonList(rule.getValue()));
+            return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
+        }
+
+        ArrayList<TestCommand> subCommands = new ArrayList<>(rule.getSubRules().size());
+        for (MailCategoryRule subTest : rule.getSubRules()) {
+            subCommands.add(getCommand(subTest));
+        }
+        return rule.isAND() ? new TestCommand(Commands.ALLOF, new ArrayList<>(), subCommands) : new TestCommand(Commands.ANYOF, new ArrayList<>(), subCommands);
+    }
+
+    /**
+     * Creates a {@link TagArgument} from the specified string value
+     *
+     * @param value The value of the {@link TagArgument}
+     * @return the {@link TagArgument}
+     */
+    private static TagArgument createTagArgument(String value) {
+        Token token = new Token();
+        token.image = ":" + value;
+        return new TagArgument(token);
+    }
+
+    @Override
+    public MailCategoryRule getRule(Session session, String flag) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+
+        Credentials creds = getCredentials(session);
+
+        List<Rule> rules = mailFilterService.listRules(creds, "category");
+        for (Rule tmpRule : rules) {
+            if (tmpRule.getRuleComment().getRulename().equals(flag)) {
+                return parseRule(tmpRule.getTestCommand(), flag);
+            }
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private MailCategoryRule parseRule(TestCommand command, String flag) throws OXException {
+        if (command == null) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        }
+
+        if (command.getTestCommands() != null && !command.getTestCommands().isEmpty()) {
+            boolean isAND = false;
+            // Any or All test
+            if (command.getCommand().equals(Commands.ALLOF)) {
+                isAND = true;
+            }
+            MailCategoryRule result = new MailCategoryRule(flag, isAND);
+            for (TestCommand com : command.getTestCommands()) {
+                result.addSubRule(parseRule(com, flag));
+            }
+            return result;
+        }
+
+        // header command
+        if (!command.getCommand().equals(Commands.HEADER)) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        }
+
+        List<Object> argList = command.getArguments();
+        if (argList == null || argList.isEmpty() || argList.size() != 3) {
+            throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
+        }
+
+        List<String> list = (List<String>) argList.get(1);
+        String header = list.get(0);
+        list = (List<String>) argList.get(2);
+        String value = list.get(0);
+        return new MailCategoryRule(header, value, flag);
+
+    }
+
+}
