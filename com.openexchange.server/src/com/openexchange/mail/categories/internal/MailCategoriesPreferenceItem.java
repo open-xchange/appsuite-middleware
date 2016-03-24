@@ -103,7 +103,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
             public void getValue(Session session, Context ctx, User user, UserConfiguration userConfig, Setting setting) throws OXException {
                 JSONObject item = new JSONObject(3);
                 try {
-                    MailCategoriesConfigService service = lookupService.getService(MailCategoriesConfigService.class);
+                    MailCategoriesConfigService service = lookupService.getOptionalService(MailCategoriesConfigService.class);
                     if (service != null) {
                         boolean mailCategoriesEnabled = service.isEnabled(session);
                         item.put("tabbed_inbox", mailCategoriesEnabled);

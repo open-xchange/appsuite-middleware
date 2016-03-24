@@ -338,7 +338,7 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                             searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
 
                             // Check if mail categories are enabled
-                            MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getService(MailCategoriesConfigService.class);
+                            MailCategoriesConfigService categoriesService = MailJSONActivator.SERVICES.get().getOptionalService(MailCategoriesConfigService.class);
                             if (categoriesService != null && categoriesService.isEnabled(req.getSession()) && category_filter != null && !category_filter.equals("none")) {
 
                                 if (category_filter.equals("General")) {
