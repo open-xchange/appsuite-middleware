@@ -47,55 +47,61 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories.impl.mailfilter;
 
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.documentation.RequestMethod;
-import com.openexchange.documentation.annotations.Action;
-import com.openexchange.documentation.annotations.Parameter;
+import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
 import com.openexchange.exception.OXException;
-import com.openexchange.i18n.tools.StringHelper;
-import com.openexchange.java.Strings;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.session.ServerSession;
+import com.openexchange.mail.FullnameArgument;
+import com.openexchange.mail.IndexRange;
+import com.openexchange.mail.MailField;
+import com.openexchange.mail.OrderDirection;
+import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailMessageStorage;
+import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.dataobjects.MailMessage;
+import com.openexchange.mail.search.SearchTerm;
+import com.openexchange.session.Session;
 
 /**
- * {@link RemoveAction}
+ * {@link MailCategoriesOrganizer} is a helper class to reorganize a mail folder
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.GET, name = "remove", description = "Removes a mail user category.", parameters = {
-    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
-    @Parameter(name = "category", description = "The category identifier"),
-}, responseDescription = "Response: If successfull a success message, otherwise an exception")
-public class RemoveAction extends AbstractCategoriesAction {
+public class MailCategoriesOrganizer {
 
     /**
-     * Initializes a new {@link SwitchAction}.
+     * Searches for all mails in the given folder which matches the given search term and set or unset the given flag to them
+     *
+     * @param session The user session
+     * @param folder The folder id
+     * @param searchTerm The search term
+     * @param flag The flag
+     * @param set <code>true</code> to enable the flags; otherwise <code>false</code>
+     * @throws OXException If retrieving or setting fails
      */
-    public RemoveAction(ServiceLookup services) {
-        super(services);
-    }
+    public static void organizeExistingMails(Session session, String folder, SearchTerm<?> searchTerm, String flag, boolean set) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            FullnameArgument fa = prepareMailFolderParam(folder);
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
 
-    @Override
-    public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        String category = requestData.getParameter("category");
-        if (Strings.isEmpty(category)) {
-            throw AjaxExceptionCodes.MISSING_PARAMETER.create("category");
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            MailMessage[] messages = messageStorage.searchMessages(fa.getFullName(), IndexRange.NULL, null, OrderDirection.ASC, searchTerm, new MailField[] { MailField.ID });
+            String mailIds[] = new String[messages.length];
+            for (int i = messages.length; i-- > 0;) {
+                MailMessage message = messages[i];
+                if (null != message) {
+                    mailIds[i] = message.getMailId();
+                }
+            }
+            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
+        } finally {
+            if (mailAccess != null) {
+                mailAccess.close();
+            }
         }
-        MailCategoriesConfigService categoriesService = services.getService(MailCategoriesConfigService.class);
-        if (categoriesService == null) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class);
-        }
-
-        categoriesService.removeUserCategory(category, session);
-        String result = StringHelper.valueOf(getLocaleFor(session)).getString(ResultStrings.SUCCESSFULLY_DELETED);
-        return new AJAXRequestResult(result);
     }
 
 }

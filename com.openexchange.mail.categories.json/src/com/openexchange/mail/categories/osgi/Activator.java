@@ -58,7 +58,6 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.json.MailCategoriesActionFactory;
 import com.openexchange.mail.categories.json.MailCategoriesConfigConverter;
-import com.openexchange.mailfilter.MailFilterService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.user.UserService;
 
@@ -72,7 +71,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MailCategoriesConfigService.class, ConfigurationService.class, MailFilterService.class, ConfigViewFactory.class, UserService.class };
+        return new Class[] { MailCategoriesConfigService.class, ConfigurationService.class, ConfigViewFactory.class, UserService.class };
     }
 
     @Override

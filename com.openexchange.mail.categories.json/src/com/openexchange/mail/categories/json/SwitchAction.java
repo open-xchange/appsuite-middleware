@@ -96,7 +96,7 @@ public class SwitchAction extends AbstractCategoriesAction {
         if (!session.getUserPermissionBits().hasWebMail()) {
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail/categories");
         }
-        MailCategoriesConfigService categoriesConfigService = LOOKUP.getService(MailCategoriesConfigService.class);
+        MailCategoriesConfigService categoriesConfigService = services.getService(MailCategoriesConfigService.class);
         Validate.notNull(categoriesConfigService);
 
         if (!categoriesConfigService.isEnabled(session)) {

@@ -47,7 +47,7 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mail.categories.impl.mailfilter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -56,9 +56,6 @@ import java.util.Map;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
 import org.apache.jsieve.parser.generated.Token;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.ActionCommand;
 import com.openexchange.jsieve.commands.Command;
@@ -67,7 +64,6 @@ import com.openexchange.jsieve.commands.Rule;
 import com.openexchange.jsieve.commands.RuleComment;
 import com.openexchange.jsieve.commands.TestCommand;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
-import com.openexchange.mail.categories.exception.MailCategoriesJSONExceptionCodes;
 import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
@@ -95,44 +91,45 @@ public class SearchableMailFilterRule {
 
     /**
      * Initializes a new {@link SearchableMailFilterRule}.
-     * 
-     * @throws JSONException
+     *
+     * @param filterDesc The mail filter description
+     * @throws OXException If initialization fails
      */
     @SuppressWarnings("unchecked")
-    public SearchableMailFilterRule(JSONObject json, String flag) throws JSONException {
+    public SearchableMailFilterRule(Map<String, Object> filterDesc, String flag) throws OXException {
         super();
         this.flag = flag;
-        if (json.has(SUBTESTS_STR)) {
-            JSONArray array = (JSONArray) json.get(SUBTESTS_STR);
-            if (json.has(OPERATOR_STR)) {
-                if (json.getString(OPERATOR_STR).equalsIgnoreCase("and")) {
+        if (filterDesc.containsKey(SUBTESTS_STR)) {
+            if (filterDesc.containsKey(OPERATOR_STR)) {
+                if ("and".equalsIgnoreCase((String) filterDesc.get(OPERATOR_STR))) {
                     isAND = true;
                 }
             }
-            for (Object subObject : array.asList()) {
+
+            for (Object subObject : (List<Object>) filterDesc.get(SUBTESTS_STR)) {
                 if (!(subObject instanceof Map)) {
-                    throw new JSONException("conditions element is not a JSONObject!");
-                } else {
-                    JSONObject subTest = new JSONObject((Map<String, ? extends Object>) subObject);
-                    addSubRule(new SearchableMailFilterRule(subTest, flag));
+                    throw OXException.general("conditions element is not a structure!");
                 }
+
+                Map<String, Object> subTest = (Map<String, Object>) subObject;
+                addSubRule(new SearchableMailFilterRule(subTest, flag));
             }
             return;
         }
-        this.header = json.getString(HEADER_STR);
-        this.value = json.getString(VALUE_STR);
+        this.header = (String) filterDesc.get(HEADER_STR);
+        this.value = (String) filterDesc.get(VALUE_STR);
 
     }
 
     /**
      * Initializes a new {@link SearchableMailFilterRule}.
-     * 
+     *
      * @param oldRule
      */
     @SuppressWarnings("unchecked")
     public SearchableMailFilterRule(TestCommand command, String flag) throws OXException {
         if (command == null) {
-            throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+            throw MailCategoriesFilterExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
         }
         this.flag = flag;
 
@@ -149,12 +146,12 @@ public class SearchableMailFilterRule {
         } else {
             // header command
             if (!command.getCommand().equals(Commands.HEADER)) {
-                throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+                throw MailCategoriesFilterExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
             }
 
             List<Object> argList = command.getArguments();
             if (argList == null || argList.isEmpty() || argList.size() != 3) {
-                throw MailCategoriesJSONExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
+                throw MailCategoriesFilterExceptionCodes.UNABLE_TO_PARSE_TEST_COMMAND.create();
             }
 
             List<String> list = (List<String>) argList.get(1);
@@ -176,29 +173,29 @@ public class SearchableMailFilterRule {
     }
 
     public SearchTerm<?> getSearchTerm() {
-        if (hasSubRules) {
-            SearchTerm<?> result = null;
-            if (isAND) {
-                for (SearchableMailFilterRule subRule : subRules) {
-                    if (result == null) {
-                        result = subRule.getSearchTerm();
-                    } else {
-                        result = new ANDTerm(result, subRule.getSearchTerm());
-                    }
-                }
-            } else {
-                for (SearchableMailFilterRule subRule : subRules) {
-                    if (result == null) {
-                        result = subRule.getSearchTerm();
-                    } else {
-                        result = new ORTerm(result, subRule.getSearchTerm());
-                    }
-                }
-            }
-            return result;
-        } else {
+        if (!hasSubRules) {
             return new HeaderTerm(header, value);
         }
+
+        SearchTerm<?> result = null;
+        if (isAND) {
+            for (SearchableMailFilterRule subRule : subRules) {
+                if (result == null) {
+                    result = subRule.getSearchTerm();
+                } else {
+                    result = new ANDTerm(result, subRule.getSearchTerm());
+                }
+            }
+        } else {
+            for (SearchableMailFilterRule subRule : subRules) {
+                if (result == null) {
+                    result = subRule.getSearchTerm();
+                } else {
+                    result = new ORTerm(result, subRule.getSearchTerm());
+                }
+            }
+        }
+        return result;
     }
 
     public Rule getRule() throws SieveException {
@@ -218,18 +215,7 @@ public class SearchableMailFilterRule {
     }
 
     private TestCommand getCommand() throws SieveException {
-        if (hasSubRules) {
-
-            ArrayList<TestCommand> subCommands = new ArrayList<>(subRules.size());
-            for (SearchableMailFilterRule subtest : subRules) {
-                subCommands.add(subtest.getCommand());
-            }
-            if (isAND) {
-                return new TestCommand(Commands.ALLOF, new ArrayList<>(), subCommands);
-            } else {
-                return new TestCommand(Commands.ANYOF, new ArrayList<>(), subCommands);
-            }
-        } else {
+        if (!hasSubRules) {
 
             final List<Object> argList = new ArrayList<Object>();
             argList.add(createTagArgument("contains"));
@@ -237,11 +223,17 @@ public class SearchableMailFilterRule {
             argList.add(Collections.singletonList(value));
             return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
         }
+
+        ArrayList<TestCommand> subCommands = new ArrayList<>(subRules.size());
+        for (SearchableMailFilterRule subtest : subRules) {
+            subCommands.add(subtest.getCommand());
+        }
+        return isAND ? new TestCommand(Commands.ALLOF, new ArrayList<>(), subCommands) : new TestCommand(Commands.ANYOF, new ArrayList<>(), subCommands);
     }
 
     /**
      * Creates a {@link TagArgument} from the specified string value
-     * 
+     *
      * @param value The value of the {@link TagArgument}
      * @return the {@link TagArgument}
      */

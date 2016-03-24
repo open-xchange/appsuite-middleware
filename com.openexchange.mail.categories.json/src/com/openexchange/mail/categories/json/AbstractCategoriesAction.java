@@ -50,13 +50,8 @@
 package com.openexchange.mail.categories.json;
 
 import java.util.Locale;
-import javax.security.auth.Subject;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.config.ConfigurationService;
 import com.openexchange.exception.OXException;
-import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterProperties;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.tools.session.ServerSession;
@@ -70,31 +65,14 @@ import com.openexchange.user.UserService;
  */
 public abstract class AbstractCategoriesAction implements AJAXActionService {
 
-    protected final ServiceLookup LOOKUP;
+    protected final ServiceLookup services;
 
     /**
      * Initializes a new {@link SwitchAction}.
      */
     public AbstractCategoriesAction(ServiceLookup services) {
         super();
-        LOOKUP = services;
-
-    }
-
-    protected Credentials getCredentials(Session session, AJAXRequestData request) throws OXException {
-        final ConfigurationService config = LOOKUP.getService(ConfigurationService.class);
-        final String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
-        final String loginName;
-        if (MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc)) {
-            loginName = session.getLogin();
-        } else {
-            loginName = session.getLoginName();
-        }
-        final String password = session.getPassword();
-        final int userId = session.getUserId();
-        final int contextId = session.getContextId();
-        final Subject subject = (Subject) session.getParameter("kerberosSubject");
-        return new Credentials(loginName, password, userId, contextId, null, subject);
+        this.services = services;
     }
 
     /**
@@ -112,7 +90,7 @@ public abstract class AbstractCategoriesAction implements AJAXActionService {
         if (session instanceof ServerSession) {
             return ((ServerSession) session).getUser().getLocale();
         }
-        UserService service = LOOKUP.getService(UserService.class);
+        UserService service = services.getService(UserService.class);
         return service.getUser(session.getUserId(), session.getContextId()).getLocale();
     }
 

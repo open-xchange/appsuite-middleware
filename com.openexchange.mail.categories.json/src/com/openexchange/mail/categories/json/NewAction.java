@@ -49,13 +49,12 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.Collections;
-import org.apache.jsieve.SieveException;
-import org.json.JSONException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
@@ -63,21 +62,12 @@ import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
-import com.openexchange.jsieve.commands.Rule;
-import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoryConfig;
-import com.openexchange.mail.categories.exception.MailCategoriesJSONExceptionCodes;
-import com.openexchange.mail.categories.util.MailCategoriesOrganizer;
-import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.mailfilter.Credentials;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
-import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -94,8 +84,6 @@ import com.openexchange.tools.session.ServerSession;
 }, responseDescription = "Response: The newly created category configuration")
 public class NewAction extends AbstractCategoriesAction {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NewAction.class);
-
     /**
      * Initializes a new {@link SwitchAction}.
      */
@@ -106,7 +94,7 @@ public class NewAction extends AbstractCategoriesAction {
     @Override
     public AJAXRequestResult perform(AJAXRequestData requestData, ServerSession session) throws OXException {
 
-        ConfigViewFactory viewFactory = LOOKUP.getService(ConfigViewFactory.class);
+        ConfigViewFactory viewFactory = services.getService(ConfigViewFactory.class);
         if (viewFactory == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ConfigViewFactory.class.getSimpleName());
         }
@@ -119,60 +107,34 @@ public class NewAction extends AbstractCategoriesAction {
         String category = requestData.getParameter("category");
         String name = requestData.getParameter("name");
 
-        // create category
-        MailCategoriesConfigService mailCategoriesService = LOOKUP.getService(MailCategoriesConfigService.class);
+        // Create category
+        MailCategoriesConfigService mailCategoriesService = services.getService(MailCategoriesConfigService.class);
         if (mailCategoriesService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
         }
         String flag = mailCategoriesService.generateFlag(category);
-        mailCategoriesService.addUserCategory(category, flag, name, session);
 
-        // create filter
-        SearchableMailFilterRule mailFilterTest = null;
-        try {
+        // Check for filter description
+        Map<String, Object> filterDesc = null;
+        {
             Object data = requestData.getData();
-            Rule rule = null;
-            if (data != null && data instanceof JSONObject) {
-                try {
-                    mailFilterTest = new SearchableMailFilterRule((JSONObject) data, flag);
-                } catch (JSONException e) {
-                    throw OXJSONExceptionCodes.JSON_READ_ERROR.create(data.toString());
-                }
-                rule = mailFilterTest.getRule();
-                final MailFilterService mailFilterService = LOOKUP.getService(MailFilterService.class);
-                Credentials creds = getCredentials(session, requestData);
-                int uid = mailFilterService.createFilterRule(creds, rule);
-                mailFilterService.reorderRules(creds, new int[0]);
-                LOG.debug("Created sieve filter '" + category + "' for user " + session.getUserId() + " in context " + session.getContextId() + " with id " + uid);
+            if (data instanceof JSONObject) {
+                filterDesc = ((JSONObject) data).asMap();
             }
-        } catch (OXException | SieveException e) {
-            // undo category creation
-            mailCategoriesService.removeUserCategory(category, session);
-            throw (e instanceof OXException) ? (OXException) e : MailFilterExceptionCode.handleSieveException((SieveException) e);
         }
-        // reorganize if necessary
-        OXException warning = null;
-        try {
-            String reorganize = requestData.getParameter("reorganize");
-            if (reorganize != null && Boolean.parseBoolean(reorganize)) {
-                SearchTerm<?> searchTerm = null;
-                if (mailFilterTest != null) {
-                    searchTerm = mailFilterTest.getSearchTerm();
-                    FullnameArgument fa = new FullnameArgument("INBOX");
-                    if (searchTerm != null) {
-                        MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
-                    }
-                } else {
-                    warning = MailCategoriesJSONExceptionCodes.UNABLE_TO_ORGANIZE.create();
-                }
-            }
-        } catch (OXException e) {
-            warning = MailCategoriesJSONExceptionCodes.UNABLE_TO_ORGANIZE.create();
-        }
+
+        // Check for re-organize flag
+        boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
+
+        // Warnings
+        List<OXException> warnings = new LinkedList<OXException>();
+
+        mailCategoriesService.addUserCategory(category, flag, name, filterDesc, reorganize, warnings, session);
+
         MailCategoryConfig config = mailCategoriesService.getConfigByCategory(session, category);
         AJAXRequestResult result = new AJAXRequestResult(config, "mailCategoriesConfig");
-        if (warning != null) {
-            result.addWarnings(Collections.singleton(warning));
+        if (!warnings.isEmpty()) {
+            result.addWarnings(warnings);
         }
         return result;
     }

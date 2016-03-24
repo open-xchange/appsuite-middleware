@@ -50,6 +50,7 @@
 package com.openexchange.mail.categories;
 
 import java.util.List;
+import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.session.Session;
 
@@ -63,17 +64,17 @@ public interface MailCategoriesConfigService {
 
     /**
      * Retrieves all category configurations for the given user
-     * 
+     *
      * @param session The user session
      * @param onlyEnabled If true only returns enabled or forced configurations
      * @return A list of category configurations
      * @throws OXException
      */
     public List<MailCategoryConfig> getAllCategories(Session session, boolean onlyEnabled) throws OXException;
-    
+
     /**
      * Retrieves all category flags for the given user
-     * 
+     *
      * @param session The user session
      * @param onlyEnabled If true only returns enabled or forced categories
      * @param onlyUserCategories If true only returns user categories
@@ -84,27 +85,27 @@ public interface MailCategoriesConfigService {
 
     /**
      * Retrieves the system category configuration for the given user
-     * 
+     *
      * @param session The user session
      * @param category The category identifier
      * @return The category configuration or null if no configuration exists for given category
      * @throws OXException
      */
     public MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException;
-    
+
     /**
      * Retrieves the user category configuration for the given user
-     * 
+     *
      * @param session The user session
      * @param category The category identifier
      * @return The category configuration or null if no configuration exists for given category
      * @throws OXException
      */
     public MailCategoryConfig getUserConfigByCategory(Session session, String category) throws OXException;
-    
+
     /**
      * Retrieves the category flag for the given user
-     * 
+     *
      * @param session The user session
      * @param category The category identifier
      * @return The category flag or null if no configuration exists for given category
@@ -114,59 +115,65 @@ public interface MailCategoriesConfigService {
 
     /**
      * Retrieves the category configuration with the given flag for the given user
-     * 
+     *
      * @param session The user session
      * @param flag The flag of the configuration
      * @return The category configuration or null if no configuration exists with given flag
      * @throws OXException
      */
     public MailCategoryConfig getConfigByFlag(Session session, String flag) throws OXException;
-    
+
     /**
      * Activates or deactivates given categories
-     * 
+     *
      * @param categories An array of category identifiers
      * @param enable Boolean flag indicating activation or deactivation
      * @param session The user session
      * @return A list of all category configurations
-     * @throws OXException 
+     * @throws OXException
      */
     public List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException;
-    
+
     /**
      * Tests if the given category is a system category or not
-     * 
+     *
      * @param category The category identifier
      * @param session The user session
      * @return true if the category is a system category, false otherwise
-     * @throws OXException 
+     * @throws OXException
      */
     public boolean isSystemCategory(String category, Session session) throws OXException;
-    
+
     /**
-     * Adds a new user category 
-     * 
+     * Adds a new user category.
+     *
      * @param category The category identifier
      * @param flag The category flag
      * @param name The category name
+     * @param filterDesc The filter description
+     * @param reorganize Whether to re-organize existing messages
+     * @param warnings A collection to add possible warnings to
      * @param session The user session
      * @throws OXException if a category with this identifier already exists
      */
-    public void addUserCategory(String category, String flag, String name, Session session) throws OXException;
-    
+    public void addUserCategory(String category, String flag, String name, Map<String, Object> filterDesc, boolean reorganize, List<OXException> warnings, Session session) throws OXException;
+
     /**
      * Updates the name of a user category
-     * 
+     *
      * @param category The category identifier
      * @param name The category name
+     * @param filterDesc The filter description
+     * @param reorganize Whether to re-organize existing messages
+     * @param warnings A collection to add possible warnings to
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
      */
-    public void updateUserCategoryName(String category, String name, Session session) throws OXException;
+    public void updateUserCategory(String category, String name, Map<String, Object> filterDesc, boolean reorganize, List<OXException> warnings, Session session) throws OXException;
 
     /**
      * Removes a user category
-     * 
+     *
      * @param category The category identifier
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
@@ -175,16 +182,16 @@ public interface MailCategoriesConfigService {
 
     /**
      * Returns true if the mail categories feature is enabled for the given user
-     * 
+     *
      * @param session The user session
      * @return true if enabled, otherwise false
      * @throws OXException
      */
     public boolean isEnabled(Session session) throws OXException;
-    
+
     /**
      * Returns true if the given user is allowed to create own categories
-     * 
+     *
      * @param session The user session
      * @return true if allowed, otherwise false
      * @throws OXException
@@ -193,7 +200,7 @@ public interface MailCategoriesConfigService {
 
     /**
      * Generates a flag for the given category
-     * 
+     *
      * @param category The category identifier
      * @return The flag
      */

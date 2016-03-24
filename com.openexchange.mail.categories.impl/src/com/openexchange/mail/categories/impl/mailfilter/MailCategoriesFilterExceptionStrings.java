@@ -47,33 +47,19 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.osgi;
+package com.openexchange.mail.categories.impl.mailfilter;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.i18n.LocalizableStrings;
 
 /**
- * {@link Activator}
+ * {@link MailCategoriesFilterExceptionStrings}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class MailCategoriesFilterExceptionStrings implements LocalizableStrings {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailFilterService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this.context);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
-
-    }
+    // Reorganizing of mails failed. Please try again later.
+    public static final String UNABLE_TO_ORGANIZE = "Reorganizing of mails failed. Please try again later.";
 
 }

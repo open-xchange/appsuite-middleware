@@ -47,33 +47,40 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.osgi;
+package com.openexchange.mail.categories.impl.mailfilter;
 
+import javax.security.auth.Subject;
 import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
-import com.openexchange.mailfilter.MailFilterService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.mail.categories.impl.osgi.Services;
+import com.openexchange.mailfilter.Credentials;
+import com.openexchange.mailfilter.MailFilterProperties;
+import com.openexchange.session.Session;
 
 /**
- * {@link Activator}
+ * {@link MailFilterUtility}
  *
- * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class MailFilterUtility {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailFilterService.class };
+    /**
+     * Initializes a new {@link MailFilterUtility}.
+     */
+    private MailFilterUtility() {
+        super();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this.context);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
-
+    public static Credentials getCredentials(Session session) throws OXException {
+        ConfigurationService config = Services.getService(ConfigurationService.class);
+        String credsrc = config.getProperty(MailFilterProperties.Values.SIEVE_CREDSRC.property);
+        String loginName = MailFilterProperties.CredSrc.SESSION_FULL_LOGIN.name.equals(credsrc) ? session.getLogin() : session.getLoginName();
+        String password = session.getPassword();
+        int userId = session.getUserId();
+        int contextId = session.getContextId();
+        Subject subject = (Subject) session.getParameter("kerberosSubject");
+        return new Credentials(loginName, password, userId, contextId, null, subject);
     }
 
 }

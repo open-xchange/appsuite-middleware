@@ -5,15 +5,39 @@ Bundle-SymbolicName: com.openexchange.mail.categories.impl
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.config.cascade,
+Import-Package: com.openexchange.config,
+ com.openexchange.config.cascade,
  com.openexchange.exception,
  com.openexchange.i18n,
  com.openexchange.java,
+ com.openexchange.jsieve.commands,
+ com.openexchange.mail,
+ com.openexchange.mail.api,
  com.openexchange.mail.categories,
+ com.openexchange.mail.dataobjects,
+ com.openexchange.mail.search,
+ com.openexchange.mail.utils,
+ com.openexchange.mailfilter,
+ com.openexchange.mailfilter.exceptions,
  com.openexchange.osgi,
+ com.openexchange.server,
  com.openexchange.session,
- org.apache.commons.lang;version="2.6.0",
- org.json,
- org.osgi.framework
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ javax.net,
+ javax.net.ssl,
+ javax.security.auth,
+ javax.security.auth.callback,
+ javax.security.auth.kerberos,
+ javax.security.auth.login,
+ javax.security.auth.spi,
+ javax.security.auth.x500,
+ javax.security.cert,
+ org.apache.commons.lang,
+ org.apache.jsieve,
+ org.apache.jsieve.parser.generated,
+ org.osgi.framework,
+ org.slf4j
 Bundle-Activator: com.openexchange.mail.categories.impl.osgi.Activator
 
