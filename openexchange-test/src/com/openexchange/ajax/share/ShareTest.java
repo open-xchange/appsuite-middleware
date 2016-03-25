@@ -297,7 +297,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param module The module to get the public root folder identifier for
      * @return The public root folder identifier
      */
-    protected int getPublicRoot(int module) {
+    protected static int getPublicRoot(int module) {
         return FolderObject.INFOSTORE == module ? FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID : FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
     }
 
@@ -331,6 +331,29 @@ public abstract class ShareTest extends AbstractAJAXSession {
         InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;
+    }
+
+    protected static FolderObject insertPublicFolder(AJAXClient client, EnumAPI api, int module) throws Exception {
+        return insertPublicFolder(client, api, module, getPublicRoot(module), randomUID());
+    }
+
+    protected static FolderObject insertPublicFolder(AJAXClient client, EnumAPI api, int module, int parent, String name) throws Exception {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setParentFolderID(parent);
+        folder.setModule(module);
+        folder.setType(FolderObject.PUBLIC);
+        OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(client.getValues().getUserId());
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
+        return insertFolder(client, api, folder);
     }
 
     /**

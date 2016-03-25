@@ -47,14 +47,12 @@
  *
  */
 
-package com.openexchange.mailfilter.json.ajax.json.mapper.parser.test;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser;
 
 import java.util.HashMap;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.jsieve.commands.TestCommand;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.exceptions.CommandParserExceptionCodes;
 
 /**
@@ -87,6 +85,16 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
     /*
      * (non-Javadoc)
      * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#unregister(java.lang.String)
+     */
+    @Override
+    public void unregister(String key) {
+        parsers.remove(key);
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
      * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#get(java.lang.String)
      */
     @Override
@@ -96,5 +104,15 @@ public class TestCommandParserRegistry implements CommandParserRegistry<TestComm
             throw CommandParserExceptionCodes.UNKNOWN_PARSER.create(key);
         }
         return parser;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserRegistry#purge()
+     */
+    @Override
+    public void purge() {
+        parsers.clear();
     }
 }

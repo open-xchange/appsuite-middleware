@@ -465,11 +465,9 @@ public class DriveServiceImpl implements DriveService {
          */
         Set<String> capabilities = new HashSet<String>();
         CapabilitySet capabilitySet = DriveServiceLookup.getService(CapabilityService.class).getCapabilities(session.getServerSession());
-        if (session.getServerSession().getUserConfiguration().hasFullSharedFolderAccess()) {
-            capabilities.add("invite_users_and_groups");
-            if (capabilitySet.contains("invite_guests")) {
-                capabilities.add("invite_guests");
-            }
+        capabilities.add("invite_users_and_groups");
+        if (capabilitySet.contains("invite_guests")) {
+            capabilities.add("invite_guests");
         }
         if (capabilitySet.contains("share_links")) {
             capabilities.add("share_links");

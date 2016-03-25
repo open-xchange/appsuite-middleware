@@ -473,11 +473,13 @@ public final class OXFolderUtility {
             GuestInfo guestInfo = null == shareService || permission.isGroupPermission() ? null : shareService.getGuestInfo(session, permission.getEntity());
             if (null == guestInfo) {
                 /*
-                 * internal permission entity, check "readcreatesharedfolders" flag
+                 * internal permission entity, check "readcreatesharedfolders" / "editpublicfolders" flag for non-infostore PIM folders
                  */
-                if (permission.getEntity() != session.getUserId() && false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() &&
-                    (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
-                    throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(I(session.getUserId()), I(folder.getObjectID()), I(session.getContextId()));
+                if (permission.getEntity() != session.getUserId() && FolderObject.INFOSTORE != folder.getModule()) {
+                    if (FolderObject.PRIVATE == folder.getType() && false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() ||
+                        FolderObject.PUBLIC == folder.getType() && false == serverSession.getUserConfiguration().hasFullPublicFolderAccess()) {
+                        throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(I(session.getUserId()), I(folder.getObjectID()), I(session.getContextId()));
+                    }
                 }
             } else if (RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
                 /*
@@ -524,11 +526,13 @@ public final class OXFolderUtility {
                 }
             } else if (RecipientType.GUEST.equals(guestInfo.getRecipientType())) {
                 /*
-                 * external guest permission entity, check "readcreatesharedfolders" flag and "invite_guests" capability
+                 * external guest permission entity, check "readcreatesharedfolders" / "editpublicfolders" flag for non-infostore PIM folders,
+                 * but require "invite_guests" capability for all folders
                  */
                 if (permission.getEntity() != session.getUserId()) {
-                    if (false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() &&
-                        (FolderObject.PRIVATE == folder.getType() || FolderObject.INFOSTORE == folder.getModule())) {
+                    if (FolderObject.INFOSTORE != folder.getModule() && (
+                        FolderObject.PRIVATE == folder.getType() && false == serverSession.getUserConfiguration().hasFullSharedFolderAccess() ||
+                        FolderObject.PUBLIC == folder.getType() && false == serverSession.getUserConfiguration().hasFullPublicFolderAccess())) {
                         throw OXFolderExceptionCode.SHARE_FORBIDDEN.create(I(session.getUserId()), I(folder.getObjectID()), I(session.getContextId()));
                     }
                     if (null == capabilities || false == capabilities.contains("invite_guests")) {

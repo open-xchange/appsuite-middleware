@@ -179,16 +179,16 @@ public class Bug43270Test extends ShareTest {
         inviteGuestToFolder(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
-    public void testDontInviteGuestToFolderWithInviteGuests() throws Exception {
-        inviteGuestToFolder(false, Boolean.FALSE, Boolean.TRUE, "FLD-0072");
+    public void testInviteGuestToFolderWithInviteGuests() throws Exception {
+        inviteGuestToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     public void testDontInviteGuestToFolderWithShareLinks() throws Exception {
         inviteGuestToFolder(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
-    public void testDontInviteGuestToFolderWithInviteGuestsAndShareLinks() throws Exception {
-        inviteGuestToFolder(false, Boolean.TRUE, Boolean.TRUE, "FLD-0072");
+    public void testInviteGuestToFolderWithInviteGuestsAndShareLinks() throws Exception {
+        inviteGuestToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     public void testDontInviteGuestToFolderWithShareLinksAndReadCreateSharedFolders() throws Exception {
@@ -207,16 +207,16 @@ public class Bug43270Test extends ShareTest {
         inviteGuestToFile(false, Boolean.FALSE, Boolean.FALSE, "SHR-0019");
     }
 
-    public void testDontInviteGuestToFileWithInviteGuests() throws Exception {
-        inviteGuestToFile(false, Boolean.FALSE, Boolean.TRUE, "IFO-2104");
+    public void testInviteGuestToFileWithInviteGuests() throws Exception {
+        inviteGuestToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
     public void testDontInviteGuestToFileWithShareLinks() throws Exception {
         inviteGuestToFile(false, Boolean.TRUE, Boolean.FALSE, "SHR-0019");
     }
 
-    public void testDontInviteGuestToFileWithInviteGuestsAndShareLinks() throws Exception {
-        inviteGuestToFile(false, Boolean.TRUE, Boolean.TRUE, "IFO-2104");
+    public void testInviteGuestToFileWithInviteGuestsAndShareLinks() throws Exception {
+        inviteGuestToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     public void testDontInviteGuestToFileWithShareLinksAndReadCreateSharedFiles() throws Exception {
@@ -235,20 +235,20 @@ public class Bug43270Test extends ShareTest {
         inviteUserToFolder(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
-    public void testDontInviteUserToFolder() throws Exception {
-        inviteUserToFolder(false, Boolean.FALSE, Boolean.FALSE, "FLD-0072");
+    public void testInviteUserToFolder() throws Exception {
+        inviteUserToFolder(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
-    public void testDontInviteUserToFolderWithInviteGuests() throws Exception {
-        inviteUserToFolder(false, Boolean.FALSE, Boolean.TRUE, "FLD-0072");
+    public void testInviteUserToFolderWithInviteGuests() throws Exception {
+        inviteUserToFolder(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
-    public void testDontInviteUserToFolderWithShareLinks() throws Exception {
-        inviteUserToFolder(false, Boolean.TRUE, Boolean.FALSE, "FLD-0072");
+    public void testInviteUserToFolderWithShareLinks() throws Exception {
+        inviteUserToFolder(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
-    public void testDontInviteUserToFolderWithInviteGuestsAndShareLinks() throws Exception {
-        inviteUserToFolder(false, Boolean.TRUE, Boolean.TRUE, "FLD-0072");
+    public void testInviteUserToFolderWithInviteGuestsAndShareLinks() throws Exception {
+        inviteUserToFolder(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     public void testInviteUserToFileWithReadCreateSharedFolders() throws Exception {
@@ -263,20 +263,20 @@ public class Bug43270Test extends ShareTest {
         inviteUserToFile(true, Boolean.TRUE, Boolean.TRUE, null);
     }
 
-    public void testDontInviteUserToFile() throws Exception {
-        inviteUserToFile(false, Boolean.FALSE, Boolean.FALSE, "IFO-2104");
+    public void testInviteUserToFile() throws Exception {
+        inviteUserToFile(false, Boolean.FALSE, Boolean.FALSE, null);
     }
 
-    public void testDontInviteUserToFileWithInviteGuests() throws Exception {
-        inviteUserToFile(false, Boolean.FALSE, Boolean.TRUE, "IFO-2104");
+    public void testInviteUserToFileWithInviteGuests() throws Exception {
+        inviteUserToFile(false, Boolean.FALSE, Boolean.TRUE, null);
     }
 
-    public void testDontInviteUserToFileWithShareLinks() throws Exception {
-        inviteUserToFile(false, Boolean.TRUE, Boolean.FALSE, "IFO-2104");
+    public void testInviteUserToFileWithShareLinks() throws Exception {
+        inviteUserToFile(false, Boolean.TRUE, Boolean.FALSE, null);
     }
 
-    public void testDontInviteUserToFileWithInviteGuestsAndShareLinks() throws Exception {
-        inviteUserToFile(false, Boolean.TRUE, Boolean.TRUE, "IFO-2104");
+    public void testInviteUserToFileWithInviteGuestsAndShareLinks() throws Exception {
+        inviteUserToFile(false, Boolean.TRUE, Boolean.TRUE, null);
     }
 
     private void setReadCreateSharedFolders(boolean readCreateSharedFolders) throws Exception {
