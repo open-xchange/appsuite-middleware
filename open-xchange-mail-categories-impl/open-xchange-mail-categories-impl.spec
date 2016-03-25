@@ -13,7 +13,8 @@ BuildRequires: java7-devel
 %else
 BuildRequires: java-devel >= 1.7.0
 %endif
-BuildRequires: open-xchange-core >= @OXVERSION@, open-xchange-mailfilter >= @OXVERSION@
+BuildRequires: open-xchange-core >= @OXVERSION@
+BuildRequires: open-xchange-mailfilter >= @OXVERSION@
 Version:       @OXVERSION@
 %define        ox_release 4
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
@@ -24,7 +25,8 @@ URL:           http://www.open-xchange.com/
 Source:        %{name}_%{version}.orig.tar.bz2
 Summary:       Open Xchange Mail Categories Plugin
 Autoreqprov:   no
-Requires:      open-xchange-core >= @OXVERSION@, open-xchange-mailfilter >= @OXVERSION@
+Requires:      open-xchange-core >= @OXVERSION@
+Requires:      open-xchange-mailfilter >= @OXVERSION@
 
 %description
 This package offers the possibility to manage system and user categories for mails.
