@@ -6,6 +6,17 @@
 #, fuzzy
 msgid ""
 msgstr ""
+"#-#-#-#-#  backend1.pot (PACKAGE VERSION)  #-#-#-#-#\n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"#-#-#-#-#  backend2.pot (PACKAGE VERSION)  #-#-#-#-#\n"
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
@@ -3420,6 +3431,37 @@ msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.autoconfig/src/com/openexchange/mail/autoconfig/AutoconfigException.java:69
 msgid "The E-Mail address %1$s is invalid."
+msgstr ""
+
+#. Reorganizing of mails failed. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories.impl/src/com/openexchange/mail/categories/impl/mailfilter/MailCategoriesOrganizeExceptionStrings.java:63
+msgid "Reorganizing of mails failed. Please try again later."
+msgstr ""
+
+#. The user category %1$s already exists.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:64
+msgid "The user category %1$s already exists."
+msgstr ""
+
+#. The user category %1$s does not exist.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:67
+msgid "The user category %1$s does not exist."
+msgstr ""
+
+#. Invalid configuration: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:70
+msgid "Invalid configuration: %1$s"
+msgstr ""
+
+#. The required service %1$s is temporary not available. Please try again later.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:73
+msgid ""
+"The required service %1$s is temporary not available. Please try again later."
+msgstr ""
+
+#. Unable to create category. Missing parameter %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:76
+msgid "Unable to create category. Missing parameter %1$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
@@ -7370,6 +7412,17 @@ msgstr ""
 #. The content/body of the message is too big
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:208
 msgid "The content of the mail is too big."
+msgstr ""
+
+#. Invalid parameter value: %1$s
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:211
+msgid "Invalid parameter value: %1$s"
+msgstr ""
+
+#. The flag name %1$s is not valid. Flags may not begin with a leading '\\'.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:214
+msgid ""
+"The flag name %1$s is not valid. Flags may not begin with a leading '\\'."
 msgstr ""
 
 #. *
