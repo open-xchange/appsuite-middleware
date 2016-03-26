@@ -73,7 +73,7 @@ fi
 %config(noreplace) /opt/open-xchange/etc/*
 
 %changelog
-* Thu Mar 24 2016 Markus Wagner <markus.wagner@open-xchange.com>
+* Fri Mar 25 2016 Markus Wagner <markus.wagner@open-xchange.com>
 First candidate for 7.8.1 release
 * Tue Mar 15 2016 Markus Wagner <markus.wagner@open-xchange.com>
 Fifth preview for 7.8.1 release

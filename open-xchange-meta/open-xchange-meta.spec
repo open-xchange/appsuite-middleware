@@ -352,7 +352,7 @@ Authors:
 %doc README.TXT
 
 %changelog
-* Thu Mar 24 2016 Carsten Hoeger <choeger@open-xchange.com>
+* Fri Mar 25 2016 Carsten Hoeger <choeger@open-xchange.com>
 First candidate for 7.8.1 release
 * Tue Mar 15 2016 Carsten Hoeger <choeger@open-xchange.com>
 Fifth preview for 7.8.1 release
