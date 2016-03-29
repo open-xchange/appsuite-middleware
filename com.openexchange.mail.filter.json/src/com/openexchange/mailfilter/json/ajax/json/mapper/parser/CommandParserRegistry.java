@@ -67,6 +67,18 @@ public interface CommandParserRegistry<T> {
     void register(String key, CommandParser<T> parser);
 
     /**
+     * Unregisters the {@link CommandParser} with the specified key
+     * 
+     * @param key The key
+     */
+    void unregister(String key);
+
+    /**
+     * Purges the registry
+     */
+    void purge();
+
+    /**
      * Get the parser registered under the specified key
      * 
      * @param key The key

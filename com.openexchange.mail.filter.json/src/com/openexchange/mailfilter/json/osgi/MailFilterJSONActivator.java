@@ -60,6 +60,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.jsieve.commands.TestCommand.Commands;
 import com.openexchange.mailfilter.MailFilterService;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AddressTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AllOfTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.AnyOfTestCommandParser;
@@ -69,7 +70,6 @@ import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.EnvelopeTes
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.HeaderTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.NotTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.SizeTestCommandParser;
-import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TestCommandParserRegistry;
 import com.openexchange.mailfilter.json.ajax.json.mapper.parser.test.TrueTestCommandParser;
 import com.openexchange.mailfilter.json.ajax.servlet.MailFilterServletInit;
 import com.openexchange.osgi.HousekeepingActivator;
