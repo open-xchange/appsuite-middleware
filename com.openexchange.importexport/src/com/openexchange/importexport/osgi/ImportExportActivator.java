@@ -54,6 +54,7 @@ import com.openexchange.ajax.requesthandler.osgiservice.AJAXModuleActivator;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
+import com.openexchange.contact.similarity.ContactSimilarityService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
@@ -89,6 +90,11 @@ public class ImportExportActivator extends AJAXModuleActivator{
 			VCardService.class
 		};
 	}
+
+    @Override
+    protected Class<?>[] getOptionalServices() {
+        return new Class[] { ContactSimilarityService.class };
+    }
 
 	@Override
 	protected void startBundle() throws Exception {
