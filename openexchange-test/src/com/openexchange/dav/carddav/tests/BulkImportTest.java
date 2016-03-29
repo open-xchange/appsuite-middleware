@@ -175,7 +175,7 @@ public class BulkImportTest extends CardDAVTest {
         node = list.item(1);
         hrefContent = node.getTextContent();
         assertTrue("Response does contain a href, but it shouldn't", hrefContent == null || hrefContent.isEmpty());
-        NodeList noSimilarContacts = xmlDoc.getElementsByTagName("ox:no-similar-contact");
+        NodeList noSimilarContacts = xmlDoc.getElementsByTagName("OX:no-similar-contact");
         assertEquals("Unexpected no-similar-contact count", 1, noSimilarContacts.getLength());
 
         /*

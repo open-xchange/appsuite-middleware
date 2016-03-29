@@ -67,7 +67,7 @@ public class SimilarityException extends OXException {
      */
     private static final long serialVersionUID = -8513856024355900129L;
     
-    private static Namespace OX_NAMESPACE = Namespace.getNamespace("ox", "http://www.open-xchange.org");
+    private static Namespace OX_NAMESPACE = Namespace.getNamespace("OX", "http://www.open-xchange.org");
     private static final String ELEMENT_NAME = "no-similar-contact";
     
     private final String hrefSimilarContact;
