@@ -1,12 +1,11 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
-#
 # , 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: backend\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: \n"
+"POT-Creation-Date: 2016-03-29 08:20+0000\n"
 "PO-Revision-Date: 2016-03-16 18:14+1100\n"
 "Last-Translator: \n"
 "Language-Team: Russian <>\n"
@@ -14,9 +13,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 "X-Generator: Lokalize 1.5\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
 #. The verb "accepted", like "User A has accepted an appointment."
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.calendar/src/com/openexchange/calendar/itip/ContextSensitiveMessages.java:82
@@ -911,8 +910,7 @@ msgstr "Ошибка выполнения. Выберите другой вар�
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:82
 msgid ""
 "Sent quota exceeded. You are only allowed to send 1 SMS in %1$s seconds."
-msgstr ""
-"Превышение квоты: SMS-сообщения могут отправляться один раз в %1$s сек."
+msgstr "Превышение квоты: SMS-сообщения могут отправляться один раз в %1$s сек."
 
 #. The download link is invalid.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.client.onboarding/src/com/openexchange/client/onboarding/OnboardingExceptionMessages.java:85
@@ -1472,8 +1470,7 @@ msgstr "Адрес (доп.)"
 msgid ""
 "No vCard could be found in the supplied file. Please use a valid vCard file "
 "and try again."
-msgstr ""
-"Недействительный файл vCard. Выберите файл с vCard и повторите попытку."
+msgstr "Недействительный файл vCard. Выберите файл с vCard и повторите попытку."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.contact.vcard.impl/src/com/openexchange/contact/vcard/impl/internal/VCardExceptionMessages.java:63
 msgid "Validation failed for property \"%1$s\": %2$s"
@@ -1805,9 +1802,9 @@ msgid ""
 "The maximum number of synchronizable directories (%1$d) is exceeded. Please "
 "remove some directories and try again, or select another root folder."
 msgstr ""
-"Превышено ограничение на максимальное число синхронизируемых каталогов "
-"(%1$d). Удалите часть каталогов и повторите попытку или выберите другую "
-"корневую папку."
+"Превышено ограничение на максимальное число синхронизируемых каталогов (%1$d)"
+". Удалите часть каталогов и повторите попытку или выберите другую корневую "
+"папку."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.drive/src/com/openexchange/drive/DriveExceptionMessages.java:94
 msgid ""
@@ -2032,8 +2029,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:154
 msgid ""
 "Assigning categories to file \"%1$s\" is not supported in account \"%2$s\"."
-msgstr ""
-"Учетная запись «%2$s» не поддерживает выбор категорий для файла «%1$s»."
+msgstr "Учетная запись «%2$s» не поддерживает выбор категорий для файла «%1$s»."
 
 #. The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.file.storage/src/com/openexchange/file/storage/FileStorageExceptionMessages.java:157
@@ -3171,8 +3167,7 @@ msgstr "Число полей поиска (%d) не соответствует 
 msgid ""
 "IMAP search failed due to reason \"%1$s\". Switching to application-based "
 "search"
-msgstr ""
-"Ошибка поиска IMAP: %1$s. Поиск будет выполнен программными средствами."
+msgstr "Ошибка поиска IMAP: %1$s. Поиск будет выполнен программными средствами."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:114
 msgid ""
@@ -3209,8 +3204,8 @@ msgid ""
 "Message move aborted for user %1$s. Source and destination folder are equal "
 "to \"%2$s\""
 msgstr ""
-"Перемещение сообщения для %1$s отменено. Исходная папка совпадает с "
-"конечной : «%2$s»."
+"Перемещение сообщения для %1$s отменено. Исходная папка совпадает с конечной "
+": «%2$s»."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:126
 msgid "IMAP folder read-only check failed"
@@ -3754,8 +3749,7 @@ msgstr "Недопустимая учетная запись. Создайте �
 #. The account "%1$s" is invalid, please recreate it.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:79
 msgid "The account \"%1$s\" is invalid, please recreate it."
-msgstr ""
-"Недействительная учетная запись «%1$s». Создайте учетную запись заново."
+msgstr "Недействительная учетная запись «%1$s». Создайте учетную запись заново."
 
 #. Please provide a display name.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.oauth/src/com/openexchange/oauth/OAuthExceptionMessages.java:82
@@ -3988,8 +3982,7 @@ msgstr "Не удалось изменить флаг %1$s: %2$s"
 msgid ""
 "POP3 search failed due to the following reason: %1$s. Switching to "
 "application-based search"
-msgstr ""
-"Ошибка поиска POP3: %1$s. Поиск будет выполнен программными средствами."
+msgstr "Ошибка поиска POP3: %1$s. Поиск будет выполнен программными средствами."
 
 #. *
 #. * POP3 sort failed due to following reason: %1$s Switching to application-based sorting
@@ -5041,8 +5034,7 @@ msgstr "Вы пытаетесь создать повтор на основе и
 msgid ""
 "Moving an instance of a recurring appointment into another folder is not "
 "allowed."
-msgstr ""
-"Экземпляр повторяющейся встречи не может быть перенесен в другую папку."
+msgstr "Экземпляр повторяющейся встречи не может быть перенесен в другую папку."
 
 #. *
 #. * Moving an appointment with private flag to a shared folder is not allowed.
@@ -5050,8 +5042,7 @@ msgstr ""
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:183
 msgid ""
 "Moving an appointment with private flag to a shared folder is not allowed."
-msgstr ""
-"Не разрешается переносить личную встречу в папку с совместным доступом."
+msgstr "Не разрешается переносить личную встречу в папку с совместным доступом."
 
 #. *
 #. * You can not use different private flags for one element of a recurring appointment.
@@ -5545,8 +5536,8 @@ msgid ""
 "on the recipients computer. There is no guarantee that the recipient has "
 "read or understood the message contents."
 msgstr ""
-"Это уведомление о доставке сообщения с темой «#SUBJECT#» адресату "
-"#RECIPIENT#, #DATE#.\n"
+"Это уведомление о доставке сообщения с темой «#SUBJECT#» адресату #RECIPIENT#"
+", #DATE#.\n"
 "\n"
 "Примечание. Уведомление подтверждает, что сообщение было открыто, но не "
 "гарантирует, что получатель ознакомился с его содержимым."
@@ -7957,8 +7948,7 @@ msgstr "Доступ к почте отключен контекстным ад�
 msgid ""
 "The maximum number of files that may be attached to an E-Mail is exceeded. "
 "Max. is %1$s."
-msgstr ""
-"Вы пытаетесь присоединить слишком большое число файлов. Максимум: %1$s."
+msgstr "Вы пытаетесь присоединить слишком большое число файлов. Максимум: %1$s."
 
 #. The client request is not permitted.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:188
@@ -8214,18 +8204,13 @@ msgstr ""
 #. *
 #. * The message could not be sent due to a mail server temporary failure. Please try again later.
 #.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:193
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:192
 msgid ""
 "The message could not be sent due to a mail server temporary failure. Please "
 "try again later."
 msgstr ""
 "Письмо не было отправлено вследствие временного сбоя почтового сервера. "
 "Повторите попытку позже."
-
-#. Timeout while trying to send to the following recipient: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/mime/MimeMailExceptionMessage.java:196
-msgid "Timeout while trying to send to the following recipient: %1$s"
-msgstr "Истекло время ожидания отправки письма адресату %1$s"
 
 #. Cannot find mail account for user "%2$s".
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mailaccount/MailAccountExceptionStrings.java:62
@@ -8569,8 +8554,7 @@ msgstr "Владелец исходной папки должен иметь а�
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:103
 msgid "You do not have appropriate permissions to share the folder."
-msgstr ""
-"Недостаточно разрешений для предоставления совместного доступа к папке."
+msgstr "Недостаточно разрешений для предоставления совместного доступа к папке."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/tools/oxfolder/OXFolderExceptionMessage.java:104
 msgid "It is not possible to apply the changes due to limited permissions"
@@ -9538,23 +9522,6 @@ msgstr "Ошибка: не удалось отправить письмо на �
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.share/src/com/openexchange/share/notification/ShareNotifyExceptionMessages.java:68
 msgid "An error occurred, we were unable to send out the notification mails."
 msgstr "Ошибка: не удалось отправить уведомления."
-
-#. You have exceeded the maximum number of sms allowed. Please try again after %1$s hours
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:71
-msgid ""
-"You have exceeded the maximum number of sms allowed. Please try again after "
-"%1$s hours"
-msgstr ""
-"Превышено ограничение на максимальное число SMS-сообщений. Повторите попытку "
-"через %1$s час(а)(ов) "
-
-#. SMS limits apply. You can only send one more message in the next %1$s hours
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms.tools/src/com/openexchange/sms/tools/SMSBucketExceptionMessages.java:74
-msgid ""
-"SMS limits apply. You can only send one more message in the next %1$s hours"
-msgstr ""
-"Действуют ограничения на SMS. В течение следующих %1$s часов вы сможете "
-"отправить только одно сообщение."
 
 #. Could not parse phone number %1$s
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.sms/src/com/openexchange/sms/SMSExceptionMessages.java:64
@@ -12072,6 +12039,211 @@ msgstr "UTC"
 #: /var/lib/jenkins/workspace/createPOT/automation/backendI18N/tmp/TimeZones.java:524
 msgid "Zulu"
 msgstr "Зулу"
+
+# Drive Application
+msgid "Drive Application"
+msgstr ""
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr ""
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr ""
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr ""
+
+# Drive App
+msgid "Drive App"
+msgstr ""
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr ""
+
+# Mail App
+msgid "Mail App"
+msgstr ""
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr ""
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr ""
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr ""
+
+# OX Sync
+msgid "OX Sync"
+msgstr ""
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr ""
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr ""
+
+# Updater
+msgid "Updater"
+msgstr ""
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr ""
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr ""
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr ""
+
+# Mail
+msgid "Mail"
+msgstr ""
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr ""
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr ""
+
+# OX Drive Windows Client
+msgid "OX Drive Windows Client"
+msgstr ""
+
+# To use Drive on your device, simply download OX Drive Windows Client
+msgid "To use Drive on your device, simply download OX Drive Windows Client"
+msgstr ""
+
+# eM-Client
+msgid "eM-Client"
+msgstr ""
+
+# To use eM-Client on your device, simply download and install
+msgid "To use eM-Client on your device, simply download and install"
+msgstr ""
+
+# OX Drive
+msgid "OX Drive"
+msgstr ""
+
+# To use Drive on your Mac, simply download OX Drive
+msgid "To use Drive on your Mac, simply download OX Drive"
+msgstr ""
+
+# OX Mail App
+msgid "OX Mail App"
+msgstr ""
+
+# To use Mail on your device, simply download OX Mail App
+msgid "To use Mail on your device, simply download OX Mail App"
+msgstr ""
+
+# OX Drive App
+msgid "OX Drive App"
+msgstr ""
+
+# To use Drive on your device, simply download OX Drive App
+msgid "To use Drive on your device, simply download OX Drive App"
+msgstr ""
+
+# Sync App
+msgid "Sync App"
+msgstr ""
+
+# To use Drive on your device, simply download the App
+msgid "To use Drive on your device, simply download the App"
+msgstr ""
+
+# Calendar + Contacts
+msgid "Calendar + Contacts"
+msgstr ""
+
+# Synchronize your data via Calendar and Addressbook natively on your device
+msgid ""
+"Synchronize your data via Calendar and Addressbook natively on your device"
+msgstr ""
+
+# To manually setup your Calendar & Addressbook accounts, please use the following information
+msgid ""
+"To manually setup your Calendar & Addressbook accounts, please use the "
+"following information"
+msgstr ""
+
+# Updater for Windows Clients
+msgid "Updater for Windows Clients"
+msgstr ""
+
+# Exchange ActiveSync
+msgid "Exchange ActiveSync"
+msgstr ""
+
+# Synchronize your emails, contacts, calendar, and tasks
+msgid "Synchronize your emails, contacts, calendar, and tasks"
+msgstr ""
+
+# eMail
+msgid "eMail"
+msgstr ""
+
+# Use your Apple Mail App to manage your mailbox
+msgid "Use your Apple Mail App to manage your mailbox"
+msgstr ""
+
+# To manually setup your eMail client, please use the following information
+msgid ""
+"To manually setup your eMail client, please use the following information"
+msgstr ""
+
+#~ msgid "Timeout while trying to send to the following recipient: %1$s"
+#~ msgstr "Истекло время ожидания отправки письма адресату %1$s"
+
+#~ msgid ""
+#~ "You have exceeded the maximum number of sms allowed. Please try again after "
+#~ "%1$s hours"
+#~ msgstr ""
+#~ "Превышено ограничение на максимальное число SMS-сообщений. Повторите попытку "
+#~ "через %1$s час(а)(ов) "
+
+#~ msgid ""
+#~ "SMS limits apply. You can only send one more message in the next %1$s hours"
+#~ msgstr ""
+#~ "Действуют ограничения на SMS. В течение следующих %1$s часов вы сможете "
+#~ "отправить только одно сообщение."
 
 #~ msgid "Asia/Riyadh87"
 #~ msgstr "Азия/Эр-Рияд87"
