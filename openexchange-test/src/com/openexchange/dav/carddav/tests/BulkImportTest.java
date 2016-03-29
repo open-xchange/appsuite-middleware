@@ -148,6 +148,10 @@ public class BulkImportTest extends CardDAVTest {
 
         final String vCard = vCard2 + vCard3;
 
+        // Delete existing contacts
+        super.delete(uid);
+        super.delete(uid2);
+
         // Import first contacts (ignore similarity)
         String xmlResponse = super.postVCard(uid, vCard1, 0);
         Document xmlDoc = loadXMLFromString(xmlResponse);
@@ -162,7 +166,7 @@ public class BulkImportTest extends CardDAVTest {
         xmlResponse = super.postVCard(uid, vCard, 1);
         xmlDoc = loadXMLFromString(xmlResponse);
         list = xmlDoc.getElementsByTagName("D:href");
-        assertEquals("Unexpected href count", 2, list.getLength());
+        assertEquals("Unexpected href count", 3, list.getLength());
         node = list.item(0);
         hrefContent = node.getTextContent();
         assertNotNull("Response does not contain a href", hrefContent);

@@ -5,6 +5,8 @@ Bundle-SymbolicName: com.openexchange.contact.similarity
 Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.groupware.contact.helpers,
- com.openexchange.groupware.container
+Import-Package: com.openexchange.exception,
+ com.openexchange.groupware.contact.helpers,
+ com.openexchange.groupware.container,
+ com.openexchange.session
 Export-Package: com.openexchange.contact.similarity

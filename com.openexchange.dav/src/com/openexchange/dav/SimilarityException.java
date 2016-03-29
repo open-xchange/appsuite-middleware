@@ -49,6 +49,7 @@
 
 package com.openexchange.dav;
 
+import static com.openexchange.webdav.protocol.Protocol.DAV_NS;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import com.openexchange.exception.OXException;
@@ -66,7 +67,7 @@ public class SimilarityException extends OXException {
      */
     private static final long serialVersionUID = -8513856024355900129L;
     
-    private static Namespace OX_NAMESPACE = Namespace.getNamespace("ox", "carddav");
+    private static Namespace OX_NAMESPACE = Namespace.getNamespace("ox", "http://www.open-xchange.org");
     private static final String ELEMENT_NAME = "no-similar-contact";
     
     private final String hrefSimilarContact;
@@ -104,8 +105,8 @@ public class SimilarityException extends OXException {
     
     public Element getElement() {
         Element result = new Element(ELEMENT_NAME, getNamespace());
-        result.addContent(new Element("href", getNamespace()).setText(hrefSimilarContact));
-        result.addContent(new Element("uid", getNamespace()).setText(uidNewContact));
+        result.addContent(new Element("href", DAV_NS).setText(hrefSimilarContact));
+        result.addContent(new Element("uid", DAVProtocol.CALENDARSERVER_NS).setText(uidNewContact));
         return result;
     }
 

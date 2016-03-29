@@ -72,7 +72,7 @@ public final class Headers {
     /**
      * max_similarity
      */
-    public static final String MAX_SIMILARITY = "max_similarity";
+    public static final String MAX_SIMILARITY = "X-OX-MAX-SIMILARITY";
 	
 	private Headers() {
 		// prevent instantiation

@@ -190,15 +190,10 @@ public class CardDAVCollection extends CommonFolderCollection<Contact> {
             if (service == null) {
                 throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(ContactSimilarityService.class.getSimpleName());
             }
-            ContactService contactService = this.factory.getContactService();
-            SearchIterator<Contact> existingContacts = contactService.getAllContacts(factory.getSession(), this.getFolder().getID(), service.getContactFields());
-            while (existingContacts.hasNext()) {
-                Contact other = existingContacts.next();
-                float actual = service.getSimilarity(contact, other);
-                if (actual >= maxSimilarity) {
-                    result.setUid(other.getUid());
-                    throw new SimilarityException(constructPathForChildResource(other).toString(), contact.getUid(), HttpServletResponse.SC_CONFLICT);
-                }
+            Contact duplicate = service.getSimilar(factory.getSession(), contact, maxSimilarity);
+            if (duplicate != null) {
+                result.setUid(duplicate.getUid());
+                throw new SimilarityException(constructPathForChildResource(duplicate).toString(), contact.getUid(), HttpServletResponse.SC_CONFLICT);
             }
         }
     }

@@ -86,7 +86,7 @@ public class CardDAVPOSTAction extends POSTAction {
 
     private final GroupwareCarddavFactory factory;
 
-    private static final String MAX_SIMILARITY = "max_similarity";
+    private static final String MAX_SIMILARITY = "X-OX-MAX-SIMILARITY";
 
     /**
      * Initializes a new {@link CardDAVPOSTAction}.

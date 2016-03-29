@@ -49,8 +49,9 @@
 
 package com.openexchange.contact.similarity;
 
-import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.session.Session;
 
 /**
  * {@link ContactSimilarityService}
@@ -61,20 +62,15 @@ import com.openexchange.groupware.container.Contact;
 public interface ContactSimilarityService {
 
     /**
-     * Compares two contacts and calculates the similarity score.
-     * Whereby a similarity of 1 means they are identical and a similarity of 0 means they are completely different.
+     * Tests if there is any contact which is similar to the given contact and retrieves it.
+     * A contact is similar if the similarity score is equal or greater than <code>maxSimilarity</code>.
      * 
-     * @param con1 The first contact
-     * @param con2 The second contact
-     * @return The similarity score. Values: [0,1]
+     * @param session The user session
+     * @param contact The contact
+     * @param maxSimilarity The max similarity score. Values: [0,1]
+     * @return a similar contact or null otherwise
+     * @throws OXException
      */
-    public float getSimilarity(Contact con1, Contact con2);
-
-    /**
-     * Retrieves all contact fields necessary for the similarity check.
-     * 
-     * @return The contact fields
-     */
-    public ContactField[] getContactFields();
+    public Contact getSimilar(Session session, Contact contact, float maxSimilarity) throws OXException;
 
 }
