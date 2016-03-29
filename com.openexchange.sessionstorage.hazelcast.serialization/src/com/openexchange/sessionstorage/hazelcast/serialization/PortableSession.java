@@ -49,18 +49,13 @@
 
 package com.openexchange.sessionstorage.hazelcast.serialization;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.BitSet;
-import java.util.LinkedList;
 import java.util.List;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.lang.SerializationException;
-import org.apache.commons.lang.SerializationUtils;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
@@ -121,10 +116,6 @@ public class PortableSession extends StoredSession implements CustomPortable {
     public static final String PARAMETER_ALT_ID = "altId";
     public static final String PARAMETER_REMOTE_PARAMETER_NAMES = "remoteParameterNames";
     public static final String PARAMETER_REMOTE_PARAMETER_VALUES = "remoteParameterValues";
-    public static final String PARAMETER_SERIALIZABLE_PARAMETER_NAMES = "remoteSerializableParameterNames";
-
-    // Must not contain a colon in any name!
-    private static final String[] PORTABLE_PARAMETERS = new String[] { "kerberosSubject", "kerberosPrincipal" };
 
     /**
      * Initializes a new {@link PortableSession}.
@@ -178,44 +169,38 @@ public class PortableSession extends StoredSession implements CustomPortable {
             writer.writeUTF(PARAMETER_ALT_ID, null == altId ? null : altId.toString());
         }
         {
-            List<String> remoteParameterNames = new LinkedList<String>();
-            remoteParameterNames.addAll(SessionStorageConfiguration.getInstance().getRemoteParameterNames());
-            remoteParameterNames.addAll(Arrays.asList(PORTABLE_PARAMETERS));
-            if (remoteParameterNames.isEmpty()) {
+            List<String> remoteParameterNames = SessionStorageConfiguration.getInstance().getRemoteParameterNames();
+            int size = remoteParameterNames.size();
+            if (size <= 0) {
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                 writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
             } else {
-                StringAppender names = new StringAppender(':');
-                StringAppender values = new StringAppender(':');
-                StringAppender serializableNames = new StringAppender(':');
+                StringAppender names = null;
+                StringAppender values = null;
                 for (String parameterName : remoteParameterNames) {
                     Object value = parameters.get(parameterName);
                     if (null != value) {
                         if (isSerializablePojo(value)) {
                             String sValue = value.toString();
+                            if (null == names) {
+                                int capacity = size << 4;
+                                names = new StringAppender(':', capacity);
+                                values = new StringAppender(':', capacity);
+                            }
                             names.append(parameterName);
                             values.append(getSafeValue(sValue));
-                        } else if (value instanceof Serializable) {
-                            serializableNames.append(parameterName);
-                            byte[] bytes = SerializationUtils.serialize((Serializable) value);
-                            writer.writeByteArray(parameterName, bytes);
                         } else {
                             org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(PortableSession.class);
                             logger.warn("Denied remote parameter for name {}. Seems to be no ordinary Java object.", value.getClass().getName());
                         }
                     }
                 }
-                if (0 == names.length()) {
+                if (null == names || null == values) {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, null);
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, null);
                 } else {
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_NAMES, names.toString());
                     writer.writeUTF(PARAMETER_REMOTE_PARAMETER_VALUES, values.toString());
-                }
-                if (0 == serializableNames.length()) {
-                    writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, null);
-                } else {
-                    writer.writeUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES, serializableNames.toString());
                 }
             }
         }
@@ -255,39 +240,10 @@ public class PortableSession extends StoredSession implements CustomPortable {
                 List<String> values = parseColonString(reader.readUTF(PARAMETER_REMOTE_PARAMETER_VALUES)); // Expect them, too
                 for (int i = 0, size = names.size(); i < size; i++) {
                     try {
-                        parameters.put(names.get(i), decodeSafeValue(values.get(i)));
+                        Object value = parseToSerializablePojo(decodeSafeValue(values.get(i)));
+                        parameters.put(names.get(i), value);
                     } catch (DecoderException e) {
                         // Ignore
-                    }
-                }
-            }
-        }
-        {
-            String serializableNames = reader.readUTF(PARAMETER_SERIALIZABLE_PARAMETER_NAMES);
-            if (null != serializableNames) {
-                List<String> names = parseColonString(serializableNames);
-                for (String name : names) {
-                    ByteArrayInputStream bais = null;
-                    ObjectInputStream ois = null;
-                    try {
-                        byte[] bytes = reader.readByteArray(name);
-                        bais = new ByteArrayInputStream(bytes);
-                        ois = new ObjectInputStream(bais);
-                        Object value = ois.readObject();
-                        parameters.put(name, value);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SerializationException e) {
-                        e.printStackTrace();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    } finally {
-                        if (null != ois) {
-                            ois.close();
-                        }
-                        if (null != bais) {
-                            bais.close();
-                        }
                     }
                 }
             }
@@ -295,7 +251,7 @@ public class PortableSession extends StoredSession implements CustomPortable {
     }
 
     private static List<String> parseColonString(String str) {
-        List<String> retval = new LinkedList<String>();
+        List<String> retval = new ArrayList<String>();
         int length = str.length();
         {
             int prev = 0;
@@ -335,35 +291,39 @@ public class PortableSession extends StoredSession implements CustomPortable {
             return Boolean.FALSE;
         }
 
-        Object obj = parseObjectFromString(value, Integer.class);
-        if (null != obj) {
-            return obj;
+        try {
+            int i = Integer.parseInt(value, 10);
+            return Integer.valueOf(i);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Long.class);
-        if (null != obj) {
-            return obj;
+        try {
+            long l = Long.parseLong(value, 10);
+            return Long.valueOf(l);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Float.class);
-        if (null != obj) {
-            return obj;
+        /*-
+         *
+        try {
+            float f = Float.parseFloat(value);
+            return new Float(f);
+        } catch (Exception e) {
+            // Ignore...
         }
 
-        obj = parseObjectFromString(value, Double.class);
-        if (null != obj) {
-            return obj;
+        try {
+            double d = Double.parseDouble(value);
+            return new Double(d);
+        } catch (Exception e) {
+            // Ignore...
         }
+        *
+        */
 
         return value;
-    }
-
-    private static <T> T parseObjectFromString(String s, Class<T> clazz) {
-        try {
-            return clazz.getConstructor(new Class[] { String.class }).newInstance(s);
-        } catch (Exception e) {
-            return null;
-        }
     }
 
 }
