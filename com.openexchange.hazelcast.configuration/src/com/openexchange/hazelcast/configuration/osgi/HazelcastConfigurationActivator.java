@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,9 +52,11 @@ package com.openexchange.hazelcast.configuration.osgi;
 
 import org.eclipse.osgi.framework.console.CommandProvider;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.Reloadable;
 import com.openexchange.hazelcast.configuration.HazelcastConfigurationService;
 import com.openexchange.hazelcast.configuration.internal.AddNodeUtilCommandProvider;
 import com.openexchange.hazelcast.configuration.internal.HazelcastConfigurationServiceImpl;
+import com.openexchange.hazelcast.configuration.internal.HazelcastReloadable;
 import com.openexchange.hazelcast.configuration.internal.Services;
 import com.openexchange.hazelcast.serialization.DynamicPortableFactory;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -86,6 +88,7 @@ public class HazelcastConfigurationActivator extends HousekeepingActivator {
         Services.set(this);
         HazelcastConfigurationServiceImpl configService = new HazelcastConfigurationServiceImpl();
         registerService(HazelcastConfigurationService.class, configService);
+        registerService(Reloadable.class, new HazelcastReloadable(configService));
         registerService(CommandProvider.class, new AddNodeUtilCommandProvider(configService));
     }
 

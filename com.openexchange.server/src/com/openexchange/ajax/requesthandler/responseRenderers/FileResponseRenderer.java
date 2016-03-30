@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -256,7 +256,7 @@ public class FileResponseRenderer implements ResponseRenderer {
             }
             String contentType = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_TYPE), true);
             boolean contentTypeByParameter = false;
-            if (null == contentType) {
+            if (Strings.isEmpty(contentType)) {
                 if (DOWNLOAD.equalsIgnoreCase(delivery)) {
                     contentType = SAVE_AS_TYPE;
                 } else {
@@ -275,7 +275,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                 }
             }
             String contentDisposition = AJAXUtility.encodeUrl(req.getParameter(PARAMETER_CONTENT_DISPOSITION));
-            if (null == contentDisposition) {
+            if (Strings.isEmpty(contentDisposition)) {
                 if (VIEW.equalsIgnoreCase(delivery)) {
                     contentDisposition = "inline";
                 } else if (DOWNLOAD.equalsIgnoreCase(delivery)) {
@@ -785,7 +785,7 @@ public class FileResponseRenderer implements ResponseRenderer {
         if (null == session) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create("session");
         }
-        
+
         // Check cache first
         final ResourceCache resourceCache;
 		{
@@ -894,7 +894,7 @@ public class FileResponseRenderer implements ResponseRenderer {
                     fileContentType = contentTypeByFileName;
                 }
             }
-            
+
             final byte[] transformed;
             try {
                 TransformedImage transformedImage = transformations.getTransformedImage(fileContentType);
@@ -915,20 +915,20 @@ public class FileResponseRenderer implements ResponseRenderer {
                 // Rethrow...
                 throw ioe;
             }
-            
+
             if (null == transformed) {
                 LOG.debug("Got no resulting input stream from transformation, trying to recover original input");
                 return handleFailure(file);
             }
-            
+
             final int size = transformed.length;
             final String fileName = file.getName();
             final String contentType = fileContentType;
-            
+
             if (cachingAdvised && null != resourceCache && isValidEtag && AJAXRequestDataTools.parseBoolParameter("cache", request, true)) {
             	final String cacheKey = ResourceCaches.generatePreviewCacheKey(eTag, request, previewLanguage);
             	AbstractTask<Void> task = new AbstractTask<Void>() {
-            		
+
 	                @Override
 	                public Void call() {
 	                    try {
@@ -937,16 +937,16 @@ public class FileResponseRenderer implements ResponseRenderer {
 	                    } catch (OXException e) {
 	                        LOG.warn("Could not cache preview.", e);
 	                    }
-	
+
 	                    return null;
 	                }
 	            };
 	            ThreadPools.submitElseExecute(task);
             }
-            
+
             // Cleanse old one
             Streams.close(file);
-            
+
             // Return
             return new FileHolder(new ByteArrayInputStreamClosure(transformed), size, contentType, fileName);
         } catch (final RuntimeException e) {

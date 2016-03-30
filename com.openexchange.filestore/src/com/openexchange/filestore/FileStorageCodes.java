@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,6 +51,7 @@ package com.openexchange.filestore;
 
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE;
 import static com.openexchange.exception.OXExceptionStrings.MESSAGE_RETRY;
+import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
@@ -62,6 +63,7 @@ import com.openexchange.exception.OXExceptionFactory;
  * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
  */
 public enum FileStorageCodes implements DisplayableOXExceptionCode {
+
     /** An IO error occurred: %s */
     IOERROR("An IO error occurred: %s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 3),
     /** May be used to turn the IOException of getInstance into a proper OXException */
@@ -92,6 +94,22 @@ public enum FileStorageCodes implements DisplayableOXExceptionCode {
     INVALID_LENGTH("The specified length %1$d for the file \"%2$s\" (current size: %3$d) is invalid.", MESSAGE_RETRY, Category.CATEGORY_USER_INPUT, 20),
     /** No such file storage: %1$s */
     NO_SUCH_FILE_STORAGE("No such file storage: %1$s", MESSAGE, Category.CATEGORY_SERVICE_DOWN, 21),
+    /** An end of stream has been reached unexpectedly during reading input. */
+    CONNECTION_CLOSED("An end of stream has been reached unexpectedly during reading input.", FileStorageStrings.CONNECTION_CLOSED_MSG, Category.CATEGORY_CONNECTIVITY, 22),
+
+    /**
+     * "Wrong filestore %1$d for context %2$d needing filestore %3$d.
+     */
+    FILESTORE_MIXUP("Wrong file store %1$d for context %2$d. Correct file store: %3$d.", MESSAGE, Category.CATEGORY_ERROR, 201),
+    /**
+     * Cannot create URI from "%1$s".
+     */
+    URI_CREATION_FAILED("Cannot create URI from \"%1$s\".", MESSAGE, Category.CATEGORY_ERROR, 304),
+    /**
+     * SQL Problem: "%s".
+     */
+    SQL_PROBLEM("SQL problem: \"%s\".", SQL_ERROR_MSG, Category.CATEGORY_ERROR, 306),
+
     ;
 
     private static final String PREFIX = "FLS";

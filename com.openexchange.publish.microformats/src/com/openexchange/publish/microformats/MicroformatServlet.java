@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -52,6 +52,9 @@ package com.openexchange.publish.microformats;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,6 +67,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -76,6 +80,7 @@ import com.openexchange.html.HtmlService;
 import com.openexchange.java.AllocatingStringWriter;
 import com.openexchange.java.Strings;
 import com.openexchange.osgi.ExceptionUtils;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.osgi.Services;
@@ -177,7 +182,8 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
-                writer.println("The publication has either been revoked in the meantime or module \"" + module + "\" is unknown.");
+                String escaped = StringEscapeUtils.escapeHtml(module);
+                writer.println("The publication has either been revoked in the meantime or module \"" + escaped + "\" is unknown.");
                 writer.flush();
                 return;
             }
@@ -199,16 +205,15 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 return;
             }
 
-            final Collection<? extends Object> loaded = dataLoader.load(publication);
-
-            final HashMap<String, Object> variables = new HashMap<String, Object>();
-            final User user = getUser(publication);
-            final Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
+            Collection<? extends Object> loaded = dataLoader.load(publication, EscapeMode.HTML);
+            User user = getUser(publication);
+            Contact userContact = getContact(new PublicationSession(publication), publication.getContext());
 
             // Sanitize publication
             sanitizePublication(publication);
 
             // Compose variables for template processing
+            Map<String, Object> variables = new HashMap<String, Object>(12, 0.9F);
             variables.put(getCollectionName(module), loaded);
             variables.put("publication", publication);
             {
@@ -331,6 +336,26 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             return site;
         }
         return AJAXUtility.encodeUrl(site, true, false);
+    }
+
+    private static <T> T getProxy(Class<? extends T> intf, final T obj) {
+        return (T) Proxy.newProxyInstance(obj.getClass().getClassLoader(), new Class[] { intf }, new InvocationHandler() {
+
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                String meth = method.getName();
+                if (!meth.startsWith("get")) {
+                    return method.invoke(obj, args);
+                }
+
+                Object retval = method.invoke(obj, args);
+                if (!(retval instanceof String)) {
+                    return retval;
+                }
+
+                return StringEscapeUtils.escapeHtml(retval.toString());
+            }
+        });
     }
 
 }
