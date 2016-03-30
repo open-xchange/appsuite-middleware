@@ -54,6 +54,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
@@ -73,7 +74,7 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class RdbAliasStorage implements UserAliasStorage {
 
-    private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
+    // private static final String CREATE_ALIAS = "INSERT INTO user_alias (cid, user, alias) VALUES(?,?,?)";
 
     private static final String CREATE_ALIAS_WITH_UUID = "INSERT INTO user_alias (cid, user, alias, uuid) VALUES(?,?,?,?)";
 
@@ -99,7 +100,7 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public HashSet<String> getAliases(int contextId, int userId) throws OXException {
-        final Connection con = Database.get(contextId, false);
+        Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -123,7 +124,7 @@ public class RdbAliasStorage implements UserAliasStorage {
 
     @Override
     public int getUserId(int contextId, String alias) throws OXException {
-        final Connection con = Database.get(contextId, false);
+        Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
@@ -144,13 +145,21 @@ public class RdbAliasStorage implements UserAliasStorage {
         }
     }
 
+    private boolean createAlias(int contextId, int userId, String alias) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            return createAlias(con, contextId, userId, alias);
+        } finally {
+            Database.back(contextId, true, con);
+        }
+    }
+
     @Override
     public boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException {
-        boolean useExistingConnection = true;
-        if(con == null) {
-            con = Database.get(contextId, true);
-            useExistingConnection = false;
+        if (con == null) {
+            return createAlias(contextId, userId, alias);
         }
+
         PreparedStatement stmt = null;
         try {
             int index = 0;
@@ -165,20 +174,24 @@ public class RdbAliasStorage implements UserAliasStorage {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            // Only take back newly created database connection to the database pool
-            if (!useExistingConnection) {
-                Database.back(contextId, false, con);
-            }
+        }
+    }
+
+    private boolean updateAlias(int contextId, int userId, String oldAlias, String newAlias) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            return updateAlias(con, contextId, userId, oldAlias, newAlias);
+        } finally {
+            Database.back(contextId, true, con);
         }
     }
 
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
-        boolean useExistingConnection = true;
-        if(con == null) {
-            con = Database.get(contextId, true);
-            useExistingConnection = false;
+        if (con == null) {
+            return updateAlias(contextId, userId, oldAlias, newAlias);
         }
+
         PreparedStatement stmt = null;
         try {
             int index = 0;
@@ -192,20 +205,24 @@ public class RdbAliasStorage implements UserAliasStorage {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
-                Database.back(contextId, false, con);
-            }
+        }
+    }
+
+    private boolean deleteAlias(int contextId, int userId, String alias) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            return deleteAlias(con, contextId, userId, alias);
+        } finally {
+            Database.back(contextId, true, con);
         }
     }
 
     @Override
     public boolean deleteAlias(Connection con, int contextId, int userId, String alias) throws OXException {
-        boolean useExistingConnection = true;
-        if(con == null) {
-            con = Database.get(contextId, true);
-            useExistingConnection = false;
+        if (con == null) {
+            return deleteAlias(contextId, userId, alias);
         }
+
         PreparedStatement stmt = null;
         try {
             int index = 0;
@@ -218,20 +235,24 @@ public class RdbAliasStorage implements UserAliasStorage {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
-                Database.back(contextId, false, con);
-            }
+        }
+    }
+
+    private boolean deleteAliases(int contextId, int userId) throws OXException {
+        Connection con = Database.get(contextId, true);
+        try {
+            return deleteAliases(con, contextId, userId);
+        } finally {
+            Database.back(contextId, true, con);
         }
     }
 
     @Override
     public boolean deleteAliases(Connection con, int contextId, int userId) throws OXException {
-        boolean useExistingConnection = true;
-        if(con == null) {
-            con = Database.get(contextId, true);
-            useExistingConnection = false;
+        if (con == null) {
+            return deleteAliases(contextId, userId);
         }
+
         PreparedStatement stmt = null;
         try {
             int index = 0;
@@ -243,46 +264,38 @@ public class RdbAliasStorage implements UserAliasStorage {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             DBUtils.closeSQLStuff(stmt);
-            // Only take back newly created database connection to the database pool
-            if(!useExistingConnection) {
-                Database.back(contextId, false, con);
-            }
         }
     }
 
     @Override
     public List<Integer> getUserIdsByAliasDomain(int contextId, String aliasDomain) throws OXException {
-
-        Connection read_ox_con = null;
+        Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            if (read_ox_con == null) {
-                read_ox_con = Database.get(contextId, true);
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid ");
-            sb.append("WHERE us.cid = ? and la.alias LIKE ?");
-
-            String query = sb.toString();
-            stmt = read_ox_con.prepareStatement(query);
+            con = Database.get(contextId, false);
+            stmt = con.prepareStatement("SELECT us.id FROM user us LEFT JOIN user_alias la ON us.id = la.user AND us.cid = la.cid WHERE us.cid = ? and la.alias LIKE ?");
             stmt.setInt(1, contextId);
             stmt.setString(2, "%" + aliasDomain);
-
             rs = stmt.executeQuery();
-            ArrayList<Integer> retval = new ArrayList<Integer>();
-            while (rs.next()) {
-                retval.add(rs.getInt(1));
+
+            if (false == rs.next()) {
+                return Collections.emptyList();
             }
+
+            List<Integer> retval = new ArrayList<Integer>();
+            do {
+                retval.add(Integer.valueOf(rs.getInt(1)));
+            } while (rs.next());
             return retval;
         } catch (SQLException e) {
             throw UserAliasStorageExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            throw e;
+            throw UserAliasStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.closeSQLStuff(stmt);
-            Database.back(contextId, false, read_ox_con);
+            DBUtils.closeSQLStuff(rs, stmt);
+            Database.back(contextId, false, con);
         }
     }
+
 }
