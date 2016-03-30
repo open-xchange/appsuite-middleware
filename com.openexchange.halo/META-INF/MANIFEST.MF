@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Halo API
 Bundle-SymbolicName: com.openexchange.halo
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.cache,
  com.openexchange.ajax.container,

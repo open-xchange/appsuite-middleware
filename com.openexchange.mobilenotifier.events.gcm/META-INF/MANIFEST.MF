@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-Name: Open-Xchange Mobilenotifier Event GCM Bundle
 Bundle-SymbolicName: com.openexchange.mobilenotifier.events.gcm
 Bundle-Version: 7.6.3

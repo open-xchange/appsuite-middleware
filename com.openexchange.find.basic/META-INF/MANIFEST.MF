@@ -4,7 +4,7 @@ Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.davekoelle,
  com.openexchange.api2,

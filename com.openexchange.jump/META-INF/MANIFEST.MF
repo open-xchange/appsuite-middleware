@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: The Open-Xchange Jump Bundle used to pass an identity token from one system to another
 Bundle-SymbolicName: com.openexchange.jump
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.exception,

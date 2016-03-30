@@ -4,7 +4,7 @@ Bundle-Name: Realtime event pubsub implementation for mail
 Bundle-SymbolicName: com.openexchange.realtime.events.mail
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.realtime.events.mail.osgi.RTMailEventsActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.osgi,
  com.openexchange.push,

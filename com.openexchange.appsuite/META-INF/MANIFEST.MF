@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange RequireJS servlet bundle
 Bundle-SymbolicName: com.openexchange.appsuite
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange, Inc.
+Bundle-Vendor: OX Software GmbH
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,

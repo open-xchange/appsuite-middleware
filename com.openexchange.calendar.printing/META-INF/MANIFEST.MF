@@ -4,7 +4,7 @@ Bundle-Name: Calendar Printing Plug-in
 Bundle-SymbolicName: com.openexchange.calendar.printing
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.calendar.printing.osgi.CalendarPrintingActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax,
  com.openexchange.ajax.osgi,

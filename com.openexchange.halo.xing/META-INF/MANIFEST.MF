@@ -4,7 +4,7 @@ Bundle-Name: Xing
 Bundle-SymbolicName: com.openexchange.halo.xing
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.halo.xing.osgi.XingHaloActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.container,
  com.openexchange.ajax.requesthandler,

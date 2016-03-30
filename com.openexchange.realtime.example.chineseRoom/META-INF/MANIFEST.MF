@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: ChineseRoom
 Bundle-SymbolicName: com.openexchange.realtime.example.chineseRoom
 Bundle-Version: 7.1.0.0
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.conversion.simple,
  com.openexchange.exception,

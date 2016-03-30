@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange admin reseller plugin rmi bundle
 Bundle-SymbolicName: com.openexchange.admin.reseller.rmi
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Export-Package: com.openexchange.admin.reseller.rmi,
  com.openexchange.admin.reseller.rmi.dataobjects,

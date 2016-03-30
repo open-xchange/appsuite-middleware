@@ -4,7 +4,7 @@ Bundle-Name: Database REST Service
 Bundle-SymbolicName: com.openexchange.rest.services.database
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.rest.services.database.osgi.DatabaseRESTActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.google.common.cache,
  com.openexchange.ajax.requesthandler,

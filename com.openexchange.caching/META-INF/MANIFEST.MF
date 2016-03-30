@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Cache
 Bundle-SymbolicName: com.openexchange.caching
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.caching.events,
  com.openexchange.config,

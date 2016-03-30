@@ -4,7 +4,7 @@ Bundle-Name: Report Generation Framework
 Bundle-SymbolicName: com.openexchange.report.appsuite
 Bundle-Version: 7.6.3
 Bundle-Activator: com.openexchange.report.appsuite.osgi.ReportActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: com.hazelcast
 Import-Package: com.hazelcast.core,

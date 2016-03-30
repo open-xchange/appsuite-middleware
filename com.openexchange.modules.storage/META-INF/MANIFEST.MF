@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Storage classes for generic models
 Bundle-SymbolicName: com.openexchange.modules.storage
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.database,
  com.openexchange.exception,

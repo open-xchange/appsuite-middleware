@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Autocontextid
 Bundle-SymbolicName: com.openexchange.admin.autocontextid
 Bundle-Version: 7.6.3
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.admin.autocontextid.osgi.Activator
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.admin.daemons,
