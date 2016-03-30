@@ -58,7 +58,7 @@ import com.openexchange.i18n.LocalizableStrings;
  */
 public class ContactExceptionMessages implements LocalizableStrings {
 
-    public final static String INVALID_EMAIL_DISPLAY = "Invalid E-Mail address.";
+    public final static String INVALID_EMAIL_DISPLAY = "Invalid E-Mail address: '%s'. Please correct the E-Mail address.";
 
     public final static String IMAGE_SCALE_PROBLEM_DISPLAY = "Unable to import this contact picture.";
 
