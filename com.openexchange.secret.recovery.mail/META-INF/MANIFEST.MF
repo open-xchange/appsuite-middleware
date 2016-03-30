@@ -4,7 +4,7 @@ Bundle-Name: Mail Secret Recovery Plug-in
 Bundle-SymbolicName: com.openexchange.secret.recovery.mail
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.secret.recovery.mail.osgi.MailSecretRecoveryActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.groupware,

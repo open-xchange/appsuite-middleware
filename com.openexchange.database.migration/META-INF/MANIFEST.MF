@@ -82,4 +82,4 @@ Import-Package: com.openexchange.config,
 Export-Package: com.openexchange.database.migration,
  com.openexchange.database.migration.mbean,
  com.openexchange.database.migration.resource.accessor
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH

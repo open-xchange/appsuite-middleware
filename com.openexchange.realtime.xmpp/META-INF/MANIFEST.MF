@@ -4,7 +4,7 @@ Bundle-Name: XMPP Server
 Bundle-SymbolicName: com.openexchange.realtime.xmpp
 Bundle-Version: 6.22.0.0
 Bundle-Activator: com.openexchange.realtime.xmpp.osgi.XMPPActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.authentication,
  com.openexchange.conversion.simple,

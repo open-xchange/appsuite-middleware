@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -115,7 +115,7 @@ public final class HTMLDetector {
         if ((lc.indexOf("<body>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<script>") >= 0)) {
+        if ((lc.indexOf("<script") >= 0)) {
             return true;
         }
         if ((lc.indexOf("javascript") >= 0)) {
@@ -170,7 +170,7 @@ public final class HTMLDetector {
         if ((lc.indexOf("body>") >= 0)) {
             return true;
         }
-        if ((lc.indexOf("<script>") >= 0)) {
+        if ((lc.indexOf("<script") >= 0)) {
             return true;
         }
         if ((lc.indexOf("javascript") >= 0)) {
@@ -247,7 +247,7 @@ public final class HTMLDetector {
         if (containsHTMLTag(sequence, "body")) {
             return true;
         }
-        if (containsHTMLTag(sequence, "script")) {
+        if (containsIgnoreCase(sequence, "<script")) {
             return true;
         }
         if (containsIgnoreCase(sequence, "javascript")) {
@@ -384,39 +384,33 @@ public final class HTMLDetector {
         if (off < 0 || len < 0 || len > sequence.length - off) {
             throw new IndexOutOfBoundsException();
         }
-        final byte[] b;
-        if (off > 0 || sequence.length != len) {
-            b = new byte[len];
-            System.arraycopy(sequence, off, b, 0, len);
-        } else {
-            b = sequence;
-        }
-        if (containsHTMLTag(b, "html")) {
+
+        if (containsHTMLTag(sequence, off, len, "html")) {
             return true;
         }
-        if (containsHTMLTag(b, "head")) {
+        if (containsHTMLTag(sequence, off, len, "head")) {
             return true;
         }
-        if (containsHTMLTag(b, "body")) {
+        if (containsHTMLTag(sequence, off, len, "body")) {
             return true;
         }
-        if (containsHTMLTag(b, "script")) {
+        if (containsIgnoreCase(sequence, off, len, "<script")) {
             return true;
         }
-        if (containsIgnoreCase(b, "javascript")) {
+        if (containsIgnoreCase(sequence, off, len, "javascript")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<img")) {
+        if (containsIgnoreCase(sequence, off, len, "<img")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<object")) {
+        if (containsIgnoreCase(sequence, off, len, "<object")) {
             return true;
         }
-        if (containsIgnoreCase(b, "<embed")) {
+        if (containsIgnoreCase(sequence, off, len, "<embed")) {
             return true;
         }
         for (final String jsEventHandler : JS_EVENT_HANDLER) {
-            if (containsIgnoreCase(b, jsEventHandler)) {
+            if (containsIgnoreCase(sequence, off, len, jsEventHandler)) {
                 return true;
             }
         }
@@ -453,14 +447,7 @@ public final class HTMLDetector {
         if (off < 0 || len < 0 || len > sequence.length - off) {
             throw new IndexOutOfBoundsException();
         }
-        final byte[] b;
-        if (off > 0 || sequence.length != len) {
-            b = new byte[len];
-            System.arraycopy(sequence, off, b, 0, len);
-        } else {
-            b = sequence;
-        }
-        return containsIgnoreCase(b, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
+        return containsIgnoreCase(sequence, off, len, new StringBuilder(tag.length() + 2).append('<').append(tag).append('>').toString());
     }
 
     /**
@@ -519,16 +506,16 @@ public final class HTMLDetector {
             throw new IndexOutOfBoundsException(Integer.toString(endIndex - beginIndex));
         }
 
-        final int[] failure = computeFailure(pattern);
+        if (data.length == 0) {
+            return -1;
+        }
+
+        int[] failure = computeFailure(pattern);
         if (failure == null) {
             throw new IllegalArgumentException("pattern is null");
         }
 
         int j = 0;
-        if (data.length == 0) {
-            return -1;
-        }
-
         for (int i = beginIndex; i < endIndex; i++) {
             while (j > 0 && pattern[j] != data[i]) {
                 j = failure[j - 1];
@@ -553,8 +540,8 @@ public final class HTMLDetector {
         if (pattern == null) {
             return null;
         }
-        final int[] failure = new int[pattern.length];
 
+        int[] failure = new int[pattern.length];
         int j = 0;
         for (int i = 1; i < pattern.length; i++) {
             while (j > 0 && pattern[j] != pattern[i]) {

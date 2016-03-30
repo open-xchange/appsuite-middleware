@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -51,8 +51,13 @@ package com.openexchange.http.deferrer.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.sim.SimHttpServletRequest;
+import javax.servlet.http.sim.SimHttpServletResponse;
+import javax.servlet.sim.ByteArrayServletOutputStream;
 import junit.framework.TestCase;
 import com.openexchange.dispatcher.DispatcherPrefixService;
+import com.openexchange.http.deferrer.servlet.DeferrerServlet;
 
 
 /**
@@ -105,15 +110,43 @@ public class DefaultDeferringURLServiceTest extends TestCase {
         assertTrue(null == service.getDeferredURL(null, 0, 0));
     }
 
+    public void testForBug44583() throws Exception {
+        final SimHttpServletRequest req = new SimHttpServletRequest();
+        req.setParameter("redirect", "http://evil.hacker.com/ajax/someModule");
+
+        final SimHttpServletResponse resp = new SimHttpServletResponse();
+        final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
+        resp.setOutputStream(servletOutputStream);
+        resp.setCharacterEncoding("UTF-8");
+
+        DeferrerServlet deferrerServlet = new DeferrerServlet();
+        deferrerServlet.service(req, resp);
+
+        int status = resp.getStatus();
+        assertTrue("Unexpected response code: " + status, HttpServletResponse.SC_BAD_REQUEST == status);
+
+        String s = new String(servletOutputStream.toByteArray(), "UTF-8");
+        assertTrue("Unexpected HTML response: " + s, s.indexOf("400 Bad Request") > 0);
+    }
+
     public void assertTransformed(final String url, final String expectedTransformation) {
         final String deferredURL = service.getDeferredURL(url, 0, 0);
         assertNotNull("URL was null: ", deferredURL);
         assertEquals(expectedTransformation, deferredURL);
     }
 
+    // ----------------------------------------------------------------------------------------------------------
+
     private static class TestDeferringURLService extends DefaultDeferringURLService {
 
         private String url = "https://www.open-xchange.com";
+
+        /**
+         * Initializes a new {@link DefaultDeferringURLServiceTest.TestDeferringURLService}.
+         */
+        TestDeferringURLService() {
+            super();
+        }
 
         public void setUrl(final String url) {
             this.url = url;

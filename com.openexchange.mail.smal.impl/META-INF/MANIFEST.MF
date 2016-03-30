@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange Super-MAL Implementation Bundle
 Bundle-SymbolicName: com.openexchange.mail.smal.impl
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mail.smal.impl.osgi.SmalActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Eclipse-RegisterBuddy: com.hazelcast,com.openexchange.service.indexing.impl
 Import-Package: com.google.common.base,

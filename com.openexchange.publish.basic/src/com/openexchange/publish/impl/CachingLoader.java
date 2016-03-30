@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2014 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -55,6 +55,7 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheService;
 import com.openexchange.caching.ElementAttributes;
 import com.openexchange.exception.OXException;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.server.ServiceLookup;
@@ -70,39 +71,44 @@ public class CachingLoader implements PublicationDataLoaderService {
 
     private static final String CACHE_REGION = "com.openexchange.publish.dataloader";
 
-    private PublicationDataLoaderService delegate = null;
+    private final PublicationDataLoaderService delegate;
     private final CacheService cachingService;
 
+    /**
+     * Initializes a new {@link CachingLoader}.
+     *
+     * @param services The OSGi service look-up
+     * @param delegate The delegate service
+     */
     public CachingLoader(final ServiceLookup services, final PublicationDataLoaderService delegate) {
+        super();
         this.delegate = delegate;
         this.cachingService = services.getService(CacheService.class);
     }
 
     @Override
-    public Collection<? extends Object> load(final Publication publication) throws OXException {
-        try {
-            final Collection<? extends Object> fromCache = tryCache(publication);
-            if(fromCache == null) {
-                final Collection<? extends Object> loaded = delegate.load(publication);
-                remember(publication, loaded);
-                return loaded;
-            }
-            return fromCache;
-
-        } catch (final OXException x) {
-            throw x;
+    public Collection<? extends Object> load(Publication publication, EscapeMode escapeMode) throws OXException {
+        Cache cache = getCache();
+        if (null == cache) {
+            return delegate.load(publication, escapeMode);
         }
+
+
+        Collection<? extends Object> fromCache = tryCache(publication, escapeMode, cache);
+        if (fromCache == null) {
+            Collection<? extends Object> loaded = delegate.load(publication, escapeMode);
+            remember(publication, escapeMode, loaded, cache);
+            fromCache = loaded;
+        }
+        return fromCache;
    }
 
-    private void remember(final Publication publication, final Collection<? extends Object> loaded) throws OXException {
-        if(! allElementsAreSerializable(loaded)) {
+    private void remember(Publication publication, EscapeMode escapeMode, Collection<? extends Object> loaded, Cache cache) throws OXException {
+        if (!allElementsAreSerializable(loaded)) {
             return;
         }
-        final Cache cache = getCache();
-        if(cache == null) {
-            return;
-        }
-        cache.put(new PublicationKey(publication), (Serializable) loaded, modifyAttributes(cache.getDefaultElementAttributes()), false);
+
+        cache.put(new PublicationKey(publication, escapeMode), (Serializable) loaded, modifyAttributes(cache.getDefaultElementAttributes()), false);
     }
 
     private ElementAttributes modifyAttributes(final ElementAttributes attributes) {
@@ -128,12 +134,8 @@ public class CachingLoader implements PublicationDataLoaderService {
         return true;
     }
 
-    private Collection<? extends Object> tryCache(final Publication publication) throws OXException {
-        final Cache cache = getCache();
-        if(cache == null) {
-            return null;
-        }
-        return (Collection<? extends Object>) cache.get(new PublicationKey(publication));
+    private Collection<? extends Object> tryCache(Publication publication, EscapeMode escapeMode, Cache cache) throws OXException {
+        return (Collection<? extends Object>) cache.get(new PublicationKey(publication, escapeMode));
     }
 
     private Cache getCache() throws OXException {
@@ -141,35 +143,44 @@ public class CachingLoader implements PublicationDataLoaderService {
     }
 
     private static final class PublicationKey implements Serializable {
+
+        private static final long serialVersionUID = 7259709320829767274L;
+
         private final int id;
         private final int ctxId;
+        private final int escape;
+        private final int hash;
 
-        public PublicationKey(final Publication publication) {
+        PublicationKey(final Publication publication, EscapeMode escapeMode) {
+            super();
+            this.escape = escapeMode.ordinal();
             this.id = publication.getId();
             this.ctxId = publication.getContext().getContextId();
+
+            int prime = 31;
+            int result = prime * 1 + escape;
+            result = prime * result + ctxId;
+            result = prime * result + id;
+            this.hash = result;
         }
 
         @Override
         public int hashCode() {
-            final int prime = 31;
-            int result = 1;
-            result = prime * result + ctxId;
-            result = prime * result + id;
-            return result;
+            return hash;
         }
 
         @Override
-        public boolean equals(final Object obj) {
+        public boolean equals(Object obj) {
             if (this == obj) {
                 return true;
             }
-            if (obj == null) {
+            if (!(obj instanceof PublicationKey)) {
                 return false;
             }
-            if (getClass() != obj.getClass()) {
+            PublicationKey other = (PublicationKey) obj;
+            if (escape != other.escape) {
                 return false;
             }
-            final PublicationKey other = (PublicationKey) obj;
             if (ctxId != other.ctxId) {
                 return false;
             }
@@ -178,8 +189,6 @@ public class CachingLoader implements PublicationDataLoaderService {
             }
             return true;
         }
-
-
     }
 
 }

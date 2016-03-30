@@ -4,7 +4,7 @@ Bundle-Name: Rhino Scripting
 Bundle-SymbolicName: com.openexchange.scripting.rhino
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.scripting.rhino.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.log,
  com.openexchange.osgi,

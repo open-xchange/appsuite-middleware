@@ -4,7 +4,7 @@ Bundle-Name: Open-Xchange shared JSlob service test bundle
 Bundle-SymbolicName: com.openexchange.jslob.test
 Bundle-Version: 7.4.0
 Bundle-Activator: com.openexchange.jslob.test.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.exception,
  com.openexchange.jslob,

@@ -4,7 +4,7 @@ Bundle-Name: Core implementation for copying users between contexts
 Bundle-SymbolicName: com.openexchange.user.copy
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.user.copy.osgi.Activator
-Bundle-Vendor: Open-Xchange, Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.context,
  com.openexchange.database,

@@ -4,7 +4,7 @@ Bundle-Name: Service for persistent Presence Subscriptions
 Bundle-SymbolicName: com.openexchange.realtime.presence.subscribe
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.realtime.presence.subscribe.osgi.PresenceSubscribeActivator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.config,
  com.openexchange.context,

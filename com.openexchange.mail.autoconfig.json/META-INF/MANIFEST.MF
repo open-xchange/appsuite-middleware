@@ -4,7 +4,7 @@ Bundle-Name: Json bundle for autoconfig
 Bundle-SymbolicName: com.openexchange.mail.autoconfig.json
 Bundle-Version: 7.6.2
 Bundle-Activator: com.openexchange.mail.autoconfig.json.osgi.Activator
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Import-Package: com.openexchange.ajax.requesthandler,
  com.openexchange.ajax.requesthandler.osgiservice,

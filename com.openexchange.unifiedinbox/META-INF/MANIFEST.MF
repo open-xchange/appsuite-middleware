@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Unified Inbox
 Bundle-SymbolicName: com.openexchange.unifiedinbox
 Bundle-Version: 7.6.2
-Bundle-Vendor: Open-Xchange Inc.
+Bundle-Vendor: OX Software GmbH
 Import-Package: com.openexchange.caching,
  com.openexchange.config,
  com.openexchange.config.cascade,
