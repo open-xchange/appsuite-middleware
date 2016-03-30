@@ -57,7 +57,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -100,7 +99,7 @@ public class RdbAliasStorage implements UserAliasStorage {
     }
 
     @Override
-    public Set<String> getAliases(int contextId, int userId) throws OXException {
+    public HashSet<String> getAliases(int contextId, int userId) throws OXException {
         Connection con = Database.get(contextId, false);
         PreparedStatement stmt = null;
         ResultSet rs = null;
