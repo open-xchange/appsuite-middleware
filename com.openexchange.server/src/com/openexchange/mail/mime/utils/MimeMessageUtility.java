@@ -872,8 +872,18 @@ public final class MimeMessageUtility {
 
     private static String removeWhitespacesBetweenEncodedWords(String value) {
         StringBuilder sb = new StringBuilder(value);
+
         String pattern = "?= =?";
-        for (int i; (i = sb.indexOf(pattern)) >= 0;) {
+        int i = sb.indexOf(pattern);
+        if (i >= 0) {
+            do {
+                sb.deleteCharAt(i + 2);
+            } while ((i = sb.indexOf(pattern)) >= 0);
+            return sb.toString();
+        }
+
+        pattern = "?=\t=?";
+        while ((i = sb.indexOf(pattern)) >= 0) {
             sb.deleteCharAt(i + 2);
         }
         return sb.toString();
