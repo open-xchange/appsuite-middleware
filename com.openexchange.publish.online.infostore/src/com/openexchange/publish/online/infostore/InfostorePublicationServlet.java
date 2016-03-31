@@ -70,6 +70,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
+import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.online.infostore.util.InfostorePublicationUtils;
@@ -246,7 +247,7 @@ public class InfostorePublicationServlet extends HttpServlet {
     }
 
     private InputStream loadContent(final Publication publication) throws OXException {
-        Collection<? extends Object> load = dataLoader.load(publication, null);
+        Collection<? extends Object> load = dataLoader.load(publication, EscapeMode.NONE);
         if(load == null || load.isEmpty()) {
             return new ByteArrayInputStream(new byte[0]);
         }
