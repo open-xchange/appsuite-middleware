@@ -7,6 +7,7 @@ Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-Activator: com.openexchange.mail.categories.osgi.Activator
 Import-Package: com.openexchange.ajax.requesthandler,
+ com.openexchange.ajax.writer,
  com.openexchange.documentation,
  com.openexchange.documentation.annotations,
  com.openexchange.exception,
