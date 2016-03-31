@@ -72,7 +72,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.userconfiguration.Permission;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.api.MailConfig;
-import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.service.MailService;
 import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.mail.usersetting.UserSettingMail;
@@ -83,6 +82,7 @@ import com.openexchange.plist.PListDict;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
+import com.openexchange.sessiond.SessiondService;
 import com.openexchange.user.UserService;
 
 /**
@@ -238,68 +238,17 @@ public class MailOnboardingProvider implements OnboardingPlistProvider {
     }
 
     private Configurations getEffectiveConfigurations(int userId, int contextId) throws OXException {
-
-        MailAccountStorageService mailAccountStorageService = services.getService(MailAccountStorageService.class);
-        if (mailAccountStorageService == null) {
-            throw new OXException();
-        }
-        String userLogin = OnboardingUtility.getUserLogin(userId, contextId);
-        String userLoginInfo = getUser(userId, contextId).getLoginInfo();
-
-        // IMAP
-        Configuration imapConfiguration;
-        {
-            MailAccount mailAcc = mailAccountStorageService.getDefaultMailAccount(userId, contextId);
-            String imapServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.imap.host", null, userId, contextId);
-            if (null == imapServer) {
-                imapServer = mailAcc.getMailServer();
-            }
-            Integer imapPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.imap.port", null, userId, contextId);
-            if (null == imapPort) {
-                imapPort = Integer.valueOf(mailAcc.getMailPort());
-            }
-            Boolean imapSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.imap.secure", null, userId, contextId);
-            if (null == imapSecure) {
-                imapSecure = Boolean.valueOf(mailAcc.isMailSecure());
-            }
-
-            String imapLogin = getMailLogin(mailAcc, userLogin, userLoginInfo);
-            imapConfiguration = new Configuration(imapServer, imapPort.intValue(), imapSecure.booleanValue(), imapLogin, null);
+        SessiondService sessiondService = services.getOptionalService(SessiondService.class);
+        if (null == sessiondService) {
+            throw ServiceExceptionCode.absentService(SessiondService.class);
         }
 
-        // SMTP
-        Configuration smtpConfiguration;
-        {
-            MailAccount transportAcc = mailAccountStorageService.getTransportAccountForID(MailAccount.DEFAULT_ID, userId, contextId);
-
-            String smtpServer = OnboardingUtility.getValueFromProperty("com.openexchange.client.onboarding.mail.smtp.host", null, userId, contextId);
-            if (null == smtpServer) {
-                smtpServer = transportAcc.getTransportServer();
-            }
-            Integer smtpPort = OnboardingUtility.getIntFromProperty("com.openexchange.client.onboarding.mail.smtp.port", null, userId, contextId);
-            if (null == smtpPort) {
-                smtpPort = Integer.valueOf(transportAcc.getTransportPort());
-            }
-            Boolean smtpSecure = OnboardingUtility.getBoolFromProperty("com.openexchange.client.onboarding.mail.smtp.secure", null, userId, contextId);
-            if (null == smtpSecure) {
-                smtpSecure = Boolean.valueOf(transportAcc.isTransportSecure());
-            }
-            String smtpLogin = transportAcc.getTransportLogin();
-            smtpConfiguration = new Configuration(smtpServer, smtpPort.intValue(), smtpSecure.booleanValue(), smtpLogin, null);
+        Session session = sessiondService.getAnyActiveSessionForUser(userId, contextId);
+        if (null == session) {
+            throw OXException.general("No active session for user " + userId + " in context " + contextId);
         }
 
-        // Return configurations
-        return new Configurations(imapConfiguration, smtpConfiguration);
-    }
-
-    private String getMailLogin(MailAccount mailAccount, String slogin, String userLoginInfo) throws OXException {
-        final String proxyDelimiter = MailProperties.getInstance().getAuthProxyDelimiter();
-        // Assign login
-        if (proxyDelimiter != null && slogin.contains(proxyDelimiter)) {
-            return MailConfig.saneLogin(slogin);
-        } else {
-            return MailConfig.getMailLogin(mailAccount, userLoginInfo);
-        }
+        return getEffectiveConfigurations(session);
     }
 
     private Result doExecutePlist(OnboardingRequest request, Result previousResult, Session session) throws OXException {
