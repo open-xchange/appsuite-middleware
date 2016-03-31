@@ -112,7 +112,7 @@ public class RemoveAction extends AbstractCategoriesAction {
         JSONArray array = new JSONArray(resultObjects.size());
         for (MailCategoriesServiceResult resultObject : resultObjects) {
             if (resultObject.hasError()) {
-                JSONObject o = new JSONObject(2).put(CATEGORY_FIELD, resultObject.getCategory());
+                JSONObject o = new JSONObject(10).put(CATEGORY_FIELD, resultObject.getCategory());
                 addException(o, resultObject.getException(), session.getUser().getLocale(), newWriteExceptionProps().checkIncludeStackTraceOnError(false).checkProblematic(false).checkTruncated(true));
                 array.put(o);
             }
