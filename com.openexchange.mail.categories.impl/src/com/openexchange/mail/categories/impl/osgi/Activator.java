@@ -72,7 +72,7 @@ public class Activator extends HousekeepingActivator {
     @Override
     protected void startBundle() throws Exception {
         Services.setServiceLookup(this);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl(this));
+        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
 
     }
 

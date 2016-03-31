@@ -88,7 +88,9 @@ public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
     private MailCategoriesActionFactory(final ServiceLookup services) {
         super();
         actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
-        actions.put("switch", new SwitchAction(services));
+        AbstractCategoriesAction switchAction = new SwitchAction(services);
+        actions.put("enable", switchAction);
+        actions.put("disable", switchAction);
         actions.put("unread", new UnreadAction(services));
         actions.put("new", new NewAction(services));
         actions.put("remove", new RemoveAction(services));

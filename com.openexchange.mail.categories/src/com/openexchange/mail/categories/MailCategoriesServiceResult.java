@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,47 @@
  *
  */
 
-package com.openexchange.groupware.settings.tree.participants;
+package com.openexchange.mail.categories;
 
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.configuration.ParticipantConfig;
-import com.openexchange.groupware.configuration.ParticipantConfig.Property;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.session.Session;
 
 /**
- * Setup for the config tree node determining if an automatic search for all
- * users, groups and resources is triggered if the participant selection dialog
- * is opened.
- * @author <a href="mailto:marcus@open-xchange.org">Marcus Klein</a>
+ * {@link MailCategoriesServiceResult}
+ *
+ * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
+ * @since v7.8.2
  */
-public class MaximumNumberParticipants implements PreferencesItemService {
+public class MailCategoriesServiceResult {
 
-    public static final String NAME = "maximumNumberParticipants";
+    String category;
+    OXException error;
 
     /**
-     * Default constructor.
+     * Initializes a new {@link MailCategoriesServiceResult.ResultObject}.
      */
-    public MaximumNumberParticipants() {
+    public MailCategoriesServiceResult(String category, OXException error) {
         super();
+        this.category = category;
+        this.error = error;
     }
 
     /**
-     * {@inheritDoc}
+     * Initializes a new {@link MailCategoriesServiceResult.ResultObject}.
      */
-    @Override
-    public String[] getPath() {
-        return new String[] { "participants", NAME };
+    public MailCategoriesServiceResult(String category) {
+        super();
+        this.category = category;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return userConfig.hasCalendar() || userConfig.hasTask();
-            }
-            @Override
-            public void getValue(final Session session, final Context ctx,
-                final User user, final UserConfiguration userConfig,
-                final Setting setting) throws OXException {
-                setting.setSingleValue(ParticipantConfig.getInstance()
-                    .getIntProperty(Property.MAXIMUM_NUMBER_PARTICIPANTS));
-            }
-        };
+    public OXException getException() {
+        return error;
+    }
+
+    public boolean hasError() {
+        return error != null;
+    }
+
+    public String getCategory() {
+        return category;
     }
 }

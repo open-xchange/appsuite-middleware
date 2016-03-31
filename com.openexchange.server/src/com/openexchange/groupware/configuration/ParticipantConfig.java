@@ -116,12 +116,7 @@ public final class ParticipantConfig {
          * triggered on opened participant dialog.
          */
         AUTO_SEARCH("com.openexchange.participant.autoSearch",
-            Boolean.TRUE.toString()),
-        /**
-         * Defines the maximum number of participants for an appointment or a
-         * task.
-         */
-        MAXIMUM_NUMBER_PARTICIPANTS("com.openexchange.participant.MaximumNumberParticipants", "0");
+            Boolean.TRUE.toString());
 
         /**
          * Name of the property in the participant.properties file.

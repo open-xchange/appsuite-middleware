@@ -64,6 +64,7 @@ import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
+import com.openexchange.mail.categories.MailCategoriesServiceResult;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
 import com.openexchange.mail.categories.ReorganizeParameter;
@@ -77,7 +78,6 @@ import com.openexchange.mail.search.ANDTerm;
 import com.openexchange.mail.search.HeaderTerm;
 import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 
@@ -89,15 +89,10 @@ import com.openexchange.session.Session;
  */
 public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailCategoriesConfigServiceImpl.class);
-
     private final static String FLAG_PREFIX = "$ox_";
 
-    private final ServiceLookup services;
-
-    public MailCategoriesConfigServiceImpl(ServiceLookup services) {
+    public MailCategoriesConfigServiceImpl() {
         super();
-        this.services = services;
     }
 
     @Override
@@ -286,10 +281,12 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             if (categoriesToChange.contains(config.getCategory())) {
                 MailCategories.activateProperty(config.getCategory(), activate, session);
                 retval.add(MailCategoryConfig.copyOf(config, activate));
+            } else {
+                retval.add(MailCategoryConfig.copyOf(config));
             }
         }
 
-        return allConfigs;
+        return retval;
     }
 
     @Override
@@ -337,7 +334,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
                 error = false;
             } finally {
                 if (error) {
-                    removeUserCategory(category, session);
+                    removeUserCategories(new String[] { category }, session);
                 }
             }
         }
@@ -363,35 +360,44 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
     }
 
     @Override
-    public void removeUserCategory(String category, Session session) throws OXException {
-        removeRule(session, category);
+    public List<MailCategoriesServiceResult> removeUserCategories(String[] categories, Session session) throws OXException {
+        List<MailCategoriesServiceResult> result = new ArrayList<>(categories.length);
+        for (String category : categories) {
+            try {
+                removeRule(session, category);
 
-        String[] userCategories = getUserCategoryNames(session);
-        if (userCategories.length == 0) {
-            throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
-        }
-
-        StringBuilder newCategoriesList = new StringBuilder(userCategories.length << 3);
-        boolean exists = false;
-        for (String oldCategory : userCategories) {
-            if (oldCategory.equals(category)) {
-                exists = true;
-            } else {
-                if (newCategoriesList.length() > 0) {
-                    newCategoriesList.append(',');
+                String[] userCategories = getUserCategoryNames(session);
+                if (userCategories.length == 0) {
+                    throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
                 }
-                newCategoriesList.append(oldCategory);
+
+                StringBuilder newCategoriesList = new StringBuilder(userCategories.length << 3);
+                boolean exists = false;
+                for (String oldCategory : userCategories) {
+                    if (oldCategory.equals(category)) {
+                        exists = true;
+                    } else {
+                        if (newCategoriesList.length() > 0) {
+                            newCategoriesList.append(',');
+                        }
+                        newCategoriesList.append(oldCategory);
+                    }
+                }
+
+                if (!exists) {
+                    throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
+                }
+
+                MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
+                MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
+                MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
+                MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
+                result.add(new MailCategoriesServiceResult(category));
+            } catch (OXException e) {
+                result.add(new MailCategoriesServiceResult(category, e));
             }
         }
-
-        if (!exists) {
-            throw MailCategoriesExceptionCodes.USER_CATEGORY_DOES_NOT_EXIST.create(category);
-        }
-
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_NAME, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_ACTIVE, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_PREFIX + category + MailCategoriesConstants.MAIL_CATEGORIES_FLAG, null, session);
-        MailCategories.setProperty(MailCategoriesConstants.MAIL_USER_CATEGORIES_IDENTIFIERS, newCategoriesList.toString(), session);
+        return result;
     }
 
     @Override
@@ -422,7 +428,7 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             } finally {
                 if (error) {
                     // undo category creation
-                    removeUserCategory(category, session);
+                    removeUserCategories(new String[] { category }, session);
                 }
             }
         }

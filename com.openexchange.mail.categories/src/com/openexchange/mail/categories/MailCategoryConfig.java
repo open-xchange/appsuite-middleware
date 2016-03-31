@@ -200,6 +200,16 @@ public class MailCategoryConfig {
         return new MailCategoryConfig(categoryConfig.category, categoryConfig.flag, categoryConfig.force, active, categoryConfig.name, categoryConfig.names);
     }
 
+    /**
+     * Creates a copy of specified instance..
+     *
+     * @param categoryConfig The instance to copy from
+     * @return The copied instance
+     */
+    public static MailCategoryConfig copyOf(MailCategoryConfig categoryConfig) {
+        return copyOf(categoryConfig, categoryConfig.active);
+    }
+
     // ----------------------------------------------------------------------------------------------------------
 
     private final String category;
