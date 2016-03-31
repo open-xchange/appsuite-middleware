@@ -4386,6 +4386,9 @@ final class MailServletInterfaceImpl extends MailServletInterface {
     void move2Archive(MailMessage[] msgs, String fullName, String archiveFullname, char separator, Calendar cal, List<ArchiveDataWrapper> result) throws OXException {
         Map<Integer, List<String>> map = new HashMap<Integer, List<String>>(4);
         for (MailMessage mailMessage : msgs) {
+            if (mailMessage == null) {
+                continue;
+            }
             Date receivedDate = mailMessage.getReceivedDate();
             cal.setTime(receivedDate);
             Integer year = Integer.valueOf(cal.get(Calendar.YEAR));
