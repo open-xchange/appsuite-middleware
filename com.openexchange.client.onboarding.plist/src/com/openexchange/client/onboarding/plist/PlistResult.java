@@ -242,8 +242,18 @@ public class PlistResult implements Result {
     // --------------------------------------------- SMS utils --------------------------------------------------------------
 
     private ResultObject generateSMSResult(OnboardingRequest request, Session session) throws OXException {
+        SMSServiceSPI smsService = Services.optService(SMSServiceSPI.class);
+        if (smsService == null) {
+            throw ServiceExceptionCode.absentService(SMSServiceSPI.class);
+        }
+
+        SMSBucketService smsBucketService = Services.optService(SMSBucketService.class);
+        if (smsBucketService == null) {
+            throw ServiceExceptionCode.absentService(SMSBucketService.class);
+        }
+
         long ratelimit = getSMSRateLimit(session);
-        int smsRemaining = checkSMSLimit(session, ratelimit);
+        int smsRemaining = checkSMSLimit(session, ratelimit, smsBucketService);
         String untranslatedText;
         {
             List<OnboardingProvider> providers = request.getScenario().getProviders(session);
@@ -264,10 +274,6 @@ public class PlistResult implements Result {
         String link = smsLinkProvider.getLink(request.getHostData(), session.getUserId(), session.getContextId(), request.getScenario().getId(), request.getDevice().getId());
         text = text + link;
 
-        SMSServiceSPI smsService = Services.getService(SMSServiceSPI.class);
-        if (smsService == null) {
-            throw ServiceExceptionCode.absentService(SMSServiceSPI.class);
-        }
         Map<String, Object> input = request.getInput();
         if (input == null) {
             throw OnboardingExceptionCodes.MISSING_INPUT_FIELD.create(SMS_KEY);
@@ -284,11 +290,9 @@ public class PlistResult implements Result {
         ResultObject resultObject;
         resultObject = new SimpleResultObject(OnboardingUtility.getTranslationFor(OnboardingStrings.RESULT_SMS_SENT, session), "string");
         if (smsRemaining == 2) {
-            SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
             int hours = smsBucketService.getRefreshInterval(session);
             resultObject.addWarning(SMSBucketExceptionCodes.NEXT_TO_LAST_SMS_SENT.create(hours));
         }
-
 
         return resultObject;
     }
@@ -366,7 +370,7 @@ public class PlistResult implements Result {
         return property.get().longValue();
     }
 
-    private int checkSMSLimit(Session session, long ratelimit) throws OXException {
+    private int checkSMSLimit(Session session, long ratelimit, SMSBucketService smsBucketService) throws OXException {
         if (ratelimit > 0) {
             Long lastSMSSend = (Long) session.getParameter(OnboardingSMSConstants.SMS_LAST_SEND_TIMESTAMP);
 
@@ -376,7 +380,6 @@ public class PlistResult implements Result {
         }
 
         int remainingSMS = -1;
-        SMSBucketService smsBucketService = Services.getService(SMSBucketService.class);
         if (smsBucketService.isEnabled(session)) {
             remainingSMS = smsBucketService.getSMSToken(session);
         }
