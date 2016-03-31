@@ -47,39 +47,47 @@
  *
  */
 
-package com.openexchange.mail.categories.impl.osgi;
+package com.openexchange.mail.categories;
 
-import com.openexchange.config.ConfigurationService;
-import com.openexchange.config.cascade.ConfigViewFactory;
-import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.impl.MailCategoriesConfigServiceImpl;
-import com.openexchange.mail.categories.ruleengine.MailCategoriesRuleEngine;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link Activator}
+ * {@link MailCategoriesServiceResult}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class Activator extends HousekeepingActivator {
+public class MailCategoriesServiceResult {
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class[] { ConfigViewFactory.class, ConfigurationService.class, MailCategoriesRuleEngine.class };
+    String category;
+    OXException error;
+
+    /**
+     * Initializes a new {@link MailCategoriesServiceResult.ResultObject}.
+     */
+    public MailCategoriesServiceResult(String category, OXException error) {
+        super();
+        this.category = category;
+        this.error = error;
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        Services.setServiceLookup(this);
-        registerService(MailCategoriesConfigService.class, new MailCategoriesConfigServiceImpl());
-
+    /**
+     * Initializes a new {@link MailCategoriesServiceResult.ResultObject}.
+     */
+    public MailCategoriesServiceResult(String category) {
+        super();
+        this.category = category;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        super.stopBundle();
-        Services.setServiceLookup(null);
+    public OXException getException() {
+        return error;
     }
 
+    public boolean hasError() {
+        return error != null;
+    }
+
+    public String getCategory() {
+        return category;
+    }
 }

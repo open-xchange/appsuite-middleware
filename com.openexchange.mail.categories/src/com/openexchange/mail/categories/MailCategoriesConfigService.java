@@ -171,13 +171,14 @@ public interface MailCategoriesConfigService {
     void updateUserCategory(String category, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
-     * Removes a user category
+     * Removes the given user categories
      *
-     * @param category The category identifier
+     * @param categories The category identifiers
      * @param session The user session
+     * @return A list of result objects
      * @throws OXException if a category with this identifier does not exist
      */
-    void removeUserCategory(String category, Session session) throws OXException;
+    List<MailCategoriesServiceResult> removeUserCategories(String[] categories, Session session) throws OXException;
 
     /**
      * Returns true if the mail categories feature is enabled for the given user

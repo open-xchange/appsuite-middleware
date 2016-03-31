@@ -51,7 +51,6 @@ package com.openexchange.mail.categories.json;
 
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -78,9 +77,8 @@ import com.openexchange.tools.session.ServerSession;
     }, responseDescription = "Response: An array with category configurations")
 public class SwitchAction extends AbstractCategoriesAction {
 
-    private static final String ACTION = "categories";
+    private static final String ACTION_DISABLE = "disable";
     private static final String PARAMETER_CATEGORY_IDS = "category_ids";
-    private static final String PARAMETER_ENABLE = "enable";
 
 
     /**
@@ -102,7 +100,7 @@ public class SwitchAction extends AbstractCategoriesAction {
         }
 
         if (!categoriesConfigService.isEnabled(session)) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create(ACTION);
+            throw AjaxExceptionCodes.DISABLED_ACTION.create(requestData.getAction());
         }
 
         String[] ids = Strings.splitByComma(requestData.requireParameter(PARAMETER_CATEGORY_IDS));
@@ -110,7 +108,7 @@ public class SwitchAction extends AbstractCategoriesAction {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(PARAMETER_CATEGORY_IDS);
         }
 
-        boolean enable = AJAXRequestDataTools.parseBoolParameter(PARAMETER_ENABLE, requestData);
+        boolean enable = requestData.getAction().equals(ACTION_DISABLE) ? false : true;
         List<MailCategoryConfig> configs = categoriesConfigService.changeConfigurations(ids, enable, session);
 
         final AJAXRequestResult result = new AJAXRequestResult(configs, "mailCategoriesConfig");
