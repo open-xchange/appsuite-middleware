@@ -87,7 +87,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { NotificationMailFactory.class, ConfigViewFactory.class, ConfigurationService.class,
- DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class, SMSBucketService.class };
+            DispatcherPrefixService.class, HttpService.class, OnboardingService.class, UserService.class };
     }
 
     @Override
@@ -96,6 +96,7 @@ public class OnboardingPlistActivator extends HousekeepingActivator {
 
         // Track services needed for SMS transport
         trackService(SMSServiceSPI.class);
+        trackService(SMSBucketService.class);
         trackService(DownloadLinkProvider.class);
         trackService(HostnameService.class);
         openTrackers();
