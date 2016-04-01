@@ -55,6 +55,8 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.psd.PsdMetadataReader;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.MetadataException;
@@ -64,8 +66,8 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.imagetransformation.ImageInformation;
 import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.Utility;
+import com.openexchange.java.BoolReference;
 import com.openexchange.java.Streams;
-import com.openexchange.tools.images.transformations.RotateTransformation;
 
 
 /**
@@ -76,6 +78,10 @@ import com.openexchange.tools.images.transformations.RotateTransformation;
 public class ImageTransformationUtility {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ImageTransformationUtility.class);
+    private static final int JPEG_FILE_MAGIC_NUMBER = 0xFFD8;
+    private static final int MOTOROLA_TIFF_MAGIC_NUMBER = 0x4D4D;  // "MM"
+    private static final int INTEL_TIFF_MAGIC_NUMBER = 0x4949;     // "II"
+    private static final int PSD_MAGIC_NUMBER = 0x3842;            // "8B" note that the full magic number is 8BPS
 
     /**
      * Initializes a new {@link ImageTransformationUtility}.
@@ -217,7 +223,7 @@ public class ImageTransformationUtility {
         try {
             Metadata metadata = ImageMetadataReader.readMetadata(bufferedInputStreamFor(in), false);
             ImageInformation imageInformation = getImageInformation(metadata);
-            return RotateTransformation.getInstance().needsRotation(imageInformation);
+            return null != imageInformation && 1 < imageInformation.orientation;
         } catch (ImageProcessingException e) {
             LOG.debug("error getting metadata.", e);
         } finally {
@@ -226,6 +232,39 @@ public class ImageTransformationUtility {
 
         // RotateTransformation does nothing if 'ImageInformation' is absent
         return false;
+    }
+
+    /**
+     * Reads out image information from an image stream.
+     *
+     * @param bufferedStream The stream to read the image information from
+     * @param reset Will be set to <code>true</code> if something was read and the stream should be reset
+     * @return The image information, or <code>null</code> if not available
+     */
+    public static ImageInformation readImageInformation(BufferedInputStream bufferedStream, BoolReference reset) throws IOException {
+        // Read the magic number
+        int magicNumber = ImageTransformationUtility.readMagicNumber(bufferedStream);
+
+        // Read image metadata
+        try {
+            if ((magicNumber & JPEG_FILE_MAGIC_NUMBER) == JPEG_FILE_MAGIC_NUMBER) {
+                // This covers all JPEG files
+                bufferedStream.mark(65536); // 64K mark limit
+                reset.setValue(true);
+                return getImageInformation(JpegMetadataReader.readMetadata(bufferedStream, false));
+            } else if (magicNumber == INTEL_TIFF_MAGIC_NUMBER || magicNumber == MOTOROLA_TIFF_MAGIC_NUMBER) {
+                // This covers all TIFF and camera RAW files
+                // Do not read meta-data from TIFF images using 'com.drew.imaging' package as it is very inefficient
+            } else if (magicNumber == PSD_MAGIC_NUMBER) {
+                // This covers PSD files, which only need 26 bytes for extracting metadata
+                bufferedStream.mark(32);
+                reset.setValue(true);
+                return getImageInformation(PsdMetadataReader.readMetadata(bufferedStream, false));
+            }
+        } catch (ImageProcessingException e) {
+            LOG.debug("Error getting metadata", e);
+        }
+        return null;
     }
 
 }

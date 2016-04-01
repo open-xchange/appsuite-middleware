@@ -10,7 +10,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/metadata-extractor-2.6.1.jar" sourcepath="lib/source/metadata-extractor-2.6.1-src.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xmpcore.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jacksum.jar" sourcepath="lib/source/jacksum-src.zip"/>
-	<classpathentry exported="true" kind="lib" path="lib/imgscalr-lib-4.2.jar" sourcepath="lib/source/imgscalr-lib-4.2-sources.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.test"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>

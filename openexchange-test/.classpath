@@ -138,5 +138,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.client.onboarding"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.sms"/>
 	<classpathentry kind="lib" path="lib/xmlwise-1_2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/com.openexchange.imagetransformation.java"/>
 	<classpathentry kind="output" path="build"/>
 </classpath>
