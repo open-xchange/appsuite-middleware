@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH. group of companies.
+ *    trademarks of the OX Software GmbH group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -82,7 +82,7 @@ public final class VCardMailPartImportTest extends AbstractConversionTest {
 					+ "ADR;TYPE=home:;;Musterstr. 10;Olpe;NRW;57666;Deutschland\n"
 					+ "TEL;TYPE=work;TYPE=voice:+49 (2761) 8385-16\n" + "TEL;TYPE=work;TYPE=fax:+49 (2761) 8385-30\n"
 					+ "TEL;TYPE=home;TYPE=voice:+49 2761 / 843 157\n" + "TEL;TYPE=cell;TYPE=voice:0171 / 835 72 89\n"
-					+ "EMAIL:thomas.mustermann@open-xchange.com\n" + "ORG:OX Software GmbH.;Development\n"
+					+ "EMAIL:thomas.mustermann@open-xchange.com\n" + "ORG:OX Software GmbH;Development\n"
 					+ "REV:20080818T064153.771Z\n" + "UID:5@ox6-unstable.netline.de\n" + "END:VCARD").getBytes();
 
 	/**

@@ -1,4 +1,4 @@
 
-$ find . -name "*.java" -print | xargs sed -ie 's/Copyright (C) 2016-2020 OX Software GmbH./g'
+$ find . -name "*.java" -print | xargs sed -ie 's/Copyright (C) 2016-2020 OX Software GmbH/g'
 
 $ find . -type f -name "*.javae" -exec rm -f {} \;
