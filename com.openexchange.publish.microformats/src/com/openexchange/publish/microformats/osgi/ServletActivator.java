@@ -60,6 +60,7 @@ import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.groupware.infostore.InfostoreFacade;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.publish.PublicationDataLoaderService;
 import com.openexchange.publish.microformats.ContactPictureServlet;
@@ -67,7 +68,6 @@ import com.openexchange.publish.microformats.InfostoreFileServlet;
 import com.openexchange.publish.microformats.MicroformatServlet;
 import com.openexchange.publish.microformats.OnlinePublicationServlet;
 import com.openexchange.templating.TemplateService;
-import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
 

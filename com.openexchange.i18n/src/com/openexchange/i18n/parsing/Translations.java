@@ -49,34 +49,162 @@
 
 package com.openexchange.i18n.parsing;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Translations {
 
-    private final Map<String, String> transMap;
+    private Map<String, Translation> simpleTranslations; // Key -> [form1, form2, ...]
+    private Map<String, Map<String, Translation>> contextTranslations; // Context -> (Key -> [form1, form2, ...])
     private Locale locale;
 
     public Translations() {
         super();
-        transMap = new HashMap<String, String>(32);
+        simpleTranslations = new HashMap<String, Translation>(32);
+        contextTranslations = new HashMap<String, Map<String, Translation>>(32);
     }
 
-    public String translate(final String original) {
-        return transMap.get(original);
+    public String translate(String original) {
+        if (!simpleTranslations.containsKey(original)) {
+            return null;
+        }
+        return simpleTranslations.get(original).getMessage();
     }
 
-    public void setTranslation(final String key, final String value) {
-        transMap.put(key, value);
+    public String translate(String original, int plural) {
+        if (!simpleTranslations.containsKey(original)) {
+            return null;
+        }
+        return simpleTranslations.get(original).getMessage(plural);
+    }
+
+    public String translate(String context, String original) {
+        if (!contextTranslations.containsKey(context)) {
+            return null;
+        }
+        return contextTranslations.get(context).get(original).getMessage();
+    }
+
+    public String translate(String context, String original, int plural) {
+        if (!contextTranslations.containsKey(context)) {
+            return null;
+        }
+        return contextTranslations.get(context).get(original).getMessage(plural);
+    }
+
+    public void setTranslation(String key, String value) {
+        if (key == null) {
+            return;
+        }
+
+        Translation t = new Translation(null, key, null);
+        t.setMessage(0, value);
+        simpleTranslations.put(key, t);
+    }
+
+    public void setTranslationPlural(String key, String keyPlural, List<String> values) {
+        if (key == null || values == null || values.isEmpty()) {
+            return;
+        }
+
+        if (keyPlural == null && values.size() == 1) {
+            setTranslation(key, values.get(0));
+            return;
+        }
+
+        Translation t = new Translation(null, key, keyPlural);
+        for (int i = 0; i < values.size(); i++) {
+            t.setMessage(i, values.get(i));
+        }
+        simpleTranslations.put(key, t);
+        if (keyPlural != null) {
+            simpleTranslations.put(keyPlural, t);
+        }
+    }
+
+    public void setContextTranslation(String context, String key, String value) {
+        if (key == null || Strings.isEmpty(key)) {
+            return;
+        }
+
+        Translation t = new Translation(context, key, null);
+        t.setMessage(0, value);
+        if (contextTranslations.containsKey(context)) {
+            contextTranslations.get(context).put(key, t);
+        } else {
+            Map<String, Translation> translations = new HashMap<String, Translation>();
+            translations.put(key, t);
+            contextTranslations.put(context, translations);
+        }
+    }
+
+    public void setContextTranslationPlural(String context, String key, String keyPlural, List<String> values) {
+        if (key == null || values == null || values.isEmpty()) {
+            return;
+        }
+
+        if (context == null) {
+            setTranslationPlural(key, keyPlural, values);
+            return;
+        }
+
+        if (keyPlural == null && values.size() == 1) {
+            setContextTranslation(context, key, values.get(0));
+            return;
+        }
+
+        Translation t = new Translation(context, key, keyPlural);
+        for (int i = 0; i < values.size(); i++) {
+            t.setMessage(i, values.get(i));
+        }
+        if (contextTranslations.containsKey(context)) {
+            contextTranslations.get(context).put(key, t);
+            if (keyPlural != null) {
+                contextTranslations.get(context).put(keyPlural, t);
+            }
+        } else {
+            Map<String, Translation> translations = new HashMap<String, Translation>();
+            translations.put(key, t);
+            if (keyPlural != null) {
+                translations.put(keyPlural, t);
+            }
+            contextTranslations.put(context, translations);
+        }
     }
 
     public Set<String> getKnownStrings() {
-        return transMap.keySet();
+        return getKnownStrings(false);
+    }
+
+    public Set<String> getKnownStrings(boolean includeContexts) {
+        if (includeContexts) {
+            Set<String> retval = new HashSet<String>();
+            retval.addAll(getKnownStrings());
+            for (Map<String, Translation> contextMap : contextTranslations.values()) {
+                retval.addAll(contextMap.keySet());
+            }
+            return retval;
+        } else {
+            return simpleTranslations.keySet();
+        }
+    }
+
+    public Set<String> getKnownStrings(String context) {
+        if (contextTranslations.containsKey(context)) {
+            return contextTranslations.get(context).keySet();
+        } else {
+            return Collections.<String> emptySet();
+        }
     }
 
     public Locale getLocale() {
@@ -94,8 +222,8 @@ public class Translations {
         if (locale != null) {
             builder.append("locale=").append(locale).append(", ");
         }
-        if (transMap != null) {
-            builder.append("translation-map=").append(transMap);
+        if (simpleTranslations != null) {
+            builder.append("translation-map=").append(simpleTranslations);
         }
         builder.append('}');
         return builder.toString();

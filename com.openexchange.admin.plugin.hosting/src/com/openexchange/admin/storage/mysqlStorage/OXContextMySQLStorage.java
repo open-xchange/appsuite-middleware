@@ -257,7 +257,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.debug("Filestore delete(cid={}) from disc finished!", ctx.getId());
 
             // Get connection for ConfigDB
-            conForConfigDB = adminCache.getConnectionForConfigDB();
+            conForConfigDB = adminCache.getWriteConnectionForConfigDB();
 
             // Get connection and scheme for given context
             int poolId;
@@ -339,7 +339,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
                 try {
-                    adminCache.pushConnectionForConfigDB(conForConfigDB);
+                    adminCache.pushWriteConnectionForConfigDB(conForConfigDB);
                 } catch (PoolException exp) {
                     LOG.error("Pool Error", exp);
                 }
@@ -479,7 +479,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             stmt = con.prepareStatement("UPDATE context SET enabled = 0, reason_id = ? WHERE cid IN (SELECT cid FROM context_server2db_pool WHERE db_schema = ?) AND enabled = 1");
             stmt.setInt(1, reason.getId());
             stmt.setString(2, schema);
@@ -496,7 +496,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -553,7 +553,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con = null;
         PreparedStatement stmt = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             String query;
             if (reason == null) {
@@ -580,9 +580,53 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
+                }
+            }
+        }
+    }
+
+    @Override
+    public Set<String> getLoginMappings(Context ctx) throws StorageException {
+        Connection configCon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        try {
+            configCon = cache.getReadConnectionForConfigDB();
+            prep = configCon.prepareStatement("SELECT login_info FROM login2context WHERE cid=?");
+            prep.setInt(1, ctx.getId().intValue());
+            rs = prep.executeQuery();
+            if (false == rs.next()) {
+                return Collections.emptySet();
+            }
+
+            Set<String> loginMappings = new HashSet<String>(4);
+            String idAsString = ctx.getIdAsString();
+            do {
+                String loginMapping = rs.getString(1);
+                // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
+                // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
+                // SEE #11094 FOR DETAILS!
+                if (null != loginMapping && !idAsString.equals(loginMapping)){
+                    loginMappings.add(loginMapping);
+                }
+            } while (rs.next());
+            return loginMappings;
+        } catch (final PoolException e) {
+            LOG.error("Pool Error", e);
+            throw new StorageException(e);
+        } catch (final SQLException e) {
+            LOG.error("SQL Error", e);
+            throw new StorageException(e);
+        } finally {
+            Databases.closeSQLStuff(prep);
+            if (null != configCon) {
+                try {
+                    cache.pushReadConnectionForConfigDB(configCon);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
             }
         }
@@ -603,7 +647,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // (disabled,enabled,text)
         final Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
@@ -622,12 +666,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                if (null != configCon) {
-                    cache.pushConnectionForConfigDB(configCon);
+            if (null != configCon) {
+                try {
+                    cache.pushReadConnectionForConfigDB(configCon);
+                } catch (final PoolException exp) {
+                    LOG.error("Error pushing configdb connection to pool!", exp);
                 }
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
             }
         }
     }
@@ -693,7 +737,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // create database or use existing database AND update the mapping in contextserver2dbpool
             LOG.debug("Creating new scheme or using existing scheme on target database system!");
-            configdb_write_con = cache.getConnectionForConfigDB();
+            configdb_write_con = cache.getWriteConnectionForConfigDB();
             startTransaction(configdb_write_con);
             createDatabaseAndMappingForContext(db_handle, configdb_write_con, ctx.getId().intValue());
             LOG.debug("Scheme found and mapping in configdb changed to new target database system!");
@@ -815,7 +859,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             if (configdb_write_con != null) {
                 Databases.autocommit(configdb_write_con);
                 try {
-                    cache.pushConnectionForConfigDB(configdb_write_con);
+                    cache.pushWriteConnectionForConfigDB(configdb_write_con);
                 } catch (final Exception ex) {
                     LOG.error("Error pushing connection", ex);
                 }
@@ -950,7 +994,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             stmt = con.prepareStatement("SELECT cid FROM context_server2db_pool WHERE db_schema = ?");
             stmt.setString(1, schema);
             rs = stmt.executeQuery();
@@ -969,7 +1013,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushReadConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -988,7 +1032,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         ResultSet rs2 = null;
         int context_id = -1;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
 
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
@@ -1080,7 +1124,12 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             closePreparedStatement(logininfo);
             closeRecordset(rs);
-            pushConnectionToPoolConfigDB(con);
+            try {
+                cache.pushReadConnectionForConfigDB(con);
+            } catch (PoolException e) {
+                LOG.error("Error pushing ox read connection to pool!", e);
+            }
+
         }
     }
 
@@ -1120,7 +1169,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         final Connection configCon;
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
@@ -1232,7 +1281,11 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 autocommit(configCon);
             }
         } finally {
-            pushConnectionToPoolConfigDB(configCon);
+            try {
+                cache.pushWriteConnectionForConfigDB(configCon);
+            } catch (PoolException e) {
+                LOG.error("Error pushing ox write connection to pool!", e);
+            }
         }
     }
 
@@ -1339,56 +1392,48 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void updateDynamicAttributes(final Connection oxCon, final Context ctx) throws SQLException {
+        if (!ctx.isUserAttributesset()) {
+            return;
+        }
+
         PreparedStatement stmtupdateattribute = null;
         PreparedStatement stmtinsertattribute = null;
         PreparedStatement stmtdelattribute = null;
-        final int contextId = ctx.getId().intValue();
         try {
+            int contextId = ctx.getId().intValue();
 
-            if (ctx.isUserAttributesset()) {
+            stmtupdateattribute = oxCon.prepareStatement("UPDATE contextAttribute SET value = ? WHERE cid=? AND name=?");
+            stmtupdateattribute.setInt(2, contextId);
 
-                stmtupdateattribute = oxCon.prepareStatement("UPDATE contextAttribute SET value = ? WHERE cid=? AND name=?");
-                stmtupdateattribute.setInt(2, contextId);
+            stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?)");
+            stmtinsertattribute.setInt(2, contextId);
 
-                stmtinsertattribute = oxCon.prepareStatement("INSERT INTO contextAttribute (value, cid, name) VALUES (?, ?, ?)");
-                stmtinsertattribute.setInt(2, contextId);
+            stmtdelattribute = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
+            stmtdelattribute.setInt(1, contextId);
 
-                stmtdelattribute = oxCon.prepareStatement("DELETE FROM contextAttribute WHERE cid=? AND name=?");
-                stmtdelattribute.setInt(1, contextId);
+            for (Map.Entry<String, Map<String, String>> ns : ctx.getUserAttributes().entrySet()) {
+                String namespace = ns.getKey();
+                for (Map.Entry<String, String> pair : ns.getValue().entrySet()) {
+                    String name = namespace + "/" + pair.getKey();
+                    String value = pair.getValue();
+                    if (value != null) {
+                        stmtupdateattribute.setString(1, value);
+                        stmtupdateattribute.setString(3, name);
 
-                for (final Map.Entry<String, Map<String, String>> ns : ctx.getUserAttributes().entrySet()) {
-                    final String namespace = ns.getKey();
-                    for (final Map.Entry<String, String> pair : ns.getValue().entrySet()) {
-                        final String name = namespace + "/" + pair.getKey();
-                        final String value = pair.getValue();
-                        if (value != null) {
-                            stmtupdateattribute.setString(1, value);
-                            stmtupdateattribute.setString(3, name);
-
-                            final int changedRows = stmtupdateattribute.executeUpdate();
-                            if (changedRows == 0) {
-                                stmtinsertattribute.setString(1, value);
-                                stmtinsertattribute.setString(3, name);
-                                stmtinsertattribute.executeUpdate();
-                            }
-                        } else {
-                            stmtdelattribute.setString(2, name);
-                            stmtdelattribute.executeUpdate();
+                        int changedRows = stmtupdateattribute.executeUpdate();
+                        if (changedRows == 0) {
+                            stmtinsertattribute.setString(1, value);
+                            stmtinsertattribute.setString(3, name);
+                            stmtinsertattribute.executeUpdate();
                         }
+                    } else {
+                        stmtdelattribute.setString(2, name);
+                        stmtdelattribute.executeUpdate();
                     }
                 }
-
             }
         } finally {
-            if (stmtupdateattribute != null) {
-                stmtupdateattribute.close();
-            }
-            if (stmtinsertattribute != null) {
-                stmtinsertattribute.close();
-            }
-            if (stmtdelattribute != null) {
-                stmtdelattribute.close();
-            }
+            Databases.closeSQLStuff(stmtupdateattribute, stmtinsertattribute, stmtdelattribute);
         }
 
     }
@@ -1916,7 +1961,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con_write = null;
         PreparedStatement stmt = null;
         try {
-            con_write = cache.getConnectionForConfigDB();
+            con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
             if (reason_id != -1) {
                 stmt = con_write.prepareStatement("UPDATE context " + (additionaltable != null ? "," + additionaltable : "") + " SET enabled = ?, reason_id = ? " + (sqlconjunction != null ? sqlconjunction : ""));
@@ -1953,7 +1998,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con_write);
+                    cache.pushWriteConnectionForConfigDB(con_write);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
@@ -1965,7 +2010,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Connection con_write = null;
         PreparedStatement stmt = null;
         try {
-            con_write = cache.getConnectionForConfigDB();
+            con_write = cache.getWriteConnectionForConfigDB();
             con_write.setAutoCommit(false);
             stmt = con_write.prepareStatement("UPDATE context SET enabled = ?, reason_id = ? WHERE cid = ?");
 
@@ -2011,7 +2056,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             closePreparedStatement(stmt);
             if (con_write != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con_write);
+                    cache.pushWriteConnectionForConfigDB(con_write);
                 } catch (final PoolException exp) {
                     LOG.error("Error pushing configdb connection to pool!", exp);
                 }
@@ -2044,9 +2089,9 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         Collections.sort(list, Collections.reverseOrder(new DBWeightComparator(totalUnits, totalWeight)));
         final Iterator<DatabaseHandle> iter = list.iterator();
         DatabaseHandle retval = null;
-        while (iter.hasNext() && null == retval) {
-            final DatabaseHandle db = iter.next();
-            final int dbPoolId = i(db.getId());
+        while (null == retval && iter.hasNext()) {
+            DatabaseHandle db = iter.next();
+            int dbPoolId = i(db.getId());
             try {
                 final Connection dbCon = cache.getWRITEConnectionForPoolId(dbPoolId, null);
                 cache.pushWRITEConnectionForPoolId(dbPoolId, dbCon);
@@ -2475,15 +2520,14 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
     @Override
     public void change(final Context ctx) throws StorageException {
-        final Connection configCon;
+        Connection configCon = null;
+        boolean rollback = false;
         try {
-            configCon = cache.getConnectionForConfigDB();
-        } catch (final PoolException e) {
-            LOG.error("Pool Error", e);
-            throw new StorageException(e);
-        }
-        try {
+            // Fetch connection
+            configCon = cache.getWriteConnectionForConfigDB();
+
             configCon.setAutoCommit(false);
+            rollback = true;
 
             // Change login mappings in configdb
             changeLoginMappingsForContext(ctx, configCon);
@@ -2499,39 +2543,48 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             // commit changes to db
             configCon.commit();
-        } catch (final SQLException e) {
-            rollback(configCon);
-            LOG.error("SQL Error", e);
-            throw new StorageException(e);
-        } catch (final StorageException e) {
-            rollback(configCon);
-            throw e;
-        } finally {
-            try {
-                cache.pushConnectionForConfigDB(configCon);
-            } catch (final PoolException e) {
-                LOG.error("Error pushing configdb connection to pool!", e);
-            }
-        }
-        final Connection oxCon;
-        try {
-            oxCon = cache.getConnectionForContext(i(ctx.getId()));
+            rollback = false;
         } catch (final PoolException e) {
             LOG.error("Pool Error", e);
             throw new StorageException(e);
-        }
-        try {
-            updateDynamicAttributes(oxCon, ctx);
         } catch (final SQLException e) {
             LOG.error("SQL Error", e);
             throw new StorageException(e);
         } finally {
-            try {
-                cache.pushConnectionForContext(i(ctx.getId()), oxCon);
-            } catch (final PoolException e) {
-                LOG.error("SQL Error", e);
+            if (rollback) {
+                rollback(configCon);
+            }
+            if (null != configCon) {
+                try {
+                    cache.pushWriteConnectionForConfigDB(configCon);
+                } catch (final PoolException e) {
+                    LOG.error("Error pushing configdb connection to pool!", e);
+                }
             }
         }
+
+        if (ctx.isUserAttributesset()) {
+            Connection oxCon = null;
+            try {
+                oxCon = cache.getConnectionForContext(i(ctx.getId()));
+                updateDynamicAttributes(oxCon, ctx);
+            } catch (final PoolException e) {
+                LOG.error("Pool Error", e);
+                throw new StorageException(e);
+            } catch (final SQLException e) {
+                LOG.error("SQL Error", e);
+                throw new StorageException(e);
+            } finally {
+                if (null != oxCon) {
+                    try {
+                        cache.pushConnectionForContext(i(ctx.getId()), oxCon);
+                    } catch (final PoolException e) {
+                        LOG.error("SQL Error", e);
+                    }
+                }
+            }
+        }
+
         LOG.info("Context {} changed.", ctx.getId());
     }
 
@@ -2598,7 +2651,6 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         if (ctx.getMaxQuota() != null) {
 
             long quota_max_temp = ctx.getMaxQuota().longValue();
-
             if (quota_max_temp != -1) {
                 quota_max_temp = quota_max_temp << 20;
             }
@@ -2618,24 +2670,16 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     LOG.error("Failed to invalidate caches. Restart recommended.", e);
                 }
             } finally {
-                try {
-                    if (prep != null) {
-                        prep.close();
-                    }
-                } catch (final SQLException e) {
-                    LOG.error("SQL Error closing statement!", e);
-                }
+                Databases.closeSQLStuff(prep);
             }
-
         }
-
     }
 
     private void changeLoginMappingsForContext(final Context ctx, final Connection con) throws SQLException, StorageException {
-        if (null == ctx.getLoginMappings()) {
+        Set<String> loginMappings = ctx.getLoginMappings();
+        if (null == loginMappings) {
             return;
         }
-        final Set<String> loginMappings = ctx.getLoginMappings();
 
         // add always the context name
         if (ctx.getName() != null) {
@@ -2722,55 +2766,46 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
     }
 
     private void changeNameForContext(final Context ctx, final Connection configdb_con) throws SQLException {
+        // first check if name is set and has a valid name
+        if (ctx.getName() == null || ctx.getName().trim().length() <= 0) {
+            return;
+        }
 
         PreparedStatement prep = null;
-
         try {
+            // ok , now check if a context with this name the client wants
+            // to change already exists
+            // BUT exclude the name of the current context, because this
+            // context can of course be renamed to the same
+            // name as it had before the update :)
 
-            // first check if name is set and has a valid name
-            if (ctx.getName() != null && ctx.getName().trim().length() > 0) {
-                // ok , now check if a context with this name the client wants
-                // to change already exists
-                // BUT exclude the name of the current context, because this
-                // context can of course be renamed to the same
-                // name as it had before the update :)
-
-                prep = configdb_con.prepareStatement("SELECT cid FROM context WHERE name = ? AND cid !=?");
-                prep.setString(1, ctx.getName().trim());
-                prep.setInt(2, ctx.getId().intValue());
-                final ResultSet rs = prep.executeQuery();
-                if (rs.next()) {
-                    // context with the name already exists in the system,
-                    final String err_msg = "A context with context name \"" + ctx.getName().trim() + "\" already exists in the system!";
-                    LOG.error(err_msg);
-                    // throw error
-                    throw new SQLException(err_msg);
-                }
-                rs.close();
-                prep.close();
-
-                // if we reach here, update the table
-                prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
-                prep.setString(1, ctx.getName().trim());
-                prep.setInt(2, ctx.getId().intValue());
-                prep.executeUpdate();
-                prep.close();
-
+            prep = configdb_con.prepareStatement("SELECT cid FROM context WHERE name = ? AND cid !=?");
+            prep.setString(1, ctx.getName().trim());
+            prep.setInt(2, ctx.getId().intValue());
+            final ResultSet rs = prep.executeQuery();
+            if (rs.next()) {
+                // context with the name already exists in the system,
+                final String err_msg = "A context with context name \"" + ctx.getName().trim() + "\" already exists in the system!";
+                LOG.error(err_msg);
+                // throw error
+                throw new SQLException(err_msg);
             }
+            rs.close();
+            prep.close();
+
+            // if we reach here, update the table
+            prep = configdb_con.prepareStatement("UPDATE context SET name = ? where cid = ?");
+            prep.setString(1, ctx.getName().trim());
+            prep.setInt(2, ctx.getId().intValue());
+            prep.executeUpdate();
+            prep.close();
         } finally {
-            try {
-                if (prep != null) {
-                    prep.close();
-                }
-            } catch (final SQLException e) {
-                LOG.error("SQL Error closing statement!", e);
-            }
+            Databases.closeSQLStuff(prep);
         }
 
     }
 
     private void changeStorageDataImpl(final Context ctx, final Connection configdb_write_con) throws SQLException, StorageException {
-
         if (ctx.getFilestoreId() != null) {
             final OXUtilStorageInterface oxutil = OXUtilStorageInterface.getInstance();
             final Filestore filestore = oxutil.getFilestore(ctx.getFilestoreId().intValue(), false);
@@ -2786,7 +2821,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     prep.close();
                 }
 
-                final String filestore_name = ctx.getFilestore_name();
+                String filestore_name = ctx.getFilestore_name();
                 if (null != filestore_name) {
                     prep = configdb_write_con.prepareStatement("UPDATE context SET filestore_name = ? WHERE cid = ?");
                     prep.setString(1, filestore_name);
@@ -2796,13 +2831,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 }
 
             } finally {
-                try {
-                    if (prep != null) {
-                        prep.close();
-                    }
-                } catch (final SQLException exp) {
-                    LOG.error(OXContextMySQLStorageCommon.LOG_ERROR_CLOSING_STATEMENT);
-                }
+                Databases.closeSQLStuff(prep);
             }
         }
     }
@@ -2827,29 +2856,18 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
     }
 
-    private void pushConnectionToPoolConfigDB(final Connection con) {
-        if (con != null) {
-            try {
-                cache.pushConnectionForConfigDB(con);
-            } catch (final PoolException exp) {
-                LOG.error("Error pushing configdb connection to pool!", exp);
-            }
-        }
-    }
-
     @Override
     public void updateContextReferences(String sourceSchema, String targetSchema, int targetClusterId) throws StorageException {
         Connection con = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
 
             // Get the database pool identifier from the specified target cluster identifier
             String getPoolIds = "SELECT read_db_pool_id, write_db_pool_id FROM db_cluster WHERE cluster_id = ?";
             stmt = con.prepareStatement(getPoolIds);
             stmt.setInt(1, targetClusterId);
-            stmt.executeQuery();
             rs = stmt.executeQuery();
             final int writeDbPoolId;
             final int readDbPoolId;
@@ -2882,7 +2900,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             Databases.closeSQLStuff(rs, stmt);
             if (con != null) {
                 try {
-                    cache.pushConnectionForConfigDB(con);
+                    cache.pushWriteConnectionForConfigDB(con);
                 } catch (PoolException e) {
                     LOG.error("Error pushing configdb connection to pool!", e);
                 }
@@ -2896,7 +2914,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         // Get connection to 'configdb'
         try {
-            configCon = cache.getConnectionForConfigDB();
+            configCon = cache.getWriteConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e.getMessage(), e);
         }
@@ -2935,7 +2953,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         } finally {
             autocommit(configCon);
             try {
-                cache.pushConnectionForConfigDB(configCon);
+                cache.pushWriteConnectionForConfigDB(configCon);
             } catch (PoolException e) {
                 LOG.error("Error pushing configdb connection to pool!", e);
             }

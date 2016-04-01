@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -40,9 +40,10 @@
 
 package com.sun.mail.imap.protocol;
 
+import java.util.Map;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
+
 import com.sun.mail.iap.*;
 
 /**
@@ -66,11 +67,12 @@ public class Status {
 	{ "MESSAGES", "RECENT", "UNSEEN", "UIDNEXT", "UIDVALIDITY" };
 
     public Status(Response r) throws ParsingException {
-	mbox = r.readAtomString(); // mailbox := astring
+	// mailbox := astring
+	mbox = BASE64MailboxDecoder.decode(r.readAtomString());
 
 	// Workaround buggy IMAP servers that don't quote folder names
 	// with spaces.
-	final StringBuilder buffer = new StringBuilder();
+	final StringBuffer buffer = new StringBuffer();
 	boolean onlySpaces = true;
 
 	while (r.peekByte() != '(' && r.peekByte() != 0) {
@@ -116,6 +118,8 @@ public class Status {
     /**
      * Get the value for the STATUS item.
      *
+     * @param	item	the STATUS item
+     * @return		the value
      * @since	JavaMail 1.5.2
      */
     public long getItem(String item) {

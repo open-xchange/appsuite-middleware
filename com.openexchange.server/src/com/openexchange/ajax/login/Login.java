@@ -63,19 +63,19 @@ import com.openexchange.login.internal.LoginPerformer;
 
 /**
  * {@link Login}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class Login extends AbstractLoginRequestHandler {
 
     /**
-     * 
+     *
      */
     private final LoginConfiguration conf;
 
     /**
      * Initializes a new {@link Login}.
-     * 
+     *
      * @param login
      */
     public Login(LoginConfiguration conf, Set<LoginRampUpService> rampUp) {

@@ -64,4 +64,6 @@ public class OAuthProviderProperties {
 
     public static final String ENCRYPTION_KEY = "com.openexchange.oauth.provider.encryptionKey";
 
+    public static final String IS_AUTHORIZATION_SERVER = "com.openexchange.oauth.provider.isAuthorizationServer";
+
 }

@@ -48,6 +48,10 @@
 # debian postinst is going to fail when not set'ting +e
 set +e
 
+# CentOS moves utils like pidof to /sbin so we have to append it to $PATH if
+# not already contained
+[[ "$PATH" =~ (^|:)/sbin:* ]] || PATH=${PATH}:/sbin
+
 JAVA_BIN=
 
 ox_set_JAVA_BIN() {
@@ -472,7 +476,7 @@ ox_comment(){
             mv $tmp $propfile
         fi
     elif [ "$action" == "remove" ];then
-        sed "s/^#.*$prop/$prop/" < $propfile > $tmp;
+      sed "s/^#[ ]*\($prop[ ]*=\)/\1/" < $propfile > $tmp;
         if [ $? -gt 0 ]; then
             rm -f $tmp
             die "ox_comment: FATAL: could not remove comment in file $propfile for $prop"

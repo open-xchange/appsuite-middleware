@@ -59,7 +59,6 @@ import java.util.Map;
 import java.util.Set;
 import com.openexchange.database.Databases;
 import com.openexchange.groupware.filestore.AbstractFileLocationHandler;
-import com.openexchange.groupware.filestore.FileLocationHandler;
 
 
 /**

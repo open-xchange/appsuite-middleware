@@ -215,7 +215,8 @@ Actions for client:
             if (Action.REMOVE.equals(action.getAction())) {
                 AbstractAction<FileVersion> matchingAction = null;
                 for (AbstractAction<FileVersion> fileAction : optimizedList) {
-                    if (Action.DOWNLOAD == fileAction.getAction() && matchesByChecksum(action.getVersion(), fileAction.getNewVersion())) {
+                    if (Action.DOWNLOAD == fileAction.getAction() && false == isDriveMeta(fileAction.getNewVersion()) &&
+                        matchesByChecksum(action.getVersion(), fileAction.getNewVersion())) {
                         matchingAction = fileAction;
                         break;
                     }
@@ -248,7 +249,7 @@ Actions for client:
     private static FileVersion findByNameAndChecksum(String name, String checksum, Collection<? extends FileVersion> fileVersions) {
         if (null != fileVersions && 0 < fileVersions.size()) {
             for (FileVersion fileVersion : fileVersions) {
-                if (name.equals(fileVersion.getName()) && checksum.equals(fileVersion.getChecksum())) {
+                if (name.equals(fileVersion.getName()) && checksum.equals(fileVersion.getChecksum()) && false == isDriveMeta(fileVersion)) {
                     return fileVersion;
                 }
             }

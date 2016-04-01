@@ -67,7 +67,8 @@ import java.util.TimeZone;
 import net.sourceforge.cardme.engine.VCardEngine;
 import net.sourceforge.cardme.io.CompatibilityMode;
 import net.sourceforge.cardme.vcard.exceptions.VCardException;
-import net.sourceforge.cardme.vcard.exceptions.VCardParseException;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.DavException;
@@ -371,37 +372,45 @@ public abstract class CardDAVTest extends WebDAVTest {
     	return eTags;
 	}
 
-	/**
-	 * Performs a REPORT method at /carddav/Contacts/, requesting the address
-	 * data and ETags of all elements identified by the supplied hrefs.
-	 * @param hrefs
-	 * @return
-	 * @throws ConfigurationException
-	 * @throws IOException
-	 * @throws DavException
-	 * @throws VCardParseException
-	 * @throws VCardException
-	 */
-	protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws Exception {
-		final List<VCardResource> addressData = new ArrayList<VCardResource>();
-    	final DavPropertyNameSet props = new DavPropertyNameSet();
-    	props.add(PropertyNames.GETETAG);
-    	props.add(PropertyNames.ADDRESS_DATA);
-    	final ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
-    	final MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/Contacts/");
-        for (final MultiStatusResponse response : responses) {
-        	if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
-	        	final String href = response.getHref();
-	        	assertNotNull("got no href from response", href);
-	        	final String data = this.extractTextContent(PropertyNames.ADDRESS_DATA, response);
-	        	assertNotNull("got no address data from response", data);
-	        	final String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
-	        	assertNotNull("got no etag data from response", eTag);
-	        	addressData.add(new VCardResource(data, href, eTag));
-        	}
-		}
-		return addressData;
-	}
+    /**
+     * Performs a REPORT method at /carddav/Contacts/, requesting the address data and ETags of all elements identified by the
+     * supplied hrefs.
+     *
+     * @param hrefs The hrefs to request
+     * @return The vCard resources
+     */
+    protected List<VCardResource> addressbookMultiget(final Collection<String> hrefs) throws Exception {
+        return addressbookMultiget("Contacts", hrefs);
+    }
+
+    /**
+     * Performs a REPORT method in a specific collection, requesting the address data and ETags of all elements identified by the
+     * supplied hrefs.
+     *
+     * @param collection The collection to perform the report action in
+     * @param hrefs The hrefs to request
+     * @return The vCard resources
+     */
+    protected List<VCardResource> addressbookMultiget(String collection, Collection<String> hrefs) throws Exception {
+        List<VCardResource> addressData = new ArrayList<VCardResource>();
+        DavPropertyNameSet props = new DavPropertyNameSet();
+        props.add(PropertyNames.GETETAG);
+        props.add(PropertyNames.ADDRESS_DATA);
+        ReportInfo reportInfo = new AddressbookMultiGetReportInfo(hrefs.toArray(new String[hrefs.size()]), props);
+        MultiStatusResponse[] responses = this.getWebDAVClient().doReport(reportInfo, getBaseUri() + "/carddav/" + collection + '/');
+        for (MultiStatusResponse response : responses) {
+            if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.GETETAG)) {
+                String href = response.getHref();
+                assertNotNull("got no href from response", href);
+                String data = this.extractTextContent(PropertyNames.ADDRESS_DATA, response);
+                assertNotNull("got no address data from response", data);
+                String eTag = this.extractTextContent(PropertyNames.GETETAG, response);
+                assertNotNull("got no etag data from response", eTag);
+                addressData.add(new VCardResource(data, href, eTag));
+            }
+        }
+        return addressData;
+    }
 
 	protected VCardResource getVCard(final String uid) throws Exception {
 		final String href = "/carddav/Contacts/" + uid + ".vcf";
@@ -411,6 +420,15 @@ public abstract class CardDAVTest extends WebDAVTest {
     	final VCardResource vCard = vCards.get(0);
     	assertNotNull("no vCard data found", vCard);
     	return vCard;
+	}
+
+	protected VCardResource getVCardResource(String href) throws Exception {
+        GetMethod get = new GetMethod(getWebDAVClient().getBaseURI() + href);
+        String vCard = getWebDAVClient().doGet(get);
+        assertNotNull(vCard);
+        Header eTagHeader = get.getResponseHeader("ETag");
+        String eTag = null != eTagHeader ? eTagHeader.getValue() : null;
+        return new VCardResource(vCard, href, eTag);
 	}
 
 	private static JSONObject getSearchFilter(String uid, int[] folderIDs) throws JSONException {

@@ -50,55 +50,106 @@ package com.openexchange.data.conversion.ical.ical4j.internal.appointment;
 
 import java.util.List;
 import java.util.TimeZone;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Transp;
+import net.fortuna.ical4j.model.property.XProperty;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.Mode;
 import com.openexchange.data.conversion.ical.ical4j.internal.AbstractVerifyingAttributeConverter;
 import com.openexchange.groupware.container.Appointment;
 import com.openexchange.groupware.contexts.Context;
+import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
  */
 public class Transparency extends AbstractVerifyingAttributeConverter<VEvent, Appointment> {
 
+    /**
+     * Initializes a new {@link Transparency}.
+     */
     public Transparency() {
         super();
     }
 
     @Override
-    public boolean isSet(final Appointment appointment) {
+    public boolean isSet(Appointment appointment) {
         return appointment.containsShownAs();
     }
 
     @Override
-    public void emit(final Mode mode, final int index, final Appointment appointment, final VEvent event, final List<ConversionWarning> warnings, final Context ctx, final Object... args) {
-        switch(appointment.getShownAs()) {
-        case Appointment.RESERVED:
-        case Appointment.ABSENT:
-        case Appointment.TEMPORARY:
-            event.getProperties().add(new Transp("OPAQUE"));
-            break;
-        case Appointment.FREE:
-            event.getProperties().add(new Transp("TRANSPARENT"));
-            break;
-        default:
+    public void emit(Mode mode, int index, Appointment appointment, VEvent event, List<ConversionWarning> warnings, Context ctx, Object... args) {
+        switch (appointment.getShownAs()) {
+            case Appointment.RESERVED:
+                event.getProperties().add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "BUSY"));
+                event.getProperties().add(new Transp("OPAQUE"));
+                break;
+            case Appointment.ABSENT:
+                event.getProperties().add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "OOF"));
+                event.getProperties().add(new Transp("OPAQUE"));
+                break;
+            case Appointment.TEMPORARY:
+                event.getProperties().add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "TENTATIVE"));
+                event.getProperties().add(new Transp("OPAQUE"));
+                break;
+            case Appointment.FREE:
+                event.getProperties().add(new XProperty("X-MICROSOFT-CDO-BUSYSTATUS", "FREE"));
+                event.getProperties().add(new Transp("TRANSPARENT"));
+                break;
+            default:
+                break;
         }
     }
 
     @Override
-    public boolean hasProperty(final VEvent event) {
-        return event.getTransparency() != null;
+    public boolean hasProperty(VEvent event) {
+        return null != event.getTransparency() || null != event.getProperty("X-MICROSOFT-CDO-BUSYSTATUS");
     }
 
     @Override
-    public void parse(final int index, final VEvent event, final Appointment appointment, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) {
-        final String value = event.getProperty("TRANSP").getValue().toLowerCase();
-        if("opaque".equals(value))  {
-            appointment.setShownAs(Appointment.RESERVED);
-        } else if ("transparent".equals(value)) {
-            appointment.setShownAs(Appointment.FREE);
+    public void parse( int index, VEvent event, Appointment appointment, TimeZone timeZone, Context ctx, List<ConversionWarning> warnings) {
+        int shownAs = 0;
+        /*
+         * parse default TRANSP
+         */
+        Transp transp = event.getTransparency();
+        if (null != transp && Strings.isNotEmpty(transp.getValue())) {
+            switch (transp.getValue().toUpperCase()) {
+                case "OPAQUE":
+                    shownAs = Appointment.RESERVED;
+                    break;
+                case "TRANSPARENT":
+                    shownAs = Appointment.FREE;
+                    break;
+                default:
+                    break;
+            }
+        }
+        /*
+         * refine RESERVED based on X-MICROSOFT-CDO-BUSYSTATUS when available
+         */
+        Property busyStatus = event.getProperty("X-MICROSOFT-CDO-BUSYSTATUS");
+        if (Appointment.FREE != shownAs && null != busyStatus && Strings.isNotEmpty(busyStatus.getValue())) {
+            switch (busyStatus.getValue().toUpperCase()) {
+                case "BUSY":
+                    shownAs = Appointment.RESERVED;
+                    break;
+                case "OOF":
+                    shownAs = Appointment.ABSENT;
+                    break;
+                case "TENTATIVE":
+                    shownAs = Appointment.TEMPORARY;
+                    break;
+                case "FREE":
+                    shownAs = Appointment.FREE;
+                    break;
+                default:
+                    break;
+            }
+        }
+        if (0 < shownAs) {
+            appointment.setShownAs(shownAs);
         }
     }
 }

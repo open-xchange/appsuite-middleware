@@ -56,9 +56,7 @@ import com.openexchange.exception.OXException;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-public interface UpdateTaskV2 extends UpdateTask {
-
-    static final int NO_VERSION = Schema.NO_VERSION;
+public interface UpdateTaskV2 {
 
     /**
      * Performs the database schema upgrade. Once this method returns either successful or unsuccessful, this task is written as executed
@@ -95,4 +93,5 @@ public interface UpdateTaskV2 extends UpdateTask {
      * @return the attributes.
      */
     TaskAttributes getAttributes();
+
 }

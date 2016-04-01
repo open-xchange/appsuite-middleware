@@ -51,6 +51,7 @@ package com.openexchange.share;
 
 import static com.openexchange.exception.OXExceptionStrings.SQL_ERROR_MSG;
 import static com.openexchange.share.ShareExceptionMessages.INVALID_LINK_MSG;
+import static com.openexchange.share.ShareExceptionMessages.INVALID_LINK_PERMISSIONS_MSG;
 import static com.openexchange.share.ShareExceptionMessages.INVALID_MAIL_ADDRESS_MSG;
 import static com.openexchange.share.ShareExceptionMessages.UNKNOWN_SHARE_MSG;
 import com.openexchange.exception.Category;
@@ -91,7 +92,7 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
         ShareExceptionMessages.NO_DELETE_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 7),
 
     /** You don't have sufficient permissions to edit the share. || User %1$d has no edit permissions for share \"%2$s\" in context %3$d. */
-    NO_EDIT_PERMISSIONS("User %1$d has no delete permissions for share \"%2$s\" in context %3$d.",
+    NO_EDIT_PERMISSIONS("User %1$d has no edit permissions for share \"%2$s\" in context %3$d.",
         ShareExceptionMessages.NO_EDIT_PERMISSIONS_MSG, Category.CATEGORY_PERMISSION_DENIED, 8),
 
     /** You don't have sufficient permissions to share folder or item \"%2$s\". || User %1$d has no share permissions for folder or item \"%2$s\" in context %3$d. */
@@ -149,6 +150,9 @@ public enum ShareExceptionCodes implements DisplayableOXExceptionCode {
 
     /** A link for target [%1$s - %2$s - %2$s] does not exist. **/
     INVALID_LINK_TARGET("A link for target [%1$s - %2$s - %2$s] does not exist.", null, Category.CATEGORY_ERROR, 23),
+
+    /** The set permissions for the link are invalid. */
+    INVALID_LINK_PERMISSION(INVALID_LINK_PERMISSIONS_MSG, INVALID_LINK_PERMISSIONS_MSG, Category.CATEGORY_USER_INPUT, 24),
 
     ;
 

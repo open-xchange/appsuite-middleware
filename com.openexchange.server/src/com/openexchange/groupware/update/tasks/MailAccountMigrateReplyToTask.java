@@ -83,19 +83,8 @@ public final class MailAccountMigrateReplyToTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskPriority.HIGH.priority;
-    }
-
-    @Override
     public String[] getDependencies() {
-        return new String[] {
-            GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddReplyToTask.class.getName() };
+        return new String[] {};
     }
 
     @Override

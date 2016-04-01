@@ -64,6 +64,7 @@ import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.database.DBPoolingExceptionCodes;
 import com.openexchange.database.GlobalDatabaseService;
+import com.openexchange.database.internal.wrapping.JDBC4ConnectionReturner;
 import com.openexchange.database.migration.DBMigration;
 import com.openexchange.database.migration.DBMigrationCallback;
 import com.openexchange.database.migration.DBMigrationConnectionProvider;
@@ -80,11 +81,11 @@ import com.openexchange.java.Strings;
  */
 public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDatabaseServiceImpl.class);
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GlobalDatabaseServiceImpl.class);
     private static final String GLOBALDB_CHANGE_LOG = "/liquibase/globaldbChangeLog.xml";
 
-    private final Pools pools;
-    private final ReplicationMonitor monitor;
+    final Pools pools;
+    final ReplicationMonitor monitor;
     private Map<String, GlobalDbConfig> globalDbConfigs;
     private final ConfigViewFactory configViewFactory;
     private final ConfigDatabaseServiceImpl configDatabaseService;
@@ -179,15 +180,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
              * replication monitor
              */
             final AssignmentImpl assignment = dbConfig.getAssignment();
-            final AssignmentImpl firstAssignment = new AssignmentImpl(assignment) {
-
-                private static final long serialVersionUID = -6801059791528227771L;
-
-                @Override
-                public boolean isToConfigDB() {
-                    return true;
-                }
-            };
+            final AssignmentImpl firstAssignment = new AssignmentImpl(assignment);
             DBMigrationConnectionProvider connectionProvider = new DBMigrationConnectionProvider() {
 
                 @Override
@@ -197,7 +190,12 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
                 @Override
                 public void back(Connection connection) {
-                    GlobalDatabaseServiceImpl.this.back(connection);
+                    GlobalDatabaseServiceImpl.this.back(connection, false);
+                }
+
+                @Override
+                public void backAfterReading(Connection connection) {
+                    GlobalDatabaseServiceImpl.this.back(connection, true);
                 }
             };
             /*
@@ -256,12 +254,12 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
     @Override
     public void backReadOnlyForGlobal(String group, Connection connection) {
-        back(connection);
+        back(connection, true);
     }
 
     @Override
     public void backReadOnlyForGlobal(int contextId, Connection connection) {
-        back(connection);
+        back(connection, true);
     }
 
     @Override
@@ -276,12 +274,12 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
 
     @Override
     public void backWritableForGlobal(String group, Connection connection) {
-        back(connection);
+        back(connection, false);
     }
 
     @Override
     public void backWritableForGlobal(int contextId, Connection connection) {
-        back(connection);
+        back(connection, false);
     }
 
     private AssignmentImpl getAssignment(String group) throws OXException {
@@ -299,16 +297,20 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         return getAssignment(group);
     }
 
-    private Connection get(AssignmentImpl assignment, boolean write, boolean noTimeout) throws OXException {
+    Connection get(AssignmentImpl assignment, boolean write, boolean noTimeout) throws OXException {
         return monitor.checkActualAndFallback(pools, assignment, noTimeout, write);
     }
 
-    private void back(Connection connection) {
+    void back(Connection connection, boolean usedAsRead) {
         if (null == connection) {
             LOG.error("", DBPoolingExceptionCodes.NULL_CONNECTION.create());
             return;
         }
         try {
+            if (usedAsRead && (connection instanceof JDBC4ConnectionReturner)) {
+                // Not the nice way to tell the replication monitor not to increment the counter.
+                ((JDBC4ConnectionReturner) connection).setUsedAsRead(true);
+            }
             connection.close();
         } catch (SQLException e) {
             LOG.error("", DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage()));

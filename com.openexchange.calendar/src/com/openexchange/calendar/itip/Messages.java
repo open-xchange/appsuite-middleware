@@ -142,7 +142,7 @@ public class Messages implements LocalizableStrings {
      */
     public static final String TENTATIVE_ON_YOUR_BEHALF_INTRO = "%1$s has %2$s the invitation on your behalf:";
 
-    public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
+//    public static final String TENTATIVELY_ACCEPTED = "tentatively accepted";
 
     // Used if a participant changed it status to either 'Accepted', 'Denied', or 'Tentatively accepted'
     public static final String NONE_INTRO =  "%1$s sets the status to %2$s for this appointment:";
@@ -232,13 +232,13 @@ public class Messages implements LocalizableStrings {
      */
     public static final String HAS_CHANGED_STATE = "%1$s has %2$s the appointment.";
 
-    public static final String ACCEPTED = "accepted";
-
-    public static final String DECLINED = "declined";
-
+//    public static final String ACCEPTED = "accepted";
+//
+//    public static final String DECLINED = "declined";
+//
     public static final String WAITING = "waiting";
-
-    public static final String TENTATIVELY_ACCEPT = "tentatively accept";
+//
+//    public static final String TENTATIVELY_ACCEPT = "tentatively accept";
 
     public static final String ASK_INVITE_GROUP = "Invite the group %1$s to the appointment.";
 

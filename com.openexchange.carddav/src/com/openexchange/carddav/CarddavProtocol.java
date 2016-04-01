@@ -51,13 +51,13 @@ package com.openexchange.carddav;
 
 import java.util.Arrays;
 import java.util.List;
-
 import org.jdom2.Namespace;
-
 import com.openexchange.carddav.reports.AddressbookMultigetReport;
-import com.openexchange.carddav.reports.SyncCollection;
+import com.openexchange.carddav.reports.AddressbookQueryReport;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.reports.ACLPrincipalPropSet;
+import com.openexchange.dav.reports.SyncCollection;
 import com.openexchange.webdav.action.WebdavAction;
-import com.openexchange.webdav.protocol.Protocol;
 
 
 /**
@@ -65,14 +65,14 @@ import com.openexchange.webdav.protocol.Protocol;
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
-public class CarddavProtocol extends Protocol {
+public class CarddavProtocol extends DAVProtocol {
+
     public static final Namespace CARD_NS = Namespace.getNamespace("CARD", "urn:ietf:params:xml:ns:carddav");
-
-    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CARD_NS);
-
-    public static final String CARD_NAMESPACE = "CARD:";
-
     public static final String ADDRESSBOOK = "<CARD:addressbook />";
+
+    public static final Namespace ME_NS = Namespace.getNamespace("MM", "http://me.com/_namespace/");
+
+    private static final List<Namespace> ADDITIONAL_NAMESPACES = Arrays.asList(CARD_NS, ME_NS);
 
     @Override
     public List<Namespace> getAdditionalNamespaces() {
@@ -80,15 +80,20 @@ public class CarddavProtocol extends Protocol {
     }
 
     @Override
-    public WebdavAction getReportAction(String ns, String name) {
-        if (ns.equals(AddressbookMultigetReport.NAMESPACE) && name.equals(AddressbookMultigetReport.NAME)) {
+    public WebdavAction getReportAction(String namespace, String name) {
+        if (namespace.equals(AddressbookMultigetReport.NAMESPACE) && name.equals(AddressbookMultigetReport.NAME)) {
             return new AddressbookMultigetReport(this);
         }
-        if (ns.equals(SyncCollection.NAMESPACE) && name.equals(SyncCollection.NAME)) {
+        if (namespace.equals(SyncCollection.NAMESPACE) && name.equals(SyncCollection.NAME)) {
             return new SyncCollection(this);
         }
-        return null;
+        if (namespace.equals(ACLPrincipalPropSet.NAMESPACE) && name.equals(ACLPrincipalPropSet.NAME)) {
+            return new ACLPrincipalPropSet(this);
+        }
+        if (namespace.equals(AddressbookQueryReport.NAMESPACE) && name.equals(AddressbookQueryReport.NAME)) {
+            return new AddressbookQueryReport(this);
+        }
+        return super.getReportAction(namespace, name);
     }
-
 
 }

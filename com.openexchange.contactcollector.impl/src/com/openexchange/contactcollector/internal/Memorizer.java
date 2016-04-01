@@ -189,7 +189,7 @@ public class Memorizer implements Runnable {
     }
 
     private static final ContactField[] FIELDS = {
-    	ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.USE_COUNT };
+        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED };
 
 	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL1, ContactField.EMAIL3 };
 

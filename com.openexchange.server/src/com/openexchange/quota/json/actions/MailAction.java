@@ -59,6 +59,7 @@ import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.quota.json.QuotaAJAXRequest;
 import com.openexchange.server.ServiceLookup;
 
@@ -94,7 +95,7 @@ public final class MailAction extends AbstractQuotaAction {
                 quotaInfo = mi.getQuotas(new int[] {
                     MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
             } catch (final OXException e) {
-                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e) || MimeMailExceptionCode.LOGIN_FAILED.equals(e)) {
                     LOG.debug("", e);
                 } else {
                     LOG.error("", e);

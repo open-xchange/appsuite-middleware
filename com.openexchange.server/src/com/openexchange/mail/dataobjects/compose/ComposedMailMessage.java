@@ -67,6 +67,7 @@ import com.openexchange.mail.dataobjects.MailPart;
 import com.openexchange.mail.dataobjects.compose.ComposedMailPart.ComposedPartType;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 
@@ -89,6 +90,8 @@ public abstract class ComposedMailMessage extends MailMessage {
     private ComposeType sendType;
     private transient MimeMessageFiller filler;
     private final Set<InternetAddress> recipients;
+    private UserSettingMail mailSettings;
+    private String csid;
 
     /**
      * Default constructor
@@ -98,6 +101,42 @@ public abstract class ComposedMailMessage extends MailMessage {
         this.session = session;
         this.ctx = ctx;
         recipients = new HashSet<InternetAddress>();
+    }
+
+    /**
+     * Gets the identifier of the associated composition space
+     *
+     * @return The identifier of the associated composition space
+     */
+    public String getCsid() {
+        return csid;
+    }
+
+    /**
+     * Sets the identifier of the associated composition space
+     *
+     * @param csid The identifier of the associated composition space to set
+     */
+    public void setCsid(String csid) {
+        this.csid = csid;
+    }
+
+    /**
+     * Sets the mail settings
+     *
+     * @param mailSettings The mail settings to set
+     */
+    public void setMailSettings(UserSettingMail mailSettings) {
+        this.mailSettings = mailSettings;
+    }
+
+    /**
+     * Gets the optional mail settings
+     *
+     * @return The mail settings or <code>null</code>
+     */
+    public UserSettingMail getMailSettings() {
+        return mailSettings;
     }
 
     /**

@@ -54,14 +54,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Pattern;
@@ -69,14 +68,12 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
-import com.javacodegeeks.concurrent.LRUPolicy;
+import com.google.common.cache.RemovalListener;
+import com.google.common.cache.RemovalNotification;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.java.Strings;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.timer.ScheduledTimerTask;
-import com.openexchange.timer.TimerService;
 import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.servlet.CountingHttpServletRequest;
 import com.openexchange.tools.servlet.http.Cookies;
@@ -230,52 +227,48 @@ public final class RateLimiter {
 
     // ----------------------------------------------------------------------------------- //
 
-    private static volatile ScheduledTimerTask timerTask;
-    private static volatile ConcurrentMap<Key, Rate> bucketMap;
+    private static volatile Cache<Key, Rate> bucketMap;
 
     /**
      * Gets the bucket map for rate limit slots.
      *
      * @return The bucket map or <code>null</code> if not yet initialized
      */
-    private static ConcurrentMap<Key, Rate> bucketMap() {
-        ConcurrentMap<Key, Rate> tmp = bucketMap;
+    private static Cache<Key, Rate> bucketMap() {
+        Cache<Key, Rate> tmp = bucketMap;
         if (null == tmp) {
             synchronized (RateLimiter.class) {
                 tmp = bucketMap;
                 if (null == tmp) {
-                    final ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                    final TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                    if (null == service || null == timerService) {
-                        LOG.info(RateLimiter.class.getSimpleName() + " not yet fully initialized; awaiting " + (null == service ? ConfigurationService.class.getSimpleName() : "") + " " + (null == timerService ? TimerService.class.getSimpleName() : ""));
+                    ConfigurationService configService = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
+                    if (null == configService) {
+                        LOG.info(RateLimiter.class.getSimpleName() + " not yet fully initialized; awaiting " + ConfigurationService.class.getSimpleName());
                         return null;
                     }
-                    final int maxCapacity = service.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
-                    final ConcurrentLinkedHashMap<Key, Rate> tmp2 = new ConcurrentLinkedHashMap<Key, Rate>(256, 0.75F, 16, maxCapacity, new LRUPolicy());
-                    tmp = tmp2;
-                    bucketMap = tmp;
+                    /*
+                     * configure cache where entries expire after not being used for a bit longer than the rate limit window
+                     */
+                    long maximumSize = configService.getIntProperty("com.openexchange.servlet.maxActiveSessions", 250000);
+                    if (0 >= maximumSize) {
+                        maximumSize = 250000;
+                    }
+                    CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+                        .concurrencyLevel(16)
+                        .maximumSize(maximumSize)
+                        .initialCapacity(16)
+                        .expireAfterAccess((int) (1.1 * maxRateTimeWindow()), TimeUnit.MILLISECONDS)
+                    ;
+                    if (LOG.isTraceEnabled()) {
+                        cacheBuilder.removalListener(new RemovalListener<Key, Rate>() {
 
-                    final int delay = 300000; // Delay of 5 minutes
-                    final Runnable r = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            try {
-                                final long mark = System.currentTimeMillis() - (delay << 1); // Older than doubled delay -- 10 minutes
-                                // Iterator obeys LRU policy therefore stop after first non-elapsed entry
-                                for (final Iterator<Entry<Key, Rate>> iterator = tmp2.entrySet().iterator(); iterator.hasNext();) {
-                                    final Entry<Key, Rate> entry = iterator.next();
-                                    if (!entry.getValue().markDeprecatedIfElapsed(mark)) {
-                                        break;
-                                    }
-                                    iterator.remove();
-                                }
-                            } catch (final Exception e) {
-                                // Ignore
+                            @Override
+                            public void onRemoval(RemovalNotification<Key, Rate> notification) {
+                                LOG.trace("Rate limit slot removed for {}, last accessed at {}", notification.getKey(), notification.getValue().lastAccessTime());
                             }
-                        }
-                    };
-                    timerTask = timerService.scheduleWithFixedDelay(r, delay, delay);
+                        });
+                    }
+                    tmp = cacheBuilder.build();
+                    bucketMap = tmp;
                 }
             }
         }
@@ -347,23 +340,57 @@ public final class RateLimiter {
 
     // ----------------------------------------------------------------------------------- //
 
-    /**
-     * Stops scheduled time task.
-     */
-    public static void stop() {
-        final ScheduledTimerTask t = timerTask;
-        if (null != t) {
-            t.cancel();
-            timerTask = null;
-        }
-    }
-
-    // ----------------------------------------------------------------------------------- //
-
     private static final Set<String> LOCALS = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("localhost", "127.0.0.1", "::1")));
 
     private static final String LINE_SEP = System.getProperty("line.separator");
     private static final long LAST_RATE_LIMIT_LOG_THRESHOLD = 60000L;
+    private static final AtomicLong PROCESSED_REQUESTS = new AtomicLong();
+
+    /**
+     * Gets the number of requests that have been processed in the rate limiter.
+     *
+     * @return The processed requests
+     */
+    public static long getProcessedRequests() {
+        return PROCESSED_REQUESTS.get();
+    }
+
+    /**
+     * Gets the number of currently tracked rate limit slots held in the internal bucket map.
+     *
+     * @return The slot count
+     */
+    public static long getSlotCount() {
+        return getSlotCount(false);
+    }
+
+    /**
+     * Gets the number of currently tracked rate limit slots held in the internal bucket map.
+     *
+     * @param purge <code>true</code> to trigger pending cleanup operations prior getting the size, <code>false</code>, otherwise
+     * @return The slot count
+     */
+    public static long getSlotCount(boolean purge) {
+        Cache<Key, Rate> bucketMap = bucketMap();
+        if (null == bucketMap) {
+            return 0L;
+        }
+        if (purge) {
+            bucketMap.cleanUp();
+        }
+        return bucketMap.size();
+    }
+
+    /**
+     * Clears the internal bucket map.
+     */
+    public static void clear() {
+        Cache<Key, Rate> bucketMap = bucketMap();
+        if (null != bucketMap) {
+            bucketMap.invalidateAll();
+            bucketMap.cleanUp();
+        }
+    }
 
     /**
      * Checks given request if possibly rate limited.
@@ -432,32 +459,42 @@ public final class RateLimiter {
      * @return <code>true</code> if a rate permit was consumed; otherwise <code>false</code>
      * @throws RateLimitedException If rate limit is exceeded
      */
-    private static boolean checkRateLimitForRequest(Key key, int maxRate, int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
-        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+    private static boolean checkRateLimitForRequest(final Key key, final int maxRate, final int maxRateTimeWindow, boolean createIfAbsent, HttpServletRequest optRequest) {
+        Cache<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
             return false;
         }
+        PROCESSED_REQUESTS.incrementAndGet();
         while (true) {
-            Rate rate = bucketMap.get(key);
-            if (null == rate) {
-                if (false == createIfAbsent) {
-                    // No rate limit trace available
+            Rate rate;
+            if (createIfAbsent) {
+                try {
+                    rate = bucketMap.get(key, new Callable<Rate>() {
+
+                        @Override
+                        public Rate call() throws Exception {
+                            // Requested to create a rate limit trace, hence do so
+                            LOG.trace("Inserting new rate limit slot for {}", key);
+                            return new RateImpl(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
+                        }
+                    });
+                } catch (ExecutionException e) {
+                    LOG.warn("Error checking rate limit for '{}'", key, e.getCause());
                     return false;
                 }
-
-                // Requested to create a rate limit trace, hence do so
-                Rate newRate = new RateImpl(maxRate, maxRateTimeWindow, TimeUnit.MILLISECONDS);
-                rate = bucketMap.putIfAbsent(key, newRate);
+            } else {
+                rate = bucketMap.getIfPresent(key);
                 if (null == rate) {
-                    rate = newRate;
+                    // No rate limit trace available
+                    return false;
                 }
             }
             // Acquire or fail to do so
             Rate.Result res = rate.consume(System.currentTimeMillis());
             if (Result.DEPRECATED == res) {
                 // Deprecated
-                bucketMap.remove(key, rate);
+                bucketMap.invalidate(key);
             } else {
                 // Success or failure?
                 if (Result.SUCCESS == res) {
@@ -488,19 +525,28 @@ public final class RateLimiter {
     /**
      * Removes the rate limit trace
      *
+     * @param httpRequest The HHTP request for which to delete the rate limit trace
+     */
+    public static void removeRateLimit(HttpServletRequest httpRequest) {
+        removeRateLimit(new Key(httpRequest));
+    }
+
+    /**
+     * Removes the rate limit trace
+     *
      * @param key The key associated with the rate limit trace
      */
     public static void removeRateLimit(Key key) {
         if (null == key) {
             return;
         }
-        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        Cache<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
             return;
         }
 
-        bucketMap.remove(key);
+        bucketMap.invalidate(key);
     }
 
     /**
@@ -512,13 +558,13 @@ public final class RateLimiter {
         if (null == key) {
             return;
         }
-        ConcurrentMap<Key, Rate> bucketMap = bucketMap();
+        Cache<Key, Rate> bucketMap = bucketMap();
         if (null == bucketMap) {
             // Not yet fully initialized
             return;
         }
 
-        Rate rate = bucketMap.get(key);
+        Rate rate = bucketMap.getIfPresent(key);
         if (null != rate) {
             rate.setTimeInMillis(rate.getTimeInMillis() << 1);
         }

@@ -53,7 +53,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import com.openexchange.drive.DriveAction;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.FileVersion;
@@ -78,6 +77,7 @@ import com.openexchange.drive.impl.management.DriveConfig;
 import com.openexchange.drive.impl.metadata.DriveMetadata;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStoragePermission;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 
 
@@ -152,6 +152,18 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
                 twc.setClientVersion(clientVersion);
                 OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
                 LOG.warn("Client upload not allowed due to unicode conflicts: {}", clientVersion, e);
+                syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
+            }
+        }
+        if (null != mapper.getMappingProblems().getDuplicateClientVersions()) {
+            for (FileVersion clientVersion : mapper.getMappingProblems().getDuplicateClientVersions()) {
+                /*
+                 * indicate as error with quarantine flag
+                 */
+                ThreeWayComparison<FileVersion> twc = new ThreeWayComparison<FileVersion>();
+                twc.setClientVersion(clientVersion);
+                OXException e = DriveExceptionCodes.CONFLICTING_FILENAME.create(clientVersion.getName());
+                LOG.warn("Duplicate file version indicated by client: {}", clientVersion, e);
                 syncResult.addActionForClient(new ErrorFileAction(null, clientVersion, twc, path, e, true));
             }
         }
@@ -319,7 +331,7 @@ public class FileSynchronizer extends Synchronizer<FileVersion> {
              * new on client
              */
             if (mayCreate()) {
-                if (DriveUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
+                    if (FilenameValidationUtils.isInvalidFileName(comparison.getClientVersion().getName())) {
                     /*
                      * invalid name, indicate as error with quarantine flag
                      */

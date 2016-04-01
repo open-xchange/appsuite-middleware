@@ -83,10 +83,9 @@ import com.openexchange.log.LogProperties;
 import com.openexchange.login.Interface;
 import com.openexchange.login.LoginRequest;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sessiond.SessiondService;
@@ -260,8 +259,8 @@ public abstract class OXServlet extends WebDavServlet {
     /**
      * Defines if this servlet supports OAuth access, i.e. the bearer authentication scheme may be used to provide an OAuth 2.0 access
      * token. OAuth is only taken into account, if {@link #useHttpAuth()} returns <code>true</code>. If OAuth is allowed you are responsible
-     * on your own to check the granted scope on every request! After successful OAuth authentication you'll find the according {@link OAuthGrant}
-     * instances as attribute on the servlet request under the {@link OAuthConstants#PARAM_OAUTH_GRANT} key.
+     * on your own to check the granted scope on every request! After successful OAuth authentication you'll find the according {@link OAuthAccess}
+     * instances as attribute on the servlet request under the {@link OAuthConstants#PARAM_OAUTH_ACCESS} key.
      */
     protected boolean allowOAuthAccess() {
         return false;
@@ -269,11 +268,6 @@ public abstract class OXServlet extends WebDavServlet {
 
     private OAuthResourceService getOAuthResourceService() {
         return ServerServiceRegistry.getInstance().getService(OAuthResourceService.class);
-    }
-
-
-    private OAuthSessionProvider getOAuthSessionProvider() {
-        return ServerServiceRegistry.getInstance().getService(OAuthSessionProvider.class);
     }
 
     /**
@@ -324,7 +318,7 @@ public abstract class OXServlet extends WebDavServlet {
         }
     }
 
-    private RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
+    protected RequestContext buildRequestContext(HttpServletRequest req, HttpServletResponse resp, Session session) {
         int contextId = -1;
         int userId = -1;
         if (session != null) {
@@ -349,7 +343,7 @@ public abstract class OXServlet extends WebDavServlet {
      * @return <code>true</code> if the authentication was successful; otherwise <code>false</code>. In that case the response is already committed.
      * @throws IOException If an I/O error occurs
      */
-    private boolean authenticate(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
+    protected boolean authenticate(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         Session session = null;
         if (useCookies()) {
             /*
@@ -467,16 +461,15 @@ public abstract class OXServlet extends WebDavServlet {
 
     private Session doOAuth(AuthorizationHeader authHeader, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
         OAuthResourceService oAuthResourceService = getOAuthResourceService();
-        OAuthSessionProvider sessionProvider = getOAuthSessionProvider();
-        if (oAuthResourceService == null || sessionProvider == null) {
+        if (oAuthResourceService == null) {
             httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN);
             return null;
         }
 
         try {
-            OAuthGrant grant = oAuthResourceService.validate(authHeader.getAuthString());
-            httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
-            return sessionProvider.getSession(grant, httpRequest);
+            OAuthAccess oAuthAccess = oAuthResourceService.checkAccessToken(authHeader.getAuthString(), httpRequest);
+            httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_ACCESS, oAuthAccess);
+            return oAuthAccess.getSession();
         } catch (OXException e) {
             if (e instanceof OAuthInvalidTokenException) {
                 OAuthInvalidTokenException ex = (OAuthInvalidTokenException) e;
@@ -645,9 +638,7 @@ public abstract class OXServlet extends WebDavServlet {
         if (useHttpAuth()) {
             resp.addHeader("WWW-Authenticate", "Basic realm=\"" + basicRealm + "\", encoding=\"UTF-8\"");
             if (allowOAuthAccess()) {
-                OAuthResourceService oAuthResourceService = getOAuthResourceService();
-                OAuthSessionProvider sessionProvider = getOAuthSessionProvider();
-                if (oAuthResourceService != null && sessionProvider != null) {
+                if (getOAuthResourceService() != null) {
                     resp.addHeader("WWW-Authenticate", "Bearer");
                 }
             }
@@ -767,15 +758,16 @@ public abstract class OXServlet extends WebDavServlet {
      */
     protected static boolean isTransient(Interface iface) {
         switch (iface) {
-        case CALDAV:
-        case CARDDAV:
-        case WEBDAV_INFOSTORE:
-        case WEBDAV_ICAL:
-        case WEBDAV_VCARD:
-        case OUTLOOK_UPDATER:
-            return true;
-        default:
-            return false;
+            case CALDAV:
+            case CARDDAV:
+            case WEBDAV_INFOSTORE:
+            case WEBDAV_ICAL:
+            case WEBDAV_VCARD:
+            case OUTLOOK_UPDATER:
+            case DRIVE_UPDATER:
+                return true;
+            default:
+                return false;
         }
     }
 

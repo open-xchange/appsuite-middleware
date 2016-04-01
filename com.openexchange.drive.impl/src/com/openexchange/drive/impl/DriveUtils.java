@@ -49,8 +49,7 @@
 
 package com.openexchange.drive.impl;
 
-import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
+import static com.openexchange.drive.impl.DriveConstants.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -139,19 +138,6 @@ public class DriveUtils {
     }
 
     /**
-     * Gets a value indicating whether the supplied folder name is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param name The folder name to check
-     * @return <code>true</code> if the name is considered invalid, <code>false</code>, otherwise
-     * @throws OXException
-     */
-    public static boolean isInvalidFolderName(String name) throws OXException {
-        // same check as for filenames for now
-        return isInvalidFileName(name);
-    }
-
-    /**
      * Gets a value indicating whether the supplied path is ignored, i.e. it is excluded from synchronization by definition.
      *
      * @param session The sync session
@@ -180,26 +166,6 @@ public class DriveUtils {
             if (null != trashPath && trashPath.equals(path)) {
                 return true; // no trash path
             }
-        }
-        return false;
-    }
-
-    /**
-     * Gets a value indicating whether the supplied filename is invalid, i.e. it contains illegal characters or is not supported for
-     * other reasons.
-     *
-     * @param fileName The filename to check
-     * @return <code>true</code> if the filename is considered invalid, <code>false</code>, otherwise
-     */
-    public static boolean isInvalidFileName(String fileName) {
-        if (Strings.isEmpty(fileName)) {
-            return true; // no empty filenames
-        }
-        if (false == DriveConstants.FILENAME_VALIDATION_PATTERN.matcher(fileName).matches()) {
-            return true; // no invalid filenames
-        }
-        if (DriveConstants.MAX_PATH_SEGMENT_LENGTH < fileName.length()) {
-            return true; // no too long filenames
         }
         return false;
     }
@@ -502,6 +468,42 @@ public class DriveUtils {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Calculates a hash code based on the (client-side) file- and directory exclusion filters and whether metadata synchronization is
+     * enabled or not, which may be used as a specific client "view" for the calculated directory checksums.
+     *
+     * @param session The drive session to get the view for
+     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined, and no metadata synchronization is off
+     */
+    public static int calculateView(DriveSession session) {
+        return calculateView(session.getDirectoryExclusions(), session.getFileExclusions(), session.useDriveMeta());
+    }
+
+    /**
+     * Calculates a hash code based on the (client-side) file- and directory exclusion filters and whether metadata synchronization is
+     * enabled or not, which may be used as a specific client "view" for the calculated directory checksums.
+     *
+     * @param directoryExclusions The directory exclusions to consider
+     * @param fileExclusions The file exclusions to consider
+     * @param useDriveMeta <code>true</code> to consider metadata synchronization, <code>false</code>, otherwise
+     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined, and no metadata synchronization is off
+     */
+    public static int calculateView(List<DirectoryPattern> directoryExclusions, List<FilePattern> fileExclusions, boolean useDriveMeta) {
+        final int prime = 31;
+        int result = useDriveMeta ? -1 : 1;
+        if (null != directoryExclusions && 0 < directoryExclusions.size()) {
+            for (DirectoryPattern directoryPattern : directoryExclusions) {
+                result = prime * result + directoryPattern.hashCode();
+            }
+        }
+        if (null != fileExclusions && 0 < fileExclusions.size()) {
+            for (FilePattern filePattern : fileExclusions) {
+                result = prime * result + filePattern.hashCode();
+            }
+        }
+        return 1 == result ? 0 : result;
     }
 
     private DriveUtils() {

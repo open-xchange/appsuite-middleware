@@ -70,15 +70,14 @@ import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.Dispatcher;
 import com.openexchange.ajax.requesthandler.DispatcherServlet;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthModule;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthModule;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Reply;
 import com.openexchange.session.Session;
@@ -125,10 +124,10 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         }
 
         OAuthResourceService oAuthResourceService = requireService(OAuthResourceService.class, services);
-        OAuthGrant grant = oAuthResourceService.validate(authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1));
-        session = requireService(OAuthSessionProvider.class, services).getSession(grant, httpRequest);
+        OAuthAccess oAuthAccess = oAuthResourceService.checkAccessToken(authHeader.substring(OAuthConstants.BEARER_SCHEME.length() + 1), httpRequest);
+        session = oAuthAccess.getSession();
         SessionUtility.rememberSession(httpRequest, ServerSessionAdapter.valueOf(session));
-        httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_GRANT, grant);
+        httpRequest.setAttribute(OAuthConstants.PARAM_OAUTH_ACCESS, oAuthAccess);
         return new SessionResult<ServerSession>(Reply.CONTINUE, ServerSessionAdapter.valueOf(session));
     }
 
@@ -144,8 +143,8 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
 
-        OAuthGrant grant = (OAuthGrant) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_GRANT);
-        if (grant == null) {
+        OAuthAccess oAuthAccess = (OAuthAccess) httpRequest.getAttribute(OAuthConstants.PARAM_OAUTH_ACCESS);
+        if (oAuthAccess == null) {
             LOG.warn("OAuthToken was not contained in servlet request attributes!", new Exception());
             throw new OAuthInvalidTokenException(Reason.TOKEN_MISSING);
         }
@@ -156,7 +155,7 @@ public class OAuthDispatcherServlet extends DispatcherServlet {
         AJAXRequestData requestData = requestDataTools.parseRequest(httpRequest, preferStream, isMultipartContent(httpRequest), session, prefix, httpResponse);
         requestData.setModule(module);
         requestData.setSession(session);
-        requestData.setProperty(OAuthConstants.PARAM_OAUTH_GRANT, grant);
+        requestData.setProperty(OAuthConstants.PARAM_OAUTH_ACCESS, oAuthAccess);
 
         AJAXActionServiceFactory factory = dispatcher.lookupFactory(module);
         if (factory == null || !factory.getClass().isAnnotationPresent(OAuthModule.class)) {

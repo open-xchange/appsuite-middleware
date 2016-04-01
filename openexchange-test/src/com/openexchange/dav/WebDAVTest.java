@@ -202,11 +202,11 @@ public abstract class WebDAVTest {
 
     @After
     public void after() throws Exception {
-        if (client != null) {
+        if (null != client) {
+            cleanupFolders();
             client.logout();
+            client = null;
         }
-
-        this.cleanupFolders();
     }
 
     public AJAXSession getSession() {
@@ -552,7 +552,7 @@ public abstract class WebDAVTest {
     }
 
     protected static String formatAsUTC(final Date date) {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmm'00Z'");
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'");
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return dateFormat.format(date);
     }

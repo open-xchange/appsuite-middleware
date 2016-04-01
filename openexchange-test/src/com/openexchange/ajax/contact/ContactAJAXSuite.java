@@ -88,6 +88,7 @@ public class ContactAJAXSuite extends TestSuite {
         tests.addTestSuite(UpdateNotAllowedFieldsTest.class);
         tests.addTestSuite(SortingInJapanTest.class);
         tests.addTestSuite(AutocompleteTest.class);
+        tests.addTestSuite(UseCountTest.class);
 
         tests.addTest(ContactBugTestSuite.suite());
         return tests;

@@ -56,7 +56,6 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.regex.Pattern;
-
 import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.sql.Table;
@@ -122,14 +121,26 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 		return Types.VARCHAR == mapping.getSqlType();
 	}
 
-	protected static String getSelectClause(ContactField[] fields) throws OXException {
-	    return getSelectClause(fields, true);
+    protected static String getSelectClause(ContactField[] fields, int forUser) throws OXException {
+        return getSelectClause(fields, true, forUser);
+    }
+
+    protected static String getSelectClause(ContactField[] fields, boolean withTable, int forUser) throws OXException {
+        StringBuilder sb = new StringBuilder(256);
+        sb.append("SELECT ");
+        sb.append(Mappers.CONTACT.getColumns(fields, Table.CONTACTS.getName() + "."));
+        sb.append(" FROM ");
+        if (withTable) {
+            sb.append(Table.CONTACTS);
+        }
+        insertObjectUseCountClause(sb, forUser);
+        return sb.toString();
     }
 
     protected static String getSelectClause(ContactField[] fields, boolean withTable) throws OXException {
         StringBuilder sb = new StringBuilder(256);
         sb.append("SELECT ");
-        sb.append(Mappers.CONTACT.getColumns(fields));
+        sb.append(Mappers.CONTACT.getColumns(fields, Table.CONTACTS.getName() + "."));
         sb.append(" FROM ");
         if (withTable) {
             sb.append(Table.CONTACTS);
@@ -146,12 +157,15 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
                 stringBuilder.append(',').append(tableAlias).append('.').append(Mappers.CONTACT.get(fields[i]).getColumnLabel());
             }
             stringBuilder.append(" FROM ").append(Table.CONTACTS);
+
         }
         return stringBuilder.toString();
     }
 
 	protected static String getContextIDClause(int contextID) throws OXException {
-        return Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel() + "=" + contextID;
+        StringBuilder sb = new StringBuilder(128);
+        sb.append(Table.CONTACTS.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=").append(contextID);
+        return sb.toString();
     }
 
 	protected static String getFolderIDsClause(int[] folderIDs) throws OXException {
@@ -168,18 +182,15 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 	}
 
 	protected static String getEMailAutoCompleteClause(boolean ignoreDistributionLists) throws OXException {
-        StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder
-            .append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
+        StringBuilder stringBuilder = new StringBuilder()
+            .append('(').append(Mappers.CONTACT.get(ContactField.EMAIL1).getColumnLabel()).append("<>'' OR ")
             .append(Mappers.CONTACT.get(ContactField.EMAIL2).getColumnLabel()).append("<>'' OR ")
-            .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>''");
-        String dlColumn = Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel();
+            .append(Mappers.CONTACT.get(ContactField.EMAIL3).getColumnLabel()).append("<>'')");
         if (ignoreDistributionLists) {
         	stringBuilder.append(" AND ").append(getIgnoreDistributionListsClause());
         } else {
-        	stringBuilder.append(" OR ").append(dlColumn).append(">0");
+        	stringBuilder.append(" OR ").append(Mappers.CONTACT.get(ContactField.NUMBER_OF_DISTRIBUTIONLIST).getColumnLabel()).append(">0");
         }
-
         return stringBuilder.toString();
     }
 
@@ -189,4 +200,15 @@ public abstract class DefaultSearchAdapter implements SearchAdapter {
 		stringBuilder.append("(").append(dlColumn).append("=0 OR ").append(dlColumn).append(" IS NULL)");
 		return stringBuilder.toString();
 	}
+
+    protected static void insertObjectUseCountClause(StringBuilder stringBuilder, int forUser) {
+        int offset = stringBuilder.indexOf("FROM");
+        StringBuilder sb = new StringBuilder(1024);
+        sb.append(",").append(Table.OBJECT_USE_COUNT).append(".value");
+        stringBuilder.insert(offset - 1, sb.toString());
+        stringBuilder.append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(Table.CONTACTS.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
+            .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+            .append(Table.CONTACTS.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+            .append(Table.CONTACTS.getName()).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ");
+    }
 }

@@ -68,7 +68,8 @@ public interface AJAXRequest<T extends AbstractAJAXResponse> {
         GET,
         POST,
         UPLOAD,
-        PUT
+        PUT,
+        DELETE
     }
 
     Method getMethod();

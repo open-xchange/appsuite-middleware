@@ -458,6 +458,9 @@ public class IMAPBodyPart extends MimeBodyPart implements ReadableMime {
     protected boolean checkExists(IMAPMessage message, IMAPProtocol p) throws ProtocolException, MessagingException {
         long uid = message.getUID();
         if (uid < 0) {
+            if (message.getFolder() == null) {
+                return false;
+            }
             uid = ((IMAPFolder) message.getFolder()).getUID(message);
             if (uid < 0) {
                 return false;

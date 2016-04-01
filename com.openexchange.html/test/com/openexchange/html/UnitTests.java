@@ -90,6 +90,7 @@ import com.openexchange.html.internal.Bug27708Test;
 import com.openexchange.html.internal.HtmlServiceImplTest;
 import com.openexchange.html.internal.css.Bug30114Test;
 import com.openexchange.html.internal.css.Bug36024Test;
+import com.openexchange.html.internal.css.Bug43387Test;
 import com.openexchange.html.internal.css.CSSMatcherTest;
 import com.openexchange.html.internal.jericho.handler.FilterJerichoHandlerTest;
 import com.openexchange.html.vulntests.Bug17991VulTest;
@@ -163,6 +164,7 @@ import com.openexchange.html.vulntests.Bug35982VulTest;
     Bug36275Test.class,
     Bug36412Test.class,
     Bug40189Test.class,
+    Bug43387Test.class,
     CSSMatcherTest.class,
     ConformHtmlTest.class,
     HtmlServiceImplTest.class,

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Database Connection Pooling
 Bundle-SymbolicName: com.openexchange.database
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.base,
@@ -28,6 +28,7 @@ Import-Package: com.google.common.base,
  javax.management.remote,
  liquibase.changelog,
  liquibase.resource,
+ org.apache.commons.lang,
  org.apache.commons.logging,
  org.osgi.framework,
  org.osgi.util.tracker,

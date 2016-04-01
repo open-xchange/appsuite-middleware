@@ -281,6 +281,10 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
 
     private boolean mail_folder_trash_nameset = false;
 
+    private String mail_folder_archive_full_name;
+
+    private boolean mail_folder_archive_full_nameset = false;
+
     private String mail_folder_confirmed_spam_name;
 
     private final boolean mail_folder_confirmed_spam_nameset = false;
@@ -973,6 +977,15 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
      **/
     final public boolean isMail_folder_trash_nameset() {
         return mail_folder_trash_nameset;
+    }
+
+    /**
+     * Used to check if the mail_folder_archive_name field of this user object has been changed
+     *
+     * @return true if set; false if not
+     **/
+    final public boolean isMail_folder_archive_full_nameset() {
+        return mail_folder_archive_full_nameset;
     }
 
     /**
@@ -2642,6 +2655,27 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
     }
 
     /**
+     * Returns the mail folder full-name of the archive folder of this user object
+     *
+     * @return A {@link String} containing the mail folder full-name of the archive folder
+     */
+    final public String getMail_folder_archive_full_name() {
+        return mail_folder_archive_full_name;
+    }
+
+    /**
+     * Sets the mail folder full-name of the archive folder of this user object
+     *
+     * @param mail_folder_archive_full_name A {@link String} containing the mail folder full-name of the archive folder
+     */
+    final public void setMail_folder_archive_full_name(final String mail_folder_archive_full_name) {
+        if (null == mail_folder_archive_full_name) {
+            this.mail_folder_archive_full_nameset = true;
+        }
+        this.mail_folder_archive_full_name = mail_folder_archive_full_name;
+    }
+
+    /**
      * Returns the name of the manager of this user object
      *
      * @return A {@link String} containing the name of the manager
@@ -4292,6 +4326,7 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         this.mail_folder_sent_name = null;
         this.mail_folder_spam_name = null;
         this.mail_folder_trash_name = null;
+        this.mail_folder_archive_full_name = null;
         this.manager_name = null;
         this.marital_status = null;
         this.cellular_telephone1 = null;
@@ -4866,6 +4901,8 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
         result = prime * result + (mail_folder_spam_nameset ? 1231 : 1237);
         result = prime * result + ((mail_folder_trash_name == null) ? 0 : mail_folder_trash_name.hashCode());
         result = prime * result + (mail_folder_trash_nameset ? 1231 : 1237);
+        result = prime * result + ((mail_folder_archive_full_name == null) ? 0 : mail_folder_archive_full_name.hashCode());
+        result = prime * result + (mail_folder_archive_full_nameset ? 1231 : 1237);
         result = prime * result + ((mailenabled == null) ? 0 : mailenabled.hashCode());
         result = prime * result + (mailenabledset ? 1231 : 1237);
         result = prime * result + ((manager_name == null) ? 0 : manager_name.hashCode());
@@ -5475,6 +5512,16 @@ public class User extends ExtendableDataObject implements NameAndIdObject, Passw
             return false;
         }
         if (mail_folder_trash_nameset != other.mail_folder_trash_nameset) {
+            return false;
+        }
+        if (mail_folder_archive_full_name == null) {
+            if (other.mail_folder_archive_full_name != null) {
+                return false;
+            }
+        } else if (!mail_folder_archive_full_name.equals(other.mail_folder_archive_full_name)) {
+            return false;
+        }
+        if (mail_folder_archive_full_nameset != other.mail_folder_archive_full_nameset) {
             return false;
         }
         if (mailenabled == null) {

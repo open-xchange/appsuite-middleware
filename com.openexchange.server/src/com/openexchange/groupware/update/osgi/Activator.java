@@ -58,6 +58,7 @@ import com.openexchange.groupware.update.internal.CreateUpdateTaskTable;
 import com.openexchange.groupware.update.internal.ExcludedList;
 import com.openexchange.groupware.update.internal.InternalList;
 import com.openexchange.groupware.update.tasks.objectpermission.ObjectPermissionCreateTableService;
+import com.openexchange.groupware.update.tasks.objectusagecount.CreateObjectUseCountTableService;
 import com.openexchange.osgi.HousekeepingActivator;
 
 /**
@@ -98,6 +99,7 @@ public class Activator extends HousekeepingActivator {
 
         registerService(CreateTableService.class, new CreateUpdateTaskTable());
         registerService(CreateTableService.class, new ObjectPermissionCreateTableService());
+        registerService(CreateTableService.class, new CreateObjectUseCountTableService());
     }
 
     @Override

@@ -60,6 +60,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TimeZone;
 import com.openexchange.calendar.AppointmentDiff;
@@ -115,14 +116,6 @@ public class Participants implements ChangeDescriptionGenerator{
 
     }};
 
-    private static final Map<ChangeType, String> STATE_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
-
-        put(ChangeType.ACCEPT,  Messages.ACCEPTED);
-        put(ChangeType.DECLINE, Messages.DECLINED);
-        put(ChangeType.TENTATIVE, Messages.TENTATIVELY_ACCEPTED);
-     }};
-
-
     private static final Map<ChangeType,String> GROUP_MESSAGE_MAP = new HashMap<ChangeType, String>(){{
         put(ChangeType.ADD, Messages.HAS_INVITED_GROUP);
         put(ChangeType.REMOVE, Messages.HAS_REMOVED_GROUP);
@@ -154,9 +147,9 @@ public class Participants implements ChangeDescriptionGenerator{
     @Override
     public List<Sentence> getDescriptions(Context ctx, Appointment original, Appointment updated, AppointmentDiff diff, Locale locale, TimeZone timezone) throws OXException {
 
-        List<Integer> userIds = new ArrayList<Integer>();
-        List<Integer> groupIds = new ArrayList<Integer>();
-        List<Integer> resourceIds = new ArrayList<Integer>();
+        Set<Integer> userIds = new HashSet<Integer>();
+        Set<Integer> groupIds = new HashSet<Integer>();
+        Set<Integer> resourceIds = new HashSet<Integer>();
 
         Map<Integer,ChangeType> userChange = new HashMap<Integer, ChangeType>();
         Map<Integer,ChangeType> resourceChange = new HashMap<Integer, ChangeType>();
@@ -226,9 +219,9 @@ public class Participants implements ChangeDescriptionGenerator{
 //            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(u.getDisplayName(), ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
             }
         }
 
@@ -245,9 +238,9 @@ public class Participants implements ChangeDescriptionGenerator{
 //            }
             switch (changeType) {
             case ADD: case REMOVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT)); break;
-            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.ACCEPT)); break;
-            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.DECLINE)); break;
-            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).add(STATE_MESSAGE_MAP.get(changeType), ArgumentType.STATUS, ConfirmStatus.TENTATIVE)); break;
+            case ACCEPT: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.ACCEPT)); break;
+            case DECLINE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.DECLINE)); break;
+            case TENTATIVE: changes.add(new Sentence(PARTICIPANT_MESSAGE_MAP.get(changeType)).add(mail, ArgumentType.PARTICIPANT).addStatus(ConfirmStatus.TENTATIVE)); break;
             }
         }
 
@@ -263,9 +256,9 @@ public class Participants implements ChangeDescriptionGenerator{
             }
         }
 
-        for(Integer id : resourceChange.keySet()) {
-            Resource resource = resources.getResource(id.intValue(), ctx);
-            ChangeType changeType = resourceChange.get(id);
+        for (Entry<Integer, ChangeType> entry : resourceChange.entrySet()) {
+            Resource resource = resources.getResource(entry.getKey().intValue(), ctx);
+            ChangeType changeType = entry.getValue();
             if (changeType == null) {
                 continue;
             }
@@ -279,7 +272,7 @@ public class Participants implements ChangeDescriptionGenerator{
         return changes;
     }
 
-    private void investigateChanges(Difference difference, List<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
+    private void investigateChanges(Difference difference, Set<Integer> userIds, Map<Integer, ChangeType> userChange, Map<String, ChangeType> externalChange, Set<String> external) {
 
         for(Change change : difference.getChanged()) {
             if (change instanceof ConfirmationChange) {
@@ -310,9 +303,37 @@ public class Participants implements ChangeDescriptionGenerator{
                 }
             }
         }
+
+        if (difference.getAdded() != null) {
+            for (Object added : difference.getAdded()) {
+                if (added instanceof UserParticipant) {
+                    UserParticipant up = (UserParticipant) added;
+                    int id = up.getIdentifier();
+                    userIds.add(id);
+                    userChange.put(id, ChangeType.ADD);
+                } else if (added instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant ep = (ExternalUserParticipant) added;
+                    externalChange.put(ep.getEmailAddress(), ChangeType.ADD);
+                }
+            }
+        }
+
+        if (difference.getRemoved() != null) {
+            for (Object removed : difference.getRemoved()) {
+                if (removed instanceof UserParticipant) {
+                    UserParticipant up = (UserParticipant) removed;
+                    int id = up.getIdentifier();
+                    userIds.add(id);
+                    userChange.put(id, ChangeType.REMOVE);
+                } else if (removed instanceof ExternalUserParticipant) {
+                    ExternalUserParticipant ep = (ExternalUserParticipant) removed;
+                    externalChange.put(ep.getEmailAddress(), ChangeType.REMOVE);
+                }
+            }
+        }
     }
 
-    private void investigateSetOperation(Difference difference, List<Integer> userIds, List<Integer> groupIds, List<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Object> list) {
+    private void investigateSetOperation(Difference difference, Set<Integer> userIds, Set<Integer> groupIds, Set<Integer> resourceIds, Map<Integer, ChangeType> userChange, Map<Integer, ChangeType> resourceChange, Map<Integer, ChangeType> groupChange, Map<String, ChangeType> externalChange, ChangeType changeType, List<Object> list) {
         for(Object added : list) {
             if (added instanceof UserParticipant) {
                 UserParticipant up = (UserParticipant) added;

@@ -107,7 +107,7 @@ public class AsyncDeliverTasks
             TaskExecuter executer = m_running_threads.get(currentThreadId);
             if ( executer == null )
             {
-                executer = new TaskExecuter(m_running_threads, deliveredEvents);
+                executer = new TaskExecuter(m_running_threads, deliveredEvents, currentThreadId);
             }
             synchronized ( executer )
             {
@@ -147,11 +147,13 @@ public class AsyncDeliverTasks
 
         private final Map<Long, TaskExecuter> m_running_threads;
         private final AtomicLong m_deliveredEvents;
+        private final Long m_currentThreadId;
 
-        public TaskExecuter(Map<Long, TaskExecuter> runningThreads, AtomicLong deliveredEvents) {
+        public TaskExecuter(Map<Long, TaskExecuter> runningThreads, AtomicLong deliveredEvents, Long currentThreadId) {
             super();
             m_running_threads = runningThreads;
             m_deliveredEvents = deliveredEvents;
+            m_currentThreadId = currentThreadId;
         }
 
         public boolean isActive()
@@ -190,7 +192,7 @@ public class AsyncDeliverTasks
                     if ( !running )
                     {
                         this.m_deliver_task = null;
-                        this.m_running_threads.remove(this);
+                        this.m_running_threads.remove(m_currentThreadId);
                     }
                 }
             } while ( running );

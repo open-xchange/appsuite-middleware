@@ -2,15 +2,17 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The session reservation implementation bundle
 Bundle-SymbolicName: com.openexchange.session.reservation.impl
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.google.common.net,
+Import-Package: com.google.common.annotations,
+ com.google.common.base,
+ com.google.common.cache,
+ com.google.common.net,
  com.hazelcast.config,
  com.hazelcast.core,
  com.hazelcast.nio,
  com.hazelcast.nio.serialization,
- com.javacodegeeks.concurrent,
  com.openexchange.ajax,
  com.openexchange.ajax.fields,
  com.openexchange.ajax.login,

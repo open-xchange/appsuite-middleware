@@ -306,7 +306,7 @@ public class ICalImporter extends AbstractImporter {
                     task.setUid(replacedUID);
                 }
 				try {
-                    taskInterface.insertTaskObject(task, true);
+                                       taskInterface.insertTaskObject(task);
 					importResult.setObjectId(String.valueOf(task
 							.getObjectID()));
 					importResult.setDate(task.getLastModified());
@@ -397,6 +397,7 @@ public class ICalImporter extends AbstractImporter {
 				appointmentObj.setContext(session.getContext());
 				appointmentObj.setParentFolderID(appointmentFolderId);
 				appointmentObj.setIgnoreConflicts(true);
+				appointmentObj.removeLastModified();
 				if (ignoreUIDs && appointmentObj.containsUid()) {
 				    // perform fixed UID replacement to keep recurring appointment relations
 				    String originalUID = appointmentObj.getUid();

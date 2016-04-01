@@ -119,6 +119,9 @@ public abstract class AbstractGoogleDriveAccess {
     /** Status code (401) indicating that the request requires HTTP authentication. */
     protected static final int SC_UNAUTHORIZED = 401;
 
+    /** Status code (403) indicating the server understood the request but refused to fulfill it. */
+    protected static final int SC_FORBIDDEN = 403;
+
     /** Status code (404) indicating that the requested resource is not available. */
     protected static final int SC_NOT_FOUND = 404;
 
@@ -141,7 +144,33 @@ public abstract class AbstractGoogleDriveAccess {
             return FileStorageExceptionCodes.AUTHENTICATION_FAILED.create(account.getId(), GoogleDriveConstants.ID, e.getMessage());
         }
 
+        if (SC_FORBIDDEN == e.getStatusCode()) {
+            // See https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors
+            if (e.getMessage().indexOf("userRateLimitExceeded") > 0) {
+                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
+            }
+            if (e.getMessage().indexOf("insufficientPermissions") > 0) {
+                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create(e, new Object[0]);
+            }
+        }
+
         return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", Integer.valueOf(e.getStatusCode()) + " " + e.getStatusMessage());
+    }
+
+    /**
+     * Checks if specified {@link HttpResponseException} instance denoted a rate limit exception.
+     *
+     * @param e The exception to check
+     * @return <code>true</code> if user hit a rate limit exception; otherwise <code>false</code>
+     */
+    protected static boolean isUserRateLimitExceeded(HttpResponseException e) {
+        if (SC_FORBIDDEN == e.getStatusCode()) {
+            // See https://developers.google.com/analytics/devguides/reporting/core/v3/coreErrors
+            if (e.getMessage().indexOf("userRateLimitExceeded") > 0) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

@@ -56,6 +56,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.groupware.infostore.DocumentAndMetadata;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.java.SizeKnowingInputStream;
 
 
 /**
@@ -96,7 +97,7 @@ public class DocumentAndMetadataImpl implements DocumentAndMetadata {
     @Override
     public InputStream getData() throws OXException {
         try {
-            return isClosure.newStream();
+            return new SizeKnowingInputStream(isClosure.newStream(), metadata.getFileSize());
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

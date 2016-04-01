@@ -649,6 +649,8 @@ public final class MimeMessageUtility {
      */
     private static final String MULTI_SUBTYPE_ALTERNATIVE = "ALTERNATIVE";
 
+    private static final String MULTI_SUBTYPE_RELATED = "RELATED";
+
     // private static final String MULTI_SUBTYPE_MIXED = "MIXED";
 
     // private static final String MULTI_SUBTYPE_SIGNED = "SIGNED";
@@ -667,36 +669,40 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-            if (mp.getEnclosedCount() > 2) {
+            int count = mp.getEnclosedCount();
+            if (count > 2) {
                 return true;
             }
-            return hasAttachments0(mp);
+            return hasAttachments0(mp, count);
+        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype)) {
+            return hasAttachments0(mp, mp.getEnclosedCount());
         }
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
          */
-        if (mp.getEnclosedCount() > 1) {
+        int count = mp.getEnclosedCount();
+        if (count > 1) {
             return true;
         }
-        return hasAttachments0(mp);
+        return hasAttachments0(mp, count);
     }
 
-    private static boolean hasAttachments0(final MailPart mp) throws MessagingException, OXException, IOException {
+    private static boolean hasAttachments0(MailPart mp, int count) throws MessagingException, OXException, IOException {
         boolean found = false;
-        final int count = mp.getEnclosedCount();
-        final ContentType ct = new ContentType();
-        for (int i = 0; i < count && !found; i++) {
-            final MailPart part = mp.getEnclosedMailPart(i);
-            final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+        ContentType ct = new ContentType();
+        for (int i = count; !found && i-- > 0;) {
+            MailPart part = mp.getEnclosedMailPart(i);
+
+            String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
-            } else {
-                ct.setContentType(MimeTypes.MIME_DEFAULT);
-            }
-            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+                if (ct.startsWith("multipart/")) {
+                    found |= hasAttachments(part, ct.getSubType());
+                }
             }
         }
         return found;
@@ -716,36 +722,39 @@ public final class MimeMessageUtility {
         if (null == mp) {
             return false;
         }
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(subtype)) {
-            if (mp.getCount() > 2) {
+            int count = mp.getCount();
+            if (count > 2) {
                 return true;
             }
-            return hasAttachments0(mp);
+            return hasAttachments0(mp, count);
+        } else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(subtype)) {
+            return hasAttachments0(mp, mp.getCount());
         }
         // TODO: Think about special check for multipart/signed
         /*
          * if (MULTI_SUBTYPE_SIGNED.equalsIgnoreCase(subtype)) { if (mp.getCount() > 2) { return true; } return hasAttachments0(mp); }
          */
-        if (mp.getCount() > 1) {
+        int count = mp.getCount();
+        if (count > 1) {
             return true;
         }
-        return hasAttachments0(mp);
+        return hasAttachments0(mp, count);
     }
 
-    private static boolean hasAttachments0(final Multipart mp) throws MessagingException, OXException, IOException {
+    private static boolean hasAttachments0(Multipart mp, int count) throws MessagingException, OXException, IOException {
         boolean found = false;
-        final int count = mp.getCount();
-        final ContentType ct = new ContentType();
-        for (int i = 0; i < count && !found; i++) {
-            final BodyPart part = mp.getBodyPart(i);
-            final String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
+        ContentType ct = new ContentType();
+        for (int i = count; !found && i-- > 0;) {
+            BodyPart part = mp.getBodyPart(i);
+            String[] tmp = part.getHeader(MessageHeaders.HDR_CONTENT_TYPE);
             if (tmp != null && tmp.length > 0) {
                 ct.setContentType(MimeMessageUtility.unfold(tmp[0]));
-            } else {
-                ct.setContentType(MimeTypes.MIME_DEFAULT);
-            }
-            if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
-                found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+                if (ct.isMimeType(MimeTypes.MIME_MULTIPART_ALL)) {
+                    found |= hasAttachments((Multipart) part.getContent(), ct.getSubType());
+                }
             }
         }
         return found;
@@ -758,11 +767,15 @@ public final class MimeMessageUtility {
      * @return <code>true</code> if given BODYSTRUCTURE item indicates to contain (file) attachments; otherwise <code>false</code>
      */
     public static boolean hasAttachments(final BODYSTRUCTURE bodystructure) {
+        // The value determined by this routine will outsmart exact examination
+        // See bug 42695 & 42862
         if (bodystructure.isMulti()) {
             if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(bodystructure.subtype)) {
                 if (bodystructure.bodies.length > 2) {
                     return true;
                 }
+                return hasAttachments0(bodystructure);
+            }  else if (MULTI_SUBTYPE_RELATED.equalsIgnoreCase(bodystructure.subtype)) {
                 return hasAttachments0(bodystructure);
             }
             // TODO: Think about special check for multipart/signed
@@ -783,7 +796,7 @@ public final class MimeMessageUtility {
 
         BODYSTRUCTURE[] bodies = bodystructure.bodies;
         if (null != bodies) {
-            for (int i = 0; !found && (i < bodies.length); i++) {
+            for (int i = bodies.length; !found && i-- > 0;) {
                 found |= hasAttachments(bodies[i]);
             }
         }
@@ -2194,7 +2207,7 @@ public final class MimeMessageUtility {
         }
         return charset;
     }
-    
+
     /**
      * Reads the textual content from specified part.
      *
@@ -2265,12 +2278,24 @@ public final class MimeMessageUtility {
      * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
      *
      * @param is The MIME input stream
+     * @param retainDate <code>true</code> to retain the date (align received date to sent date); otherwise <code>false</code>
+     * @return The new {@link MimeMessage} instance
+     * @throws OXException If a new {@link MimeMessage} instance cannot be returned
+     */
+    public static MimeMessage newMimeMessage(InputStream is, boolean retainDate) throws OXException {
+        return newMimeMessage(is, null, retainDate);
+    }
+
+    /**
+     * Constructs a MimeMessage by reading and parsing the data from the specified MIME input stream.
+     *
+     * @param is The MIME input stream
      * @param optReceivedDate The optional received date or <code>null</code>
      * @return The new {@link MimeMessage} instance
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
     public static MimeMessage parseMimeMessageFrom(InputStream is, Date optReceivedDate) throws OXException {
-        return newMimeMessage(is, optReceivedDate);
+        return newMimeMessage(is, optReceivedDate, false);
     }
 
     /**
@@ -2282,6 +2307,10 @@ public final class MimeMessageUtility {
      * @throws OXException If a new {@link MimeMessage} instance cannot be returned
      */
     public static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate) throws OXException {
+        return newMimeMessage(is, optReceivedDate, false);
+    }
+
+    private static MimeMessage newMimeMessage(InputStream is, final Date optReceivedDate, final boolean retainDate) throws OXException {
         InputStream msgSrc = is;
         ThresholdFileHolder sink = new ThresholdFileHolder();
         boolean closeSink = true;
@@ -2296,11 +2325,26 @@ public final class MimeMessageUtility {
 
                     @Override
                     public Date getReceivedDate() throws MessagingException {
-                        return null == optReceivedDate ? super.getReceivedDate() : optReceivedDate;
+                        if (null != optReceivedDate) {
+                            return optReceivedDate;
+                        }
+
+                        return retainDate ? getSentDate() : super.getReceivedDate();
                     }
                 };
             } else {
-                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate);
+                tmp = new FileBackedMimeMessage(MimeDefaultSession.getDefaultSession(), tempFile, optReceivedDate) {
+
+                    @Override
+                    public Date getReceivedDate() throws MessagingException {
+                        Date optReceivedDate = super.getReceivedDate();
+                        if (null != optReceivedDate) {
+                            return optReceivedDate;
+                        }
+
+                        return retainDate ? getSentDate() : super.getReceivedDate();
+                    }
+                };
             }
             closeSink = false;
             return tmp;

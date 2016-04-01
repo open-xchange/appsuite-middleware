@@ -99,7 +99,7 @@ public final class DefaultLoginFormatter implements LoginFormatter {
         sb.append('(');
         sb.append(request.getVersion());
         sb.append(") Interface:");
-        sb.append(request.getInterface().toString());
+        sb.append(null == request.getInterface() ? null : request.getInterface().toString());
         final Context ctx = result.getContext();
         if (null != ctx) {
             sb.append(" Context:");

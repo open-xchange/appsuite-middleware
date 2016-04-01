@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- *************************************************************************************
+    Hints:
+       - changeSet id has to be unique as it is used as primary key for DATABASECHANGELOG table
+       - use failOnError param to define if a successful execution of the ChangeSet is required
+       - DDLs for the configdb have additionally be considered within the configdb.sql file (for new installations)
+ ************************************************************************************* -->
+
+<databaseChangeLog xmlns="urn:liquibase"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="urn:liquibase /liquibase/dbchangelog-3.0.xsd"
+    logicalFilePath="swiftConfigdbChangeLog">
+
+    <!-- ******************************************************* -->
+    <!-- ************** Release 7.8.1 starts here ************** -->
+    <!-- ******************************************************* -->
+
+    <changeSet id="7.8.1:swift_token" author="thorben.betten@open-xchange.com">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="swift_token" />
+            </not>
+        </preConditions>
+        <comment>Creates the 'swift_token' table</comment>
+        <sql>
+            CREATE TABLE swift_token (
+                id VARCHAR(48) CHARACTER SET ascii COLLATE ascii_general_ci NOT NULL,
+				token VARCHAR(512) COLLATE utf8_unicode_ci NOT NULL,
+				expires BIGINT(64) NOT NULL,
+				PRIMARY KEY (id)
+			) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+        </sql>
+        <rollback>
+            <dropTable tableName="swift_token" />
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog>

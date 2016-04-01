@@ -49,13 +49,18 @@
 
 package com.openexchange.passwordchange.osgi;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+import org.apache.commons.lang.ArrayUtils;
+import com.openexchange.capabilities.CapabilityChecker;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.guest.GuestService;
 import com.openexchange.guest.osgi.GuestServiceServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.passwordchange.BasicPasswordChangeService;
 import com.openexchange.passwordchange.DefaultBasicPasswordChangeService;
+import com.openexchange.passwordchange.EditPasswordCapabilityChecker;
 import com.openexchange.user.UserService;
-
 
 /**
  * {@link PasswordChangeActivator}
@@ -74,12 +79,21 @@ public class PasswordChangeActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { UserService.class };
+        return (Class<?>[]) ArrayUtils.addAll(new Class<?>[] { UserService.class, CapabilityService.class }, EditPasswordCapabilityChecker.getNeededServices());
     }
 
     @Override
     protected void startBundle() throws Exception {
         registerService(BasicPasswordChangeService.class, new DefaultBasicPasswordChangeService());
+
+        // Register CapabilityChecker
+        {
+            final Dictionary<String, Object> properties = new Hashtable<String, Object>(1);
+            properties.put(CapabilityChecker.PROPERTY_CAPABILITIES, EditPasswordCapabilityChecker.EDIT_PASSWORD_CAP);
+            registerService(CapabilityChecker.class, new EditPasswordCapabilityChecker(this), properties);
+
+            getService(CapabilityService.class).declareCapability(EditPasswordCapabilityChecker.EDIT_PASSWORD_CAP);
+        }
 
         track(GuestService.class, new GuestServiceServiceTracker(this.context));
         openTrackers();

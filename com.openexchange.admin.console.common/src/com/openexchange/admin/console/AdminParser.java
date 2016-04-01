@@ -54,6 +54,7 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.admin.rmi.exceptions.MissingOptionException;
 
 /**
@@ -442,7 +443,7 @@ public class AdminParser extends CLIParser {
             }
 
             // show all missing opts
-            if (sb.toString().length() > 0) {
+            if (sb.length() > 0) {
                 sb.deleteCharAt(sb.length() - 1);
                 throw new MissingOptionException("Option(s) \"" + sb.toString() + "\" missing");
             }
@@ -528,8 +529,8 @@ public class AdminParser extends CLIParser {
         System.out.println("\nThe following environment variables and their current value are known\n" +
         		"and can be modified to change behaviour:\n");
         final Hashtable<String, String> env = BasicCommandlineOptions.getEnvOptions();
-        for( final String key : env.keySet()) {
-            System.out.println("\t" + key + "=" + env.get(key));
+        for( final Entry<String, String> entry : env.entrySet()) {
+            System.out.println("\t" + entry.getKey() + "=" + entry.getValue());
         }
         System.out.println("\n");
         System.out.println("Date format is used to format all dates coming out of or going into the system.");

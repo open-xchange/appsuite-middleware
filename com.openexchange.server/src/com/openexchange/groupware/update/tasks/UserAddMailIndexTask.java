@@ -61,7 +61,6 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.server.services.ServerServiceRegistry;
 
@@ -82,15 +81,8 @@ public final class UserAddMailIndexTask extends UpdateTaskAdapter {
     }
 
     @Override
-    public int getPriority() {
-        @SuppressWarnings("deprecation")
-        final int priority = UpdateTask.UpdateTaskPriority.HIGH.priority;
-        return priority;
-    }
-
-    @Override
     public String[] getDependencies() {
-        return new String[] { CalendarExtendDNColumnTask.class.getName(), EnlargeCalendarUid.class.getName() };
+        return new String[] { EnlargeCalendarUid.class.getName() };
     }
 
     @Override

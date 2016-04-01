@@ -137,7 +137,7 @@ public class RuleConverter {
         final ASTcommands tcommands = new ASTcommands(js[0]++);
         for (int k = 0; k < actioncommands.size(); k++) {
             final ActionCommand actionCommand = actioncommands.get(k);
-            final String commandname = actionCommand.getCommand().getCommandname();
+            final String commandname = actionCommand.getCommand().getCommandName();
             final ASTcommand tcommand = createActionCommand(actionCommand.getArguments(), commandname, js, linenumber);
             tcommands.jjtAddChild(tcommand, k);
         }
@@ -179,8 +179,8 @@ public class RuleConverter {
 
     private static ASTtest createCompleteTestPart(final TestCommand testcommand, final int[] js) {
         final ASTtest ttest = new ASTtest(js[0]++);
-        final List<TestCommand> testcommands = testcommand.getTestcommands();
-        final String commandname = testcommand.getCommand().getCommandname();
+        final List<TestCommand> testcommands = testcommand.getTestCommands();
+        final String commandname = testcommand.getCommand().getCommandName();
         ttest.setName(commandname);
         if ("not".equals(commandname)) {
             ttest.jjtAddChild(createCompleteTestPart(testcommands.get(0), js), 0);
@@ -299,7 +299,7 @@ public class RuleConverter {
                         tcommand.jjtAddChild(arguments, 0);
 
                         // ... and finally the actioncommand block
-                        final ASTblock tblock = createActionBlockForTest(ifcommand.getActioncommands(), js, rule.getLinenumber());
+                        final ASTblock tblock = createActionBlockForTest(ifcommand.getActionCommands(), js, rule.getLinenumber());
                         tcommand.jjtAddChild(tblock, 1);
                         tcommands.jjtAddChild(tcommand, o);
                     } else if (command instanceof ElseCommand) {
@@ -312,14 +312,14 @@ public class RuleConverter {
                         tcommand.jjtAddChild(arguments, 0);
 
                         // ... and finally the actioncommand block
-                        final ASTblock tblock = createActionBlockForTest(elsecommand.getActioncommands(), js, rule.getLinenumber());
+                        final ASTblock tblock = createActionBlockForTest(elsecommand.getActionCommands(), js, rule.getLinenumber());
                         tcommand.jjtAddChild(tblock, 1);
                         tcommands.jjtAddChild(tcommand, o);
                     } else if (command instanceof ActionCommand) {
                         final ActionCommand actionCommand = (ActionCommand) command;
                         // We need an array here, because we have to make
                         // call-by-reference through the call-by-value of java
-                        final ASTcommand tcommand = createActionCommand(actionCommand.getArguments(), actionCommand.getCommand().getCommandname(), js, rule.getLinenumber());
+                        final ASTcommand tcommand = createActionCommand(actionCommand.getArguments(), actionCommand.getCommand().getCommandName(), js, rule.getLinenumber());
                         tcommands.jjtAddChild(tcommand, o);
                     }
                     o++;

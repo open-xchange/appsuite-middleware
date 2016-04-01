@@ -65,7 +65,7 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
-import com.openexchange.mailmapping.MailResolver;
+import com.openexchange.mailmapping.MultipleMailResolver;
 import com.openexchange.mailmapping.ResolvedMail;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
@@ -78,7 +78,7 @@ import com.openexchange.user.UserService;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a> Simple code clean-up
  */
-public class DefaultMailMappingService implements MailResolver {
+public class DefaultMailMappingService implements MultipleMailResolver {
 
     /** The service look-up */
     private final ServiceLookup services;
@@ -104,6 +104,19 @@ public class DefaultMailMappingService implements MailResolver {
         for (Object domain : set) {
             externalDomains.add(domain.toString());
         }
+    }
+
+    @Override
+    public ResolvedMail[] resolveMultiple(String... mails) throws OXException {
+        if (null == mails || mails.length == 0) {
+            return new ResolvedMail[0];
+        }
+
+        ResolvedMail[] results = new ResolvedMail[mails.length];
+        for (int i = results.length; i-- > 0;) {
+            results[i] = resolve(mails[i]);
+        }
+        return results;
     }
 
     @Override

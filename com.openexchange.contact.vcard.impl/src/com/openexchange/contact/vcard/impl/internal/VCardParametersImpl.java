@@ -50,6 +50,8 @@
 package com.openexchange.contact.vcard.impl.internal;
 
 import java.awt.Dimension;
+import java.util.HashMap;
+import java.util.Map;
 import com.openexchange.contact.vcard.VCardParameters;
 import com.openexchange.contact.vcard.VCardVersion;
 import com.openexchange.session.Session;
@@ -74,6 +76,9 @@ public class VCardParametersImpl implements VCardParameters {
     private boolean keepOriginalVCard;
     private boolean removeImageFromKeptVCard;
     private boolean enforceUtf8;
+    private boolean importAttachments;
+    private boolean removeAttachmentsFromKeptVCard;
+    private Map<String, Object> parameters;
 
     /**
      * Initializes a new, empty {@link VCardParametersImpl}.
@@ -200,6 +205,53 @@ public class VCardParametersImpl implements VCardParameters {
     @Override
     public VCardParameters setEnforceUtf8(boolean enforceUtf8) {
         this.enforceUtf8 = enforceUtf8;
+        return this;
+    }
+
+    @Override
+    public boolean isImportAttachments() {
+        return importAttachments;
+    }
+
+    @Override
+    public VCardParameters setImportAttachments(boolean importAttachments) {
+        this.importAttachments = importAttachments;
+        return this;
+    }
+
+    @Override
+    public boolean isRemoveAttachmentsFromKeptVCard() {
+        return removeAttachmentsFromKeptVCard;
+    }
+
+    @Override
+    public VCardParameters setRemoveAttachmentsFromKeptVCard(boolean removeAttachmentsFromKeptVCard) {
+        this.removeAttachmentsFromKeptVCard = removeAttachmentsFromKeptVCard;
+        return this;
+    }
+
+    @Override
+    public <T> T get(String name, Class<T> clazz) {
+        if (null == name || null == parameters) {
+            return null;
+        }
+        try {
+            return clazz.cast(parameters.get(name));
+        } catch (ClassCastException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public <T> VCardParameters set(String name, T value) {
+        if (null != name) {
+            if (null == parameters) {
+                parameters = new HashMap<String, Object>();
+            }
+            parameters.put(name, value);
+        } else if (null != parameters) {
+            parameters.remove(name);
+        }
         return this;
     }
 

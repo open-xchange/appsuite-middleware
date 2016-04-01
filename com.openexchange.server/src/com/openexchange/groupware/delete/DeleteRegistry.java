@@ -61,6 +61,7 @@ import com.openexchange.groupware.attach.impl.AttachmentContextDelete;
 import com.openexchange.groupware.attach.impl.AttachmentDelDelete;
 import com.openexchange.groupware.calendar.CalendarAdministrationService;
 import com.openexchange.groupware.contact.ContactDeleteListener;
+import com.openexchange.groupware.delete.objectusagecount.ObjectUsageCountDeleteListener;
 import com.openexchange.groupware.filestore.FileStorageRemover;
 import com.openexchange.groupware.infostore.InfostoreDelete;
 import com.openexchange.groupware.tasks.TasksDelete;
@@ -179,6 +180,7 @@ public final class DeleteRegistry {
              */
             new UserConfigurationDeleteListener(),
             new UserSettingMailDeleteListener(),
+            new ObjectUsageCountDeleteListener(),
             new QuotaUsageDelete(),
             new UserQuotaUsageDelete(),
             new AttachmentContextDelete(),

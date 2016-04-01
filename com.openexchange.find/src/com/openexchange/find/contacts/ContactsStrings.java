@@ -83,6 +83,11 @@ public class ContactsStrings implements LocalizableStrings {
     // The 'user input' part is always prepended, please heed this in translations.
     public static final String FACET_ADDRESS = "in addresses";
 
+    // Context: Searching in contacts.
+    // Displayed as: [Search for] 'user input' in departments.
+    // The 'user input' part is always prepended, please heed this in translations.
+    public static final String FACET_DEPARTMENT = "in departments";
+
     public static final String CONTACT_TYPE_CONTACT = "Contact";
 
     public static final String CONTACT_TYPE_DISTRIBUTION_LIST = "Distribution List";

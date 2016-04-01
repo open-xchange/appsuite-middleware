@@ -50,11 +50,13 @@
 package com.openexchange.share.notification.impl.mail;
 
 import static com.openexchange.osgi.Tools.requireService;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MailDateFormat;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
@@ -62,6 +64,7 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
+import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.transport.TransportProvider;
 import com.openexchange.notification.FullNameBuilder;
 import com.openexchange.notification.mail.MailData;
@@ -139,6 +142,11 @@ public class ShareCreatedMail extends ShareNotificationMail {
             context.getContextId());
 
         Map<String, Object> vars = prepareShareCreatedVars(data);
+        String date;
+        final MailDateFormat mdf = MimeMessageUtility.getMailDateFormat(notification.getSession());
+        synchronized (mdf) {
+            date = mdf.format(new Date());
+        }
         Builder mailData = MailData.newBuilder()
             .setSendingUser(sharingUser)
             .setRecipient(notification.getTransportInfo())
@@ -146,6 +154,7 @@ public class ShareCreatedMail extends ShareNotificationMail {
             .setTemplateVars(vars)
             .setMailConfig(serverConfig.getNotificationMailConfig())
             .setContext(context)
+            .addMailHeader("Date", date)
             .addMailHeader("X-Open-Xchange-Share-Type", notification.getType().getId())
             .addMailHeader("X-Open-Xchange-Share-URL", notification.getShareUrl());
         if (data.notification.getTargetGroup() == null) {

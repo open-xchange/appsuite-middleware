@@ -58,10 +58,8 @@ import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.tools.update.Tools;
 
@@ -73,16 +71,6 @@ import com.openexchange.tools.update.Tools;
 public final class MALPollCreateTableTask extends AbstractCreateTableImpl implements UpdateTaskV2 {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MALPollCreateTableTask.class);
-
-    @Override
-    public int addedWithVersion() {
-        return 102;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskPriority.HIGHEST.priority;
-    }
 
     private static String getCreateHashTable() {
         return "CREATE TABLE malPollHash (" +
@@ -129,11 +117,6 @@ public final class MALPollCreateTableTask extends AbstractCreateTableImpl implem
     @Override
     public TaskAttributes getAttributes() {
         return new Attributes();
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

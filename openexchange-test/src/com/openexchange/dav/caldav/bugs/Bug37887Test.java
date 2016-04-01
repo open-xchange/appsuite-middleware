@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.jackrabbit.webdav.DavConstants;
@@ -86,6 +88,8 @@ public class Bug37887Test extends CalDAVTest {
             Map<String, Object> meta = folder.getMeta();
             if (null == meta) {
                 meta = new HashMap<String, Object>();
+            } else {
+                meta = new HashMap<String, Object>(meta);
             }
             color = "#000000FF";
             FolderObject toUpdate = new FolderObject(folderID);
@@ -111,7 +115,7 @@ public class Bug37887Test extends CalDAVTest {
          */
         Boolean found = null;
         for (MultiStatusResponse response : responses) {
-            if ("/caldav/".equals(response.getHref())) {
+            if ("/caldav/".equals(response.getHref()) || "/caldav/schedule-inbox/".equals(response.getHref()) || "/caldav/schedule-outbox/".equals(response.getHref())) {
                 continue;
             }
             if (response.getProperties(StatusCodes.SC_OK).contains(PropertyNames.CALENDAR_COLOR)) {

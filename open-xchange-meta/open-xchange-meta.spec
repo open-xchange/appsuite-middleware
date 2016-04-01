@@ -1,9 +1,10 @@
+%define __jar_repack %{nil}
 
 Name:           open-xchange-meta
 BuildArch:      noarch
 #!BuildIgnore:  post-build-checks
 Version:        @OXVERSION@
-%define         ox_release 27
+%define         ox_release 7
 Release:        %{ox_release}_<CI_CNT>.<B_CNT>
 Group:          Applications/Productivity
 License:        GPL-2.0
@@ -11,10 +12,6 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-build
 URL:            http://www.open-xchange.com/
 Source:         %{name}_%{version}.orig.tar.bz2
 Summary:        Open-Xchange Meta packages
-
-%define ox6_common open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
-
-%define oxcommon open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-report-client
 
 %define all_lang_ui_ox6 open-xchange-gui-l10n-de-de, open-xchange-gui-l10n-cs-cz, open-xchange-gui-l10n-es-es, open-xchange-gui-l10n-hu-hu, open-xchange-gui-l10n-it-it, open-xchange-gui-l10n-ja-jp, open-xchange-gui-l10n-lv-lv, open-xchange-gui-l10n-nl-nl, open-xchange-gui-l10n-pl-pl, open-xchange-gui-l10n-sk-sk, open-xchange-gui-l10n-zh-cn, open-xchange-gui-l10n-zh-tw, open-xchange-online-help-de-de, open-xchange-online-help-en-us, open-xchange-online-help-es-es, open-xchange-online-help-fr-fr, open-xchange-online-help-it-it, open-xchange-online-help-ja-jp, open-xchange-online-help-nl-nl, open-xchange-online-help-pl-pl, open-xchange-online-help-zh-cn, open-xchange-online-help-zh-tw
 
@@ -31,19 +28,6 @@ Requires:       open-xchange, open-xchange-spamhandler
 
 %description -n open-xchange-meta-server
 The Open-Xchange Meta package for OX Backend
-
-Authors:
---------
-    Open-Xchange
-
-# ----------------------------------------------------------------------------------------------------
-%package -n     open-xchange-meta-admin
-Group:          Applications/Productivity
-Summary:        The Open-Xchange Meta package for User/Group Provisioning
-Requires:       open-xchange-admin
-
-%description -n open-xchange-meta-admin
-The Open-Xchange Meta package for User/Group Provisioning
 
 Authors:
 --------
@@ -79,7 +63,7 @@ Authors:
 %package -n     open-xchange-meta-singleserver
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX on a single server
-Requires:       open-xchange-meta-server, open-xchange-meta-gui, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
+Requires:       open-xchange-meta-server, open-xchange-meta-gui, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging
 
 %description -n open-xchange-meta-singleserver
 The Open-Xchange Meta package for OX on a single server
@@ -149,7 +133,7 @@ Summary:        The Open-Xchange Meta package for OX into Parallels integration
 Requires:       open-xchange-meta-backend
 Requires:       open-xchange-meta-gui
 Requires:       %{all_lang_backend}
-Requires:       open-xchange-parallels, open-xchange-meta-parallels-ui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
+Requires:       open-xchange-parallels, open-xchange-meta-parallels-ui, open-xchange-spamhandler-spamassassin, open-xchange-admin-soap, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
 Conflicts:      open-xchange-admin-plugin-autocontextid, open-xchange-admin-plugin-reseller
 
 %description -n open-xchange-meta-parallels
@@ -207,7 +191,7 @@ Summary:        The Open-Xchange Meta package for OX into cPanel integration
 Requires:       open-xchange-meta-backend
 Requires:       open-xchange-meta-gui
 Requires:       %{all_lang_backend}
-Requires:       open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-meta-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
+Requires:       open-xchange-spamhandler-spamassassin, open-xchange-admin-soap-reseller, open-xchange-authentication-imap, open-xchange-admin, open-xchange-meta-pubsub, open-xchange-meta-messaging, open-xchange-manage-group-resource
 
 %description -n open-xchange-meta-cpanel
 The Open-Xchange Meta package for OX into cPanel integration
@@ -263,7 +247,7 @@ Authors:
 Group:          Applications/Productivity
 Summary:        The Open-Xchange Meta package for OX6 backend packages
 Provides:       open-xchange-meta-backend
-Requires:       %{ox6_common}
+Requires:       open-xchange, open-xchange-core, open-xchange-imap, open-xchange-pop3, open-xchange-smtp, open-xchange-calendar-printing, open-xchange-gui-wizard-plugin, open-xchange-report-client
 
 %description -n open-xchange-meta-backend-ox6
 The Open-Xchange Meta package for OX6 backend packages
@@ -319,10 +303,6 @@ Authors:
 %defattr(-,root,root)
 %doc README.TXT
 
-%files -n open-xchange-meta-admin
-%defattr(-,root,root)
-%doc README.TXT
-
 %files -n open-xchange-meta-pubsub
 %defattr(-,root,root)
 %doc README.TXT
@@ -372,20 +352,34 @@ Authors:
 %doc README.TXT
 
 %changelog
+* Wed Mar 30 2016 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.8.1 release
+* Fri Mar 25 2016 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.8.1 release
 * Wed Mar 23 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-03-29 (3188)
+* Tue Mar 15 2016 Carsten Hoeger <choeger@open-xchange.com>
+Fifth preview for 7.8.1 release
 * Mon Mar 07 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-03-14 (3148)
+* Fri Mar 04 2016 Carsten Hoeger <choeger@open-xchange.com>
+Fourth preview for 7.8.1 release
 * Fri Feb 26 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-02-29 (3141)
 * Mon Feb 22 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-02-29 (3121)
+* Sat Feb 20 2016 Carsten Hoeger <choeger@open-xchange.com>
+Third candidate for 7.8.1 release
 * Mon Feb 15 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-02-18 (3106)
 * Wed Feb 10 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-02-08 (3073)
+* Wed Feb 03 2016 Carsten Hoeger <choeger@open-xchange.com>
+Second candidate for 7.8.1 release
 * Tue Jan 26 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-01-19 (3062)
+* Tue Jan 26 2016 Carsten Hoeger <choeger@open-xchange.com>
+First candidate for 7.8.1 release
 * Mon Jan 25 2016 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2016-01-25 (3031)
 * Sat Jan 23 2016 Carsten Hoeger <choeger@open-xchange.com>
@@ -412,10 +406,20 @@ Build for patch 2015-11-23 (2878)
 Build for patch 2015-11-09 (2840)
 * Fri Oct 30 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-11-02 (2853)
+* Tue Oct 20 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-10-26 (2813)
+* Mon Oct 19 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-10-30 (2818)
 * Mon Oct 19 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-10-26 (2812)
+* Mon Oct 12 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-10-23 (2806)
+* Thu Oct 08 2015 Carsten Hoeger <choeger@open-xchange.com>
+prepare for 7.8.1
 * Fri Oct 02 2015 Carsten Hoeger <choeger@open-xchange.com>
 Sixth candidate for 7.8.0 release
+* Wed Sep 30 2015 Carsten Hoeger <choeger@open-xchange.com>
+Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>
 Build for patch 2015-09-28  (2767)
 * Fri Sep 25 2015 Carsten Hoeger <choeger@open-xchange.com>

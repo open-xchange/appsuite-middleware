@@ -57,9 +57,8 @@ import com.hazelcast.core.IMap;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.impl.authcode.portable.PortableAuthCodeInfo;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 
 /**
@@ -79,23 +78,21 @@ public class HzAuthorizationCodeProvider extends AbstractAuthorizationCodeProvid
 
     private final String mapName;
     private final AtomicBoolean notActive;
+    private final HazelcastInstance hazelcast;
 
     /**
      * Initializes a new {@link HzAuthorizationCodeProvider}.
      */
-    public HzAuthorizationCodeProvider(String mapName, ServiceLookup services) {
-        super(services);
+    public HzAuthorizationCodeProvider(String mapName, HazelcastInstance hazelcast) {
+        super();
         this.mapName = mapName;
+        this.hazelcast = hazelcast;
         notActive = new AtomicBoolean();
     }
 
     private IMap<String, PortableAuthCodeInfo> map() throws OXException {
         try {
-            HazelcastInstance hzInstance = services.getOptionalService(HazelcastInstance.class);
-            if (null == hzInstance) {
-                throw ServiceExceptionCode.absentService(HazelcastInstance.class);
-            }
-            return hzInstance.getMap(mapName);
+            return hazelcast.getMap(mapName);
         } catch (HazelcastInstanceNotActiveException e) {
             handleNotActiveException(e);
             return null;

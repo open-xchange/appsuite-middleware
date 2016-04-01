@@ -51,12 +51,11 @@ package com.openexchange.carddav.resources;
 
 import java.util.Collection;
 import java.util.Date;
-
-
+import java.util.List;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.webdav.acl.mixins.CurrentUserPrivilegeSet;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
@@ -68,79 +67,37 @@ import com.openexchange.webdav.protocol.WebdavProtocolException;
  */
 public class AggregatedCollection extends CardDAVCollection {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AggregatedCollection.class);
+    private final String displayName;
 
-    private String displayName = null;
-
-    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws WebdavProtocolException {
-        super(factory, url);
+    /**
+     * Initializes a new {@link AggregatedCollection}.
+     *
+     * @param factory The factory
+     * @param url The WebDAV path
+     * @param displayName The displayname to use
+     */
+    public AggregatedCollection(GroupwareCarddavFactory factory, WebdavPath url, String displayName) throws OXException {
+        super(factory, url, factory.getState().getDefaultFolder());
         this.displayName = displayName;
-        try {
-			super.includeProperties(new CurrentUserPrivilegeSet(factory.getState().getDefaultFolder().getOwnPermission()));
-		} catch (OXException e) {
-			throw protocolException(e);
-		}
-        LOG.debug("{}: initialized.", getUrl());
     }
 
-	@Override
-    protected Collection<Contact> getModifiedContacts(Date since) throws OXException {
-    	return factory.getState().getModifiedContacts(since);
+    @Override
+    protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
+        Collection<Contact> contacts = super.getDeletedObjects(since);
+        for (UserizedFolder folder : factory.getState().getDeletedFolders(since)) {
+            contacts.addAll(factory.getState().getDeletedContacts(since, folder.getID()));
+        }
+        return contacts;
     }
 
-	@Override
-    protected Collection<Contact> getDeletedContacts(Date since) throws OXException {
-    	return factory.getState().getDeletedContacts(since);
+    @Override
+    protected List<UserizedFolder> getFolders() throws OXException {
+        return factory.getState().getFolders();
     }
-
-	@Override
-    protected Collection<Contact> getContacts() throws OXException {
-    	return factory.getState().getContacts();
-    }
-
-	@Override
-	protected String getFolderID() throws OXException {
-		return factory.getState().getDefaultFolder().getID();
-	}
-
-	@Override
-	public void create() throws WebdavProtocolException {
-	}
-
-	@Override
-	public boolean exists() throws WebdavProtocolException {
-		return true;
-	}
-
-	@Override
-	public void save() throws WebdavProtocolException {
-	}
-
-	@Override
-	public Date getCreationDate() throws WebdavProtocolException {
-		return new Date(0);
-	}
-
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-		try {
-			return factory.getState().getLastModified();
-		} catch (OXException e) {
-			throw protocolException(e);
-		}
-	}
 
 	@Override
 	public String getDisplayName() throws WebdavProtocolException {
 		return displayName;
-	}
-
-	@Override
-	public void setDisplayName(String displayName) throws WebdavProtocolException {
-	}
-
-	@Override
-	public void setCreationDate(Date date) throws WebdavProtocolException {
 	}
 
 }

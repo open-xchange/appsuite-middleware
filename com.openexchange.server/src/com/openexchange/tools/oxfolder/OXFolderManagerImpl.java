@@ -60,6 +60,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.procedure.TIntObjectProcedure;
 import gnu.trove.procedure.TIntProcedure;
 import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import java.sql.Connection;
 import java.sql.DataTruncation;
 import java.sql.SQLException;
@@ -177,6 +178,11 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * Allows changing the "created by" property.
      */
     private static final int OPTION_OVERRIDE_CREATED_BY = 2;
+
+    /**
+     * Signals a move to trash through a delete.
+     */
+    private static final int OPTION_TRASHING = 4;
 
     private static final String TABLE_OXFOLDER_TREE = "oxfolder_tree";
 
@@ -357,7 +363,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         } else if (FolderObject.INFOSTORE == folderObj.getModule() && setAdminAsCreatorForPublicDriveFolder() && isPublicInfoStoreFolder(parentFolder)) {
             folderObj.setCreatedBy(ctx.getMailadmin());
         }
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(folderObj, userPerms, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, folderObj, parentFolder.getNonSystemPermissionsAsArray());
         /*
          * Check if admin exists and permission structure
          */
@@ -563,23 +569,62 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 throw OXFolderExceptionCode.NO_ADMIN_ACCESS.create(session.getUserId(), Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
         }
-        final boolean performMove = fo.containsParentFolderID();
+
+        boolean performMove = fo.containsParentFolderID();
         FolderObject originalFolder = getFolderFromMaster(fo.getObjectID());
         int oldParentId = originalFolder.getParentFolderID();
-        Map<Integer, Integer> folderId2OldOwner = null;
         FolderObject storageObject = originalFolder.clone();
+
+        int optionz = options;
+        if (((optionz & OPTION_TRASHING) <= 0) && performMove) {
+            int newParentFolderID = fo.getParentFolderID();
+            if (newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
+                if ((FolderObject.TRASH == getFolderTypeFromMaster(newParentFolderID)) && (FolderObject.TRASH != getFolderTypeFromMaster(storageObject.getParentFolderID()))) {
+                    // Move to trash
+                    int folderId = fo.getObjectID();
+                    String name = fo.containsFolderName() && !Strings.isEmpty(fo.getFolderName()) ? fo.getFolderName() : storageObject.getFolderName();
+                    try {
+                        while (-1 != OXFolderSQL.lookUpFolderOnUpdate(folderId, newParentFolderID, name, storageObject.getModule(), readCon, ctx)) {
+                            name = incrementSequenceNumber(name);
+                        }
+                    } catch (SQLException e) {
+                        throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+                    }
+                    /*
+                     * remove any folder-dependent entities
+                     */
+                    deleteDependentEntities(writeCon, storageObject, true);
+                    /*
+                     * perform move to trash
+                     */
+                    fo.setFolderName(name);
+                    fo.setPermissions(getFolderFromMaster(newParentFolderID).getPermissions());
+                    // when deleting a folder, the permissions should always be inherited from the parent trash folder
+                    // in order to do so, "created by" is overridden intentionally here to not violate permission restrictions,
+                    // and to prevent synthetic system permissions to get inserted implicitly
+                    optionz |= user.getId() != storageObject.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE;
+                }
+            }
+        }
+
+        Map<Integer, Integer> folderId2OldOwner = null;
         try {
             if (fo.containsPermissions() || fo.containsModule() || fo.containsMeta()) {
-                final int newParentFolderID = fo.getParentFolderID();
+                int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
                     move(fo.getObjectID(), newParentFolderID, fo.getCreatedBy(), fo.getFolderName(), storageObject, lastModified);
                     // Reload storage's folder for following update
                     storageObject = getFolderFromMaster(fo.getObjectID());
+                } else {
+                    // Check if permissions of a trash folder are supposed to be changed
+                    if (fo.containsPermissions()) {
+                        checkTrashFolderPermissionChange(fo, storageObject);
+                    }
                 }
-                update(fo, options, storageObject, lastModified, handDown);
+                update(fo, optionz, storageObject, lastModified, handDown);
             } else if (fo.containsFolderName()) {
-                final int newParentFolderID = fo.getParentFolderID();
+                int newParentFolderID = fo.getParentFolderID();
                 if (performMove && newParentFolderID > 0 && newParentFolderID != storageObject.getParentFolderID()) {
                     // Perform move
                     folderId2OldOwner = determineCurrentOwnerships(originalFolder);
@@ -660,6 +705,28 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     DBPool.closeWriterAfterReading(ctx, wc);
                     wc = null;
                 }
+            }
+        }
+    }
+
+    private void checkTrashFolderPermissionChange(final FolderObject fo, FolderObject storageObject) throws OXException {
+        FolderObject trashFolder = getTrashFolder(storageObject.getModule());
+        if (null != trashFolder) {
+            boolean belowTrash;
+            int trashFolderID = trashFolder.getObjectID();
+            if (storageObject.getObjectID() == trashFolderID || storageObject.getParentFolderID() == trashFolderID) {
+                belowTrash = true;
+            } else {
+                OXFolderAccess folderAccess = getOXFolderAccess();
+                FolderObject p = storageObject;
+                while (p.getParentFolderID() != trashFolderID && FolderObject.MIN_FOLDER_ID < p.getParentFolderID()) {
+                    p = folderAccess.getFolderObject(p.getParentFolderID());
+                }
+                belowTrash = p.getParentFolderID() == trashFolderID;
+            }
+
+            if (belowTrash && !OXFolderUtility.equalPermissions(fo.getNonSystemPermissionsAsArray(), storageObject.getNonSystemPermissionsAsArray())) {
+                throw OXFolderExceptionCode.NO_TRASH_PERMISSIONS_CHANGE_ALLOWED.create(Integer.valueOf(fo.getObjectID()), Integer.valueOf(ctx.getContextId()));
             }
         }
     }
@@ -826,7 +893,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             fo.setCreatedBy(storageObj.getCreatedBy());
         }
         fo.setDefaultFolder(storageObj.isDefaultFolder());
-        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(fo, userPerms, ctx);
+        OXFolderUtility.checkPermissionsAgainstSessionUserConfig(session, fo, storageObj.getNonSystemPermissionsAsArray());
         OXFolderUtility.checkFolderPermissions(fo, user.getId(), ctx, warnings);
         OXFolderUtility.checkPermissionsAgainstUserConfigs(readCon, fo, ctx);
         OXFolderUtility.checkSystemFolderPermissions(fo.getObjectID(), fo.getNonSystemPermissionsAsArray(), user, ctx);
@@ -839,6 +906,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
             }
             new CheckPermissionOnInsert(session, writeCon, ctx).checkParentPermissions(storageObj.getParentFolderID(), fo.getNonSystemPermissionsAsArray(), lastModified);
         }
+
         boolean rename = false;
         if (fo.containsFolderName() && !storageObj.getFolderName().equals(fo.getFolderName())) {
             rename = true;
@@ -853,6 +921,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         if (fo.getType() == FolderObject.PRIVATE && fo.getPermissions().size() > 1) {
             final TIntSet diff = OXFolderUtility.getShareUsers(rename ? null : storageObj.getPermissions(), fo.getPermissions(), user.getId(), ctx);
             if (!diff.isEmpty()) {
+                OXFolderAccess folderAccess = getOXFolderAccess();
                 final FolderObject[] allSharedFolders;
                 try {
                     /*
@@ -868,7 +937,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                          */
                         final int fuid = iter.next();
                         if (fuid != fo.getObjectID()) {
-                            allSharedFolders[i] = getOXFolderAccess().getFolderObject(fuid);
+                            allSharedFolders[i] = folderAccess.getFolderObject(fuid);
                         }
                     }
                 } catch (final DataTruncation e) {
@@ -958,29 +1027,37 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
         }
     }
 
-    private int getFolderOwnerFromMaster(final int folderId) throws OXException {
-        return getFolderFromMaster(folderId).getCreatedBy();
+    private int getFolderTypeFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).getType();
     }
 
-    private boolean hasSubfoldersFromMaster(final int folderId) throws OXException {
-        return getFolderFromMaster(folderId).hasSubfolders();
+    private int getFolderOwnerFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).getCreatedBy();
     }
 
-    protected FolderObject getFolderFromMaster(final int folderId) throws OXException {
+    private boolean hasSubfoldersFromMaster(int folderId) throws OXException {
+        return getFolderFromMaster(folderId, false, false).hasSubfolders();
+    }
+
+    protected FolderObject getFolderFromMaster(int folderId) throws OXException {
         return getFolderFromMaster(folderId, false);
     }
 
-    private FolderObject getFolderFromMaster(final int folderId, final boolean withSubfolders) throws OXException {
+    private FolderObject getFolderFromMaster(int folderId, boolean withSubfolders) throws OXException {
+        return getFolderFromMaster(folderId, true, withSubfolders);
+    }
+
+    private FolderObject getFolderFromMaster(int folderId, boolean loadPermissions, boolean withSubfolders) throws OXException {
         // Use writable connection to ensure to fetch from master database
         Connection wc = writeCon;
         if (wc != null) {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, loadPermissions, withSubfolders);
         }
 
         // Fetch new writable connection
         wc = DBPool.pickupWriteable(ctx);
         try {
-            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, withSubfolders);
+            return FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, loadPermissions, withSubfolders);
         } finally {
             DBPool.closeWriterAfterReading(ctx, wc);
         }
@@ -1265,8 +1342,12 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
 
     private boolean changeOwnerOnMove(FolderObject fo, int newParentId, int oldParentId, boolean recursive) throws OXException, SQLException {
         if (FolderObject.INFOSTORE == fo.getModule() && (newParentId > 0 && newParentId != oldParentId) && setAdminAsCreatorForPublicDriveFolder()) {
-            boolean isPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(newParentId));
-            boolean wasPublicInfoStoreFolder = isPublicInfoStoreFolder(getFolderFromMaster(oldParentId));
+            FolderObject newParent = getFolderFromMaster(newParentId);
+            boolean isPublicInfoStoreFolder = isPublicInfoStoreFolder(newParent);
+
+            FolderObject oldParent = getFolderFromMaster(oldParentId);
+            boolean wasPublicInfoStoreFolder = isPublicInfoStoreFolder(oldParent);
+
             if (isPublicInfoStoreFolder != wasPublicInfoStoreFolder) {
                 List<Integer> folderIDs;
                 if (false == recursive || false == fo.hasSubfolders()) {
@@ -1277,7 +1358,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     folderIDs.addAll(OXFolderSQL.getSubfolderIDs(fo.getObjectID(), readCon, ctx, true));
                 }
 
-                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, isPublicInfoStoreFolder ? ctx.getMailadmin() : user.getId(), folderIDs);
+                int newOwner = isPublicInfoStoreFolder ? ctx.getMailadmin() : newParent.getCreatedBy();
+                return 0 < OXFolderSQL.updateFolderOwner(writeCon, ctx, newOwner, folderIDs);
             }
         }
         return false;
@@ -1438,8 +1520,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 /*
                  * trash folder available, check if folder already located below trash
                  */
-                int trashFolderID = trashFolder.getObjectID();
                 boolean belowTrash;
+                int trashFolderID = trashFolder.getObjectID();
                 if (parentFolder.getObjectID() == trashFolderID || parentFolder.getParentFolderID() == trashFolderID) {
                     belowTrash = true;
                 } else {
@@ -1474,7 +1556,8 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                     // when deleting a folder, the permissions should always be inherited from the parent trash folder
                     // in order to do so, "created by" is overridden intentionally here to not violate permission restrictions,
                     // and to prevent synthetic system permissions to get inserted implicitly
-                    int options = user.getId() != folder.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE;
+                    int options = OPTION_TRASHING;
+                    options |= (user.getId() != folder.getCreatedBy() ? OPTION_OVERRIDE_CREATED_BY : OPTION_NONE);
                     return updateFolder(toUpdate, false, true, lastModified, options);
                 }
             }
@@ -1531,14 +1614,7 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
                 /*
                  * Load return value
                  */
-                fo.fill(FolderObject.loadFolderObjectFromDB(
-                    folderId,
-                    ctx,
-                    wc,
-                    true,
-                    false,
-                    "del_oxfolder_tree",
-                    "del_oxfolder_permissions"));
+                fo.fill(FolderObject.loadFolderObjectFromDB(folderId, ctx, wc, true, false, "del_oxfolder_tree", "del_oxfolder_permissions"));
                 return fo;
             } finally {
                 if (create && wc != null) {
@@ -1559,56 +1635,23 @@ final class OXFolderManagerImpl extends OXFolderManager implements OXExceptionCo
      * @throws OXException If deletion fails for any folder
      */
     void deleteValidatedFolders(final TIntObjectMap<TIntObjectMap<?>> deleteableIDs, final long lastModified, final int type) throws OXException {
-        final DeleteValidatedFoldersProcedure procedure = new DeleteValidatedFoldersProcedure(lastModified, type);
-        if (!deleteableIDs.forEachEntry(procedure)) {
-            final OXException error = procedure.error;
-            if (null != error) {
-                throw error;
-            }
-        }
-    }
+        final TIntSet validatedFolders = new TIntHashSet();
+        TIntObjectProcedure<TIntObjectMap<?>> procedure = new TIntObjectProcedure<TIntObjectMap<?>>() {
 
-    private final class DeleteValidatedFoldersProcedure implements TIntObjectProcedure<TIntObjectMap<?>> {
-
-        public OXException error;
-
-        private final long lastModified;
-
-        private final int type;
-
-        public DeleteValidatedFoldersProcedure(final long lastModified, final int type) {
-            super();
-            this.lastModified = lastModified;
-            this.type = type;
-        }
-
-        @Override
-        public boolean execute(final int folderId, final TIntObjectMap<?> hashMap) {
-            if (null == error) {
-                try {
-                    if (null != hashMap) {
-                        final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
-                        deleteValidatedFolders(tmp, lastModified, type);
-                    }
-                    deleteValidatedFolder(folderId, lastModified, type, false);
-                    /*
-                     * Allow further executions
-                     */
-                    return true;
-                } catch (final OXException e) {
-                    error = e;
-                    /*
-                     * Deny further executions
-                     */
-                    return false;
+            @Override
+            public boolean execute(int folderId, TIntObjectMap<?> hashMap) {
+                if (null != hashMap) {
+                    final @SuppressWarnings("unchecked") TIntObjectMap<TIntObjectMap<?>> tmp = (TIntObjectMap<TIntObjectMap<?>>) hashMap;
+                    tmp.forEachEntry(this);
                 }
+                validatedFolders.add(folderId);
+                return true;
             }
-            /*
-             * Deny further executions
-             */
-            return false;
+        };
+        deleteableIDs.forEachEntry(procedure);
+        for (int validatedFolder : validatedFolders.toArray()) {
+            deleteValidatedFolder(validatedFolder, lastModified, type, false);
         }
-
     }
 
     /**

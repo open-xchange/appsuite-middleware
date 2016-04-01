@@ -123,7 +123,7 @@ public abstract class HttpAuthShareHandler extends AbstractShareHandler {
             GuestInfo guest = shareRequest.getGuest();
             ShareLoginConfiguration shareLoginConfig = ShareServletUtils.getShareLoginConfiguration();
             LoginConfiguration loginConfig = shareLoginConfig.getLoginConfig(guest);
-            ShareLoginMethod shareLoginMethod = getShareLoginMethod(guest);
+            ShareLoginMethod shareLoginMethod = getShareLoginMethod(shareRequest);
             LoginResult loginResult = ShareServletUtils.login(guest, request, response, loginConfig, shareLoginConfig.isTransientShareSessions(), shareLoginMethod);
             if (null == loginResult) {
                 shareLoginMethod.sendUnauthorized(request, response);

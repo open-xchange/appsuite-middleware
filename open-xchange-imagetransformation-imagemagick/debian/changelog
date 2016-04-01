@@ -1,0 +1,17 @@
+open-xchange-imagetransformation-imagemagick (7.8.1-2) stable; urgency=medium
+
+  * Second candidate for 7.8.1 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Wed, 03 Feb 2016 10:46:25 +0100
+
+open-xchange-imagetransformation-imagemagick (7.8.1-1) stable; urgency=medium
+
+  * First candidate for 7.8.1 release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Tue, 26 Jan 2016 10:12:55 +0100
+
+open-xchange-imagetransformation-imagemagick (7.8.1-0) unstable; urgency=medium
+
+  * Initial release
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Fri, 18 Dec 2015 16:26:09 +0100

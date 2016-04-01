@@ -49,8 +49,9 @@
 
 package com.openexchange.consistency;
 
-import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -58,29 +59,38 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.management.MBeanException;
 import javax.management.MBeanServerConnection;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
-import javax.management.remote.JMXConnector;
-import javax.management.remote.JMXConnectorFactory;
-import javax.management.remote.JMXServiceURL;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
+import com.openexchange.auth.mbean.AuthenticatorMBean;
+import com.openexchange.cli.AbstractMBeanCLI;
 
 /**
- * CommandLineClient to run the consistency tool.
+ * {@link ConsistencyCheck}
  *
- * @author Francisco Laguna <francisco.laguna@open-xchange.com>
- * @author Ioannis Chouklis <ioannis.chouklis@open-xchange.com>
+ * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
  */
-public class ConsistencyCheck {
+public class ConsistencyCheck extends AbstractMBeanCLI<Void> {
 
     /**
      * Defines the actions of the CLT
      */
     private enum Action {
-        list, unassigned, missing, listUnassigned, listMissing, repair, repairconfigdb, checkconfigdb;
+        list_unassigned("listUnassignedFiles"),
+        list_missing("listMissingFiles"),
+        repair("repairFiles"),
+        repair_configdb("checkOrRepairConfigDB"),
+        check_configdb("checkOrRepairConfigDB");
+
+        private final String methodName;
+
+        /**
+         * Initialises a new {@link ConsistencyCheck.Action}.
+         */
+        private Action(String methodName) {
+            this.methodName = methodName;
+        }
     }
 
     /**
@@ -104,571 +114,389 @@ public class ConsistencyCheck {
         delete, create_dummy, create_admin_infoitem;
     }
 
-    private static final String LOCALHOST = "localhost";
+    private Action action;
+    private Source source;
+    private Policy policy;
+    private PolicyAction policyAction;
+    private int sourceId;
 
     /**
-     * Main method used for checkconsistency clt
-     *
-     * @param args - arguments provided by clt
+     * Entry point
+     * 
+     * @param args
      */
-    public static void main(final String[] args) {
-        final SimpleLexer lexer = new SimpleLexer(args);
-        final Configuration config = new Configuration();
+    public static void main(String[] args) {
+        new ConsistencyCheck().execute(args);
+    }
 
-        lexer.noise("in");
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractMBeanCLI#administrativeAuth(java.lang.String, java.lang.String, org.apache.commons.cli.CommandLine, com.openexchange.auth.mbean.AuthenticatorMBean)
+     */
+    @Override
+    protected void administrativeAuth(String login, String password, CommandLine cmd, AuthenticatorMBean authenticator) throws MBeanException {
+        //no-op, we only support JMX authentication for this tool
+    }
 
-        if (lexer.consume("host")) {
-            final String hostname = lexer.getCurrent();
-            final String[] hostAndPort = hostname.split(":");
-            config.setHost(hostAndPort[0]);
-            if (hostAndPort.length > 1) {
-                config.setPort(Integer.parseInt(hostAndPort[1]));
-            }
-            lexer.advance();
-        } else {
-            config.setHost(LOCALHOST);
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractMBeanCLI#addOptions(org.apache.commons.cli.Options)
+     */
+    @Override
+    protected void addOptions(Options options) {
+        options.addOption("a", "action", true, "Defines the action\nAvailable actions are: " + Arrays.toString(Action.values()));
+        options.addOption("o", "source", true, "Defines the source that is going to be used\nAvailable sources are: " + Arrays.toString(Source.values()));
+        options.addOption("r", "policy", true, "Defines the 'repair' policy\nAvailable repair policies are: " + Arrays.toString(Policy.values()));
+        options.addOption("y", "policy-action", true, "Defines an action for the desired repair policy\nAvailable policy actions are: " + Arrays.toString(PolicyAction.values()));
+        options.addOption("i", "source-id", true, "Defines the source identifier. If source is set to 'all' then this option is simply ignored");
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractMBeanCLI#invoke(org.apache.commons.cli.Options, org.apache.commons.cli.CommandLine, javax.management.MBeanServerConnection)
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Void invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception {
+        String operationName = getOperationName();
+        String policyString = getPolicyString();
+        List<Object> params = new ArrayList<Object>();
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("Executing '").append(action).append("'");
+        if (sourceId > 0) {
+            builder.append(" in '").append(source).append("' source");
+            builder.append(" with sourceId: ").append(sourceId);
         }
 
-        int responseTimeoutMillis = 0;
-        if (lexer.consume("responsetimeout")) {
-            final String value = lexer.getCurrent();
-            responseTimeoutMillis = Integer.parseInt(value) * 1000;
-            lexer.advance();
-        }
-        config.setResponseTimeoutMillis(responseTimeoutMillis);
-
-        if (lexer.consume(Action.repair.name())) {
-            config.setAction(Action.repair.name());
-        } else if (lexer.consume(Action.list.name())) {
-            if (lexer.consume(Action.missing.name())) {
-                config.setAction(Action.listMissing.name());
-            } else if (lexer.consume(Action.unassigned.name())) {
-                config.setAction(Action.listUnassigned.name());
-            } else {
-                System.exit(dontKnowWhatToList());
-            }
-        } else if (lexer.consume(Action.checkconfigdb.name())) {
-            config.setAction(Action.checkconfigdb.name());
-        } else if (lexer.consume(Action.repairconfigdb.name())) {
-            config.setAction(Action.repairconfigdb.name());
-        } else {
-            System.exit(noaction());
-        }
-        lexer.noise("files");
-        lexer.noise("errors");
-        lexer.noise("in");
-
-        if (!config.getAction().equals(Action.checkconfigdb.name()) && !config.getAction().equals(Action.repairconfigdb.name())) {
-            if (lexer.consume(Source.database.name())) {
-                config.setSource(Source.database.name());
-                if (!parseId(lexer, config)) {
-                    System.exit(noid());
-                }
-            } else if (lexer.consume(Source.filestore.name())) {
-                config.setSource(Source.filestore.name());
-                if (!parseId(lexer, config)) {
-                    System.exit(noid());
-                }
-            } else if (lexer.consume(Source.context.name())) {
-                config.setSource(Source.context.name());
-                if (!parseId(lexer, config)) {
-                    System.exit(noid());
-                }
-            } else if (lexer.consume(Source.all.name())) {
-                config.setSource(Source.all.name());
-            } else {
-                System.exit(noproblemsource());
-            }
-
-            lexer.noise("with");
-            lexer.noise("policies");
-
-            while (!lexer.eol()) {
-                if (lexer.consume(Policy.missing_file_for_infoitem.name())) {
-                    lexer.noise(":");
-                    if (lexer.consume(PolicyAction.create_dummy.name())) {
-                        config.addPolicy(Policy.missing_file_for_infoitem.name(), PolicyAction.create_dummy.name());
-                    } else if (lexer.consume(PolicyAction.delete.name())) {
-                        config.addPolicy(Policy.missing_file_for_infoitem.name(), PolicyAction.delete.name());
-                    } else {
-                        System.exit(unknownAction(Policy.missing_file_for_infoitem.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
-                    }
-                } else if (lexer.consume(Policy.missing_file_for_attachment.name())) {
-                    lexer.noise(":");
-                    if (lexer.consume(PolicyAction.create_dummy.name())) {
-                        config.addPolicy(Policy.missing_file_for_attachment.name(), PolicyAction.create_dummy.name());
-                    } else if (lexer.consume(PolicyAction.delete.name())) {
-                        config.addPolicy(Policy.missing_file_for_attachment.name(), PolicyAction.delete.name());
-                    } else {
-                        System.exit(unknownAction(Policy.missing_file_for_attachment.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
-                    }
-                } else if (lexer.consume(Policy.missing_file_for_snippet.name())) {
-                    lexer.noise(":");
-                    if (lexer.consume(PolicyAction.create_dummy.name())) {
-                        config.addPolicy(Policy.missing_file_for_snippet.name(), PolicyAction.create_dummy.name());
-                    } else if (lexer.consume(PolicyAction.delete.name())) {
-                        config.addPolicy(Policy.missing_file_for_snippet.name(), PolicyAction.delete.name());
-                    } else {
-                        System.exit(unknownAction(Policy.missing_file_for_snippet.name(), lexer.getCurrent(), PolicyAction.create_dummy.name(), PolicyAction.delete.name()));
-                    }
-                } else if (lexer.consume(Policy.missing_entry_for_file.name())) {
-                    lexer.noise(":");
-                    if (lexer.consume(PolicyAction.create_admin_infoitem.name())) {
-                        config.addPolicy(Policy.missing_entry_for_file.name(), PolicyAction.create_admin_infoitem.name());
-                    } else if (lexer.consume(PolicyAction.delete.name())) {
-                        config.addPolicy(Policy.missing_entry_for_file.name(), PolicyAction.delete.name());
-                    } else {
-                        System.exit(unknownAction(Policy.missing_entry_for_file.name(), lexer.getCurrent(), PolicyAction.create_admin_infoitem.name(), PolicyAction.delete.name()));
-                    }
-                } else if (lexer.consume(Policy.missing_file_for_vcard.name())) {
-                    //VCard only supports removing references from the db.<br>
-                    // Removing files should be done by using the generic file removal call Policy.missing_entry_for_file.name() + PolicyAction.delete.name()<br>
-                    // In addition you are able to create files for the context admin to review them with Policy.missing_entry_for_file.name() + PolicyAction.create_admin_infoitem.name()
-                    lexer.noise(":");
-                    if (lexer.consume(PolicyAction.delete.name())) {
-                        config.addPolicy(Policy.missing_file_for_vcard.name(), PolicyAction.delete.name());
-                    } else {
-                        System.exit(unknownAction(Policy.missing_file_for_vcard.name(), lexer.getCurrent(), PolicyAction.delete.name()));
-                    }
+        switch (action) {
+            case check_configdb:
+                params.add(false);
+                operationName = action.methodName;
+                break;
+            case repair_configdb:
+                params.add(true);
+                operationName = action.methodName;
+                break;
+            case list_missing:
+                if (source.equals(Source.all)) {
+                    operationName = "listAllMissingFiles";
                 } else {
-                    System.exit(unknownCondition(lexer.getCurrent(), Policy.missing_file_for_infoitem.name(), Policy.missing_file_for_attachment.name(), Policy.missing_entry_for_file.name()));
+                    params.add(sourceId);
                 }
-            }
+                break;
+            case list_unassigned:
+                if (source.equals(Source.all)) {
+                    operationName = "listAllUnassignedFiles";
+                } else {
+                    params.add(sourceId);
+                }
+                break;
+            case repair:
+                if (source.equals(Source.all)) {
+                    operationName = "repairAllFiles";
+                } else {
+                    params.add(sourceId);
+                }
+                params.add(policyString);
+                builder.append(" with repair policy '").append(policyString).append("'");
+                break;
+            default:
+                // Should never happen
+                System.err.println("Invalid action '" + action + "'");
+                printHelp();
+                System.exit(-1);
         }
 
-        try {
-            config.run();
-        } catch (final Exception x) {
-            System.err.println("ERROR\n" + x.getCause().getMessage());
-            System.exit(1);
+        System.out.println(builder.toString());
+        Object resultObject = mbsc.invoke(MBeanNamer.getName(), operationName, params.toArray(new Object[params.size()]), getSignatureOf(ConsistencyMBean.class, operationName));
+
+        if (action.equals(Action.check_configdb)) {
+            printList((List<String>) resultObject);
+            System.out.println("Now run 'checkconsistency' tool again with the 'repair_configdb' option to remove these inconsistent contexts from the 'configdb'.");
+        } else {
+            printResult(resultObject);
         }
+        return null;
     }
 
-    private static boolean parseId(final SimpleLexer lexer, final Configuration config) {
-        try {
-            config.setSourceId(Integer.parseInt(lexer.getCurrent()));
-            lexer.advance();
-            return true;
-        } catch (final NumberFormatException nfe) {
-            return false;
-        }
+    /**
+     * Get the operation name
+     * 
+     * @return
+     */
+    private String getOperationName() {
+        return (source != null) ? action.methodName + "In" + source.name().substring(0, 1).toUpperCase() + source.name().substring(1) : action.methodName;
     }
 
-    private static int dontKnowWhatToList() {
-        System.err.println("Please tell me what to list. Either \"" + Action.list + Action.missing + "\" or \"" + Action.list + Action.unassigned + "\".");
-        return 6;
+    /**
+     * Get the policy string
+     * 
+     * @return
+     */
+    private String getPolicyString() {
+        return (policy != null) ? policy.name() + ":" + policyAction.name() : new String();
     }
 
-    private static int unknownAction(final String policy, final String action, final String... possibleActions) {
-        StringBuilder actions = new StringBuilder();
-
-        for (String possibleAction : possibleActions) {
-            actions.append("\"" + possibleAction + "\", ");
-        }
-
-        System.err.println("Unknown action \"" + action + "\" for policy \"" + policy + "\". I know only " + actions.toString());
-        return 5;
-    }
-
-    private static int unknownCondition(final String condition, final String... possibleConditions) {
-        StringBuilder conditions = new StringBuilder();
-
-        for (String possibleCondition : possibleConditions) {
-            conditions.append("\"" + possibleCondition + "\", ");
-        }
-
-        System.err.println("Unknown condition \"" + condition + "\". I know only about: " + conditions.toString());
-        return 4;
-    }
-
-    private static int noid() {
-        System.err.println("Please specify an id for the context, filestore or database that I should check.");
-        return 3;
-    }
-
-    private static int noproblemsource() {
-        System.err.println("Please specify what to search for problems (either \"" + Source.context + " [id]\" or \"" + Source.filestore + " [id]\" or \"" + Source.database + " [id]\" or \"" + Source.all + "\".");
-        return 2;
-    }
-
-    private static int noaction() {
-        final String ls = System.getProperty("line.separator");
-        System.err.println("Please specify an action, either" + ls + "\"" + Action.list + Action.missing + "\", \"" + Action.list + Action.unassigned + "\", \"" + Action.repair + "\", \"" + Action.checkconfigdb + "\" or \"" + Action.repairconfigdb + "\"" + ls +
-            "You can also specify the hostname of the open-xchange server, optionally." + ls +
-            "Example:" + ls +
-            "checkconsistency in host 10.10.10.10 list missing [...]");
-        return 1;
-    }
-
-    private static class SimpleLexer {
-
-        private final String[] args;
-        private int index;
-
-        public SimpleLexer(final String[] args) {
-            this.args = args;
-            this.index = 0;
-        }
-
-        public String getCurrent() {
-            if (eol()) {
-                return "";
-            }
-            return args[index];
-        }
-
-        public void advance() {
-            index++;
-        }
-
-        public boolean lookahead(final String expect) {
-            return getCurrent().equals(expect);
-        }
-
-        public boolean consume(final String expect) {
-            if (!lookahead(expect)) {
-                return false;
-            }
-            advance();
-            return true;
-        }
-
-        public boolean lookahead(final Pattern p) {
-            return p.matcher(getCurrent()).find();
-        }
-
-        public Matcher consume(final Pattern p) {
-            final Matcher m = p.matcher(getCurrent());
-            if (!m.find()) {
-                return null;
-            }
-            advance();
-            return m;
-        }
-
-        public void noise(final String token) {
-            consume(token);
-        }
-
-        public boolean eol() {
-            return index >= args.length;
-        }
-    }
-
-    private static final class Configuration {
-
-        private String host;
-        private int port = 9999;
-        private String action;
-        private String source;
-        private int sourceId;
-        private final Map<String, String> policies = new HashMap<String, String>();
-        private ConsistencyMBean consistency;
-        private JMXConnector jmxConnector;
-        private int responseTimeoutMillis = 0;
-
-        /**
-         * Initializes a new {@link ConsistencyCheck.Configuration}.
-         */
-        public Configuration() {
-            super();
-        }
-
-        public String getAction() {
-            return action;
-        }
-
-        public void setResponseTimeoutMillis(int responseTimeoutMillis) {
-            this.responseTimeoutMillis = responseTimeoutMillis;
-        }
-
-        public void setHost(final String host) {
-            this.host = host;
-        }
-
-        public void setPort(final int port) {
-            this.port = port;
-        }
-
-        public void setAction(final String action) {
-            this.action = action;
-        }
-
-        public void setSource(final String source) {
-            this.source = source;
-        }
-
-        public void setSourceId(final int sourceId) {
-            this.sourceId = sourceId;
-        }
-
-        public void addPolicy(final String condition, final String action) {
-            if (policies.containsKey(condition)) {
-                throw new IllegalArgumentException("Condition " + condition + " already has an action assigned to it.");
-            }
-            policies.put(condition, action);
-        }
-
-        public void run() throws Exception {
-            if (Action.listMissing.name().equals(action)) {
-                listMissing();
-            } else if (Action.listUnassigned.name().equals(action)) {
-                listUnassigned();
-            } else if (Action.checkconfigdb.name().equals(action)) {
-                checkAndRepairConfigDB(false);
-            } else if (Action.repairconfigdb.name().equals(action)) {
-                checkAndRepairConfigDB(true);
+    /**
+     * Prints the result
+     * 
+     * @param result
+     */
+    @SuppressWarnings("unchecked")
+    private void printResult(Object result) {
+        if (result == null) {
+            System.out.println("Operation complete.");
+        } else {
+            if (result != null && result instanceof List) {
+                Map<MBeanEntity, List<String>> results = new HashMap<MBeanEntity, List<String>>();
+                results.put(new MBeanEntity(Integer.valueOf(sourceId)), (List<String>) result);
+                printMap(results);
+            } else if (result != null && result instanceof Map) {
+                printMap((Map<MBeanEntity, List<String>>) result);
             } else {
-                repair();
+                System.out.println("Cannot print result object. Here's the stringified version: \n" + result.toString());
             }
         }
+    }
 
-        private void listMissing() throws MBeanException {
-            Map<MBeanEntity, List<String>> result = null;
-            try {
-                connect();
-
-                System.out.print("Fetching a list for ");
-                if (Source.database.name().equals(source)) {
-                    System.out.print("all mising files in database with the identifier '" + sourceId + "'...");
-                    result = consistency.listMissingFilesInDatabase(sourceId);
-                } else if (Source.filestore.name().equals(source)) {
-                    System.out.print("all mising files in filestore with the identifier '" + sourceId + "'...");
-                    result = consistency.listMissingFilesInFilestore(sourceId);
-                } else if (Source.context.name().equals(source)) {
-                    System.out.print("all mising files in context with the identifier '" + sourceId + "'...");
-                    result = new HashMap<MBeanEntity, List<String>>();
-                    result.put(new MBeanEntity(Integer.valueOf(sourceId)), consistency.listMissingFilesInContext(sourceId));
-                } else if (Source.all.name().equals(source)) {
-                    System.out.print("all mising files...");
-                    result = consistency.listAllMissingFiles();
-                }
-                System.out.println(" OK.");
-
-                print(result);
-            } finally {
-                disconnect();
-            }
-        }
-
-        private void repair() throws MBeanException {
-            if (policies.isEmpty()) {
-                System.out.println("Please specify a policy (either \"" + Policy.missing_entry_for_file.name() + "\" or \"" + Policy.missing_file_for_attachment.name() + "\" or \"" + Policy.missing_file_for_infoitem.name() + "\" or \"" + Policy.missing_file_for_vcard.name() + "\").");
-                return;
-            }
-            try {
-                connect();
-
-                System.out.print("Repairing ");
-                String policyString = getPolicyString();
-                if (Source.database.name().equals(source)) {
-                    System.out.print("all files with policy '" + policyString + "' in the database with the identifier '" + sourceId + "'... ");
-                    consistency.repairFilesInDatabase(sourceId, policyString);
-                } else if (Source.filestore.name().equals(source)) {
-                    System.out.print("all files with policy '" + policyString + "' in the filestore with the identifier '" + sourceId + "'... ");
-                    consistency.repairFilesInFilestore(sourceId, policyString);
-                } else if (Source.context.name().equals(source)) {
-                    System.out.print("all files with policy '" + policyString + "' in the context with the identifier '" + sourceId + "'... ");
-                    consistency.repairFilesInContext(sourceId, policyString);
-                } else if (Source.all.name().equals(source)) {
-                    System.out.print("all files with policy '" + policyString + "'... ");
-                    consistency.repairAllFiles(policyString);
-                }
-                System.out.println(" OK.");
-            } finally {
-                disconnect();
-            }
-        }
-
-        private String getPolicyString() {
-            final StringBuilder sb = new StringBuilder();
-            for (final String condition : policies.keySet()) {
-                sb.append(condition).append(':').append(policies.get(condition)).append(',');
-            }
-            sb.setLength(sb.length() - 1);
-            return sb.toString();
-        }
-
-        private void disconnect() {
-            if (null != jmxConnector) {
-                try {
-                    jmxConnector.close();
-                } catch (final Exception e) {
-                    System.err.println(" Error while closing connection: '" + e.getMessage() + '.');
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#checkOptions(org.apache.commons.cli.CommandLine)
+     */
+    @Override
+    protected void checkOptions(CommandLine cmd) {
+        action = checkAndSetOption(Action.class, cmd, 'a');
+        if (!action.equals(Action.check_configdb) && !action.equals(Action.repair_configdb)) {
+            source = checkAndSetOption(Source.class, cmd, 'o');
+            if (!source.equals(Source.all)) {
+                if (cmd.hasOption('i')) {
+                    sourceId = Integer.parseInt(cmd.getOptionValue('i'));
                 }
             }
-        }
-
-        private void connect() {
-            if (responseTimeoutMillis > 0) {
-                /*
-                 * The value of this property represents the length of time (in milliseconds) that the client-side Java RMI runtime will
-                 * use as a socket read timeout on an established JRMP connection when reading response data for a remote method invocation.
-                 * Therefore, this property can be used to impose a timeout on waiting for the results of remote invocations;
-                 * if this timeout expires, the associated invocation will fail with a java.rmi.RemoteException.
-                 * 
-                 * Setting this property should be done with due consideration, however, because it effectively places an upper bound on the
-                 * allowed duration of any successful outgoing remote invocation. The maximum value is Integer.MAX_VALUE, and a value of
-                 * zero indicates an infinite timeout. The default value is zero (no timeout).
-                 */
-                System.setProperty("sun.rmi.transport.tcp.responseTimeout", Integer.toString(responseTimeoutMillis));
-            }
-            MBeanServerConnection mbsc = null;
-            ObjectName name = null;
-            try {
-                JMXServiceURL url = new JMXServiceURL("service:jmx:rmi:///jndi/rmi://" + host + ":" + port + "/server");
-                System.out.print("Connecting to '" + url + "'... ");
-                jmxConnector = JMXConnectorFactory.connect(url, null);
-
-                mbsc = jmxConnector.getMBeanServerConnection();
-                name = MBeanNamer.getName();
-            } catch (Exception e) {
-                System.err.println("ERROR\n" + e.getMessage());
-                System.exit(1);
-            }
-
-            consistency = new MBeanConsistency(mbsc, name);
-            System.out.println("OK.");
-        }
-
-        private void checkAndRepairConfigDB(final boolean repair) throws IOException, MalformedObjectNameException, NullPointerException, MBeanException {
-
-            List<String> result = null;
-            try {
-                connect();
-                result = consistency.checkOrRepairConfigDB(repair);
-            } finally {
-                disconnect();
-            }
-
-            if (null != result && result.size() > 0) {
-                for (final String ctx : result) {
-                    System.out.println(ctx);
-                }
-                if (!repair) {
-                    System.out.println("Now run repairconfigdb to remove these inconsistent contexts from configdb");
-                }
+            if (!action.equals(Action.list_missing) && !action.equals(Action.list_unassigned)) {
+                policy = checkAndSetOption(Policy.class, cmd, 'r');
+                policyAction = checkAndSetOption(PolicyAction.class, cmd, 'y');
             }
         }
+    }
 
-        private void listUnassigned() throws MBeanException, IOException, MalformedObjectNameException, NullPointerException {
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#requiresAdministrativePermission()
+     */
+    @Override
+    protected boolean requiresAdministrativePermission() {
+        return false;
+    }
 
-            Map<MBeanEntity, List<String>> result = null;
-            try {
-                connect();
-                if (Source.database.name().equals(source)) {
-                    result = consistency.listUnassignedFilesInDatabase(sourceId);
-                } else if (Source.filestore.name().equals(source)) {
-                    result = consistency.listUnassignedFilesInFilestore(sourceId);
-                } else if (Source.context.name().equals(source)) {
-                    result = new HashMap<MBeanEntity, List<String>>();
-                    result.put(new MBeanEntity(sourceId), consistency.listUnassignedFilesInContext(sourceId));
-                } else if (Source.all.name().equals(source)) {
-                    result = consistency.listAllUnassignedFiles();
-                }
-            } finally {
-                disconnect();
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getFooter()
+     */
+    @Override
+    protected String getFooter() {
+        return "The OX check consistency tool";
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.cli.AbstractCLI#getName()
+     */
+    @Override
+    protected String getName() {
+        return "checkconsistency -a <action> -o <source> [-i <sourceId>] [-r <policy> -y <policyAction>] [-l <jmxUser>] [-s <jmxPassword>] [-t <jmxHost>] [-p <jmxPort>] [--responsetimeout <responseTimeout>]";
+    }
+
+    ///////////////////////////////////////////////////////////////////// HELPERS ///////////////////////////////////////////////////////////////
+
+    /**
+     * Check and set the specified option
+     * 
+     * @param enumClass The enum class to check it with
+     * @param e The enum variable to set
+     * @param cmd The command line options
+     * @param option The option to check
+     */
+
+    private final <E extends Enum<E>> E checkAndSetOption(Class<E> enumClass, CommandLine cmd, char option) {
+        E e = null;
+        if (cmd.hasOption(option)) {
+            e = parseEnumValue(enumClass, cmd.getOptionValue(option));
+        } else {
+            System.err.println("You must specify a valid value for the '" + option + "' option.");
+            printHelp();
+            System.exit(-1);
+        }
+        return e;
+    }
+
+    /**
+     * Generic helper method for parsing an enum value
+     * 
+     * @param enumClass The enum class to use
+     * @param value The value to parse
+     * @return The parsed Enum value
+     * @throws IllegalArgumentException in case the value cannot be parsed to a valid enum class
+     */
+    private final <E extends Enum<E>> E parseEnumValue(Class<E> enumClass, String value) {
+        E valueOf = null;
+        try {
+            valueOf = E.valueOf(enumClass, value);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid value '" + value + "' specified for '" + enumClass.getSimpleName() + "'");
+            printHelp();
+            System.exit(-1);
+        }
+        return valueOf;
+    }
+
+    /**
+     * Get the signature of the specified method as an array of Strings
+     *
+     * @param clazz The class from which to get the signature
+     * @param methodName The method name
+     * @return
+     */
+    private final String[] getSignatureOf(Class<?> clazz, String methodName) {
+        String[] signature = null;
+        Class<?>[] types = null;
+        for (Method m : clazz.getMethods()) {
+            if (m.getName().equals(methodName)) {
+                types = m.getParameterTypes();
+                break;
             }
-
-            print(result);
         }
 
-        private void print(final Map<MBeanEntity, List<String>> result) {
-            if (null == result) {
-                System.out.println("No problems found.");
-                return;
+        if (types != null) {
+            signature = new String[types.length];
+            int s = 0;
+            for (Class<?> c : types) {
+                signature[s++] = c.getName();
+            }
+            return signature;
+        }
+
+        System.err.println("Invalid operation '" + methodName + "'");
+        printHelp();
+        System.exit(-1);
+
+        return null;
+    }
+
+    /**
+     * Print the result
+     * 
+     * @param result The result to print
+     */
+    private void printMap(final Map<MBeanEntity, List<String>> result) {
+        if (null == result) {
+            System.out.println("No problems found.");
+            return;
+        }
+
+        String formatter;
+        StringBuilder dashBuilder;
+        {
+            // Find the widest string of the keys
+            int widestEntityString;
+            List<String> entities = compileListOfEntities(result.keySet());
+            widestEntityString = fetchWidestString(entities);
+
+            // Find the widest string of the values
+            int widestHashString;
+            List<String> flattenedList = flattenList(result.values());
+            widestHashString = fetchWidestString(flattenedList);
+
+            // Compare both and get the widest
+            int widestString = (widestEntityString > widestHashString) ? widestEntityString : widestHashString;
+
+            formatter = "| %-" + widestString + "s   |%n";
+
+            dashBuilder = new StringBuilder();
+            for (int i = 0; i < widestString; i++) {
+                dashBuilder.append("-");
+            }
+            dashBuilder.append("--+");
+        }
+
+        for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
+            final List<String> brokenFiles = entry.getValue();
+            MBeanEntity entity = entry.getKey();
+
+            System.out.format("+--" + dashBuilder.toString() + "%n");
+            System.out.format(formatter, entity.toString());
+            System.out.format("+--" + dashBuilder.toString() + "%n");
+
+            for (final String brokenFile : brokenFiles) {
+                System.out.format(formatter, brokenFile);
             }
 
-            String formatter;
-            StringBuilder dashBuilder;
-            {
-                // Find the widest string of the keys
-                int widestEntityString;
-                List<String> entities = compileListOfEntities(result.keySet());
-                widestEntityString = fetchWidestString(entities);
-
-                // Find the widest string of the values
-                int widestHashString;
-                List<String> flattenedList = flattenList(result.values());
-                widestHashString = fetchWidestString(flattenedList);
-
-                // Compare both and get the widest
-                int widestString = (widestEntityString > widestHashString) ? widestEntityString : widestHashString;
-
-                formatter = "| %-" + widestString + "s   |%n";
-
-                dashBuilder = new StringBuilder();
-                for (int i = 0; i < widestString; i++) {
-                    dashBuilder.append("-");
-                }
-                dashBuilder.append("--+");
-            }
-
-            for (final Map.Entry<MBeanEntity, List<String>> entry : result.entrySet()) {
-                final List<String> brokenFiles = entry.getValue();
-                MBeanEntity entity = entry.getKey();
-
+            if (!brokenFiles.isEmpty()) {
                 System.out.format("+--" + dashBuilder.toString() + "%n");
-                System.out.format(formatter, entity.toString());
-                System.out.format("+--" + dashBuilder.toString() + "%n");
-
-                for (final String brokenFile : brokenFiles) {
-                    System.out.format(formatter, brokenFile);
-                }
-
-                if (!brokenFiles.isEmpty()) {
-                    System.out.format("+--" + dashBuilder.toString() + "%n");
-                }
-                System.out.format(formatter, brokenFiles.size() + " problem(s) found");
-                System.out.format("+--" + dashBuilder.toString() + "%n%n");
             }
+            System.out.format(formatter, brokenFiles.size() + " problem(s) found");
+            System.out.format("+--" + dashBuilder.toString() + "%n%n");
         }
+    }
 
-        /**
-         * @param keySet
-         * @return
-         */
-        private List<String> compileListOfEntities(Set<MBeanEntity> keySet) {
-            List<String> entities = new ArrayList<String>(keySet.size());
-            for (MBeanEntity entity : keySet) {
-                entities.add(entity.toString());
-            }
-            return entities;
+    private void printList(List<String> results) {
+        for (String s : results) {
+            System.out.println(s);
         }
+    }
 
-        /**
-         * Flattens the specified list
-         * 
-         * @param values A Collection with List of strings
-         * @return the flattened collection
-         */
-        private List<String> flattenList(Collection<List<String>> values) {
-            Iterator<List<String>> iterator = values.iterator();
-            List<String> flattenedList = new ArrayList<String>();
-            while (iterator.hasNext()) {
-                flattenedList.addAll(iterator.next());
-            }
-            return flattenedList;
+    /**
+     * @param keySet
+     * @return
+     */
+    private List<String> compileListOfEntities(Set<MBeanEntity> keySet) {
+        List<String> entities = new ArrayList<String>(keySet.size());
+        for (MBeanEntity entity : keySet) {
+            entities.add(entity.toString());
         }
+        return entities;
+    }
 
-        /**
-         * Sort the results and fetch the length of the widest string
-         * 
-         * @param results The strings to sort
-         * @return The length of the widest string
-         */
-        private int fetchWidestString(List<String> results) {
-            int widestURL = 5;
-            Object[] a = results.toArray();
-            ListIterator<String> i = results.listIterator();
-            for (int j = 0; j < a.length; j++) {
-                String p = i.next();
-                if (widestURL < p.length()) {
-                    widestURL = p.length();
-                }
-                i.set((String) a[j]);
-            }
-            return widestURL;
+    /**
+     * Flattens the specified list
+     * 
+     * @param values A Collection with List of strings
+     * @return the flattened collection
+     */
+    private List<String> flattenList(Collection<List<String>> values) {
+        Iterator<List<String>> iterator = values.iterator();
+        List<String> flattenedList = new ArrayList<String>();
+        while (iterator.hasNext()) {
+            flattenedList.addAll(iterator.next());
         }
+        return flattenedList;
+    }
+
+    /**
+     * Sort the results and fetch the length of the widest string
+     * 
+     * @param results The strings to sort
+     * @return The length of the widest string
+     */
+    private int fetchWidestString(List<String> results) {
+        int widestURL = 5;
+        Object[] a = results.toArray();
+        ListIterator<String> i = results.listIterator();
+        for (int j = 0; j < a.length; j++) {
+            String p = i.next();
+            if (widestURL < p.length()) {
+                widestURL = p.length();
+            }
+            i.set((String) a[j]);
+        }
+        return widestURL;
     }
 }

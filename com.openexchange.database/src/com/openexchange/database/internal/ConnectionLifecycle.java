@@ -49,9 +49,9 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -59,10 +59,12 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.database.internal.reloadable.GenericReloadable;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolableLifecycle;
@@ -111,7 +113,7 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
         } catch (final SQLException e) {
             retval = false;
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return retval;
     }
@@ -147,17 +149,17 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
 
     @Override
     public void destroy(final Connection obj) {
-        DBUtils.close(obj);
+        Databases.close(obj);
     }
 
-    private static void addTrace(final OXException dbe,
-        final PooledData<Connection> data) {
+    private static void addTrace(final OXException dbe, final PooledData<Connection> data) {
         if (null != data.getTrace()) {
             dbe.setStackTrace(data.getTrace());
         }
     }
 
     private static volatile Integer usageThreshold;
+
     private static int usageThreshold() {
         Integer tmp = usageThreshold;
         if (null == tmp) {
@@ -217,7 +219,22 @@ class ConnectionLifecycle implements PoolableLifecycle<Connection> {
                 if (active > 0) {
                     final OXException dbe = DBPoolingExceptionCodes.ACTIVE_STATEMENTS.create(I(active));
                     addTrace(dbe, data);
-                    ConnectionPool.LOG.error("", dbe);
+                    String openStatement = "";
+                    if (con instanceof com.mysql.jdbc.ConnectionImpl) {
+                        try {
+                            com.mysql.jdbc.ConnectionImpl impl = ((com.mysql.jdbc.ConnectionImpl) con);
+                            Field openStatementsField = impl.getClass().getSuperclass().getDeclaredField("openStatements");
+                            openStatementsField.setAccessible(true);
+                            
+                            Map<Statement, Statement> open = (Map<Statement, Statement>) openStatementsField.get(impl);
+                            for (Entry<Statement, Statement> entry : open.entrySet()) {
+                                openStatement = entry.getKey().toString();
+                            }
+                        } catch (NoSuchFieldException nsfe) {
+                            // Unable to retrieve openStatements content. Just log that there is an open statement...
+                        }
+                    }
+                    ConnectionPool.LOG.error(openStatement, dbe);
                     retval = false;
                 }
             } catch (final Exception e) {

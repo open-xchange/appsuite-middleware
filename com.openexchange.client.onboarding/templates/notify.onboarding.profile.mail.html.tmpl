@@ -1,0 +1,25 @@
+<#include "notify.common.button.tmpl">
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta charset="UTF-8">
+</head>
+<body>
+ <#escape x as x?html>
+  
+  <#-- onboarding profile created -->
+  <p>
+  ${salutation}
+  <p>
+
+  <p>
+  ${content}
+  </p>
+  
+ </#escape>
+ 
+ <#include "notify.common.footer.html.tmpl">
+ 
+</body>
+</html>

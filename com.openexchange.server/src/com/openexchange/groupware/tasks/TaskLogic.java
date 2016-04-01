@@ -347,11 +347,22 @@ public final class TaskLogic {
      * @throws OXException if a necessary recurrence attribute is missing.
      */
     private static void checkRecurrence(Task task, @Nullable Task oldTask) throws OXException {
-        if (CalendarObject.NO_RECURRENCE == task.getRecurrenceType() && oldTask != null && CalendarObject.NO_RECURRENCE == oldTask.getRecurrenceType()) {
-            return;
+
+        // First check if the client want to set some recurrence.
+        if (task.containsRecurrenceType()) {
+            if (CalendarObject.NO_RECURRENCE == task.getRecurrenceType()) {
+                // No recurrence is present and set to no recurrence
+                return;
+            }
+        } else {
+            if (oldTask == null || CalendarObject.NO_RECURRENCE == oldTask.getRecurrenceType()) {
+                //RecurrenceType is not present in new task and either old task is not available or it is set to no recurrence
+                return;
+            }
         }
+
         // First simple checks on start and end date.
-        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType() || (null != oldTask && CalendarObject.NO_RECURRENCE != oldTask.getRecurrenceType())) {
+        if (CalendarObject.NO_RECURRENCE != task.getRecurrenceType()) {
             if (null == oldTask) {
                 if (!task.containsStartDate()) {
                     throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
@@ -364,7 +375,7 @@ public final class TaskLogic {
                     throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
                 }
                 if (task.containsEndDate() && null == task.getEndDate()) {
-                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.START_DATE));
+                    throw TaskExceptionCode.MISSING_RECURRENCE_VALUE.create(Integer.valueOf(CalendarObject.END_DATE));
                 }
             }
         }
@@ -881,7 +892,7 @@ public final class TaskLogic {
         // Move task to delete to deleted tables.
         task.setLastModified(new Date());
         task.setModifiedBy(userId);
-        storage.insertTask(ctx, con, task, DELETED, TaskStorage.TOMBSTONE_ATTRS, false);
+        storage.insertTask(ctx, con, task, DELETED, TaskStorage.TOMBSTONE_ATTRS);
         final Set<Folder> removed = deleteParticipants(ctx, con, task.getObjectID());
         deleteFolder(ctx, con, task.getObjectID(), removed);
         storage.delete(ctx, con, task.getObjectID(), lastModified, ACTIVE);

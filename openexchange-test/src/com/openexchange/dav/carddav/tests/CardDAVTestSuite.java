@@ -72,6 +72,7 @@ import org.junit.runners.Suite.SuiteClasses;
     UpgradeTest.class,
     ImageTest.class,
     CookieTest.class,
+    BasicTest.class
 })
 public final class CardDAVTestSuite {
 

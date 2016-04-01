@@ -54,7 +54,7 @@ import org.json.JSONArray;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.grant.GrantView;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
 import com.openexchange.oauth.provider.json.GrantViewJSONConverter;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
@@ -70,6 +70,7 @@ public class AllAction extends AbstractOAuthProviderAction {
 
     /**
      * Initializes a new {@link AllAction}.
+     * 
      * @param services
      */
     public AllAction(ServiceLookup services) {
@@ -78,7 +79,7 @@ public class AllAction extends AbstractOAuthProviderAction {
 
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
-        Iterator<GrantView> grants = getOAuthProvider().getGrants(session.getContextId(), session.getUserId());
+        Iterator<GrantView> grants = getGrantManagement().getGrants(session.getContextId(), session.getUserId());
         JSONArray result = new GrantViewJSONConverter(services, session).convert(grants);
         return new AJAXRequestResult(result, "json");
     }

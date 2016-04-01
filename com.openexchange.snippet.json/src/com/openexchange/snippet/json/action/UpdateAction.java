@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.LinkedList;
@@ -75,6 +76,7 @@ import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.json.SnippetJsonParser;
 import com.openexchange.snippet.json.SnippetRequest;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
+import com.openexchange.tools.session.ServerSession;
 
 /**
  * {@link UpdateAction}
@@ -111,29 +113,30 @@ public final class UpdateAction extends SnippetAction {
         if (null == jsonSnippet) {
             throw AjaxExceptionCodes.MISSING_REQUEST_BODY.create();
         }
+
         // Parse from JSON to snippet
         DefaultSnippet snippet = new DefaultSnippet();
         Set<Property> properties = EnumSet.noneOf(Property.class);
         SnippetJsonParser.parse(jsonSnippet, snippet, properties);
 
         // Process image in an <img> tag and add it as an attachment
+        ServerSession session = snippetRequest.getSession();
         String contentSubType = getContentSubType(snippet);
         List<Attachment> attachments = Collections.<Attachment> emptyList();
         if (contentSubType.equals("html")) {
-            SnippetProcessor snippetProcessor = new SnippetProcessor(snippetRequest.getSession());
             attachments = new LinkedList<Attachment>();
-            snippetProcessor.processImages(snippet, attachments);
+            new SnippetProcessor(session).processImages(snippet, attachments);
         }
 
         // Update
-        SnippetManagement management = getSnippetService(snippetRequest.getSession()).getManagement(snippetRequest.getSession());
+        SnippetManagement management = getSnippetService(session).getManagement(session);
         String newId = management.updateSnippet(id, snippet, properties, attachments, Collections.<Attachment> emptyList());
         Snippet newSnippet = management.getSnippet(newId);
         return new AJAXRequestResult(newSnippet, "snippet");
     }
 
     @Override
-    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
+    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException, IOException {
         if (!Method.PUT.equals(method)) {
             throw AjaxExceptionCodes.BAD_REQUEST.create();
         }

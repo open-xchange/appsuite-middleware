@@ -55,6 +55,7 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.contact.AutocompleteParameters;
+import com.openexchange.contact.SortOptions;
 import com.openexchange.contacts.json.ContactActionFactory;
 import com.openexchange.contacts.json.ContactRequest;
 import com.openexchange.documentation.RequestMethod;
@@ -63,8 +64,9 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
+import com.openexchange.groupware.contact.helpers.UseCountComparator;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.iterator.SearchIterator;
 
@@ -113,21 +115,19 @@ public class AutocompleteAction extends ContactAction {
         AutocompleteParameters parameters = AutocompleteParameters.newInstance();
         parameters.put(AutocompleteParameters.REQUIRE_EMAIL, requireEmail);
         SearchIterator<Contact> searchIterator;
+        SortOptions sortOptions = request.getSortOptions();
         if (null != folderID) {
             searchIterator = getContactService().autocompleteContacts(request.getSession(), Collections.singletonList(folderID),
-                query, parameters, fields, request.getSortOptions());
+                query, parameters, fields, sortOptions);
         } else {
-            searchIterator = getContactService().autocompleteContacts(request.getSession(), query, parameters, fields,
-                request.getSortOptions());
+            searchIterator = getContactService().autocompleteContacts(request.getSession(), query, parameters, fields, sortOptions);
         }
         /*
          * construct result
          */
         List<Contact> contacts = new ArrayList<Contact>();
         Date lastModified = addContacts(contacts, searchIterator, excludedAdminID);
-        if (request.sortInternalIfNeeded(contacts)) {
-            contacts = request.slice(contacts);
-        }
+        Collections.sort(contacts, new UseCountComparator(request.getSession().getUser().getLocale()));
         return new AJAXRequestResult(contacts, lastModified, "contact");
     }
 

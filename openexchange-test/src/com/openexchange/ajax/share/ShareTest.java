@@ -297,7 +297,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param module The module to get the public root folder identifier for
      * @return The public root folder identifier
      */
-    protected int getPublicRoot(int module) {
+    protected static int getPublicRoot(int module) {
         return FolderObject.INFOSTORE == module ? FolderObject.SYSTEM_PUBLIC_INFOSTORE_FOLDER_ID : FolderObject.SYSTEM_PUBLIC_FOLDER_ID;
     }
 
@@ -331,6 +331,29 @@ public abstract class ShareTest extends AbstractAJAXSession {
         InsertResponse response = client.execute(request);
         response.fillObject(folder);
         return folder;
+    }
+
+    protected static FolderObject insertPublicFolder(AJAXClient client, EnumAPI api, int module) throws Exception {
+        return insertPublicFolder(client, api, module, getPublicRoot(module), randomUID());
+    }
+
+    protected static FolderObject insertPublicFolder(AJAXClient client, EnumAPI api, int module, int parent, String name) throws Exception {
+        FolderObject folder = new FolderObject();
+        folder.setFolderName(name);
+        folder.setParentFolderID(parent);
+        folder.setModule(module);
+        folder.setType(FolderObject.PUBLIC);
+        OCLPermission perm1 = new OCLPermission();
+        perm1.setEntity(client.getValues().getUserId());
+        perm1.setGroupPermission(false);
+        perm1.setFolderAdmin(true);
+        perm1.setAllPermission(
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION,
+            OCLPermission.ADMIN_PERMISSION);
+        folder.setPermissionsAsArray(new OCLPermission[] { perm1 });
+        return insertFolder(client, api, folder);
     }
 
     /**
@@ -369,6 +392,19 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts a new file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertFile(AJAXClient client, int folderID, String filename) throws Exception {
+        return insertSharedFile(client, folderID, filename, null);
+    }
+
+    /**
      * Inserts and remembers a new shared file with random content.
      *
      * @param folderID The parent folder identifier
@@ -384,6 +420,22 @@ public abstract class ShareTest extends AbstractAJAXSession {
     }
 
     /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, FileStorageObjectPermission permission) throws Exception {
+        byte[] contents = new byte[64 + random.nextInt(256)];
+        random.nextBytes(contents);
+        return insertSharedFile(client, folderID, filename, permission, contents);
+    }
+
+    /**
      * Inserts and remembers a new shared file with random content.
      *
      * @param folderID The parent folder identifier
@@ -391,10 +443,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @param permission The permission to assign
      * @param data The file contents
      * @return The inserted file
-     * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
         return insertSharedFile(folderID, filename, null == permission ? null : Collections.singletonList(permission), data);
+    }
+
+    /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, FileStorageObjectPermission permission, byte[] data) throws Exception {
+        return insertSharedFile(client, folderID, filename, null == permission ? null : Collections.singletonList(permission), data);
     }
 
     /**
@@ -408,6 +473,23 @@ public abstract class ShareTest extends AbstractAJAXSession {
      * @throws Exception
      */
     protected File insertSharedFile(int folderID, String filename, List<FileStorageObjectPermission> permissions, byte[] data) throws Exception {
+        File createdFile = insertSharedFile(getClient(), folderID, filename, permissions, data);
+        remember(createdFile);
+        return createdFile;
+    }
+
+    /**
+     * Inserts a new shared file with random content.
+     *
+     * @param client The client to use
+     * @param folderID The parent folder identifier
+     * @param filename The filename to use
+     * @param permission The permission to assign
+     * @param data The file contents
+     * @return The inserted file
+     * @throws Exception
+     */
+    protected static File insertSharedFile(AJAXClient client, int folderID, String filename, List<FileStorageObjectPermission> permissions, byte[] data) throws Exception {
         DefaultFile metadata = new DefaultFile();
         metadata.setFolderId(String.valueOf(folderID));
         metadata.setFileName(filename);
@@ -416,14 +498,13 @@ public abstract class ShareTest extends AbstractAJAXSession {
         }
         NewInfostoreRequest newRequest = new NewInfostoreRequest(metadata, new ByteArrayInputStream(data));
         newRequest.setNotifyPermissionEntities(Transport.MAIL);
-        NewInfostoreResponse newResponse = getClient().execute(newRequest);
+        NewInfostoreResponse newResponse = client.execute(newRequest);
         String id = newResponse.getID();
         metadata.setId(id);
         GetInfostoreRequest getRequest = new GetInfostoreRequest(id);
         GetInfostoreResponse getResponse = client.execute(getRequest);
         File createdFile = getResponse.getDocumentMetadata();
         assertNotNull(createdFile);
-        remember(createdFile);
         return createdFile;
     }
 

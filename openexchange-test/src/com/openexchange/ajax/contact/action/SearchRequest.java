@@ -151,6 +151,7 @@ public class SearchRequest extends AbstractContactRequest<SearchResponse> {
             body.put(ContactFields.EMAIL1, cso.getEmail1());
             body.put(ContactFields.EMAIL2, cso.getEmail2());
             body.put(ContactFields.EMAIL3, cso.getEmail3());
+            body.put(ContactFields.DEPARTMENT, cso.getDepartment());
             // TODO add missing fields
 
             if (cso.isEmailAutoComplete()) {

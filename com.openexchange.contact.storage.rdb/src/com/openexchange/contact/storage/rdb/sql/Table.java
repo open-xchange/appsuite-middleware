@@ -87,6 +87,10 @@ public enum Table {
      * The 'del_contacts_linkage' table
      */
     DELETED_LINKS("del_contacts_linkage"),
+    /**
+     * The 'object_use_count' table
+     */
+    OBJECT_USE_COUNT("object_use_count"),
     ;
 
     private final String name;

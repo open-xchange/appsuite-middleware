@@ -54,8 +54,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.databaseold.Database;
@@ -69,7 +67,6 @@ import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.TaskInfo;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdaterEventConstants;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -83,16 +80,14 @@ public final class UpdateExecutor {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(UpdateExecutor.class);
 
-    private static final ConcurrentMap<String, SchemaUpdateState> LOCKED_SCHEMAS = new ConcurrentHashMap<String, SchemaUpdateState>();
-
     private static final SchemaStore store = SchemaStore.getInstance();
 
     private SchemaUpdateState state;
     private final int contextId;
-    private final List<UpdateTask> tasks;
+    private final List<UpdateTaskV2> tasks;
     private SeparatedTasks separatedTasks;
 
-    public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTask> tasks) {
+    public UpdateExecutor(final SchemaUpdateState state, final int contextId, final List<UpdateTaskV2> tasks) {
         super();
         this.state = state;
         this.contextId = contextId;
@@ -155,7 +150,7 @@ public final class UpdateExecutor {
             if (blocking) {
                 removeContexts();
             }
-            final List<UpdateTask> scheduled = new ArrayList<UpdateTask>();
+            final List<UpdateTaskV2> scheduled = new ArrayList<UpdateTaskV2>();
             if (null == separatedTasks) {
                 state = store.getSchema(contextId);
                 // Get filtered & sorted list of update tasks
@@ -166,18 +161,14 @@ public final class UpdateExecutor {
             final int poolId = Database.resolvePool(contextId, true);
 
             // Perform updates
-            for (final UpdateTask task : scheduled) {
+            for (final UpdateTaskV2 task : scheduled) {
                 final String taskName = task.getClass().getSimpleName();
                 boolean success = false;
                 try {
                     LOG.info("Starting update task {} on schema {}.", taskName, state.getSchema());
-                    if (task instanceof UpdateTaskV2) {
-                        final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
-                        final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
-                        ((UpdateTaskV2) task).perform(params);
-                    } else {
-                        task.perform(state, contextId);
-                    }
+                    final ProgressState logger = new ProgressStatusImpl(taskName, state.getSchema());
+                    final PerformParameters params = new PerformParametersImpl(state, contextId, logger);
+                    task.perform(params);
                     success = true;
                 } catch (final OXException e) {
                     LOG.error("", e);

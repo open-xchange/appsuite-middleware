@@ -62,8 +62,6 @@ import com.openexchange.ajax.LoginServlet;
 import com.openexchange.ajax.SessionUtility;
 import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.ajax.login.LoginRequestHandler;
-import com.openexchange.ajax.login.LoginRequestImpl;
-import com.openexchange.ajax.login.LoginTools;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -73,6 +71,7 @@ import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Strings;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
+import com.openexchange.login.LoginRequest;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginMethodClosure;
 import com.openexchange.login.internal.LoginPerformer;
@@ -211,10 +210,9 @@ public class SAMLLoginRequestHandler implements LoginRequestHandler {
         // The properties derived from optional state
         final Map<String, Object> props = optState == null ? new HashMap<String, Object>(4) : new HashMap<String, Object>(optState);
 
+
         // The login request
-        String login = user.getLoginInfo() + '@' + context.getLoginInfo()[0];
-        String defaultClient = loginConfiguration.getDefaultClient();
-        final LoginRequestImpl loginRequest = LoginTools.parseLogin(httpRequest, login, null, false, defaultClient, loginConfiguration.isCookieForceHTTPS(), false);
+        final LoginRequest loginRequest = backend.prepareLoginRequest(httpRequest, loginConfiguration, user, context);
 
         // Do the login
         LoginResult loginResult = LoginPerformer.getInstance().doLogin(loginRequest, props, new LoginMethodClosure() {

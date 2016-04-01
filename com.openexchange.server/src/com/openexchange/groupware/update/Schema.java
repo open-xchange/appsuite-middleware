@@ -59,15 +59,6 @@ import java.io.Serializable;
  */
 public interface Schema extends Serializable {
 
-    static final int FINAL_VERSION = 200;
-
-    static final int NO_VERSION = -1;
-
-    /**
-     * @return the database version number stored in the database.
-     */
-    int getDBVersion();
-
     /**
      * @return if this schema can be used with an OX that database version
      * number is directly before the actual.

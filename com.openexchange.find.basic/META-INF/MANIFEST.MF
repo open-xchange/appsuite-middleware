@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: com.openexchange.find.basic
 Bundle-SymbolicName: com.openexchange.find.basic
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.find.basic.osgi.FindBasicActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -44,9 +44,11 @@ Import-Package: com.davekoelle,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.results,
  com.openexchange.groupware.search,
+ com.openexchange.groupware.settings,
  com.openexchange.groupware.tasks,
  com.openexchange.groupware.tools.chunk,
  com.openexchange.groupware.tools.iterator,
+ com.openexchange.groupware.tools.mappings.json,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.i18n,
  com.openexchange.java,
@@ -81,5 +83,4 @@ Import-Package: com.davekoelle,
  org.slf4j
 Bundle-ActivationPolicy: lazy
 Export-Package: com.openexchange.find.basic.drive
-Bundle-ClassPath: .,
- lib/joda-time-2.3.jar
+Bundle-ClassPath: .

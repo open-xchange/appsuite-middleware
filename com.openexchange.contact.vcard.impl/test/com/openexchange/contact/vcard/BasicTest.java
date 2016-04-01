@@ -65,6 +65,8 @@ import ezvcard.VCard;
  */
 public class BasicTest extends VCardTest {
 
+    private final String NEWLINE = System.getProperty("line.separator");
+
     /**
      * Initializes a new {@link BasicTest}.
      */
@@ -200,7 +202,7 @@ public class BasicTest extends VCardTest {
         assertTrue(0 < bufferedImage.getWidth() && 0 < bufferedImage.getHeight());
         assertEquals("+49-221-9999123", contact.getTelephoneBusiness1());
         assertEquals("+49-221-1234567", contact.getTelephoneHome1());
-        assertEquals("Heidestra\u00dfe 17\r\n51147 K\u00f6ln\r\nDeutschland", contact.getAddressHome());
+        assertEquals("Heidestra\u00dfe 17" + NEWLINE + "51147 K\u00f6ln" + NEWLINE + "Deutschland", contact.getAddressHome());
         assertEquals("Heidestra\u00dfe 17", contact.getStreetHome());
         assertEquals("K\u00f6ln", contact.getCityHome());
         assertEquals("51147", contact.getPostalCodeHome());
@@ -681,7 +683,7 @@ public class BasicTest extends VCardTest {
             "SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; " +
             "LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN " +
             "CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS " +
-            "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\r\nFavotire Color: Blue"
+            "SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." + NEWLINE + "Favotire Color: Blue"
         ;
         assertEquals(expectedNote, contact.getNote());
     }
@@ -1331,7 +1333,7 @@ public class BasicTest extends VCardTest {
         assertEquals("New York", contact.getStateHome());
         assertEquals("12345", contact.getPostalCodeHome());
         assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("Street4\r\nBuilding 6\r\nFloor 8", contact.getStreetBusiness());
+        assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
         assertEquals("New York", contact.getCityBusiness());
         assertEquals("12345", contact.getPostalCodeBusiness());
         assertEquals("USA", contact.getCountryBusiness());
@@ -1546,22 +1548,22 @@ public class BasicTest extends VCardTest {
         assertEquals("john.doe@ibm.com", contact.getEmail1());
         assertEquals("+1 (212) 204-34456", contact.getCellularTelephone1());
         assertEquals("00-1-212-555-7777", contact.getFaxBusiness());
-        assertEquals("25334\r\nSouth cresent drive, Building 5, 3rd floo r", contact.getStreetHome());
+        assertEquals("25334" + NEWLINE + "South cresent drive, Building 5, 3rd floo r", contact.getStreetHome());
         assertEquals("New York", contact.getCityHome());
         assertEquals("New York", contact.getStateHome());
         assertEquals("NYC887", contact.getPostalCodeHome());
         assertEquals("U.S.A.", contact.getCountryHome());
         String expectedNote =
-            "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"\r\n" +
-            "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO , THE\r\n" +
-            "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR P URPOSE\r\n" +
-            "ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTOR S BE\r\n" +
-            "LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR\r\n" +
-            "CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF\r\n" +
-            " SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS \r\n" +
-            "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN\r\n" +
-            " CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)\r\n" +
-            "A RISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE\r\n " +
+            "THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS \"AS IS\"" + NEWLINE +
+            "AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO , THE" + NEWLINE +
+            "IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR P URPOSE" + NEWLINE +
+            "ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTOR S BE" + NEWLINE +
+            "LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR" + NEWLINE +
+            "CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF" + NEWLINE +
+            " SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS " + NEWLINE +
+            "INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN" + NEWLINE +
+            " CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)" + NEWLINE +
+            "A RISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE" + NEWLINE + " " +
             "POSSIBILITY OF SUCH DAMAGE.";
         assertEquals(expectedNote, contact.getNote());
         assertEquals("http://www.sun.com", contact.getURL());
@@ -1962,7 +1964,7 @@ public class BasicTest extends VCardTest {
         assertEquals("New York", contact.getStateHome());
         assertEquals("12345", contact.getPostalCodeHome());
         assertEquals("United States of America", contact.getCountryHome());
-        assertEquals("Street4\r\nBuilding 6\r\nFloor 8", contact.getStreetBusiness());
+        assertEquals("Street4" + NEWLINE + "Building 6" + NEWLINE + "Floor 8", contact.getStreetBusiness());
         assertEquals("New York", contact.getCityBusiness());
         assertEquals("12345", contact.getPostalCodeBusiness());
         assertEquals("USA", contact.getCountryBusiness());
@@ -1973,7 +1975,7 @@ public class BasicTest extends VCardTest {
             "SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR " +
             "SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, " +
             "WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE " +
-            "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.\r\nFavotire Color: Blue"
+            "OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE." + NEWLINE + "Favotire Color: Blue"
         ;
         assertEquals(expectedNote, contact.getNote());
         assertEquals("http://www.ibm.com", contact.getURL());

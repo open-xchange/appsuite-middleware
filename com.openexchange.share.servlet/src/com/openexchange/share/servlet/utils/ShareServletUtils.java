@@ -139,13 +139,13 @@ public final class ShareServletUtils {
                 response.addCookie(configureCookie(new Cookie(LoginServlet.getShareCookieName(request), guest.getBaseToken()), request, loginConfig));
             }
             /*
-             * set public session cookie if not yet present
+             * set public session cookie
              */
-            String publicCookieName = getPublicSessionCookieName(request);
-            Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
-            if (null == cookie) {
-                String alternativeID = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
-                if (null != alternativeID) {
+            String alternativeID = (String) session.getParameter(Session.PARAM_ALTERNATIVE_ID);
+            if (null != alternativeID) {
+                String publicCookieName = getPublicSessionCookieName(request);
+                Cookie cookie = Cookies.cookieMapFor(request).get(publicCookieName);
+                if (null == cookie || false == alternativeID.equals(cookie.getValue())) {
                     response.addCookie(configureCookie(new Cookie(publicCookieName, alternativeID), request, loginConfig));
                 }
             }

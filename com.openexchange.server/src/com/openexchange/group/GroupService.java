@@ -107,4 +107,15 @@ public interface GroupService {
      */
     Group getGroup(Context ctx, int groupId) throws OXException;
 
+    /**
+     * Searches for groups by their display name.
+     *
+     * @param ctx The context
+     * @param pattern The pattern to search for
+     * @param loadMembers <code>true</code> to load the members of found groups, <code>false</code>, otherwise
+     * @return An array of groups that match the search pattern
+     * @throws OXException if searching has some storage related problem.
+     */
+    Group[] search(Context ctx, String pattern, boolean loadMembers) throws OXException;
+
 }

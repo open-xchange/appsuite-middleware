@@ -65,18 +65,18 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ConcurrentPriorityQueue<E extends Comparable<E>> extends AbstractQueue<E> {
 
-    private transient final ReentrantLock lock = new ReentrantLock();
-    private final PriorityQueue<E> q = new PriorityQueue<E>();
+    transient final ReentrantLock lock = new ReentrantLock();
+    final PriorityQueue<E> q = new PriorityQueue<E>();
 
     /**
-     * Creates a new <tt>DelayQueue</tt> that is initially empty.
+     * Creates a new <tt>ConcurrentPriorityQueue</tt> that is initially empty.
      */
     public ConcurrentPriorityQueue() {
         super();
     }
 
     /**
-     * Creates a <tt>DelayQueue</tt> initially containing the elements of the given collection of {@link Delayed} instances.
+     * Creates a <tt>ConcurrentPriorityQueue</tt> initially containing the elements of the given collection of {@link Delayed} instances.
      *
      * @param c the collection of elements to initially contain
      * @throws NullPointerException if the specified collection or any of its elements are null
@@ -300,7 +300,7 @@ public class ConcurrentPriorityQueue<E extends Comparable<E>> extends AbstractQu
             // not just a .equals element.
             lock.lock();
             try {
-                for (final Iterator it = q.iterator(); it.hasNext();) {
+                for (final Iterator<E> it = q.iterator(); it.hasNext();) {
                     if (it.next() == x) {
                         it.remove();
                         return;

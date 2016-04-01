@@ -51,6 +51,7 @@ package com.openexchange.tokenlogin.impl;
 
 import static org.mockito.Matchers.anyString;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.junit.Assert;
 import org.junit.Before;
@@ -66,7 +67,6 @@ import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import com.hazelcast.core.IMap;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -137,9 +137,9 @@ public class Bug32698Test {
     @Mock
     private IMap<String, String> SessionIMap;
 
-    private final ConcurrentMap<String, String> myMap1 = new ConcurrentLinkedHashMap<String, String>();
+    private final ConcurrentMap<String, String> myMap1 = new ConcurrentHashMap<String, String>();
 
-    private final ConcurrentMap<String, String> myMap2 = new ConcurrentLinkedHashMap<String, String>();
+    private final ConcurrentMap<String, String> myMap2 = new ConcurrentHashMap<String, String>();
 
     @Before
     public void setUp() throws Exception {

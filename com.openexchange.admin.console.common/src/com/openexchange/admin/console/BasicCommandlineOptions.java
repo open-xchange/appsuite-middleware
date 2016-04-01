@@ -52,6 +52,7 @@ package com.openexchange.admin.console;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import com.openexchange.admin.console.AdminParser.NeededQuadState;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -321,7 +322,7 @@ public abstract class BasicCommandlineOptions {
      * @param data
      * @throws InvalidDataException
      */
-    protected final void doCSVOutput(final ArrayList<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
+    protected final void doCSVOutput(final List<String> columns, final ArrayList<ArrayList<String>> data) throws InvalidDataException {
         // first prepare the columns line
         StringBuilder sb = new StringBuilder();
         for (final String column_entry : columns) {

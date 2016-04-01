@@ -211,7 +211,7 @@ public final class SQL {
     }
 
     /**
-     * @return all fields colon seperated for using in SELECT and INSERT
+     * @return all fields colon separated for using in SELECT and INSERT
      * statements.
      */
     static String getAllFields() {
@@ -222,7 +222,7 @@ public final class SQL {
      * @param columns attributes of a task that should be selected.
      * @param folder <code>true</code> if the folder must be selected in
      * searches.
-     * @return all fields that are specified in the columns colon seperated for
+     * @return all fields that are specified in the columns colon separated for
      * using in SELECT and INSERT statements.
      * @throws OXException if a mapping for a column isn't implemented.
      */
@@ -235,15 +235,24 @@ public final class SQL {
      * @param folder <code>true</code> if the folder must be selected in
      * searches.
      * @param prefix reference table prefix for column names
-     * @return all fields that are specified in the columns colon seperated for
+     * @return all fields that are specified in the columns colon separated for
      * using in SELECT and INSERT statements.
      * @throws OXException if a mapping for a column isn't implemented.
      */
-    static String getFields(final int[] columns, final boolean folder, String prefix) throws OXException {
-        if (prefix == null)
-            prefix = "";
-        else
-            prefix += ".";
+    static String getFields(int[] columns, boolean folder, String prefix) throws OXException {
+        return getFields(columns, folder, false, prefix);
+    }
+
+    /**
+     * @param columns attributes of a task that should be selected.
+     * @param folder <code>true</code> if the folder must be selected in searches.
+     * @param withGroupBy <code>true</code> If query uses a <code>"GROUP BY"</code> clause; otherwise <code>false</code>
+     * @param prefix reference table prefix for column names
+     * @return all fields that are specified in the columns colon separated for using in SELECT and INSERT statements.
+     * @throws OXException if a mapping for a column isn't implemented.
+     */
+    static String getFields(int[] columns, boolean folder, boolean withGroupBy, String prefix) throws OXException {
+        String prfix = (prefix == null) ? "" : prefix + ".";
 
         final StringBuilder builder = new StringBuilder();
         for (final int i : columns) {
@@ -257,14 +266,18 @@ public final class SQL {
                     break;
                 case FolderChildObject.FOLDER_ID:
                     if (folder) {
-                        builder.append("folder,");
+                        if (withGroupBy) {
+                            builder.append("MIN(folder) AS folder,");
+                        } else {
+                            builder.append("folder,");
+                        }
                     }
                     break;
                 default:
                     throw TaskExceptionCode.UNKNOWN_ATTRIBUTE.create(I(i));
                 }
             } else {
-                builder.append(prefix);
+                builder.append(prfix);
                 builder.append(mapper.getDBColumnName());
                 builder.append(',');
             }

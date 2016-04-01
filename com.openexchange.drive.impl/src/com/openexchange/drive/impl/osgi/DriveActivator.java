@@ -56,11 +56,13 @@ import org.osgi.service.event.EventConstants;
 import org.osgi.service.event.EventHandler;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contact.storage.ContactUserStorage;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.DriveService;
 import com.openexchange.drive.checksum.rdb.DriveCreateTableService;
 import com.openexchange.drive.checksum.rdb.DriveDeleteListener;
@@ -72,6 +74,7 @@ import com.openexchange.drive.impl.internal.throttle.BucketInputStream;
 import com.openexchange.drive.impl.internal.throttle.DriveTokenBucket;
 import com.openexchange.drive.impl.internal.throttle.ThrottlingDriveService;
 import com.openexchange.drive.impl.management.DriveConfig;
+import com.openexchange.drive.impl.management.version.BrandedDriveVersionServiceImpl;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
 import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.filemanagement.ManagedFileManagement;
@@ -108,7 +111,7 @@ public class DriveActivator extends HousekeepingActivator {
         return new Class<?>[] { IDBasedFileAccessFactory.class, ManagedFileManagement.class, DatabaseService.class, CapabilityService.class,
             IDBasedFolderAccessFactory.class, EventAdmin.class, ConfigurationService.class, ThreadPoolService.class, TimerService.class,
             UserService.class, GroupService.class, ModuleSupport.class, ShareService.class, ContextService.class, ShareNotificationService.class,
-            ContactService.class, ContactUserStorage.class
+            ContactService.class, ContactUserStorage.class, ConfigViewFactory.class
         };
     }
 
@@ -128,6 +131,7 @@ public class DriveActivator extends HousekeepingActivator {
         registerService(CreateTableService.class, new DriveCreateTableService());
         registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(SQL.getUpdateTasks()));
         registerService(DeleteListener.class, new DriveDeleteListener());
+        registerService(BrandedDriveVersionService.class, BrandedDriveVersionServiceImpl.getInstance());
         /*
          * register event handler
          */

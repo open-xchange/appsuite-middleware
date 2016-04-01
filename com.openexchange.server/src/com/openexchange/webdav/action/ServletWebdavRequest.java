@@ -64,22 +64,25 @@ import com.openexchange.webdav.protocol.WebdavFactory;
 import com.openexchange.webdav.protocol.WebdavPath;
 
 public class ServletWebdavRequest extends AbstractWebdavRequest implements WebdavRequest {
-	private final HttpServletRequest req;
+
+    private static final ApacheURLDecoder URL_DECODER = new ApacheURLDecoder();
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletWebdavRequest.class);
+
+    private final HttpServletRequest req;
+    private final WebdavPath url;
 	private String urlPrefix;
-	private final WebdavPath url;
 	private WebdavPath destUrl;
 
-	private final ApacheURLDecoder decoder = new ApacheURLDecoder();
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ServletWebdavRequest.class);
-
-	public ServletWebdavRequest(final WebdavFactory factory, final HttpServletRequest req) {
+	/**
+	 * Initializes a new {@link ServletWebdavRequest}.
+	 *
+	 * @param factory The WebDAV factory
+	 * @param req The underlying servlet request
+	 */
+	public ServletWebdavRequest(WebdavFactory factory, HttpServletRequest req) {
 		super(factory);
 		this.req = req;
-		final StringBuilder builder = new StringBuilder();
-		builder.append(req.getServletPath());
-		builder.append('/');
-		this.urlPrefix = builder.toString();
+		this.urlPrefix = req.getServletPath().endsWith("/") ? req.getServletPath() : req.getServletPath() + '/';
 		LOG.debug("WEBDAV URL PREFIX FROM CONTAINER: {}", this.urlPrefix);
         this.url = toWebdavURL(req.getRequestURI());
 	}
@@ -90,16 +93,18 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	}
 
 	@Override
-    public String getHeader(final String header) {
+    public String getHeader(String header) {
 		return req.getHeader(header);
 	}
 
 	@Override
     public List<String> getHeaderNames() {
-		final List<String> headers = new ArrayList<String>();
-		final Enumeration enumeration = req.getHeaderNames();
-		while(enumeration.hasMoreElements()) {
-			headers.add(enumeration.nextElement().toString());
+        List<String> headers = new ArrayList<String>();
+		Enumeration<?> headerNames = req.getHeaderNames();
+		if (null != headerNames) {
+		    for (String header : headers) {
+		        headers.add(header);
+            }
 		}
 		return headers;
 	}
@@ -164,12 +169,17 @@ public class ServletWebdavRequest extends AbstractWebdavRequest implements Webda
 	}
 
     public String decode(final String component, final String encoding) throws UnsupportedEncodingException {
-        return decoder.decode(component, encoding);
+        return URL_DECODER.decode(component, encoding);
     }
 
     @Override
     public String getCharset() {
 		return req.getCharacterEncoding() == null ? ServerConfig.getProperty(Property.DefaultEncoding) : req.getCharacterEncoding();
 	}
+
+    @Override
+    public String getParameter(String name) {
+        return req.getParameter(name);
+    }
 
 }

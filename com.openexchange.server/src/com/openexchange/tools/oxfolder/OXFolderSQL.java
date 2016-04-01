@@ -52,13 +52,6 @@ package com.openexchange.tools.oxfolder;
 import static com.openexchange.tools.sql.DBUtils.autocommit;
 import static com.openexchange.tools.sql.DBUtils.closeResources;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import gnu.trove.TIntCollection;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
-import gnu.trove.list.linked.TIntLinkedList;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -76,6 +69,7 @@ import org.osgi.service.event.Event;
 import org.osgi.service.event.EventAdmin;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderEventConstants;
 import com.openexchange.groupware.Types;
@@ -90,6 +84,13 @@ import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.oxfolder.memory.ConditionTreeMapManagement;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.TIntCollection;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
+import gnu.trove.list.linked.TIntLinkedList;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 
 /**
  * Contains useful SQL-related helper methods for folder operations
@@ -1317,6 +1318,51 @@ public final class OXFolderSQL {
     }
 
     /**
+     * Gets the parent identifier for specified folder.
+     *
+     * @param folder The folder identifier
+     * @param ctx The associated context
+     * @return The parent identifier or <code>-1</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    public static int getParentId(int folder, Context ctx) throws OXException, SQLException {
+        Connection connection = DBPool.pickup(ctx);
+        try {
+            return getParentId(folder, ctx, connection);
+        } finally {
+            DBPool.closeReaderSilent(ctx, connection);
+        }
+    }
+
+    /**
+     * Gets the parent identifier for specified folder.
+     *
+     * @param folder The folder identifier
+     * @param ctx The associated context
+     * @param connection The connection to use
+     * @return The parent identifier or <code>-1</code>
+     * @throws OXException If an Open-Xchange error occurs
+     * @throws SQLException If an SQL error occurs
+     */
+    public static int getParentId(int folder, Context ctx, Connection connection) throws OXException, SQLException {
+        if (null == connection) {
+            return getParentId(folder, ctx);
+        }
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            stmt = connection.prepareStatement("SELECT parent FROM oxfolder_tree WHERE cid=? AND fuid=?");
+            stmt.setInt(1, ctx.getContextId());
+            stmt.setInt(2, folder);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : -1;
+        } finally {
+            Databases.closeSQLStuff(rs, stmt);
+        }
+    }
+
+    /**
      * Gets a folder's path down to the root folder, ready to be used in events.
      *
      * @param folder The folder to get the path for
@@ -1796,9 +1842,12 @@ public final class OXFolderSQL {
                 writeCon.setAutoCommit(false);
             }
             try {
+                int srcParentId = getParentId(src.getObjectID(), ctx, writeCon);
+                int destParentId = getParentId(dest.getObjectID(), ctx, writeCon);
+
                 // Acquire lock
-                lock(src.getObjectID(), ctx.getContextId(), writeCon);
-                lock(dest.getObjectID(), ctx.getContextId(), writeCon);
+                lock(srcParentId > 0 ? srcParentId : src.getObjectID(), ctx.getContextId(), writeCon);
+                lock(destParentId > 0 ? destParentId : dest.getObjectID(), ctx.getContextId(), writeCon);
 
                 // Do the move
                 pst = writeCon.prepareStatement(SQL_MOVE_UPDATE);
@@ -1961,8 +2010,10 @@ public final class OXFolderSQL {
         final boolean backup = (createBackup && deleteWorking);
         PreparedStatement stmt = null;
         try {
+            int parent = getParentId(folderId, ctx, writeCon);
+
             // Acquire lock
-            lock(folderId, ctx.getContextId(), backup, writeCon);
+            lock(parent > 0 ? parent : folderId, ctx.getContextId(), backup, writeCon);
 
             // Do delete
             if (backup) {
@@ -2370,14 +2421,14 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, ctx.getContextId());
             rs = executeQuery(stmt);
-            final TIntSet deletePerms = new TIntHashSet();
-            final TIntSet reassignPerms = new TIntHashSet();
+
+            TIntSet deletePerms = new TIntHashSet();
+            TIntSet reassignPerms = new TIntHashSet();
             while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final int type = rs.getInt(2);
-                final int module = rs.getInt(3);
-                final boolean defaultFlag = rs.getInt(4) > 0;
-                if (isMailAdmin || markForDeletion(type, module, defaultFlag)) {
+                int fuid = rs.getInt(1);
+                int type = rs.getInt(2);
+                int module = rs.getInt(3);
+                if (isMailAdmin || markForDeletion(type, module)) {
                     deletePerms.add(fuid);
                 } else {
                     reassignPerms.add(fuid);
@@ -2486,7 +2537,7 @@ public final class OXFolderSQL {
                 closeWrite = true;
             }
             stmt = wc.prepareStatement(SQL_DELETE_PERMS.replaceFirst(TMPL_PERM_TABLE, permTable));
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, iter.next());
                 stmt.setInt(3, entity);
@@ -2527,7 +2578,7 @@ public final class OXFolderSQL {
             // ,
             // permTable));
             TIntIterator iter = reassignPerms.iterator();
-            Next: for (int i = 0; i < size; i++) {
+            Next: for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
                 /*
                  * Check if admin already holds permission on current folder
@@ -2575,7 +2626,7 @@ public final class OXFolderSQL {
             }
             stmt = wc.prepareStatement(SQL_REASSIGN_UPDATE_TIMESTAMP.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             iter = reassignPerms.iterator();
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 stmt.setInt(1, mailAdmin);
                 stmt.setLong(2, lastModified);
                 stmt.setInt(3, ctx.getContextId());
@@ -2741,14 +2792,14 @@ public final class OXFolderSQL {
             stmt.setInt(1, ctx.getContextId());
             stmt.setInt(2, entity);
             rs = executeQuery(stmt);
+
             TIntSet deleteFolders = new TIntHashSet();
             TIntSet reassignFolders = new TIntHashSet();
             while (rs.next()) {
-                final int fuid = rs.getInt(1);
-                final int type = rs.getInt(2);
-                final int module = rs.getInt(3);
-                final boolean defaultFlag = rs.getInt(4) > 0;
-                if (isMailAdmin || markForDeletion(type, module, defaultFlag)) {
+                int fuid = rs.getInt(1);
+                int type = rs.getInt(2);
+                int module = rs.getInt(3);
+                if (isMailAdmin || markForDeletion(type, module)) {
                     deleteFolders.add(fuid);
                 } else {
                     reassignFolders.add(fuid);
@@ -2867,7 +2918,7 @@ public final class OXFolderSQL {
              * Delete folder's permissions if any exist
              */
             TIntIterator iter = deleteFolders.iterator();
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
                 checkFolderPermissions(fuid, permTable, writeConArg, ctx);
             }
@@ -2875,7 +2926,7 @@ public final class OXFolderSQL {
              * Delete references to table 'oxfolder_specialfolders'
              */
             iter = deleteFolders.iterator();
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
                 deleteSpecialfoldersRefs(fuid, writeConArg, ctx);
             }
@@ -2888,7 +2939,7 @@ public final class OXFolderSQL {
             }
             stmt = wc.prepareStatement(SQL_DELETE_FOLDER.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             iter = deleteFolders.iterator();
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 final int fuid = iter.next();
                 stmt.setInt(1, ctx.getContextId());
                 stmt.setInt(2, fuid);
@@ -2954,41 +3005,40 @@ public final class OXFolderSQL {
                 closeWrite = true;
             }
             int size = reassignFolders.size();
-            TIntIterator iter = reassignFolders.iterator();
             {
-                /*
-                 * Special handling for default infostore folder
-                 */
-                boolean found = false;
-                for (int i = 0; i < size && !found; i++) {
-                    final int fuid = iter.next();
-                    final String fname;
-                    if ((fname = isDefaultInfostoreFolder(fuid, entity, folderTable, wc, ctx)) != null) {
-                        iter.remove();
-                        size--;
-                        stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
-                        stmt.setInt(1, mailAdmin);
-                        stmt.setInt(2, mailAdmin);
-                        stmt.setLong(3, lastModified);
-                        stmt.setString(4, new StringBuilder(fname).append(fuid).toString());
-                        stmt.setInt(5, ctx.getContextId());
-                        stmt.setInt(6, fuid);
-                        executeUpdate(stmt);
-                        stmt.close();
-                        stmt = null;
-                        /*
-                         * Leave loop
-                         */
-                        found = true;
+                // Special handling for default infostore folder
+                FuidAndName defaultInfostoreFolder = getDefaultInfostoreFolder(entity, folderTable, wc, ctx);
+                if (null != defaultInfostoreFolder) {
+                    TIntIterator iter = reassignFolders.iterator();
+                    boolean go = true;
+                    for (int i = size; go && i-- > 0;) {
+                        int fuid = iter.next();
+                        if (fuid == defaultInfostoreFolder.fuid) {
+                            iter.remove();
+                            size--;
+
+                            stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS_WITH_NAME.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+                            stmt.setInt(1, mailAdmin);
+                            stmt.setInt(2, mailAdmin);
+                            stmt.setLong(3, lastModified);
+                            stmt.setString(4, new StringBuilder(defaultInfostoreFolder.name).append(fuid).toString());
+                            stmt.setInt(5, ctx.getContextId());
+                            stmt.setInt(6, fuid);
+                            executeUpdate(stmt);
+                            stmt.close();
+                            stmt = null;
+
+                            // Leave loop
+                            go = false;
+                        }
                     }
                 }
             }
-            /*
-             * Iterate rest
-             */
-            iter = reassignFolders.iterator();
+
+            // Iterate others
+            TIntIterator iter = reassignFolders.iterator();
             stmt = wc.prepareStatement(SQL_REASSIGN_FOLDERS.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
-            for (int i = 0; i < size; i++) {
+            for (int i = size; i-- > 0;) {
                 stmt.setInt(1, mailAdmin);
                 stmt.setInt(2, mailAdmin);
                 stmt.setLong(3, lastModified);
@@ -3002,22 +3052,24 @@ public final class OXFolderSQL {
         }
     }
 
-    private static final String SQL_DEF_INF = "SELECT fname FROM #FOLDER# WHERE cid = ? AND fuid = ? AND module = ? AND created_from = ? AND default_flag = 1";
+    private static final String SQL_DEFAULT_INFOSTORE = "SELECT fuid, fname FROM #FOLDER# WHERE cid=? and module=? AND default_flag=1 AND created_from=? AND type=?";
 
-    /**
-     * @return The entity's default infostore folder's name if <code>true</code> ; otherwise <code>null</code>
-     */
-    private static String isDefaultInfostoreFolder(final int fuid, final int entity, final String folderTable, final Connection con, final Context ctx) throws SQLException {
+    private static FuidAndName getDefaultInfostoreFolder(int entity, String folderTable, Connection con, Context ctx) throws SQLException {
         PreparedStatement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = con.prepareStatement(SQL_DEF_INF.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
+            stmt = con.prepareStatement(SQL_DEFAULT_INFOSTORE.replaceFirst(TMPL_FOLDER_TABLE, folderTable));
             stmt.setInt(1, ctx.getContextId());
-            stmt.setInt(2, fuid);
-            stmt.setInt(3, FolderObject.INFOSTORE);
-            stmt.setInt(4, entity);
+            stmt.setInt(2, FolderObject.INFOSTORE);
+            stmt.setInt(3, entity);
+            stmt.setInt(4, FolderObject.PUBLIC);
+
             rs = executeQuery(stmt);
-            return rs.next() ? rs.getString(1) : null;
+            if (false == rs.next()) {
+                return null;
+            }
+
+            return new FuidAndName(rs.getInt(1), rs.getString(2));
         } finally {
             closeResources(rs, stmt, null, true, ctx);
         }
@@ -3026,16 +3078,12 @@ public final class OXFolderSQL {
     /**
      * @return <code>true</code> if folder type is set to private, <code>false</code> otherwise
      */
-    private static boolean markForDeletion(final int type, int module, boolean defaultFlag) {
-        return isPrivate(type) || isPersonalInfoStoreFolder(type, module, defaultFlag) || isTrashInfoStoreFolder(type, module, defaultFlag);
+    private static boolean markForDeletion(final int type, int module) {
+        return isPrivate(type) || isTrashInfoStoreFolder(type, module);
     }
 
-    private static boolean isTrashInfoStoreFolder(final int type, int module, boolean defaultFlag) {
-        return (type == FolderObject.TRASH) && (module == FolderObject.INFOSTORE) && defaultFlag;
-    }
-
-    private static boolean isPersonalInfoStoreFolder(final int type, int module, boolean defaultFlag) {
-        return (type == FolderObject.PUBLIC) && (module == FolderObject.INFOSTORE) && defaultFlag;
+    private static boolean isTrashInfoStoreFolder(final int type, int module) {
+        return (type == FolderObject.TRASH) && (module == FolderObject.INFOSTORE);
     }
 
     private static boolean isPrivate(final int type) {
@@ -3092,10 +3140,10 @@ public final class OXFolderSQL {
                 permissionFlag = FolderObject.PRIVATE_PERMISSION;
             }
         } else if (folder.getType() == FolderObject.PUBLIC) {
-            final int permissionsSize = folder.getPermissions().size();
-            final Iterator<OCLPermission> iter = folder.getPermissions().iterator();
-            for (int i = 0; i < permissionsSize; i++) {
-                final OCLPermission oclPerm = iter.next();
+            int permissionsSize = folder.getPermissions().size();
+            Iterator<OCLPermission> iter = folder.getPermissions().iterator();
+            for (int i = permissionsSize; i-- > 0;) {
+                OCLPermission oclPerm = iter.next();
                 if (oclPerm.getEntity() == OCLPermission.ALL_GROUPS_AND_USERS && oclPerm.getFolderPermission() > OCLPermission.NO_PERMISSIONS) {
                     permissionFlag = FolderObject.PUBLIC_PERMISSION;
                     break;
@@ -3103,6 +3151,19 @@ public final class OXFolderSQL {
             }
         }
         return permissionFlag;
+    }
+
+    // --------------------------------------------------------------------------------------------------------------------------- //
+
+    private static class FuidAndName {
+        final int fuid;
+        final String name;
+
+        FuidAndName(int fuid, String name) {
+            super();
+            this.fuid = fuid;
+            this.name = name;
+        }
     }
 
 }

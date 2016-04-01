@@ -50,11 +50,19 @@
 package com.openexchange.caldav.resources;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
+import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
+import com.openexchange.caldav.mixins.ScheduleInboxURL;
+import com.openexchange.caldav.mixins.ScheduleOutboxURL;
 import com.openexchange.caldav.mixins.SupportedCalendarComponentSets;
+import com.openexchange.caldav.mixins.SupportedReportSet;
+import com.openexchange.dav.Privilege;
+import com.openexchange.dav.mixins.CurrentUserPrivilegeSet;
+import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.DAVRootCollection;
+import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.FolderResponse;
@@ -68,19 +76,19 @@ import com.openexchange.folderstorage.mail.contentType.TrashContentType;
 import com.openexchange.folderstorage.type.PrivateType;
 import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.folderstorage.type.SharedType;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link CalDAVRootCollection}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class CalDAVRootCollection extends CommonCollection {
+public class CalDAVRootCollection extends DAVRootCollection {
 
     /**
      * The reserved tree identifier for MS Outlook folder tree: <code>"1"</code>.
@@ -98,17 +106,13 @@ public class CalDAVRootCollection extends CommonCollection {
      * @param factory the factory
      */
     public CalDAVRootCollection(GroupwareCaldavFactory factory) {
-        super(factory, GroupwareCaldavFactory.ROOT_URL);
+        super(factory, "Calendars");
         this.factory = factory;
         super.includeProperties(
             new SupportedCalendarComponentSets(SupportedCalendarComponentSets.VEVENT, SupportedCalendarComponentSets.VTODO),
-            new ScheduleDefaultCalendarURL(factory)
+            new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory), new SupportedReportSet(),
+            new CurrentUserPrivilegeSet(Privilege.READ, Privilege.READ_ACL, Privilege.READ_CURRENT_USER_PRIVILEGE_SET, Privilege.BIND, Privilege.UNBIND)
         );
-    }
-
-    @Override
-    protected GroupwareCaldavFactory getFactory() {
-        return this.factory;
     }
 
     protected FolderService getFolderService() {
@@ -123,42 +127,29 @@ public class CalDAVRootCollection extends CommonCollection {
     }
 
     @Override
-    public Date getCreationDate() throws WebdavProtocolException {
-        return new Date(0);
-    }
-
-    @Override
-    public Date getLastModified() throws WebdavProtocolException {
-        return new Date(0);
-    }
-
-    @Override
-    public AbstractCollection getChild(String name) throws WebdavProtocolException {
+    public DAVCollection getChild(String name) throws WebdavProtocolException {
+        if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(name)) {
+            return factory.mixin(new ScheduleOutboxCollection(factory));
+        } else if (ScheduleInboxURL.SCHEDULE_INBOX.equals(name)) {
+            return factory.mixin(new ScheduleInboxCollection(factory));
+        }
         try {
             for (UserizedFolder folder : getSubfolders()) {
                 if (name.equals(folder.getID())) {
                     LOG.debug("{}: found child collection by name '{}'", this.getUrl(), name);
                     return createCollection(folder);
                 }
+                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
+                    LOG.debug("{}: found child collection by resource name '{}'", this.getUrl(), name);
+                    return createCollection(folder);
+                }
             }
             LOG.debug("{}: child collection '{}' not found, creating placeholder collection", this.getUrl(), name);
-            return new UndecidedFolderCollection(factory, constructPathForChildResource(name));
-
+            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), CalendarContentType.getInstance(), factory.getState().getTreeID());
         } catch (OXException e) {
             throw protocolException(e);
         }
-//        throw protocolException(HttpServletResponse.SC_NOT_FOUND);
     }
-
-//    private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
-//        if (TaskContentType.getInstance().equals(folder.getContentType())) {
-//            return new TaskCollection(factory, constructPathForChildResource(folder), folder);
-//        } else if (CalendarContentType.getInstance().equals(folder.getContentType())) {
-//            return new AppointmentCollection(factory, constructPathForChildResource(folder), folder);
-//        } else {
-//            throw new UnsupportedOperationException("content type " + folder.getContentType() + " not supported");
-//        }
-//    }
 
     private CalDAVFolderCollection<?> createCollection(UserizedFolder folder) throws OXException {
         if (TaskContentType.getInstance().equals(folder.getContentType())) {
@@ -192,14 +183,10 @@ public class CalDAVRootCollection extends CommonCollection {
         } catch (OXException e) {
             throw protocolException(e);
         }
-
+        children.add(new ScheduleOutboxCollection(factory));
+        children.add(new ScheduleInboxCollection(factory));
         LOG.debug("{}: got {} child resources.", getUrl(), children.size());
         return children;
-    }
-
-    @Override
-    public String getDisplayName() throws WebdavProtocolException {
-        return "Calendars";
     }
 
     /**

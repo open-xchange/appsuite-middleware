@@ -108,11 +108,12 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected void saveObject() throws OXException {
-        final Task originalTask = parent.load(object);
-        this.checkForExplicitRemoves(originalTask, taskToSave);
+        Task originalTask = parent.load(object);
+        checkForExplicitRemoves(originalTask, taskToSave);
         Patches.Incoming.adjustTaskStatus(originalTask, taskToSave);
         Patches.Incoming.adjustTaskStart(originalTask, taskToSave);
         getTaskInterface().updateTaskObject(taskToSave, parentFolderID, object.getLastModified());
+        handleAttachments(originalTask, taskToSave);
     }
 
     @Override
@@ -124,7 +125,8 @@ public class TaskResource extends CalDAVResource<Task> {
     protected void createObject() throws OXException {
         taskToSave.removeObjectID(); // in case it's already assigned due to retry operations
         taskToSave.setParentFolderID(null != object ? object.getParentFolderID() : parentFolderID);
-        getTaskInterface().insertTaskObject(this.taskToSave);
+        getTaskInterface().insertTaskObject(taskToSave);
+        handleAttachments(null, taskToSave);
     }
 
     @Override
@@ -137,35 +139,34 @@ public class TaskResource extends CalDAVResource<Task> {
 
     @Override
     protected String generateICal() throws OXException {
-        final ICalEmitter icalEmitter = factory.getIcalEmitter();
-        final ICalSession session = icalEmitter.createSession();
-        final Task task = parent.load(this.object);
-        icalEmitter.writeTask(session, task, factory.getContext(),
-            new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
-        final ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        ICalEmitter icalEmitter = factory.getIcalEmitter();
+        ICalSession session = icalEmitter.createSession();
+        Task task = parent.load(object);
+        applyAttachments(task);
+        icalEmitter.writeTask(session, task, factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         icalEmitter.writeSession(session, bytes);
         try {
             return new String(bytes.toByteArray(), "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
+        } catch (UnsupportedEncodingException e) {
             throw protocolException(e);
         }
     }
 
     @Override
-    protected void deserialize(final InputStream body) throws OXException {
-        final List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(),
-            new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
+    protected void deserialize(InputStream body) throws OXException {
+        List<Task> tasks = getICalParser().parseTasks(body, getTimeZone(), factory.getContext(), new LinkedList<ConversionError>(), new LinkedList<ConversionWarning>());
         if (null == tasks || 1 != tasks.size()) {
             throw protocolException(HttpServletResponse.SC_BAD_REQUEST);
         } else {
-            this.taskToSave = tasks.get(0);
+            taskToSave = tasks.get(0);
             taskToSave.removeLastModified();
-            if (null != this.object) {
-                taskToSave.setParentFolderID(this.object.getParentFolderID());
-                taskToSave.setObjectID(this.object.getObjectID());
+            if (null != object) {
+                taskToSave.setParentFolderID(object.getParentFolderID());
+                taskToSave.setObjectID(object.getObjectID());
                 taskToSave.removeUid();
             } else {
-                taskToSave.setParentFolderID(this.parentFolderID);
+                taskToSave.setParentFolderID(parentFolderID);
             }
         }
     }

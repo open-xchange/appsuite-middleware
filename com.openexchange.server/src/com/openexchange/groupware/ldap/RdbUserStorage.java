@@ -453,12 +453,12 @@ public class RdbUserStorage extends UserStorage {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_ATTRIBUTES);
-            for (final String key : attributes.keySet()) {
-                final Set<String> valueSet = attributes.get(key);
+            for (final Entry<String, Set<String>> entry : attributes.entrySet()) {
+                final Set<String> valueSet = entry.getValue();
                 for (final String value : valueSet) {
                     stmt.setInt(1, context.getContextId());
                     stmt.setInt(2, userId);
-                    stmt.setString(3, key);
+                    stmt.setString(3, entry.getKey());
                     stmt.setString(4, value);
                     stmt.setBytes(5, UUIDs.toByteArray(UUID.randomUUID()));
 
@@ -1358,9 +1358,10 @@ public class RdbUserStorage extends UserStorage {
             removed.remove(key);
         }
         // Now the keys that are contained in old and new attributes.
-        for (final String key : newAttributes.keySet()) {
+        for (final Entry<String, UserAttribute> entry : newAttributes.entrySet()) {
+            String key = entry.getKey();
             if (oldAttributes.containsKey(key)) {
-                compareValues(key, oldAttributes.get(key), newAttributes.get(key), added, removed, changed);
+                compareValues(key, oldAttributes.get(key), entry.getValue(), added, removed, changed);
             }
         }
     }

@@ -10,6 +10,7 @@ import com.openexchange.group.GroupService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.notification.mail.NotificationMailFactory;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.serverconfig.ServerConfigService;
 import com.openexchange.share.ShareService;
@@ -72,6 +73,7 @@ public class ShareNotificationActivator extends HousekeepingActivator {
         });
 
         trackService(ContactCollectorService.class);
+        trackService(ObjectUseCountService.class);
 
         registerService(ShareNotificationService.class, defaultNotificationService);
         openTrackers();

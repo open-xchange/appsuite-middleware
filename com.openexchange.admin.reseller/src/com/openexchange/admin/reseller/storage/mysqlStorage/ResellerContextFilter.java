@@ -100,7 +100,7 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
     private List<Integer> filterContexts(Collection<Integer> cids) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e);
         }
@@ -136,9 +136,9 @@ public class ResellerContextFilter implements Filter<Integer, Integer> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error("", e);
+                LOG.error("Error pushing connection to pool!", e);
             }
         }
         return retval;

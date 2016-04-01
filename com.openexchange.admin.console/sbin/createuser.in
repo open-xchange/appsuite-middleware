@@ -63,7 +63,7 @@ test -f $OXCONFIG && . $OXCONFIG
 ox_set_JAVA_BIN
 
 BNAME=$(basename $0)
-CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|movecontextfilestore2user\|moveuserfilestore2context\|movemasterfilestore2user\|moveuserfilestore2master\|moveuserfilestore\|changeaccessglobal\|getaccesscombinationnameforuser\|getusercapabilities\|list\|change\)\(.*\)/\1 \2/') )
+CMDARR=( $(echo $BNAME | sed -e 's/\(create\|delete\|exists\|movecontextfilestore2user\|moveuserfilestore2context\|movemasterfilestore2user\|moveuserfilestore2master\|moveuserfilestore\|changeaccessglobal\|getaccesscombinationnameforuser\|getusercapabilities\|listusersbyaliasdomain\|listuserfilestores\|list\|change\)\(.*\)/\1 \2/') )
 MODULE=${CMDARR[1]}
 
 case "${CMDARR[0]}" in
@@ -114,6 +114,14 @@ case "${CMDARR[0]}" in
     "list")
     ACTION="List"
     ;;
+    "listusersbyaliasdomain")
+    ACTION="ListUsersByAliasDomain"
+    MODULE=user
+    ;;
+     "listuserfilestores")
+    ACTION="ListUserFilestores"
+    MODULE=user
+    ;;
 esac
 
 JAVAMAIN="com.openexchange.admin.console.${MODULE}.${ACTION}"
@@ -126,9 +134,10 @@ JAVA_OPTS="${JAVA_OXCMD_OPTS} \
 
 CLASSPATH="-classpath @classpath@"
 
-test -z "$LIBPATH" && LIBPATH=${PREFIX}/lib
-
 ADMINCP=$(for jar in $LIBPATH/*.jar; do
+    if [[ "${jar}" == *"calcengine"* ]]; then
+        continue
+    fi
     echo -n "${jar}:"
     done)
 

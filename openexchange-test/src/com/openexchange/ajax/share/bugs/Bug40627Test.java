@@ -64,13 +64,17 @@ import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.FileShare;
 import com.openexchange.ajax.share.actions.FolderShare;
+import com.openexchange.ajax.user.actions.GetRequest;
 import com.openexchange.file.storage.DefaultFileStorageObjectPermission;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageGuestObjectPermission;
 import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.java.util.TimeZones;
 import com.openexchange.server.impl.OCLPermission;
+import com.openexchange.share.recipient.RecipientType;
+import com.openexchange.tools.arrays.Arrays;
 
 /**
  * {@link Bug40627Test}
@@ -90,12 +94,27 @@ public class Bug40627Test extends ShareTest {
         super(name);
     }
 
-    public void testCheckExtendedFolderPermissions() throws Exception {
+    public void testCheckExtendedFolderPermissionAsAnonymousGuest() throws Exception {
+        testCheckExtendedFolderPermissions(createAnonymousGuestPermission());
+    }
+
+    public void testCheckExtendedFolderPermissionAsInvitedGuest() throws Exception {
+        testCheckExtendedFolderPermissions(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest"));
+    }
+
+    public void testCheckExtendedObjectPermissionAsAnonymousGuest() throws Exception {
+        testCheckExtendedObjectPermissions(asObjectPermission(createAnonymousGuestPermission()));
+    }
+
+    public void testCheckExtendedObjectPermissionAsInvitedGuest() throws Exception {
+        testCheckExtendedObjectPermissions(asObjectPermission(createNamedGuestPermission(randomUID() + "@example.org", "Test Guest")));
+    }
+
+    private void testCheckExtendedFolderPermissions(OCLGuestPermission guestPermission) throws Exception {
         /*
          * create shared folder
          */
         int module = randomModule();
-        OCLGuestPermission guestPermission = randomGuestPermission(module);
         List<OCLPermission> permissions = new ArrayList<OCLPermission>();
         permissions.add(guestPermission);
         OCLPermission groupPermission = new OCLPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, 0);
@@ -140,14 +159,22 @@ public class Bug40627Test extends ShareTest {
         GetResponse getResponse = guestClient.execute(new com.openexchange.ajax.folder.actions.GetRequest(EnumAPI.OX_NEW, folder.getObjectID()));
         assertFalse(getResponse.getErrorMessage(), getResponse.hasError());
         FolderShare folderShare = FolderShare.parse((JSONObject) getResponse.getData(), guestClient.getValues().getTimeZone());
-        checkExtendedPermissions(client, folderShare.getExtendedPermissions(), matchingPermission.getEntity(), GroupStorage.GROUP_ZERO_IDENTIFIER, userId2);
+        /*
+         * expect to see other permission entities based on recipient type
+         */
+        int[] visibleUserIDs;
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
+            visibleUserIDs = new int[] { getClient().getValues().getUserId() };
+        } else {
+            visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
+        }
+        checkExtendedPermissions(client, folderShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
     }
 
-    public void testCheckExtendedObjectPermissions() throws Exception {
+    private void testCheckExtendedObjectPermissions(FileStorageGuestObjectPermission guestPermission) throws Exception {
         /*
          * create folder and a shared file inside
          */
-        FileStorageGuestObjectPermission guestPermission = randomGuestObjectPermission();
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>();
         permissions.add(guestPermission);
         permissions.add(new DefaultFileStorageObjectPermission(GroupStorage.GROUP_ZERO_IDENTIFIER, true, FileStorageObjectPermission.READ));
@@ -191,20 +218,32 @@ public class Bug40627Test extends ShareTest {
         GetInfostoreResponse getInfostoreResponse = guestClient.execute(getInfostoreRequest);
         assertFalse(getInfostoreResponse.getErrorMessage(), getInfostoreResponse.hasError());
         FileShare fileShare = FileShare.parse((JSONObject) getInfostoreResponse.getData(), guestClient.getValues().getTimeZone());
-        checkExtendedPermissions(client, fileShare.getExtendedPermissions(), matchingPermission.getEntity(), GroupStorage.GROUP_ZERO_IDENTIFIER, userId2);
+        /*
+         * expect to see other permission entities based on recipient type
+         */
+        int[] visibleUserIDs;
+        if (RecipientType.ANONYMOUS.equals(guestPermission.getRecipient().getType())) {
+            visibleUserIDs = new int[] { getClient().getValues().getUserId() };
+        } else {
+            visibleUserIDs = new int[] { getClient().getValues().getUserId(), userId2 };
+        }
+        checkExtendedPermissions(client, fileShare.getExtendedPermissions(), guest.getEntity(), visibleUserIDs);
     }
 
-    private static void checkExtendedPermissions(AJAXClient sharingClient, List<ExtendedPermissionEntity> actual, int expectedGuestID, int expectedGroupID, int expectedUserID) throws Exception {
+    private static void checkExtendedPermissions(AJAXClient sharingClient, List<ExtendedPermissionEntity> actual, int guestID, int[] visibleUserIDs) throws Exception {
         assertNotNull(actual);
         for (ExtendedPermissionEntity permissionEntity : actual) {
             switch (permissionEntity.getType()) {
                 case GROUP:
-                    assertEquals(permissionEntity.getEntity(), expectedGroupID);
                     assertEquals("Group " + permissionEntity.getEntity(), permissionEntity.getDisplayName());
                     break;
+                case GUEST:
+                    assertEquals(permissionEntity.getEntity(), guestID);
+                    break;
                 case USER:
-                    if (permissionEntity.getEntity() == sharingClient.getValues().getUserId()) {
-                        com.openexchange.ajax.user.actions.GetResponse getResponse = sharingClient.execute(new com.openexchange.ajax.user.actions.GetRequest(sharingClient.getValues().getTimeZone(), true));
+                    if (Arrays.contains(visibleUserIDs, permissionEntity.getEntity())) {
+                        GetRequest getRequest = new com.openexchange.ajax.user.actions.GetRequest(permissionEntity.getEntity(), TimeZones.UTC);
+                        com.openexchange.ajax.user.actions.GetResponse getResponse = sharingClient.execute(getRequest);
                         com.openexchange.groupware.ldap.User expectedUser = getResponse.getUser();
                         assertEquals(expectedUser.getDisplayName(), permissionEntity.getDisplayName());
                         assertNotNull(permissionEntity.getContact());
@@ -212,7 +251,6 @@ public class Bug40627Test extends ShareTest {
                         assertEquals(expectedUser.getGivenName(), permissionEntity.getContact().getGivenName());
                         assertEquals(expectedUser.getMail(), permissionEntity.getContact().getEmail1());
                     } else {
-                        assertEquals(permissionEntity.getEntity(), expectedUserID);
                         assertEquals("User " + permissionEntity.getEntity(), permissionEntity.getDisplayName());
                         assertNotNull(permissionEntity.getContact());
                         assertEquals("User", permissionEntity.getContact().getSurName());
@@ -220,7 +258,6 @@ public class Bug40627Test extends ShareTest {
                     }
                     break;
                 default:
-                    assertEquals(permissionEntity.getEntity(), expectedGuestID);
                     break;
             }
         }

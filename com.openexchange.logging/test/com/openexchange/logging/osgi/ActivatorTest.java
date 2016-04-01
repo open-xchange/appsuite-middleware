@@ -71,8 +71,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.jul.LevelChangePropagator;
 import ch.qos.logback.classic.spi.LoggerContextListener;
 import ch.qos.logback.classic.spi.TurboFilterList;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 import com.openexchange.logging.mbean.IncludeStackTraceServiceImpl;
-import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
 import com.openexchange.test.mock.MockUtils;
 
 /**

@@ -194,7 +194,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
     private JSONArray getJSONFiles() throws JSONException, OXException {
         List<FileStorageCapability> specialCapabilites = new ArrayList<FileStorageCapability>();
         List<Field> fields = new ArrayList<Field>(Arrays.asList(
-            Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE));
+            Field.CREATED, Field.LAST_MODIFIED, Field.FILENAME, Field.CREATED_BY, Field.MODIFIED_BY, Field.FILE_MIMETYPE, Field.FILE_SIZE));
         FolderID folderID = new FolderID(this.folderID);
         if (session.getStorage().supports(folderID, FileStorageCapability.OBJECT_PERMISSIONS)) {
             specialCapabilites.add(FileStorageCapability.OBJECT_PERMISSIONS);
@@ -211,7 +211,7 @@ public class JsonDirectoryMetadata extends AbstractJsonMetadata {
             fields.add(Field.VERSION);
             fields.add(Field.VERSION_COMMENT);
         }
-        List<File> files = session.getStorage().getFilesInFolder(this.folderID, false, null, fields);
+        List<File> files = session.getStorage().getFilesInFolder(this.folderID, false, false, null, fields);
         return getJSONFiles(files, specialCapabilites.toArray(new FileStorageCapability[specialCapabilites.size()]));
     }
 

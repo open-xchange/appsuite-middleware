@@ -53,7 +53,6 @@ import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtili
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUnsignedInteger;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.getUserPermissionBits;
 import static com.openexchange.folderstorage.database.DatabaseFolderStorageUtility.localizeFolderNames;
-import static com.openexchange.groupware.container.FolderObject.SYSTEM_MODULE;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.server.impl.OCLPermission.ADMIN_PERMISSION;
 import static com.openexchange.server.impl.OCLPermission.DELETE_ALL_OBJECTS;
@@ -155,6 +154,9 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareService;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
@@ -533,12 +535,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                 final FolderObject parent = getFolderObject(parentFolderID, storageParameters.getContext(), con, storageParameters);
                 final int userId = storageParameters.getUserId();
                 final boolean isShared = parent.isShared(userId);
-                final boolean isSystem = (SYSTEM_MODULE == parent.getModule());
+                final boolean isSystem = FolderObject.SYSTEM_TYPE == parent.getType();
                 final List<OCLPermission> parentPermissions = parent.getPermissions();
                 /*
                  * Create permission list
                  */
-                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 0 : parentPermissions.size()) + 1);
+                final List<OCLPermission> permissions = new ArrayList<OCLPermission>((isSystem ? 1 : parentPermissions.size()) + 1);
                 if (isShared) {
                     permissions.add(newMaxPermissionFor(parent.getCreatedBy()));
                     permissions.add(newStandardPermissionFor(userId));
@@ -554,6 +556,12 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
                     }
                     for (final OCLPermission permission : parentPermissions) {
                         if ((permission.getSystem() <= 0) && !ignore.contains(permission.getEntity())) {
+                            if (false == permission.isGroupPermission()) {
+                                GuestInfo guestInfo = ServerServiceRegistry.getServize(ShareService.class).getGuestInfo(session, permission.getEntity());
+                                if (null != guestInfo && RecipientType.ANONYMOUS.equals(guestInfo.getRecipientType())) {
+                                    continue; // don't inherit anonymous share links
+                                }
+                            }
                             permissions.add(permission);
                         }
                     }
@@ -1832,47 +1840,42 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
 
     @Override
     public String[] getModifiedFolderIDs(final String treeId, final Date timeStamp, final ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        Date since = null != timeStamp ? timeStamp : new Date(0L);
+        ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        SearchIterator<FolderObject> searchIterator = null;
         try {
-            final Connection con = provider.getConnection();
-            final Context ctx = storageParameters.getContext();
-
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getAllModifiedFoldersSince(timeStamp == null ? new Date(0) : timeStamp, ctx, con)).asQueue();
-            final int size = q.size();
-            final Iterator<FolderObject> iterator = q.iterator();
-            final String[] ret = new String[size];
-            for (int i = 0; i < size; i++) {
-                ret[i] = String.valueOf(iterator.next().getObjectID());
+            if (null == includeContentTypes) {
+                searchIterator = OXFolderIteratorSQL.getAllModifiedFoldersSince(since, storageParameters.getContext(), provider.getConnection());
+            } else {
+                searchIterator = OXFolderIteratorSQL.getModifiedFoldersSince(since, getModulesByContentType(includeContentTypes), storageParameters.getContext(), provider.getConnection());
             }
-
-            return ret;
+            return filterByContentType(searchIterator, includeContentTypes);
         } finally {
+            SearchIterators.close(searchIterator);
             provider.close();
         }
     }// End of getModifiedFolderIDs()
 
     @Override
     public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, final StorageParameters storageParameters) throws OXException {
-        final ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        return getDeletedFolderIDs(treeId, timeStamp, null, storageParameters);
+    }
+
+    public String[] getDeletedFolderIDs(final String treeId, final Date timeStamp, ContentType[] includeContentTypes, final StorageParameters storageParameters) throws OXException {
+        Date since = null != timeStamp ? timeStamp : new Date(0L);
+        ConnectionProvider provider = getConnection(Mode.READ, storageParameters);
+        SearchIterator<FolderObject> searchIterator = null;
         try {
-            final Connection con = provider.getConnection();
-            final User user = storageParameters.getUser();
-            final Context ctx = storageParameters.getContext();
-            final UserPermissionBits userPermissionBits = getUserPermissionBits(con, storageParameters);
-
-            final Queue<FolderObject> q = ((FolderObjectIterator) OXFolderIteratorSQL.getDeletedFoldersSince(timeStamp, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), ctx, con)).asQueue();
-            final int size = q.size();
-            final Iterator<FolderObject> iterator = q.iterator();
-            final String[] ret = new String[size];
-            for (int i = 0; i < size; i++) {
-                ret[i] = String.valueOf(iterator.next().getObjectID());
-            }
-
-            return ret;
+            Connection connection = provider.getConnection();
+            User user = storageParameters.getUser();
+            UserPermissionBits userPermissionBits = getUserPermissionBits(connection, storageParameters);
+            searchIterator = OXFolderIteratorSQL.getDeletedFoldersSince(
+                since, user.getId(), user.getGroups(), userPermissionBits.getAccessibleModules(), storageParameters.getContext(), connection);
+            return filterByContentType(searchIterator, includeContentTypes);
         } finally {
+            SearchIterators.close(searchIterator);
             provider.close();
         }
-
     }// End of getDeletedFolderIDs()
 
     /*-
@@ -1971,6 +1974,29 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
         }
     }
 
+    private static String[] filterByContentType(SearchIterator<FolderObject> searchIterator, ContentType[] allowedContentTypes) throws OXException {
+        List<String> folderIDs = new ArrayList<String>();
+        while (searchIterator.hasNext()) {
+            FolderObject folder = searchIterator.next();
+            if (matches(folder, allowedContentTypes)) {
+                folderIDs.add(String.valueOf(folder.getObjectID()));
+            }
+        }
+        return folderIDs.toArray(new String[folderIDs.size()]);
+    }
+
+    private static boolean matches(FolderObject folder, ContentType[] allowedContentTypes) {
+        if (null == allowedContentTypes) {
+            return true;
+        }
+        for (ContentType allowedContentType : allowedContentTypes) {
+            if (folder.getModule() == getModuleByContentType(allowedContentType)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static int getModuleByContentType(final ContentType contentType) {
         final String cts = contentType.toString();
         if (TaskContentType.getInstance().toString().equals(cts)) {
@@ -1986,6 +2012,17 @@ public final class DatabaseFolderStorage implements AfterReadAwareFolderStorage 
             return FolderObject.INFOSTORE;
         }
         return FolderObject.UNBOUND;
+    }
+
+    private static int[] getModulesByContentType(ContentType[] contentTypes) {
+        if (null == contentTypes) {
+            return null;
+        }
+        int[] modules = new int[contentTypes.length];
+        for (int i = 0; i < contentTypes.length; i++) {
+            modules[i] = getModuleByContentType(contentTypes[i]);
+        }
+        return modules;
     }
 
     private static int getTypeByFolderType(final Type type) {

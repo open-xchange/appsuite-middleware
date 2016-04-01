@@ -501,116 +501,6 @@ public final class HtmlProcessing {
         return sb;
     }
 
-    private static final Pattern PATTERN_HTML = Pattern.compile("<html.*?>(.*?)</html>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_HEAD = Pattern.compile("<head.*?>(.*?)</head>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-    private static final Pattern PATTERN_BODY = Pattern.compile("<body(.*?)>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
-
-    /**
-     * Replaces body tag with an appropriate &lt;div&gt; tag.
-     *
-     * @param htmlContent The HTML content
-     * @param cssPrefix The CSS prefix
-     * @return The HTML content with replaced body tag
-     */
-    private static String replaceBody(String htmlContent, String cssPrefix) {
-        if (isEmpty(htmlContent) || isEmpty(cssPrefix)) {
-            return htmlContent;
-        }
-
-        Matcher htmlMatcher = PATTERN_HTML.matcher(htmlContent);
-        if (!htmlMatcher.find()) {
-            String retval = replaceBodyPlain(htmlContent, cssPrefix);
-            return retval;
-        }
-
-        Matcher headMatcher = PATTERN_HEAD.matcher(htmlMatcher.group(1));
-        htmlMatcher = null;
-        if (!headMatcher.find()) {
-            String retval = replaceBodyPlain(htmlContent, cssPrefix);
-            return retval;
-        }
-
-        Matcher bodyMatcher = PATTERN_BODY.matcher(htmlContent);
-        if (!bodyMatcher.find()) {
-            // No <body> tag contained in HTML content;
-            // replaceBodyPlain() does not work in this case as it relies on PATTERN_BODY, too
-            StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-            sb.append("<div id=\"").append(cssPrefix).append("\">");
-            sb.append(htmlContent);
-            sb.append("</div>");
-            return sb.toString();
-        }
-
-        // Replace <body> with <div>
-        StringBuilder sb = new StringBuilder(htmlContent.length() + 256);
-        sb.append("<div id=\"").append(cssPrefix).append('"');
-        {
-            final String rest = bodyMatcher.group(1);
-            if (!isEmpty(rest)) {
-                sb.append(' ').append(cleanUpRest(rest));
-            }
-        }
-        sb.append('>');
-
-        // The content...
-        Matcher styleMatcher = PATTERN_STYLE.matcher(headMatcher.group(1));
-        headMatcher = null;
-        while (styleMatcher.find()) {
-            sb.append(styleMatcher.group());
-        }
-        sb.append(bodyMatcher.group(2));
-
-        sb.append("</div>");
-
-        // Is there more behind closing <body> tag?
-        int end = bodyMatcher.end();
-        if (end < htmlContent.length()) {
-            sb.append(htmlContent.substring(end));
-        }
-        return sb.toString();
-    }
-
-    private static final Pattern PAT_ATTR_BGCOLOR = Pattern.compile("bgcolor=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-    private static final Pattern PAT_ATTR_STYLE = Pattern.compile("style=\"([^\"]+)\"", Pattern.CASE_INSENSITIVE);
-
-    private static String cleanUpRest(String rest) {
-        Matcher m = PAT_ATTR_BGCOLOR.matcher(rest);
-        if (!m.find()) {
-            return rest;
-        }
-
-        String color = m.group(1);
-        String ret = rest;
-        StringBuffer sbuf = new StringBuffer(ret.length());
-        m.appendReplacement(sbuf, "");
-        m.appendTail(sbuf);
-        // Check for script attribute
-        m = PAT_ATTR_STYLE.matcher(sbuf.toString());
-        if (!m.find()) {
-            return sbuf.append(" style=\"background-color: ").append(color).append(";\"").toString();
-        }
-        sbuf.setLength(0);
-        m.appendReplacement(sbuf, "style=\"" + com.openexchange.java.Strings.quoteReplacement(m.group(1)) + " background-color: " + color + ";\"");
-        m.appendTail(sbuf);
-        return sbuf.toString();
-    }
-
-    private static String replaceBodyPlain(String htmlContent, String cssPrefix) {
-        Matcher m = PATTERN_BODY.matcher(htmlContent);
-        StringBuffer sb = new StringBuffer(htmlContent.length() + 256);
-        if (m.find()) {
-            m.appendReplacement(sb, Matcher.quoteReplacement("<div id=\"" + cssPrefix + "\" " + m.group(1) + '>' + m.group(2) + "</div>"));
-            m.appendTail(sb);
-        } else {
-            // No <body> tag contained in HTML content
-            sb.append("<div id=\"").append(cssPrefix).append("\">");
-            sb.append(htmlContent);
-            sb.append("</div>");
-            return sb.toString();
-        }
-        return sb.toString();
-    }
-
     private static final Pattern PATTERN_CSS_CLASS_NAME = Pattern.compile("\\s?\\.[a-zA-Z0-9\\s:,\\.#_-]*\\s*\\{.*?\\}", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
 
     private static final Pattern PATTERN_HTML_BODY = Pattern.compile("<body.*?>(.*?)</body>", Pattern.DOTALL | Pattern.CASE_INSENSITIVE);
@@ -1023,6 +913,10 @@ public final class HtmlProcessing {
         return i;
     }
 
+    private static final Pattern BACKGROUND_CSS_PATTERN = Pattern.compile(
+        "(background|background-image\\s*:\\s*)url\\(cid:([^\\s>\\)]*)\\)",
+        Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
     private static final Pattern BACKGROUND_PATTERN = Pattern.compile(
         "(<[a-zA-Z]+[^>]*?)(?:(?:background=cid:([^\\s>]*))|(?:background=\"cid:([^\"]*)\"))([^>]*/?>)",
         Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
@@ -1073,6 +967,7 @@ public final class HtmlProcessing {
     public static String filterInlineImages(String content, Session session, MailPath msgUID, ImageUriGenerator generator) {
         String ret = filterImgInlineImages(content, session, msgUID, generator);
         ret = filterBackgroundInlineImages(ret, session, msgUID, generator);
+        ret = filterBackgroundCssInlineImages(ret, session, msgUID, generator);
         return ret;
     }
 
@@ -1100,6 +995,35 @@ public final class HtmlProcessing {
             }
         }
         return tmp;
+    }
+
+    private static String filterBackgroundCssInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {
+        String reval = content;
+        try {
+            final Matcher imgMatcher = BACKGROUND_CSS_PATTERN.matcher(reval);
+            final MatcherReplacer imgReplacer = new MatcherReplacer(imgMatcher, reval);
+            final StringBuilder sb = new StringBuilder(reval.length());
+            if (imgMatcher.find()) {
+                final StringBuilder linkBuilder = new StringBuilder(256);
+                // Replace inline images with Content-ID
+                do {
+                    // Extract Content-ID
+                    String cid = imgMatcher.group(2);
+
+                    // Compose corresponding image data
+                    linkBuilder.setLength(0);
+                    linkBuilder.append(imgMatcher.group(1)).append("url(");
+                    linkBuilder.append(generator.getPlainImageUri(cid, msgUID, session));
+                    linkBuilder.append(")");
+                    imgReplacer.appendLiteralReplacement(sb, 0 == linkBuilder.length() ? imgMatcher.group() : linkBuilder.toString());
+                } while (imgMatcher.find());
+            }
+            imgReplacer.appendTail(sb);
+            reval = sb.toString();
+        } catch (final Exception e) {
+            LOG.warn("Unable to filter cid background images: {}", e.getMessage());
+        }
+        return reval;
     }
 
     private static String filterBackgroundInlineImages(final String content, final Session session, final MailPath msgUID, ImageUriGenerator generator) {

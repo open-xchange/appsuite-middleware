@@ -129,6 +129,7 @@ import com.openexchange.mail.mime.filler.ContextCompositionParameters;
 import com.openexchange.mail.mime.filler.MimeMessageFiller;
 import com.openexchange.mail.mime.filler.SessionCompositionParameters;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayInputStream;
@@ -529,17 +530,22 @@ public final class MimeMessageConverter {
      */
     public static MailMessage fillComposedMailMessage(final ComposedMailMessage composedMail) throws OXException {
         try {
-            final MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
+            MimeMessage mimeMessage = new MimeMessage(MimeDefaultSession.getDefaultSession());
             /*
              * Fill message
              */
-            CompositionParameters compositionParameters;
-            if (composedMail.getSession() == null) {
-                compositionParameters = new ContextCompositionParameters(composedMail.getContext());
-            } else {
-                compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()));
+            MimeMessageFiller filler;
+            {
+                CompositionParameters compositionParameters;
+                if (composedMail.getSession() == null) {
+                    compositionParameters = new ContextCompositionParameters(composedMail.getContext());
+                } else {
+                    UserSettingMail usm = null == composedMail.getMailSettings() ? UserSettingMailStorage.getInstance().getUserSettingMail(composedMail.getSession()) : composedMail.getMailSettings();
+                    compositionParameters = new SessionCompositionParameters(composedMail.getSession(), composedMail.getContext(), usm);
+                }
+                filler = new MimeMessageFiller(compositionParameters);
             }
-            final MimeMessageFiller filler = new MimeMessageFiller(compositionParameters);
+
             filler.setAccountId(composedMail.getAccountId());
             composedMail.setFiller(filler);
             /*
@@ -1905,48 +1911,24 @@ public final class MimeMessageConverter {
                 }
             }
            {
-                final ContentType ct = mail.getContentType();
+                ContentType ct = mail.getContentType();
                 if (ct.startsWith(MULTI_PRIMTYPE)) {
                     if (MULTI_SUBTYPE_MIXED.equalsIgnoreCase(ct.getSubType())) {
                         // For convenience consider multipart/mixed to hold file attachments
                         mail.setHasAttachment(true);
                     } else if (MULTI_SUBTYPE_ALTERNATIVE.equalsIgnoreCase(ct.getSubType())) {
-                        // For convenience consider multipart/mixed to hold file attachments
-                        mail.setHasAttachment(mail.getEnclosedCount() > 2);
-                    } else {
-                        // Examine Multipart object
-                        Object content = null;
-                        try {
-                            content = msg.getContent();
-                        } catch (final Exception ignore) {
-                            // Ignore
-                        }
-                        if (null == content) {
-                            // No multipart object
-                            mail.setHasAttachment(false);
+                        // For convenience consider multipart/alternative to hold file attachments if it has more than 2 sub-parts
+                        if (mail.getEnclosedCount() > 2) {
+                            mail.setHasAttachment(true);
                         } else {
-                            try {
-                                mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
-                            } catch (final OXException e) {
-                                if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
-                                    throw e;
-                                }
-                                // A messaging error occurred
-                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            } catch (final ClassCastException e) {
-                                // Cast to javax.mail.Multipart failed
-                                LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but {}.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", content.getClass().getName());
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            } catch (final MessagingException e) {
-                                // A messaging error occurred
-                                LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
-                                mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
-                            }
+                            examineAttachmentPresence(mail, ct);
                         }
+                    } else {
+                        // Examine...
+                        examineAttachmentPresence(mail, ct);
                     }
                 } else {
-                    // No multipart/*
+                    // No multipart/* at all
                     mail.setHasAttachment(false);
                 }
             }
@@ -2072,6 +2054,27 @@ public final class MimeMessageConverter {
                 throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+        }
+    }
+
+    private static void examineAttachmentPresence(MimeMailMessage mail, ContentType ct) throws IOException, OXException {
+        try {
+            mail.setHasAttachment(hasAttachments(mail, ct.getSubType()));
+        } catch (OXException e) {
+            if (!MailExceptionCode.MESSAGING_ERROR.equals(e)) {
+                throw e;
+            }
+            // A messaging error occurred
+            LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+        } catch (ClassCastException e) {
+            // Cast to javax.mail.Multipart failed
+            LOG.debug("Message's Content-Type indicates to be multipart/* but its content is not an instance of javax.mail.Multipart but is not.\nIn case if IMAP it is due to a wrong BODYSTRUCTURE returned by IMAP server.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e);
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
+        } catch (MessagingException e) {
+            // A messaging error occurred
+            LOG.debug("Parsing message's multipart/* content to check for file attachments caused a messaging error: {}.\nGoing to mark message to have (file) attachments if Content-Type matches multipart/mixed.", e.getMessage());
+            mail.setHasAttachment(ct.startsWith(MimeTypes.MIME_MULTIPART_MIXED));
         }
     }
 

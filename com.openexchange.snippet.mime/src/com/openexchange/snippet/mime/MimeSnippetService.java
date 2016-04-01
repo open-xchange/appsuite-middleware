@@ -52,6 +52,7 @@ package com.openexchange.snippet.mime;
 import java.util.Collections;
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.SnippetManagement;
 import com.openexchange.snippet.SnippetService;
@@ -74,16 +75,19 @@ import com.openexchange.snippet.SnippetService;
  */
 public final class MimeSnippetService implements SnippetService {
 
+    private final QuotaProvider quotaProvider;
+
     /**
      * Initializes a new {@link MimeSnippetService}.
      */
-    public MimeSnippetService() {
+    public MimeSnippetService(QuotaProvider quotaProvider) {
         super();
+        this.quotaProvider = quotaProvider;
     }
 
     @Override
     public SnippetManagement getManagement(final Session session) throws OXException {
-        return new MimeSnippetManagement(session);
+        return new MimeSnippetManagement(session, quotaProvider);
     }
 
     @Override

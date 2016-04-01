@@ -60,6 +60,8 @@ import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.report.internal.ReportingInit;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
+import com.openexchange.tools.servlet.ratelimit.monitoring.RateLimiterMBean;
+import com.openexchange.tools.servlet.ratelimit.monitoring.RateLimiterMBeanImpl;
 
 /**
  * {@link ManagementServiceTracker}
@@ -69,6 +71,7 @@ import com.openexchange.tools.oxfolder.OXFolderProperties;
 public final class ManagementServiceTracker extends BundleServiceTracker<ManagementService> {
 
     private volatile ObjectName gadObjectName;
+    private volatile ObjectName rateLimiterObjectName;
 
     /**
      * Initializes a new {@link ManagementServiceTracker}
@@ -91,6 +94,9 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
              */
             gadObjectName = OXFolderProperties.registerRestorerMBean(managementService);
             managementService.registerMBean(getObjectName(mailInterfaceMonitor.getClass().getName(), true), mailInterfaceMonitor);
+            ObjectName rateLimiterObjectName = getObjectName(RateLimiterMBean.NAME, true);
+            managementService.registerMBean(rateLimiterObjectName, new RateLimiterMBeanImpl());
+            this.rateLimiterObjectName = rateLimiterObjectName;
         } catch (final MalformedObjectNameException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final NullPointerException e) {
@@ -115,6 +121,10 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             if (null != gadObjectName) {
                 OXFolderProperties.unregisterRestorerMBean(gadObjectName, managementService);
             }
+            ObjectName rateLimiterObjectName = this.rateLimiterObjectName;
+            if (null != rateLimiterObjectName) {
+                managementService.unregisterMBean(rateLimiterObjectName);
+            }
         } catch (final MalformedObjectNameException e) {
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } catch (final NullPointerException e) {
@@ -123,6 +133,7 @@ public final class ManagementServiceTracker extends BundleServiceTracker<Managem
             org.slf4j.LoggerFactory.getLogger(ManagementServiceTracker.class).error("", e);
         } finally {
             this.gadObjectName = null;
+            this.rateLimiterObjectName = null;
         }
     }
 

@@ -98,6 +98,8 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.modules.Module;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.share.CreatedShares;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareInfo;
@@ -601,6 +603,7 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
         if (comparedPermissions.hasNewGuests()) {
             Map<ShareTarget, List<GuestPermission>> permissionsPerTarget = getPermissionsPerTarget(folderID, contentType, comparedPermissions.getNewGuestPermissions());
             ShareService shareService = FolderStorageServices.requireService(ShareService.class);
+            ObjectUseCountService useCountService = FolderStorageServices.getService(ObjectUseCountService.class);
 
             CreatedShares shares = null;
             boolean sessionParameterSet = false;
@@ -623,6 +626,10 @@ public abstract class AbstractUserizedFolderPerformer extends AbstractPerformer 
                         ShareInfo share = shares.getShare(permission.getRecipient());
                         permission.setEntity(share.getGuest().getGuestID());
                         comparedPermissions.rememberGuestInfo(share.getGuest());
+                        if (null != useCountService) {
+                            IncrementArguments arguments = new IncrementArguments.Builder(share.getGuest().getEmailAddress()).build();
+                            useCountService.incrementObjectUseCount(session, arguments);
+                        }
                     }
                 }
             } finally {

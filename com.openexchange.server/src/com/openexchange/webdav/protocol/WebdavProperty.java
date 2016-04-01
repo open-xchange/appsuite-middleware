@@ -54,7 +54,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class WebdavProperty {
-    
+
 	private String namespace = "";
 	private String name = "";
 	private String lang = "";
@@ -72,20 +72,20 @@ public class WebdavProperty {
 
 	/**
 	 * Initializes a new {@link WebdavProperty}.
-	 * 
+	 *
 	 * @param namespace The namespace
 	 * @param name the property name
 	 */
 	public WebdavProperty(final String namespace, final String name) {
 	    super();
-		setNamespace(namespace);
-		setName(name);
+	    this.namespace = namespace;
+	    this.name = name;
 	}
-	
+
 	public String getLanguage() {
 		return lang;
 	}
-	
+
 	public void setLanguage(final String lang) {
 		this.lang = lang;
 	}
@@ -93,7 +93,7 @@ public class WebdavProperty {
 	public String getName() {
 		return name;
 	}
-	
+
 	public void setName(final String name) {
 		this.name = name;
 	}
@@ -101,7 +101,7 @@ public class WebdavProperty {
 	public String getNamespace() {
 		return namespace;
 	}
-	
+
 	public void setNamespace(final String namespace) {
 		this.namespace = namespace;
 	}
@@ -109,14 +109,14 @@ public class WebdavProperty {
 	public String getValue() {
 		return value;
 	}
-	
+
 	public void setValue(final String value) {
 		this.value = value;
 	}
 
 	/**
 	 * Adds an additional attribute to this property.
-	 * 
+	 *
 	 * @param name The attribute name
 	 * @param value The value
 	 */
@@ -126,10 +126,10 @@ public class WebdavProperty {
 	    }
 	    attributes.put(name, value);
 	}
-	
+
 	/**
 	 * Gets the additional attributes of this property.
-	 * 
+	 *
 	 * @return The attributes, or <code>null</code> if there are none
 	 */
 	public Map<String, String> getAttributes() {
@@ -165,5 +165,10 @@ public class WebdavProperty {
 	public void setDate(final boolean b) {
 		this.date = b;
 	}
+
+    @Override
+    public String toString() {
+        return "WebdavProperty [namespace=" + namespace + ", name=" + name + "]";
+    }
 
 }

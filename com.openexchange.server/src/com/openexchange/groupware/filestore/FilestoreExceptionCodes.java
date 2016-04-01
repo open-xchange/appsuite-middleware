@@ -53,7 +53,7 @@ import com.openexchange.exception.Category;
 import com.openexchange.exception.DisplayableOXExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.exception.OXExceptionFactory;
-import com.openexchange.exception.OXExceptionStrings;
+import com.openexchange.filestore.FileStorageCodes;
 
 /**
  * {@link FilestoreExceptionCodes}
@@ -65,36 +65,38 @@ public enum FilestoreExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * "Wrong filestore %1$d for context %2$d needing filestore %3$d.
      */
-    FILESTORE_MIXUP("Wrong file store %1$d for context %2$d. Correct file store: %3$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 201),
+    FILESTORE_MIXUP(FileStorageCodes.FILESTORE_MIXUP),
     /**
      * Cannot find filestore with id %1$d.
      */
-    NO_SUCH_FILESTORE("Cannot find file store with id %1$d.", OXExceptionStrings.MESSAGE, Category.CATEGORY_CONFIGURATION, 303),
+    NO_SUCH_FILESTORE(FileStorageCodes.NO_SUCH_FILE_STORAGE),
     /**
      * Cannot create URI from "%1$s".
      */
-    URI_CREATION_FAILED("Cannot create URI from \"%1$s\".", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 304),
+    URI_CREATION_FAILED(FileStorageCodes.URI_CREATION_FAILED),
     /**
      * SQL Problem: "%s".
      */
-    SQL_PROBLEM("SQL problem: \"%s\".", OXExceptionStrings.SQL_ERROR_MSG, Category.CATEGORY_ERROR, 306),
+    SQL_PROBLEM(FileStorageCodes.SQL_PROBLEM),
     ;
 
     private final String message;
     private final String displayMessage;
     private final Category category;
     private final int number;
+    private final String prefix;
 
-    private FilestoreExceptionCodes(final String message, String displayMessage, final Category category, final int number) {
-        this.message = message;
-        this.displayMessage = displayMessage;
-        this.category = category;
-        this.number = number;
+    private FilestoreExceptionCodes(DisplayableOXExceptionCode origin) {
+        this.message = origin.getMessage();
+        this.displayMessage = origin.getDisplayMessage();
+        this.category = origin.getCategory();
+        this.number = origin.getNumber();
+        this.prefix = origin.getPrefix();
     }
 
     @Override
     public String getPrefix() {
-        return "FLS";
+        return prefix;
     }
 
     @Override

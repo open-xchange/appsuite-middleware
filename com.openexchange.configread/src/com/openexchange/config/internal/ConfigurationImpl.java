@@ -133,6 +133,27 @@ public final class ConfigurationImpl implements ConfigurationService {
         return tmp.toArray(new String[tmp.size()]);
     }
 
+    private static interface FileNameMatcher {
+
+        boolean matches(String filename, File file);
+    }
+
+    private static final FileNameMatcher PATH_MATCHER = new FileNameMatcher() {
+
+        @Override
+        public boolean matches(String filename, File file) {
+            return file.getPath().endsWith(filename);
+        }
+    };
+
+    private static final FileNameMatcher NAME_MATCHER = new FileNameMatcher() {
+
+        @Override
+        public boolean matches(String filename, File file) {
+            return file.getName().equals(filename);
+        }
+    };
+
     /*-
      * ------------- Member stuff -------------
      */
@@ -144,7 +165,7 @@ public final class ConfigurationImpl implements ConfigurationService {
     private final File[] dirs;
 
     /** Maps file paths of the .properties file to their properties. */
-    private final Map<String, Properties> propertiesByFile;
+    private final Map<File, Properties> propertiesByFile;
 
     /** Maps property names to their values. */
     private final Map<String, String> properties;
@@ -153,12 +174,12 @@ public final class ConfigurationImpl implements ConfigurationService {
     private final Map<String, String> propertiesFiles;
 
     /** Maps objects to yaml filename, with a path */
-    private final Map<String, byte[]> yamlFiles;
+    private final Map<File, byte[]> yamlFiles;
 
     /** Maps filenames to whole file paths for yaml lookup */
-    private final Map<String, String> yamlPaths;
+    private final Map<String, File> yamlPaths;
 
-    private final Map<String, byte[]> xmlFiles;
+    private final Map<File, byte[]> xmlFiles;
 
     /** The <code>ConfigProviderServiceImpl</code> reference. */
     private volatile ConfigProviderServiceImpl configProviderServiceImpl;
@@ -181,14 +202,14 @@ public final class ConfigurationImpl implements ConfigurationService {
         super();
         this.reinitQueue = null == reinitQueue ? Collections.<ReinitializableConfigProviderService> emptyList() : reinitQueue;
         reloadableServices = new ConcurrentHashMap<String, Reloadable>(128, 0.9f, 1);
-        propertiesByFile = new HashMap<String, Properties>(256);
+        propertiesByFile = new HashMap<File, Properties>(256);
         texts = new ConcurrentHashMap<String, String>(1024, 0.9f, 1);
         properties = new HashMap<String, String>(2048);
         propertiesFiles = new HashMap<String, String>(2048);
-        yamlFiles = new HashMap<String, byte[]>(64);
-        yamlPaths = new HashMap<String, String>(64);
+        yamlFiles = new HashMap<File, byte[]>(64);
+        yamlPaths = new HashMap<String, File>(64);
         dirs = new File[directories.length];
-        xmlFiles = new HashMap<String, byte[]>(2048);
+        xmlFiles = new HashMap<File, byte[]>(2048);
         loadConfiguration(directories);
     }
 
@@ -196,9 +217,10 @@ public final class ConfigurationImpl implements ConfigurationService {
         if (null == directories || directories.length == 0) {
             throw new IllegalArgumentException("Missing configuration directory path.");
         }
+
         // First filter+processor pair
-        final FileFilter fileFilter = new PropertyFileFilter();
-        final FileProcessor processor = new FileProcessor() {
+        FileFilter fileFilter = new PropertyFileFilter();
+        FileProcessor processor = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
@@ -206,8 +228,9 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
 
         };
+
         // Second filter+processor pair
-        final FileFilter fileFilter2 = new FileFilter() {
+        FileFilter fileFilter2 = new FileFilter() {
 
             @Override
             public boolean accept(final File pathname) {
@@ -216,12 +239,14 @@ public final class ConfigurationImpl implements ConfigurationService {
 
         };
 
-        final FileProcessor processor2 = new FileProcessor() {
+        final Map<String, File> yamlPaths = this.yamlPaths;
+        final Map<File, byte[]> yamlFiles = this.yamlFiles;
+        FileProcessor processor2 = new FileProcessor() {
 
             @Override
             public void processFile(final File file) {
-                yamlPaths.put(file.getName(), file.getPath());
-                yamlFiles.put(file.getPath(), readFile(file).getBytes());
+                yamlPaths.put(file.getName(), file);
+                yamlFiles.put(file, readFile(file).getBytes());
             }
 
         };
@@ -234,12 +259,13 @@ public final class ConfigurationImpl implements ConfigurationService {
             }
         };
 
+        final Map<File, byte[]> xmlFiles = this.xmlFiles;
         FileProcessor processor3 = new FileProcessor() {
 
             @Override
             public void processFile(File file) {
                 byte[] hash = getHash(file);
-                xmlFiles.put(file.getPath(), hash);
+                xmlFiles.put(file, hash);
             }
         };
 
@@ -287,24 +313,16 @@ public final class ConfigurationImpl implements ConfigurationService {
             if (!propFile.exists() || !propFile.canRead()) {
                 return;
             }
-            final Properties tmp = loadProperties(propFile);
-            final String propFilePath = propFile.getPath();
-            propertiesByFile.put(propFilePath, tmp);
-            final int size = tmp.size();
-            final Iterator<Entry<Object, Object>> iter = tmp.entrySet().iterator();
-            for (int i = 0; i < size; i++) {
-                final Entry<Object, Object> e = iter.next();
-                final String propName = e.getKey().toString().trim();
-                final String otherValue = properties.get(propName);
+            Properties tmp = loadProperties(propFile);
+            propertiesByFile.put(propFile, tmp);
+
+            String propFilePath = propFile.getPath();
+            for (Map.Entry<Object, Object> e : tmp.entrySet()) {
+                String propName = e.getKey().toString().trim();
+                String otherValue = properties.get(propName);
                 if (otherValue != null && !otherValue.equals(e.getValue())) {
-                    final String otherFile = propertiesFiles.get(propName);
-                    LOG.debug(
-                        "Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''",
-                        propName,
-                        otherFile,
-                        propFilePath,
-                        otherValue,
-                        e.getValue());
+                    String otherFile = propertiesFiles.get(propName);
+                    LOG.debug("Overwriting property {} from file ''{}'' with property from file ''{}'', overwriting value ''{}'' with value ''{}''", propName, otherFile, propFilePath, otherValue, e.getValue());
                 }
                 properties.put(propName, e.getValue().toString().trim());
                 propertiesFiles.put(propName, propFilePath);
@@ -410,12 +428,15 @@ public final class ConfigurationImpl implements ConfigurationService {
             return new Properties();
         }
 
-        for (final Entry<String, Properties> entry : propertiesByFile.entrySet()) {
-            if (entry.getKey().endsWith(filename)) {
-                final Properties retval = new Properties();
+        boolean isPath = filename.indexOf(File.separatorChar) >= 0;
+        FileNameMatcher matcher = isPath ? PATH_MATCHER : NAME_MATCHER;
+
+        for (Map.Entry<File, Properties> entry : propertiesByFile.entrySet()) {
+            if (matcher.matches(filename, entry.getKey())) {
+                Properties retval = new Properties();
                 retval.putAll(entry.getValue());
                 if (listener != null) {
-                    for (final Object k : retval.keySet()) {
+                    for (Object k : retval.keySet()) {
                         getProperty((String) k, listener);
                     }
                 }
@@ -681,7 +702,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return null;
     }
 
-    private String readFile(final File file) {
+    String readFile(final File file) {
         Reader reader = null;
         try {
             reader = new InputStreamReader(new FileInputStream(file));
@@ -704,15 +725,38 @@ public final class ConfigurationImpl implements ConfigurationService {
 
     @Override
     public Object getYaml(final String filename) {
-        String path = yamlPaths.get(filename);
+        if (null == filename) {
+            return null;
+        }
+
+        boolean isPath = filename.indexOf(File.separatorChar) >= 0;
+        if (isPath) {
+            FileNameMatcher matcher = PATH_MATCHER;
+            for (Map.Entry<File, byte[]> entry : yamlFiles.entrySet()) {
+                if (matcher.matches(filename, entry.getKey())) {
+                    try {
+                        return Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8));
+                    } catch (YamlException e) {
+                        // Failed to load .yml file
+                        throw new IllegalStateException("Failed to load YAML file '" + entry.getKey() + "'. Reason:" + e.getMessage(), e);
+                    }
+                }
+            }
+
+            // No such YAML file
+            return null;
+        }
+
+        // Look-up by file name
+        File path = yamlPaths.get(filename);
         if (path == null) {
             path = yamlPaths.get(filename + ".yml");
-        }
-        if (path == null) {
-            path = yamlPaths.get(filename + ".yaml");
-        }
-        if (path == null) {
-            return null;
+            if (path == null) {
+                path = yamlPaths.get(filename + ".yaml");
+                if (path == null) {
+                    return null;
+                }
+            }
         }
 
         try {
@@ -726,13 +770,13 @@ public final class ConfigurationImpl implements ConfigurationService {
     @Override
     public Map<String, Object> getYamlInFolder(final String folderName) {
         final Map<String, Object> retval = new HashMap<String, Object>();
-        final Iterator<Entry<String, byte[]>> iter = yamlFiles.entrySet().iterator();
+        final Iterator<Entry<File, byte[]>> iter = yamlFiles.entrySet().iterator();
         String fldName = folderName;
         for (final File dir : dirs) {
             fldName = dir.getAbsolutePath() + File.separatorChar + fldName + File.separatorChar;
             while (iter.hasNext()) {
-                final Entry<String, byte[]> entry = iter.next();
-                String pathName = entry.getKey();
+                final Entry<File, byte[]> entry = iter.next();
+                String pathName = entry.getKey().getPath();
                 if (pathName.startsWith(fldName)) {
                     try {
                         retval.put(pathName, Yaml.load(Charsets.toString(entry.getValue(), Charsets.UTF_8)));
@@ -753,9 +797,9 @@ public final class ConfigurationImpl implements ConfigurationService {
         LOG.info("Reloading configuration...");
 
         // Copy current content to get associated files on check for expired PropertyWatchers
-        final Map<String, Properties> oldPropertiesByFile = new HashMap<String, Properties>(propertiesByFile);
-        final Map<String, byte[]> oldXml = new HashMap<String, byte[]>(xmlFiles);
-        final Map<String, byte[]> oldYaml = new HashMap<String, byte[]>(yamlFiles);
+        final Map<File, Properties> oldPropertiesByFile = new HashMap<File, Properties>(propertiesByFile);
+        final Map<File, byte[]> oldXml = new HashMap<File, byte[]>(xmlFiles);
+        final Map<File, byte[]> oldYaml = new HashMap<File, byte[]>(yamlFiles);
 
         // Clear maps
         properties.clear();
@@ -773,7 +817,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         reinitConfigCascade();
 
         // Check if properties have been changed, execute only forced ones if not
-        Set<String> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
+        Set<File> changes = getChanges(oldPropertiesByFile, oldXml, oldYaml);
         if (changes.isEmpty()) {
             LOG.info("No changes in *.properties, *.xml, *.yaml configuration files detected");
 
@@ -808,10 +852,9 @@ public final class ConfigurationImpl implements ConfigurationService {
                     boolean doReload = false;
                     for (Iterator<String> it = configFileNames.keySet().iterator(); !doReload && it.hasNext();) {
                         String fileName = it.next();
-                        for (String changedFilePath : changes) {
-                            if (changedFilePath.endsWith(fileName)) {
+                        for (File changedFilePath : changes) {
+                            if (changedFilePath.getName().equals(fileName)) {
                                 doReload = true;
-                                break;
                             }
                         }
                     }
@@ -904,45 +947,54 @@ public final class ConfigurationImpl implements ConfigurationService {
     }
 
     @NonNull
-    private Set<String> getChanges(Map<String, Properties> oldPropertiesByFile, Map<String, byte[]> oldXml, Map<String, byte[]> oldYaml) {
-        final Set<String> result = new HashSet<String>(oldPropertiesByFile.size());
-        for (final Map.Entry<String, Properties> newEntry : propertiesByFile.entrySet()) {
-            final String fileName = newEntry.getKey();
-            final Properties newProperties = newEntry.getValue();
-            final Properties oldProperties = oldPropertiesByFile.get(fileName);
+    private Set<File> getChanges(Map<File, Properties> oldPropertiesByFile, Map<File, byte[]> oldXml, Map<File, byte[]> oldYaml) {
+        Set<File> result = new HashSet<File>(oldPropertiesByFile.size());
+
+        // Check for changes in .properties files
+        for (Map.Entry<File, Properties> newEntry : propertiesByFile.entrySet()) {
+            File pathname = newEntry.getKey();
+            Properties newProperties = newEntry.getValue();
+            Properties oldProperties = oldPropertiesByFile.get(pathname);
             if (null == oldProperties || !newProperties.equals(oldProperties)) {
                 // New or changed .properties file
-                result.add(fileName);
+                result.add(pathname);
             }
         }
-        // Determine deleted ones
-        final Set<String> removedFiles = new HashSet<String>(oldPropertiesByFile.keySet());
-        removedFiles.removeAll(propertiesByFile.keySet());
-        result.addAll(removedFiles);
+        {
+            Set<File> removedFiles = new HashSet<File>(oldPropertiesByFile.keySet());
+            removedFiles.removeAll(propertiesByFile.keySet());
+            result.addAll(removedFiles);
+        }
 
-        // Do the same for xml files
-        for (String file : xmlFiles.keySet()) {
+        // Do the same for XML files
+        for (Entry<File, byte[]> fileEntry : xmlFiles.entrySet()) {
+            File file = fileEntry.getKey();
+            byte[] newHash = fileEntry.getValue();
             byte[] oldHash = oldXml.get(file);
-            byte[] newHash = xmlFiles.get(file);
             if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
                 result.add(file);
             }
         }
-        final Set<String> removedXml = new HashSet<String>(oldXml.keySet());
-        removedXml.removeAll(xmlFiles.keySet());
-        result.addAll(removedXml);
+        {
+            Set<File> removedXml = new HashSet<File>(oldXml.keySet());
+            removedXml.removeAll(xmlFiles.keySet());
+            result.addAll(removedXml);
+        }
 
-        // ... and one more time for yamls
-        for (String filename : yamlFiles.keySet()) {
+        // ... and one more time for YAMLs
+        for (Entry<File, byte[]> filenameEntry : yamlFiles.entrySet()) {
+            File filename = filenameEntry.getKey();
+            byte[] newHash = filenameEntry.getValue();
             byte[] oldHash = oldYaml.get(filename);
-            byte[] newHash = yamlFiles.get(filename);
             if (null == oldHash || !Arrays.equals(oldHash, newHash)) {
                 result.add(filename);
             }
         }
-        final Set<String> removedYaml = new HashSet<String>(oldYaml.keySet());
-        removedYaml.removeAll(yamlFiles.keySet());
-        result.addAll(removedYaml);
+        {
+            Set<File> removedYaml = new HashSet<File>(oldYaml.keySet());
+            removedYaml.removeAll(yamlFiles.keySet());
+            result.addAll(removedYaml);
+        }
 
         return result;
     }
@@ -956,7 +1008,7 @@ public final class ConfigurationImpl implements ConfigurationService {
         return reloadableServices.values();
     }
 
-    private byte[] getHash(File file) {
+    byte[] getHash(File file) {
         byte[] retval = null;
         MessageDigest md;
         try {

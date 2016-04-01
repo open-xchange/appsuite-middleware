@@ -76,6 +76,7 @@ public class AbstractMailAccountTest extends AbstractAJAXSession {
 
     protected static MailAccountDescription createMailAccountObject() throws OXException {
         final MailAccountDescription mailAccountDescription = new MailAccountDescription();
+        mailAccountDescription.setArchive("Archive");
         mailAccountDescription.setConfirmedHam("confirmedHam");
         mailAccountDescription.setConfirmedSpam("confirmedSpam");
         mailAccountDescription.setDrafts("drafts");

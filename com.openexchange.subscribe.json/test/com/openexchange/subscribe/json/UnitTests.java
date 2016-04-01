@@ -49,22 +49,29 @@
 
 package com.openexchange.subscribe.json;
 
-import junit.framework.Test;
-import junit.framework.TestSuite;
-
-
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
+import com.openexchange.subscribe.json.actions.AbstractSubscribeActionTest;
 
 /**
  * {@link UnitTests}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
+@RunWith(Suite.class)
+@SuiteClasses({
+    BasicSubscriptionSourceJSONWriterTest.class,
+    SubscriptionJSONParserTest.class,
+    SubscriptionJSONWriterTest.class,
+    AbstractSubscribeActionTest.class
+})
 public class UnitTests {
-    public static Test suite() {
-        TestSuite suite = new TestSuite();
-        suite.addTestSuite(BasicSubscriptionSourceJSONWriterTest.class);
-        suite.addTestSuite(SubscriptionJSONParserTest.class);
-        suite.addTestSuite(SubscriptionJSONWriterTest.class);
-        return suite;
+
+    /**
+     * Initializes a new {@link UnitTests}.
+     */
+    public UnitTests() {
+        super();
     }
 }

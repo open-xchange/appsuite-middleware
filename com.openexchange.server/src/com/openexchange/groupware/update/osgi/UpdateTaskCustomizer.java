@@ -53,7 +53,7 @@ import java.util.Collection;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.internal.DynamicList;
 
@@ -78,9 +78,9 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
         final UpdateTaskProviderService providerService = context.getService(reference);
         final DynamicList registry = DynamicList.getInstance();
         // Get provider's collection
-        final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
+        final Collection<UpdateTaskV2> collection = (Collection<UpdateTaskV2>) providerService.getUpdateTasks();
         boolean error = false;
-        for (final UpdateTask task : collection) {
+        for (final UpdateTaskV2 task : collection) {
             if (!registry.addUpdateTask(task)) {
                 LOG.error("Update task \"{}\" could not be registered.", task.getClass().getName(), new Exception());
                 error = true;
@@ -92,7 +92,7 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
             return providerService;
         }
         // Rollback
-        for (final UpdateTask task : collection) {
+        for (final UpdateTaskV2 task : collection) {
             registry.removeUpdateTask(task);
         }
         // Nothing to track, return null
@@ -111,8 +111,8 @@ public final class UpdateTaskCustomizer implements ServiceTrackerCustomizer<Upda
             try {
                 final DynamicList registry = DynamicList.getInstance();
                 final UpdateTaskProviderService providerService = service;
-                final Collection<UpdateTask> collection = (Collection<UpdateTask>) providerService.getUpdateTasks();
-                for (final UpdateTask task : collection) {
+                final Collection<UpdateTaskV2> collection = (Collection<UpdateTaskV2>) providerService.getUpdateTasks();
+                for (final UpdateTaskV2 task : collection) {
                     registry.removeUpdateTask(task);
                 }
             } finally {

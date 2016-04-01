@@ -61,6 +61,6 @@ import com.openexchange.groupware.update.CreateTableUpdateTask;
 public class CreateServiceSchemaVersionTableTask extends CreateTableUpdateTask {
 
     public CreateServiceSchemaVersionTableTask(DatabaseService databaseService) {
-        super(new CreateServiceSchemaVersionTable(), new String[0], NO_VERSION, databaseService);
+        super(new CreateServiceSchemaVersionTable(), new String[0], databaseService);
     }
 }

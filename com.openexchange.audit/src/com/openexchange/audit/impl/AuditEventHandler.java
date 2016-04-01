@@ -155,7 +155,7 @@ public class AuditEventHandler implements EventHandler {
                         }
                         throwable = new FastThrowable(errorStatus.getMessage());
                     }
-                    throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]);
+                    throw new OXException(OXExceptionConstants.CODE_DEFAULT, OXExceptionStrings.MESSAGE, throwable, new Object[0]).setLogMessage(throwable.getMessage());
                 }
             }
         }
@@ -381,6 +381,8 @@ public class AuditEventHandler implements EventHandler {
             logBuilder.append("EVENT TYPE: UPDATE; ");
         } else if (commonEvent.getAction() == CommonEvent.DELETE) {
             logBuilder.append("EVENT TYPE: DELETE; ");
+        } else {
+            logBuilder.append("EVENT TYPE: " + commonEvent.getAction() + "; ");
         }
 
         synchronized (logDateFormat) {

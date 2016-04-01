@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -85,12 +85,8 @@ public class Protocol {
 
     private String localHostName;
 
-    /*
-     * handlers is a Vector, initialized here,
-     * because we depend on it always existing and depend
-     * on the synchronization that Vector provides.
-     */
-    private final Vector handlers = new Vector(); // response handlers
+    private final List<ResponseHandler> handlers
+	    = new java.util.concurrent.CopyOnWriteArrayList<ResponseHandler>();
 
     private volatile long timestamp;
 
@@ -107,6 +103,8 @@ public class Protocol {
      * @param prefix 	Prefix to prepend to property keys
      * @param isSSL 	use SSL?
      * @param logger 	log messages here
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
      */
     public Protocol(String host, int port, 
 		    Properties props, String prefix,
@@ -158,13 +156,20 @@ public class Protocol {
 
     /**
      * Constructor for debugging.
+     *
+     * @param in	the InputStream to read from
+     * @param out	the PrintStream to write to
+     * @param props     Properties object used by this protocol
+     * @param debug	true to enable debugging output
+     * @exception	IOException	for I/O errors
      */
-    public Protocol(InputStream in, PrintStream out, boolean debug)
-				throws IOException {
+    public Protocol(InputStream in, PrintStream out, Properties props,
+				boolean debug) throws IOException {
 	this.host = "localhost";
 	this.port = 143;
+	this.props = props;
 	this.quote = false;
-	logger = new MailLogger(this.getClass(), "DEBUG", debug, out);
+	logger = new MailLogger(this.getClass(), "DEBUG", debug, System.out);
 	traceLogger = logger.getSubLogger("protocol", null);
 
 	// XXX - inlined initStreams, won't allow later startTLS
@@ -181,8 +186,9 @@ public class Protocol {
 
     /**
      * Returns the timestamp.
+     *
+     * @return	the timestamp
      */
- 
     public long getTimestamp() {
         return timestamp;
     }
@@ -196,40 +202,39 @@ public class Protocol {
     
     /**
      * Adds a response handler.
+     *
+     * @param	h	the response handler
      */
     public void addResponseHandler(ResponseHandler h) {
-	handlers.addElement(h);
+	handlers.add(h);
     }
 
     /**
      * Removed the specified response handler.
+     *
+     * @param	h	the response handler
      */
     public void removeResponseHandler(ResponseHandler h) {
-	handlers.removeElement(h);
+	handlers.remove(h);
     }
 
     /**
      * Notify response handlers
+     *
+     * @param	responses	the responses
      */
     public void notifyResponseHandlers(Response[] responses) {
-	if (handlers.size() == 0)
+	if (handlers.isEmpty()) {
 	    return;
-	
-	for (int i = 0; i < responses.length; i++) { // go thru responses
-	    Response r = responses[i];
+	}
 
-	    // skip responses that have already been handled
-	    if (r == null)
-		continue;
-
-	    // Need to copy handlers list because handlers can be removed
-	    // when handling a response.
-	    Object[] h = handlers.toArray();
-
-	    // dispatch 'em
-	    for (int j = 0; j < h.length; j++) {
-		if (h[j] != null)
-		    ((ResponseHandler)h[j]).handleResponse(r);
+	for (Response r : responses) {
+	    if (r != null) {
+		for (ResponseHandler rh : handlers) {
+		    if (rh != null) {
+			rh.handleResponse(r);
+		    }
+		}
 	    }
 	}
     }
@@ -242,6 +247,8 @@ public class Protocol {
 
     /**
      * Return the Protocol's InputStream.
+     *
+     * @return	the input stream
      */
     protected ResponseInputStream getInputStream() {
 	return input;
@@ -249,6 +256,8 @@ public class Protocol {
 
     /**
      * Return the Protocol's OutputStream
+     *
+     * @return	the output stream
      */
     protected OutputStream getOutputStream() {
 	return output;
@@ -257,6 +266,8 @@ public class Protocol {
     /**
      * Returns whether this Protocol supports non-synchronizing literals
      * Default is false. Subclasses should override this if required
+     *
+     * @return	true if the server supports non-synchronizing literals
      */
     protected synchronized boolean supportsNonSyncLiterals() {
 	return false;
@@ -268,10 +279,31 @@ public class Protocol {
     }
 
     /**
+     * Is another response available in our buffer?
+     *
+     * @return	true if another response is in the buffer
+     * @since	JavaMail 1.5.4
+     */
+    public boolean hasResponse() {
+	/*
+	 * XXX - Really should peek ahead in the buffer to see
+	 * if there's a *complete* response available, but if there
+	 * isn't who's going to read more data into the buffer 
+	 * until there is?
+	 */
+	try {
+	    return input.available() > 0;
+	} catch (IOException ex) {
+	}
+	return false;
+    }
+
+    /**
      * Return a buffer to be used to read a response.
      * The default implementation returns null, which causes
      * a new buffer to be allocated for every response.
      *
+     * @return	the buffer to use
      * @since	JavaMail 1.4.1
      */
     protected ByteArray getResponseBuffer() {
@@ -360,6 +392,9 @@ public class Protocol {
 
     /**
      * Convenience routine to handle OK, NO, BAD and BYE responses.
+     *
+     * @param	response	the response
+     * @exception	ProtocolException	for protocol failures
      */
     public void handleResult(Response response) throws ProtocolException {
 	if (response.isOK())
@@ -381,6 +416,10 @@ public class Protocol {
     /**
      * Convenience routine to handle simple IAP commands
      * that do not have responses specific to that command.
+     *
+     * @param	cmd	the command
+     * @param	args	the arguments
+     * @exception	ProtocolException	for protocol failures
      */
     public void simpleCommand(String cmd, Argument args)
 			throws ProtocolException {
@@ -400,6 +439,10 @@ public class Protocol {
      * If the command succeeds, we begin TLS negotiation.
      * If the socket is already an SSLSocket this is a nop and the command
      * is not issued.
+     *
+     * @param	cmd	the command to issue
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
      */
     public synchronized void startTLS(String cmd)
 				throws IOException, ProtocolException {
@@ -408,6 +451,75 @@ public class Protocol {
 	simpleCommand(cmd, null);
 	socket = SocketFetcher.startTLS(socket, host, props, prefix);
 	initStreams();
+    }
+
+    /**
+     * Start compression on the current connection.
+     * <code>cmd</code> is the command to issue to start compression.
+     * If the command succeeds, we begin compression.
+     *
+     * @param	cmd	the command to issue
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
+     */
+    public synchronized void startCompression(String cmd)
+				throws IOException, ProtocolException {
+	/*
+	 * The Deflator.SYNC_FLUSH support requires JDK 1.7 so use
+	 * reflection to allow compiling on 1.5 but running on 1.7.
+	 */
+	Class<java.util.zip.DeflaterOutputStream> dc = java.util.zip.DeflaterOutputStream.class;
+	java.lang.reflect.Constructor<java.util.zip.DeflaterOutputStream> cons = null;
+	try {
+	    cons = dc.getConstructor(
+			    OutputStream.class, java.util.zip.Deflater.class, boolean.class);
+	} catch (NoSuchMethodException ex) {
+	    logger.fine("Ignoring COMPRESS; " +
+			"missing JDK 1.7 DeflaterOutputStream constructor");
+	    return;	// ignore request, just as if server doesn't support it
+	}
+
+	// XXX - check whether compression is already enabled?
+	simpleCommand(cmd, null);
+
+	// need to create our own Inflater and Deflater in order to set nowrap
+	java.util.zip.Inflater inf = new java.util.zip.Inflater(true);
+	traceInput = new TraceInputStream(new java.util.zip.InflaterInputStream(
+			    socket.getInputStream(), inf), traceLogger);
+	traceInput.setQuote(quote);
+	input = new ResponseInputStream(traceInput);
+
+	// configure the Deflater
+	int level = PropUtil.getIntProperty(props, prefix + ".compress.level",
+	                    java.util.zip.Deflater.DEFAULT_COMPRESSION);
+	int strategy = PropUtil.getIntProperty(props,
+						prefix + ".compress.strategy",
+						java.util.zip.Deflater.DEFAULT_STRATEGY);
+	if (logger.isLoggable(Level.FINE))
+	    logger.log(Level.FINE,
+		"Creating Deflater with compression level {0} and strategy {1}",
+		new Object[] { level, strategy });
+	java.util.zip.Deflater def = new java.util.zip.Deflater(java.util.zip.Deflater.DEFAULT_COMPRESSION, true);
+	try {
+	    def.setLevel(level);
+	} catch (IllegalArgumentException ex) {
+	    logger.log(Level.FINE, "Ignoring bad compression level", ex);
+	}
+	try {
+	    def.setStrategy(strategy);
+	} catch (IllegalArgumentException ex) {
+	    logger.log(Level.FINE, "Ignoring bad compression strategy", ex);
+	}
+	//traceOutput = new TraceOutputStream(new DeflaterOutputStream(
+	//		    socket.getOutputStream(), def, true), traceLogger);
+	try {
+	    traceOutput = new TraceOutputStream(cons.newInstance(
+			    socket.getOutputStream(), def, true), traceLogger);
+	} catch (Exception ex) {
+	    throw new ProtocolException("can't create deflater", ex);
+	}
+	traceOutput.setQuote(quote);
+	output = new DataOutputStream(new BufferedOutputStream(traceOutput));
     }
 
     /**
@@ -433,6 +545,7 @@ public class Protocol {
     /**
      * Return the SocketChannel associated with this connection, if any.
      *
+     * @return	the SocketChannel
      * @since	JavaMail 1.5.2
      */
     public SocketChannel getChannel() {
@@ -459,6 +572,8 @@ public class Protocol {
      * The property &lt;prefix&gt;.localhost overrides
      * &lt;prefix&gt;.localaddress,
      * which overrides what InetAddress would tell us.
+     *
+     * @return	the name of the local host
      */
     protected synchronized String getLocalHost() {
 	// get our hostname and cache it for future use
@@ -496,6 +611,8 @@ public class Protocol {
 
     /**
      * Is protocol tracing enabled?
+     *
+     * @return	true if protocol tracing is enabled
      */
     protected boolean isTracing() {
 	return traceLogger.isLoggable(Level.FINEST);
@@ -526,8 +643,11 @@ public class Protocol {
      * Finalizer.
      */
     protected void finalize() throws Throwable {
-	super.finalize();
-	disconnect();
+	try {
+	    disconnect();
+	} finally {
+	    super.finalize();
+	}
     }
 
     /*

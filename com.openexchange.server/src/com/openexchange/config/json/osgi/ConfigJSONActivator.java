@@ -54,8 +54,8 @@ import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.config.json.ConfigActionFactory;
-import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.server.ExceptionOnAbsenceServiceLookup;
 
 

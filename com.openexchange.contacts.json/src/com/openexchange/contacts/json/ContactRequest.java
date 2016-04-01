@@ -200,7 +200,7 @@ public class ContactRequest {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
                 return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
+                Collections.sort(contacts, new UseCountComparator(user.getLocale()));
                 return true;
             }
         }
@@ -223,7 +223,7 @@ public class ContactRequest {
                 Collections.sort(contacts, new SpecialAlphanumSortContactComparator(user.getLocale()));
                 return true;
             } else if (Contact.USE_COUNT_GLOBAL_FIRST == sort) {
-                Collections.sort(contacts, new UseCountComparator(true, user.getLocale()));
+                Collections.sort(contacts, new UseCountComparator(user.getLocale()));
                 return true;
             } else if (0 == sort) {
                 Collections.sort(contacts, RequestTools.getAnnualDateComparator(dateField, reference));
@@ -292,7 +292,7 @@ public class ContactRequest {
     		fields = new ContactField[] {
     			ContactField.LAST_MODIFIED, ContactField.YOMI_LAST_NAME, ContactField.SUR_NAME, ContactField.MARK_AS_DISTRIBUTIONLIST,
 				ContactField.YOMI_FIRST_NAME, ContactField.GIVEN_NAME, ContactField.DISPLAY_NAME, ContactField.YOMI_COMPANY,
-				ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.USE_COUNT };
+                ContactField.COMPANY, ContactField.EMAIL1, ContactField.EMAIL2, ContactField.DEPARTMENT };
     	} else {
     		fields = new ContactField[] { ContactField.LAST_MODIFIED };
     	}

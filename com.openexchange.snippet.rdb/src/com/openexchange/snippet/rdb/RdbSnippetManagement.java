@@ -87,6 +87,11 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.ContentDisposition;
 import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MimeType2ExtMap;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
@@ -153,15 +158,17 @@ public final class RdbSnippetManagement implements SnippetManagement {
     private final int userId;
     private final Session session;
     private final boolean supportsAttachments;
+    private final QuotaProvider quotaProvider;
 
     /**
      * Initializes a new {@link RdbSnippetManagement}.
      */
-    public RdbSnippetManagement(Session session, ServiceLookup services) {
+    public RdbSnippetManagement(Session session, QuotaProvider quotaProvider, ServiceLookup services) {
         super();
         this.session = session;
         this.userId = session.getUserId();
         this.contextId = session.getContextId();
+        this.quotaProvider = quotaProvider;
 
         ConfigViewFactory factory = services.getOptionalService(ConfigViewFactory.class);
         boolean defaultSupportsAttachments = false;
@@ -189,6 +196,10 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     private static Context getContext(final int contextId) throws OXException {
         return getService(ContextService.class).getContext(contextId);
+    }
+
+    private AccountQuota getQuota() throws OXException {
+        return null == quotaProvider ? null : quotaProvider.getFor(session, "0");
     }
 
     @Override
@@ -250,6 +261,29 @@ public final class RdbSnippetManagement implements SnippetManagement {
                 throw e;
             }
             return list;
+        } catch (final SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public int getOwnSnippetsCount() throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder sql = new StringBuilder("SELECT COUNT(id) FROM snippet WHERE cid=? AND user=? AND refType=").append(ReferenceType.GENCONF.getType());
+            stmt = con.prepareStatement(sql.toString());
+            int pos = 0;
+            stmt.setInt(++pos, contextId);
+            stmt.setInt(++pos, userId);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
         } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
@@ -451,6 +485,14 @@ public final class RdbSnippetManagement implements SnippetManagement {
 
     @Override
     public String createSnippet(final Snippet snippet) throws OXException {
+        AccountQuota quota = getQuota();
+        if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
+            Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
+            if (amountQuota.isExceeded() || amountQuota.willExceed(getOwnSnippetsCount())) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+            }
+        }
+
         DatabaseService databaseService = getDatabaseService();
         int contextId = this.contextId;
         Connection con = databaseService.getWritable(contextId);

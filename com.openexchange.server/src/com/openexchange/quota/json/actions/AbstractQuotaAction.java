@@ -50,10 +50,8 @@
 package com.openexchange.quota.json.actions;
 
 import static com.openexchange.tools.TimeZoneUtils.getTimeZone;
-
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.AJAXServlet;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;

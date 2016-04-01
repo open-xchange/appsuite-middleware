@@ -67,7 +67,6 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import org.apache.commons.lang.StringEscapeUtils;
 import com.openexchange.ajax.AJAXUtility;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.contact.ContactService;
@@ -83,6 +82,7 @@ import com.openexchange.osgi.ExceptionUtils;
 import com.openexchange.publish.EscapeMode;
 import com.openexchange.publish.Publication;
 import com.openexchange.publish.PublicationDataLoaderService;
+import com.openexchange.publish.Publications;
 import com.openexchange.publish.microformats.osgi.Services;
 import com.openexchange.publish.microformats.osgi.StringTranslator;
 import com.openexchange.publish.microformats.tools.CustomizableHttpServletRequest;
@@ -182,7 +182,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
             final OXMFPublicationService publisher = publishers.get(module);
             if (publisher == null) {
                 final PrintWriter writer = resp.getWriter();
-                String escaped = StringEscapeUtils.escapeHtml(module);
+                String escaped = Publications.escape(module, EscapeMode.HTML);
                 writer.println("The publication has either been revoked in the meantime or module \"" + escaped + "\" is unknown.");
                 writer.flush();
                 return;
@@ -352,8 +352,7 @@ public class MicroformatServlet extends OnlinePublicationServlet {
                 if (!(retval instanceof String)) {
                     return retval;
                 }
-
-                return StringEscapeUtils.escapeHtml(retval.toString());
+                return Publications.escape(retval.toString(), EscapeMode.HTML);
             }
         });
     }

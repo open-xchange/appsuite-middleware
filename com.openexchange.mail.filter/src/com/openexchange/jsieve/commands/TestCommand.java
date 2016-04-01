@@ -136,21 +136,21 @@ public class TestCommand extends Command {
     // }
     // }
     public enum Commands {
-        ADDRESS("address", 2, Integer.MAX_VALUE, standard_address_part(), standard_comparators(), standard_address_match_types(), standardJSONAddressMatchTypes(), null),
-        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standard_address_part(), standard_comparators(), standard_match_types(), standardJSONMatchTypes(), "envelope"),
+        ADDRESS("address", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardAddressMatchTypes(), standardJSONAddressMatchTypes(), null),
+        ENVELOPE("envelope", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), "envelope"),
         EXITS("exists", 1, 1, null, null, null, null, null),
         FALSE("false", 0, 0, null, null, null, null, null),
         TRUE("true", 0, 0, null, null, null, null, null),
         NOT("not", 0, 0, null, null, null, null, null),
-        SIZE("size", 1, 1, null, null, match_type_size(), standardJSONSizeMatchTypes(), null),
-        HEADER("header", 2, Integer.MAX_VALUE, standard_address_part(), standard_comparators(), standard_match_types(), standardJSONMatchTypes(), null),
+        SIZE("size", 1, 1, null, null, matchTypeSize(), standardJSONSizeMatchTypes(), null),
+        HEADER("header", 2, Integer.MAX_VALUE, standardAddressPart(), standardComparators(), standardMatchTypes(), standardJSONMatchTypes(), null),
         ALLOF("allof", 0, 0, null, null, null, null, null),
         ANYOF("anyof", 0, 0, null, null, null, null, null),
-        BODY("body", 1, 1, standard_body_part(), null, standard_match_types(), standardJSONMatchTypes(), "body"),
+        BODY("body", 1, 1, standardBodyPart(), null, standardMatchTypes(), standardJSONMatchTypes(), "body"),
         //DATE("date", 3, null, null, date_match_types(), "date"),
-        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, date_match_types(), dateJSONMatchTypes(), "date");
+        CURRENTDATE("currentdate", 2, Integer.MAX_VALUE, null, null, dateMatchTypes(), dateJSONMatchTypes(), "date");
 
-        private static Hashtable<String, String> match_type_size() {
+        private static Hashtable<String, String> matchTypeSize() {
             final Hashtable<String, String> match_type_size = new Hashtable<String, String>(2);
             match_type_size.put(":over", "");
             match_type_size.put(":under", "");
@@ -164,7 +164,7 @@ public class TestCommand extends Command {
             return standard_match_types;
         }
 
-        private static Hashtable<String, String> standard_address_part() {
+        private static Hashtable<String, String> standardAddressPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
             standard_address_part.put(":localpart", "");
             standard_address_part.put(":domain", "");
@@ -173,7 +173,7 @@ public class TestCommand extends Command {
             return standard_address_part;
         }
 
-        private static Hashtable<String, String> standard_body_part() {
+        private static Hashtable<String, String> standardBodyPart() {
             final Hashtable<String, String> standard_address_part = new Hashtable<String, String>(3);
             //standard_address_part.put(":raw", "");
             standard_address_part.put(":content", "");
@@ -182,8 +182,8 @@ public class TestCommand extends Command {
             return standard_address_part;
         }
 
-        private static Hashtable<String, String> standard_address_match_types() {
-            final Hashtable<String, String> standard_match_types = standard_match_types();
+        private static Hashtable<String, String> standardAddressMatchTypes() {
+            final Hashtable<String, String> standard_match_types = standardMatchTypes();
             standard_match_types.put(":user", "subaddress");
             standard_match_types.put(":detail", "subaddress");
             return standard_match_types;
@@ -196,7 +196,7 @@ public class TestCommand extends Command {
             return standard_match_types;
         }
 
-        private static Hashtable<String, String> standard_match_types() {
+        private static Hashtable<String, String> standardMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(4);
             standard_match_types.put(":is", "");
             standard_match_types.put(":contains", "");
@@ -216,7 +216,7 @@ public class TestCommand extends Command {
             return standard_match_types;
         }
 
-        private static Hashtable<String, String> date_match_types() {
+        private static Hashtable<String, String> dateMatchTypes() {
             final Hashtable<String, String> standard_match_types = new Hashtable<String, String>(2);
             standard_match_types.put(":is", "");
             standard_match_types.put(":contains", "");
@@ -235,7 +235,7 @@ public class TestCommand extends Command {
             return standard_match_types;
         }
 
-        private static Hashtable<String, String> standard_comparators() {
+        private static Hashtable<String, String> standardComparators() {
             final Hashtable<String, String> standard_comparators = new Hashtable<String, String>(2);
             standard_comparators.put("i;ascii-casemap", "");
             standard_comparators.put("i;octet", "");
@@ -253,7 +253,7 @@ public class TestCommand extends Command {
         /**
          * The number of arguments which this command takes
          */
-        private int numberofarguments;
+        private int numberOfArguments;
 
         /**
          * Defines how many arguments this test can have at max
@@ -263,7 +263,7 @@ public class TestCommand extends Command {
         /**
          * The name of the command
          */
-        private String commandname;
+        private String commandName;
 
         /**
          * Defines if this command can take a comparator argument or not
@@ -273,7 +273,7 @@ public class TestCommand extends Command {
         /**
          * Defines if this command can take a match-type argument or not
          */
-        private Hashtable<String, String> matchtypes;
+        private Hashtable<String, String> matchTypes;
 
         /**
          * Needed for the resolution of the configuration parameters for JSON
@@ -287,27 +287,27 @@ public class TestCommand extends Command {
 
 
 
-        Commands(final String commandname, final int numberofarguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchtypes, List<String[]> jsonMatchTypes, final String required) {
-            this.commandname = commandname;
-            this.numberofarguments = numberofarguments;
+        Commands(final String commandName, final int numberOfArguments, int maxNumberOfArguments, final Hashtable<String, String> address, final Hashtable<String, String> comparator, final Hashtable<String, String> matchTypes, List<String[]> jsonMatchTypes, final String required) {
+            this.commandName = commandName;
+            this.numberOfArguments = numberOfArguments;
             this.maxNumberOfArguments = maxNumberOfArguments;
             this.address = address;
             this.comparator = comparator;
-            this.matchtypes = matchtypes;
+            this.matchTypes = matchTypes;
             this.jsonMatchTypes = jsonMatchTypes;
             this.required = required;
         }
 
-        public final int getNumberofarguments() {
-            return numberofarguments;
+        public final int getNumberOfArguments() {
+            return numberOfArguments;
         }
 
         public final int getMaxNumberOfArguments() {
             return maxNumberOfArguments;
         }
 
-        public final String getCommandname() {
-            return commandname;
+        public final String getCommandName() {
+            return commandName;
         }
 
         public final Hashtable<String, String> getAddress() {
@@ -326,12 +326,12 @@ public class TestCommand extends Command {
             this.address = address;
         }
 
-        public final void setNumberofarguments(final int arguments) {
-            this.numberofarguments = arguments;
+        public final void setNumberOfArguments(final int arguments) {
+            this.numberOfArguments = arguments;
         }
 
-        public final void setCommandname(final String commandname) {
-            this.commandname = commandname;
+        public final void setCommandName(final String commandname) {
+            this.commandName = commandname;
         }
 
         public final void setComparator(final Hashtable<String, String> comparator) {
@@ -342,12 +342,12 @@ public class TestCommand extends Command {
             this.required = required;
         }
 
-        public final Hashtable<String, String> getMatchtypes() {
-            return matchtypes;
+        public final Hashtable<String, String> getMatchTypes() {
+            return matchTypes;
         }
 
-        public final void setMatchtypes(final Hashtable<String, String> matchtypes) {
-            this.matchtypes = matchtypes;
+        public final void setMatchTypes(final Hashtable<String, String> matchtypes) {
+            this.matchTypes = matchtypes;
         }
 
         public List<String[]> getJsonMatchTypes() {
@@ -357,11 +357,11 @@ public class TestCommand extends Command {
 
     private Commands command;
 
-    private final List<String> tagarguments;
+    private final List<String> tagArguments;
 
     private final List<Object> arguments;
 
-    private final List<TestCommand> testcommands;
+    private final List<TestCommand> testCommands;
 
     private final int indexOfComparator = -1;
 
@@ -371,37 +371,37 @@ public class TestCommand extends Command {
      */
     public TestCommand() {
         super();
-        this.testcommands = new ArrayList<TestCommand>();
+        this.testCommands = new ArrayList<TestCommand>();
         this.arguments = new ArrayList<Object>();
-        this.tagarguments = new ArrayList<String>();
+        this.tagArguments = new ArrayList<String>();
     }
 
     public TestCommand(final Commands command, final List<Object> arguments, final List<TestCommand> testcommands) throws SieveException {
         this.command = command;
-        this.tagarguments = new ArrayList<String>();
+        this.tagArguments = new ArrayList<String>();
         this.arguments = arguments;
         for (final Object arg : this.arguments) {
             if (arg instanceof TagArgument) {
                 final TagArgument tagarg = (TagArgument) arg;
-                this.tagarguments.add(tagarg.getTag());
+                this.tagArguments.add(tagarg.getTag());
             }
         }
-        this.testcommands = testcommands;
+        this.testCommands = testcommands;
         checkCommand();
     }
 
     private void checkCommand() throws SieveException {
-        if (null != this.tagarguments) {
-            final ArrayList<String> tagarray = new ArrayList<String>(this.tagarguments);
-            final Hashtable<String, String> matchtypes = this.command.getMatchtypes();
-            if (null != matchtypes) {
-                tagarray.removeAll(matchtypes.keySet());
+        if (null != this.tagArguments) {
+            final ArrayList<String> tagArray = new ArrayList<String>(this.tagArguments);
+            final Hashtable<String, String> matchTypes = this.command.getMatchTypes();
+            if (null != matchTypes) {
+                tagArray.removeAll(matchTypes.keySet());
             }
             final Hashtable<String, String> address = this.command.getAddress();
             if (null != address) {
-                tagarray.removeAll(address.keySet());
+                tagArray.removeAll(address.keySet());
             }
-            if (tagarray.contains(":comparator")) {
+            if (tagArray.contains(":comparator")) {
                 throw new SieveException("Sieve comparators aren't supported by this implementation");
             }
 //            final Hashtable<String, String> comparator = this.command.getComparator();
@@ -423,16 +423,16 @@ public class TestCommand extends Command {
 //                    }
 //                }
 //            }
-            if (!tagarray.isEmpty()) {
-                throw new SieveException("One of the tagarguments: " + tagarray + " is not valid for " + this.command.getCommandname());
+            if (!tagArray.isEmpty()) {
+                throw new SieveException("One of the tagArguments: " + tagArray + " is not valid for " + this.command.getCommandName());
             }
         }
-        if (null != this.arguments && this.command.getNumberofarguments() >= 0) {
-            final int realArguments = this.arguments.size() - this.tagarguments.size();
-            final int minArguments = this.command.getNumberofarguments() + ((-1 != indexOfComparator) ? 1 : 0);
+        if (null != this.arguments && this.command.getNumberOfArguments() >= 0) {
+            final int realArguments = this.arguments.size() - this.tagArguments.size();
+            final int minArguments = this.command.getNumberOfArguments() + ((-1 != indexOfComparator) ? 1 : 0);
             final int maxArguments = this.command.getMaxNumberOfArguments();
             if (realArguments < minArguments || realArguments > maxArguments) {
-                throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandname() + " is not valid.");
+                throw new SieveException("The number of arguments (" + realArguments + ") for " + this.command.getCommandName() + " is not valid.");
             }
         }
         // Add test for testcommands here only anyof and allof are allowed to
@@ -447,7 +447,7 @@ public class TestCommand extends Command {
      * @return
      * @throws SieveException
      */
-    private int searchcomparator() throws SieveException {
+    private int searchComparator() throws SieveException {
         for (int i = 0; i < this.arguments.size(); i++) {
             final Object obj = this.arguments.get(i);
             if (obj instanceof TagArgument) {
@@ -471,8 +471,8 @@ public class TestCommand extends Command {
         this.command = command;
     }
 
-    public final List<String> getTagarguments() {
-        return tagarguments;
+    public final List<String> getTagArguments() {
+        return tagArguments;
     }
 
     /**
@@ -480,8 +480,8 @@ public class TestCommand extends Command {
      * @return
      * @see java.util.List#add(java.lang.Object)
      */
-    public boolean addTagarguments(final String o) {
-        return tagarguments.add(o);
+    public boolean addTagArguments(final String o) {
+        return tagArguments.add(o);
     }
 
     public final List<Object> getArguments() {
@@ -493,9 +493,9 @@ public class TestCommand extends Command {
      *
      * @return
      */
-    public final String getMatchtype() {
-        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchtypes().keySet());
-        arrayList.retainAll(this.tagarguments);
+    public final String getMatchType() {
+        final ArrayList<String> arrayList = new ArrayList<String>(this.command.getMatchTypes().keySet());
+        arrayList.retainAll(this.tagArguments);
         if (1 == arrayList.size()) {
             return arrayList.get(0);
         } else {
@@ -503,13 +503,13 @@ public class TestCommand extends Command {
         }
     }
 
-    public final List<TestCommand> getTestcommands() {
-        return testcommands;
+    public final List<TestCommand> getTestCommands() {
+        return testCommands;
     }
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() + ": " + this.command.getCommandname() + " : " + this.tagarguments + " : " + this.arguments + " : " + this.testcommands;
+        return this.getClass().getSimpleName() + ": " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments + " : " + this.testCommands;
     }
 
     @Override
@@ -527,11 +527,11 @@ public class TestCommand extends Command {
                 retval.add(string);
             }
         }
-        for (final TestCommand command : this.getTestcommands()) {
+        for (final TestCommand command : this.getTestCommands()) {
             retval.addAll(command.getRequired());
         }
-        for (final String text : this.tagarguments) {
-            final String string = this.command.matchtypes.get(text);
+        for (final String text : this.tagArguments) {
+            final String string = this.command.matchTypes.get(text);
             if (null != string && (0 != string.length())) {
                 retval.add(string);
             }

@@ -81,7 +81,7 @@ public final class HeaderCacheDropFKTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { MailAccountCreateTablesTask.class.getName(), POP3CreateTableTask.class.getName() };
+        return new String[] {};
     }
 
     @Override

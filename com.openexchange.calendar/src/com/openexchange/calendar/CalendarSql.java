@@ -97,6 +97,8 @@ import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
@@ -154,6 +156,12 @@ public class CalendarSql implements AppointmentSQLInterface {
         CalendarSql.SERVICES_REF.set(contactCollectorService);
     }
 
+    private static final AtomicReference<ObjectUseCountService> OBJECT_USE_COUNT_SERVICE = new AtomicReference<ObjectUseCountService>();
+
+    public static void setObjectUseCountService(ObjectUseCountService objectUseCountService) {
+        CalendarSql.OBJECT_USE_COUNT_SERVICE.set(objectUseCountService);
+    }
+
     static {
         int i = 0;
         for (final int col : Appointment.ALL_COLUMNS) {
@@ -168,7 +176,7 @@ public class CalendarSql implements AppointmentSQLInterface {
     // ---------------------------------------------------------------------------------------------------------------------------------------------------------------- //
 
     private final Session session;
-    private CalendarCollection calendarCollection;
+    private final CalendarCollection calendarCollection;
     private boolean includePrivateAppointments;
 
     /**
@@ -403,6 +411,43 @@ public class CalendarSql implements AppointmentSQLInterface {
     }
 
     @Override
+    public long getSequenceNumber(int folderId) throws OXException {
+        if (null == session) {
+            throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
+        }
+        Connection readcon = null;
+        PreparedStatement prep = null;
+        ResultSet rs = null;
+        Context ctx = Tools.getContext(session);
+        UserConfiguration userConfig = Tools.getUserConfiguration(ctx, session.getUserId());
+        try {
+            readcon = DBPool.pickup(ctx);
+            OXFolderAccess ofa = new OXFolderAccess(readcon, ctx);
+            mayRead(ofa.getFolderPermission(folderId, session.getUserId(), userConfig));
+            CalendarSqlImp cimp = CalendarSql.cimp;
+
+            if (FolderObject.PUBLIC == ofa.getFolderType(folderId, session.getUserId())) {
+                prep = cimp.getPublicFolderSequenceNumber(ctx.getContextId(), folderId, readcon);
+            } else if (FolderObject.PRIVATE == ofa.getFolderType(folderId, session.getUserId())) {
+                prep = cimp.getPrivateFolderSequenceNumber(ctx.getContextId(), session.getUserId(), folderId, readcon);
+            } else {
+                int shared_folder_owner = ofa.getFolderOwner(folderId);
+                prep = cimp.getPrivateFolderSequenceNumber(ctx.getContextId(), shared_folder_owner, folderId, readcon);
+            }
+            rs = cimp.getResultSet(prep);
+            return rs.next() ? rs.getLong(1) : 0L;
+        } catch (SQLException sqle) {
+            throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(sqle);
+        } finally {
+            calendarCollection.closeResultSet(rs);
+            calendarCollection.closePreparedStatement(prep);
+            if (readcon != null) {
+                DBPool.push(ctx, readcon);
+            }
+        }
+    }
+
+    @Override
     public CalendarDataObject getObjectById(final int oid) throws OXException, SQLException {
         return getObjectById(oid, 0, null, false);
     }
@@ -486,6 +531,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                             try {
                                 final CalendarDataObject[] appointments = cimp.insertAppointment(cdao, writecon, session);
                                 collectAddresses(cdao);
+                                countObjectUse(cdao, writecon);
                                 modificationPerformed = true;
                                 return appointments;
                             } catch(final DataTruncation dt) {
@@ -568,6 +614,36 @@ public class CalendarSql implements AppointmentSQLInterface {
         }
     }
 
+    private void countObjectUse(CalendarDataObject cdao, Connection con) throws OXException {
+        if (null == cdao) {
+            return;
+        }
+        ObjectUseCountService service = OBJECT_USE_COUNT_SERVICE.get();
+        if (null == service) {
+            return;
+        }
+        if (cdao.containsParticipants()) {
+            for (Participant p : cdao.getParticipants()) {
+                switch (p.getType()) {
+                    case Participant.USER:
+                        if (p.getIdentifier() != session.getUserId()) {
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getIdentifier(), FolderObject.SYSTEM_LDAP_FOLDER_ID).setCon(con).build();
+                            service.incrementObjectUseCount(session, arguments);
+                        }
+                        break;
+                    case Participant.EXTERNAL_USER:
+                        {
+                            IncrementArguments arguments = new IncrementArguments.Builder(p.getEmailAddress()).setCon(con).build();
+                            service.incrementObjectUseCount(session, arguments);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
+
     /**
      * Tries to add addresses of external participants to the ContactCollector.
      *
@@ -635,7 +711,8 @@ public class CalendarSql implements AppointmentSQLInterface {
                 return null;
             }
 
-            if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, user.getTimeZone())) {
+            String timezone = edao.getTimezone() == null ? user.getTimeZone() : edao.getTimezone();
+            if (co.prepareUpdateAction(cdao, edao, session.getUserId(), inFolder, timezone)) {
                 // Insert-through-update detected
                 throw OXCalendarExceptionCodes.UPDATE_WITHOUT_OBJECT_ID.create();
             }
@@ -685,6 +762,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     if (difference != null) {
                         List<Object> added = difference.getAdded();
                         this.collectAddresses(added);
+                        countObjectUse(cdao, writecon);
                     }
 
                     return cimp.updateAppointment(cdao, edao, writecon, session, ctx, inFolder, clientLastModified);
@@ -1269,6 +1347,11 @@ public class CalendarSql implements AppointmentSQLInterface {
 
     @Override
     public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, int[] cols) throws OXException {
+        return searchAppointments(searchObj, orderBy, orderDir, -1, cols);
+    }
+
+    @Override
+    public SearchIterator<Appointment> searchAppointments(final AppointmentSearchObject searchObj, final int orderBy, final Order orderDir, int limit, int[] cols) throws OXException {
         if (session == null) {
             throw OXCalendarExceptionCodes.ERROR_SESSIONOBJECT_IS_NULL.create();
         }
@@ -1346,9 +1429,9 @@ public class CalendarSql implements AppointmentSQLInterface {
                 CalendarFolderObject emptyCFO = new CalendarFolderObject(user.getId(), ctx.getContextId(), true);
                 searchFolder = searchObj.getFolderIDs();
                 searchObj.setFolderIDs(Collections.<Integer>emptySet());
-                stmt = cimp.getSearchStatement(user.getId(), searchObj, emptyCFO, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+                stmt = cimp.getSearchStatement(user.getId(), searchObj, emptyCFO, folderAccess, columnBuilder.toString(), orderBy, orderDir, limit, ctx, readcon);
             } else {
-                stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, ctx, readcon);
+                stmt = cimp.getSearchStatement(user.getId(), searchObj, cfo, folderAccess, columnBuilder.toString(), orderBy, orderDir, limit, ctx, readcon);
             }
             rs = cimp.getResultSet(stmt);
             co.setResultSet(rs, stmt, cols, cimp, readcon, 0, 0, session, ctx);
@@ -1379,7 +1462,7 @@ public class CalendarSql implements AppointmentSQLInterface {
         if (searchObj == null || cfo == null) {
             return false;
         }
-        if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().size() < 0) {
+        if (searchObj.getFolderIDs() == null || searchObj.getFolderIDs().isEmpty()) {
             return false;
         }
 

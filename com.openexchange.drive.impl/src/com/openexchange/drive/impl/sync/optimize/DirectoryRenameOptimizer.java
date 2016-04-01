@@ -55,15 +55,21 @@ import java.util.Comparator;
 import java.util.List;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryVersion;
+import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.actions.AbstractAction;
 import com.openexchange.drive.impl.actions.AcknowledgeDirectoryAction;
 import com.openexchange.drive.impl.actions.EditDirectoryAction;
 import com.openexchange.drive.impl.actions.SyncDirectoryAction;
+import com.openexchange.drive.impl.checksum.ChecksumProvider;
+import com.openexchange.drive.impl.checksum.DirectoryChecksum;
 import com.openexchange.drive.impl.comparison.Change;
+import com.openexchange.drive.impl.comparison.ServerDirectoryVersion;
 import com.openexchange.drive.impl.comparison.ThreeWayComparison;
 import com.openexchange.drive.impl.comparison.VersionMapper;
 import com.openexchange.drive.impl.internal.SyncSession;
 import com.openexchange.drive.impl.sync.IntermediateSyncResult;
+import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FolderID;
 
 
 /**
@@ -87,7 +93,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         int optimizationCount = 0;
         boolean hasChanged;
         do {
-            optimizedResult = optimizeServerRenames(optimizeClientRenames(unoptimizedResult));
+            optimizedResult = optimizeServerRenames(optimizeClientRenames(session, unoptimizedResult));
             hasChanged = false == optimizedResult.equals(unoptimizedResult);
             unoptimizedResult = optimizedResult;
         } while (hasChanged && ++optimizationCount < 100);
@@ -119,10 +125,11 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
      * Client: SYNC [version=/otto | d41d8cd98f00b204e9800998ecf8427e, newVersion=null, parameters={}]
      * </code><p/>
      *
+     * @param session The session
      * @param result The current intermediate sync result
      * @return The optimized intermediate sync result
      */
-    private IntermediateSyncResult<DirectoryVersion> optimizeClientRenames(IntermediateSyncResult<DirectoryVersion> result) {
+    private IntermediateSyncResult<DirectoryVersion> optimizeClientRenames(SyncSession session, IntermediateSyncResult<DirectoryVersion> result) {
         List<AbstractAction<DirectoryVersion>> optimizedActionsForClient = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForClient());
         List<AbstractAction<DirectoryVersion>> optimizedActionsForServer = new ArrayList<AbstractAction<DirectoryVersion>>(result.getActionsForServer());
         /*
@@ -150,6 +157,23 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
                             optimizedActionsForClient, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
                         AbstractAction<DirectoryVersion> serverSync = findBestMatchingAction(
                             optimizedActionsForServer, Action.SYNC, clientAction.getVersion(), Change.NEW, Change.NONE);
+
+                        if (null == clientSync && null == serverSync && session.getDriveSession().useDriveMeta()) {
+                            /*
+                             * also match against a directory without .drive-meta file, in case the virtual file has not been copied over client-side
+                             */
+                            try {
+                                ServerDirectoryVersion version = ServerDirectoryVersion.valueOf(serverAction.getVersion(), session);
+                                FolderID folderID = version.getDirectoryChecksum().getFolderID();
+                                int view = DriveUtils.calculateView(session.getDriveSession().getDirectoryExclusions(), session.getDriveSession().getFileExclusions(), false);
+                                DirectoryChecksum checksum = ChecksumProvider.getChecksum(session, folderID.toUniqueID(),  view, false);
+                                ServerDirectoryVersion plainVersion = new ServerDirectoryVersion(version.getPath(), checksum);
+                                clientSync = findBestMatchingAction(optimizedActionsForClient, Action.SYNC, plainVersion, Change.NEW, Change.NONE);
+                                serverSync = findBestMatchingAction(optimizedActionsForServer, Action.SYNC, plainVersion, Change.NEW, Change.NONE);
+                            } catch (OXException e) {
+                                LOG.warn("", e);
+                            }
+                        }
                         if (null != clientSync && null != serverSync) {
                             /*
                              * edit server directory instead, insert adjusted ACK and SYNC actions for client (acks for edits are done automatically with next sync)

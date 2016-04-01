@@ -56,19 +56,38 @@ package com.openexchange.tools.update;
  */
 public class Column {
 
+    /** The column name; e.g. <code>"intfield01"</code> */
     public final String name;
+
+    /** The column definition; e.g. <code>"INT4 unsigned NOT NULL"</code> */
     public final String definition;
 
+    /**
+     * Initializes a new {@link Column}.
+     *
+     * @param name The name; e.g. <code>"intfield01"</code>
+     * @param definition The definition; e.g. <code>"INT4 unsigned NOT NULL"</code>
+     */
     public Column(String name, String definition) {
         super();
         this.name = name;
         this.definition = definition;
     }
 
+    /**
+     * Gets the column name; e.g. <code>"intfield01"</code>.
+     *
+     * @return The column name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Gets the column definition; e.g. <code>"INT4 unsigned NOT NULL"</code>.
+     *
+     * @return The column definition
+     */
     public String getDefinition() {
         return definition;
     }

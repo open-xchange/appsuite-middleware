@@ -159,6 +159,25 @@ public final class IMAPCommandsCollection {
 
     static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPCommandsCollection.class);
 
+    private static final Field FIELD_IMAPFOLDER_EXISTS;
+    private static final Field FIELD_IMAPFOLDER_ATTRIBUTES;
+
+    static {
+        Field existsField = null;
+        Field attributesField = null;
+        try {
+            existsField = IMAPFolder.class.getDeclaredField("exists");
+            existsField.setAccessible(true);
+
+            attributesField = IMAPFolder.class.getDeclaredField("attributes");
+            attributesField.setAccessible(true);
+        } catch (Exception e) {
+            LOG.error("", e);
+        }
+        FIELD_IMAPFOLDER_EXISTS = existsField;
+        FIELD_IMAPFOLDER_ATTRIBUTES = attributesField;
+    }
+
     /**
      * Prevent instantiation.
      */
@@ -1408,24 +1427,21 @@ public final class IMAPCommandsCollection {
             }
         });
         if (null == ret) {
-            final ProtocolException pex =
-                new ProtocolException(new StringBuilder(64).append("IMAP folder \"").append(folder.getFullName()).append(
-                    "\" cannot be renamed.").toString());
+            ProtocolException pex = new ProtocolException("IMAP folder \"" + folder.getFullName() + "\" cannot be renamed.");
             throw new MessagingException(pex.getMessage(), pex);
         }
-        // Reset exists and attributes
+
+        // Reset fields 'exists' and 'attributes'
         try {
-            Field field = IMAPFolder.class.getDeclaredField("exists");
-            field.setAccessible(true);
+            Field field = FIELD_IMAPFOLDER_EXISTS;
             field.setBoolean(folder, false);
-            field = IMAPFolder.class.getDeclaredField("attributes");
-            field.setAccessible(true);
+
+            field = FIELD_IMAPFOLDER_ATTRIBUTES;
             field.set(folder, null);
-        } catch (final NoSuchFieldException e) {
-            LOG.error("", e);
-        } catch (final IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
             LOG.error("", e);
         }
+
         new ExtendedIMAPFolder(folder, folder.getSeparator()).triggerNotifyFolderListeners(FolderEvent.RENAMED);
     }
 
@@ -2122,7 +2138,7 @@ public final class IMAPCommandsCollection {
                             IMAPStore imapStore = (IMAPStore) folder.getStore();
                             if (imapStore.hasCapability("SORT")) {
                                 final MailSortField sortBy = sortField == null ? MailSortField.RECEIVED_DATE : sortField;
-                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, IMAPMessageStorage.allowSORTDISPLAY(session, serverInfo.getAccountId()) && imapStore.hasCapability("SORT=DISPLAY"));
+                                final String sortCriteria = IMAPSort.getSortCritForIMAPCommand(sortBy, orderDir == OrderDirection.DESC, imapStore.hasCapability("SORT=DISPLAY") && IMAPMessageStorage.allowSORTDISPLAY(session, serverInfo.getAccountId()));
                                 if (tmp.length > 256) {
                                     /*
                                      * Sort all
@@ -2237,8 +2253,6 @@ public final class IMAPCommandsCollection {
         return val;
     }
 
-    private static final String COMMAND_EXPUNGE = "EXPUNGE";
-
     /**
      * Performs the <code>EXPUNGE</code> command on whole folder referenced by <code>imapFolder</code>.
      * <p>
@@ -2260,23 +2274,17 @@ public final class IMAPCommandsCollection {
 
             @Override
             public Object doCommand(final IMAPProtocol p) throws ProtocolException {
-                String command = COMMAND_EXPUNGE;
+                String command = "EXPUNGE";
                 final Response[] r = performCommand(p, command);
                 final Response response = r[r.length - 1];
                 if (response.isOK()) {
                     return Boolean.TRUE;
                 } else if (response.isBAD()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new BadCommandException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new BadCommandException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else if (response.isNO()) {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
-                    throw new CommandFailedException(IMAPException.getFormattedMessage(
-                        IMAPException.Code.PROTOCOL_ERROR,
-                        command,
-                        ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
+                    throw new CommandFailedException(IMAPException.getFormattedMessage(IMAPException.Code.PROTOCOL_ERROR, command, ImapUtility.appendCommandInfo(response.toString(), imapFolder)));
                 } else {
                     LogProperties.putProperty(LogProperties.Name.MAIL_COMMAND, prepareImapCommandForLogging(command));
                     p.handleResult(response);
@@ -3199,8 +3207,7 @@ public final class IMAPCommandsCollection {
                     }
                     byteArray = b.getByteArray();
                 } else {
-                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
-                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    final RFC822DATA rd = p.fetchRFC822(uid, null);
                     if (null == rd) {
                         return null;
                     }
@@ -3357,8 +3364,7 @@ public final class IMAPCommandsCollection {
                     }
                     byteArray = b.getByteArray();
                 } else {
-                    final UID sequenceNumber = p.fetchSequenceNumber(uid);
-                    final RFC822DATA rd = p.fetchRFC822(sequenceNumber.seqnum, null);
+                    final RFC822DATA rd = p.fetchRFC822(uid, null);
                     if (null == rd) {
                         return null;
                     }
@@ -3453,7 +3459,7 @@ public final class IMAPCommandsCollection {
      */
     private static String getSequenceId(final String prefix, final int partCount) {
         if (prefix == null) {
-            return String.valueOf(partCount);
+            return Integer.toString(partCount);
         }
         return new StringBuilder(prefix).append('.').append(partCount).toString();
     }

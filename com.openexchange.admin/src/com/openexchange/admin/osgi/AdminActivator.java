@@ -93,6 +93,7 @@ import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.filestore.FileStorageUnregisterListenerRegistry;
 import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.filestore.FileLocationHandler;
 import com.openexchange.mailaccount.MailAccountStorageService;
@@ -158,6 +159,7 @@ public class AdminActivator extends HousekeepingActivator {
         track(UserServiceInterceptor.class, interceptorRegistry);
         track(UserService.class, new RegistryServiceTrackerCustomizer<UserService>(context, AdminServiceRegistry.getInstance(), UserService.class));
         track(UserAliasStorage.class, new RegistryServiceTrackerCustomizer<UserAliasStorage>(context, AdminServiceRegistry.getInstance(), UserAliasStorage.class));
+        track(FileStorageUnregisterListenerRegistry.class, new RegistryServiceTrackerCustomizer<FileStorageUnregisterListenerRegistry>(context, AdminServiceRegistry.getInstance(), FileStorageUnregisterListenerRegistry.class));
 
         // Plugin interfaces
         {

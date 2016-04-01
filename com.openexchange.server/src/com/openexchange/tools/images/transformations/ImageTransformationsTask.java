@@ -58,9 +58,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.ImageTransformationSignaler;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.ThreadPools.ExpectedExceptionFactory;
-import com.openexchange.tools.images.ImageTransformationSignaler;
 import com.openexchange.tools.images.scheduler.Scheduler;
 
 /**
@@ -123,21 +124,37 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
 
     @Override
     protected BufferedImage getImage(String formatName, ImageTransformationSignaler signaler) throws IOException {
-        int waitTimeoutSeconds = waitTimeoutSeconds();
-        if (waitTimeoutSeconds <= 0) {
-            // No wait timeout configured
-            FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new GetImageCallable(formatName, null, signaler));
-
-            // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
-            boolean success = Scheduler.getInstance().execute(optSource, ft);
-            if (!success) {
-                throw new IOException("Image transformation rejected");
+        try {
+            int waitTimeoutSeconds = waitTimeoutSeconds();
+            if (waitTimeoutSeconds <= 0) {
+                return getImageWithoutTimeout(formatName, signaler);
             }
 
-            // Get result from scheduled task; waiting for as long as it needs
-            return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+            return getImageWithTimeout(formatName, signaler, waitTimeoutSeconds);
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw new IOException(null == cause ? e : cause);
+        }
+    }
+
+    private BufferedImage getImageWithoutTimeout(String formatName, ImageTransformationSignaler signaler) throws OXException, IOException {
+        // No wait timeout configured
+        FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new GetImageCallable(formatName, null, signaler));
+
+        // Pass appropriate key object to accumulate tasks for the same caller/session/whatever
+        boolean success = Scheduler.getInstance().execute(optSource, ft);
+        if (!success) {
+            throw new IOException("Image transformation rejected");
         }
 
+        // Get result from scheduled task; waiting as long as it needs
+        return ThreadPools.getFrom(ft, EXCEPTION_FACTORY);
+    }
+
+    private BufferedImage getImageWithTimeout(String formatName, ImageTransformationSignaler signaler, int waitTimeoutSeconds) throws OXException, IOException, InterruptedIOException {
         // Wait timeout configured - Use a CountDownLatch to let timeout jump in if actual image processing happens
         CountDownLatch latch = new CountDownLatch(1);
         FutureTask<BufferedImage> ft = new FutureTask<BufferedImage>(new GetImageCallable(formatName, latch, signaler));
@@ -159,7 +176,6 @@ public final class ImageTransformationsTask extends ImageTransformationsImpl {
             throw ioe;
         }
 
-        // Image transformation initiated
         // Get result from scheduled task; waiting for at most the configured time for the computation to complete
         return ThreadPools.getFrom(ft, waitTimeoutSeconds, TimeUnit.SECONDS, EXCEPTION_FACTORY);
     }

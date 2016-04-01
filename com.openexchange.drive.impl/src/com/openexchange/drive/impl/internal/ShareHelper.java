@@ -113,6 +113,15 @@ public class ShareHelper {
     public DriveShareLink getLink(DriveShareTarget target) throws OXException {
         ShareTarget shareTarget = getShareTarget(target);
         ShareLink shareLink = getShareService().getLink(session.getServerSession(), shareTarget);
+        if (shareLink.isNew() && target.isFolder()) {
+            /*
+             * invalidate storage cache & retrieve updated directory checksum for response
+             */
+            session.getStorage().invalidateCache();
+            String folderID = session.getStorage().getFolderID(target.getDrivePath());
+            DirectoryChecksum directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folderID)).get(0);
+            target = new DriveShareTarget(new ShareTarget(DriveConstants.FILES_MODULE, folderID), target.getDrivePath(), directoryChecksum.getChecksum());
+        }
         return new DefaultDriveShareLink(shareLink, target);
     }
 
@@ -152,6 +161,12 @@ public class ShareHelper {
             }
             ShareTarget shareTarget = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
             shareLink = getShareService().updateLink(session.getServerSession(), shareTarget, linkUpdate, folder.getLastModifiedDate());
+            /*
+             * invalidate storage cache & retrieve updated directory checksum for response
+             */
+            session.getStorage().invalidateCache();
+            directoryChecksum = ChecksumProvider.getChecksums(session, Collections.singletonList(folder.getId())).get(0);
+            driveTarget = new DriveShareTarget(new ShareTarget(DriveConstants.FILES_MODULE, folder.getId()), driveTarget.getDrivePath(), directoryChecksum.getChecksum());
         } else {
             File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
             if (null == file) {
@@ -189,6 +204,7 @@ public class ShareHelper {
             }
             ShareTarget shareTarget = new ShareTarget(DriveConstants.FILES_MODULE, folder.getId());
             getShareService().deleteLink(session.getServerSession(), shareTarget, folder.getLastModifiedDate());
+            session.getStorage().invalidateCache();
         } else {
             File file = session.getStorage().getFileByName(driveTarget.getDrivePath(), driveTarget.getName());
             if (null == file) {

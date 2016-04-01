@@ -67,7 +67,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.6.0
  */
-public final class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter {
+public class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter {
 
     /**
      * Initializes a new {@link POP3CheckAndDropObsoleteTablesTask}.
@@ -78,7 +78,7 @@ public final class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter 
 
     @Override
     public String[] getDependencies() {
-        return new String[] { MailAccountCreateTablesTask.class.getName(), POP3CreateTableTask.class.getName() };
+        return new String[] {};
     }
 
     @Override
@@ -94,7 +94,7 @@ public final class POP3CheckAndDropObsoleteTablesTask extends UpdateTaskAdapter 
             con.setAutoCommit(false);
             rollback = true;
 
-            for (String table : new String[] { "user_pop3_data", "user_pop3_user_flag" }) {
+            for (String table : new String[] { "user_pop3_user_flag", "user_pop3_data" }) {
                 modified |= dropTable(table, con);
             }
 

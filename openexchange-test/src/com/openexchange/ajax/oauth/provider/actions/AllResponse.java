@@ -57,10 +57,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.oauth.provider.client.DefaultClient;
-import com.openexchange.oauth.provider.grant.DefaultGrantView;
-import com.openexchange.oauth.provider.grant.GrantView;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.authorizationserver.client.DefaultClient;
+import com.openexchange.oauth.provider.authorizationserver.grant.DefaultGrantView;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantView;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 
 /**

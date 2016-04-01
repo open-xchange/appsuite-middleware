@@ -16,7 +16,7 @@ opt/open-xchange/etc/findbasic.properties
 opt/open-xchange/etc/foldercache.properties
 opt/open-xchange/etc/folderjson.properties
 opt/open-xchange/etc/folder-reserved-names
-opt/open-xchange/etc/guard.properties
+opt/open-xchange/etc/globaldb.yml
 opt/open-xchange/etc/hazelcast.properties
 opt/open-xchange/etc/HTMLEntities.properties
 opt/open-xchange/etc/html-sanitizer.properties
@@ -69,4 +69,5 @@ opt/open-xchange/etc/settings/themes.properties
 opt/open-xchange/etc/settings/ui.properties
 opt/open-xchange/etc/webdav-disabled-message.txt
 opt/open-xchange/etc/tokenlogin-secrets
-opt/open-xchange/etc/globaldb.yml
+opt/open-xchange/etc/sms-tools.properties
+opt/open-xchange/etc/hazelcast/smsBucketHz.properties

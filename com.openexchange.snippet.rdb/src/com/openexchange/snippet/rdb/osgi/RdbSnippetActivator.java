@@ -66,6 +66,7 @@ import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.rdb.RdbSnippetFilestoreLocationUpdater;
 import com.openexchange.snippet.rdb.RdbSnippetService;
@@ -74,6 +75,7 @@ import com.openexchange.snippet.rdb.groupware.RdbSnippetAttachmentBinaryCreateTa
 import com.openexchange.snippet.rdb.groupware.RdbSnippetCreateTableTask;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetDeleteListener;
 import com.openexchange.snippet.rdb.groupware.RdbSnippetFixAttachmentPrimaryKey;
+import com.openexchange.snippet.rdb.groupware.RdbSnippetQuotaProvider;
 
 /**
  * {@link RdbSnippetActivator} - The activator for RDB Snippet bundle.
@@ -120,9 +122,15 @@ public class RdbSnippetActivator extends HousekeepingActivator {
             /*
              * Register
              */
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            RdbSnippetQuotaProvider quotaProvider = new RdbSnippetQuotaProvider();
+            RdbSnippetService snippetService = new RdbSnippetService(quotaProvider, this);
+
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(0));
-            registerService(SnippetService.class, new RdbSnippetService(this), properties);
+            registerService(SnippetService.class, snippetService, properties);
+
+            quotaProvider.setSnippetService(snippetService);
+            registerService(QuotaProvider.class, quotaProvider);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.rdb", e);
             throw e;

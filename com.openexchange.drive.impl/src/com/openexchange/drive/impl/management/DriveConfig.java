@@ -59,14 +59,19 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import org.slf4j.Logger;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigView;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.configuration.ConfigurationExceptionCodes;
+import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.DriveClientType;
 import com.openexchange.drive.DriveClientVersion;
 import com.openexchange.drive.impl.DriveConstants;
 import com.openexchange.drive.impl.internal.DriveServiceLookup;
+import com.openexchange.drive.impl.management.version.BrandedDriveVersionServiceImpl;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
 import com.openexchange.server.Initialization;
+import com.openexchange.session.Session;
 import com.openexchange.tools.strings.TimeSpanParser;
 
 /**
@@ -449,7 +454,7 @@ public class DriveConfig implements Initialization {
         }
         try {
             excludedDirectoriesPattern = Pattern.compile(configService.getProperty("com.openexchange.drive.excludedDirectoriesPattern",
-                "^.*/\\.msngr_hstr_data$"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
+                "^.*/\\.msngr_hstr_data$|^.*/\\.drive-meta(?:$|/.*)"), Pattern.CASE_INSENSITIVE | Pattern.UNICODE_CASE);
         } catch (PatternSyntaxException e) {
             throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, "com.openexchange.drive.excludedDirectoriesPattern");
         }
@@ -514,7 +519,7 @@ public class DriveConfig implements Initialization {
             "[protocol]://[hostname]/[uiwebpath]#[filefragments]");
         jumpLink = configService.getProperty("com.openexchange.drive.jumpLink",
             "[protocol]://[hostname]/[uiwebpath]#[app]&[folder]&[id]");
-        previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "800x800"));
+        previewImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.previewImageSize", "1600x1600"));
         thumbnailImageSize = parseDimensions(configService.getProperty("com.openexchange.drive.thumbnailImageSize", "100x100"));
         imageLinkImageFile = configService.getProperty("com.openexchange.drive.imageLinkImageFile",
             "[protocol]://[hostname]/[dispatcherPrefix]/files?action=document&folder=[folder]&id=[object]&version=[version]&" +
@@ -536,12 +541,10 @@ public class DriveConfig implements Initialization {
          */
         softMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
         hardMinimumVersions = new EnumMap<DriveClientType, DriveClientVersion>(DriveClientType.class);
-        softMinimumVersions.put(DriveClientType.WINDOWS, parseClientVersion(
-            configService.getProperty("com.openexchange.drive.version.windows.softMinimum",
-            configService.getProperty("com.openexchange.drive.windows.version", "0"))));
-        hardMinimumVersions.put(DriveClientType.WINDOWS, parseClientVersion(
-            configService.getProperty("com.openexchange.drive.version.windows.hardMinimum",
-            configService.getProperty("com.openexchange.drive.windows.minimumVersion", "0"))));
+        softMinimumVersions.put(DriveClientType.WINDOWS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.softMinimum", "0")));
+        hardMinimumVersions.put(DriveClientType.WINDOWS,
+            parseClientVersion(configService.getProperty("com.openexchange.drive.version.windows.hardMinimum", "0")));
         softMinimumVersions.put(DriveClientType.MAC_OS,
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.macos.softMinimum", "0")));
         hardMinimumVersions.put(DriveClientType.MAC_OS,
@@ -614,9 +617,31 @@ public class DriveConfig implements Initialization {
      * Gets the (soft) minimum version limit for the supplied client type
      *
      * @param clientType The client type to get the limit for
+     * @param session The current session
      * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
      */
-    public DriveClientVersion getSoftMinimumVersion(DriveClientType clientType) {
+    public DriveClientVersion getSoftMinimumVersion(DriveClientType clientType, Session session) {
+        try {
+            if (clientType == DriveClientType.WINDOWS) {
+                BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
+
+                ConfigViewFactory configService = DriveServiceLookup.getService(ConfigViewFactory.class);
+                if (configService != null) {
+                    ConfigView view = configService.getView(session.getUserId(), session.getContextId());
+                    String branding = view.get("com.openexchange.drive.update.branding", String.class);
+                    if (branding != null && !branding.isEmpty()) {
+                        String version = versionService.getSoftMinimumVersion(branding);
+                        if (version != null && !version.isEmpty()) {
+                            return parseClientVersion(version);
+                        }
+                    }
+                }
+            }
+        } catch (OXException e) {
+            LOG.error(e.getMessage());
+            //Fallback to old handling
+        }
+
         DriveClientVersion version = softMinimumVersions.get(clientType);
         return null != version ? version : DriveClientVersion.VERSION_0;
     }
@@ -625,9 +650,31 @@ public class DriveConfig implements Initialization {
      * Gets the (hard) minimum version limit for the supplied client type
      *
      * @param clientType The client type to get the limit for
+     * @param session The current session
      * @return The configured limit, or {@link DriveClientVersion#VERSION_0} if not defined
      */
-    public DriveClientVersion getHardMinimumVersion(DriveClientType clientType) {
+    public DriveClientVersion getHardMinimumVersion(DriveClientType clientType, Session session) {
+        try {
+            if (clientType == DriveClientType.WINDOWS) {
+                BrandedDriveVersionService versionService = BrandedDriveVersionServiceImpl.getInstance();
+
+                ConfigViewFactory configService = DriveServiceLookup.getService(ConfigViewFactory.class);
+                if (configService != null) {
+                    ConfigView view = configService.getView(session.getUserId(), session.getContextId());
+                    String branding = view.get("com.openexchange.drive.update.branding", String.class);
+                    if (branding != null && !branding.isEmpty()) {
+                        String version = versionService.getHardMinimumVersion(branding);
+                        if (version != null && !version.isEmpty()) {
+                            return parseClientVersion(version);
+                        }
+                    }
+                }
+            }
+        } catch (OXException e) {
+            LOG.error(e.getMessage());
+            //Fallback to old handling
+        }
+
         DriveClientVersion version = hardMinimumVersions.get(clientType);
         return null != version ? version : DriveClientVersion.VERSION_0;
     }

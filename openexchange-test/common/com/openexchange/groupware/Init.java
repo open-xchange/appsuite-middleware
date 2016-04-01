@@ -181,6 +181,8 @@ import com.openexchange.sessionstorage.TestSessionStorageService;
 import com.openexchange.share.ShareService;
 import com.openexchange.share.impl.DefaultShareService;
 import com.openexchange.share.impl.cleanup.GuestCleaner;
+import com.openexchange.sms.PhoneNumberParserService;
+import com.openexchange.sms.impl.PhoneNumberParserServiceImpl;
 import com.openexchange.spamhandler.SpamHandlerRegistry;
 import com.openexchange.spamhandler.defaultspamhandler.DefaultSpamHandler;
 import com.openexchange.spamhandler.spamassassin.SpamAssassinSpamHandler;
@@ -494,6 +496,10 @@ public final class Init {
         startTestServices = System.currentTimeMillis();
         startAndInjectDefaultShareService();
         System.out.println("startAndInjectDefaultShareService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
+
+        startTestServices = System.currentTimeMillis();
+        startAndInjectPhoneNumberParserService();
+        System.out.println("startAndInjectPhoneNumberParserService took " + (System.currentTimeMillis() - startTestServices) + "ms.");
 
         startTestServices = System.currentTimeMillis();
         startAndInjectAliasService();
@@ -1057,6 +1063,14 @@ public final class Init {
             DefaultShareService service = new DefaultShareService(LOOKUP, new GuestCleaner(LOOKUP));
             services.put(ShareService.class, service);
             TestServiceRegistry.getInstance().addService(ShareService.class, service);
+        }
+    }
+
+    public static void startAndInjectPhoneNumberParserService() throws OXException {
+        if (null == TestServiceRegistry.getInstance().getService(PhoneNumberParserService.class)) {
+            PhoneNumberParserService service = new PhoneNumberParserServiceImpl();
+            services.put(PhoneNumberParserService.class, service);
+            TestServiceRegistry.getInstance().addService(PhoneNumberParserService.class, service);
         }
     }
 

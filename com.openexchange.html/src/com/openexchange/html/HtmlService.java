@@ -49,6 +49,8 @@
 
 package com.openexchange.html;
 
+import java.io.Reader;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 
 
@@ -151,6 +153,24 @@ public interface HtmlService {
      * @return The sanitized HTML content
      */
     String sanitize(String htmlContent, String optConfigName, boolean dropExternalImages, boolean[] modified, String cssPrefix);
+
+    /**
+     * Extracts the plain text from specified HTML content.
+     *
+     * @param htmlContent The HTML content to extract from
+     * @return The extracted plain text
+     * @throws OXException If text extraction fails
+     */
+    String extractText(String htmlContent) throws OXException;
+
+    /**
+     * Extracts the plain text from specified HTML input.
+     *
+     * @param htmlContent The HTML input to extract from
+     * @return The extracted plain text
+     * @throws OXException If text extraction fails
+     */
+    String extractText(Reader htmlInput) throws OXException;
 
     /**
      * Converts specified HTML content to plain text.

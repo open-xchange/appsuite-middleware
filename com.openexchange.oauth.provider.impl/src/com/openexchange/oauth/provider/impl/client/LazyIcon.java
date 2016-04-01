@@ -59,8 +59,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Streams;
-import com.openexchange.oauth.provider.client.DefaultIcon;
-import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.DefaultIcon;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 
 /**

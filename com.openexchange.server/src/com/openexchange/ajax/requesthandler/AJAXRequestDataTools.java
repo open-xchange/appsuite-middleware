@@ -450,4 +450,31 @@ public class AJAXRequestDataTools {
         return action;
 
     }
+
+    /**
+     * Gets the value for the <code>"User-Agent"</code> header from passed AJAX request data<br>
+     * (while preferring the one from {@link HttpServletRequest}).
+     *
+     * @param request The AJAX request data
+     * @return The value for the <code>"User-Agent"</code> header or <code>null</code>
+     */
+    public static String getUserAgent(AJAXRequestData request) {
+        if (null == request) {
+            return null;
+        }
+
+        String userAgent = null;
+
+        HttpServletRequest servletRequest = request.optHttpServletRequest();
+        if (null != servletRequest) {
+            userAgent = servletRequest.getHeader("User-Agent");
+        }
+
+        if (null == userAgent) {
+            userAgent = request.getUserAgent();
+        }
+
+        return userAgent;
+    }
+
 }

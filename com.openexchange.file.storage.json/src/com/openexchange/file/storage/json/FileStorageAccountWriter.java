@@ -49,8 +49,10 @@
 
 package com.openexchange.file.storage.json;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -135,8 +137,8 @@ public class FileStorageAccountWriter {
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
      */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder) throws JSONException {
-        JSONObject accountJSON = new JSONObject(6);
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities) throws JSONException {
+        JSONObject accountJSON = new JSONObject(7);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
         accountJSON.put(FileStorageAccountConstants.QUALIFIED_ID, FileStorageAccounts.getQualifiedID(account));
@@ -150,6 +152,12 @@ public class FileStorageAccountWriter {
             JSONObject configJSON = FormContentWriter.write(formDescription, account.getConfiguration(), null);
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
+
+        // Add capabilities
+        if (capabilities == null) {
+            capabilities = new HashSet<String>(0);
+        }
+        accountJSON.put("capabilities", capabilities);
         return accountJSON;
     }
 
@@ -161,7 +169,7 @@ public class FileStorageAccountWriter {
      * @return The resulting JSON
      * @throws JSONException If writing JSON fails
      */
-    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, OXException exception, Session session) throws JSONException {
+    public JSONObject write(FileStorageAccount account, FileStorageFolder rootFolder, Set<String> capabilities, OXException exception, Session session) throws JSONException {
         JSONObject accountJSON = new JSONObject(7);
         accountJSON.put(FileStorageAccountConstants.ID, account.getId());
         final FileStorageService fsService = account.getFileStorageService();
@@ -179,6 +187,11 @@ public class FileStorageAccountWriter {
             accountJSON.put(FileStorageAccountConstants.CONFIGURATION, configJSON);
         }
 
+        // Add capabilities
+        if (capabilities == null) {
+            capabilities = new HashSet<String>(0);
+        }
+        accountJSON.put("capabilities", capabilities);
         accountJSON.put("hasError", true);
         accountJSON.put("error", exception);
 

@@ -55,7 +55,6 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -66,7 +65,6 @@ import com.openexchange.server.services.ServerServiceRegistry;
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
-@SuppressWarnings("deprecation")
 public abstract class UpdateTaskRegisterer implements ServiceTrackerCustomizer<DatabaseService, DatabaseService> {
 
     private final BundleContext context;
@@ -82,7 +80,7 @@ public abstract class UpdateTaskRegisterer implements ServiceTrackerCustomizer<D
         final DatabaseService service = context.getService(reference);
         registration = context.registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
             @Override
-            public Collection<? extends UpdateTask> getUpdateTasks() {
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
                 return createTasks(service);
             }
         }, null);

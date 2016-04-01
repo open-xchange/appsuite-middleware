@@ -54,7 +54,7 @@ import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.ServerSession;
 
@@ -81,8 +81,8 @@ public abstract class AbstractOAuthProviderAction implements AJAXActionService {
 
     protected abstract AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException;
 
-    protected OAuthProviderService getOAuthProvider() throws OXException {
-        return requireService(OAuthProviderService.class, services);
+    protected GrantManagement getGrantManagement() throws OXException {
+        return requireService(GrantManagement.class, services);
     }
 
 }

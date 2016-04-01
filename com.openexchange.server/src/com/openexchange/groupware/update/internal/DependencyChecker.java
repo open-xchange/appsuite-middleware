@@ -49,7 +49,7 @@
 
 package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * Checks if the dependencies of an update task are fulfilled.
@@ -67,6 +67,6 @@ public interface DependencyChecker {
      * @param toExecute list of tasks that have to be executed.
      * @return <code>true</code> if the current task can be now scheduled for execution.
      */
-    boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute);
+    boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute);
 
 }

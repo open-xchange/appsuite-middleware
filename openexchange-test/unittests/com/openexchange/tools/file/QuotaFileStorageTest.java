@@ -314,6 +314,11 @@ public class QuotaFileStorageTest extends TestCase {
         }
 
         @Override
+        public void backWritableAfterReading(Connection con) {
+            // Nothing to do.
+        }
+
+        @Override
         public Connection getReadOnly() {
             return null;
         }
@@ -461,6 +466,18 @@ public class QuotaFileStorageTest extends TestCase {
         @Override
         public boolean isGlobalDatabaseAvailable(int contextId) throws OXException {
             return false;
+        }
+
+        @Override
+        public Connection getWritable(Assignment assignment, boolean noTimeout) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
+        }
+
+        @Override
+        public Connection getReadOnly(Assignment assignment, boolean noTimeout) throws OXException {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 

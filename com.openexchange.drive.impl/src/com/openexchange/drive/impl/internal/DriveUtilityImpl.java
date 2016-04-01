@@ -85,6 +85,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.java.Collators;
 import com.openexchange.java.Reference;
 import com.openexchange.session.Session;
@@ -124,7 +125,7 @@ public class DriveUtilityImpl implements DriveUtility {
 
     @Override
     public boolean isInvalidFileName(String fileName) {
-        return DriveUtils.isInvalidFileName(fileName);
+        return FilenameValidationUtils.isInvalidFileName(fileName);
     }
 
     @Override
@@ -351,6 +352,9 @@ public class DriveUtilityImpl implements DriveUtility {
 
     private JSONArray getDirectorySharesMetadata(SyncSession session) throws OXException, JSONException {
         List<FileStorageFolder> folders = session.getStorage().getSharedFolders();
+        if (null == folders || 0 == folders.size()) {
+            return new JSONArray(0);
+        }
         List<String> folderIDs = new ArrayList<String>(folders.size());
         for (FileStorageFolder folder : folders) {
             folderIDs.add(folder.getId());

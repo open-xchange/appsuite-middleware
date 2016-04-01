@@ -61,11 +61,8 @@ import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.rdb.Services;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.tools.sql.DBUtils;
 
@@ -116,21 +113,6 @@ public final class FileStorageRdbCreateTableTask extends AbstractCreateTableImpl
         createTable("filestorageAccount", getMessagingAccountTable(), contextId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(FileStorageRdbCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", FileStorageRdbCreateTableTask.class.getSimpleName());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws com.openexchange.exception.OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

@@ -59,8 +59,8 @@ import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.user.UserService;
 
 /**

@@ -57,6 +57,7 @@ import java.util.List;
 import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.context.ContextService;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
@@ -68,13 +69,14 @@ import com.openexchange.java.Strings;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 
-
 /**
  * {@link ContactReader}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
 public class ContactReader {
+
+    private static final org.slf4j.Logger LOGGER = org.slf4j.LoggerFactory.getLogger(ContactReader.class);
 
     private final Connection connection;
     private final int contextID;
@@ -100,14 +102,15 @@ public class ContactReader {
      * Deserializes all contacts found in the result set, using the supplied fields.
      *
      * @param fields The contact fields to read
+     * @param withObjectUseCount ResultSet contains additional data for sorting contacts
      * @return The contacts, or an empty list if no there were no results
      * @throws SQLException
      * @throws OXException
      */
-    public List<Contact> readContacts(ContactField[] fields) throws SQLException, OXException {
+    public List<Contact> readContacts(ContactField[] fields, boolean withObjectUseCount) throws SQLException, OXException {
         List<Contact> contacts = new ArrayList<Contact>();
         while (resultSet.next()) {
-            contacts.add(patch(Mappers.CONTACT.fromResultSet(resultSet, fields)));
+            contacts.add(patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount));
         }
         return contacts;
     }
@@ -116,28 +119,39 @@ public class ContactReader {
      * Deserializes the first contact found in the result set, using the supplied fields.
      *
      * @param fields The contact fields to read
+     * @param withObjectUseCount ResultSet contains additional data for sorting contacts
      * @return The contact, or <code>null</code> if there was no result
      * @throws SQLException
      * @throws OXException
      */
-    public Contact readContact(ContactField[] fields) throws SQLException, OXException {
-        return resultSet.next() ? patch(Mappers.CONTACT.fromResultSet(resultSet, fields)) : null;
+    public Contact readContact(ContactField[] fields, boolean withObjectUseCount) throws SQLException, OXException {
+        return resultSet.next() ? patch(Mappers.CONTACT.fromResultSet(resultSet, fields), withObjectUseCount) : null;
     }
 
-    private Contact patch(Contact contact) throws OXException {
-        if (null != contact && 0 < contact.getInternalUserId() && contact.containsEmail1()) {
-            String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
+    private Contact patch(Contact contact, boolean withObjectUseCount) throws SQLException, OXException {
+        if (null != contact) {
+            if (0 < contact.getInternalUserId() && contact.containsEmail1()) {
+                String senderSource = NotificationConfig.getProperty(NotificationProperty.FROM_SOURCE, "primaryMail");
 
-            //TODO: Guests do not have mail settings
-            if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
-                UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
-                String defaultSendAddress = userSettingMail.getSendAddr();
-                if (false == Strings.isEmpty(defaultSendAddress)) {
-                    contact.setEmail1(defaultSendAddress);
+                //TODO: Guests do not have mail settings
+                if (contact.getParentFolderID() != 16 && senderSource.equalsIgnoreCase("defaultSenderAddress")) {
+                    UserSettingMail userSettingMail = UserSettingMailStorage.getInstance().getUserSettingMail(contact.getInternalUserId(), getContext(), connection);
+                    String defaultSendAddress = userSettingMail.getSendAddr();
+                    if (false == Strings.isEmpty(defaultSendAddress)) {
+                        contact.setEmail1(defaultSendAddress);
+                    }
+                } else {
+                    String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
+                    contact.setEmail1(primaryMail);
                 }
-            } else {
-                String primaryMail = UserStorage.getInstance().getUser(contact.getInternalUserId(), contextID).getMail();
-                contact.setEmail1(primaryMail);
+            }
+            if (withObjectUseCount) {
+                try {
+                    contact.setUseCount(resultSet.getInt("value"));
+                } catch (SQLException e) {
+                    String query = Databases.getSqlStatement(resultSet.getStatement(), null);
+                    LOGGER.warn("Failed to determine use-count information from {}", null == query ? "<unknown>" : query, e);
+                }
             }
         }
         return contact;

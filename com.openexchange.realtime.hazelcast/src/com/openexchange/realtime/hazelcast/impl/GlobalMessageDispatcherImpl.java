@@ -98,7 +98,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
 
     private final HazelcastResourceDirectory directory;
 
-    private ResponseChannel channel = null;
+    private final ResponseChannel channel;
 
     public GlobalMessageDispatcherImpl(HazelcastResourceDirectory directory) {
         super();
@@ -121,7 +121,7 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         if(idMap == null || idMap.isEmpty()) {
             throw DispatchExceptionCode.RESOURCE_OFFLINE.create(stanza.getTo());
         }
-        Map<ID, OXException> exceptions = send(stanza, directory.get(stanza.getTo()));
+        Map<ID, OXException> exceptions = send(stanza, idMap);
         if(!exceptions.isEmpty()) {
             throw exceptions.values().iterator().next();
         }
@@ -227,8 +227,9 @@ public class GlobalMessageDispatcherImpl extends AbstractRealtimeJanitor impleme
         // Sent to remote receivers
         IExecutorService executorService = hazelcastInstance.getExecutorService("default");
         List<Future<IDMap<OXException>>> futures = new ArrayList<Future<IDMap<OXException>>>();
-        for (Member receiver : targets.keySet()) {
-            Set<ID> ids = targets.get(receiver);
+        for (Entry<Member, Set<ID>> receiverEntry : targets.entrySet()) {
+            Member receiver = receiverEntry.getKey();
+            Set<ID> ids = receiverEntry.getValue();
             LOG.debug("Sending to '{}' @ {}", stanza.getTo(), receiver);
             stanza.trace("Sending to '" + stanza.getTo() + "' @ " + receiver);
             ensureSequence(stanza, receiver);

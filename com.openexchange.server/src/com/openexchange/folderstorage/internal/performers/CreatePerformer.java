@@ -53,6 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.ContentType;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
@@ -62,18 +63,18 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -135,6 +136,12 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
      * @throws OXException If creation fails
      */
     public String doCreate(final Folder toCreate) throws OXException {
+
+        if (InfostoreContentType.getInstance().equals(toCreate.getContentType()) && Strings.isNotEmpty(toCreate.getName())) {
+            FilenameValidationUtils.checkCharacters(toCreate.getName());
+            FilenameValidationUtils.checkName(toCreate.getName());
+        }
+
         final String parentId = toCreate.getParentID();
         if (null == parentId) {
             throw FolderExceptionErrorMessage.MISSING_PARENT_ID.create(new Object[0]);
@@ -152,6 +159,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        boolean rollbackTransaction = true;
         /*
          * Throws an exception if someone tries to add an element. If this happens, you found a bug.
          * As long as a TransactionManager is present, every storage has to add itself to the
@@ -209,8 +217,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              * check for any present guest permissions
              */
             Permission[] permissions = toCreate.getPermissions();
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0], shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0]);
             final String newId;
             try {
                 /*
@@ -232,6 +239,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
             }
 
             transactionManager.commit();
+            rollbackTransaction = false;
 
             /*
              * Sanity check
@@ -253,11 +261,13 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
 
             return newId;
         } catch (final OXException e) {
-            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollbackTransaction) {
+                transactionManager.rollback();
+            }
         }
     }
 

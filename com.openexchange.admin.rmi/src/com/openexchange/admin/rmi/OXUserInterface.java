@@ -650,6 +650,30 @@ public interface OXUserInterface extends Remote {
     public User getData(final Context ctx, final User user, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, NoSuchUserException, DatabaseUpdateException;
 
     /**
+     * Retrieve all user objects with given filestore for a given context.
+     * If filestore_id is null all user objects with a own filestore for a given context are retrieved instead.
+     * 
+     * @param context
+     *            Context object.
+     * @param auth
+     *            Credentials for authenticating against server.
+     * @return User[] with currently ONLY id set in each User.
+     * 
+     * @throws RemoteException
+     *             General RMI Exception
+     * @throws StorageException
+     *             When an error in the subsystems occured.
+     * @throws InvalidCredentialsException
+     *             When the supplied credentials were not correct or invalid.
+     * @throws NoSuchContextException
+     *             If the context does not exist in the system.
+     * @throws InvalidDataException
+     *             If the data sent within the method contained invalid data.
+     * @throws DatabaseUpdateException
+     */
+    public User[] listUsersWithOwnFilestore(final Context context, final Credentials auth, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException;
+
+    /**
      * Retrieve all users for a given context.
      * The search pattern is directly transformed into a SQL LIKE string comparison, where<br>
      * a * is transformed into a %<br>
@@ -831,4 +855,20 @@ public interface OXUserInterface extends Remote {
      * @throws InvalidCredentialsException
      */
     public Map<String, Map<String, Set<String>>> getUserCapabilitiesSource(Context ctx, User user, Credentials credentials) throws RemoteException, InvalidDataException, StorageException, InvalidCredentialsException, NoSuchUserException;
+
+    /**
+     * Retrieves all users with an alias within the given domain
+     * 
+     * @param context Context object the user is associated to
+     * @param aliasDomain The domain of the alias
+     * @param auth Credentials for authenticating against server
+     * @return The users
+     * @throws RemoteException
+     * @throws StorageException
+     * @throws InvalidCredentialsException
+     * @throws NoSuchContextException
+     * @throws InvalidDataException
+     */
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException;
+
 }

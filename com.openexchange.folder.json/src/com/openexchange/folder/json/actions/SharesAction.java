@@ -67,8 +67,8 @@ import com.openexchange.folderstorage.FolderResponse;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -110,7 +110,7 @@ public class SharesAction extends AbstractFolderAction {
         if (null == contentType) {
             throw AjaxExceptionCodes.MISSING_PARAMETER.create(AJAXServlet.PARAMETER_CONTENT_TYPE);
         }
-        if (isOAuthRequest(request) && false == mayReadViaOAuthRequest(contentType, getOAuthGrant(request))) {
+        if (isOAuthRequest(request) && false == mayReadViaOAuthRequest(contentType, getOAuthAccess(request))) {
             throw new OAuthInsufficientScopeException();
         }
         /*

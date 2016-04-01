@@ -67,6 +67,7 @@ import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.tools.update.Column;
+import com.openexchange.tools.update.Tools;
 
 /**
  * {@link FolderExtendNameTask}
@@ -106,8 +107,8 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
         try {
             connnection.setAutoCommit(false);
             rollback = true;
-            enlargeVarcharColumn("fname", 767, "oxfolder_tree", connnection);
-            enlargeVarcharColumn("name", 767, "virtualTree", connnection);
+            Tools.changeVarcharColumnSize("fname", 767, "oxfolder_tree", connnection);
+            Tools.changeVarcharColumnSize("name", 767, "virtualTree", connnection);
             connnection.commit();
             rollback = false;
         } catch (SQLException e) {
@@ -123,36 +124,4 @@ public final class FolderExtendNameTask extends UpdateTaskAdapter {
         }
         log.info("{} successfully performed.", simpleName);
     }
-
-    private void enlargeVarcharColumn(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
-        ResultSet rsColumns = null;
-        boolean doAlterTable = false;
-        try {
-            DatabaseMetaData meta = con.getMetaData();
-            rsColumns = meta.getColumns(null, null, tableName, null);
-            while (rsColumns.next()) {
-                final String columnName = rsColumns.getString("COLUMN_NAME");
-                if (colName.equals(columnName)) {
-                    final int size = rsColumns.getInt("COLUMN_SIZE");
-                    if (size < newSize) {
-                        doAlterTable = true;
-                    }
-                    break;
-                }
-            }
-            Databases.closeSQLStuff(rsColumns);
-            rsColumns = null;
-
-            if (doAlterTable) {
-                com.openexchange.tools.update.Tools.modifyColumns(con, tableName, new Column(colName, "VARCHAR("+newSize+")"));
-            }
-        } catch (final SQLException e) {
-            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
-        } catch (final RuntimeException e) {
-            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(rsColumns);
-        }
-    }
-
 }

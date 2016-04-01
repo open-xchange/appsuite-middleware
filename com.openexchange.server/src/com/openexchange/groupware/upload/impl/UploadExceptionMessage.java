@@ -112,4 +112,7 @@ public class UploadExceptionMessage implements LocalizableStrings {
     // Request rejected because file size exceeds the maximum configured file size of %1$s.
     public static final String MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN_MSG = "Request rejected because file size exceeds the maximum configured file size of %1$s.";
 
+    // Read timed out. Waited too long for incoming data from client.
+    public static final String UNEXPECTED_TIMEOUT_MSG = "Read timed out. Waited too long for incoming data from client.";
+
 }

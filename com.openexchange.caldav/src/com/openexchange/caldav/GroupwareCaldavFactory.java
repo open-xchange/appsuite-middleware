@@ -59,12 +59,13 @@ import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.TasksSQLInterface;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
 import com.openexchange.caldav.mixins.ScheduleOutboxURL;
-import com.openexchange.caldav.resources.CommonCollection;
 import com.openexchange.config.cascade.ComposedConfigProperty;
 import com.openexchange.config.cascade.ConfigView;
 import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalParser;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.resources.DAVCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderStorage;
@@ -73,19 +74,18 @@ import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.freebusy.service.FreeBusyService;
 import com.openexchange.groupware.calendar.AppointmentSqlFactoryService;
 import com.openexchange.groupware.calendar.CalendarCollectionService;
-import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.tasks.TasksSQLImpl;
-import com.openexchange.session.Session;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.user.UserService;
 import com.openexchange.webdav.loader.BulkLoader;
 import com.openexchange.webdav.loader.LoadingHints;
+import com.openexchange.webdav.protocol.Protocol;
 import com.openexchange.webdav.protocol.WebdavCollection;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
 
 /**
  * The {@link GroupwareCaldavFactory} holds access to all external groupware services and acts as the factory for CaldavResources and
@@ -94,13 +94,12 @@ import com.openexchange.webdav.protocol.helpers.AbstractWebdavFactory;
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class GroupwareCaldavFactory extends AbstractWebdavFactory implements BulkLoader {
+public class GroupwareCaldavFactory extends DAVFactory implements BulkLoader {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(GroupwareCaldavFactory.class);
     private static final CaldavProtocol PROTOCOL = new CaldavProtocol();
     public static final WebdavPath ROOT_URL = new WebdavPath();
 
-    private final SessionHolder sessionHolder;
     private final AppointmentSqlFactoryService appointments;
     private final FolderService folders;
     private final ICalEmitter icalEmitter;
@@ -111,18 +110,21 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     private final ConfigViewFactory configs;
     private final FreeBusyService freeBusyService;
 
-    public GroupwareCaldavFactory(SessionHolder sessionHolder, AppointmentSqlFactoryService appointments, FolderService folders,
-        ICalEmitter icalEmitter, ICalParser icalParser, UserService users, CalendarCollectionService calendarUtils, ConfigViewFactory configs,
-        FreeBusyService freeBusyService) {
-        this.sessionHolder = sessionHolder;
-        this.appointments = appointments;
-        this.folders = folders;
-        this.icalEmitter = icalEmitter;
-        this.icalParser = icalParser;
-        this.users = users;
-        this.calendarUtils = calendarUtils;
-        this.configs = configs;
-        this.freeBusyService = freeBusyService;
+    public GroupwareCaldavFactory(Protocol protocol, ServiceLookup services, SessionHolder sessionHolder) {
+        super(protocol, services, sessionHolder);
+        this.appointments = services.getService(AppointmentSqlFactoryService.class);
+        this.folders = services.getService(FolderService.class);
+        this.icalEmitter = services.getService(ICalEmitter.class);
+        this.icalParser = services.getService(ICalParser.class);
+        this.users = services.getService(UserService.class);
+        this.calendarUtils = services.getService(CalendarCollectionService.class);
+        this.configs = services.getService(ConfigViewFactory.class);
+        this.freeBusyService = services.getService(FreeBusyService.class);
+    }
+
+    @Override
+    protected String getURLPrefix() {
+        return "/caldav/";
     }
 
     @Override
@@ -153,7 +155,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     }
 
     public AppointmentSQLInterface getAppointmentInterface() {
-        return appointments.createAppointmentSql(sessionHolder.getSessionObject());
+        return appointments.createAppointmentSql(getSessionObject());
     }
 
     public FreeBusyService getFreeBusyService() {
@@ -168,10 +170,6 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         return folders;
     }
 
-    public Session getSession() {
-        return sessionHolder.getSessionObject();
-    }
-
     public ICalEmitter getIcalEmitter() {
         return icalEmitter;
     }
@@ -180,20 +178,12 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         return icalParser;
     }
 
-    public Context getContext() {
-        return sessionHolder.getContext();
-    }
-
-    public User getUser() {
-        return sessionHolder.getUser();
-    }
-
     public String getLoginName() {
-        return sessionHolder.getSessionObject().getLoginName();
+        return getSession().getLoginName();
     }
 
     public SessionHolder getSessionHolder() {
-        return sessionHolder;
+        return this;
     }
 
     public CalendarCollectionService getCalendarUtilities() {
@@ -201,7 +191,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
     }
 
     public String getConfigValue(String key, String defaultValue) throws OXException {
-        ConfigView view = configs.getView(sessionHolder.getUser().getId(), sessionHolder.getContext().getContextId());
+        ConfigView view = configs.getView(getUser().getId(), getContext().getContextId());
         ComposedConfigProperty<String> property = view.property(key, String.class);
         if (null == property || false == property.isDefined()) {
             return defaultValue;
@@ -238,18 +228,31 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
      */
     public static final class State {
 
-        private final Map<WebdavPath, CommonCollection> knownCollections;
+        private final Map<WebdavPath, DAVCollection> knownCollections;
         private final GroupwareCaldavFactory factory;
 
         private Date minDateTime = null;
         private Date maxDateTime = null;
         private String treeID;
         private UserizedFolder defaultFolder = null;
+        private CalDAVAgent userAgent;
 
         public State(final GroupwareCaldavFactory factory) {
             super();
             this.factory = factory;
-            this.knownCollections = new HashMap<WebdavPath, CommonCollection>();
+            this.knownCollections = new HashMap<WebdavPath, DAVCollection>();
+        }
+
+        /**
+         * Gets the user agent performing the CalDAV request.
+         *
+         * @return The CalDAV agent, or {@link CalDAVAgent#UNKNOWN} if not recognized
+         */
+        public CalDAVAgent getUserAgent() {
+            if (null == userAgent) {
+                userAgent = CalDAVAgent.parse((String) factory.getSession().getParameter("user-agent"));
+            }
+            return userAgent;
         }
 
         /**
@@ -342,7 +345,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             return maxDateTime;
         }
 
-        public CommonCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
+        public DAVCollection resolveCollection(WebdavPath url) throws WebdavProtocolException {
             url = sanitize(url);
             if (url.size() > 1) {
                 throw WebdavProtocolException.generalError(url, HttpServletResponse.SC_NOT_FOUND);
@@ -351,7 +354,7 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
                 return knownCollections.get(url);
             }
 
-            CommonCollection collection = null;
+            DAVCollection collection = null;
             if (isRoot(url)) {
                 collection = new com.openexchange.caldav.resources.CalDAVRootCollection(factory);
             } else if (ScheduleOutboxURL.SCHEDULE_OUTBOX.equals(url.name())) {
@@ -359,8 +362,8 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
             } else if (ScheduleInboxURL.SCHEDULE_INBOX.equals(url.name())) {
                 collection = factory.mixin(new com.openexchange.caldav.resources.ScheduleInboxCollection(factory));
             } else {
-                CommonCollection rootCollection = this.resolveCollection(ROOT_URL);
-                collection = (CommonCollection)rootCollection.getChild(url.name());
+                DAVCollection rootCollection = this.resolveCollection(ROOT_URL);
+                collection = (DAVCollection)rootCollection.getChild(url.name());
             }
 
             if (null == collection) {
@@ -390,4 +393,5 @@ public class GroupwareCaldavFactory extends AbstractWebdavFactory implements Bul
         }
 
     }
+
 }

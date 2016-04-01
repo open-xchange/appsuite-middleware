@@ -86,13 +86,16 @@ public class FileDiscoverer {
      * @return The matching files
      */
     public String[] getFilesFromLanguageFolder(final String extension) {
-        final String[] files = dir.list(new FilenameFilter() {
+        String[] files = dir.list(new FilenameFilter() {
 
             @Override
             public boolean accept(final File d, final String f) {
                 return f.endsWith(extension);
             }
         });
+        if (null == files) {
+            return new String[0];
+        }
         Arrays.sort(files);
         return files;
     }
@@ -114,12 +117,9 @@ public class FileDiscoverer {
         }
         final int indexOfDotBeforeUnderscore = fileName.lastIndexOf('.', indexOfUnderscore);
 
-        if (indexOfUnderscore != -1) {
-            final String language = fileName.substring(indexOfDotBeforeUnderscore + 1, indexOfUnderscore);
-            final String country = fileName.substring(indexOfUnderscore + 1, indexOfLastDot);
-            return new Locale(language, country);
-        }
-        return null;
+        final String language = fileName.substring(indexOfDotBeforeUnderscore + 1, indexOfUnderscore);
+        final String country = fileName.substring(indexOfUnderscore + 1, indexOfLastDot);
+        return new Locale(language, country);
     }
 
     /**

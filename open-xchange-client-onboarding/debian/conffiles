@@ -1,0 +1,10 @@
+opt/open-xchange/etc/client-onboarding.properties
+opt/open-xchange/etc/client-onboarding-caldav.properties
+opt/open-xchange/etc/client-onboarding-carddav.properties
+opt/open-xchange/etc/client-onboarding-driveapp.properties
+opt/open-xchange/etc/client-onboarding-eas.properties
+opt/open-xchange/etc/client-onboarding-mail.properties
+opt/open-xchange/etc/client-onboarding-mailapp.properties
+opt/open-xchange/etc/client-onboarding-emclient.properties
+opt/open-xchange/etc/client-onboarding-syncapp.properties
+opt/open-xchange/etc/client-onboarding-scenarios.yml

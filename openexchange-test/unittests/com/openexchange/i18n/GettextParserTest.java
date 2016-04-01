@@ -218,22 +218,6 @@ public class GettextParserTest extends TestCase {
             "Ich bin eine andere Nachricht.");
     }
 
-    public void testShouldIgnoreMessageContext() throws OXException {
-        final String poText = "msgctxt Testing\n"
-            + "msgid \"I am a message.\"\n\n"
-            + "msgstr \"Ich bin eine Nachricht.\"\n\n\n" + "msgctxt Testing\n"
-            + "msgid \"I am another message.\"\n\n  \n"
-            + "msgstr \"Ich bin eine andere Nachricht.\"\n";
-
-        final Translations translations = parse(poText);
-        assertNotNull(translations);
-
-        assertTranslation(translations, "I am a message.",
-            "Ich bin eine Nachricht.");
-        assertTranslation(translations, "I am another message.",
-            "Ich bin eine andere Nachricht.");
-    }
-
     public void testShouldSurviveRunawayStrings() throws OXException {
         final String poText = "msgid \"I am a message.\"\n"
             + "msgstr \"Ich bin eine Nachricht.\n"

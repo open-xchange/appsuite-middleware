@@ -61,6 +61,7 @@ import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageFileAccess.SortDirection;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -70,11 +71,13 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.PUT, name = "search", description = "Search infoitems", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "folder", optional = true, description = "The folder ID to restrict the search to. If not specified, all folders are searched."),
     @Parameter(name = "columns", description = "The requested fields as per tables Common object data and Detailed infoitem data."),
     @Parameter(name = "sort", optional = true, description = "The identifier of a column which determines the sort order of the response. If this parameter is specified, then the parameter order must be also specified."),
     @Parameter(name = "order", optional = true, description = "\"asc\" if the response entires should be sorted in the ascending order, \"desc\" if the response entries should be sorted in the descending order. If this parameter is specified, then the parameter sort must be also specified."),
     @Parameter(name = "start", optional = true, description = "The start index (inclusive) in the ordered search, that is requested."),
-    @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") }, requestBody = "An Object as described in Search contacts.", responseDescription = "")
+    @Parameter(name = "end", optional = true, description = "The last index (inclusive) from the ordered search, that is requested.") },
+    requestBody = "The search pattern string in a JSON object named \"pattern\".", responseDescription = "")
 public class SearchAction extends AbstractListingAction {
 
     @Override
@@ -114,6 +117,20 @@ public class SearchAction extends AbstractListingAction {
                 serverSession.getUser().getLocale(),
                 serverSession.getContext()).setDescending(SortDirection.DESC.equals(sortingOrder));
             results = CreatedByComparator.resort(results, comparator);
+        }
+
+        //limit results if a limit is defined
+        int limit = 0;
+        if (request.getStart() == 0 && request.getEnd() != 0) {
+            limit = request.getEnd() - request.getStart() + 1;
+        }
+
+        if (limit != 0 && results.size() > limit) {
+            ArrayList<File> resultList = new ArrayList<File>(limit);
+            for (int x = 0; x < limit && results.hasNext(); x++) {
+                resultList.add(results.next());
+            }
+            results = new SearchIteratorAdapter<File>(resultList.iterator());
         }
 
         return results(results, 0L, request);

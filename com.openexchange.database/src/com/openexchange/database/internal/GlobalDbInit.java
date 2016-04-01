@@ -60,12 +60,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import com.google.common.base.CharMatcher;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.database.ConfigDatabaseService;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 
 /**
@@ -133,15 +134,7 @@ public class GlobalDbInit {
              * use a special assignment override that pretends a connection to the config database to prevent accessing a not yet existing
              * replication monitor
              */
-            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment()) {
-
-                private static final long serialVersionUID = -6801059792528227771L;
-
-                @Override
-                public boolean isToConfigDB() {
-                    return true;
-                }
-            };
+            AssignmentImpl firstAssignment = new AssignmentImpl(dbConfig.getAssignment());
             Connection connection = null;
             boolean modified = false;
 
@@ -157,9 +150,9 @@ public class GlobalDbInit {
                 throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
             } finally {
                 if (rollback) {
-                    DBUtils.rollback(connection);
+                    Databases.rollback(connection);
                 }
-                DBUtils.autocommit(connection);
+                Databases.autocommit(connection);
 
                 if (null != connection) {
                     ConnectionState connectionState = new ConnectionState(!modified);
@@ -215,7 +208,7 @@ public class GlobalDbInit {
             Integer poolID = entry.getKey();
             GlobalDbConfig dbConfig = configsByPool.get(poolID);
             if (null == dbConfig) {
-                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier "+ poolID +" found.");
+                throw DBPoolingExceptionCodes.INVALID_GLOBALDB_CONFIGURATION.create("No database pool with identifier " + poolID + " found.");
             }
             for (String group : entry.getValue()) {
                 if (null != dbConfigs.put(group, dbConfig)) {
@@ -311,7 +304,7 @@ public class GlobalDbInit {
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            DBUtils.close(connection);
+            Databases.close(connection);
         }
     }
 
@@ -360,7 +353,7 @@ public class GlobalDbInit {
                 dbConfigs.put(Integer.valueOf(writePoolId), config);
             }
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
+            Databases.closeSQLStuff(resultSet, statement);
         }
         return dbConfigs;
     }
@@ -381,7 +374,7 @@ public class GlobalDbInit {
             resultSet = statement.executeQuery();
             return resultSet.next();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
+            Databases.closeSQLStuff(resultSet, statement);
         }
     }
 
@@ -399,7 +392,7 @@ public class GlobalDbInit {
             statement = connection.prepareStatement("CREATE DATABASE IF NOT EXISTS `" + name + "` DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci;");
             return statement.executeUpdate();
         } finally {
-            DBUtils.closeSQLStuff(resultSet, statement);
+            Databases.closeSQLStuff(resultSet, statement);
         }
     }
 

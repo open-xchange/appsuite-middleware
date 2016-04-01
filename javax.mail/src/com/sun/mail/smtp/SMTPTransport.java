@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -104,9 +104,10 @@ public class SMTPTransport extends Transport {
     private SMTPOutputStream dataStream;
 
     // Map of SMTP service extensions supported by server, if EHLO used.
-    private Hashtable extMap;
+    private Hashtable<String, String> extMap;
 
-    private Map authenticators = new HashMap();
+    private Map<String, Authenticator> authenticators
+	    = new HashMap<String, Authenticator>();
     private String defaultAuthenticationMechanisms;	// set in constructor
 
     private boolean quitWait = false;	// true if we should wait
@@ -221,7 +222,8 @@ public class SMTPTransport extends Transport {
 	    new LoginAuthenticator(),
 	    new PlainAuthenticator(),
 	    new DigestMD5Authenticator(),
-	    new NtlmAuthenticator()
+	    new NtlmAuthenticator(),
+	    new OAuth2Authenticator()
 	};
 	StringBuffer sb = new StringBuffer();
 	for (int i = 0; i < a.length; i++) {
@@ -408,7 +410,7 @@ public class SMTPTransport extends Transport {
      */
     public synchronized String[] getSASLMechanisms() {
 	if (saslMechanisms == UNKNOWN_SA) {
-	    List v = new ArrayList(5);
+	    List<String> v = new ArrayList<String>(5);
 	    String s = session.getProperty("mail." + name + ".sasl.mechanisms");
 	    if (s != null && s.length() > 0) {
 		if (logger.isLoggable(Level.FINE))
@@ -425,7 +427,7 @@ public class SMTPTransport extends Transport {
 	}
 	if (saslMechanisms == null)
 	    return null;
-	return (String[])saslMechanisms.clone();
+	return saslMechanisms.clone();
     }
 
     /**
@@ -439,7 +441,7 @@ public class SMTPTransport extends Transport {
      */
     public synchronized void setSASLMechanisms(String[] mechanisms) {
 	if (mechanisms != null)
-	    mechanisms = (String[])mechanisms.clone();
+	    mechanisms = mechanisms.clone();
 	this.saslMechanisms = mechanisms;
     }
 
@@ -787,28 +789,37 @@ public class SMTPTransport extends Transport {
 	StringTokenizer st = new StringTokenizer(mechs);
 	while (st.hasMoreTokens()) {
 	    String m = st.nextToken();
-	    String dprop = "mail." + name + ".auth." +
-				m.toLowerCase(Locale.ENGLISH) + ".disable";
-	    boolean disabled =
-		PropUtil.getBooleanSessionProperty(session, dprop, false);
-	    if (disabled) {
-		if (logger.isLoggable(Level.FINE))
-		    logger.fine(
-			"mechanism " + m + " disabled by property: " + dprop);
+	    m = m.toUpperCase(Locale.ENGLISH);
+	    Authenticator a = authenticators.get(m);
+	    if (a == null) {
+		logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
 		continue;
 	    }
-	    m = m.toUpperCase(Locale.ENGLISH);
+
 	    if (!supportsAuthentication(m)) {
 		logger.log(Level.FINE, "mechanism {0} not supported by server",
 					m);
 		continue;
 	    }
-	    Authenticator a = (Authenticator)authenticators.get(m);
-	    if (a == null) {
-		logger.log(Level.FINE, "no authenticator for mechanism {0}", m);
-		continue;
+
+	    /*
+	     * If using the default mechanisms, check if this one is disabled.
+	     */
+	    if (mechs == defaultAuthenticationMechanisms) {
+		String dprop = "mail." + name + ".auth." +
+				    m.toLowerCase(Locale.ENGLISH) + ".disable";
+		boolean disabled = PropUtil.getBooleanSessionProperty(
+						session, dprop, !a.enabled());
+		if (disabled) {
+		    if (logger.isLoggable(Level.FINE))
+			logger.fine("mechanism " + m +
+					" disabled by property: " + dprop);
+		    continue;
+		}
 	    }
-	    // only first supported mechanism is used
+
+	    // only the first supported and enabled mechanism is used
+	    logger.log(Level.FINE, "Using mechanism {0}", m);
 	    return a.authenticate(host, authzid, user, passwd);
 	}
 
@@ -822,14 +833,24 @@ public class SMTPTransport extends Transport {
      */
     private abstract class Authenticator {
 	protected int resp;	// the response code, used by subclasses
-	private String mech;	// the mechanism name, set in the constructor
+	private final String mech; // the mechanism name, set in the constructor
+	private final boolean enabled; // is this mechanism enabled by default?
 
 	Authenticator(String mech) {
+	    this(mech, true);
+	}
+
+	Authenticator(String mech, boolean enabled) {
 	    this.mech = mech.toUpperCase(Locale.ENGLISH);
+	    this.enabled = enabled;
 	}
 
 	String getMechanism() {
 	    return mech;
+	}
+
+	boolean enabled() {
+	    return enabled;
 	}
 
 	/**
@@ -1032,6 +1053,30 @@ public class SMTPTransport extends Transport {
     }
 
     /**
+     * Perform the authentication handshake for XOAUTH2 authentication.
+     */
+    private class OAuth2Authenticator extends Authenticator {
+
+	OAuth2Authenticator() {
+	    super("XOAUTH2", false);	// disabled by default
+	}
+
+	String getInitialResponse(String host, String authzid, String user,
+		String passwd) throws MessagingException, IOException {
+	    String resp = "user=" + user + "\001auth=Bearer " +
+			    passwd + "\001\001";
+	    byte[] b = BASE64EncoderStream.encode(ASCIIUtility.getBytes(resp));
+	    return ASCIIUtility.toString(b);
+	}
+
+	void doAuth(String host, String authzid, String user, String passwd)
+		throws MessagingException, IOException {
+	    // should never get here
+	    throw new AuthenticationFailedException("OAUTH2 asked for more");
+	}
+    }
+
+    /**
      * SASL-based login.
      *
      * @param	allowed	the allowed SASL mechanisms
@@ -1051,9 +1096,9 @@ public class SMTPTransport extends Transport {
 	    serviceHost = host;
 	if (saslAuthenticator == null) {
 	    try {
-		Class sac = Class.forName(
+		Class<?> sac = Class.forName(
 		    "com.sun.mail.smtp.SMTPSaslAuthenticator");
-		Constructor c = sac.getConstructor(new Class[] {
+		Constructor<?> c = sac.getConstructor(new Class<?>[] {
 					SMTPTransport.class,
 					String.class,
 					Properties.class,
@@ -1076,18 +1121,18 @@ public class SMTPTransport extends Transport {
 	}
 
 	// were any allowed mechanisms specified?
-	List v;
+	List<String> v;
 	if (allowed != null && allowed.length > 0) {
 	    // remove anything not supported by the server
-	    v = new ArrayList(allowed.length);
+	    v = new ArrayList<String>(allowed.length);
 	    for (int i = 0; i < allowed.length; i++)
 		if (supportsAuthentication(allowed[i]))	// XXX - case must match
 		    v.add(allowed[i]);
 	} else {
 	    // everything is allowed
-	    v = new ArrayList();
+	    v = new ArrayList<String>();
 	    if (extMap != null) {
-		String a = (String)extMap.get("AUTH");
+		String a = extMap.get("AUTH");
 		if (a != null) {
 		    StringTokenizer st = new StringTokenizer(a);
 		    while (st.hasMoreTokens())
@@ -1095,7 +1140,7 @@ public class SMTPTransport extends Transport {
 		}
 	    }
 	}
-	String[] mechs = (String[])v.toArray(new String[v.size()]);
+	String[] mechs = v.toArray(new String[v.size()]);
 	try {
 	    if (noauthdebug && isTracing()) {
 		logger.fine("SASL AUTH command trace suppressed");
@@ -1116,13 +1161,13 @@ public class SMTPTransport extends Transport {
      * successful submission of a message to the SMTP host.<p>
      *
      * If some of the <code>addresses</code> fail the SMTP check,
-     * and the <code>mail.stmp.sendpartial</code> property is not set,
+     * and the <code>mail.smtp.sendpartial</code> property is not set,
      * sending is aborted. The TransportEvent of type MESSAGE_NOT_DELIVERED
      * is fired containing the valid and invalid addresses. The
      * SendFailedException is also thrown. <p>
      *
      * If some of the <code>addresses</code> fail the SMTP check,
-     * and the <code>mail.stmp.sendpartial</code> property is set to true,
+     * and the <code>mail.smtp.sendpartial</code> property is set to true,
      * the message is sent. The TransportEvent of type
      * MESSAGE_PARTIALLY_DELIVERED
      * is fired containing the valid and invalid addresses. The
@@ -1207,6 +1252,7 @@ public class SMTPTransport extends Transport {
 				lastServerResponse, exception,
 				validSentAddr, validUnsentAddr, invalidAddr);
 	    }
+	    logger.fine("message successfully delivered to mail server");
 	    notifyTransportListeners(TransportEvent.MESSAGE_DELIVERED,
 				     validSentAddr, validUnsentAddr,
 				     invalidAddr, this.message);
@@ -1387,39 +1433,39 @@ public class SMTPTransport extends Transport {
      * Expand any group addresses.
      */
     private void expandGroups() {
-	Vector groups = null;
+	List<Address> groups = null;
 	for (int i = 0; i < addresses.length; i++) {
 	    InternetAddress a = (InternetAddress)addresses[i];
 	    if (a.isGroup()) {
 		if (groups == null) {
 		    // first group, catch up with where we are
-		    groups = new Vector();
+		    groups = new ArrayList<Address>();
 		    for (int k = 0; k < i; k++)
-			groups.addElement(addresses[k]);
+			groups.add(addresses[k]);
 		}
 		// parse it and add each individual address
 		try {
 		    InternetAddress[] ia = a.getGroup(true);
 		    if (ia != null) {
 			for (int j = 0; j < ia.length; j++)
-			    groups.addElement(ia[j]);
+			    groups.add(ia[j]);
 		    } else
-			groups.addElement(a);
+			groups.add(a);
 		} catch (ParseException pex) {
 		    // parse failed, add the whole thing
-		    groups.addElement(a);
+		    groups.add(a);
 		}
 	    } else {
 		// if we've started accumulating a list, add this to it
 		if (groups != null)
-		    groups.addElement(a);
+		    groups.add(a);
 	    }
 	}
 
 	// if we have a new list, convert it back to an array
 	if (groups != null) {
 	    InternetAddress[] newa = new InternetAddress[groups.size()];
-	    groups.copyInto(newa);
+	    groups.toArray(newa);
 	    addresses = newa;
 	}
     }
@@ -1520,11 +1566,12 @@ public class SMTPTransport extends Transport {
     }
 
     protected void finalize() throws Throwable {
-	super.finalize();
 	try {
 	    closeConnection();
 	} catch (MessagingException mex) {
 	    // ignore it
+	} finally {
+	    super.finalize();
 	}
     }
 
@@ -1574,7 +1621,7 @@ public class SMTPTransport extends Transport {
 	    BufferedReader rd =
 		new BufferedReader(new StringReader(lastServerResponse));
 	    String line;
-	    extMap = new Hashtable();
+	    extMap = new Hashtable<String, String>();
 	    try {
 		boolean first = true;
 		while ((line = rd.readLine()) != null) {
@@ -1727,14 +1774,14 @@ public class SMTPTransport extends Transport {
      * E: 500, 501, 503, 421
      *
      * and how we map the above error/failure conditions to valid/invalid
-     * address vectors that are reported in the thrown exception:
+     * address lists that are reported in the thrown exception:
      * invalid addr: 550, 501, 503, 551, 553
      * valid addr: 552 (quota), 450, 451, 452 (quota), 421 (srvr abort)
      */
     protected void rcptTo() throws MessagingException {
-	Vector valid = new Vector();
-	Vector validUnsent = new Vector();
-	Vector invalid = new Vector();
+	List<InternetAddress> valid = new ArrayList<InternetAddress>();
+	List<InternetAddress> validUnsent = new ArrayList<InternetAddress>();
+	List<InternetAddress> invalid = new ArrayList<InternetAddress>();
 	int retCode = -1;
 	MessagingException mex = null;
 	boolean sendFailed = false;
@@ -1794,7 +1841,7 @@ public class SMTPTransport extends Transport {
 	    }
 	    switch (retCode) {
 	    case 250: case 251:
-		valid.addElement(ia);
+		valid.add(ia);
 		if (!reportSuccess)
 		    break;
 
@@ -1814,7 +1861,7 @@ public class SMTPTransport extends Transport {
 		// given address is invalid
 		if (!sendPartial)
 		    sendFailed = true;
-		invalid.addElement(ia);
+		invalid.add(ia);
 		// create and chain the exception
 		sfex = new SMTPAddressFailedException(ia, cmd, retCode,
 							lastServerResponse);
@@ -1828,7 +1875,7 @@ public class SMTPTransport extends Transport {
 		// given address is valid
 		if (!sendPartial)
 		    sendFailed = true;
-		validUnsent.addElement(ia);
+		validUnsent.add(ia);
 		// create and chain the exception
 		sfex = new SMTPAddressFailedException(ia, cmd, retCode,
 							lastServerResponse);
@@ -1842,10 +1889,10 @@ public class SMTPTransport extends Transport {
 		// handle remaining 4xy & 5xy codes
 		if (retCode >= 400 && retCode <= 499) {
 		    // assume address is valid, although we don't really know
-		    validUnsent.addElement(ia);
+		    validUnsent.add(ia);
 		} else if (retCode >= 500 && retCode <= 599) {
 		    // assume address is invalid, although we don't really know
-		    invalid.addElement(ia);
+		    invalid.add(ia);
 		} else {
 		    // completely unexpected response, just give up
 		    if (logger.isLoggable(Level.FINE))
@@ -1878,19 +1925,19 @@ public class SMTPTransport extends Transport {
 	if (sendPartial && valid.size() == 0)
 	    sendFailed = true;
 
-	// copy the vectors into appropriate arrays
+	// copy the lists into appropriate arrays
 	if (sendFailed) {
 	    // copy invalid addrs
 	    invalidAddr = new Address[invalid.size()];
-	    invalid.copyInto(invalidAddr);
+	    invalid.toArray(invalidAddr);
 
 	    // copy all valid addresses to validUnsent, since something failed
 	    validUnsentAddr = new Address[valid.size() + validUnsent.size()];
 	    int i = 0;
 	    for (int j = 0; j < valid.size(); j++)
-		validUnsentAddr[i++] = (Address)valid.elementAt(j);
+		validUnsentAddr[i++] = (Address)valid.get(j);
 	    for (int j = 0; j < validUnsent.size(); j++)
-		validUnsentAddr[i++] = (Address)validUnsent.elementAt(j);
+		validUnsentAddr[i++] = (Address)validUnsent.get(j);
 	} else if (reportSuccess || (sendPartial &&
 			(invalid.size() > 0 || validUnsent.size() > 0))) {
 	    // we'll go on to send the message, but after sending we'll
@@ -1900,15 +1947,15 @@ public class SMTPTransport extends Transport {
 
 	    // copy invalid addrs
 	    invalidAddr = new Address[invalid.size()];
-	    invalid.copyInto(invalidAddr);
+	    invalid.toArray(invalidAddr);
 
 	    // copy valid unsent addresses to validUnsent
 	    validUnsentAddr = new Address[validUnsent.size()];
-	    validUnsent.copyInto(validUnsentAddr);
+	    validUnsent.toArray(validUnsentAddr);
 
 	    // copy valid addresses to validSent
 	    validSentAddr = new Address[valid.size()];
-	    valid.copyInto(validSentAddr);
+	    valid.toArray(validSentAddr);
 	} else {        // all addresses pass
 	    validSentAddr = addresses;
 	}
@@ -2271,7 +2318,7 @@ public class SMTPTransport extends Transport {
         try {
 	    serverOutput.write(cmdBytes);
 	    serverOutput.write(CRLF);
-	    flush(serverOutput);
+	    serverOutput.flush();
 	} catch (IOException ex) {
 	    throw new MessagingException("Can't send command to SMTP host", ex);
 	}
@@ -2412,7 +2459,7 @@ public class SMTPTransport extends Transport {
      */
     public String getExtensionParameter(String ext) {
 	return extMap == null ? null :
-			(String)extMap.get(ext.toUpperCase(Locale.ENGLISH));
+			extMap.get(ext.toUpperCase(Locale.ENGLISH));
     }
 
     /**
@@ -2429,7 +2476,7 @@ public class SMTPTransport extends Transport {
 	assert Thread.holdsLock(this);
 	if (extMap == null)
 	    return false;
-	String a = (String)extMap.get("AUTH");
+	String a = extMap.get("AUTH");
 	if (a == null)
 	    return false;
 	StringTokenizer st = new StringTokenizer(a);

@@ -158,7 +158,7 @@ public abstract class ICalDataHandler implements DataHandler {
         try {
             final CalendarDataObject loadAppointment = appointmentSql.getObjectById(appointment.getObjectID(), calendarFolder);
             if (loadAppointment.getSequence() >= appointment.getSequence()) {
-                return;
+                throw OXCalendarExceptionCodes.OUTDATED_SEQUENCE.create();
             }
         } catch (final SQLException e) {
             throw OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e);

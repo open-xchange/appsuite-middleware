@@ -204,6 +204,10 @@ public class ConversionWarning extends OXException {
          * Element automatically truncated: %s
          */
         TRUNCATION_WARNING("Element truncated: %s", CATEGORY_TRUNCATED, 20, ConversionWarningMessage.TRUNCATION_WARNING_MSG),
+        /**
+         * Can not resolve group: %d
+         */
+        CANT_RESOLVE_GROUP("Can not resolve group: %1$s", CATEGORY_ERROR, 21, null),
 
         ;
 

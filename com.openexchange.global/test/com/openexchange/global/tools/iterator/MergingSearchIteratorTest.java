@@ -72,6 +72,7 @@ public class MergingSearchIteratorTest extends TestCase {
 
         final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
+            true,
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b),
             new ArrayIterator<Integer>(c)
@@ -94,6 +95,7 @@ public class MergingSearchIteratorTest extends TestCase {
 
         final SearchIterator<Integer> complete = new MergingSearchIterator<Integer>(
             new IntegerComparator(),
+            true,
             new ArrayIterator<Integer>(a),
             new ArrayIterator<Integer>(b)
             );

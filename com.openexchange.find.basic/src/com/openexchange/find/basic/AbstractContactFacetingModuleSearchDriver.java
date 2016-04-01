@@ -89,14 +89,14 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
         ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.PRIVATE_FLAG, ContactField.DISPLAY_NAME, ContactField.GIVEN_NAME,
         ContactField.SUR_NAME, ContactField.TITLE, ContactField.POSITION, ContactField.INTERNAL_USERID, ContactField.EMAIL1,
         ContactField.EMAIL2, ContactField.EMAIL3, ContactField.COMPANY, ContactField.DISTRIBUTIONLIST, ContactField.NUMBER_OF_IMAGES,
-        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2
+        ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.CELLULAR_TELEPHONE1, ContactField.CELLULAR_TELEPHONE2, ContactField.DEPARTMENT
     };
 
     /**
      * The default sort order used to get pre-sorted results when retrieving contacts for auto-completion.
      */
-    private static final SortOrder[] SORT_ORDER = new SortOrder[] {
-        new SortOrder(ContactField.USE_COUNT, Order.DESCENDING), new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
+    private static final SortOrder[] SORT_ORDER = new SortOrder[] { //new SortOrder(ContactField.VALUE, Order.DESCENDING),
+    new SortOrder(ContactField.FOLDER_ID, Order.ASCENDING)
     };
 
     /**
@@ -235,6 +235,9 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
      * @throws OXException If contact search fails
      */
     private List<Contact> searchContacts(ServerSession session, String prefix, AutocompleteParameters parameters, List<String> folderIDs, int limit, boolean includeAdmin) throws OXException {
+        if (false == session.getUserConfiguration().hasContact()) {
+            return Collections.emptyList();
+        }
         int minimumSearchCharacters = ServerConfig.getInt(ServerConfig.Property.MINIMUM_SEARCH_CHARACTERS);
         if (Strings.isEmpty(prefix) || prefix.length() < minimumSearchCharacters) {
             return Collections.emptyList();
@@ -271,7 +274,7 @@ public abstract class AbstractContactFacetingModuleSearchDriver extends Abstract
             return Collections.emptyList();
         }
         if (1 < contacts.size()) {
-            Collections.sort(contacts, new UseCountComparator(true, session.getUser().getLocale()));
+            Collections.sort(contacts, new UseCountComparator(session.getUser().getLocale()));
             if (0 < sortOptions.getLimit() && contacts.size() > sortOptions.getLimit()) {
                 contacts.subList(0, sortOptions.getLimit()).clear();
             }

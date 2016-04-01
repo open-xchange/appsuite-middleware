@@ -57,6 +57,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONValue;
@@ -110,6 +111,7 @@ import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 
@@ -240,7 +242,11 @@ public final class NewAction extends AbstractMailAction {
                 /*
                  * ... and save draft
                  */
-                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, warnings);
+                ComposedMailMessage composedMail = MessageParser.parse4Draft(jMail, uploadEvent, session, accountId, csid, warnings);
+                UserSettingMail usm = session.getUserSettingMail();
+                usm.setNoSave(true);
+                checkAndApplyLineWrapAfter(request, usm);
+                composedMail.setMailSettings(usm);
                 MailPath msgref = composedMail.getMsgref();
                 ComposeType sendType = jMail.hasAndNotNull(Mail.PARAMETER_SEND_TYPE) ? ComposeType.getType(jMail.getInt(Mail.PARAMETER_SEND_TYPE)) : null;
                 if (null != sendType) {
@@ -273,7 +279,7 @@ public final class NewAction extends AbstractMailAction {
                  * ... and send message
                  */
                 String protocol = request.isSecure() ? "https://" : "http://";
-                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), warnings);
+                ComposedMailMessage[] composedMails = MessageParser.parse4Transport(jMail, uploadEvent, session, accountId, protocol, request.getHostname(), csid, warnings);
                 if (newMessageId) {
                     for (ComposedMailMessage composedMail : composedMails) {
                         if (null != composedMail) {
@@ -394,15 +400,23 @@ public final class NewAction extends AbstractMailAction {
                         }
                     }
                 }
+                checkAndApplyLineWrapAfter(request, usm);
+                for (final ComposedMailMessage cm : composedMails) {
+                    if (null != cm) {
+                        cm.setMailSettings(usm);
+                    }
+                }
                 userSettingMail = usm;
                 /*
                  * Check
                  */
-                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo());
+                HttpServletRequest servletRequest = request.optHttpServletRequest();
+                String remoteAddress = null == servletRequest ? request.getRemoteAddress() : servletRequest.getRemoteAddr();
+                msgIdentifier = mailInterface.sendMessage(composedMails[0], sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
                 for (int i = 1; i < composedMails.length; i++) {
                     ComposedMailMessage cm = composedMails[i];
                     if (null != cm) {
-                        mailInterface.sendMessage(cm, sendType, accountId, usm);
+                        mailInterface.sendMessage(cm, sendType, accountId, usm, new MtaStatusInfo(), remoteAddress);
                     }
                 }
 
@@ -447,6 +461,21 @@ public final class NewAction extends AbstractMailAction {
         return result;
     }
 
+    private void checkAndApplyLineWrapAfter(AJAXRequestData request, UserSettingMail usm) throws OXException {
+        String paramName = "lineWrapAfter";
+        if (request.containsParameter(paramName)) { // Provided as URL parameter
+            String sLineWrapAfter = request.getParameter(paramName);
+            if (null != sLineWrapAfter) {
+                try {
+                    int lineWrapAfter = Integer.parseInt(sLineWrapAfter.trim());
+                    usm.setAutoLinebreak(lineWrapAfter <= 0 ? 0 : lineWrapAfter);
+                } catch (NumberFormatException nfe) {
+                    throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(nfe, paramName, sLineWrapAfter);
+                }
+            }
+        }
+    }
+
     private boolean isDraftAction(ComposeType sendType) {
         return ComposeType.DRAFT_EDIT.equals(sendType);
     }
@@ -480,7 +509,7 @@ public final class NewAction extends AbstractMailAction {
         QuotedInternetAddress defaultSendAddr = new QuotedInternetAddress(getDefaultSendAddress(session), false);
         PutNewMailData data;
         {
-            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), null);
+            MimeMessage message = MimeMessageUtility.newMimeMessage(Streams.newByteArrayInputStream(Charsets.toAsciiBytes((String) req.getRequest().requireData())), true);
             message.removeHeader("x-original-headers");
             if (newMessageId) {
                 message.removeHeader("Message-ID");

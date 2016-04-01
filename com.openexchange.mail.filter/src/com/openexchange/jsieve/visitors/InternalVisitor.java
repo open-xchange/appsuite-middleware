@@ -147,7 +147,12 @@ public class InternalVisitor implements SieveParserVisitor {
                         ifCommand.setTestcommand(command);
                     } else if (jjtAccept instanceof ArrayList) {
                         final ArrayList command = (ArrayList) jjtAccept;
-                        ifCommand.setActioncommands(command);
+                        for (Object o : command) {
+                            if (o instanceof Rule) {
+                                throw new SieveException("Nested 'if' commands are not supported by this implementation");
+                            }
+                        }
+                        ifCommand.setActionCommands(command);
                     }
                 }
                 final ArrayList<Command> commands = new ArrayList<Command>();
@@ -224,7 +229,7 @@ public class InternalVisitor implements SieveParserVisitor {
                 }
             }
             for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
-                if (command.getCommandname().equals(name)) {
+                if (command.getCommandName().equals(name)) {
                     final ActionCommand actionCommand = new ActionCommand(command, arguments);
                     // Here we have to decide if we are on the base level or
                     // inside a control command. If we are inside
@@ -238,7 +243,7 @@ public class InternalVisitor implements SieveParserVisitor {
                         actionCommands.add(actionCommand);
                         final IfOrElseIfCommand ifCommand = new IfCommand();
                         ifCommand.setTestcommand(new TestCommand(TestCommand.Commands.TRUE, new ArrayList<Object>(), new ArrayList<TestCommand>()));
-                        ifCommand.setActioncommands(actionCommands);
+                        ifCommand.setActionCommands(actionCommands);
                         final ArrayList<Command> commands = new ArrayList<Command>();
                         commands.add(ifCommand);
                         ((ArrayList<Rule>) data).add(new Rule(commands, node.getCoordinate().getStartLineNumber(), node.getCoordinate().getEndLineNumber(), commented));
@@ -293,7 +298,7 @@ public class InternalVisitor implements SieveParserVisitor {
     public Object visit(final ASTtest node, final Object data) throws SieveException {
         final String name = node.getName();
         for (final TestCommand.Commands command : TestCommand.Commands.values()) {
-            if (command.getCommandname().equals(name)) {
+            if (command.getCommandName().equals(name)) {
                 final Object visitChildren = visitChildren(node, data);
                 if (visitChildren instanceof ArrayList) {
                     final ArrayList<String> tagargs = new ArrayList<String>();

@@ -60,6 +60,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -88,12 +90,14 @@ import com.openexchange.mail.mime.ContentType;
 import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.MimeDefaultSession;
 import com.openexchange.mail.mime.MimeMailException;
+import com.openexchange.mail.mime.MimeMailExceptionCode;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.usersetting.UserSettingMailStorage;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.notification.mail.MailAttachment;
 import com.openexchange.notification.mail.MailData;
 import com.openexchange.notification.mail.NotificationMailFactory;
 import com.openexchange.serverconfig.NotificationMailConfig;
@@ -115,6 +119,13 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
     private final TemplateService templateService;
     private final HtmlService htmlService;
 
+    /**
+     * Initializes a new {@link NotificationMailFactoryImpl}.
+     *
+     * @param configService The configuration service to use
+     * @param templateService The template service to use
+     * @param htmlService The HTML service to use
+     */
     public NotificationMailFactoryImpl(ConfigurationService configService, TemplateService templateService, HtmlService htmlService) {
         super();
         this.configService = configService;
@@ -124,6 +135,11 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
 
     @Override
     public ComposedMailMessage createMail(MailData data) throws OXException {
+        return createMail(data, Collections.<MailAttachment> emptyList());
+    }
+
+    @Override
+    public ComposedMailMessage createMail(MailData data, Collection<MailAttachment> attachments) throws OXException {
         try {
             NotificationMailConfig mailConfig = data.getMailConfig();
             Map<String, Object> templateVars = getMutableTemplateVars(data);
@@ -177,14 +193,60 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
                 mimeMessage.addHeader(header.getKey(), header.getValue());
             }
 
-            MimeMultipart multipart = new MimeMultipart("alternative");
-            multipart.addBodyPart(textPart);
-            multipart.addBodyPart(htmlPart);
+            MimeMultipart multipart;
+            if (null == attachments || attachments.isEmpty()) {
+                // No attachment specified
+                multipart = new MimeMultipart("alternative");
+                multipart.addBodyPart(textPart);
+                multipart.addBodyPart(htmlPart);
+            } else {
+                // Compose multipart for "alternative" content
+                MimeMultipart alternativeMultipart = new MimeMultipart("alternative");
+                alternativeMultipart.addBodyPart(textPart);
+                alternativeMultipart.addBodyPart(htmlPart);
+                MimeBodyPart tmp = new MimeBodyPart();
+                MessageUtility.setContent(alternativeMultipart, tmp);
+
+                // Create primary multipart and append "alternative" multipart as well as attachments to it
+                multipart = new MimeMultipart("mixed");
+                multipart.addBodyPart(tmp);
+
+                for (MailAttachment attachment : attachments) {
+                    String contentType = attachment.getContentType();
+                    MimeBodyPart bodyPart = new MimeBodyPart();
+
+                    // Set MIME part's DataHandler
+                    if (attachment instanceof AbstractMailAttachment) {
+                        AbstractMailAttachment ama = (AbstractMailAttachment) attachment;
+                        bodyPart.setDataHandler(new DataHandler(ama.asDataHandler()));
+                    } else {
+                        bodyPart.setDataHandler(new DataHandler(new MessageDataSource(attachment.getStream(), new ContentType(contentType).getBaseType())));
+                    }
+
+                    // Basic headers
+                    bodyPart.setHeader(MessageHeaders.HDR_MIME_VERSION, "1.0");
+                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_TYPE, MimeMessageUtility.foldContentType(contentType));
+                    bodyPart.setHeader(MessageHeaders.HDR_CONTENT_DISPOSITION, MimeMessageUtility.foldContentType(attachment.getDisposition()));
+
+                    // Other headers (if available)
+                    Map<String, String> headers = attachment.getHeaders();
+                    if (null != headers) {
+                        for (Map.Entry<String,String> entry : headers.entrySet()) {
+                            bodyPart.setHeader(entry.getKey(), entry.getValue());
+                        }
+                    }
+
+                    multipart.addBodyPart(bodyPart);
+                }
+            }
+
             mimeMessage.setContent(multipart);
             mimeMessage.saveChanges();
             return new ContentAwareComposedMailMessage(mimeMessage, data.getContext().getContextId());
         } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
+        } catch (IOException e) {
+            throw MimeMailExceptionCode.IO_ERROR.create(e, e.getMessage());
         }
     }
 

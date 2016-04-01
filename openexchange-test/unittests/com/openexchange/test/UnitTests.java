@@ -176,11 +176,11 @@ public class UnitTests {
         // Mail
         tests.addTest(com.openexchange.mail.MailAPITestSuite.suite());
 
-        //Share tests
-        tests.addTest(com.openexchange.share.ShareTestSuite.suite());
-
         //User tests
         tests.addTest(com.openexchange.user.UserTestSuite.suite());
+
+        // SMS tests
+        tests.addTest(com.openexchange.sms.SMSTestSuite.suite());
 
         return tests;
     }

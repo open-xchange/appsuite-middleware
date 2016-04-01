@@ -52,7 +52,7 @@ package com.openexchange.push.malpoll;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
 
 /**
@@ -72,8 +72,8 @@ public final class UpdateTaskPublisher implements UpdateTaskProviderService {
 
     @Override
     @SuppressWarnings("deprecation")
-    public Collection<UpdateTask> getUpdateTasks() {
-        final List<UpdateTask> tasks = new ArrayList<UpdateTask>(2);
+    public Collection<UpdateTaskV2> getUpdateTasks() {
+        final List<UpdateTaskV2> tasks = new ArrayList<UpdateTaskV2>(2);
         tasks.add(new MALPollCreateTableTask());
         tasks.add(new MALPollModifyTableTask());
         return tasks;

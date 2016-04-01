@@ -113,7 +113,7 @@ public final class PushImplActivator extends HousekeepingActivator  {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class };
+        return new Class<?>[] { HazelcastConfigurationService.class, TimerService.class, SessiondService.class, DatabaseService.class };
     }
 
     @Override
@@ -135,7 +135,6 @@ public final class PushImplActivator extends HousekeepingActivator  {
             trackService(EventFactoryService.class);
             trackService(ThreadPoolService.class);
             trackService(EventAdmin.class);
-            trackService(DatabaseService.class);
             trackService(CryptoService.class);
             trackService(HazelcastInstance.class);
 
@@ -176,6 +175,8 @@ public final class PushImplActivator extends HousekeepingActivator  {
                 track(ManagementService.class, customizer);
             }
 
+            openTrackers();
+
             // Get initialized registry instance
             PushManagerRegistry pushManagerRegistry = PushManagerRegistry.getInstance();
 
@@ -208,8 +209,6 @@ public final class PushImplActivator extends HousekeepingActivator  {
                     pushManagerRegistry.applyInitialListeners(pushManagerRegistry.getUsersWithPermanentListeners(), 0L);
                 }
             }
-
-            openTrackers();
 
             registerService(CreateTableService.class, new CreatePushTable(), null);
             registerService(DeleteListener.class, new PushDeleteListener(), null);

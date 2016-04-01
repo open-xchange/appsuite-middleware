@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Calendar Module
 Bundle-SymbolicName: com.openexchange.calendar
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.calendar.osgi.CalendarActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -50,6 +50,7 @@ Import-Package: cern.colt,
  com.openexchange.groupware.downgrade,
  com.openexchange.groupware.impl,
  com.openexchange.groupware.ldap,
+ com.openexchange.groupware.modules,
  com.openexchange.groupware.notify,
  com.openexchange.groupware.notify.hostname,
  com.openexchange.groupware.reminder,
@@ -70,6 +71,7 @@ Import-Package: cern.colt,
  com.openexchange.mail.mime.utils,
  com.openexchange.mail.usersetting,
  com.openexchange.mail.utils,
+ com.openexchange.objectusecount,
  com.openexchange.osgi,
  com.openexchange.preferences,
  com.openexchange.quota,
@@ -78,6 +80,7 @@ Import-Package: cern.colt,
  com.openexchange.search,
  com.openexchange.server,
  com.openexchange.server.impl,
+ com.openexchange.server.services,
  com.openexchange.session,
  com.openexchange.sql.builder,
  com.openexchange.sql.grammar,

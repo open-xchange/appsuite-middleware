@@ -1,0 +1,28 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The Image Transformation Bundle based on ImageMagick command-line
+Bundle-SymbolicName: com.openexchange.imagetransformation.imagemagick
+Bundle-Version: 7.8.1
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.ajax.container,
+ com.openexchange.ajax.fileholder,
+ com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.imagetransformation,
+ com.openexchange.java,
+ com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
+ com.openexchange.osgi.util,
+ com.openexchange.processing,
+ com.openexchange.server,
+ com.openexchange.threadpool,
+ javax.imageio,
+ javax.imageio.stream,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Bundle-ClassPath: lib/im4java-1.4.0.jar,
+ .
+Bundle-Activator: com.openexchange.imagetransformation.imagemagick.osgi.ImageMagickImageTransformationActivator

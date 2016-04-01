@@ -76,4 +76,15 @@ public interface ImageUriGenerator {
      */
     void generateImageUri(StringBuilder linkBuilder, String prefix, String optAppendix, String imageIdentifier, MailPath mailPath, Session session) throws OXException;
 
+    /**
+     * Gets the plain image URI
+     *
+     * @param imageIdentifier The image identifier
+     * @param mailPath The mail path
+     * @param session Tne associated session
+     * @return The plain image URI
+     * @throws OXException If plain image URI cannot be returned
+     */
+    String getPlainImageUri(String imageIdentifier, MailPath mailPath, Session session) throws OXException;
+
 }

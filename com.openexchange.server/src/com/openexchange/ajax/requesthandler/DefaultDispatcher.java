@@ -143,10 +143,10 @@ public class DefaultDispatcher implements Dispatcher {
         try {
             AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
-            /*
-             * Set request context
-             */
-            RequestContextHolder.set(buildRequestContext(modifiedRequestData));
+                /*
+                 * Set request context
+                 */
+                RequestContextHolder.set(buildRequestContext(modifiedRequestData));
 
             AJAXActionServiceFactory factory = lookupFactory(modifiedRequestData.getModule());
             if (factory == null) {
@@ -174,32 +174,32 @@ public class DefaultDispatcher implements Dispatcher {
                 return failedResult;
             }
 
-            /*
-             * Check for action annotations
-             */
-            for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
-                if (annotationProcessor.handles(action)) {
-                    annotationProcessor.process(action, modifiedRequestData, session);
+                /*
+                 * Check for action annotations
+                 */
+                for (AJAXActionAnnotationProcessor annotationProcessor : annotationProcessors) {
+                    if (annotationProcessor.handles(action)) {
+                        annotationProcessor.process(action, modifiedRequestData, session);
+                    }
                 }
-            }
 
-            /*
-             * State already initialized for module?
-             */
-            if (factory instanceof AJAXStateHandler) {
-                final AJAXStateHandler handler = (AJAXStateHandler) factory;
-                if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
-                    handler.initialize(state);
+                /*
+                 * State already initialized for module?
+                 */
+                if (factory instanceof AJAXStateHandler) {
+                    final AJAXStateHandler handler = (AJAXStateHandler) factory;
+                    if (state.addInitializer(modifiedRequestData.getModule(), handler)) {
+                        handler.initialize(state);
+                    }
                 }
-            }
-            modifiedRequestData.setState(state);
+                modifiedRequestData.setState(state);
 
-            /*
-             * Ensure requested format
-             */
-            if (requestData.getFormat() == null) {
-                requestData.setFormat("apiResponse");
-            }
+                /*
+                 * Ensure requested format
+                 */
+                if (requestData.getFormat() == null) {
+                    requestData.setFormat("apiResponse");
+                }
 
             /*
              * Perform request
@@ -231,13 +231,13 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
 
-            // Wrap unchecked exception
-            addLogProperties(requestData, true);
-            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            RequestContextHolder.reset();
+                // Wrap unchecked exception
+                addLogProperties(requestData, true);
+                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                RequestContextHolder.reset();
+            }
         }
-    }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
         HostData hostData = requestData.getHostData();

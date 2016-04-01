@@ -114,7 +114,7 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
 
     @Override
     public boolean hasProperty(final T component) {
-        return null != component.getProperty("RRULE");
+        return null != component.getProperty("RRULE") || null != component.getProperty("X-MOZ-FAKED-MASTER");
     }
 
     @Override
@@ -234,6 +234,12 @@ public class Recurrence<T extends CalendarComponent, U extends CalendarObject> e
      */
     @Override
     public void parse(final int index, final T component, final U cObj, final TimeZone timeZone, final Context ctx, final List<ConversionWarning> warnings) throws ConversionError {
+        /*
+         * check & preserve X-MOZ-FAKED-MASTER marker
+         */
+        if (null != component.getProperty("X-MOZ-FAKED-MASTER") && "1".equals(component.getProperty("X-MOZ-FAKED-MASTER").getValue())) {
+            cObj.setProperty("com.openexchange.data.conversion.ical.recurrence.mozFakedMaster", Boolean.TRUE);
+        }
         if (null == cObj.getStartDate()) {
             return;
         }

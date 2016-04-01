@@ -168,4 +168,15 @@ public interface ICalEmitter {
      */
     String writeFreeBusyReply(FreeBusyInformation freeBusyInfo, Context ctx, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
 
+    /**
+     * Writes a single timezone definition to an iCal session.
+     *
+     * @param session The underlying iCal session
+     * @param timeZoneID The identifier of the timezone
+     * @param errors A reference to store any conversion errors
+     * @param warnings A reference to store any non-fatal conversion warnings
+     * @return <code>true</code> if the timezone has been added, <code>false</code>, if no matching timezone could be found or the timezone definition was already present
+     */
+    boolean writeTimeZone(ICalSession session, String timeZoneID, List<ConversionError> errors, List<ConversionWarning> warnings) throws ConversionError;
+
 }

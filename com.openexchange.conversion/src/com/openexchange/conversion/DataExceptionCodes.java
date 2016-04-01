@@ -71,7 +71,7 @@ public enum DataExceptionCodes implements DisplayableOXExceptionCode {
     /**
      * Missing argument %1$s
      */
-    MISSING_ARGUMENT("Missing argument %1$", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
+    MISSING_ARGUMENT("Missing argument %1$s", OXExceptionStrings.MESSAGE, Category.CATEGORY_ERROR, 2),
     /**
      * Invalid value for argument %1$s: ``%2$s''
      */
@@ -112,7 +112,7 @@ public enum DataExceptionCodes implements DisplayableOXExceptionCode {
     private final int number;
 
     private final String message;
-    
+
     private final String displayMessage;
 
     private DataExceptionCodes(final String message, final String displayMessage, final Category category, final int detailNumber) {

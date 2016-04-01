@@ -49,9 +49,9 @@
 
 package javax.mail.internet.idn;
 
-import javax.mail.internet.AddressException;
-
 import gnu.inet.encoding.IDNAException;
+import javax.mail.internet.AddressException;
+import org.slf4j.LoggerFactory;
 
 /**
  * {@link IDNA} - Helper class for internationalized domain names (IDN).
@@ -145,7 +145,7 @@ public final class IDNA {
             return new StringBuilder(aceAddress.length()).append(aceAddress.substring(0, pos)).append('@').append(unicode).toString();
         } catch (RuntimeException e) {
             // Decoding punycode failed
-        	org.slf4j.LoggerFactory.getLogger(IDNA.class).error("Failed to convert ACE/puny-code to IDN address: {}", aceAddress, e);
+            LOGGER.error("Failed to convert ACE/puny-code to IDN address: {}", aceAddress, e);
             return aceAddress;
         }
     }
@@ -185,7 +185,7 @@ public final class IDNA {
             }
             return b.toString();
         } catch (final IDNAException e) {
-        	org.slf4j.LoggerFactory.getLogger(IDNA.class).warn("Couldn''t create ASCII representation for host name: {}", unicodeHostName, e);
+            LoggerFactory.getLogger(IDNA.class).warn("Couldn''t create ASCII representation for host name: {}", unicodeHostName, e);
             return unicodeHostName;
         }
     }

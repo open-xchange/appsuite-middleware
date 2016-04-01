@@ -50,19 +50,38 @@
 package com.openexchange.webdav.action;
 
 import javax.servlet.http.HttpServletResponse;
-
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
 
 public class WebdavIfMatchAction extends AbstractAction {
 
-	@Override
-	public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		check(req, true);
-		check(req, false);
-		yield(req,res);
+    private final int statusCode;
 
+    /**
+     * Initializes a new {@link WebdavIfMatchAction}, throwing a {@link HttpServletResponse#SC_PRECONDITION_FAILED} error if the checked
+     * condition is not satisfied by the underlying resource.
+     */
+    public WebdavIfMatchAction() {
+        this(HttpServletResponse.SC_PRECONDITION_FAILED);
+    }
+
+    /**
+     * Initializes a new {@link WebdavIfMatchAction}.
+     *
+     * @param statusCode The HTTP response status code to use if the condition is not satisfied, usually either
+     *                   {@link HttpServletResponse#SC_NOT_MODIFIED} for <code>GET</code> or <code>HEAD</code> request, or
+     *                   {@link HttpServletResponse#SC_PRECONDITION_FAILED} for others
+     */
+    public WebdavIfMatchAction(int statusCode) {
+        super();
+        this.statusCode = statusCode;
+    }
+
+	@Override
+	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+		check(request, true);
+		check(request, false);
+		yield(request, response);
 	}
 
 	private void check(WebdavRequest req, boolean mustMatch) throws WebdavProtocolException {
@@ -72,7 +91,6 @@ public class WebdavIfMatchAction extends AbstractAction {
 			if (res.exists() && res.isCollection()) {
 				throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
 			}
-
 			boolean foundMatch = false;
 			if (res.exists()) {
 				String eTag = res.getETag();
@@ -87,12 +105,9 @@ public class WebdavIfMatchAction extends AbstractAction {
 					}
 				}
 			}
-
-			if (foundMatch == mustMatch) {
-				return;
-			}
-
-			throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), HttpServletResponse.SC_PRECONDITION_FAILED);
+			if (foundMatch != mustMatch) {
+			    throw WebdavProtocolException.Code.GENERAL_ERROR.create(req.getUrl(), statusCode);
+		    }
 		}
 	}
 

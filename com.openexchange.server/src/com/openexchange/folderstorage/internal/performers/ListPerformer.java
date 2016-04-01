@@ -562,7 +562,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
                 addWarning(warnings.iterator().next());
             }
         } catch (final OXException e) {
-            if (OXExceptions.isUserInput(e)) {
+            if (OXExceptions.isUserInput(e) || OXExceptions.isPermissionDenied(e)) {
                 LOG.debug("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
             } else {
                 LOG.warn("Batch loading of folder failed. Fall-back to one-by-one loading.", e);
@@ -583,7 +583,7 @@ public final class ListPerformer extends AbstractUserizedFolderPerformer {
             try {
                 subfolder = folderStorage.getFolder(treeId, id, newParameters);
             } catch (final OXException e) {
-                if (OXExceptions.isUserInput(e)) {
+                if (OXExceptions.isUserInput(e) || OXExceptions.isPermissionDenied(e)) {
                     LOG.debug("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName(), e);
                 } else {
                     LOG.warn("The folder with ID \"{}\" in tree \"{}\" could not be fetched from storage \"{}\"", id, treeId, folderStorage.getClass().getSimpleName());

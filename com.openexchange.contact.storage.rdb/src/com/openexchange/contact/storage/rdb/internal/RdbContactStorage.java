@@ -80,15 +80,15 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.impl.IDGenerator;
 import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.groupware.tools.mappings.Mapping;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.impl.EffectivePermission;
 import com.openexchange.session.Session;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.ScaleType;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderProperties;
@@ -306,7 +306,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * get a list of object IDs to delete
              */
-            final List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, new ContactField[] { ContactField.OBJECT_ID }, null, null);
+            final List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, folderID, null, Integer.MIN_VALUE, new ContactField[] { ContactField.OBJECT_ID }, null, null, session.getUserId());
             if (null == contacts || 0 == contacts.size()) {
                 return;// nothing to do
             }
@@ -764,9 +764,9 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
                         availableFields.add(requestedField);
                     }
                 }
-                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions);
+                contacts = executor.select(connection, Table.DELETED_CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, availableFields.toArray(new ContactField[availableFields.size()]), term, sortOptions, session.getUserId());
             } else {
-                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions);
+                contacts = executor.select(connection, deleted ? Table.DELETED_CONTACTS : Table.CONTACTS, contextID, parentFolderID, objectIDs, minLastModified, queryFields.getContactDataFields(), term, sortOptions, session.getUserId());
                 if (null != contacts && 0 < contacts.size()) {
                     /*
                      * merge image data if needed
@@ -821,7 +821,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             /*
              * get contact data
              */
-            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, contactSearch, queryFields.getContactDataFields(), sortOptions);
+            List<Contact> contacts = executor.select(connection, Table.CONTACTS, contextID, contactSearch, queryFields.getContactDataFields(), sortOptions, session.getUserId());
             if (null != contacts && 0 < contacts.size()) {
                 /*
                  * merge image data if needed

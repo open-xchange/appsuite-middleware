@@ -70,8 +70,9 @@ import com.openexchange.i18n.LocaleTools;
 import com.openexchange.i18n.Translator;
 import com.openexchange.i18n.TranslatorFactory;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
+import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.templating.OXTemplate;
 import com.openexchange.templating.OXTemplateExceptionHandler;
@@ -92,16 +93,19 @@ public abstract class OAuthEndpoint extends HttpServlet {
 
     protected static final String ATTR_OAUTH_CSRF_TOKEN = "oauth-csrf-token";
 
-    protected final OAuthProviderService oAuthProvider;
+    protected final ClientManagement clientManagement;
+
+    protected final GrantManagement grantManagement;
 
     protected final ServiceLookup services;
 
     /**
      * Initializes a new {@link OAuthEndpoint}.
      */
-    protected OAuthEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
+    protected OAuthEndpoint(ClientManagement clientManagement, GrantManagement grantManagement, ServiceLookup services) {
         super();
-        this.oAuthProvider = oAuthProvider;
+        this.clientManagement = clientManagement;
+        this.grantManagement = grantManagement;
         this.services = services;
     }
 

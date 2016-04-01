@@ -54,11 +54,14 @@ import static com.openexchange.mail.mime.utils.MimeMessageUtility.decodeMultiEnc
 import static com.openexchange.mail.parser.MailMessageParser.generateFilename;
 import static com.openexchange.mail.utils.MailFolderUtility.prepareFullname;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -131,6 +134,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private static final String ACCOUNT_ID = MailJSONField.ACCOUNT_ID.getKey();
     private static final String ACCOUNT_NAME = MailJSONField.ACCOUNT_NAME.getKey();
     private static final String HAS_ATTACHMENTS = MailJSONField.HAS_ATTACHMENTS.getKey();
+    private static final String HAS_REAL_ATTACHMENTS = "real_attachment";
     private static final String UNREAD = MailJSONField.UNREAD.getKey();
     private static final String ATTACHMENT_FILE_NAME = MailJSONField.ATTACHMENT_FILE_NAME.getKey();
     private static final String FROM = MailJSONField.FROM.getKey();
@@ -221,7 +225,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private final MailPath mailPath;
     private final MailPath originalMailPath;
     private final JSONObject jsonObject;
-    private JSONArray attachmentsArr;
+    private AttachmentListing attachmentListing;
     private JSONArray nestedMsgsArr;
     private boolean isAlternative;
     private String altId;
@@ -342,7 +346,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 if (unreadMessages >= 0) {
                     jsonObject.put(UNREAD, unreadMessages);
                 }
-                jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                if (mail.containsHasAttachment()) {
+                    // jsonObject.put(HAS_ATTACHMENTS, mail.containsHasAttachment() ? mail.hasAttachment() : mail.getContentType().isMimeType(MimeTypes.MIME_MULTIPART_MIXED));
+                    // See bug 42695 & 42862
+                    jsonObject.put(HAS_ATTACHMENTS, mail.hasAttachment());
+                }
                 jsonObject.put(CONTENT_TYPE, mail.getContentType().getBaseType());
                 jsonObject.put(SIZE, mail.getSize());
                 jsonObject.put(ACCOUNT_NAME, mail.getAccountName());
@@ -405,12 +413,11 @@ public final class JsonMessageHandler implements MailMessageHandler {
         return this;
     }
 
-    private JSONArray getAttachmentsArr() throws JSONException {
-        if (attachmentsArr == null) {
-            attachmentsArr = new JSONArray();
-            jsonObject.put(ATTACHMENTS, attachmentsArr);
+    private AttachmentListing getAttachmentListing() {
+        if (attachmentListing == null) {
+            attachmentListing = new AttachmentListing();
         }
-        return attachmentsArr;
+        return attachmentListing;
     }
 
     private JSONArray getNestedMsgsArr() throws JSONException {
@@ -472,10 +479,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
         }
 
         // Handle attachment
-        return handleAttachment0(part, isInline, null, baseContentType, fileName, id);
+        return handleAttachment0(part, isInline, null, baseContentType, fileName, id, false);
     }
 
-    private boolean handleAttachment0(final MailPart part, final boolean isInline, final String disposition, final String baseContentType, final String fileName, final String id) throws OXException {
+    private boolean handleAttachment0(MailPart part, boolean isInline, String disposition, String baseContentType, String fileName, String id, boolean handleAsInlineImage) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(8);
             /*
@@ -543,27 +550,14 @@ public final class JsonMessageHandler implements MailMessageHandler {
              * Add token
              */
             addToken(jsonObject, attachmentId);
-            // if (isInline &&
-            // part.getContentType().isMimeType(MIMETypes.MIME_TEXT_ALL)) {
-            // // TODO: Add rtf2html conversion here!
-            // if (part.getContentType().isMimeType(MIMETypes.MIME_TEXT_RTF)) {
-            // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            // } else {
-            // final String charset =
-            // part.getContentType().containsCharsetParameter() ?
-            // part.getContentType()
-            // .getCharsetParameter() : MailConfig.getDefaultMimeCharset();
-            // jsonObject.put(MailJSONField.CONTENT.getKey(),
-            // MessageUtility.formatContentForDisplay(
-            // MessageUtility.readMailPart(part, charset),
-            // part.getContentType().isMimeType(
-            // MIMETypes.MIME_TEXT_HTM_ALL), session, mailPath,
-            // displayVersion));
-            // }
-            // } else {
-            // jsonObject.put(MailJSONField.CONTENT.getKey(), JSONObject.NULL);
-            // }
-            getAttachmentsArr().put(jsonObject);
+            /*
+             * Add attachment
+             */
+            if (handleAsInlineImage) {
+                getAttachmentListing().addRemainder(jsonObject);
+            } else {
+                getAttachmentListing().add(jsonObject);
+            }
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -705,8 +699,8 @@ public final class JsonMessageHandler implements MailMessageHandler {
             final MultipartInfo mpInfo = multiparts.peek();
             if (null != mpInfo && textAppended && id.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
                 try {
-                    JSONArray attachments = getAttachmentsArr();
-                    int len = attachments.length();
+                    List<JSONObject> attachments = getAttachmentListing().getAttachments();
+                    int len = attachments.size();
                     String keyContentType = CONTENT_TYPE;
                     String keyContent = CONTENT;
                     String keySize = SIZE;
@@ -714,7 +708,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
                     boolean b = true;
                     for (int i = len; b && i-- > 0;) {
-                        final JSONObject jAttachment = attachments.getJSONObject(i);
+                        JSONObject jAttachment = attachments.get(i);
                         if (jAttachment.getString(keyContentType).startsWith("text/plain") && null != mailPath) {
                             try {
                                 final String imageURL;
@@ -738,7 +732,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     if (b) { // No suitable text/plain
                         try {
                             for (int i = len; b && i-- > 0;) {
-                                final JSONObject jAttachment = attachments.getJSONObject(i);
+                                JSONObject jAttachment = attachments.get(i);
                                 // Is HTML and in same multipart
                                 if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null))) {
                                     String content = jAttachment.optString(CONTENT, "null");
@@ -761,18 +755,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
                                     }
                                 }
                             }
-                        } catch (final JSONException e) {
-                            throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                        } catch (final RuntimeException e) {
+                            throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                         }
                     }
 
-                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
+                    return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
                 } catch (final JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
             }
         }
-        return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id);
+        return handleAttachment0(part, considerAsInline, considerAsInline ? Part.INLINE : Part.ATTACHMENT, baseContentType, fileName, id, considerAsInline);
     }
 
     @Override
@@ -802,9 +796,9 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         } else {
                             try {
                                 asDisplayText(id, contentType.getBaseType(), htmlContent, fileName, false);
-                                getAttachmentsArr().remove(0);
-                            } catch (JSONException e) {
-                                throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                                getAttachmentListing().removeFirst();
+                            } catch (RuntimeException e) {
+                                throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
                             }
                         }
                     }
@@ -813,10 +807,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
                      */
                     try {
                         MultipartInfo mpInfo = multiparts.peek();
-                        JSONArray attachments = getAttachmentsArr();
-                        int length = attachments.length();
+                        List<JSONObject> attachments = getAttachmentListing().getAttachments();
+                        int length = attachments.size();
                         for (int i = length; i-- > 0;) {
-                            JSONObject jAttachment = attachments.getJSONObject(i);
+                            JSONObject jAttachment = attachments.get(i);
                             // Is HTML and in same multipart
                             if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                                 String content = jAttachment.optString(CONTENT, "null");
@@ -857,10 +851,10 @@ public final class JsonMessageHandler implements MailMessageHandler {
             } else {
                 try {
                     MultipartInfo mpInfo = multiparts.peek();
-                    JSONArray attachments = getAttachmentsArr();
-                    int length = attachments.length();
+                    List<JSONObject> attachments = getAttachmentListing().getAttachments();
+                    int length = attachments.size();
                     for (int i = length; i-- > 0;) {
-                        JSONObject jAttachment = attachments.getJSONObject(i);
+                        JSONObject jAttachment = attachments.get(i);
                         // Is HTML and in same multipart
                         if (jAttachment.optString(CONTENT_TYPE, "").startsWith("text/htm") && null != mpInfo && mpInfo.mpId.equals(jAttachment.optString(MULTIPART_ID, null)) && mpInfo.isSubType("mixed")) {
                             String content = jAttachment.optString(CONTENT, "null");
@@ -930,7 +924,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     jsonObject.put(SIZE, htmlContent.length());
                     jsonObject.put(DISPOSITION, Part.INLINE);
                     jsonObject.put(CONTENT, htmlContent);
-                    getAttachmentsArr().put(jsonObject);
+                    getAttachmentListing().add(jsonObject);
                 } catch (JSONException e) {
                     throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
                 }
@@ -1018,7 +1012,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     if (includePlainText) {
                         jsonObject.put("plain_text", plainTextContentArg);
                     }
-                    getAttachmentsArr().put(jsonObject);
+                    getAttachmentListing().add(jsonObject);
                 }
                 html = false;
                 textAppended = true;
@@ -1064,16 +1058,16 @@ public final class JsonMessageHandler implements MailMessageHandler {
                     final HtmlSanitizeResult sanitizeResult = HtmlProcessing.formatTextForDisplay(plainTextContentArg, usm, displayMode, maxContentSize);
                     final MultipartInfo mpInfo = multiparts.peek();
                     if (null != mpInfo && (DisplayMode.RAW.getMode() < displayMode.getMode()) && identifier.startsWith(mpInfo.mpId) && mpInfo.isSubType("mixed")) {
-                        final JSONArray attachments = getAttachmentsArr();
-                        final int len = attachments.length();
-                        final String keyContentType = CONTENT_TYPE;
-                        final String keyContent = CONTENT;
-                        final String keySize = SIZE;
+                        List<JSONObject> attachments = getAttachmentListing().getAttachments();
+                        int len = attachments.size();
+                        String keyContentType = CONTENT_TYPE;
+                        String keyContent = CONTENT;
+                        String keySize = SIZE;
                         boolean b = true;
                         for (int i = len - 1; b && i >= 0; i--) {
-                            final JSONObject jObject = attachments.getJSONObject(i);
+                            JSONObject jObject = attachments.get(i);
                             if (jObject.getString(keyContentType).startsWith("text/plain") && jObject.hasAndNotNull(keyContent)) {
-                                final String newContent = jObject.getString(keyContent) + sanitizeResult.getContent();
+                                String newContent = jObject.getString(keyContent) + sanitizeResult.getContent();
                                 jObject.put(keyContent, newContent);
                                 jObject.put(keySize, newContent.length());
                                 if (includePlainText && jObject.has("plain_text")) {
@@ -1160,7 +1154,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                  */
                 jsonObject.put(CONTENT, JSONObject.NULL);
             }
-            getAttachmentsArr().put(jsonObject);
+            getAttachmentListing().add(jsonObject);
             return true;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1174,16 +1168,30 @@ public final class JsonMessageHandler implements MailMessageHandler {
 
     @Override
     public void handleMessageEnd(final MailMessage mail) throws OXException {
-        /*
-         * Since we obviously touched message's content, mark its corresponding message object as seen
-         */
+        // Since we obviously touched message's content, mark its corresponding message object as seen
         mail.setFlags(mail.getFlags() | MailMessage.FLAG_SEEN);
+
+        // Check if we did not append any text so far
         if (!textAppended && plainText != null) {
             /*
-             * No text present
+             * Append the plain text...
              */
-            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content));
+            asRawContent(plainText.id, plainText.contentType, new HtmlSanitizeResult(plainText.content), true);
+
         }
+
+        // Attachments
+        {
+            AttachmentListing attachmentListing = this.attachmentListing;
+            if (null != attachmentListing) {
+                try {
+                    jsonObject.put(ATTACHMENTS, attachmentListing.toJsonArray());
+                } catch (JSONException e) {
+                    throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+                }
+            }
+        }
+
         try {
             String headersKey = HEADERS;
             if (!jsonObject.hasAndNotNull(headersKey)) {
@@ -1202,7 +1210,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
                         if (jAttachment.hasAndNotNull(VIRTUAL) && jAttachment.getBoolean(VIRTUAL)) {
                             jAttachment.remove(VIRTUAL);
                         } else {
-                            jsonObject.put(HAS_ATTACHMENTS, true);
+                            if (jsonObject.has(HAS_ATTACHMENTS)) {
+                                // Do not overwrite existing "has-attachment" information in a mail's JSON representation
+                                // See bug 42695 & 42862
+                                jsonObject.put(HAS_REAL_ATTACHMENTS, true);
+                            } else {
+                                jsonObject.put(HAS_ATTACHMENTS, true);
+                            }
                         }
                         if (token && !jAttachment.hasAndNotNull("token")) {
                             try {
@@ -1378,7 +1392,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
          * When creating a JSON message object from a message we do not distinguish special parts or image parts from "usual" attachments.
          * Therefore invoke the handleAttachment method. Maybe we need a separate handling in the future for vcards.
          */
-        return handleAttachment0(part, false, null, baseContentType, fileName, id);
+        return handleAttachment0(part, false, null, baseContentType, fileName, id, false);
     }
 
     private static boolean isVCalendar(final String baseContentType) {
@@ -1496,14 +1510,18 @@ public final class JsonMessageHandler implements MailMessageHandler {
              * Add token
              */
             addToken(jsonObject, id);
-            getAttachmentsArr().put(jsonObject);
+            getAttachmentListing().add(jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
     }
 
-    private void asRawContent(final String id, final String baseContentType, final HtmlSanitizeResult sanitizeResult) throws OXException {
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult) throws OXException {
+        asRawContent(id, baseContentType, sanitizeResult, false);
+    }
+
+    private void asRawContent(String id, String baseContentType, HtmlSanitizeResult sanitizeResult, boolean asFirstAttachment) throws OXException {
         try {
             final JSONObject jsonObject = new JSONObject(6);
             jsonObject.put(ID, id);
@@ -1514,7 +1532,13 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT, sanitizeResult.getContent());
             final MultipartInfo mpInfo = multiparts.peek();
             jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
-            getAttachmentsArr().put(jsonObject);
+
+            if (asFirstAttachment) {
+                getAttachmentListing().addFirst(jsonObject);
+            } else {
+                getAttachmentListing().add(jsonObject);
+            }
+
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
         }
@@ -1534,7 +1558,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT, content);
             final MultipartInfo mpInfo = multiparts.peek();
             jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
-            getAttachmentsArr().put(jsonObject);
+            getAttachmentListing().add(jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1561,7 +1585,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(CONTENT, content);
             final MultipartInfo mpInfo = multiparts.peek();
             jsonObject.put(MULTIPART_ID, null == mpInfo ? JSONObject.NULL : mpInfo.mpId);
-            getAttachmentsArr().put(jsonObject);
+            getAttachmentListing().add(jsonObject);
             if (addAttachment) {
                 /*
                  * Create attachment object for original HTML content
@@ -1578,7 +1602,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
                 } else {
                     originalVersion.put(ATTACHMENT_FILE_NAME, MimeMessageUtility.decodeMultiEncodedHeader(fileName));
                 }
-                getAttachmentsArr().put(originalVersion);
+                getAttachmentListing().add(originalVersion);
             }
             return jsonObject;
         } catch (final JSONException e) {
@@ -1595,7 +1619,7 @@ public final class JsonMessageHandler implements MailMessageHandler {
             jsonObject.put(SIZE, sanitizeResult.getContent().length());
             jsonObject.put(CONTENT, sanitizeResult.getContent());
             jsonObject.put(TRUNCATED, sanitizeResult.isTruncated());
-            getAttachmentsArr().put(jsonObject);
+            getAttachmentListing().add(jsonObject);
             return jsonObject;
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
@@ -1610,4 +1634,79 @@ public final class JsonMessageHandler implements MailMessageHandler {
     private boolean hasNoImage(final String htmlContent) {
         return null == htmlContent || (com.openexchange.java.Strings.toLowerCase(htmlContent).indexOf("<img ") < 0);
     }
+
+    // --------------------------------------------------------------------------------------------------------------------------
+
+    private static class AttachmentListing {
+
+        private List<JSONObject> attachments;
+        private List<JSONObject> remainder;
+
+        /**
+         * Initializes a new {@link JsonMessageHandler.AttachmentListing}.
+         */
+        AttachmentListing() {
+            super();
+        }
+
+        List<JSONObject> getAttachments() {
+            return null == attachments ? Collections.<JSONObject> emptyList() : attachments;
+        }
+
+        void add(JSONObject jAttachment) {
+            List<JSONObject> attachments = this.attachments;
+            if (null == attachments) {
+                attachments = new ArrayList<JSONObject>(6);
+                this.attachments = attachments;
+            }
+            attachments.add(jAttachment);
+        }
+
+        void addFirst(JSONObject jAttachment) {
+            List<JSONObject> attachments = this.attachments;
+            if (null == attachments) {
+                attachments = new ArrayList<JSONObject>(6);
+                this.attachments = attachments;
+            }
+            attachments.add(0, jAttachment);
+        }
+
+        void removeFirst() {
+            List<JSONObject> attachments = this.attachments;
+            if (null != attachments) {
+                attachments.remove(0);
+            }
+        }
+
+        void addRemainder(JSONObject jAttachment) {
+            List<JSONObject> remainder = this.remainder;
+            if (null == remainder) {
+                remainder = new ArrayList<JSONObject>(4);
+                this.remainder = remainder;
+            }
+            remainder.add(jAttachment);
+        }
+
+        JSONArray toJsonArray() {
+            List<JSONObject> attachments = this.attachments;
+            List<JSONObject> remainder = this.remainder;
+
+            JSONArray jArray = new JSONArray((null == attachments ? 0 : attachments.size()) + (null == remainder ? 0 : remainder.size()));
+
+            if (null != attachments) {
+                for (JSONObject jAttachment : attachments) {
+                    jArray.put(jAttachment);
+                }
+            }
+
+            if (null != remainder) {
+                for (JSONObject jAttachment : remainder) {
+                    jArray.put(jAttachment);
+                }
+            }
+
+            return jArray;
+        }
+    }
+
 }

@@ -61,7 +61,7 @@ public class Activator extends CompositeBundleActivator {
 
     @Override
     protected BundleActivator[] getActivators() {
-        return new BundleActivator[] { new SubcriptionServicesActivator(), new ExternalSourcesActivator() };
+        return new BundleActivator[] { new SubscriptionServicesActivator(), new ExternalSourcesActivator() };
     }
 
 }

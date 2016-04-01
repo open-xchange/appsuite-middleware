@@ -112,6 +112,6 @@ public final class OlderTerm extends SearchTerm {
      * Compute a hashCode for this object.
      */
     public int hashCode() {
-	return interval + super.hashCode();
+	return interval;
     }
 }

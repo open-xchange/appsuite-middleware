@@ -56,7 +56,6 @@ import java.util.Map;
 import com.openexchange.report.appsuite.serialization.osgi.StringParserServiceRegistry;
 import com.openexchange.tools.strings.StringParser;
 
-
 /**
  * A {@link Report} contains the analysis of a context ( in a {@link ContextReport}), a User ( in a {@link UserReport} ) or the system ( in
  * a regular {@link Report} ). It also keeps track of runtime statistics (when was it started, when was it done, how many tasks must be
@@ -97,6 +96,7 @@ public class Report implements Serializable {
 
     /**
      * Save a value in the report
+     * 
      * @param ns a namespace, to keep the data of different analyzers and cumulators separate from one another
      * @param key the name to save the value under
      * @param value the value. The value must be serializable, and a List (composed of these legal values) or Map (again, composed of these legal values) or a primitive Java Type or a String
@@ -109,7 +109,7 @@ public class Report implements Serializable {
         return this;
     }
 
-    private static Class[] allowedTypes = new Class[]{Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class};
+    private static Class[] allowedTypes = new Class[] { Integer.class, Long.class, Float.class, Short.class, Double.class, Byte.class, Boolean.class, String.class };
 
     private void checkValue(Object value) {
 
@@ -117,12 +117,12 @@ public class Report implements Serializable {
             throw new NullPointerException("value may not be null");
         }
 
-        if (! (value instanceof Serializable)) {
+        if (!(value instanceof Serializable)) {
             throw new IllegalArgumentException("Illegal type! Use only serializable types! " + value.getClass() + ": " + value);
         }
         if (value instanceof Map) {
             Map map = (Map) value;
-            for(Object oEntry: map.entrySet()) {
+            for (Object oEntry : map.entrySet()) {
                 Map.Entry entry = (Map.Entry) oEntry;
                 checkValue(entry.getKey());
                 checkValue(entry.getValue());
@@ -130,12 +130,12 @@ public class Report implements Serializable {
             return;
         } else if (value instanceof Collection) {
             Collection col = (Collection) value;
-            for(Object o: col) {
+            for (Object o : col) {
                 checkValue(o);
             }
             return;
         } else {
-            for(Class candidate: allowedTypes) {
+            for (Class candidate : allowedTypes) {
                 if (candidate.isInstance(value)) {
                     return;
                 }
@@ -148,6 +148,7 @@ public class Report implements Serializable {
 
     /**
      * Retrieve a value and try to turn it into an Object of the given class
+     * 
      * @param ns The namespace, as it was used in {@link #set(String, String, Serializable)}
      * @param key The key
      * @param klass The klass to try and turn the value into
@@ -156,8 +157,10 @@ public class Report implements Serializable {
     public <T> T get(String ns, String key, Class<T> klass) {
         return get(ns, key, null, klass);
     }
+
     /**
      * Retrieve a value and try to turn it into an Object of the given class
+     * 
      * @param ns The namespace, as used by {@link #set(String, String, Serializable)}
      * @param key The key
      * @param defaultValue The value to return, if no value was set in this report
@@ -200,12 +203,12 @@ public class Report implements Serializable {
 
     /**
      * Retrieve the Namespace -> ( Key -> Value ) mappings. Note that this is the internal Object, so
-     * whatever you do with it, it will also change the state in the report. Though it's better to use {@link #set(String, String, Serializable)}, {@link #get(String, String, Class)}, {@link #remove(String, String)} and {@link #clearNamespace(String)} for modifying this Report
+     * whatever you do with it, it will also change the state in the report. Though it's better to use {@link #set(String, String, Serializable)}, {@link #get(String, String, Class)}, {@link #remove(String, String)} and
+     * {@link #clearNamespace(String)} for modifying this Report
      */
     public Map<String, Map<String, Object>> getData() {
         return namespaces;
     }
-
 
     public String getUUID() {
         return uuid;
@@ -251,10 +254,10 @@ public class Report implements Serializable {
         this.numberOfTasks = numberOfTasks;
         this.pendingTasks = numberOfTasks;
     }
-    
+
     void setTaskState(int numberOfTasks, int pendingTasks) {
-    	this.numberOfTasks = numberOfTasks;
-    	this.pendingTasks = pendingTasks;
+        this.numberOfTasks = numberOfTasks;
+        this.pendingTasks = pendingTasks;
     }
 
     /**
@@ -279,4 +282,8 @@ public class Report implements Serializable {
         return numberOfTasks;
     }
 
+    @Override
+    public String toString() {
+        return "Report [UUID=" + uuid + ", type=" + type + ", tasks=" + numberOfTasks + ", tasksToDo=" + pendingTasks + "]";
+    }
 }

@@ -60,6 +60,7 @@ import com.openexchange.file.storage.FileStorageObjectPermission;
 import com.openexchange.file.storage.UserizedFile;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.container.ObjectPermission;
+import com.openexchange.java.Strings;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.groupware.TargetPermission;
@@ -129,7 +130,8 @@ public class FileTargetProxy extends AbstractTargetProxy {
 
     @Override
     public String getTitle() {
-        return file.getTitle();
+        String title = file.getFileName();
+        return Strings.isNotEmpty(title) ? title : file.getTitle();
     }
 
     @Override

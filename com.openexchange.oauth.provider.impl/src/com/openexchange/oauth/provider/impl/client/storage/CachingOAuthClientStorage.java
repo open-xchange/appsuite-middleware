@@ -55,10 +55,10 @@ import com.openexchange.caching.Cache;
 import com.openexchange.caching.CacheKey;
 import com.openexchange.caching.CacheService;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientData;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
 import com.openexchange.server.ServiceLookup;
 
 

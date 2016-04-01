@@ -54,8 +54,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import com.openexchange.ajax.fileholder.IFileHolder;
+import com.openexchange.capabilities.CapabilityService;
+import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.drive.Action;
 import com.openexchange.drive.DirectoryMetadata;
 import com.openexchange.drive.DirectoryPattern;
@@ -104,8 +110,10 @@ import com.openexchange.drive.impl.sync.optimize.OptimizingFileSynchronizer;
 import com.openexchange.exception.Category;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.composition.FolderID;
+import com.openexchange.java.Strings;
 
 /**
  * {@link DriveServiceImpl}
@@ -139,7 +147,7 @@ public class DriveServiceImpl implements DriveService {
         }
         DriveClientVersion clientVersion = session.getClientVersion();
         if (null != clientVersion) {
-            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType());
+            DriveClientVersion hardVersionLimit = DriveConfig.getInstance().getHardMinimumVersion(session.getClientType(), session.getServerSession());
             if (0 > clientVersion.compareTo(hardVersionLimit)) {
                 OXException error = DriveExceptionCodes.CLIENT_VERSION_OUTDATED.create(clientVersion, hardVersionLimit);
                 LOG.debug("Client synchronization aborted for {}", session, error);
@@ -169,13 +177,14 @@ public class DriveServiceImpl implements DriveService {
         long start = System.currentTimeMillis();
         DriveVersionValidator.validateDirectoryVersions(originalVersions);
         DriveVersionValidator.validateDirectoryVersions(clientVersions);
+        List<ServerDirectoryVersion> serverVersions;
         int retryCount = 0;
         while (true) {
             /*
              * get server directories
              */
             final SyncSession driveSession = new SyncSession(session);
-            List<ServerDirectoryVersion> serverVersions;
+            ;
             try {
                 serverVersions = driveSession.getServerDirectories(maxDirectories);
             } catch (OXException e) {
@@ -221,16 +230,22 @@ public class DriveServiceImpl implements DriveService {
                 throw e;
             }
             /*
-             * start cleaner run if applicable
+             * start background cleanup tasks after empty sync results if applicable
              */
             if (syncResult.isEmpty()) {
+                List<DirectoryChecksum> directoryChecksums = new ArrayList<DirectoryChecksum>(serverVersions.size());
+                for (ServerDirectoryVersion serverVersion : serverVersions) {
+                    directoryChecksums.add(serverVersion.getDirectoryChecksum());
+                }
+                int touched = driveSession.getChecksumStore().touchDirectoryChecksums(directoryChecksums);
+                driveSession.trace("Successfully touched " + touched + " stored directory checksums.");
                 TempCleaner.cleanUpIfNeeded(driveSession);
             }
             /*
              * check (soft) version restrictions
              */
             if (null != clientVersion) {
-                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType());
+                DriveClientVersion softVersionLimit = DriveConfig.getInstance().getSoftMinimumVersion(session.getClientType(), session.getServerSession());
                 if (0 > clientVersion.compareTo(softVersionLimit)) {
                     OXException error = DriveExceptionCodes.CLIENT_VERSION_UPDATE_AVAILABLE.create(clientVersion, softVersionLimit);
                     LOG.trace("Client upgrade available for {}", session, error);
@@ -421,6 +436,9 @@ public class DriveServiceImpl implements DriveService {
     public DriveSettings getSettings(DriveSession session) throws OXException {
         SyncSession syncSession = new SyncSession(session);
         LOG.debug("Handling get-settings for '{}'", session);
+        /*
+         * collect settings
+         */
         DriveSettings settings = new DriveSettings();
         Quota[] quota = syncSession.getStorage().getQuota();
         LOG.debug("Got quota for root folder '{}': {}", session.getRootFolderID(), quota);
@@ -429,6 +447,32 @@ public class DriveServiceImpl implements DriveService {
         settings.setServerVersion(com.openexchange.version.Version.getInstance().getVersionString());
         settings.setMinApiVersion(String.valueOf(DriveConfig.getInstance().getMinApiVersion()));
         settings.setSupportedApiVersion(String.valueOf(DriveConstants.SUPPORTED_API_VERSION));
+        /*
+         * add any localized folder names (up to a certain depth after which no localized names are expected anymore)
+         */
+        Map<String, String> localizedFolders = new HashMap<String, String>();
+        int maxDirectories = DriveConfig.getInstance().getMaxDirectories();
+        Map<String, FileStorageFolder> folders = syncSession.getStorage().getFolders(maxDirectories, 2);
+        for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
+            String localizedName = entry.getValue().getLocalizedName(session.getLocale());
+            if (Strings.isNotEmpty(localizedName) && false == localizedName.equals(entry.getValue().getName())) {
+                localizedFolders.put(entry.getKey(), localizedName);
+            }
+        }
+        settings.setLocalizedFolders(localizedFolders);
+        /*
+         * evaluate relevant capabilities
+         */
+        Set<String> capabilities = new HashSet<String>();
+        CapabilitySet capabilitySet = DriveServiceLookup.getService(CapabilityService.class).getCapabilities(session.getServerSession());
+        capabilities.add("invite_users_and_groups");
+        if (capabilitySet.contains("invite_guests")) {
+            capabilities.add("invite_guests");
+        }
+        if (capabilitySet.contains("share_links")) {
+            capabilities.add("share_links");
+        }
+        settings.setCapabilities(capabilities);
         return settings;
     }
 

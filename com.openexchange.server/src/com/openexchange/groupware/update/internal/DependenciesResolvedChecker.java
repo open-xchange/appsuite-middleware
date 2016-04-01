@@ -49,8 +49,6 @@
 
 package com.openexchange.groupware.update.internal;
 
-import com.openexchange.groupware.update.Schema;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
@@ -65,23 +63,9 @@ public class DependenciesResolvedChecker implements DependencyChecker {
     }
 
     @Override
-    public boolean check(UpdateTask task, String[] executed, UpdateTask[] enqueued, UpdateTask[] toExecute) {
-        if (Schema.NO_VERSION != task.addedWithVersion()) {
-            // Task has a version defined and must be sorted by the {@link LowestVersionChecker}.
-            return false;
-        }
-        if (!(task instanceof UpdateTaskV2)) {
-            // Only V2 tasks can have dependencies defined.
-            return false;
-        }
-        // Only V2 tasks having the version not defined should be in the list to be scheduled.
-        for (UpdateTask other : toExecute) {
-            if (Schema.NO_VERSION != other.addedWithVersion()) {
-                return false;
-            }
-        }
+    public boolean check(UpdateTaskV2 task, String[] executed, UpdateTaskV2[] enqueued, UpdateTaskV2[] toExecute) {
         // Check all dependencies.
-        for (String dependency : ((UpdateTaskV2) task).getDependencies()) {
+        for (String dependency : task.getDependencies()) {
             if (!dependencyFulfilled(dependency, executed, enqueued)) {
                 return false;
             }
@@ -89,13 +73,13 @@ public class DependenciesResolvedChecker implements DependencyChecker {
         return true;
     }
 
-    private boolean dependencyFulfilled(String dependency, String[] executed, UpdateTask[] enqueued) {
+    private boolean dependencyFulfilled(String dependency, String[] executed, UpdateTaskV2[] enqueued) {
         for (String taskName : executed) {
             if (taskName.equals(dependency)) {
                 return true;
             }
         }
-        for (UpdateTask task : enqueued) {
+        for (UpdateTaskV2 task : enqueued) {
             if (task.getClass().getName().equals(dependency)) {
                 return true;
             }

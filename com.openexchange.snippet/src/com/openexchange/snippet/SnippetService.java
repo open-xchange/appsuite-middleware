@@ -72,7 +72,7 @@ public interface SnippetService {
 
     /**
      * Signals the list of needed capabilities or <code>null</code>/empty list if nothing is needed.
-     * 
+     *
      * @return The list of needed capabilities or <code>null</code>
      */
     List<String> neededCapabilities();

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://www.owasp.org/index.php/OWASP_Dependency_Check_Suppression">
+   <!-- False positive. Finds the mysql library instead of the connector library -->
+   <suppress>
+      <notes><![CDATA[
+      file name: mysql-connector-java-5.1.30-bin.jar
+      ]]></notes>
+      <sha1>50aa5073896609b6b8c5e484c7671449daccf94c</sha1>
+      <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
+   </suppress>
+   <!-- False positive. Finds the mysql library instead of the connector library -->
+   <suppress>
+      <notes><![CDATA[
+      file name: mysql-connector-java-5.1.30-source.jar
+      ]]></notes>
+      <sha1>8b9def1f464b690257582c2dd423ed62b5300b1b</sha1>
+      <cpe>cpe:/a:mysql:mysql:5.1.30</cpe>
+   </suppress>
+   <!-- Not used. -->
+   <suppress>
+      <notes><![CDATA[
+      file name: apache-cassandra-1.2.0.jar
+      ]]></notes>
+      <sha1>4e118cb81049a9f3b48b63679f9423b6404c099a</sha1>
+      <cpe>cpe:/a:apache:cassandra:1.2.0</cpe>
+   </suppress>
+   <!-- False positive. Matches with some oracle client library. -->
+   <suppress>
+   <notes><![CDATA[
+      file name: org.glassfish.jersey.core.jersey-client-2.17.jar
+      ]]></notes>
+      <sha1>e6f4d0ce184a497d56ba07adfca6a118d4e34be5</sha1>
+      <cpe>cpe:/a:oracle:oracle_client:2.17</cpe>
+   </suppress>
+</suppressions>

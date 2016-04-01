@@ -55,6 +55,7 @@ import static com.openexchange.tools.sql.DBUtils.rollback;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import com.openexchange.contact.storage.rdb.internal.RdbServiceLookup;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -75,21 +76,8 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
-
-    private static final String UPDATE =
-        "UPDATE prg_contacts " +
-        "SET intfield04 = NULL " +
-        "WHERE intfield04 > 0 AND NOT EXISTS " +
-            "(SELECT intfield01 FROM prg_contacts_image WHERE " +
-            "prg_contacts.intfield01 = prg_contacts_image.intfield01 AND prg_contacts.cid = prg_contacts_image.cid)"
-    ;
-
-	private final DatabaseService dbService;
-
-	public CorrectNumberOfImagesTask(DatabaseService dbService) {
+    public CorrectNumberOfImagesTask() {
 		super();
-		this.dbService = dbService;
 	}
 
     @Override
@@ -104,16 +92,23 @@ public class CorrectNumberOfImagesTask extends UpdateTaskAdapter {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
+        DatabaseService dbService = RdbServiceLookup.getService(DatabaseService.class);
         int updated = -1;
         int contextID = params.getContextId();
         PreparedStatement statement = null;
         Connection connnection = dbService.getForUpdateTask(contextID);
         try {
             connnection.setAutoCommit(false);
-            statement = connnection.prepareStatement(UPDATE);
+            statement = connnection.prepareStatement("UPDATE prg_contacts " +
+            "SET intfield04 = NULL " +
+            "WHERE intfield04 > 0 AND NOT EXISTS " +
+                "(SELECT intfield01 FROM prg_contacts_image WHERE " +
+                "prg_contacts.intfield01 = prg_contacts_image.intfield01 AND prg_contacts.cid = prg_contacts_image.cid)");
             updated = statement.executeUpdate();
             connnection.commit();
-            LOG.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
+
+            org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CorrectNumberOfImagesTask.class);
+            logger.info("Corrected number of images in prg_contacts, {} rows affected.", updated);
         } catch (SQLException e) {
             rollback(connnection);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());

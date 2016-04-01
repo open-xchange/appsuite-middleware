@@ -132,9 +132,27 @@ public enum Client {
         return clientId;
     }
 
+
     @Override
     public String toString() {
         return getClientId();
     }
 
+    /**
+     * Gets the Client with the given clientID
+     * 
+     * @param clientID
+     * @return the Client
+     */
+    public static Client getClientByID(String clientID) {
+        Client[] clients = Client.values();
+        for (Client clt : clients)
+        {
+            if (clt.clientId.contentEquals(clientID))
+            {
+                return clt;
+            }
+        }
+        return null;
+    }
 }

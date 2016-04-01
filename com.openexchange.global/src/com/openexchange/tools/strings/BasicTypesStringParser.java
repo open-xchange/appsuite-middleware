@@ -49,12 +49,144 @@
 
 package com.openexchange.tools.strings;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link BasicTypesStringParser}
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
 public class BasicTypesStringParser implements StringParser {
+
+    private static interface Parser<T> {
+
+        T parse(String s);
+    }
+
+    private final Map<Class<?>, Parser<?>> parsers;
+
+    public BasicTypesStringParser() {
+        super();
+        Map<Class<?>, Parser<?>> parsers = new HashMap<Class<?>, Parser<?>>(16, 0.9F);
+
+        // Integer
+        {
+            Parser<Integer> parser = new Parser<Integer>() {
+
+                @Override
+                public Integer parse(String s) {
+                    try {
+                        return Integer.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Integer.class, parser);
+            parsers.put(int.class, parser);
+        }
+
+        // Long
+        {
+            Parser<Long> parser = new Parser<Long>() {
+
+                @Override
+                public Long parse(String s) {
+                    try {
+                        return Long.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Long.class, parser);
+            parsers.put(long.class, parser);
+        }
+
+        // Short
+        {
+            Parser<Short> parser = new Parser<Short>() {
+
+                @Override
+                public Short parse(String s) {
+                    try {
+                        return Short.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Short.class, parser);
+            parsers.put(short.class, parser);
+        }
+
+        // Float
+        {
+            Parser<Float> parser = new Parser<Float>() {
+
+                @Override
+                public Float parse(String s) {
+                    try {
+                        return Float.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Float.class, parser);
+            parsers.put(float.class, parser);
+        }
+
+        // Double
+        {
+            Parser<Double> parser = new Parser<Double>() {
+
+                @Override
+                public Double parse(String s) {
+                    try {
+                        return Double.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Double.class, parser);
+            parsers.put(double.class, parser);
+        }
+
+        // Byte
+        {
+            Parser<Byte> parser = new Parser<Byte>() {
+
+                @Override
+                public Byte parse(String s) {
+                    try {
+                        return Byte.valueOf(s.trim());
+                    } catch (NumberFormatException e) {
+                        return null;
+                    }
+                }
+            };
+            parsers.put(Byte.class, parser);
+            parsers.put(byte.class, parser);
+        }
+
+        // Boolean
+        {
+            Parser<Boolean> parser = new Parser<Boolean>() {
+
+                @Override
+                public Boolean parse(String s) {
+                    return Boolean.valueOf(s.trim());
+                }
+            };
+            parsers.put(Boolean.class, parser);
+            parsers.put(boolean.class, parser);
+        }
+
+        this.parsers = parsers;
+    }
 
     @Override
     public <T> T parse(final String s, final Class<T> t) {
@@ -64,26 +196,12 @@ public class BasicTypesStringParser implements StringParser {
         if (t == String.class) {
             return (T) s;
         }
-        try {
-            if (t == Integer.class || t == int.class) {
-                return (T) Integer.valueOf(s.trim());
-            } else if (t == Long.class || t == long.class) {
-                return (T) Long.valueOf(s.trim());
-            } else if (t == Short.class || t == short.class) {
-                return (T) Short.valueOf(s.trim());
-            } else if (t == Float.class || t == float.class) {
-                return (T) Float.valueOf(s.trim());
-            } else if (t == Double.class || t == double.class) {
-                return (T) Double.valueOf(s.trim());
-            } else if (t == Byte.class || t == byte.class) {
-                return (T) Byte.valueOf(s.trim());
-            } else if (t == Boolean.class || t == boolean.class) {
-                return (T) Boolean.valueOf(s.trim());
-            }
-        } catch (final NumberFormatException x) {
+
+        Parser<?> parser = parsers.get(t);
+        if (null == parser) {
             return null;
         }
-        return null;
+        return (T) parser.parse(s);
     }
 
 }

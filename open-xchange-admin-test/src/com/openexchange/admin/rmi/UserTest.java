@@ -72,6 +72,7 @@ import junit.framework.JUnit4TestAdapter;
 import org.junit.Test;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
+import com.openexchange.admin.rmi.dataobjects.Filestore;
 import com.openexchange.admin.rmi.dataobjects.User;
 import com.openexchange.admin.rmi.dataobjects.UserModuleAccess;
 import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
@@ -568,6 +569,70 @@ public class UserTest extends AbstractTest {
     }
 
     @Test
+    public void testListUsersWithOwnFilestore() throws Exception {
+
+        // get context to create an user
+        final Credentials cred = DummyCredentials();
+        final Context ctx = getTestContextObject(cred);
+        Filestore fs = null;
+        Credentials master = DummyMasterCredentials();
+
+        // create new user
+        final OXUserInterface oxu = getUserClient();
+        final UserModuleAccess client_access = new UserModuleAccess();
+        final User urs = getTestUserObject(VALID_CHAR_TESTUSER + System.currentTimeMillis(), pass, ctx);
+        OXUtilInterface oxutil = (OXUtilInterface) Naming.lookup(getRMIHostUrl() + OXUtilInterface.RMI_NAME);
+        try {
+            final User createduser = oxu.create(ctx, urs, client_access, cred);
+
+            //test if filestore already exists
+            Filestore[] filestores = oxutil.listFilestore("file:///", master, true);
+            if (filestores != null && filestores.length != 0) {
+                if (filestores.length != 1) {
+                    fail("Unexpected failure. Multiple filestores already exists.");
+                } else {
+                    fs = filestores[0];
+                }
+            }
+
+            if (fs == null) {
+                //create new filestore
+                fs = new Filestore();
+                fs.setMaxContexts(10);
+                fs.setSize(1024l);
+                fs.setUrl("file:///");
+
+                fs = oxutil.registerFilestore(fs, master);
+            }
+            //move user to new filestore
+            oxu.moveFromContextToUserFilestore(ctx, urs, fs, 10, cred);
+            Thread.sleep(500); //wait for move
+
+            final User[] srv_response = oxu.listUsersWithOwnFilestore(ctx, cred, fs.getId());
+
+            assertTrue("Expected list size > 0 ", srv_response.length > 0);
+
+            boolean founduser = false;
+            for (final User element : srv_response) {
+                if (element.getId().intValue() == createduser.getId().intValue()) {
+                    founduser = true;
+                }
+            }
+
+            assertTrue("Expected to find added user in user list", founduser);
+        } finally {
+            oxu.delete(ctx, urs, cred);
+            if (fs != null) {
+                oxutil.unregisterFilestore(fs, master);
+            }
+        }
+    }
+
+    public OXTaskMgmtInterface getTaskInterface() throws MalformedURLException, RemoteException, NotBoundException {
+        return (OXTaskMgmtInterface) Naming.lookup(getRMIHostUrl() + OXTaskMgmtInterface.RMI_NAME);
+    }
+
+    @Test
     public void testListAll() throws Exception {
 
         // get context to create an user
@@ -837,6 +902,7 @@ public class UserTest extends AbstractTest {
         notallowed.add("setMail_folder_trash_name");
         notallowed.add("setMail_folder_confirmed_ham_name");
         notallowed.add("setMail_folder_confirmed_spam_name");
+        notallowed.add("setMail_folder_archive_full_name");
         notallowed.add("setGUI_Spam_filter_capabilities_enabled");
         notallowed.add("setPassword_expired");
         notallowed.add("setMailenabled");
@@ -1375,6 +1441,7 @@ public class UserTest extends AbstractTest {
         usr.setMail_folder_sent_name("MailFolderSent");
         usr.setMail_folder_spam_name("MailFolderSpam");
         usr.setMail_folder_trash_name("MailFolderTrash");
+        usr.setMail_folder_archive_full_name("MailFolderArchive");
         usr.setManager_name("ManagersName");
         usr.setMarital_status("MaritalStatus");
         usr.setCellular_telephone1("Mobile1");
@@ -1534,6 +1601,7 @@ public class UserTest extends AbstractTest {
         assertEquals("MailFolderSent not equal", a.getMail_folder_sent_name(), b.getMail_folder_sent_name());
         assertEquals("MailFolderSpam not equal", a.getMail_folder_spam_name(), b.getMail_folder_spam_name());
         assertEquals("MailFolderTrash not equal", a.getMail_folder_trash_name(), b.getMail_folder_trash_name());
+        assertEquals("MailFolderArchiveFull not equal", a.getMail_folder_archive_full_name(), b.getMail_folder_archive_full_name());
         assertEquals("ManagersName not equal", a.getManager_name(), b.getManager_name());
         assertEquals("MaritalStatus not equal", a.getMarital_status(), b.getMarital_status());
         assertEquals("Mobile1 not equal", a.getCellular_telephone1(), b.getCellular_telephone1());
@@ -1703,6 +1771,7 @@ public class UserTest extends AbstractTest {
         retval.setMail_folder_sent_name(usr.getMail_folder_sent_name() + change_suffix);
         retval.setMail_folder_spam_name(usr.getMail_folder_spam_name() + change_suffix);
         retval.setMail_folder_trash_name(usr.getMail_folder_trash_name() + change_suffix);
+        retval.setMail_folder_archive_full_name(usr.getMail_folder_archive_full_name() + change_suffix);
         retval.setManager_name(usr.getManager_name() + change_suffix);
         retval.setMarital_status(usr.getMarital_status() + change_suffix);
         retval.setCellular_telephone1(usr.getCellular_telephone1() + change_suffix);

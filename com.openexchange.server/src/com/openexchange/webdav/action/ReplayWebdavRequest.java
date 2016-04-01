@@ -168,4 +168,9 @@ public class ReplayWebdavRequest implements WebdavRequest{
         return delegate.isBrief();
     }
 
+    @Override
+    public String getParameter(String name) {
+        return delegate.getParameter(name);
+    }
+
 }

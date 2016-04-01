@@ -56,8 +56,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.opensaml.saml2.core.Assertion;
 import org.opensaml.saml2.core.LogoutRequest;
 import org.opensaml.saml2.core.Response;
+import com.openexchange.ajax.login.LoginConfiguration;
 import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.contexts.Context;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.login.LoginRequest;
+import com.openexchange.login.internal.LoginPerformer;
 import com.openexchange.saml.SAMLConfig;
 import com.openexchange.saml.SAMLExceptionCode;
 import com.openexchange.saml.state.AuthnRequestInfo;
@@ -173,6 +178,18 @@ public interface SAMLBackend {
      * @throws IOException If writing to to servlet output stream fails
      */
     void finishLogout(HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException;
+
+    /**
+     * Prepares the login request that is passed to {@link LoginPerformer} to create the session.
+     *
+     * @param httpRequest The servlet request
+     * @param loginConfiguration The login configuration
+     * @param user The user
+     * @param context The context
+     * @return The login request
+     * @throws OXException
+     */
+    LoginRequest prepareLoginRequest(HttpServletRequest httpRequest, LoginConfiguration loginConfiguration, User user, Context context) throws OXException;
 
     /**
      * Allows to enhance the {@link Authenticated} that is used to create the session based on an authentication

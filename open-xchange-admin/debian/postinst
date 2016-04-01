@@ -147,6 +147,7 @@ postFix() {
     ox_add_property SCHEMA_MOVE_MAINTENANCE_REASON 1431655765 /opt/open-xchange/etc/plugin/hosting.properties
 
     # SoftwareChange_Request-2285
+    MOD_PASSWDS=0
     TMPFILE=$(mktemp)
     while read LINE; do
         case "$LINE" in
@@ -162,13 +163,17 @@ postFix() {
                 if [ -n "${PARTS[0]}" ] && [ -n "${PARTS[1]}" ]
                 then
                     echo ${PARTS[0]}:crypt:${PARTS[1]}
-                else 
+                    MOD_PASSWDS=$(($MOD_PASSWDS+1))
+                else
                     echo $LINE
-                fi  
-                ;;  
+                fi
+                ;;
         esac
     done < /opt/open-xchange/etc/mpasswd >$TMPFILE
-    cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    if [ ${MOD_PASSWDS} -gt 0 ]
+    then
+        cat $TMPFILE > /opt/open-xchange/etc/mpasswd
+    fi
     rm $TMPFILE
 
     # SoftwareChange_Request-2323
@@ -181,10 +186,24 @@ postFix() {
     ox_add_property MASTER_ACCOUNT_OVERRIDE false /opt/open-xchange/etc/AdminDaemon.properties
 
     # SoftwareChange_Request-2535
-    ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    # ox_add_property drive globaladdressbookdisabled,infostore,deniedportal /opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    # Bug 44000
+    pfile=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    if ox_exists_property drive $pfile
+    then
+        defin=$(ox_read_property drive $pfile)
+        if [ "$defin" = "globaladdressbookdisabled,infostore,deniedportal" ]
+        then
+            ox_set_property drive infostore,deniedportal,readcreatesharedfolders,editpublicfolders $pfile
+        fi
+    else
+        ox_add_property drive infostore,deniedportal,readcreatesharedfolders,editpublicfolders $pfile
+    fi
 
     # SoftwareChange_Request-2699
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
+
+    ox_add_property AVERAGE_USER_SIZE 100 /opt/open-xchange/etc/AdminUser.properties
 }
 
 setConfigFilePermissions() {

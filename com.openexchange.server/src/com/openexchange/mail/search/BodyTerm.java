@@ -70,6 +70,7 @@ import com.openexchange.mail.mime.MimeMailException;
 import com.openexchange.mail.utils.MessageUtility;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.util.MessageRemovedIOException;
 
 /**
  * {@link BodyTerm}
@@ -196,12 +197,16 @@ public final class BodyTerm extends SearchTerm<String> {
                 }
             }
             return getPartTextContent(part);
-        } catch (final IOException e) {
-            if ("com.sun.mail.util.MessageRemovedIOException".equals(e.getClass().getName()) || (e.getCause() instanceof MessageRemovedException)) {
-                throw MailExceptionCode.MAIL_NOT_FOUND_SIMPLE.create(e);
+        } catch (MessageRemovedIOException e) {
+            return null;
+        } catch (IOException e) {
+            if (e.getCause() instanceof MessageRemovedException) {
+                return null;
             }
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
-        } catch (final MessagingException e) {
+        } catch (MessageRemovedException e) {
+            return null;
+        } catch (MessagingException e) {
             throw MimeMailException.handleMessagingException(e);
         }
     }
@@ -242,8 +247,8 @@ public final class BodyTerm extends SearchTerm<String> {
         }
         try {
             if (contentType.startsWith("text/htm")) {
-                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(MessageUtility.readMailPart(mailPart, charset), false);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                return htmlService.extractText(MessageUtility.readMailPart(mailPart, charset));
             }
             return MessageUtility.readMailPart(mailPart, charset);
         } catch (final IOException e) {
@@ -275,8 +280,8 @@ public final class BodyTerm extends SearchTerm<String> {
                 charset = CharsetDetector.detectCharset(part.getInputStream());
             }
             if (ct.startsWith("text/htm")) {
-                final HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
-                return htmlService.html2text(MessageUtility.readMimePart(part, charset), false);
+                HtmlService htmlService = ServerServiceRegistry.getInstance().getService(HtmlService.class);
+                return  htmlService.extractText(MessageUtility.readMimePart(part, charset));
             }
             return MessageUtility.readMimePart(part, charset);
         } catch (final IOException e) {

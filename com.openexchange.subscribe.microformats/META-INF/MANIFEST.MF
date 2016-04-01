@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Subscription Plug-in
 Bundle-SymbolicName: com.openexchange.subscribe.microformats
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.subscribe.microformats.osgi.Activator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -67,8 +67,7 @@ Import-Package: com.openexchange.config,
 Bundle-ClassPath: .,
  lib/htmllexer.jar,
  lib/htmlparser.jar,
- lib/jodatime.jar,
- lib/org.microformats.hCard.jar
+ lib/jodatime.jar
 Eclipse-RegisterBuddy: com.openexchange.xerces
 Export-Package: com.openexchange.subscribe.microformats,
  com.openexchange.subscribe.microformats.datasources,

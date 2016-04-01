@@ -26,7 +26,7 @@
  *    under the copyright of the copyright holder(s) and/or original author(s)per
  *    the Attribution and Assignment Agreement that can be located at
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
- *    given Attribution for the derivative code and a license granting use.
+ *    given Attribution for the derivative code and a license oauthAccessing use.
  *
  *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
@@ -89,7 +89,7 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
 import com.openexchange.share.ShareTargetPath;
 import com.openexchange.share.notification.Entities;
 import com.openexchange.share.notification.Entities.PermissionType;
@@ -176,7 +176,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      */
     protected static List<ContentType> getDefaultAllowedModules(final AJAXRequestData request) {
         if (isOAuthRequest(request)) {
-            return new ArrayList<>(getReadableContentTypesForOAuthRequest(getOAuthGrant(request)));
+            return new ArrayList<>(getReadableContentTypesForOAuthRequest(getOAuthAccess(request)));
         }
 
         return Collections.emptyList();
@@ -271,7 +271,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
             Set<ContentType> oAuthWhitelist = null;
             if (isOAuthRequest(request)) {
-                oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthGrant(request));
+                oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthAccess(request));
             }
             if (oAuthWhitelist != null && !oAuthWhitelist.contains(contentType)) {
                 throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(contentType));
@@ -295,7 +295,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
 
         Set<ContentType> oAuthWhitelist = null;
         if (isOAuthRequest(request)) {
-            oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthGrant(request));
+            oAuthWhitelist = getReadableContentTypesForOAuthRequest(getOAuthAccess(request));
         }
         if (oAuthWhitelist != null && !oAuthWhitelist.contains(contentType)) {
             throw new OAuthInsufficientScopeException(OAuthContentTypes.readScopeForContentType(contentType));
@@ -371,29 +371,29 @@ public abstract class AbstractFolderAction implements AJAXActionService {
      * @return <code>true</code> if so
      */
     protected static boolean isOAuthRequest(AJAXRequestData request) {
-        return request.containsProperty(OAuthConstants.PARAM_OAUTH_GRANT);
+        return request.containsProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
     }
 
     /**
-     * Gets the OAuth grant if the given request is made via OAuth.
+     * Gets the OAuth oauthAccess if the given request is made via OAuth.
      *
      * @param request The request
-     * @return The grant
+     * @return The oauthAccess
      */
-    protected static OAuthGrant getOAuthGrant(AJAXRequestData request) {
-        return request.getProperty(OAuthConstants.PARAM_OAUTH_GRANT);
+    protected static OAuthAccess getOAuthAccess(AJAXRequestData request) {
+        return request.getProperty(OAuthConstants.PARAM_OAUTH_ACCESS);
     }
 
     /**
-     * Checks whether write operations are permitted for the given folder content type and OAuth grant.
+     * Checks whether write operations are permitted for the given folder content type and OAuth oauthAccess.
      *
      * @param contentType The content type
-     * @param grant The grant
+     * @param oauthAccess The oauthAccess
      * @return <code>true</code> if write operations are permitted
      */
-    protected static boolean mayWriteViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
+    protected static boolean mayWriteViaOAuthRequest(ContentType contentType, OAuthAccess oauthAccess) {
         String scope = OAuthContentTypes.writeScopeForContentType(contentType);
-        if (scope != null && grant.getScope().has(scope)) {
+        if (scope != null && oauthAccess.getScope().has(scope)) {
             return true;
         }
 
@@ -401,19 +401,19 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     }
 
     /**
-     * Checks whether read operations are permitted for the given folder content type and OAuth grant.
+     * Checks whether read operations are permitted for the given folder content type and OAuth oauthAccess.
      *
      * @param contentType The content type
-     * @param grant The grant
+     * @param oauthAccess The oauthAccess
      * @return <code>true</code> if read operations are permitted
      */
-    protected static boolean mayReadViaOAuthRequest(ContentType contentType, OAuthGrant grant) {
+    protected static boolean mayReadViaOAuthRequest(ContentType contentType, OAuthAccess oauthAccess) {
         if (contentType == SystemContentType.getInstance()) {
             return true;
         }
 
         String scope = OAuthContentTypes.readScopeForContentType(contentType);
-        if (scope != null && grant.getScope().has(scope)) {
+        if (scope != null && oauthAccess.getScope().has(scope)) {
             return true;
         }
 
@@ -423,13 +423,13 @@ public abstract class AbstractFolderAction implements AJAXActionService {
     /**
      * Gets all content types whose folders are readable for an OAuth request.
      *
-     * @param grant The grant
+     * @param oauthAccess The oauthAccess
      * @return A set of content types
      */
-    protected static Set<ContentType> getReadableContentTypesForOAuthRequest(OAuthGrant grant) {
+    protected static Set<ContentType> getReadableContentTypesForOAuthRequest(OAuthAccess oauthAccess) {
         Set<ContentType> contentTypes = new HashSet<>();
         contentTypes.add(SystemContentType.getInstance());
-        for (String scope : grant.getScope().get()) {
+        for (String scope : oauthAccess.getScope().get()) {
             ContentType contentType = OAuthContentTypes.contentTypeForReadScope(scope);
             if (contentType != null) {
                 contentTypes.add(contentType);

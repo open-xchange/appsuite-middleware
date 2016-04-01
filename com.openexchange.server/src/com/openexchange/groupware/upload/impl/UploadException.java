@@ -139,6 +139,10 @@ public class UploadException extends OXException {
          */
         MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN("Request rejected because file size exceeds the maximum configured file size of %1$s",
             UploadExceptionMessage.MAX_UPLOAD_FILE_SIZE_EXCEEDED_UNKNOWN_MSG, CATEGORY_USER_INPUT, 14),
+        /**
+         * Read timed out. Waited too long for incoming data from client.
+         */
+        UNEXPECTED_TIMEOUT("Read timed out. Waited too long for incoming data from client.", UploadExceptionMessage.UNEXPECTED_TIMEOUT_MSG, CATEGORY_ERROR, 15),
 
         ;
 

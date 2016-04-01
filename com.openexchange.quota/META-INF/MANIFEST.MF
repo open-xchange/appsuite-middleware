@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Quota Bundle
 Bundle-SymbolicName: com.openexchange.quota
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
@@ -12,6 +12,7 @@ Import-Package: com.openexchange.config,
  com.openexchange.i18n,
  com.openexchange.log,
  com.openexchange.osgi,
+ com.openexchange.osgi.annotation,
  com.openexchange.server,
  com.openexchange.session,
  org.apache.commons.logging,

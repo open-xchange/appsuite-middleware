@@ -52,7 +52,7 @@ package com.openexchange.quota.json;
 import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
-
+import org.slf4j.Logger;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
@@ -70,6 +70,8 @@ import com.openexchange.tools.session.ServerSession;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class QuotaAJAXRequest {
+
+    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(QuotaAJAXRequest.class);
 
     /**
      * Constant for not-found number.

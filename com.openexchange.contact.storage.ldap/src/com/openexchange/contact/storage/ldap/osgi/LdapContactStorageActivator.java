@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.Set;
 import org.slf4j.Logger;
 import com.openexchange.caching.CacheService;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.Reloadable;
 import com.openexchange.contact.storage.ContactStorage;
@@ -98,7 +99,7 @@ public class LdapContactStorageActivator extends HousekeepingActivator implement
     @Override
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] { DatabaseService.class, ContextService.class, UserService.class, TimerService.class,
-            CacheService.class, ConfigurationService.class };
+            CacheService.class, ConfigurationService.class, CapabilityService.class };
     }
 
     @Override

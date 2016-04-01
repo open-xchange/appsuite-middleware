@@ -71,6 +71,11 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
         return new Class[] { ManagementService.class, EventAdmin.class };
     }
 
+    @Override
+    protected boolean stopOnServiceUnavailability() {
+        return true;
+    }
+
     /*
      * Register the MessageDispatcher as Service and listen for new Channels being added to the OSGi service registry. When new Channels are
      * added/removed to/from the service registry inform the MessageDispatcher about it.
@@ -111,10 +116,10 @@ public class RealtimeDispatchActivator extends HousekeepingActivator {
 
     @Override
     protected void stopBundle() throws Exception {
-        super.stopBundle();
         RealtimeJanitors.getInstance().cleanup();
         ManagementHouseKeeper.getInstance().cleanup();
         RealtimeServiceRegistry.SERVICES.set(null);
+        super.stopBundle();
     }
 
 }

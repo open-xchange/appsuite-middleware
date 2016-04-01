@@ -165,8 +165,8 @@ public final class DefaultSMTPTransport extends AbstractSMTPTransport {
     }
 
     @Override
-    protected SMTPMessageFiller createSMTPMessageFiller() throws OXException {
-        return new SMTPMessageFiller(getTransportConfig().getSMTPProperties(), session, ctx, usm);
+    protected SMTPMessageFiller createSMTPMessageFiller(UserSettingMail optMailSettings) throws OXException {
+        return new SMTPMessageFiller(getTransportConfig().getSMTPProperties(), session, ctx, null == optMailSettings ? usm : optMailSettings);
     }
 
     @Override

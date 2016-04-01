@@ -54,6 +54,8 @@ import java.util.MissingResourceException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import com.openexchange.i18n.I18nService;
+import com.openexchange.i18n.I18nTranslator;
+import com.openexchange.i18n.Translator;
 import com.openexchange.server.services.I18nServices;
 
 /**
@@ -66,7 +68,8 @@ public class StringHelper {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(StringHelper.class);
 
-    private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>();
+    private static final ConcurrentMap<Locale, StringHelper> CACHE = new ConcurrentHashMap<Locale, StringHelper>(16, 0.9F, 1);
+    private static final ConcurrentMap<Locale, Translator> TRANSLATOR_CACHE = new ConcurrentHashMap<Locale, Translator>(16, 0.9F, 1);
 
     private static final Locale DEFAULT_LOCALE = Locale.US;
 
@@ -88,6 +91,32 @@ public class StringHelper {
         }
         return sh;
     }
+
+    /**
+     * Convenience method for retrieving the translator associated with specified locale
+     *
+     * @param locale The locale
+     * @return The associated translator
+     */
+    public static Translator translatorFor(final Locale locale) {
+        Locale loc = null == locale ? DEFAULT_LOCALE : locale;
+        Translator t = TRANSLATOR_CACHE.get(loc);
+        if (null == t) {
+            I18nService service = I18nServices.getInstance().getService(loc);
+            if (null == service) {
+                // Do not cache if no such I18nService is available
+                return Translator.EMPTY;
+            }
+            Translator nt = new I18nTranslator(service);
+            t = TRANSLATOR_CACHE.putIfAbsent(loc, nt);
+            if (null == t) {
+                t = nt;
+            }
+        }
+        return t;
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------
 
     private final Locale locale;
 

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippted RDB Bundle
 Bundle-SymbolicName: com.openexchange.snippet.rdb
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.snippet.rdb.osgi.RdbSnippetActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -38,6 +38,8 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.mail,
  com.openexchange.mail.mime,
  com.openexchange.osgi,
+ com.openexchange.quota,
+ com.openexchange.quota.groupware,
  com.openexchange.secret,
  com.openexchange.secret.osgi.tools,
  com.openexchange.secret.recovery,

@@ -53,12 +53,19 @@ import com.openexchange.authentication.Authenticated;
 import com.openexchange.exception.OXException;
 
 /**
- * Closure interface for the two different login methods.
+ * Closure interface for the different login methods.
  *
  * @author <a href="mailto:marcus.klein@open-xchange.com">Marcus Klein</a>
  */
 public interface LoginMethodClosure {
 
-    Authenticated doAuthentication(LoginResultImpl retval) throws OXException;
+    /**
+     * Performs a login using currently available authentication service.
+     *
+     * @param loginResult The current login result used to pass login request information; such as headers
+     * @return The resolved login information for the context as well as for the user; even <code>null</code> for auto-login if <code>LoginExceptionCodes.NOT_SUPPORTED</code> happens
+     * @throws OXException If login attempt fails
+     */
+    Authenticated doAuthentication(LoginResultImpl loginResult) throws OXException;
 
 }

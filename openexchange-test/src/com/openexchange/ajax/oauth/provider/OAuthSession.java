@@ -69,7 +69,7 @@ import com.openexchange.ajax.oauth.provider.protocol.OAuthParams;
 import com.openexchange.ajax.oauth.provider.protocol.Protocol;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.java.util.UUIDs;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 
 /**

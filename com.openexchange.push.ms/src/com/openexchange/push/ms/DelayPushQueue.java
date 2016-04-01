@@ -92,7 +92,16 @@ public class DelayPushQueue implements Runnable {
         isRunning = new AtomicBoolean(true);
         pollThread = new Thread(this, "DelayPushQueuePoller");
         pollThread.setName(this.getClass().getName());
+    }
+
+    /**
+     * Starts the polling thread.
+     *
+     * @return This instance
+     */
+    public DelayPushQueue start() {
         pollThread.start();
+        return this;
     }
 
     /**

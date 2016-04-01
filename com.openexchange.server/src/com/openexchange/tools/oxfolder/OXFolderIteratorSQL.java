@@ -90,6 +90,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.tools.StringCollection;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIteratorException;
 import com.openexchange.tools.iterator.SearchIteratorExceptionCodes;
 import com.openexchange.tools.oxfolder.memory.Condition;
@@ -1990,6 +1991,30 @@ public final class OXFolderIteratorSQL {
      * @throws OXException If a folder error occurs
      */
     public static SearchIterator<FolderObject> getAllModifiedFoldersSince(final Date since, final Context ctx, final Connection con) throws OXException {
+        return getModifiedFoldersSince(since, null, ctx, con);
+    }
+
+    /**
+     * Gets <b>all</b> modified folders from specific module(s) since given time stamp.
+     * <p>
+     * Quote from <a href= "http://www.open-xchange.com/wiki/index.php?title=HTTP_API#Updates">HTTP API Updates</a>: <code>
+     * ...
+     * When requesting updates to a previously retrieved set of objects,
+     * the client sends the last timestamp which belongs to that set of objects.
+     * The response contains all updates with timestamps greater than the one
+     * specified by the client. The field timestamp of the response contains the
+     * new maximum timestamp value.
+     * ...
+     * </code>
+     *
+     * @param since The time stamp
+     * @param modules The modules to include, or <code>null</code> to include all modules
+     * @param ctx The context
+     * @param con The connection to use
+     * @return <b>All</b> modified folders since given time stamp
+     * @throws OXException If a folder error occurs
+     */
+    public static SearchIterator<FolderObject> getModifiedFoldersSince(final Date since, final int[] modules, final Context ctx, final Connection con) throws OXException {
         final StringBuilder sb = new StringBuilder(256).append(STR_SELECT);
         sb.append(FolderObjectIterator.getFieldsForSQL(STR_OT)).append(" FROM oxfolder_tree AS ot");
         final long time = since.getTime();
@@ -2005,8 +2030,20 @@ public final class OXFolderIteratorSQL {
         } else {
             sb.append(" WHERE (cid = ").append(ctx.getContextId()).append(')');
         }
-        sb.append(" AND (module IN ").append(SQL_IN_STR_STANDARD_MODULES_ALL);
-        sb.append(") ").append(OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
+        if (null == modules) {
+            sb.append(" AND (module IN ").append(SQL_IN_STR_STANDARD_MODULES_ALL).append(") ");
+        } else if (0 == modules.length) {
+            return SearchIteratorAdapter.emptyIterator();
+        } else if (1 == modules.length) {
+            sb.append(" AND (module=").append(modules[0]).append(") ");
+        } else {
+            sb.append(" AND (module IN (").append(modules[0]);
+            for (int i = 1; i < modules.length; i++) {
+                sb.append(',').append(modules[i]);
+            }
+            sb.append(")) ");
+        }
+        sb.append(OXFolderProperties.isEnableDBGrouping() ? getGroupBy(STR_OT) : null).append(" ORDER by ot.fuid").toString();
         Connection readCon = con;
         boolean closeCon = false;
         PreparedStatement stmt = null;

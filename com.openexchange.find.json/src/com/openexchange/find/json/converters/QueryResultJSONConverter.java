@@ -48,6 +48,7 @@
  */
 package com.openexchange.find.json.converters;
 
+import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -88,6 +89,10 @@ public class QueryResultJSONConverter extends AbstractJSONConverter {
         if (resultObject instanceof QueryResult) {
             QueryResult queryResult = (QueryResult) resultObject;
             SearchResult searchResult = queryResult.getSearchResult();
+            List<OXException> warnings = searchResult.getWarnings();
+            if (null != warnings && 0 < warnings.size()) {
+                result.addWarnings(warnings);
+            }
             JSONObject json = new JSONObject();
             try {
                 json.put("num_found", searchResult.getNumFound());

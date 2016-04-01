@@ -35,6 +35,9 @@ postFix() {
     if dpkg --compare-versions "7.6.2-0" gt-nl "$1"; then
         sed -i 's/2014 Open-Xchange/2015 Open-Xchange/' /opt/open-xchange/etc/as-config-defaults.yml
     fi
+
+    # SoftwareChange_Request-2880
+    ox_add_property io.ox/core//pdf/enableRangeRequests true /opt/open-xchange/etc/settings/appsuite.properties
 }
 
 

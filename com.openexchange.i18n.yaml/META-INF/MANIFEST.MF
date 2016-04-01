@@ -1,0 +1,34 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: The i18n bundle for YAML files
+Bundle-SymbolicName: com.openexchange.i18n.yaml
+Bundle-Version: 7.8.1
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.groupware,
+ com.openexchange.i18n,
+ com.openexchange.java,
+ com.openexchange.log,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ javax.crypto,
+ javax.crypto.interfaces,
+ javax.crypto.spec,
+ javax.net,
+ javax.net.ssl,
+ javax.rmi,
+ javax.rmi.ssl,
+ org.apache.commons.logging,
+ org.osgi.framework,
+ org.osgi.util.tracker,
+ org.slf4j
+Export-Package: com.openexchange.i18n.yaml,
+ org.fedorahosted.tennera.jgettext,
+ org.fedorahosted.tennera.jgettext.catalog.parse,
+ org.fedorahosted.tennera.jgettext.catalog.util,
+ org.fedorahosted.tennera.jgettext.util
+Bundle-Activator: com.openexchange.i18n.yaml.osgi.I18NYamlParserActivator
+Bundle-ClassPath: .,
+ lib/jgettext-0.14.jar

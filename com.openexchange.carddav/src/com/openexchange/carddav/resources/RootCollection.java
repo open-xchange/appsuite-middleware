@@ -50,43 +50,37 @@
 package com.openexchange.carddav.resources;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.carddav.GroupwareCarddavFactory;
-import com.openexchange.carddav.mixins.DummySyncToken;
+import com.openexchange.dav.mixins.SyncToken;
+import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.dav.resources.DAVRootCollection;
+import com.openexchange.dav.resources.PlaceholderCollection;
 import com.openexchange.exception.OXException;
+import com.openexchange.folderstorage.FolderStorage;
 import com.openexchange.folderstorage.UserizedFolder;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
-import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProperty;
+import com.openexchange.folderstorage.database.contentType.ContactContentType;
+import com.openexchange.groupware.container.CommonObject;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.helpers.AbstractCollection;
 
 /**
  * {@link RootCollection} - Top-level collection for CardDAV.
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class RootCollection extends AbstractCollection {
+public class RootCollection extends DAVRootCollection {
 
     private static final String EXPOSED_COLLECTIONS_PROPERTY = "com.openexchange.carddav.exposedCollections";
     private static final String REDUCED_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.reducedAggregatedCollection";
     private static final String USER_AGENT_FOR_AGGREGATED_COLLECTION_PROPERTY = "com.openexchange.carddav.userAgentForAggregatedCollection";
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(RootCollection.class);
-    private static final String DISPLAY_NAME = "Addressbooks";
     private static final String AGGREGATED_FOLDER_ID = "Contacts"; // folder ID needs to be exactly "Contacts" for backwards compatibility
     private static final String AGGREGATED_DISPLAY_NAME = "All Contacts";
 
     private final GroupwareCarddavFactory factory;
-    private final WebdavPath url;
     private String exposedCollections = null;
     private Pattern userAgentForAggregatedCollection = null;
     private Boolean reducedAggregatedCollection = null;
@@ -97,37 +91,10 @@ public class RootCollection extends AbstractCollection {
      * @param factory the factory
      */
     public RootCollection(GroupwareCarddavFactory factory) {
-    	super();
+    	super(factory, "Addressbooks");
     	this.factory = factory;
-    	this.url = new WebdavPath();
-        includeProperties(new DummySyncToken());
-        LOG.debug("{}: initialized.", getUrl());
+    	includeProperties(new SyncToken(this));
     }
-
-    protected WebdavProtocolException protocolException(Throwable t) {
-    	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("", t);
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
-    }
-
-	@Override
-	public WebdavPath getUrl() {
-		return this.url;
-	}
-
-	@Override
-	protected WebdavFactory getFactory() {
-		return this.factory;
-	}
-
-	@Override
-	protected boolean isset(Property p) {
-		int id = p.getId();
-		return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETCONTENTLENGTH != id && Protocol.GETETAG != id;
-	}
 
 	@Override
 	public List<WebdavResource> getChildren() throws WebdavProtocolException {
@@ -136,7 +103,11 @@ public class RootCollection extends AbstractCollection {
 			/*
 			 * add the aggregated collection as child resource
 			 */
-			children.add(new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME));
+		    if (isReducedAggregatedCollection()) {
+		        children.add(createReducedAggregatedCollection());
+            } else {
+                children.add(createAggregatedCollection());
+            }
 			LOG.debug("{}: adding aggregated collection as child resource.", getUrl());
 		}
 		if (isUseFolderCollections()) {
@@ -145,7 +116,7 @@ public class RootCollection extends AbstractCollection {
 			 */
 			try {
 				for (UserizedFolder folder : factory.getState().getFolders()) {
-					children.add(new FolderCollection(factory, constructPathForChildResource(folder), folder));
+					children.add(createFolderCollection(folder));
 					LOG.debug("{}: adding folder collection for folder '{}' as child resource.", getUrl(), folder.getName());
 				}
 			} catch (OXException e) {
@@ -156,29 +127,6 @@ public class RootCollection extends AbstractCollection {
 		return children;
 	}
 
-	@Override
-	public String getDisplayName() throws WebdavProtocolException {
-		return DISPLAY_NAME;
-	}
-
-    /**
-     * Constructs a string representing the WebDAV name for a folder resource.
-     *
-     * @param folder the folder to construct the name for
-     * @return the name
-     */
-	private String constructNameForChildResource(UserizedFolder folder) {
-		return folder.getID();
-    }
-
-    private WebdavPath constructPathForChildResource(UserizedFolder folder) {
-    	return constructPathForChildResource(constructNameForChildResource(folder));
-    }
-
-    private WebdavPath constructPathForChildResource(String id) {
-    	return this.getUrl().dup().append(id);
-    }
-
     /**
      * Gets a child collection from this collection by name. If the resource
      * does not yet exists, a placeholder contact resource is created.
@@ -187,45 +135,35 @@ public class RootCollection extends AbstractCollection {
      * @return the child collection
      * @throws WebdavProtocolException
      */
-	public CardDAVCollection getChild(String name) throws WebdavProtocolException {
+	@Override
+    public DAVCollection getChild(String name) throws WebdavProtocolException {
 		if (isUseAggregatedCollection() && (AGGREGATED_FOLDER_ID.equals(name) || AGGREGATED_DISPLAY_NAME.equals(name))) {
 			/*
 			 * this is the aggregated collection
 			 */
-		    if (this.isReducedAggregatedCollection()) {
-                return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+		    if (isReducedAggregatedCollection()) {
+                return createReducedAggregatedCollection();
 		    } else {
-	            return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+	            return createAggregatedCollection();
 		    }
 		}
 		if (isUseFolderCollections()) {
-			/*
-			 * search available folders
-			 */
-			try {
-				List<UserizedFolder> folders = factory.getState().getFolders();
-				// try folder ID first
-				for (UserizedFolder folder : folders) {
-					if (name.equals(constructNameForChildResource(folder))) {
-						return new FolderCollection(factory, constructPathForChildResource(folder), folder);
-					}
-				}
-				// try folder name
-				for (UserizedFolder folder : folders) {
-					if (folder.getName().equals(name)) {
-						return new FolderCollection(factory, constructPathForChildResource(folder), folder);
-					}
-				}
-				// try localized folder name
-				Locale locale = factory.getUser().getLocale();
-				for (UserizedFolder folder : folders) {
-					if (folder.getLocalizedName(locale).equals(name)) {
-						return new FolderCollection(factory, constructPathForChildResource(folder), folder);
-					}
-				}
-			} catch (OXException e) {
-				throw protocolException(e);
-			}
+	        try {
+	            for (UserizedFolder folder : factory.getState().getFolders()) {
+	                if (name.equals(folder.getID())) {
+	                    LOG.debug("{}: found child collection by name '{}'", getUrl(), name);
+	                    return createFolderCollection(folder);
+	                }
+	                if (null != folder.getMeta() && folder.getMeta().containsKey("resourceName") && name.equals(folder.getMeta().get("resourceName"))) {
+	                    LOG.debug("{}: found child collection by resource name '{}'", getUrl(), name);
+	                    return createFolderCollection(folder);
+	                }
+	            }
+	            LOG.debug("{}: child collection '{}' not found, creating placeholder collection", getUrl(), name);
+	            return new PlaceholderCollection<CommonObject>(factory, constructPathForChildResource(name), ContactContentType.getInstance(), FolderStorage.REAL_TREE_ID);
+	        } catch (OXException e) {
+	            throw protocolException(e);
+	        }
 		}
 		throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
 	}
@@ -283,90 +221,28 @@ public class RootCollection extends AbstractCollection {
 		return false;
 	}
 
-	@Override
-	public String getSource() throws WebdavProtocolException {
-		return null;
-	}
+    private CardDAVCollection createFolderCollection(UserizedFolder folder) throws WebdavProtocolException {
+        try {
+            return new CardDAVCollection(factory, constructPathForChildResource(folder.getID()), folder);
+        } catch (OXException e) {
+            throw protocolException(e);
+        }
+    }
 
-	@Override
-	public void lock(WebdavLock lock) throws WebdavProtocolException {
-	}
+    private CardDAVCollection createAggregatedCollection() throws WebdavProtocolException {
+        try {
+            return new AggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+        } catch (OXException e) {
+            throw protocolException(e);
+        }
+    }
 
-	@Override
-	public List<WebdavLock> getLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	public WebdavLock getLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void unlock(String token) throws WebdavProtocolException {
-	}
-
-	@Override
-	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	protected void internalDelete() throws WebdavProtocolException {
-	}
-
-	@Override
-	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void create() throws WebdavProtocolException {
-	}
-
-	@Override
-	public boolean exists() throws WebdavProtocolException {
-		return true;
-	}
-
-	@Override
-	public void save() throws WebdavProtocolException {
-	}
-
-	@Override
-	public Date getCreationDate() throws WebdavProtocolException {
-		return new Date(0);
-	}
-
-	@Override
-	public Date getLastModified() throws WebdavProtocolException {
-		return new Date(0);
-	}
-
-	@Override
-	public void setDisplayName(String displayName) throws WebdavProtocolException {
-	}
-
-	@Override
-	public void setCreationDate(Date date) throws WebdavProtocolException {
-	}
+    private CardDAVCollection createReducedAggregatedCollection() throws WebdavProtocolException {
+        try {
+            return new ReducedAggregatedCollection(factory, constructPathForChildResource(AGGREGATED_FOLDER_ID), AGGREGATED_DISPLAY_NAME);
+        } catch (OXException e) {
+            throw protocolException(e);
+        }
+    }
 
 }

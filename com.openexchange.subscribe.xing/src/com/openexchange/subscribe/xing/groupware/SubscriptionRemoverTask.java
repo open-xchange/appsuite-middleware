@@ -57,11 +57,9 @@ import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateConcurrency;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.subscribe.xing.Services;
 
@@ -97,21 +95,7 @@ public abstract class SubscriptionRemoverTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
+        int contextId = params.getContextId();
         final DatabaseService ds = Services.getService(DatabaseService.class);
         final Connection con = ds.getForUpdateTask(contextId);
         PreparedStatement stmt = null;

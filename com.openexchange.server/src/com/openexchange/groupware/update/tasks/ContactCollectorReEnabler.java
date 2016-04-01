@@ -78,7 +78,7 @@ public final class ContactCollectorReEnabler extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { ContactCollectOnIncomingAndOutgoingMailUpdateTask.class.getName() };
+        return new String[] {};
     }
 
     @Override

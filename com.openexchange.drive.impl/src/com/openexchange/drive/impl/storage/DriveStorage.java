@@ -49,10 +49,8 @@
 
 package com.openexchange.drive.impl.storage;
 
-import static com.openexchange.drive.impl.DriveConstants.PATH_SEPARATOR;
-import static com.openexchange.drive.impl.DriveConstants.ROOT_PATH;
-import static com.openexchange.drive.impl.DriveUtils.combine;
-import static com.openexchange.drive.impl.DriveUtils.split;
+import static com.openexchange.drive.impl.DriveConstants.*;
+import static com.openexchange.drive.impl.DriveUtils.*;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -89,6 +87,7 @@ import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
 import com.openexchange.file.storage.TypeAware;
 import com.openexchange.file.storage.composition.FileID;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
@@ -127,6 +126,13 @@ public class DriveStorage {
         this.session = session;
         this.rootFolderID = new FolderID(session.getRootFolderID());
         this.knownFolders = new FolderCache();
+    }
+
+    /**
+     * Invalidates any cached directories in the current session.
+     */
+    public void invalidateCache() {
+        knownFolders.clear();
     }
 
     /**
@@ -577,6 +583,17 @@ public class DriveStorage {
     }
 
     /**
+     * Gets all synchronized files present in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @param includeDriveMeta <code>true</code> to also include the folder's <code>.drive-meta</code> file, <code>false</code>, otherwise
+     * @return All synchronizable files in the folder
+     */
+    public List<File> getFilesInFolder(String folderID, boolean includeDriveMeta) throws OXException {
+        return getFilesInFolder(folderID, false, includeDriveMeta, null, null);
+    }
+
+    /**
      * Gets a list of files in the folder identified by the supplied ID.
      *
      * @param folderID The folder ID
@@ -587,6 +604,20 @@ public class DriveStorage {
      * @throws OXException
      */
     public List<File> getFilesInFolder(String folderID, boolean all, String pattern, List<Field> fields) throws OXException {
+        return getFilesInFolder(folderID, all, session.getDriveSession().useDriveMeta(), pattern, fields);
+    }
+
+    /**
+     * Gets a list of files in the folder identified by the supplied ID.
+     *
+     * @param folderID The folder ID
+     * @param all <code>true</code> to include also files excluded from synchronization, <code>false</code>, otherwise
+     * @param includeDriveMeta <code>true</code> to also include the folder's <code>.drive-meta</code> file, <code>false</code>, otherwise
+     * @param pattern The file search pattern to apply, or <code>null</code> if not used
+     * @param fields The file-fields to get, or <code>null</code> to retrieve the default fields
+     * @return The files
+     */
+    public List<File> getFilesInFolder(String folderID, boolean all, boolean includeDriveMeta, String pattern, List<Field> fields) throws OXException {
         FileStorageFolder folder = getFolderAccess().getFolder(folderID);
         if (null == folder) {
             throw FileStorageExceptionCodes.FOLDER_NOT_FOUND.create(folderID, rootFolderID.getAccountId(), rootFolderID.getService(),
@@ -606,7 +637,7 @@ public class DriveStorage {
 
                 @Override
                 protected boolean accept(String fileName) throws OXException {
-                    return false == DriveUtils.isInvalidFileName(fileName) &&
+                    return false == FilenameValidationUtils.isInvalidFileName(fileName) &&
                         false == DriveUtils.isIgnoredFileName(session.getDriveSession(), path, fileName) &&
                         false == existingNames.contains(PathNormalizer.normalize(fileName));
                 }
@@ -615,7 +646,7 @@ public class DriveStorage {
         /*
          * include .drive-meta as needed
          */
-        if (session.getDriveSession().useDriveMeta()) {
+        if (includeDriveMeta) {
             File driveMetaFile = new DriveMetadata(session, folder);
             if (filter.accept(driveMetaFile)) {
                 files.add(driveMetaFile);
@@ -893,10 +924,24 @@ public class DriveStorage {
      * @return The folders, each one mapped to its corresponding relative path
      */
     public Map<String, FileStorageFolder> getFolders(int limit) throws OXException {
+        return getFolders(limit, -1);
+    }
+
+    /**
+     * Gets all folders in the storage recursively. The "temp" folder, as well as the trash folder including all subfolders are ignored
+     * implicitly.
+     *
+     * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
+     * @param maxDepth The maximum subtree depth folders to add, or <code>-1</code> for no limitations
+     * @return The folders, each one mapped to its corresponding relative path
+     */
+    public Map<String, FileStorageFolder> getFolders(int limit, int maxDepth) throws OXException {
         Map<String, FileStorageFolder> folders = new HashMap<String, FileStorageFolder>();
         FileStorageFolder rootFolder = getRootFolder();
         folders.put(ROOT_PATH, rootFolder);
-        addSubfolders(folders, rootFolder, ROOT_PATH, true, limit);
+        if (0 != maxDepth) {
+            addSubfolders(folders, rootFolder, ROOT_PATH, true, limit, maxDepth);
+        }
         return folders;
     }
 
@@ -973,7 +1018,19 @@ public class DriveStorage {
                         return null;
                     }
                 }
-                existingFolder = createFolder(currentFolder, name);
+                try {
+                    existingFolder = createFolder(currentFolder, name);
+                } catch (OXException e) {
+                    if ("FLD-0012".equals(e.getErrorCode())) {
+                        session.trace("Name conflict during folder creation (" + e.getMessage() + "), trying again...");
+                        existingFolder = resolveToLeaf(path, false, false);
+                        if (null == existingFolder) {
+                            throw e;
+                        }
+                    } else {
+                        throw e;
+                    }
+                }
                 knownFolders.remember(currentPath + normalizedName, existingFolder);
             }
             currentFolder = existingFolder;
@@ -1015,6 +1072,21 @@ public class DriveStorage {
      * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
      */
     private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive, int limit) throws OXException {
+        addSubfolders(folders, parent, path, recursive, limit, -1);
+    }
+
+    /**
+     * Adds all found subfolders of the supplied parent folder. The "temp" folder, as well as the trash folder(s) including all subfolders
+     * are ignored implicitly.
+     *
+     * @param folders The map to add the subfolders
+     * @param parent The parent folder
+     * @param path The path of the parent folder
+     * @param recursive <code>true</code> to add the subfolders recursively, <code>false</code> to only add the direct subfolders
+     * @param limit The maximum number of folders to add, or <code>-1</code> for no limitations
+     * @param maxDepth The maximum subtree depth folders to add, or <code>-1</code> for no limitations
+     */
+    private void addSubfolders(Map<String, FileStorageFolder> folders, FileStorageFolder parent, String path, boolean recursive, int limit, int maxDepth) throws OXException {
         FileStorageFolder[] subfolders = getFolderAccess().getSubfolders(parent.getId(), false);
         for (FileStorageFolder subfolder : subfolders) {
             String name = PathNormalizer.normalize(subfolder.getName());
@@ -1022,8 +1094,8 @@ public class DriveStorage {
             knownFolders.remember(subPath, subfolder);
             if (false == isExcludedSubfolder(subfolder, subPath) && (-1 == limit || limit > folders.size())) {
                 folders.put(subPath, subfolder);
-                if (recursive) {
-                    addSubfolders(folders, subfolder, subPath, true, limit);
+                if (recursive && (-1 == maxDepth || maxDepth > DriveUtils.split(subPath).size())) {
+                    addSubfolders(folders, subfolder, subPath, true, limit, maxDepth);
                 }
             }
         }
@@ -1038,7 +1110,7 @@ public class DriveStorage {
      * @throws OXException
      */
     private boolean isExcludedSubfolder(FileStorageFolder folder, String path) throws OXException {
-        if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(folder.getName())) {
+        if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(folder.getName())) {
             return true;
         }
         if (session.getTemp().supported() && path.equals(session.getTemp().getPath(false))) {
@@ -1071,9 +1143,6 @@ public class DriveStorage {
         newFolder.setName(name);
         newFolder.setParentId(parent.getId());
         newFolder.setSubscribed(parent.isSubscribed());
-        for (FileStoragePermission permission : parent.getPermissions()) {
-            newFolder.addPermission(permission);
-        }
         if (session.isTraceEnabled()) {
             session.trace(this.toString() + "mkdir " + combine(getPath(parent.getId()), name));
         }

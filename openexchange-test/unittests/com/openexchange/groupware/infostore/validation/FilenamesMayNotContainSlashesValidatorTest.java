@@ -76,7 +76,7 @@ public class FilenamesMayNotContainSlashesValidatorTest extends TestCase {
     private DocumentMetadataValidation validateFilename(String filename) {
         DocumentMetadata document = new DocumentMetadataImpl();
         document.setFileName(filename);
-        return new FilenamesMayNotContainSlashesValidator().validate(null, document);
+        return new FilenamesMayNotContainSlashesValidator().validate(null, document, null, null);
     }
 
 }

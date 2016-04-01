@@ -59,6 +59,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -338,8 +339,9 @@ public abstract class Consistency implements ConsistencyMBean {
             }
             DBUtils.closeSQLStuff(rs, stmt);
             stmt = null;
-            for (final String schema : schemaMap.keySet()) {
-                List<Integer> ctxs = schemaMap.get(schema);
+            for (final Entry<String, List<Integer>> schemaEntry : schemaMap.entrySet()) {
+                String schema = schemaEntry.getKey();
+                List<Integer> ctxs = schemaEntry.getValue();
                 Integer poolid = schemaPoolMap.get(schema);
                 poolCon = databaseService.get(poolid.intValue(), schema);
                 String contextids = "";
@@ -400,7 +402,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Returns a map with all missing entries for the specified entity objects
-     * 
+     *
      * @param entities the entity objects
      * @return a map with all missing entries for the specified entity objects
      * @throws OXException
@@ -418,7 +420,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Converts an Entity objects to an MBeanEntity objects
-     * 
+     *
      * @param entity The entity object to convert
      * @return the MBeanEntity
      */
@@ -435,7 +437,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Returns a map with all unassigned entries for the specified entity objects
-     * 
+     *
      * @param entities the entity objects
      * @return a map with all unassigned entries for the specified entity objects
      * @throws OXException
@@ -525,7 +527,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Repairs the specified entity objects with the specified policy
-     * 
+     *
      * @param entities The entity objects to repair
      * @param policy The policy to use
      * @throws OXException
@@ -567,7 +569,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Logs a message with log level INFO
-     * 
+     *
      * @param text the message to log
      */
     private void output(final String text) {
@@ -576,7 +578,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Logs a message with log level ERROR
-     * 
+     *
      * @param text the message to log
      */
     private void erroroutput(final Exception e) {
@@ -585,7 +587,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Logs the specified set with log level INFO
-     * 
+     *
      * @param set the set to log
      */
     private void outputSet(final SortedSet<String> set) {
@@ -601,19 +603,18 @@ public abstract class Consistency implements ConsistencyMBean {
      * Makes the difference set between two set, the first one is changed
      */
     private boolean diffset(final SortedSet<String> first, final SortedSet<String> second, final String name, final String name2) {
-        boolean retval = false;
         first.removeAll(second);
-        if (!first.isEmpty()) {
-            output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
-            outputSet(first);
-            retval = true;
+        if (first.isEmpty()) {
+            return false;
         }
-        return retval;
+        output("Inconsistencies found in " + name + ", the following files aren't in " + name2 + ':');
+        outputSet(first);
+        return true;
     }
 
     /**
      * Performs a consistency check on the specified {@link Entity} object
-     * 
+     *
      * @param entity the entity
      * @param dbSolver The database solver
      * @param attachmentSolver The attachment solver
@@ -730,7 +731,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Recalculates the usage of the specified {@link FileStorage} and ignores the specified files
-     * 
+     *
      * @param storage The {@link FileStorage}
      * @param filesToIgnore The files to ignore
      */
@@ -747,7 +748,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Converts the list with the specified contexts into entity objects
-     * 
+     *
      * @param contexts the list with contexts
      * @return a list with entity objects
      */
@@ -761,7 +762,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Get the {@link Context} for the specified context identifier from the {@link ContextStore}
-     * 
+     *
      * @param contextId The context identifier
      * @return The {@link Context}
      * @throws OXException if the {@link Context} cannot be returned
@@ -770,21 +771,21 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Get the DatabaseImpl
-     * 
+     *
      * @return the DatabaseImpl
      */
     protected abstract DatabaseImpl getDatabase();
 
     /**
      * Gets the {@link AttachmentBase} instance
-     * 
+     *
      * @return the {@link AttachmentBase} instance
      */
     protected abstract AttachmentBase getAttachments();
 
     /**
      * Gets the {@link FileStorage} for the specified {@link Context}
-     * 
+     *
      * @param ctx The {@link Context} for which the {@link FileStorage} shall be returned
      * @return the {@link FileStorage} for the specified {@link Context}
      * @throws OXException if the {@link FileStorage} cannot be returned
@@ -793,7 +794,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets the {@link FileStorage} for the specified {@link User} in the specified {@link Context}
-     * 
+     *
      * @param ctx The {@link Context}
      * @param usr The {@link User}
      * @return the {@link FileStorage} for the specified {@link User} in the specified {@link Context}
@@ -803,7 +804,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets the {@link FileStorage} for the specified {@link Entity}
-     * 
+     *
      * @param entity The {@link Entity} for which the {@link FileStorage} shall be returned
      * @return the {@link FileStorage} for the specified {@link Entity}
      * @throws OXException if the {@link FileStorage} cannot be returned
@@ -812,7 +813,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link List} with {@link Context}s that are using the {@link FileStorage} with the specified filestore identifier
-     * 
+     *
      * @param filestoreId the filestore identifier
      * @return the {@link List} with {@link Context}s that are using the {@link FileStorage} with the specified filestore identifier
      * @throws OXException If the {@link Context}s cannot be returned
@@ -821,7 +822,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
-     * 
+     *
      * @param filestoreId the filestore identifier
      * @return the {@link List} with {@link Entity} objects that are using the {@link FileStorage} with the specified filestore identifier
      * @throws OXException If the {@link Context}s cannot be returned
@@ -830,7 +831,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link List} with {@link Context}s that are using database with the specified database identifier
-     * 
+     *
      * @param databaseId the database identifier
      * @return the {@link List} with {@link Context}s that are using the database with the specified database identifier
      * @throws OXException If the {@link Context}s cannot be returned
@@ -839,7 +840,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link List} with all {@link Context}s
-     * 
+     *
      * @return a {@link List} with all {@link Context}s
      * @throws OXException If the {@link Context}s cannot be returned
      */
@@ -847,7 +848,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
-     * 
+     *
      * @param ctx the {@link Context}
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the snippet file store locations cannot be returned
@@ -856,7 +857,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
-     * 
+     *
      * @param ctx the {@link Context}
      * @return a {@link SortedSet} with all vcard file store locations for the specified {@link Context}
      * @throws OXException if the vcard file store locations cannot be returned
@@ -865,7 +866,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets a {@link SortedSet} with all preview cache file store locations for the specified {@link Context}
-     * 
+     *
      * @param ctx the {@link Context}
      * @return a {@link SortedSet} with all snippet file store locations for the specified {@link Context}
      * @throws OXException if the preview cache file store locations cannot be returned
@@ -874,7 +875,7 @@ public abstract class Consistency implements ConsistencyMBean {
 
     /**
      * Gets the admin {@link User} of the specified {@link Context}
-     * 
+     *
      * @param ctx the {@link Context}
      * @return the admin {@link User} of the specified {@link Context}
      * @throws OXException if the admin {@link User} cannot be returned

@@ -54,6 +54,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.drive.DriveShareLink;
 import com.openexchange.drive.DriveShareTarget;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
@@ -78,6 +79,7 @@ public class UpdateLinkAction extends AbstractDriveAction {
         /*
          * update share based on present data in update request
          */
+        DriveShareLink shareLink;
         try {
             LinkUpdate linkUpdate = new LinkUpdate();
             if (json.has("expiry_date")) {
@@ -88,14 +90,27 @@ public class UpdateLinkAction extends AbstractDriveAction {
                 String newPassword = json.isNull("password") ? null : json.getString("password");
                 linkUpdate.setPassword(newPassword);
             }
-            getDriveService().getUtility().updateLink(session, target, linkUpdate);
+            shareLink = getDriveService().getUtility().updateLink(session, target, linkUpdate);
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
         }
         /*
-         * return empty result in case of success
+         * return appropriate result
          */
-        return new AJAXRequestResult(new JSONObject(), "json");
+        try {
+            JSONObject jsonResult = new JSONObject();
+            jsonResult.put("url", shareLink.getShareURL(requestData.getHostData()));
+            jsonResult.put("is_new", shareLink.isNew());
+            Date expiryDate = shareLink.getGuest().getExpiryDate();
+            if (null != expiryDate) {
+                jsonResult.put("expiry_date", expiryDate.getTime());
+            }
+            jsonResult.putOpt("password", shareLink.getGuest().getPassword());
+            jsonResult.put("checksum", shareLink.getTarget().getChecksum());
+            return new AJAXRequestResult(jsonResult, "json");
+        } catch (JSONException e) {
+            throw AjaxExceptionCodes.JSON_ERROR.create(e.getMessage());
+        }
     }
 
 }

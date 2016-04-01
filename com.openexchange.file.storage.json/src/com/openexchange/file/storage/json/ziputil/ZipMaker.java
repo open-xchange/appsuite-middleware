@@ -61,10 +61,10 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveOutputStream;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
+import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.FileStorageFolder;
-import com.openexchange.file.storage.File.Field;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.json.actions.files.IdVersionPair;
@@ -146,11 +146,9 @@ public class ZipMaker {
     }
 
     private void addFolder2Archive(String folderId, ZipArchiveOutputStream zipOutput, String pathPrefix, int buflen, byte[] buf) throws OXException {
-        List<Field> columns = Arrays.<File.Field> asList(File.Field.ID, File.Field.FOLDER_ID, File.Field.FILENAME, File.Field.FILE_MIMETYPE);
-        SearchIterator<File> it = fileAccess.getDocuments(folderId, columns).results();
         try {
-            while (it.hasNext()) {
-                File file = it.next();
+            List<File> files = getFilesInFolder(folderId, Field.ID, Field.FOLDER_ID, Field.FILENAME, Field.FILE_MIMETYPE);
+            for (File file : files) {
                 try {
                     addFile2Archive(file, fileAccess.getDocument(file.getId(), FileStorageFileAccess.CURRENT_VERSION), zipOutput, pathPrefix, buflen, buf);
                 } catch (OXException e) {
@@ -160,9 +158,6 @@ public class ZipMaker {
                     // Ignore
                 }
             }
-
-            SearchIterators.close(it);
-            it = null;
 
             if (recursive) {
                 for (FileStorageFolder f : folderAccess.getSubfolders(folderId, false)) {
@@ -202,8 +197,6 @@ public class ZipMaker {
             }
         } catch (IOException e) {
             throw AjaxExceptionCodes.HTTP_ERROR.create(e, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Internal Server Error");
-        } finally {
-            SearchIterators.close(it);
         }
     }
 
@@ -320,6 +313,23 @@ public class ZipMaker {
             return total;
         }
         return totalSize;
+    }
+
+    /**
+     * Gets the document metadata for all files in a folder.
+     *
+     * @param folderId The identifier of the parent folder to get the file metadata for
+     * @param columns The metadata to fetch
+     * @return Metadata for each file in a list, or an empty list if no files were found
+     */
+    private List<File> getFilesInFolder(String folderId, File.Field...columns) throws OXException {
+        SearchIterator<File> iterator = null;
+        try {
+            iterator = fileAccess.getDocuments(folderId, Arrays.asList(columns)).results();
+            return SearchIterators.asList(iterator);
+        } finally {
+            SearchIterators.close(iterator);
+        }
     }
 
 }

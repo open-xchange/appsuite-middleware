@@ -64,7 +64,7 @@ import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
 import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
 import com.openexchange.admin.rmi.exceptions.StorageException;
 
-public class List extends ListCore {
+public class List extends ListCoreExtended {
 
     public static void main(final String[] args) {
         new List(args);

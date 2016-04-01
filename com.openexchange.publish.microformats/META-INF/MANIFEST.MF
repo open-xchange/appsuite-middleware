@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish.microformats
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.publish.microformats.osgi.ServletActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -38,6 +38,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.userconfiguration,
  com.openexchange.html,
  com.openexchange.i18n,
+ com.openexchange.imagetransformation,
  com.openexchange.java,
  com.openexchange.java.util,
  com.openexchange.log,
@@ -60,7 +61,6 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.userconf,
  javax.servlet,
  javax.servlet.http,
- org.apache.commons.lang,
  org.apache.commons.logging,
  org.json,
  org.osgi.framework,

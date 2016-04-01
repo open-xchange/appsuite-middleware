@@ -85,7 +85,7 @@ public final class Numbers {
                 throw new Exception("Can not parse minor out of version \"" + version + "\".", e);
             }
             try {
-                patch = Integer.parseInt(matcher.group(1));
+                patch = Integer.parseInt(matcher.group(3));
             } catch (NumberFormatException e) {
                 throw new Exception("Can not parse patch out of version \"" + version + "\".", e);
             }

@@ -103,6 +103,11 @@ import com.openexchange.mail.mime.MessageHeaders;
 import com.openexchange.mail.mime.datasource.MessageDataSource;
 import com.openexchange.mail.mime.utils.MimeMessageUtility;
 import com.openexchange.mail.utils.MessageUtility;
+import com.openexchange.quota.AccountQuota;
+import com.openexchange.quota.Quota;
+import com.openexchange.quota.QuotaExceptionCodes;
+import com.openexchange.quota.QuotaProvider;
+import com.openexchange.quota.QuotaType;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.Attachment;
 import com.openexchange.snippet.DefaultAttachment;
@@ -166,15 +171,21 @@ public final class MimeSnippetManagement implements SnippetManagement {
     private final int contextId;
     private final int userId;
     private final Session session;
+    private final QuotaProvider quotaProvider;
 
     /**
      * Initializes a new {@link MimeSnippetManagement}.
      */
-    public MimeSnippetManagement(final Session session) {
+    public MimeSnippetManagement(Session session, QuotaProvider quotaProvider) {
         super();
         this.session = session;
         this.userId = session.getUserId();
         this.contextId = session.getContextId();
+        this.quotaProvider = quotaProvider;
+    }
+
+    private AccountQuota getQuota() throws OXException {
+        return null == quotaProvider ? null : quotaProvider.getFor(session, "0");
     }
 
     @Override
@@ -233,6 +244,29 @@ public final class MimeSnippetManagement implements SnippetManagement {
             }
             return list;
         } catch (SQLException e) {
+            throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(rs, stmt);
+            databaseService.backReadOnly(contextId, con);
+        }
+    }
+
+    @Override
+    public int getOwnSnippetsCount() throws OXException {
+        final DatabaseService databaseService = getDatabaseService();
+        final int contextId = this.contextId;
+        final Connection con = databaseService.getReadOnly(contextId);
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        try {
+            final StringBuilder sql = new StringBuilder("SELECT COUNT(id) FROM snippet WHERE cid=? AND user=? AND refType=").append(FS_TYPE);
+            stmt = con.prepareStatement(sql.toString());
+            int pos = 0;
+            stmt.setInt(++pos, contextId);
+            stmt.setInt(++pos, userId);
+            rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (final SQLException e) {
             throw SnippetExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(rs, stmt);
@@ -464,6 +498,14 @@ public final class MimeSnippetManagement implements SnippetManagement {
 
     @Override
     public String createSnippet(Snippet snippet) throws OXException {
+        AccountQuota quota = getQuota();
+        if (null != quota && quota.hasQuota(QuotaType.AMOUNT)) {
+            Quota amountQuota = quota.getQuota(QuotaType.AMOUNT);
+            if (amountQuota.isExceeded() || amountQuota.willExceed(getOwnSnippetsCount())) {
+                throw QuotaExceptionCodes.QUOTA_EXCEEDED_SNIPPETS.create(amountQuota.getUsage(), amountQuota.getLimit());
+            }
+        }
+
         final DatabaseService databaseService = getDatabaseService();
         final int contextId = this.contextId;
         final Connection con = databaseService.getWritable(contextId);

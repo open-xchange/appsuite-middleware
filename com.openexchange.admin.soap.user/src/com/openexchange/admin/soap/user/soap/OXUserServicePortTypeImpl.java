@@ -1665,6 +1665,12 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         if (tmp != null) {
             user.setMail_folder_trash_name(tmp);
         }
+
+        tmp = soapUser.getMailFolderArchiveFullName();
+        if (tmp != null) {
+            user.setMail_folder_archive_full_name(tmp);
+        }
+
         final Boolean mailEnabled = soapUser.isMailenabled();
         if (null != mailEnabled) {
             user.setMailenabled(mailEnabled);
@@ -2162,6 +2168,7 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         soapUser.setMailFolderSentName(user.getMail_folder_sent_name());
         soapUser.setMailFolderSpamName(user.getMail_folder_spam_name());
         soapUser.setMailFolderTrashName(user.getMail_folder_trash_name());
+        soapUser.setMailFolderArchiveFullName(user.getMail_folder_archive_full_name());
         soapUser.setMailenabled(user.getMailenabled());
         soapUser.setManagerName(user.getManager_name());
         soapUser.setMaritalStatus(user.getMarital_status());
@@ -2671,5 +2678,48 @@ public class OXUserServicePortTypeImpl implements OXUserServicePortType {
         }
         soapMap.setEntries(entries);
         return soapMap;
+    }
+
+    @Override
+    public List<User> listByAliasDomain(Context ctx, String aliasDomain, Credentials auth) throws StorageException_Exception, InvalidCredentialsException_Exception, InvalidDataException_Exception, NoSuchContextException_Exception, RemoteException_Exception {
+        final OXUserInterface userInterface = getUserInterface();
+        try {
+            final com.openexchange.admin.rmi.dataobjects.User[] users = userInterface.listByAliasDomain(soap2Context(ctx), aliasDomain, soap2Credentials(auth));
+            if (null == users) {
+                return Collections.emptyList();
+            }
+            final java.util.List<User> list = new ArrayList<User>(users.length);
+            for (final com.openexchange.admin.rmi.dataobjects.User user : users) {
+                list.add(user2Soap(user));
+            }
+            return list;
+        } catch (final RemoteException e) {
+            com.openexchange.admin.soap.user.soap.RemoteException faultDetail = new com.openexchange.admin.soap.user.soap.RemoteException();
+            com.openexchange.admin.soap.user.rmi.RemoteException value = new com.openexchange.admin.soap.user.rmi.RemoteException();
+            value.setMessage(e.getMessage());
+            faultDetail.setRemoteException(value);
+            throw new RemoteException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidCredentialsException e) {
+            com.openexchange.admin.soap.user.soap.InvalidCredentialsException faultDetail = new com.openexchange.admin.soap.user.soap.InvalidCredentialsException();
+            com.openexchange.admin.soap.user.exceptions.InvalidCredentialsException value = new com.openexchange.admin.soap.user.exceptions.InvalidCredentialsException();
+            faultDetail.setInvalidCredentialsException(value);
+            throw new InvalidCredentialsException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final NoSuchContextException e) {
+            com.openexchange.admin.soap.user.soap.NoSuchContextException faultDetail = new com.openexchange.admin.soap.user.soap.NoSuchContextException();
+            com.openexchange.admin.soap.user.exceptions.NoSuchContextException value = new com.openexchange.admin.soap.user.exceptions.NoSuchContextException();
+            faultDetail.setNoSuchContextException(value);
+            throw new NoSuchContextException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final StorageException e) {
+            com.openexchange.admin.soap.user.soap.StorageException faultDetail = new com.openexchange.admin.soap.user.soap.StorageException();
+            com.openexchange.admin.soap.user.exceptions.StorageException value = new com.openexchange.admin.soap.user.exceptions.StorageException();
+            faultDetail.setStorageException(value);
+            throw new StorageException_Exception(e.getMessage(), faultDetail, e);
+        } catch (final InvalidDataException e) {
+            com.openexchange.admin.soap.user.soap.InvalidDataException faultDetail = new com.openexchange.admin.soap.user.soap.InvalidDataException();
+            com.openexchange.admin.soap.user.exceptions.InvalidDataException value = new com.openexchange.admin.soap.user.exceptions.InvalidDataException();
+            value.setObjectname(e.getObjectname());
+            faultDetail.setInvalidDataException(value);
+            throw new InvalidDataException_Exception(e.getMessage(), faultDetail, e);
+        }
     }
 }

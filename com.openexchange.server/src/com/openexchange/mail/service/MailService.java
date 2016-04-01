@@ -53,7 +53,9 @@ import com.openexchange.exception.OXException;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.transport.MailTransport;
+import com.openexchange.mail.transport.config.TransportConfig;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.session.Session;
 
@@ -139,5 +141,25 @@ public interface MailService {
      * @throws OXException If an appropriate instance of {@link MailTransport mail transport} cannot be initialized
      */
     public MailTransport getMailTransport(Session session, int accountId) throws OXException;
+
+    /**
+     * Gets the mail configuration for session-associated user and given account.
+     *
+     * @param session The session
+     * @param accountId The account identifier
+     * @return The mail configuration
+     * @throws OXException If mail configuration cannot be returned
+     */
+    public MailConfig getMailConfig(Session session, int accountId) throws OXException;
+
+    /**
+     * Gets the transport configuration for session-associated user and given account.
+     *
+     * @param session The session
+     * @param accountId The account identifier
+     * @return The transport configuration
+     * @throws OXException If transport configuration cannot be returned
+     */
+    public TransportConfig getTransportConfig(Session session, int accountId) throws OXException;
 
 }

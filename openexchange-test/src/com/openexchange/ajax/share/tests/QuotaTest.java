@@ -49,24 +49,14 @@
 
 package com.openexchange.ajax.share.tests;
 
-import java.io.IOException;
 import java.rmi.Naming;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.json.JSONException;
-
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
 import com.openexchange.admin.rmi.dataobjects.UserProperty;
-import com.openexchange.admin.rmi.exceptions.DatabaseUpdateException;
-import com.openexchange.admin.rmi.exceptions.InvalidCredentialsException;
-import com.openexchange.admin.rmi.exceptions.InvalidDataException;
-import com.openexchange.admin.rmi.exceptions.NoSuchContextException;
-import com.openexchange.admin.rmi.exceptions.NoSuchUserException;
-import com.openexchange.admin.rmi.exceptions.StorageException;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.InsertResponse;
 import com.openexchange.ajax.folder.actions.UpdateRequest;
@@ -107,21 +97,29 @@ public class QuotaTest extends ShareTest {
         super.setUp();
         foldersToDelete = new HashMap<Integer, FolderObject>();
         client2 = new AJAXClient(User.User2);
-        setQuota("com.openexchange.quota.share_links", "0");
-        setQuota("com.openexchange.quota.invite_guests", "0");
+        Map<String, String> userAttributes = new HashMap<String, String>();
+        userAttributes.put("com.openexchange.quota.invite_guests", "0");
+        userAttributes.put("com.openexchange.quota.share_links", "0");
+        setQuota(userAttributes);
     }
 
-    private void setQuota(String property, String value) throws Exception {
+    private void setQuota(Map<String, String> props) throws Exception {
         com.openexchange.admin.rmi.dataobjects.User user = new com.openexchange.admin.rmi.dataobjects.User(client2.getValues().getUserId());
-        user.setUserAttribute("config", property, value);
+        for (String property : props.keySet()) {
+            user.setUserAttribute("config", property, props.get(property));
+        }
         Credentials credentials = new Credentials(AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getLogin()), AJAXConfig.getProperty(AJAXClient.User.OXAdmin.getPassword()));
         OXUserInterface iface = (OXUserInterface) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + OXUserInterface.RMI_NAME);
         iface.change(new Context(client2.getValues().getContextId()), user, credentials);
         
+
         List<UserProperty> userConfigurationSource = iface.getUserConfigurationSource(new Context(client2.getValues().getContextId()), user, "quota", credentials);
-        System.out.println("User configuration related to 'quota' after changing '" + property + "' to " + value + ".");
+        System.out.println("User configuration related to 'quota' after changing the following properties:");
+        for (String property : props.keySet()) {
+            System.out.println(property + "' to " + props.get(property));
+        }
         for (UserProperty prop : userConfigurationSource) {
-        	System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " +prop.getValue());
+            System.out.println("Property " + prop.getName() + "(" + prop.getScope() + "): " + prop.getValue());
         }
 	}
 
@@ -129,8 +127,10 @@ public class QuotaTest extends ShareTest {
     public void tearDown() throws Exception {
         try {
             if (null != client2) {
-                setQuota("com.openexchange.quota.share_links", null);
-                setQuota("com.openexchange.quota.invite_guests", null);
+                Map<String, String> userAttributes = new HashMap<String, String>();
+                userAttributes.put("com.openexchange.quota.invite_guests", null);
+                userAttributes.put("com.openexchange.quota.share_links", null);
+                setQuota(userAttributes);
                 if (null != foldersToDelete && 0 < foldersToDelete.size()) {
                     deleteFoldersSilently(client2, foldersToDelete);
                 }

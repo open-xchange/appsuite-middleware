@@ -66,6 +66,12 @@ final class NormalLoginMethod implements LoginMethodClosure {
     private final Map<String, Object> properties;
     private final LoginRequest request;
 
+    /**
+     * Initializes a new {@link NormalLoginMethod}.
+     *
+     * @param request The login request
+     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
+     */
     NormalLoginMethod(LoginRequest request, Map<String, Object> properties) {
         super();
         this.request = request;

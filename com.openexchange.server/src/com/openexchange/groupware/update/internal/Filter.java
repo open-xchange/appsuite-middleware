@@ -50,7 +50,7 @@
 package com.openexchange.groupware.update.internal;
 
 import com.openexchange.groupware.update.SchemaUpdateState;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 
 /**
  * {@link Filter}
@@ -59,6 +59,6 @@ import com.openexchange.groupware.update.UpdateTask;
  */
 public interface Filter {
 
-    boolean mustBeExecuted(SchemaUpdateState schema, UpdateTask task);
+    boolean mustBeExecuted(SchemaUpdateState schema, UpdateTaskV2 task);
 
 }

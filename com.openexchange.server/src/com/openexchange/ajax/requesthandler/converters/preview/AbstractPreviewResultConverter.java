@@ -652,7 +652,7 @@ public abstract class AbstractPreviewResultConverter implements ResultConverter 
                 return (RemoteInternalPreviewService) bestFit;
             }
         } catch (OXException e) {
-            LOGGER.debug("Error while trying to look up CachedResource from RemoteInternalPeviewService in context {}", e);
+            LOGGER.debug("Error while trying to look up 'best fit' from RemoteInternalPeviewService in context {}", e);
         }
 
         // No suitable candidate found...

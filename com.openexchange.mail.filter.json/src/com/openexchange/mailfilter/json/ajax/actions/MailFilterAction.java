@@ -70,8 +70,7 @@ import com.openexchange.mailfilter.MailFilterService.FilterType;
 import com.openexchange.mailfilter.exceptions.MailFilterExceptionCode;
 import com.openexchange.mailfilter.json.ajax.Parameter;
 import com.openexchange.mailfilter.json.ajax.actions.AbstractRequest.Parameters;
-import com.openexchange.mailfilter.json.ajax.json.AbstractObject2JSON2Object;
-import com.openexchange.mailfilter.json.ajax.json.Rule2JSON2Rule;
+import com.openexchange.mailfilter.json.ajax.json.RuleParser;
 import com.openexchange.mailfilter.json.osgi.Services;
 import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
@@ -91,7 +90,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return INSTANCE;
     }
 
-    private static final AbstractObject2JSON2Object<Rule> CONVERTER = new Rule2JSON2Rule();
+    private static final RuleParser CONVERTER = new RuleParser();
 
     // -------------------------------------------------------------------------------------------------------------------------------- //
 
@@ -270,24 +269,16 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
         return mailFilterService.getActiveScript(credentials);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected Rule2JSON2Rule getConverter() {
-        return new Rule2JSON2Rule();
-    }
-
     private JSONArray getActionArray(final Set<String> capabilities) {
         final JSONArray actionarray = new JSONArray();
         for (final ActionCommand.Commands command : ActionCommand.Commands.values()) {
             final List<String> required = command.getRequired();
             if (required.isEmpty()) {
-                actionarray.put(command.getJsonname());
+                actionarray.put(command.getJsonName());
             } else {
                 for (final String req : required) {
                     if (capabilities.contains(req)) {
-                        actionarray.put(command.getJsonname());
+                        actionarray.put(command.getJsonName());
                         break;
                     }
                 }
@@ -316,7 +307,7 @@ public class MailFilterAction extends AbstractAction<Rule, MailFilterRequest> {
             final JSONObject object = new JSONObject();
             if (null == command.getRequired() || capabilities.contains(command.getRequired())) {
                 final JSONArray comparison = new JSONArray();
-                object.put("test", command.getCommandname());
+                object.put("test", command.getCommandName());
                 final List<String[]> jsonMatchTypes = command.getJsonMatchTypes();
                 if (null != jsonMatchTypes) {
                     for (final String[] matchtype : jsonMatchTypes) {

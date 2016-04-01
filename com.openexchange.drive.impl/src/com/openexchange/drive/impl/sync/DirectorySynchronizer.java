@@ -122,6 +122,18 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
                 syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
             }
         }
+        if (null != mapper.getMappingProblems().getDuplicateClientVersions()) {
+            for (DirectoryVersion clientVersion : mapper.getMappingProblems().getDuplicateClientVersions()) {
+                /*
+                 * indicate duplicate version as error with quarantine flag
+                 */
+                ThreeWayComparison<DirectoryVersion> twc = new ThreeWayComparison<DirectoryVersion>();
+                twc.setClientVersion(clientVersion);
+                OXException e = DriveExceptionCodes.CONFLICTING_PATH.create(clientVersion.getPath());
+                LOG.warn("Duplicate directory version indicated by client: {}", clientVersion, e);
+                syncResult.addActionForClient(new ErrorDirectoryAction(null, clientVersion, twc, e, true, false));
+            }
+        }
         return syncResult;
     }
 
@@ -451,9 +463,10 @@ public class DirectorySynchronizer extends Synchronizer<DirectoryVersion> {
      */
     private List<DirectoryVersion> getKnownSubDirectories(DirectoryVersion version) {
         List<DirectoryVersion> subDirectories = new ArrayList<DirectoryVersion>();
+        String prefix = version.getPath() + DriveConstants.PATH_SEPARATOR;
         for (DirectoryVersion directoryVersion : mapper.getServerVersions()) {
             String candidatePath = directoryVersion.getPath();
-            if (candidatePath.startsWith(version.getPath()) && false == candidatePath.equals(version.getPath())) {
+            if (candidatePath.startsWith(prefix)) {
                 subDirectories.add(directoryVersion);
             }
         }

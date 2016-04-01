@@ -88,7 +88,7 @@ public class LdapContactCache {
     private static final EnumSet<ContactField> CACHED_FIELDS = EnumSet.of(
         ContactField.CONTEXTID, ContactField.FOLDER_ID, ContactField.OBJECT_ID, ContactField.INTERNAL_USERID, ContactField.UID,
         ContactField.LAST_MODIFIED, ContactField.CREATION_DATE, ContactField.MODIFIED_BY, ContactField.CREATED_BY,
-        ContactField.PRIVATE_FLAG, ContactField.USE_COUNT, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST,
+        ContactField.PRIVATE_FLAG, ContactField.MARK_AS_DISTRIBUTIONLIST, ContactField.DISTRIBUTIONLIST,
         ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3,
         ContactField.DISPLAY_NAME, ContactField.FILE_AS, ContactField.COMPANY, ContactField.YOMI_COMPANY,
         ContactField.SUR_NAME, ContactField.GIVEN_NAME, ContactField.YOMI_LAST_NAME, ContactField.YOMI_FIRST_NAME

@@ -79,14 +79,14 @@ public final class CalendarReminderDelete implements TargetService {
     public void updateTargetObject(final Context ctx, final Connection con, final int targetId)
 			throws OXException {
 		updateAppointmentReminder(con, -1, targetId, ctx.getContextId());
-		//updateAppointmentLastModified(con, targetId, ctx.getContextId());
+		updateAppointmentLastModified(con, targetId, ctx.getContextId());
 	}
 
 	@Override
     public void updateTargetObject(final Context ctx, final Connection con, final int targetId, final int userId)
 			throws OXException {
 		updateAppointmentReminder(con, userId, targetId, ctx.getContextId());
-		//updateAppointmentLastModified(con, targetId, ctx.getContextId());
+		updateAppointmentLastModified(con, targetId, ctx.getContextId());
 	}
 
 	private static final String SQL_DEL_ALL_REMINDER = "UPDATE prg_dates_members SET reminder = ? WHERE cid = ? AND object_id = ?";
@@ -117,28 +117,28 @@ public final class CalendarReminderDelete implements TargetService {
 		}
 	}
 
-	//private static final String SQL_UP_LAST_MODIFIED = "UPDATE prg_dates SET changing_date = ? WHERE cid = ? AND intfield01 = ?";
+	private static final String SQL_UP_LAST_MODIFIED = "UPDATE prg_dates SET changing_date = ? WHERE cid = ? AND intfield01 = ?";
 
-//	private static void updateAppointmentLastModified(final Connection con, final int objectId, final int cid)
-//			throws OXException {
-//		final PreparedStatement stmt;
-//		try {
-//			stmt = con.prepareStatement(SQL_UP_LAST_MODIFIED);
-//		} catch (final SQLException e) {
-//			throw handleSQLException(e);
-//		}
-//		try {
-//			int pos = 1;
-//			stmt.setLong(pos++, System.currentTimeMillis());
-//			stmt.setInt(pos++, cid);
-//			stmt.setInt(pos++, objectId);
-//			stmt.executeUpdate();
-//		} catch (final SQLException e) {
-//			throw handleSQLException(e);
-//		} finally {
-//			DBUtils.closeSQLStuff(null, stmt);
-//		}
-//	}
+	private static void updateAppointmentLastModified(final Connection con, final int objectId, final int cid)
+			throws OXException {
+		final PreparedStatement stmt;
+		try {
+			stmt = con.prepareStatement(SQL_UP_LAST_MODIFIED);
+		} catch (final SQLException e) {
+			throw handleSQLException(e);
+		}
+		try {
+			int pos = 1;
+			stmt.setLong(pos++, System.currentTimeMillis());
+			stmt.setInt(pos++, cid);
+			stmt.setInt(pos++, objectId);
+			stmt.executeUpdate();
+		} catch (final SQLException e) {
+			throw handleSQLException(e);
+		} finally {
+			DBUtils.closeSQLStuff(null, stmt);
+		}
+	}
 
 	private static OXException handleSQLException(final SQLException e) {
 		return OXCalendarExceptionCodes.CALENDAR_SQL_ERROR.create(e, new Object[0]);

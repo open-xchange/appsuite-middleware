@@ -76,6 +76,7 @@ import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
 import com.openexchange.session.Session;
+import com.openexchange.test.mock.MockUtils;
 
 /**
  * Unit tests for {@link CalendarSql}
@@ -165,6 +166,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetExternalConfirmation_recurringResultNull_updateSingleAppointment() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         Mockito.when(calendarCollection.calculateRecurringIgnoringExceptions((CalendarObject) Matchers.any(), Matchers.anyLong(), Matchers.anyLong(), Matchers.anyInt())).thenReturn(null);
@@ -183,6 +185,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetUserConfirmation_recurringResultNull_updateSingleAppointment() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         Mockito.when(calendarCollection.calculateRecurringIgnoringExceptions((CalendarObject) Matchers.any(), Matchers.anyLong(), Matchers.anyLong(), Matchers.anyInt())).thenReturn(null);
@@ -201,6 +204,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetExternalConfirmation_exceptionAvailable_updateException() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -222,6 +226,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetUserConfirmation_exceptionAvailable_updateException() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -243,6 +248,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetExternalConfirmation_recurringResultNullAndExceptionFound_updateException() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -266,6 +272,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetExternalConfirmation_recurringResultNullAndExceptionNotFound_doNothing() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -288,6 +295,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetUserConfirmation_recurringResultNullAndExceptionFound_updateException() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -311,6 +319,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetUserConfirmation_recurringResultNullAndExceptionNotFound_doNothing() throws OXException, SQLException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
 
         final List<CalendarDataObject> retval = new ArrayList<CalendarDataObject>();
@@ -333,6 +342,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetExternalConfirmation_newOccurrenceConfirmation_createException() throws OXException, SQLException, CloneNotSupportedException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
         Mockito.doNothing().when(calendarSqlSpy).validateConfirmMessage(Matchers.anyString());
 
@@ -380,6 +390,7 @@ public class CalendarSqlTest {
 
     @Test
     public void testSetUserConfirmation_newOccurrenceConfirmation_createException() throws OXException, SQLException, CloneNotSupportedException {
+        MockUtils.injectValueIntoPrivateField(calendarSql, "calendarCollection", this.calendarCollection);
         CalendarSql calendarSqlSpy = Mockito.spy(calendarSql);
         Mockito.doNothing().when(calendarSqlSpy).validateConfirmMessage(Matchers.anyString());
 

@@ -209,6 +209,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } catch (final JSONException e) {
             throw MailExceptionCode.JSON_ERROR.create(e, e.getMessage());
+        } catch (final OXException e) {
+            //Bug 42565
+            if (MailExceptionCode.NO_ATTACHMENT_FOUND.equals(e)) {
+                throw AjaxExceptionCodes.HTTP_ERROR.create(404, e.getMessage());
+            }
+            throw e;
         } finally {
             requestData.cleanUploads();
 

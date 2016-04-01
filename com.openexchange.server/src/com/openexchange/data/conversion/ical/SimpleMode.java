@@ -49,6 +49,9 @@
 
 package com.openexchange.data.conversion.ical;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * {@link SimpleMode}
  *
@@ -57,14 +60,30 @@ package com.openexchange.data.conversion.ical;
 public final class SimpleMode implements Mode {
 
     private final ZoneInfo zoneInfo;
+    private final Map<String, Object> parameters;
 
     public SimpleMode(final ZoneInfo zoneInfo) {
         super();
         this.zoneInfo = zoneInfo;
+        this.parameters = new HashMap<String, Object>();
     }
 
     @Override
     public ZoneInfo getZoneInfo() {
         return zoneInfo;
     }
+
+    @Override
+    public Object getParameter(String name) {
+        return parameters.get(name);
+    }
+
+    public void setParameter(String name, Object value) {
+        if (null == value) {
+            parameters.remove(name);
+        } else {
+            parameters.put(name, value);
+        }
+    }
+
 }

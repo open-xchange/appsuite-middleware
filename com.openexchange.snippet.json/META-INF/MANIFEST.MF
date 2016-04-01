@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Snippet JSON Bundle
 Bundle-SymbolicName: com.openexchange.snippet.json
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.fasterxml.jackson.core,
@@ -12,7 +12,7 @@ Import-Package: com.fasterxml.jackson.core,
  com.fasterxml.jackson.core.json,
  com.fasterxml.jackson.core.sym,
  com.fasterxml.jackson.core.type,
- com.fasterxml.jackson.core.util, 
+ com.fasterxml.jackson.core.util,
  com.openexchange.ajax,
  com.openexchange.ajax.container,
  com.openexchange.ajax.fields,
@@ -30,11 +30,13 @@ Import-Package: com.fasterxml.jackson.core,
  com.openexchange.groupware.ldap,
  com.openexchange.groupware.upload,
  com.openexchange.groupware.upload.impl,
+ com.openexchange.html,
  com.openexchange.image,
  com.openexchange.java,
  com.openexchange.log,
  com.openexchange.mail.mime,
  com.openexchange.mail.text,
+ com.openexchange.mail.usersetting,
  com.openexchange.osgi,
  com.openexchange.server,
  com.openexchange.session,

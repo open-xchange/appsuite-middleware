@@ -125,14 +125,14 @@ public class Bug38550Test extends CardDAVTest {
         /*
          * verify contact not created in global addressbook collection on client
          */
-        Map<String, String> eTags = super.syncCollection(gabCollection, gabSyncToken);
+        Map<String, String> eTags = syncCollection(gabCollection, gabSyncToken);
         assertTrue("resource changes reported on sync collection", 0 == eTags.size());
         /*
          * verify contact appears in default folder instead
          */
         eTags = super.syncCollection(defaultCollection, defaultSyncToken);
         assertTrue("no resource changes reported on sync collection", 0 < eTags.size());
-        List<VCardResource> addressData = super.addressbookMultiget(eTags.keySet());
+        List<VCardResource> addressData = addressbookMultiget(defaultCollection, eTags.keySet());
         VCardResource card = assertContains(uid, addressData);
         assertEquals("N wrong", firstName, card.getGivenName());
         assertEquals("N wrong", lastName, card.getFamilyName());

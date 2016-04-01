@@ -67,6 +67,12 @@ final class AutoLoginMethod implements LoginMethodClosure {
     private final LoginRequest request;
     private final Map<String, Object> properties;
 
+    /**
+     * Initializes a new {@link AutoLoginMethod}.
+     *
+     * @param request The login request
+     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
+     */
     AutoLoginMethod(LoginRequest request, Map<String, Object> properties) {
         super();
         this.request = request;

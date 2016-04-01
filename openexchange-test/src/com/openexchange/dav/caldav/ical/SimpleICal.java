@@ -109,8 +109,12 @@ public class SimpleICal {
         }
 
         public Component getVAlarm() {
-            List<Component> components = getComponents(ICalResource.VALARM);
+            List<Component> components = getVAlarms();
             return 0 < components.size() ? components.get(0) : null;
+        }
+
+        public List<Component> getVAlarms() {
+            return getComponents(ICalResource.VALARM);
         }
 
     	public String getUID() {
@@ -244,6 +248,12 @@ public class SimpleICal {
 
         public void setProperty(String name, String value) {
             this.setProperty(name, value, new HashMap<String, String>());
+        }
+
+        public void removeProperties(String name) {
+            for (Property property : getProperties(name)) {
+                this.properties.remove(property);
+            }
         }
 
     	public List<Property> getProperties(String name) {

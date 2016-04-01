@@ -98,4 +98,7 @@ public class FindExceptionMessages implements LocalizableStrings {
     // You are not allowed to search in module \"%1$s\".
     public static final String MODULE_DISABLED = "You are not allowed to search in module \"%1$s\".";
 
+    // The query yielded too many results to be displayed. Please refine your search options and try again.
+    public static final String TOO_MANY_RESULTS = "The query yielded too many results to be displayed. Please refine your search options and try again.";
+
 }

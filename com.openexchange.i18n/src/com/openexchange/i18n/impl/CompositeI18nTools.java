@@ -85,6 +85,26 @@ public class CompositeI18nTools implements I18nService {
     }
 
     @Override
+    public String getL10NContextLocalized(String messageContext, String key) {
+        for (I18nService tool : tools) {
+            if (tool.hasKey(messageContext, key)) {
+                return tool.getL10NContextLocalized(messageContext, key);
+            }
+        }
+        return key;
+    }
+
+    @Override
+    public String getL10NPluralLocalized(String messageContext, String key, String keyPlural, int plural) {
+        for (I18nService tool : tools) {
+            if (tool.hasKey(messageContext, key)) {
+                return tool.getL10NPluralLocalized(messageContext, key, keyPlural, plural);
+            }
+        }
+        return key;
+    }
+
+    @Override
     public boolean hasKey(final String key) {
         for (final I18nService tool : tools) {
             if (tool.hasKey(key)) {
@@ -95,7 +115,23 @@ public class CompositeI18nTools implements I18nService {
     }
 
     @Override
+    public boolean hasKey(String context, String key) {
+        for (final I18nService tool : tools) {
+            if (tool.hasKey(context, key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @Override
     public Locale getLocale() {
         return locale;
     }
+
+    @Override
+    public String getL10NLocalized(String key) {
+        return getLocalized(key);
+    }
+
 }

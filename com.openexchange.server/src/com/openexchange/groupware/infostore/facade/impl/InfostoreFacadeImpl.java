@@ -127,6 +127,7 @@ import com.openexchange.groupware.infostore.database.impl.UpdateVersionAction;
 import com.openexchange.groupware.infostore.database.impl.versioncontrol.VersionControlUtil;
 import com.openexchange.groupware.infostore.search.SearchTerm;
 import com.openexchange.groupware.infostore.search.impl.SearchEngineImpl;
+import com.openexchange.groupware.infostore.utils.FileDelta;
 import com.openexchange.groupware.infostore.utils.GetSwitch;
 import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.groupware.infostore.utils.SetSwitch;
@@ -145,10 +146,10 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.ldap.UserExceptionCode;
 import com.openexchange.groupware.results.CustomizableTimedResult;
 import com.openexchange.groupware.results.Delta;
-import com.openexchange.groupware.results.DeltaImpl;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -373,10 +374,9 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
         FileStorage fileStorage = getFileStorage(permission.getFolderOwner(), session.getContextId());
         if (0 == offset && -1 == length) {
-            return fileStorage.getFile(metadata.getFilestoreLocation());
-        } else {
-            return fileStorage.getFile(metadata.getFilestoreLocation(), offset, length);
+            return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation()), metadata.getFileSize());
         }
+        return new SizeKnowingInputStream(fileStorage.getFile(metadata.getFilestoreLocation(), offset, length), length);
     }
 
     /**
@@ -531,14 +531,17 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
     public com.openexchange.file.storage.Quota getStorageQuota(ServerSession session) throws OXException {
         long limit = com.openexchange.file.storage.Quota.UNLIMITED;
         long usage = com.openexchange.file.storage.Quota.UNLIMITED;
+
         try {
-            limit = getFileStorage(session.getUserId(), session.getContextId()).getQuota();
+            QuotaFileStorage fileStorage = getFileStorage(session.getUserId(), session.getContextId());
+            limit = fileStorage.getQuota();
+            if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
+                usage = fileStorage.getUsage();
+            }
         } catch (OXException e) {
-            LOG.warn("Error getting file storage quota for context {}", session.getContextId(), e);
+            LOG.warn("Error getting file storage quota for user {} in context {}", session.getUserId(), session.getContextId(), e);
         }
-        if (com.openexchange.file.storage.Quota.UNLIMITED != limit) {
-            usage = getFileStorage(session.getUserId(), session.getContextId()).getUsage();
-        }
+
         return new com.openexchange.file.storage.Quota(limit, usage, com.openexchange.file.storage.Quota.Type.STORAGE);
     }
 
@@ -634,7 +637,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         }
 
         setDefaults(document);
-        getValidationChain().validate(session, document);
+        getValidationChain().validate(session, document, null, null);
         CheckSizeSwitch.checkSizes(document, this, context);
 
         FilenameReserver filenameReserver = null;
@@ -873,9 +876,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         updatedCols.add(Metadata.MODIFIED_BY_LITERAL);
 
         CheckSizeSwitch.checkSizes(document, this, context);
-        getValidationChain().validate(session, document);
 
         DocumentMetadata oldDocument = objectPermissionLoader.add(checkWriteLock(document.getId(), session), session.getContext(), null);
+        getValidationChain().validate(session, document, oldDocument, updatedCols);
+
         SaveParameters saveParameters = new SaveParameters(context, session, document, oldDocument, sequenceNumber, updatedCols, infoPerm.getFolderOwner());
         saveParameters.setData(data, offset, session.getUserId(), ignoreVersion);
         saveModifiedDocument(saveParameters);
@@ -1432,8 +1436,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
         /*
          * perform move
          */
-        List<DocumentMetadata> rejectedDocuments = moveDocuments(
-            session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
+        List<DocumentMetadata> rejectedDocuments = moveDocuments(session, allDocuments, destinationFolderID, sequenceNumber, adjustFilenamesAsNeeded);
         if (null == rejectedDocuments || 0 == rejectedDocuments.size()) {
             return Collections.emptyList();
         }
@@ -1971,7 +1974,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             it = delIter;
         }
 
-        Delta<DocumentMetadata> delta = new DeltaImpl<DocumentMetadata>(newIter, modIter, it, System.currentTimeMillis());
+        Delta<DocumentMetadata> delta = new FileDelta(newIter, modIter, it, System.currentTimeMillis());
         if (addLocked) {
             delta = lockedUntilLoader.add(delta, context, locks);
         }
@@ -2402,7 +2405,10 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
                 int contextID = i(entry.getKey());
                 Set<Integer> guestIDs = filterGuests(contextID, entry.getValue());
                 if (null != guestIDs && 0 < guestIDs.size()) {
-                    ServerServiceRegistry.getServize(ShareService.class).scheduleGuestCleanup(contextID, I2i(guestIDs));
+                    ShareService shareService = ServerServiceRegistry.getServize(ShareService.class);
+                    if (null != shareService) {
+                        shareService.scheduleGuestCleanup(contextID, I2i(guestIDs));
+                    }
                 }
             }
         }

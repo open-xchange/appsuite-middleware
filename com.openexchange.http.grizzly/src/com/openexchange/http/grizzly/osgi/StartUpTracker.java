@@ -73,6 +73,7 @@ import com.openexchange.http.grizzly.service.http.OSGiHandler;
 import com.openexchange.http.grizzly.service.http.OSGiMainHandler;
 import com.openexchange.http.grizzly.service.http.OSGiServletHandler;
 import com.openexchange.http.grizzly.util.ThreadControlReference;
+import com.openexchange.startup.SignalHttpApiAvailabilityService;
 import com.openexchange.startup.SignalStartedService;
 import com.openexchange.startup.ThreadControlService;
 
@@ -89,6 +90,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
     private final BundleContext context;
     private final OXHttpServer grizzly;
     private final GrizzlyConfig grizzlyConfig;
+    private ServiceRegistration<SignalHttpApiAvailabilityService> availabilityReg;
     final ServiceRegistration<HttpService> httpServiceRegistration;
 
     /**
@@ -125,6 +127,7 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
             try {
                 grizzly.startListeners();
                 LOGGER.info("Registered Grizzly HttpNetworkListener on host: {} and port: {}", grizzlyConfig.getHttpHost(), Integer.valueOf(grizzlyConfig.getHttpPort()));
+                availabilityReg = context.registerService(SignalHttpApiAvailabilityService.class, new SignalHttpApiAvailabilityService() {}, null);
             } catch (final Exception e) {
                 LOGGER.error(" ---=== /!\\ ===--- Network listeners could not be started! ---=== /!\\ ===--- ", e);
             }
@@ -146,6 +149,11 @@ public final class StartUpTracker implements ServiceTrackerCustomizer<SignalStar
             ThreadControlService threadControl = ThreadControlReference.getThreadControlService();
             if (null != threadControl) {
                 threadControl.interruptAll();
+            }
+
+            if (availabilityReg != null) {
+                availabilityReg.unregister();
+                availabilityReg = null;
             }
 
             if (!grizzlyConfig.isShutdownFast()) {

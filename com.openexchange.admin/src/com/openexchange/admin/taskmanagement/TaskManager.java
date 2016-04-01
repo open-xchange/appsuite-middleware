@@ -49,6 +49,7 @@
 package com.openexchange.admin.taskmanagement;
 
 import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,6 +57,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -94,7 +96,7 @@ public class TaskManager {
     private static class IncrementingCallable<V> implements Callable<V> {
 
         private final Callable<V> delegate;
-        private final AtomicInteger runningjobs;
+        private final AtomicInteger numberOfRunningJobs;
         private final int id;
         private final String typeofjob;
 
@@ -105,13 +107,13 @@ public class TaskManager {
             super();
             this.id = id;
             this.typeofjob = typeofjob;
-            this.runningjobs = runningjobs;
+            this.numberOfRunningJobs = runningjobs;
             this.delegate = delegate;
         }
 
         @Override
         public V call() throws Exception {
-            runningjobs.incrementAndGet();
+            numberOfRunningJobs.incrementAndGet();
             try {
                 V result = delegate.call();
                 LOGGER.info("Job '{}' with number {} successfully terminated.", typeofjob, id);
@@ -123,7 +125,7 @@ public class TaskManager {
                 LOGGER.error("Job '{}' with number {} failed.", typeofjob, id, t);
                 throw new Exception(t);
             } finally {
-                runningjobs.decrementAndGet();
+                numberOfRunningJobs.decrementAndGet();
             }
         }
     }
@@ -137,7 +139,7 @@ public class TaskManager {
          * Initializes a new {@link Extended}.
          */
         Extended(Callable<V> callable, String typeofjob, String furtherinformation, int id, int cid, TaskManager taskManager) {
-            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.runningjobs), typeofjob, furtherinformation, id, cid);
+            super(new IncrementingCallable<V>(callable, typeofjob, id, taskManager.numberOfRunningJobs), typeofjob, furtherinformation, id, cid);
             this.taskManager = taskManager;
             completionStamp = new AtomicReference<Long>(null);
         }
@@ -163,7 +165,7 @@ public class TaskManager {
     // ---------------------------------------------------------------------------------------------------------------------------------
 
     /** The number of currently running jobs */
-    final AtomicInteger runningjobs;
+    final AtomicInteger numberOfRunningJobs;
 
     /** The queue for identifiers of finished jobs; gets periodically cleaned once per hour */
     final Queue<Integer> finishedJobs = new ConcurrentLinkedQueue<Integer>();
@@ -183,7 +185,7 @@ public class TaskManager {
     private TaskManager() {
         super();
         lastID = new AtomicInteger(0);
-        runningjobs = new AtomicInteger(0);
+        numberOfRunningJobs = new AtomicInteger(0);
         jobs = new ConcurrentHashMap<Integer, Extended<?>>(16, 0.9F, 1);
         this.cache = ClientAdminThread.cache;
         this.prop = this.cache.getProperties();
@@ -201,6 +203,7 @@ public class TaskManager {
      * @param furtherinformation Arbitrary information
      * @param cid The associated context identifier
      * @return The job identifier
+     * @throws RejectedExecutionException If the task cannot be accepted for execution
      */
     public <V> int addJob(Callable<V> jobcall, String typeofjob, String furtherinformation, int cid) {
         // Get next job identifier
@@ -249,7 +252,7 @@ public class TaskManager {
      * @return <code>true</code> if there are currently running jobs; otherwise <code>false</code>
      */
     public boolean jobsRunning() {
-        return (runningjobs.get() > 0);
+        return (numberOfRunningJobs.get() > 0);
     }
 
     /**
@@ -404,7 +407,7 @@ public class TaskManager {
      * @return The pretty-printed job list
      */
     public String getJobList(Integer cid) {
-        Iterator<Integer> jids = jobs.keySet().iterator();
+        Iterator<Entry<Integer, Extended<?>>> jids = jobs.entrySet().iterator();
         if (!jids.hasNext()) {
             return "Currently no jobs queued";
         }
@@ -415,10 +418,10 @@ public class TaskManager {
         buf.append(String.format(TFORMAT, "ID", "Type of Job", "Status", "Further Information"));
 
         while (jids.hasNext()) {
-            final Integer id = jids.next();
-            final ExtendedFutureTask<?> job = this.jobs.get(id);
+            final Entry<Integer, Extended<?>> jidEntry = jids.next();
+            final ExtendedFutureTask<?> job = jidEntry.getValue();
             if (null == cid || job.cid == cid.intValue() ) {
-                buf.append(String.format(VFORMAT, id, job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
+                buf.append(String.format(VFORMAT, jidEntry.getKey(), job.getTypeofjob(), formatStatus(job), job.getFurtherinformation()));
             }
         }
         return buf.toString();

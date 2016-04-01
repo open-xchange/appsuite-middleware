@@ -56,6 +56,7 @@ import com.openexchange.ajax.drive.DriveAJAXSuite;
 import com.openexchange.ajax.find.FindTestSuite;
 import com.openexchange.ajax.jslob.JSlobTestSuite;
 import com.openexchange.ajax.oauth.provider.OAuthProviderTests;
+import com.openexchange.ajax.onboarding.OnboardingAJAXSuite;
 import com.openexchange.ajax.share.ShareAJAXSuite;
 
 /**
@@ -139,6 +140,7 @@ public final class InterfaceTests {
         tests.addTest(new JUnit4TestAdapter(OAuthProviderTests.class));
         // TODO: enable
         tests.addTest(DriveAJAXSuite.suite());
+        tests.addTest(OnboardingAJAXSuite.suite());
         return tests;
     }
 }

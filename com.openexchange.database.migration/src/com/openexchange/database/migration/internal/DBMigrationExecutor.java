@@ -102,11 +102,17 @@ public class DBMigrationExecutor implements Runnable {
     @Override
     public void run() {
         for (ScheduledExecution scheduledExecution; (scheduledExecution = nextExecution()) != null;) {
+            DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
             try {
                 if (false == needsUpdate(scheduledExecution)) {
                     LOG.info("No unrun liquibase changesets detected, skipping migration {}.", scheduledExecution.getMigration());
                     scheduledExecution.setDone(null);
                     notify(scheduledExecution.getCallback(), Collections.<ChangeSet>emptyList(), Collections.<ChangeSet>emptyList());
+                    try {
+                        connectionProvider.backAfterReading(connectionProvider.get());
+                    } catch (OXException e) {
+                        LOG.error("", e);
+                    }
                     continue;
                 }
             } catch (ValidationFailedException validationFailedException) {
@@ -117,7 +123,6 @@ public class DBMigrationExecutor implements Runnable {
             Liquibase liquibase = null;
             DBMigrationListener migrationListener = new DBMigrationListener();
             String fileLocation = scheduledExecution.getFileLocation();
-            DBMigrationConnectionProvider connectionProvider = scheduledExecution.getConnectionProvider();
             Connection connection = null;
             try {
                 connection = connectionProvider.get();

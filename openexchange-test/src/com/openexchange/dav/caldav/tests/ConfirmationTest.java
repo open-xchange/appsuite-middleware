@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.tests;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -389,11 +391,11 @@ public class ConfirmationTest extends CalDAVTest {
         /*
          * accept occurrence on server
          */
+        appointment = getAppointment(uid);
         Calendar calendar = Calendar.getInstance(TimeZones.UTC);
         calendar.setTime(appointment.getStartDate());
         calendar.add(Calendar.DAY_OF_YEAR, 5);
         Date exceptionStartDate = calendar.getTime();
-        appointment.setParentFolderID(getManager().getPrivateFolder());
         getManager().confirm(appointment, Appointment.ACCEPT, "ok", 6);
         /*
          * verify appointment on server

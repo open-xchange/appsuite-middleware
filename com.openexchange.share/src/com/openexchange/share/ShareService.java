@@ -162,12 +162,15 @@ public interface ShareService {
 
     /**
      * Gets all users that shared something to specified guest.
+     * <p/>
+     * More concrete, gets the identifiers of all other user entities present in the permissions of all shared folders and items the
+     * guest user has access to, i.e. the IDs of those users the guest user is allowed to to "see".
      *
-     * @param contextId The context identifier
-     * @param guestId The guest identifier
-     * @return The identifiers from sharing users or an empty set
+     * @param contextID The context identifier
+     * @param guestID The guest identifier
+     * @return The identifiers from sharing users, or an empty set if there are none
      */
-    Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException;
+    Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException;
 
     /**
      * Schedules guest cleanup tasks in a context.

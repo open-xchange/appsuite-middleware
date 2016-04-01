@@ -49,392 +49,348 @@
 
 package com.openexchange.carddav.resources;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletResponse;
+import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.carddav.CarddavProtocol;
 import com.openexchange.carddav.GroupwareCarddavFactory;
 import com.openexchange.carddav.Tools;
-import com.openexchange.carddav.mixins.CTag;
+import com.openexchange.carddav.mixins.BulkRequests;
 import com.openexchange.carddav.mixins.MaxImageSize;
 import com.openexchange.carddav.mixins.MaxResourceSize;
+import com.openexchange.carddav.mixins.SupportedAddressData;
 import com.openexchange.carddav.mixins.SupportedReportSet;
-import com.openexchange.carddav.mixins.SyncToken;
-import com.openexchange.carddav.reports.Syncstatus;
+import com.openexchange.contact.ContactFieldOperand;
+import com.openexchange.contact.ContactService;
+import com.openexchange.contact.SortOptions;
+import com.openexchange.contact.vcard.VCardImport;
+import com.openexchange.contact.vcard.VCardParameters;
+import com.openexchange.contact.vcard.VCardService;
+import com.openexchange.contact.vcard.storage.VCardStorageService;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.PreconditionException;
+import com.openexchange.dav.reports.SyncStatus;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
-import com.openexchange.folderstorage.FolderStorage;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
-import com.openexchange.webdav.protocol.Protocol;
-import com.openexchange.webdav.protocol.Protocol.Property;
-import com.openexchange.webdav.protocol.WebdavFactory;
-import com.openexchange.webdav.protocol.WebdavLock;
+import com.openexchange.search.CompositeSearchTerm;
+import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
+import com.openexchange.search.SearchTerm;
+import com.openexchange.search.SingleSearchTerm;
+import com.openexchange.search.SingleSearchTerm.SingleOperation;
+import com.openexchange.search.internal.operands.ConstantOperand;
+import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.webdav.protocol.WebdavPath;
-import com.openexchange.webdav.protocol.WebdavProperty;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 import com.openexchange.webdav.protocol.WebdavResource;
-import com.openexchange.webdav.protocol.WebdavStatusImpl;
-import com.openexchange.webdav.protocol.helpers.AbstractCollection;
+import com.openexchange.webdav.protocol.helpers.AbstractResource;
 
 /**
- * {@link CardDAVCollection} - Abstract base class for CardDAV collections.
+ * {@link CardDAVCollection} - CardDAV collection for contact folders.
  *
- * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public abstract class CardDAVCollection extends AbstractCollection {
+public class CardDAVCollection extends CommonFolderCollection<Contact> {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CardDAVCollection.class);
-    private static final Pattern LEGACY_FOLDER_NAME = Pattern.compile("f\\d+_(\\d+).vcf");
-    private static final long OVERRIDE_LEGACY_FOLDERS = 11;
+    protected final GroupwareCarddavFactory factory;
 
-    protected GroupwareCarddavFactory factory;
-    protected WebdavPath url;
+    private Boolean isStoreOriginalVCard;
 
     /**
      * Initializes a new {@link CardDAVCollection}.
      *
-     * @param factory A reference to the CardDAV factory
-     * @param url The collection's WebDAV path
+     * @param factory The factory
+     * @param url The WebDAV path
+     * @param folder The underlying folder, or <code>null</code> if it not yet exists
      */
-    public CardDAVCollection(GroupwareCarddavFactory factory, WebdavPath url) {
-        super();
+    public CardDAVCollection(GroupwareCarddavFactory factory, WebdavPath url, UserizedFolder folder) throws OXException {
+        super(factory, url, folder);
         this.factory = factory;
-        this.url = url;
-        includeProperties(new SupportedReportSet(), new CTag(factory, this), new SyncToken(this),
-            new MaxResourceSize(factory), new MaxImageSize(factory));
-        LOG.debug("{}: initialized.", getUrl());
-    }
-
-    protected WebdavProtocolException protocolException(Throwable t) {
-    	return protocolException(t, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    }
-
-    protected WebdavProtocolException protocolException(Throwable t, int statusCode) {
-        LOG.error("{}", this.getUrl(), t);
-        return WebdavProtocolException.Code.GENERAL_ERROR.create(this.getUrl(), statusCode, t);
+        includeProperties(new SupportedReportSet(), new MaxResourceSize(factory), new MaxImageSize(factory), new SupportedAddressData(), new BulkRequests(factory));
     }
 
     /**
-     * Gets all contacts that have been created or modified since the
-     * supplied time.
+     * Parses and imports all vCards from the supplied input stream.
      *
-     * @param since the exclusive minimum modification time to consider
-     * @return the contacts
-     * @throws OXException
+     * @param inputStream The input stream to parse and import from
+     * @return The import results
      */
-    protected abstract Collection<Contact> getModifiedContacts(Date since) throws OXException;
-
-    /**
-     * Gets all contacts that have been deleted since the supplied time.
-     *
-     * @param since the exclusive minimum modification time to consider
-     * @return the contacts
-     * @throws OXException
-     */
-    protected abstract Collection<Contact> getDeletedContacts(Date since) throws OXException;
-
-    /**
-     * Gets all contacts in the collection.
-     *
-     * @return the contacts
-     * @throws OXException
-     */
-    protected abstract Collection<Contact> getContacts() throws OXException;
-
-    /**
-     * Gets the ID of the folder that is used to create new contacts for
-     * this collection.
-     *
-     * @return the folder ID
-     */
-    protected abstract String getFolderID() throws OXException;
-
-    /**
-     * Constructs a {@link WebdavPath} for a vCard child resource of this
-     * collection with the supplied UID.
-     *
-     * @param uid the UID of the resource
-     * @return the path
-     */
-    protected WebdavPath constructPathForChildResource(String uid) {
-    	return this.getUrl().dup().append(uid + ".vcf");
-    }
-
-    /**
-     * Constructs a {@link WebdavPath} for a vCard child resource of this
-     * collection with UID found in the supplied contact.
-     *
-     * @param contact the contact represented by the resource
-     * @return the path
-     */
-    protected WebdavPath constructPathForChildResource(Contact contact) {
-		if (null != contact.getFilename() && false == contact.getFilename().equals(contact.getUid())) {
-			// for MacOS 10.6 and iOS clients
-	    	return constructPathForChildResource(contact.getFilename());
-		} else {
-			return constructPathForChildResource(contact.getUid());
-		}
-    }
-
-    /**
-     * Extracts the folder ID from the supplied resource name, i.e. the
-     * part of a ox folder resource name representing the folder's id.
-     *
-     * @param name the name of the resource
-     * @return the folder ID, or <code>null</code> if none was found
-     */
-    private static String extractLegacyFolderID(String name) {
-    	if (null != name && 0 < name.length() && 'f' == name.charAt(0)) {
-            Matcher matcher = LEGACY_FOLDER_NAME.matcher(name);
-            if (matcher.find()) {
-                return matcher.group(1);
-            }
-    	}
-    	return null;
-    }
-
-	@Override
-	public List<WebdavResource> getChildren() throws WebdavProtocolException {
+    public List<BulkImportResult> bulkImport(InputStream inputStream) throws OXException {
+        List<BulkImportResult> importResults = new ArrayList<BulkImportResult>();
+        VCardService vCardService = factory.requireService(VCardService.class);
+        VCardParameters parameters = vCardService.createParameters(factory.getSession()).setKeepOriginalVCard(isStoreOriginalVCard())
+            .setImportAttachments(true).setRemoveAttachmentsFromKeptVCard(true);
+        SearchIterator<VCardImport> searchIterator = null;
         try {
-            List<WebdavResource> children = new ArrayList<WebdavResource>();
-            for (Contact contact : this.getContacts()) {
-            	children.add(new ContactResource(contact, this.factory, constructPathForChildResource(contact)));
+            searchIterator = vCardService.importVCards(inputStream, parameters);
+            while (searchIterator.hasNext()) {
+                importResults.add(bulkImport(searchIterator.next()));
             }
-          	LOG.debug("{}: added {} contact resources.", this.getUrl(), children.size());
-            return children;
-		} catch (OXException e) {
-            throw protocolException(e);
-		}
-	}
-
-	@Override
-	public WebdavPath getUrl() {
-		return this.url;
-	}
-
-	@Override
-	protected WebdavFactory getFactory() {
-		return this.factory;
-	}
-
-	@Override
-	protected boolean isset(Property p) {
-		int id = p.getId();
-		return Protocol.GETCONTENTLANGUAGE != id && Protocol.GETCONTENTLENGTH != id && Protocol.GETETAG != id;
-	}
-
-	/**
-	 * Gets an updated {@link Syncstatus} based on the supplied sync token for
-	 * this collection.
-	 *
-	 * @param syncToken the sync token as supplied by the client
-	 * @return the sync status
-	 * @throws WebdavProtocolException
-	 */
-    public Syncstatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
-		long since = 0;
-		if (null != token && 0 < token.length()) {
-			/*
-			 * check for overridden sync-token for this client
-			 */
-			String overrrideSyncToken = factory.getOverrideNextSyncToken();
-			if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
-				factory.setOverrideNextSyncToken(null);
-				token = overrrideSyncToken;
-				LOG.debug("Overriding sync token to '{}' for user '{}'.", token, this.factory.getUser());
-			}
-			try {
-				since = Long.parseLong(token);
-			} catch (NumberFormatException e) {
-				LOG.warn("Invalid sync token: '{}', falling back to '0'.", token);
-			}
-		}
-		Syncstatus<WebdavResource> syncStatus = null;
-		try {
-			/*
-			 * get sync-status
-			 */
-			syncStatus = this.getSyncStatus(new Date(since));
-			if (OVERRIDE_LEGACY_FOLDERS == since) {
-				/*
-				 * report legacy simulated folder groups as deleted
-				 */
-				addLegacyGroupsAsDeleted(syncStatus);
-			}
-			return syncStatus;
-		} catch (OXException e) {
-			throw protocolException(e);
-		}
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return importResults;
     }
 
-	/**
-	 * Create a 'sync-status' multistatus report considering all changes since
-	 * the supplied time.
-	 *
-	 * @param since the time
-	 * @return the sync status
-	 * @throws WebdavProtocolException
-	 */
-	private Syncstatus<WebdavResource> getSyncStatus(Date since) throws OXException {
-		Syncstatus<WebdavResource> multistatus = new Syncstatus<WebdavResource>();
-		Date nextSyncToken = new Date(since.getTime());
-		/*
-		 * new and modified contacts
-		 */
-		Collection<Contact> modifiedContacts = this.getModifiedContacts(since);
-		for (Contact contact : modifiedContacts) {
-			// add contact resource to multistatus
-			ContactResource resource = new ContactResource(contact, factory, constructPathForChildResource(contact));
-			int status = contact.getCreationDate().after(since) ? HttpServletResponse.SC_CREATED : HttpServletResponse.SC_OK;
-			multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(status, resource.getUrl(), resource));
-			// remember aggregated last modified for next sync token
-			nextSyncToken = Tools.getLatestModified(nextSyncToken, contact.getLastModified());
-		}
-		/*
-		 * deleted contacts
-		 */
-		Collection<Contact> deletedContacts = this.getDeletedContacts(since);
-		for (Contact contact : deletedContacts) {
-			// only include deleted contacts that were created before last synchronization,
-			// only include contacts that are not also modified (due to move operations)
-			if (null != contact.getCreationDate() &&
-					(contact.getCreationDate().before(since) || contact.getCreationDate().equals(since)) &&
-					false == contains(modifiedContacts, contact.getUid())) {
-				// add contact resource to multistatus
-				ContactResource resource = new ContactResource(contact, factory, constructPathForChildResource(contact));
-				multistatus.addStatus(new WebdavStatusImpl<WebdavResource>(
-						HttpServletResponse.SC_NOT_FOUND, resource.getUrl(), resource));
-				// remember aggregated last modified for parent folder
-				nextSyncToken = Tools.getLatestModified(nextSyncToken, contact.getLastModified());
-			}
-		}
-		/*
-		 * Return response with new next sync-token in response
-		 */
-		multistatus.setToken(Long.toString(nextSyncToken.getTime()));
-		return multistatus;
-	}
-
-	/**
-	 * Adds WebDAV status for the formerly simulated folder groups of the
-	 * default contacts folder and the global addressbook with a status of
-	 * "Deleted" to the supplied sync status.
-	 *
-	 * @param syncStatus the sync status to add the legacy groups
-	 * @throws OXException
-	 */
-	private void addLegacyGroupsAsDeleted(Syncstatus<WebdavResource> syncStatus) throws OXException {
-		String name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getState().getDefaultFolder());
-		ContactResource defaultFolderResource = new ContactResource(factory, constructPathForChildResource(name), null);
-		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
-				HttpServletResponse.SC_NOT_FOUND, defaultFolderResource.getUrl(), defaultFolderResource));
-		name = String.format("f%d_%s", factory.getSession().getContextId(), factory.getFolderService().getFolder(
-				FolderStorage.REAL_TREE_ID, FolderStorage.GLOBAL_ADDRESS_BOOK_ID, this.factory.getSession(), null));
-		ContactResource gabResource = new ContactResource(factory, constructPathForChildResource(name), null);
-		syncStatus.addStatus(new WebdavStatusImpl<WebdavResource>(
-				HttpServletResponse.SC_NOT_FOUND, gabResource.getUrl(), gabResource));
-	}
-
-	private static boolean contains(Collection<Contact> contacts, String uid) {
-		for (Contact contact : contacts) {
-			if (contact.getUid().equals(uid)) {
-				return true;
-			}
-		}
-		return false;
-	}
+    private BulkImportResult bulkImport(VCardImport vCardImport) throws OXException {
+        BulkImportResult importResult = new BulkImportResult();
+        if (null == vCardImport || null == vCardImport.getContact()) {
+            importResult.setError(new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN));
+        } else {
+            Contact contact = vCardImport.getContact();
+            importResult.setUid(contact.getUid());
+            WebdavPath url = constructPathForChildResource(contact);
+            importResult.setHref(url);
+            try {
+                checkMaxResourceSize(vCardImport);
+                checkUidConflict(contact.getUid());
+                ContactResource.fromImport(factory, this, url, vCardImport).create();
+            } catch (PreconditionException e) {
+                importResult.setError(e);
+            } catch (WebdavProtocolException e) {
+                importResult.setError(new PreconditionException(DAVProtocol.CARD_NS.getURI(), "valid-address-data", getUrl(), HttpServletResponse.SC_FORBIDDEN));
+            }
+        }
+        return importResult;
+    }
 
     /**
-     * Gets a child resource from this collection by name. If the resource
-     * does not yet exists, a placeholder contact resource is created.
+     * Checks the vCard import's size against the maximum allowed vCard size.
      *
-     * @param name the name of the resource
-     * @return the child resource
-     * @throws WebdavProtocolException
+     * @param vCardImport The vCard import to check
+     * @throws PreconditionException <code>(CARDDAV:max-resource-size)</code> if the maximum size is exceeded
      */
-	public CardDAVResource getChild(String name) throws WebdavProtocolException {
-		if (null != extractLegacyFolderID(name)) {
-			LOG.info("{}: client requests legacy simulated group resource '{}', overriding next sync token to '11' for recovery.", getUrl(), name);
-			this.factory.setOverrideNextSyncToken("11");
-			throw protocolException(new Throwable("child resource '" + name + "' not found"), HttpServletResponse.SC_NOT_FOUND);
-		}
-    	try {
-        	String uid = Tools.extractUID(name);
-    		Contact contact = this.factory.getState().load(uid);
-    		if (null != contact) {
-              	LOG.debug("{}: found child resource by name '{}'", this.getUrl(), name);
-    			return new ContactResource(contact, this.factory, constructPathForChildResource(contact));
-    		}
-            LOG.debug("{}: child resource '{}' not found, creating placeholder resource", this.getUrl(), name);
-            return new ContactResource(factory, constructPathForChildResource(uid), getFolderID());
-    	} catch (OXException e) {
-    		throw protocolException(e);
-		}
-	}
+    private void checkMaxResourceSize(VCardImport vCardImport) throws PreconditionException {
+        long maxSize = factory.getState().getMaxVCardSize();
+        if (0 < maxSize) {
+            IFileHolder vCard = vCardImport.getVCard();
+            if (null != vCard && maxSize < vCard.getLength()) {
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "max-resource-size", getUrl(), HttpServletResponse.SC_FORBIDDEN);
+            }
+        }
+    }
+
+    /**
+     * Checks for an existing resource in this collection conflicting with a specific UID.
+     *
+     * @param uid The UID to check
+     * @throws OXException If the check fails
+     * @throws PreconditionException <code>(CARDDAV:no-uid-conflict)</code> if the UID conflicts with an existing resource
+     */
+    private void checkUidConflict(String uid) throws OXException, PreconditionException {
+        /*
+         * prepare search term
+         */
+        List<UserizedFolder> folders = getFolders();
+        if (0 == folders.size()) {
+            return;
+        }
+        CompositeSearchTerm searchTerm = new CompositeSearchTerm(CompositeOperation.AND);
+        if (1 == folders.size()) {
+            SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+            term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+            term.addOperand(new ConstantOperand<String>(folders.get(0).getID()));
+            searchTerm.addSearchTerm(term);
+        } else {
+            CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+            for (UserizedFolder folder : folders) {
+                SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+                term.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                term.addOperand(new ConstantOperand<String>(folder.getID()));
+                orTerm.addSearchTerm(term);
+            }
+            searchTerm.addSearchTerm(orTerm);
+        }
+        SingleSearchTerm uidTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+        uidTerm.addOperand(new ContactFieldOperand(ContactField.UID));
+        uidTerm.addOperand(new ConstantOperand<String>(uid));
+        searchTerm.addSearchTerm(uidTerm);
+        /*
+         * lookup conflicting contacts
+         */
+        ContactField[] fields = new ContactField[] { ContactField.FILENAME, ContactField.UID };
+        SearchIterator<Contact> iterator = null;
+        try {
+            iterator = factory.getContactService().searchContacts(factory.getSession(), searchTerm, fields, SortOptions.EMPTY);
+            if (iterator.hasNext()) {
+                Contact contact = iterator.next();
+                throw new PreconditionException(DAVProtocol.CARD_NS.getURI(), "no-uid-conflict", constructPathForChildResource(contact), HttpServletResponse.SC_FORBIDDEN);
+            }
+        } finally {
+            SearchIterators.close(iterator);
+        }
+    }
+
+    /**
+     * Gets a value indicating whether the underlying storage supports storing the original vCard or not.
+     *
+     * @return <code>true</code> if storing the original vCard is possible, <code>false</code>, otherwise
+     */
+    public boolean isStoreOriginalVCard() {
+        if (null == isStoreOriginalVCard) {
+            VCardStorageService vCardStorageService = factory.getVCardStorageService(factory.getSession().getContextId());
+            if (null != vCardStorageService) {
+                try {
+                    isStoreOriginalVCard = Boolean.valueOf(
+                        factory.requireService(ContactService.class).supports(factory.getSession(), folder.getID(), ContactField.VCARD_ID));
+                } catch (OXException e) {
+                    LOG.warn("Error checking if storing the vCard ID is supported, assuming \"false\".", e);
+                    isStoreOriginalVCard = Boolean.FALSE;
+                }
+            } else {
+                isStoreOriginalVCard = Boolean.FALSE;
+            }
+        }
+        return isStoreOriginalVCard.booleanValue();
+    }
+
+    /**
+     * Gets a list of one or more folders represented by the collection.
+     *
+     * @return The folder identifiers
+     */
+    protected List<UserizedFolder> getFolders() throws OXException {
+        return Collections.singletonList(folder);
+    }
 
     @Override
     public String getResourceType() throws WebdavProtocolException {
         return super.getResourceType() + CarddavProtocol.ADDRESSBOOK;
     }
 
-	@Override
-	public String getSource() throws WebdavProtocolException {
-		return null;
-	}
+    public List<WebdavResource> getFilteredObjects(SearchTerm<?> term) throws WebdavProtocolException {
+        List<WebdavResource> resources = new ArrayList<WebdavResource>();
+        SearchIterator<Contact> searchIterator = null;
+        try {
+            searchIterator  = searchContacts(term, getFolders());
+            while (searchIterator.hasNext()) {
+                Contact contact = searchIterator.next();
+                resources.add(createResource(contact, constructPathForChildResource(contact)));
+            }
+        } catch (OXException e) {
+            throw protocolException(e);
+        } finally {
+            SearchIterators.close(searchIterator);
+        }
+        return resources;
+    }
+
+    protected SearchIterator<Contact> searchContacts(SearchTerm<?> term, List<UserizedFolder> folders) throws OXException {
+        if (null != folders && 0 < folders.size()) {
+            CompositeSearchTerm compositeTerm = new CompositeSearchTerm(CompositeOperation.AND);
+            for (UserizedFolder folder : folders) {
+                SingleSearchTerm folderIDTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                folderIDTerm.addOperand(new ContactFieldOperand(ContactField.FOLDER_ID));
+                folderIDTerm.addOperand(new ConstantOperand<String>(folder.getID()));
+                compositeTerm.addSearchTerm(folderIDTerm);
+            }
+            compositeTerm.addSearchTerm(term);
+            term = compositeTerm;
+        }
+        return factory.getContactService().searchContacts(factory.getSession(), term);
+    }
+
+    @Override
+    protected Collection<Contact> getModifiedObjects(Date since) throws OXException {
+        Collection<Contact> contacts = new ArrayList<Contact>();
+        for (UserizedFolder folder : getFolders()) {
+            Collection<Contact> modifiedContacts = factory.getState().getModifiedContacts(since, folder.getID());
+            if (null != modifiedContacts) {
+                contacts.addAll(modifiedContacts);
+            }
+        }
+        return contacts;
+    }
+
+    @Override
+    protected Collection<Contact> getDeletedObjects(Date since) throws OXException {
+        Collection<Contact> contacts = new ArrayList<Contact>();
+        for (UserizedFolder folder : getFolders()) {
+            Collection<Contact> contactList = factory.getState().getDeletedContacts(since, folder.getID());
+            if (null != contactList) {
+                contacts.addAll(contactList);
+            }
+        }
+        return contacts;
+    }
+
+    @Override
+    protected Collection<Contact> getObjects() throws OXException {
+        Collection<Contact> contacts = new ArrayList<Contact>();
+        for (UserizedFolder folder : getFolders()) {
+            Collection<Contact> contactList = factory.getState().getContacts(folder.getID());
+            if (null != contactList) {
+                contacts.addAll(contactList);
+            }
+        }
+        return contacts;
+    }
+
+    @Override
+    protected Contact getObject(String resourceName) throws OXException {
+        return factory.getState().load(resourceName);
+    }
+
+    @Override
+    protected AbstractResource createResource(Contact object, WebdavPath url) throws OXException {
+        return new ContactResource(factory, this, object, url);
+    }
+
+    @Override
+    protected String getFileExtension() {
+        return ContactResource.EXTENSION_VCF;
+    }
 
 	@Override
-	public void lock(WebdavLock lock) throws WebdavProtocolException {
+	public Date getLastModified() throws WebdavProtocolException {
+       try {
+            Date lastModified = new Date(0);
+            for (UserizedFolder folder : getFolders()) {
+                lastModified = Tools.getLatestModified(lastModified, factory.getState().getLastModified(folder));
+            }
+            return lastModified;
+        } catch (OXException e) {
+            throw protocolException(e);
+        }
 	}
 
-	@Override
-	public List<WebdavLock> getLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
+    @Override
+    public SyncStatus<WebdavResource> getSyncStatus(String token) throws WebdavProtocolException {
+        if (null != token && 0 < token.length()) {
+            /*
+             * check for overridden sync-token for this client
+             */
+            String overrrideSyncToken = factory.getOverrideNextSyncToken();
+            if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
+                factory.setOverrideNextSyncToken(null);
+                token = overrrideSyncToken;
+                LOG.debug("Overriding sync token to '{}' for user '{}'.", token, this.factory.getUser());
+            }
+        }
+        return super.getSyncStatus(token);
+    }
 
-	@Override
-	public WebdavLock getLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	public void unlock(String token) throws WebdavProtocolException {
-	}
-
-	@Override
-	public List<WebdavLock> getOwnLocks() throws WebdavProtocolException {
-        return Collections.emptyList();
-	}
-
-	@Override
-	public WebdavLock getOwnLock(String token) throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	protected void internalDelete() throws WebdavProtocolException {
-	}
-
-	@Override
-	protected List<WebdavProperty> internalGetAllProps() throws WebdavProtocolException {
-		return null;
-	}
-
-	@Override
-	protected void internalPutProperty(WebdavProperty prop) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected void internalRemoveProperty(String namespace, String name) throws WebdavProtocolException {
-	}
-
-	@Override
-	protected WebdavProperty internalGetProperty(String namespace, String name) throws WebdavProtocolException {
-		return null;
-	}
+    @Override
+    public String getCTag() throws WebdavProtocolException {
+        /*
+         * check for overridden sync-token for this client
+         */
+        String overrrideSyncToken = factory.getOverrideNextSyncToken();
+        if (null != overrrideSyncToken && 0 < overrrideSyncToken.length()) {
+            factory.setOverrideNextSyncToken(null);
+            String value = "http://www.open-xchange.com/ctags/" + folder.getID() + "-" + overrrideSyncToken;
+            LOG.debug("Overriding CTag property to '{}' for user '{}'.", value, factory.getUser());
+            return value;
+        }
+        return super.getCTag();
+    }
 
 }

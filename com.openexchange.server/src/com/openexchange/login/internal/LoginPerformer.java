@@ -86,6 +86,8 @@ import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
 import com.openexchange.login.internal.format.DefaultLoginFormatter;
 import com.openexchange.login.internal.format.LoginFormatter;
+import com.openexchange.login.listener.LoginListener;
+import com.openexchange.login.listener.internal.LoginListenerRegistryImpl;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -134,6 +136,14 @@ public final class LoginPerformer {
         return doLogin(request, new HashMap<String, Object>(1));
     }
 
+    /**
+     * Performs the login for specified login request passing arbitrary properties.
+     *
+     * @param request The login request
+     * @param properties The arbitrary properties; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
+     * @return The login providing login information
+     * @throws LoginException If login fails
+     */
     public LoginResult doLogin(final LoginRequest request, final Map<String, Object> properties) throws OXException {
         return doLogin(request, properties, new NormalLoginMethod(request, properties));
     }
@@ -158,7 +168,7 @@ public final class LoginPerformer {
      * @throws OXException If login fails
      */
     public LoginResult doAutoLogin(final LoginRequest request) throws OXException {
-        final Map<String, Object> properties = new HashMap<String, Object>();
+        final Map<String, Object> properties = new HashMap<String, Object>(1);
         return doLogin(request, properties, new AutoLoginMethod(request, properties));
     }
 
@@ -166,16 +176,23 @@ public final class LoginPerformer {
      * Performs the login for specified login request.
      *
      * @param request The login request
-     * @param properties The properties to decorate
+     * @param properties The properties to decorate; e.g. <code>"headers"</code> or <code>{@link com.openexchange.authentication.Cookie "cookies"}</code>
      * @param loginMethod The actual login method that performs authentication
      * @return The login providing login information
      * @throws OXException If login fails
      */
     public LoginResult doLogin(LoginRequest request, Map<String, Object> properties, LoginMethodClosure loginMethod) throws OXException {
         sanityChecks(request);
+        List<LoginListener> listeners = LoginListenerRegistryImpl.getInstance().getLoginListeners();
         LoginResultImpl retval = new LoginResultImpl();
         retval.setRequest(request);
         try {
+            // Call onBeforeAuthentication
+            for (LoginListener listener : listeners) {
+                listener.onBeforeAuthentication(request, properties);
+            }
+
+            // Proceed...
             Map<String, List<String>> headers = request.getHeaders();
             if (headers != null) {
                 properties.put("headers", headers);
@@ -198,6 +215,17 @@ public final class LoginPerformer {
                 final ResultCode code = responseEnhancement.getCode();
                 retval.setCode(code);
                 if (ResultCode.REDIRECT.equals(code) || ResultCode.FAILED.equals(code)) {
+                    if (ResultCode.FAILED.equals(code)) {
+                        // Call onFailedAuthentication
+                        for (LoginListener listener : listeners) {
+                            listener.onFailedAuthentication(request, properties, null);
+                        }
+                    } else if (ResultCode.REDIRECT.equals(code)) {
+                        // Call onRedirectedAuthentication
+                        for (LoginListener listener : listeners) {
+                            listener.onRedirectedAuthentication(request, properties, null);
+                        }
+                    }
                     return retval;
                 }
             }
@@ -260,16 +288,39 @@ public final class LoginPerformer {
             LogProperties.putSessionProperties(session);
             retval.setServerToken((String) session.getParameter(LoginFields.SERVER_TOKEN));
             retval.setSession(session);
+
             // Trigger registered login handlers
             triggerLoginHandlers(retval);
+
+            // Call onSucceededAuthentication
+            for (LoginListener listener : listeners) {
+                listener.onSucceededAuthentication(retval);
+            }
+
             return retval;
         } catch (OXException e) {
             if (DBPoolingExceptionCodes.PREFIX.equals(e.getPrefix())) {
                 LOG.error(e.getLogMessage(), e);
             }
+            if (LoginExceptionCodes.REDIRECT.equals(e)) {
+                // Call onRedirectedAuthentication
+                for (LoginListener listener : listeners) {
+                    listener.onRedirectedAuthentication(request, properties, e);
+                }
+            } else {
+                // Call onFailedAuthentication
+                for (LoginListener listener : listeners) {
+                    listener.onFailedAuthentication(request, properties, e);
+                }
+            }
             throw e;
         } catch (RuntimeException e) {
-            throw LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            OXException oxe = LoginExceptionCodes.UNKNOWN.create(e, e.getMessage());
+            // Call onFailedAuthentication
+            for (LoginListener listener : listeners) {
+                listener.onFailedAuthentication(request, properties, oxe);
+            }
+            throw oxe;
         } finally {
             logLoginRequest(request, retval);
         }

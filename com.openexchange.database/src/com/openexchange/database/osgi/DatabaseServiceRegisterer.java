@@ -57,10 +57,11 @@ import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.cascade.ConfigViewFactory;
+import com.openexchange.database.AssignmentFactory;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.database.internal.AssignmentFactoryImpl;
 import com.openexchange.database.internal.Initialization;
 import com.openexchange.database.migration.DBMigrationExecutorService;
-import com.openexchange.exception.OXException;
 
 /**
  * Injects the {@link ConfigurationService} and publishes the DatabaseService.
@@ -105,13 +106,26 @@ public class DatabaseServiceRegisterer implements ServiceTrackerCustomizer<Objec
             lock.unlock();
         }
         if (needsRegistration && !Initialization.getInstance().isStarted()) {
+            DatabaseService databaseService = null;
             try {
                 Initialization.setConfigurationService(configService);
-                final DatabaseService service = Initialization.getInstance().start(configService, configViewFactory, migrationService);
+                databaseService = Initialization.getInstance().start(configService, configViewFactory, migrationService);
                 LOG.info("Publishing DatabaseService.");
-                serviceRegistration = context.registerService(DatabaseService.class, service, null);
-            } catch (final OXException e) {
+                serviceRegistration = context.registerService(DatabaseService.class, databaseService, null);
+            } catch (final Exception e) {
                 LOG.error("Publishing the DatabaseService failed.", e);
+            }
+            try {
+                if (databaseService != null) {
+                    AssignmentFactoryImpl assignmentFactoryImpl = new AssignmentFactoryImpl(databaseService);
+                    assignmentFactoryImpl.reload();
+                    LOG.info("Publishing AssignmentFactory.");
+                    context.registerService(AssignmentFactory.class, assignmentFactoryImpl, null);
+                } else {
+                    LOG.error("Publishing AssignmentFactory failed due to missing DatabaseService.");
+                }
+            } catch (final Exception e) {
+                LOG.error("Publishing AssignmentFactory failed. This is normal until a server has been registered.", e);
             }
         }
         return obj;

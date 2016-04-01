@@ -286,18 +286,18 @@ public abstract class AbstractITipAnalyzer implements ITipAnalyzer {
 				switch (newStatus) {
 				case ACCEPT:
 					sentence = new Sentence(Messages.ACCEPT_INTRO).add(displayName,
-							ArgumentType.PARTICIPANT).add(Messages.ACCEPTED,
+							ArgumentType.PARTICIPANT).add("",
 							ArgumentType.STATUS, newStatus);
 					break;
 				case DECLINE:
 					sentence = new Sentence(Messages.DECLINE_INTRO).add(
 							displayName, ArgumentType.PARTICIPANT).add(
-							Messages.DECLINED, ArgumentType.STATUS, newStatus);
+							"", ArgumentType.STATUS, newStatus);
 					break;
 				case TENTATIVE:
 					sentence = new Sentence(Messages.TENTATIVE_INTRO).add(
 							displayName, ArgumentType.PARTICIPANT).add(
-							Messages.TENTATIVELY_ACCEPTED, ArgumentType.STATUS, newStatus);
+							"", ArgumentType.STATUS, newStatus);
 					break;
 				}
 

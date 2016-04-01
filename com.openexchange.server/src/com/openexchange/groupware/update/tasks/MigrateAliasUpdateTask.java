@@ -50,14 +50,10 @@
 package com.openexchange.groupware.update.tasks;
 
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import com.openexchange.databaseold.Database;
 import com.openexchange.exception.OXException;
@@ -65,7 +61,7 @@ import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.java.util.UUIDs;
 import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Tools;
 
@@ -75,20 +71,7 @@ import com.openexchange.tools.update.Tools;
  * @author <a href="mailto:lars.hoogestraat@open-xchange.com">Lars Hoogestraat</a>
  * @since v7.8.0
  */
-public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
-
-    private static final String NEW_TABLE_NAME = "user_alias";
-
-    private static final String CREATE_ALIAS_TABLE = "CREATE TABLE `" + NEW_TABLE_NAME + "` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
-        + "`cid` INT4 UNSIGNED NOT NULL, "
-        + "`user` INT4 UNSIGNED NOT NULL, "
-        + "`alias` VARCHAR(255) NOT NULL, "
-        + "PRIMARY KEY (`cid`, `user`, `alias`) "
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
-
-    private static final String SELECT_OLD_ALIAS_ENTRIES = "SELECT cid, id, value, name FROM user_attribute WHERE name='alias'";
-
-    private static final String INSERT_ALIAS_IN_NEW_TABLE = "REPLACE INTO " + NEW_TABLE_NAME + " (cid, user, alias) VALUES(?, ?, ?)";
+public class MigrateAliasUpdateTask extends AbstractUserAliasTableUpdateTask {
 
     @Override
     public void perform(PerformParameters params) throws OXException {
@@ -96,13 +79,13 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         Connection conn = Database.getNoTimeout(ctxId, true);
         try {
             conn.setAutoCommit(false);
-            if (false == Tools.tableExists(conn, NEW_TABLE_NAME)) {
+            if (false == Tools.tableExists(conn, "user_alias")) {
                 createTable(conn);
             }
 
-            Set<Alias> aliase = getAllAliasesInUserAttributes(conn);
-            if (aliase != null && false == aliase.isEmpty()) {
-                insertAliases(conn, aliase);
+            Set<Alias> aliases = getAllAliasesInUserAttributes(conn);
+            if (aliases != null && false == aliases.isEmpty()) {
+                insertAliases(conn, aliases);
             }
             conn.commit();
         } catch (SQLException e) {
@@ -121,49 +104,29 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
         Statement stmt = null;
         try {
             stmt = conn.createStatement();
-            stmt.execute(CREATE_ALIAS_TABLE);
+            stmt.execute("CREATE TABLE `user_alias` ( " // --> Also specified in com.openexchange.admin.mysql.CreateLdap2SqlTables.createAliasTable
+            + "`cid` INT4 UNSIGNED NOT NULL, " 
+            + "`user` INT4 UNSIGNED NOT NULL, " 
+            + "`alias` VARCHAR(255) NOT NULL, " 
+            + "`uuid` BINARY(16) DEFAULT NULL," 
+            + "PRIMARY KEY (`cid`, `user`, `alias`) " 
+            + ") ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;");
         } finally {
             closeSQLStuff(stmt);
         }
     }
-
-    private Set<Alias> getAllAliasesInUserAttributes(Connection conn) throws SQLException {
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-
-        try {
-            stmt = conn.prepareStatement(SELECT_OLD_ALIAS_ENTRIES);
-            rs = stmt.executeQuery();
-            if (!rs.next()) {
-                return Collections.emptySet();
-            }
-
-            Set<Alias> aliases = new LinkedHashSet<Alias>();
-            int index;
-            do {
-                index = 0;
-                int cid = rs.getInt(++index);
-                int uid = rs.getInt(++index);
-                String alias = rs.getString(++index);
-                aliases.add(new Alias(cid, uid, alias));
-            } while (rs.next());
-
-            return aliases;
-        } finally {
-            closeSQLStuff(stmt);
-        }
-    }
-
+    
     private int insertAliases(Connection conn, Set<Alias> aliases) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = conn.prepareStatement(INSERT_ALIAS_IN_NEW_TABLE);
+            stmt = conn.prepareStatement("REPLACE INTO user_alias (cid, user, alias, uuid) VALUES(?, ?, ?, ?)");
             int index;
             for (Alias alias : aliases) {
                 index = 0;
                 stmt.setInt(++index, alias.getCid());
                 stmt.setInt(++index, alias.getUserId());
                 stmt.setString(++index, alias.getAlias());
+                stmt.setBytes(++index, UUIDs.toByteArray(alias.getUuid()));
                 stmt.addBatch();
             }
             int[] updateCounts = stmt.executeBatch();
@@ -187,67 +150,4 @@ public class MigrateAliasUpdateTask extends UpdateTaskAdapter {
     public TaskAttributes getAttributes() {
         return new Attributes(com.openexchange.groupware.update.UpdateConcurrency.BLOCKING);
     }
-
-    private class Alias {
-
-        private final int cid;
-        private final int userId;
-        private final String alias;
-        private final int hash;
-
-        Alias(int cid, int userId, String alias) {
-            this.cid = cid;
-            this.userId = userId;
-            this.alias = alias;
-
-            int prime = 31;
-            int result = prime * 1 + cid;
-            result = prime * result + userId;
-            result = prime * result + ((alias == null) ? 0 : alias.hashCode());
-            this.hash = result;
-        }
-
-        public int getCid() {
-            return cid;
-        }
-
-        public int getUserId() {
-            return userId;
-        }
-
-        public String getAlias() {
-            return alias;
-        }
-
-        @Override
-        public int hashCode() {
-            return hash;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (!(obj instanceof Alias)) {
-                return false;
-            }
-            Alias other = (Alias) obj;
-            if (cid != other.cid) {
-                return false;
-            }
-            if (userId != other.userId) {
-                return false;
-            }
-            if (alias == null) {
-                if (other.alias != null) {
-                    return false;
-                }
-            } else if (!alias.equals(other.alias)) {
-                return false;
-            }
-            return true;
-        }
-    }
-
 }

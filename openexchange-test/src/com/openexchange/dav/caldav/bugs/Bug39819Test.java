@@ -90,7 +90,7 @@ public class Bug39819Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = get(uid, null);
+        ICalResource iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No SUMMARY in iCal found", iCalResource.getVEvent().getSummary());
@@ -110,7 +110,7 @@ public class Bug39819Test extends CalDAVTest {
         /*
          * verify updated appointment on client
          */
-        iCalResource = get(uid, null);
+        iCalResource = get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         assertNotNull("No SUMMARY in iCal found", iCalResource.getVEvent().getSummary());

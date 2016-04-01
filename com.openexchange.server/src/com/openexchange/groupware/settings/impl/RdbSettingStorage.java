@@ -56,6 +56,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import com.openexchange.exception.OXException;
+import com.openexchange.exception.OXExceptions;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.settings.IValueHandler;
@@ -388,7 +389,11 @@ public class RdbSettingStorage extends SettingStorage {
                         }
                     }
                 } catch (final OXException e) {
-                    LOG.error("Problem while reading setting value.", e);
+                    if (OXExceptions.isPermissionDenied(e)) {
+                        LOG.debug("Problem while reading setting value.", e);
+                    } else {
+                        LOG.error("Problem while reading setting value.", e);
+                    }
                 }
             } else {
                 final Setting parent = setting.getParent();

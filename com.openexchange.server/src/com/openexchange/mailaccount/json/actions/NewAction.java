@@ -55,6 +55,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +75,7 @@ import com.openexchange.java.Strings;
 import com.openexchange.jslob.DefaultJSlob;
 import com.openexchange.jslob.JSlobId;
 import com.openexchange.mail.api.IMailFolderStorage;
+import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.mime.MimeMailExceptionCode;
@@ -156,10 +158,14 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
 
         // Don't check for POP3 account due to access restrictions (login only allowed every n minutes)
         boolean pop3 = Strings.toLowerCase(accountDescription.getMailProtocol()).startsWith("pop3");
+
+        // Check credentials validity
+        boolean valid = true;
         if (!pop3) {
             session.setParameter("mail-account.validate.type", "create");
             try {
                 if (!ValidateAction.actionValidateBoolean(accountDescription, session, false, warnings).booleanValue()) {
+                    valid = false;
                     final OXException warning = MimeMailExceptionCode.CONNECT_ERROR.create(accountDescription.getMailServer(), accountDescription.getLogin());
                     warning.setCategory(Category.CATEGORY_WARNING);
                     warnings.add(0, warning);
@@ -170,7 +176,7 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
         }
 
         // Check standard folder names against full names
-        if (!pop3) {
+        if (!pop3 && valid) {
             MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
             try {
                 mailAccess = getMailAccess(accountDescription, session, warnings);
@@ -210,9 +216,22 @@ public final class NewAction extends AbstractMailAccountAction implements MailAc
                 if (null == newAccount) {
                     throw MailAccountExceptionCodes.NOT_FOUND.create(id, session.getUserId(), session.getContextId());
                 }
+                Map<String, String> defaultFolderNames = null;
+                if (!pop3 && valid) {
+                    MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+                    mailAccess = getMailAccess(accountDescription, session, warnings);
+                    mailAccess.connect(false);
+                    IMailFolderStorage storage = mailAccess.getFolderStorage();
+                    if (storage instanceof IMailFolderStorageDefaultFolderAware) {
+                        defaultFolderNames = ((IMailFolderStorageDefaultFolderAware) storage).getSpecialUseFolder();
+                    }
+                    mailAccess.close(false);
+                    mailAccess = null;
+                }
 
-                newAccount = checkFullNames(newAccount, storageService, session, wcon);
-
+                if (valid) {
+                    newAccount = checkFullNames(newAccount, storageService, session, wcon, defaultFolderNames);
+                }
                 wcon.commit();
                 rollback = false;
             } catch (SQLException e) {

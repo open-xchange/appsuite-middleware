@@ -222,4 +222,7 @@ public class OXCalendarExceptionMessage implements LocalizableStrings {
      */
     public static final String TASK_UID_ALREDY_EXISTS_MSG = "Cannot insert task (%1$s). A task with the unique identifier (%2$s) already exists.";
 
+    //Sequence number is outdated.
+    public static final String OUTDATED_SEQUENCE = "Sequence number is outdated.";
+
 }

@@ -59,11 +59,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.Attributes;
 import com.openexchange.groupware.update.PerformParameters;
-import com.openexchange.groupware.update.Schema;
 import com.openexchange.groupware.update.TaskAttributes;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
-import com.openexchange.groupware.update.UpdateTaskAdapter;
 import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.messaging.generic.services.MessagingGenericServiceRegistry;
 import com.openexchange.tools.sql.DBUtils;
@@ -116,21 +113,6 @@ public final class MessagingGenericCreateTableTask extends AbstractCreateTableIm
         createTable("messagingAccount", getMessagingAccountTable(), contextId);
         final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(MessagingGenericCreateTableTask.class);
         logger.info("UpdateTask ''{}'' successfully performed!", MessagingGenericCreateTableTask.class.getSimpleName());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return Schema.NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.NORMAL.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws com.openexchange.exception.OXException {
-        UpdateTaskAdapter.perform(this, schema, contextId);
     }
 
     @Override

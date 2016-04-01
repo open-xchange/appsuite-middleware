@@ -53,8 +53,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -73,6 +75,8 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
@@ -338,10 +342,11 @@ public class DefaultNotificationService implements ShareNotificationService {
         ModuleSupport moduleSupport = serviceLookup.getService(ModuleSupport.class);
         ShareTarget srcTarget = new ShareTarget(targetPath.getModule(), targetPath.getFolder(), targetPath.getItem());
         Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
-        for (int userId : usersById.keySet()) {
+        for (Entry<Integer, UserDetail> userEntry : usersById.entrySet()) {
             User user = null;
             try {
-                UserDetail userDetail = usersById.get(userId);
+                int userId = userEntry.getKey().intValue();
+                UserDetail userDetail = userEntry.getValue();
                 ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
                 user = userDetail.getUser();
                 String shareUrl;
@@ -369,6 +374,22 @@ public class DefaultNotificationService implements ShareNotificationService {
         if (null != ccs) {
             if (!collectedAddresses.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
+            }
+        }
+
+        ObjectUseCountService service = serviceLookup.getOptionalService(ObjectUseCountService.class);
+        if (null != service) {
+            if (!collectedAddresses.isEmpty()) {
+                try {
+                    Set<String> addrs = new LinkedHashSet<String>(collectedAddresses.size());
+                    for (InternetAddress address : collectedAddresses) {
+                        addrs.add(address.getAddress());
+                    }
+                    IncrementArguments arguments = new IncrementArguments.Builder(addrs).setThrowException(true).build();
+                    service.incrementObjectUseCount(session, arguments);
+                } catch (OXException e) {
+                    warnings.add(e);
+                }
             }
         }
 

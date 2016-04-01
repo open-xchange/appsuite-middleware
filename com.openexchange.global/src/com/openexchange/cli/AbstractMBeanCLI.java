@@ -76,7 +76,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.4.2
  */
-public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
+public abstract class AbstractMBeanCLI<R> extends AbstractAdministrativeCLI<R, MBeanServerConnection> {
 
     /**
      * Initializes a new {@link AbstractMBeanCLI}.
@@ -91,6 +91,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * @param args The arguments
      * @return The return value
      */
+    @Override
     public R execute(final String[] args) {
         final Options options = newOptions();
         boolean error = true;
@@ -233,10 +234,12 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final RuntimeException e) {
-            System.err.println("Problem in runtime: " + e.getMessage());
-        } catch (final Error t) {
-            String message = t.getMessage();
-            String clazzName = t.getClass().getName();
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
+            System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } catch (final Error e) {
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
         } catch (final Throwable t) {
             String message = t.getMessage();
@@ -302,6 +305,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      *
      * @param options The options
      */
+    @Override
     protected abstract void addOptions(Options options);
 
     /**
@@ -313,6 +317,7 @@ public abstract class AbstractMBeanCLI<R> extends AbstractCLI {
      * @return The return value
      * @throws Exception If invocation fails
      */
+    @Override
     protected abstract R invoke(Options option, CommandLine cmd, MBeanServerConnection mbsc) throws Exception;
 
     /**

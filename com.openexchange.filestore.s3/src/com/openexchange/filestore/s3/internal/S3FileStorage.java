@@ -109,6 +109,7 @@ public class S3FileStorage implements FileStorage {
     private static final String DELIMITER = "/";
 
     private final AmazonS3Client amazonS3;
+    private final boolean encrypted;
     private final String bucketName;
     private final String prefix;
 
@@ -116,17 +117,19 @@ public class S3FileStorage implements FileStorage {
      * Initializes a new {@link S3FileStorage}.
      *
      * @param amazonS3 The underlying S3 client
+     * @param encrypted Whether S3 client has encryption enabled or not
      * @param bucketName The bucket name to use
-     * @param prefix The prefix to use
+     * @param prefix The prefix to use; e.g. <code>"1337ctxstore"</code>
      * @throws OXException
      */
-    public S3FileStorage(AmazonS3Client amazonS3, String bucketName, String prefix) {
+    public S3FileStorage(AmazonS3Client amazonS3, boolean encrypted, String bucketName, String prefix) {
         super();
         BucketNameUtils.validateBucketName(bucketName);
         if (Strings.isEmpty(prefix) || prefix.contains(DELIMITER)) {
             throw new IllegalArgumentException(prefix);
         }
         this.amazonS3 = amazonS3;
+        this.encrypted = encrypted;
         this.bucketName = bucketName;
         this.prefix = prefix;
         amazonS3.addRequestHandler(new RequestHandler() {
@@ -163,10 +166,10 @@ public class S3FileStorage implements FileStorage {
          * perform chunked upload as needed
          */
         String key = generateKey(true);
-        ChunkedUpload chunkedUpload = null;
-        UploadChunk chunk = null;
+        S3ChunkedUpload chunkedUpload = null;
+        S3UploadChunk chunk = null;
         try {
-            chunkedUpload = new ChunkedUpload(file);
+            chunkedUpload = new S3ChunkedUpload(file, encrypted);
             chunk = chunkedUpload.next();
             if (false == chunkedUpload.hasNext()) {
                 /*
@@ -401,7 +404,7 @@ public class S3FileStorage implements FileStorage {
     @Override
     public InputStream getFile(String name, long offset, long length) throws OXException {
         long fileSize = getFileSize(name);
-        if (offset > fileSize || -1 != length && length > fileSize - offset) {
+        if (offset >= fileSize || length >= 0 && length > fileSize - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, fileSize);
         }
         String key = addPrefix(name);
@@ -525,7 +528,7 @@ public class S3FileStorage implements FileStorage {
      * @param chunk The chunk to store
      * @return The put object result passed from the client
      */
-    private PutObjectResult uploadSingle(String key, UploadChunk chunk) throws OXException {
+    private PutObjectResult uploadSingle(String key, S3UploadChunk chunk) throws OXException {
         try {
             ObjectMetadata metadata = new ObjectMetadata();
             metadata.setContentLength(chunk.getSize());
@@ -546,11 +549,14 @@ public class S3FileStorage implements FileStorage {
      * @param lastPart <code>true</code> if this is the last part, <code>false</code>, otherwise
      * @return The put object result passed from the client
      */
-    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, UploadChunk chunk, boolean lastPart) throws OXException  {
+    private UploadPartResult uploadPart(String key, String uploadID, int partNumber, S3UploadChunk chunk, boolean lastPart) throws OXException  {
         try {
             UploadPartRequest request = new UploadPartRequest().withBucketName(bucketName).withKey(key).withUploadId(uploadID)
-                .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart)
-                .withMD5Digest(chunk.getMD5Digest());
+                .withInputStream(chunk.getData()).withPartSize(chunk.getSize()).withPartNumber(partNumber++).withLastPart(lastPart);
+            String md5Digest = chunk.getMD5Digest();
+            if (null != md5Digest) {
+                request.withMD5Digest(md5Digest);
+            }
             return amazonS3.uploadPart(request);
         } finally {
             Streams.close(chunk);

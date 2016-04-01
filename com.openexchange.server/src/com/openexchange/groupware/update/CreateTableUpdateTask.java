@@ -56,7 +56,7 @@ import com.openexchange.exception.OXException;
 
 
 /**
- * {@link CreateTableUpdateTask}
+ * {@link CreateTableUpdateTask} - Wraps an existing {@link CreateTableService} instance as an update task.
  *
  * @author <a href="mailto:francisco.laguna@open-xchange.com">Francisco Laguna</a>
  */
@@ -64,22 +64,33 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     private final CreateTableService create;
     private final String[] dependencies;
-    private final int version;
     private final DatabaseService databaseService;
+
+    /**
+     * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
+     * <p>
+     * This is the legacy constructor for maintaining the former constructor declaration.
+     *
+     * @param create The create-table service
+     * @param dependencies The dependencies to preceding update tasks
+     * @param version The version number; no more used
+     * @param databaseService The database service
+     */
+    public CreateTableUpdateTask(CreateTableService create, String[] dependencies, int version, DatabaseService databaseService) {
+        this(create, dependencies, databaseService);
+    }
 
     /**
      * Initializes a new {@link CreateTableUpdateTask} from specified arguments.
      *
      * @param create The create-table service
      * @param dependencies The dependencies to preceding update tasks
-     * @param version The version number
      * @param databaseService The database service
      */
-    public CreateTableUpdateTask(final CreateTableService create, final String[] dependencies, final int version, final DatabaseService databaseService) {
+    public CreateTableUpdateTask(CreateTableService create, String[] dependencies, DatabaseService databaseService) {
         super();
         this.create = create;
         this.dependencies = dependencies;
-        this.version = version;
         this.databaseService = databaseService;
     }
 
@@ -97,21 +108,7 @@ public class CreateTableUpdateTask implements UpdateTaskV2 {
 
     @Override
     public void perform(final PerformParameters params) throws OXException {
-        perform(params.getSchema(), params.getContextId());
-    }
-
-    @Override
-    public int addedWithVersion() {
-        return version;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTask.UpdateTaskPriority.HIGH.priority;
-    }
-
-    @Override
-    public void perform(final Schema schema, final int contextId) throws OXException {
+        int contextId = params.getContextId();
         Connection con = null;
         try {
             con = getConnection(contextId);

@@ -490,78 +490,49 @@ public class IMAPDefaultFolderChecker {
         String[] names = defaultFolderNamesProvider.getDefaultFolderNames(imapConfig, isSpamOptionEnabled);
         SpamHandler spamHandler = isSpamOptionEnabled ? SpamHandlerRegistry.getSpamHandlerBySession(session, accountId) : NoSpamHandler.getInstance();
 
-        // Check for marked default folders
-        TIntObjectMap<String> checkedIndexes = new TIntObjectHashMap<String>(6);
-        try {
-            IMAPFolder imapFolder = (IMAPFolder) imapStore.getFolder(INBOX);
-
-            // Entries with "\Drafts" marker
-            Collection<ListLsubEntry> entries = ListLsubCache.getDraftsEntry(accountId, imapFolder, session, ignoreSubscription);
-            handleMarkedEntries(entries, StorageUtility.INDEX_DRAFTS, names, fullNames, checkedIndexes, cache, modified);
-
-            // Entries with "\Junk" marker
-            entries = ListLsubCache.getJunkEntry(accountId, imapFolder, session, ignoreSubscription);
-            handleMarkedEntries(entries, StorageUtility.INDEX_SPAM, names, fullNames, checkedIndexes, cache, modified);
-
-            // Entries with "\Send" marker
-            entries = ListLsubCache.getSentEntry(accountId, imapFolder, session, ignoreSubscription);
-            handleMarkedEntries(entries, StorageUtility.INDEX_SENT, names, fullNames, checkedIndexes, cache, modified);
-
-            // Entries with "\Trash" marker
-            entries = ListLsubCache.getTrashEntry(accountId, imapFolder, session, ignoreSubscription);
-            handleMarkedEntries(entries, StorageUtility.INDEX_TRASH, names, fullNames, checkedIndexes, cache, modified);
-        } catch (MessagingException e) {
-            throw MimeMailException.handleMessagingException(e, imapConfig, session);
-        }
 
         // Sanitize given names and full-names against mail account settings
-        sanitizeAgainstMailAccount(names, fullNames, namespace, sep, checkedIndexes, accountChanged);
+        sanitizeAgainstMailAccount(names, fullNames, namespace, sep, null, accountChanged);
 
         // Check folders
         TIntObjectMap<String> toSet = (MailAccount.DEFAULT_ID == accountId) ? null : new TIntObjectHashMap<String>(6);
         boolean added = false;
         for (int index = 0; index < names.length; index++) {
-            String preCheckedFullName = checkedIndexes.get(index);
-            if (null == preCheckedFullName) {
-                String checkedFullName = null;
+            String checkedFullName = null;
 
-                // Determine the checked full name
-                {
-                    // Get desired name and full name --> full name dominates name
-                    String name = names[index];
-                    String fullName = fullNames[index];
-                    LOG.debug("Standard folder check for {} with name={} and fullName={} for account {} (user={}, context={})", getFallbackName(index), null == name ? "null" : name, null == fullName ? "null" : fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+            // Determine the checked full name
+            {
+                // Get desired name and full name --> full name dominates name
+                String name = names[index];
+                String fullName = fullNames[index];
+                LOG.debug("Standard folder check for {} with name={} and fullName={} for account {} (user={}, context={})", getFallbackName(index), null == name ? "null" : name, null == fullName ? "null" : fullName, Integer.valueOf(accountId), Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
 
-                    // Check folder & return its full name
-                    if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
-                        if (spamHandler.isCreateConfirmedHam()) {
-                            checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
-                        } else {
-                            LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
-                        }
-                    } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
-                        if (spamHandler.isCreateConfirmedSpam()) {
-                            checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
-                        } else {
-                            LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
-                        }
+                // Check folder & return its full name
+                if (StorageUtility.INDEX_CONFIRMED_HAM == index) {
+                    if (spamHandler.isCreateConfirmedHam()) {
+                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
                     } else {
-                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, 1, modified, accountChanged);
+                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedHam()=false", name);
                     }
-
-                    // Check against account data
-                    if ((null != toSet) && (null != checkedFullName) && (false == isEmpty(fullName)) && !checkedFullName.equals(fullName)) {
-                        toSet.put(index, checkedFullName);
-                        added = true;
+                } else if (StorageUtility.INDEX_CONFIRMED_SPAM == index) {
+                    if (spamHandler.isCreateConfirmedSpam()) {
+                        checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, spamHandler.isUnsubscribeSpamFolders() ? 0 : -1, modified, accountChanged);
+                    } else {
+                        LOG.debug("Skipping check for {} due to SpamHandler.isCreateConfirmedSpam()=false", name);
                     }
+                } else {
+                    checkedFullName = checkFullNameFor(index, namespace, fullName, name, sep, type, 1, modified, accountChanged);
                 }
 
-                // Set the checked full name
-                setDefaultMailFolder(index, checkedFullName, cache);
-            } else {
-                // For safety reason set pre-checked full name
-                setDefaultMailFolder(index, preCheckedFullName, cache);
+                // Check against account data
+                if ((null != toSet) && (null != checkedFullName) && (false == isEmpty(fullName)) && !checkedFullName.equals(fullName)) {
+                    toSet.put(index, checkedFullName);
+                    added = true;
+                }
             }
+
+            // Set the checked full name
+            setDefaultMailFolder(index, checkedFullName, cache);
         }
 
         // Update account data if necessary
@@ -604,14 +575,16 @@ public class IMAPDefaultFolderChecker {
                 String fullName = fullNames[i];
                 if (isEmpty(fullName)) {
                     // No full name given
-                    String expectedFullName = checkedIndexes.get(i);
-                    if (null != expectedFullName) {
-                        // Deduce expected name from SPECIAL-USE full name
-                        String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
-                        if (!expectedName.equals(names[i])) {
-                            LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
-                            names[i] = expectedName;
-                            namesToSet.put(i, expectedName);
+                    if (null != checkedIndexes) {
+                        String expectedFullName = checkedIndexes.get(i);
+                        if (null != expectedFullName) {
+                            // Deduce expected name from SPECIAL-USE full name
+                            String expectedName = expectedFullName.substring(expectedFullName.lastIndexOf(sep) + 1);
+                            if (!expectedName.equals(names[i])) {
+                                LOG.warn("Replacing invalid name in settings of primary account. Should be \"{}\", but is \"{}\" (user={}, context={})", expectedName, names[i], Integer.valueOf(session.getUserId()), Integer.valueOf(session.getContextId()));
+                                names[i] = expectedName;
+                                namesToSet.put(i, expectedName);
+                            }
                         }
                     }
                     fullNames[i] = null;
@@ -619,7 +592,11 @@ public class IMAPDefaultFolderChecker {
                     // Full name specified
                     if (fullName.indexOf(sep) > 0 || !fullName.equals(names[i])) {
                         // E.g. name=Sent, but fullName=INBOX/Sent or fullName=Zent
-                        String expectedFullName = checkedIndexes.get(i);
+
+                        String expectedFullName = null;
+                        if (null != checkedIndexes) {
+                            expectedFullName = checkedIndexes.get(i);
+                        }
                         if (null == expectedFullName) {
                             // Deduce expected full-name from namespace + name concatenation
                             expectedFullName = namespace + names[i];
@@ -661,7 +638,7 @@ public class IMAPDefaultFolderChecker {
                 }
             }
         } else {
-            if (!checkedIndexes.isEmpty()) {
+            if (null != checkedIndexes && !checkedIndexes.isEmpty()) {
                 TIntObjectMap<String> fullNamesToSet = new TIntObjectHashMap<String>(6);
                 TIntObjectMap<String> namesToSet = new TIntObjectHashMap<String>(6);
                 for (int i = 0; i < fullNames.length; i++) {

@@ -63,6 +63,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.mail.internet.idn.IDNA;
@@ -111,6 +112,7 @@ import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.ConfigurationProperty;
 import com.openexchange.exception.OXException;
 import com.openexchange.filestore.FileStorages;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.impl.ContextImpl;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
@@ -1828,6 +1830,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
                     filestoreOwners.add(user);
                 }
+
             }
 
             for (User filestoreOwner : filestoreOwners) {
@@ -1945,9 +1948,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     private String mapToString(Map<Integer, List<Integer>> map) {
         StringBuilder builder = new StringBuilder();
-        for (Integer cid : map.keySet()) {
-            builder.append("\nCID: ").append(cid).append(", User IDs: ");
-            List<Integer> ids = map.get(cid);
+        for (Entry<Integer, List<Integer>> cidEntry : map.entrySet()) {
+            builder.append("\nCID: ").append(cidEntry.getKey()).append(", User IDs: ");
+            List<Integer> ids = cidEntry.getValue();
             for (Integer id : ids) {
                 builder.append(id).append(",");
             }
@@ -2255,6 +2258,32 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         final User[] retval =  oxu.listCaseInsensitive(ctx, search_pattern, includeGuests, excludeUsers);
 
         return retval;
+    }
+
+    @Override
+    public User[] listUsersWithOwnFilestore(final Context context, final Credentials credentials, final Integer filestore_id) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException {
+        final Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+        try {
+            doNullCheck(context);
+        } catch (final InvalidDataException e1) {
+            LOGGER.error("One of the given arguments for list is null", e1);
+            throw e1;
+        }
+
+        if (prop.getUserProp(AdminProperties.User.AUTO_LOWERCASE, false)) {
+            auth.setLogin(auth.getLogin().toLowerCase());
+        }
+
+        LOGGER.debug("{} - {}", context, auth);
+
+        basicauth.doAuthentication(auth, context);
+
+        checkContextAndSchema(context);
+        if (null == filestore_id || filestore_id.intValue() <= 0) {
+            return oxu.listUsersWithOwnFilestore(context, null);
+        } else {
+            return oxu.listUsersWithOwnFilestore(context, filestore_id);
+        }
     }
 
     @Override
@@ -2754,5 +2783,43 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             LOGGER.error("Error retrieving configuration source for user {} in context {}.",user.getId().intValue(), ctx.getId(), e);
         }
         return capabilitiesSource;
+    }
+
+    @Override
+    public User[] listByAliasDomain(Context context, String aliasDomain, Credentials credentials) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException {
+        if (aliasDomain == null) {
+            throw new InvalidDataException("Invalid alias domain");
+        }
+        if (context == null) {
+            throw new InvalidDataException("Invalid context id.");
+        }
+
+        Credentials auth = credentials == null ? new Credentials("", "") : credentials;
+
+        try {
+            basicauth.doAuthentication(auth, context);
+            contextcheck(context);
+            UserAliasStorage uas = AdminServiceRegistry.getInstance().getService(UserAliasStorage.class, true);
+
+            List<Integer> ids = uas.getUserIdsByAliasDomain(context.getId(), aliasDomain);
+
+            ArrayList<User> users = new ArrayList<User>(ids.size());
+            for (int id : ids) {
+                users.add(new User(id));
+            }
+            return users.toArray(new User[ids.size()]);
+        } catch (OXException e) {
+            LOGGER.error("", e);
+            throw new StorageException(e);
+        } catch (final StorageException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidDataException e) {
+            LOGGER.error("", e);
+            throw e;
+        } catch (final InvalidCredentialsException e) {
+            LOGGER.error("", e);
+            throw e;
+        }
     }
 }

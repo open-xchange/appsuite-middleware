@@ -55,36 +55,36 @@ import com.openexchange.tools.iterator.SearchIterator;
 
 public class DeltaImpl<T> implements Delta<T> {
 
-    private final SearchIterator<T> New;
-    private final SearchIterator<T> Modified;
-    private final SearchIterator<T> Deleted;
+    private final SearchIterator<T> newOnes;
+    private final SearchIterator<T> modifiedOnes;
+    private final SearchIterator<T> deletedOnes;
     private final long sequenceNumber;
 
-    public DeltaImpl(final SearchIterator<T> New, final SearchIterator<T> Modified, final SearchIterator<T> Deleted, final long sequenceNumber) {
-        this.New = New;
-        this.Modified = Modified;
-        this.Deleted = Deleted;
+    public DeltaImpl(final SearchIterator<T> newOnes, final SearchIterator<T> modifiedOnes, final SearchIterator<T> deletedOnes, final long sequenceNumber) {
+        this.newOnes = newOnes;
+        this.modifiedOnes = modifiedOnes;
+        this.deletedOnes = deletedOnes;
         this.sequenceNumber = sequenceNumber;
     }
 
     @Override
     public SearchIterator<T> getNew() {
-        return New;
+        return newOnes;
     }
 
     @Override
     public SearchIterator<T> getModified() {
-        return Modified;
+        return modifiedOnes;
     }
 
     @Override
     public SearchIterator<T> getDeleted() {
-        return Deleted;
+        return deletedOnes;
     }
 
     @Override
     public SearchIterator<T> results() throws OXException {
-        return new CombinedSearchIterator<T>(New , Modified);
+        return new CombinedSearchIterator<T>(newOnes, modifiedOnes);
     }
 
     @Override
@@ -92,11 +92,10 @@ public class DeltaImpl<T> implements Delta<T> {
         return sequenceNumber;
     }
 
-
     public void close() throws OXException {
-        New.close();
-        Modified.close();
-        Deleted.close();
+        newOnes.close();
+        modifiedOnes.close();
+        deletedOnes.close();
     }
 
 }

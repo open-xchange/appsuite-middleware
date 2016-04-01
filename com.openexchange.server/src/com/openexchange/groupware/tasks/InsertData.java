@@ -142,8 +142,8 @@ public final class InsertData {
         }
     }
 
-    void doInsert(boolean checkUID) throws OXException {
-        insertTask(ctx, task, parts, folders, checkUID);
+    void doInsert() throws OXException {
+        insertTask(ctx, task, parts, folders);
     }
 
     void createReminder() throws OXException {
@@ -163,7 +163,7 @@ public final class InsertData {
     private static final FolderStorage foldStor = FolderStorage.getInstance();
 
     /**
-     * Stores a task with its participants and folders. This is done without an uid check.
+     * Stores a task with its participants and folders.
      *
      * @param ctx Context.
      * @param task Task to store.
@@ -172,26 +172,12 @@ public final class InsertData {
      * @throws OXException if an error occurs while storing the task.
      */
     static void insertTask(Context ctx, Task task, Set<TaskParticipant> participants, Set<Folder> folders) throws OXException {
-        insertTask(ctx, task, participants, folders, false);
-    }
-
-    /**
-     * Stores a task with its participants and folders.
-     *
-     * @param ctx Context.
-     * @param task Task to store.
-     * @param participants Participants of the task.
-     * @param folders Folders the task should appear in.
-     * @param checkUID checks if a task with the same uid is already present.
-     * @throws OXException if an error occurs while storing the task.
-     */
-    static void insertTask(Context ctx, Task task, Set<TaskParticipant> participants, Set<Folder> folders, boolean checkUID) throws OXException {
         final Connection con = DBPool.pickupWriteable(ctx);
         try {
             con.setAutoCommit(false);
             final int taskId = IDGenerator.getId(ctx, Types.TASK, con);
             task.setObjectID(taskId);
-            storage.insertTask(ctx, con, task, ACTIVE, checkUID);
+            storage.insertTask(ctx, con, task, ACTIVE);
             if (participants.size() != 0) {
                 partStor.insertParticipants(ctx, con, taskId, participants, ACTIVE);
             }

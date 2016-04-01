@@ -156,4 +156,9 @@ public class MockWebdavRequest implements WebdavRequest {
         return "t".equals(getHeader("Brief"));
     }
 
+    @Override
+    public String getParameter(String name) {
+        return null;
+    }
+
 }

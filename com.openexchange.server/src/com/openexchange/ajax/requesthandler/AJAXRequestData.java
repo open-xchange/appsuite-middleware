@@ -936,25 +936,31 @@ public class AJAXRequestData {
      */
     public @Nullable<T> T getParameter(final @Nullable String name, final @NonNull Class<T> coerceTo, final boolean optional) throws OXException {
         final String value = getParameter(name);
-        if (null == value && !optional) {
-            throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
+        if (null == value) {
+            if (!optional) {
+                throw AjaxExceptionCodes.INVALID_PARAMETER_VALUE.create(name, "null");
+            }
+            return null;
         }
 
         try {
-            final StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
-            if (null == parser) {
-                if (int.class.equals(coerceTo) || Integer.class.equals(coerceTo)) {
-                    return (T) Integer.valueOf(value);
-                }
-                if (long.class.equals(coerceTo) || Long.class.equals(coerceTo)) {
-                    return (T) Long.valueOf(value);
-                }
-                if (boolean.class.equals(coerceTo) || Boolean.class.equals(coerceTo)) {
-                    return (T) Boolean.valueOf(value);
-                }
-                throw ServiceExceptionCode.absentService(StringParser.class);
+            // Check for StringParser
+            StringParser parser = ServerServiceRegistry.getInstance().getService(StringParser.class);
+            if (null != parser) {
+                return parser.parse(value, coerceTo);
             }
-            return parser.parse(value, coerceTo);
+
+            // Check by type
+            if (boolean.class.equals(coerceTo) || Boolean.class.equals(coerceTo)) {
+                return (T) Boolean.valueOf(value);
+            }
+            if (int.class.equals(coerceTo) || Integer.class.equals(coerceTo)) {
+                return (T) Integer.valueOf(value);
+            }
+            if (long.class.equals(coerceTo) || Long.class.equals(coerceTo)) {
+                return (T) Long.valueOf(value);
+            }
+            throw ServiceExceptionCode.absentService(StringParser.class);
         } catch (final RuntimeException e) {
             /*
              * Auto-unboxing may lead to NullPointerExceptions or NumberFormatExceptions if e.g. null or "Hello" should be coerced to an

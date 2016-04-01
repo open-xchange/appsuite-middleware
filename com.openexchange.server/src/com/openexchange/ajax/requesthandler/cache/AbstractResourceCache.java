@@ -202,12 +202,32 @@ public abstract class AbstractResourceCache implements ResourceCache, EventHandl
         return serviceLookup.getService(TimerService.class);
     }
 
-    protected long getGlobalQuota() {
-        return globalQuota.get();
+    protected long getGlobalQuota(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            return globalQuota.get();
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+        ComposedConfigProperty<Long> property = view.property(GLOBAL_QUOTA, Long.class);
+        if (!property.isDefined()) {
+            return globalQuota.get();
+        }
+        return property.get().longValue();
     }
 
-    protected long getDocumentQuota() {
-        return documentQuota.get();
+    protected long getDocumentQuota(int userId, int contextId) throws OXException {
+        ConfigViewFactory viewFactory = ServerServiceRegistry.getInstance().getService(ConfigViewFactory.class);
+        if (null == viewFactory) {
+            return documentQuota.get();
+        }
+
+        ConfigView view = viewFactory.getView(userId, contextId);
+        ComposedConfigProperty<Long> property = view.property(DOCUMENT_QUOTA, Long.class);
+        if (!property.isDefined()) {
+            return documentQuota.get();
+        }
+        return property.get().longValue();
     }
 
     /**

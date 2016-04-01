@@ -58,6 +58,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import org.json.JSONException;
@@ -400,7 +401,7 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @throws OXException If check for full names fails
      */
     protected static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session) throws OXException {
-        return checkFullNames(account, storageService, session, null);
+        return checkFullNames(account, storageService, session, null, null);
     }
 
     /**
@@ -409,11 +410,12 @@ public abstract class AbstractMailAccountAction implements AJAXActionService {
      * @param account The corresponding account
      * @param storageService The storage service (needed for update)
      * @param session The session providing needed user information
+     * @param folderNames Array of predefined folder names (e.g. Special-Use Folders) or null entries. If present, these names are used for creation.
      * @return The mail account with full names present
      * @throws OXException If check for full names fails
      */
-    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con) throws OXException {
-        return Tools.checkFullNames(account, storageService, session, con);
+    public static MailAccount checkFullNames(final MailAccount account, final MailAccountStorageService storageService, final ServerSession session, final Connection con, final Map<String, String> folderNames) throws OXException {
+        return Tools.checkFullNames(account, storageService, session, con, folderNames);
     }
 
     /** Checks for an empty string */

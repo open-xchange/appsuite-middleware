@@ -99,7 +99,7 @@ public class GCMActivator extends HousekeepingActivator {
                 }, 1);
                 LOG.info("Successfully registered GCM key provider.");
             } else {
-                LOG.info("No GCM key confgiured, skipping key provider registration.");
+                LOG.info("No default GCM key configured in \"Push\" section in file 'drive.properties', skipping registration for default GCM key provider.");
             }
             /*
              * register publisher

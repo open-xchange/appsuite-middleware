@@ -50,8 +50,11 @@
 package com.openexchange.i18n.parsing;
 
 import java.io.InputStream;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import com.openexchange.exception.OXException;
+import com.openexchange.java.Strings;
 
 /**
  * @author Francisco Laguna <francisco.laguna@open-xchange.com>
@@ -68,14 +71,13 @@ public class POParser {
         final Translations translations = new Translations();
 
         final POTokenStream tokens = new POTokenStream(stream, filename);
-        skipContexts(tokens);
-        while (tokens.lookahead(POToken.MSGID)) {
-            readTranslation(translations, tokens);
-            if (null != translations.translate("") && headers.isEmpty()) {
+        while (tokens.lookahead(POToken.MSGCTXT) || tokens.lookahead(POToken.MSGID)) {
+            readFullTranslation(translations, tokens);
+            if (headers.isEmpty() && Strings.isNotEmpty(translations.translate(""))) {
                 parseHeader(translations.translate(""));
                 setCharSet(tokens);
+                translations.setTranslation("", ""); // remove header section again after headers are parsed
             }
-            skipContexts(tokens);
         }
 
         return translations;
@@ -105,39 +107,41 @@ public class POParser {
         tokens.setCharset(charset);
     }
 
-    private void readTranslation(final Translations translations, final POTokenStream tokens) throws OXException {
+    private void readFullTranslation(Translations translations, POTokenStream tokens) throws OXException {
+
+        String context = null;
+        if (tokens.lookahead(POToken.MSGCTXT)) {
+            tokens.consume(POToken.MSGCTXT);
+            StringBuilder sb = new StringBuilder();
+            collectTexts(tokens, sb);
+            context = sb.toString();
+        }
+
         tokens.consume(POToken.MSGID);
-        final StringBuilder key = new StringBuilder((String) tokens.consume(POToken.TEXT).getData());
+        StringBuilder key = new StringBuilder();
         collectTexts(tokens, key);
 
-        StringBuilder alternateKey = null;
+        String keyPlural = null;
         if (tokens.lookahead(POToken.MSGID_PLURAL)) {
-            alternateKey = new StringBuilder();
+            StringBuilder sb = new StringBuilder();
             tokens.consume(POToken.MSGID_PLURAL);
-            collectTexts(tokens, alternateKey);
+            collectTexts(tokens, sb);
+            keyPlural = sb.toString();
         }
-        tokens.consume(POToken.MSGSTR);
-        final StringBuilder value = new StringBuilder((String) tokens.consume(POToken.TEXT).getData());
-        collectTexts(tokens, value);
 
-        while (tokens.lookahead(POToken.MSGSTR)) {
-            // Ignore other plurals for now
+        List<String> strings = new LinkedList<String>();
+        do {
             tokens.consume(POToken.MSGSTR);
-            collectTexts(tokens, null);
-        }
-
-        final String valueString = value.toString();
-        if (!"".equals(valueString)) {
-            translations.setTranslation(key.toString(), valueString);
-            if (alternateKey != null) {
-                translations.setTranslation(alternateKey.toString(), valueString);
+            StringBuilder string = new StringBuilder();
+            collectTexts(tokens, string);
+            String s = string.toString();
+            if (!Strings.isEmpty(s)) {
+                strings.add(s);
             }
-        }
-    }
+        } while (tokens.lookahead(POToken.MSGSTR));
 
-    private void skipContexts(final POTokenStream tokens) throws OXException {
-        while (tokens.lookahead(POToken.MSGCTXT)) {
-            tokens.consume(POToken.MSGCTXT);
+        if (!strings.isEmpty()) {
+            translations.setContextTranslationPlural(context, key.toString(), keyPlural, strings);
         }
     }
 

@@ -65,13 +65,14 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
     private List<SearchIterator<T>> iterators = null;
     private Comparator<T> comparator;
     private List<T> topmost = null;
+    private boolean ascending = true;
     private boolean hasNext;
 
-    public MergingSearchIterator(final Comparator<T> criterion, final SearchIterator<T>...iterators) throws OXException {
-        this(criterion, Arrays.asList(iterators));
+    public MergingSearchIterator(final Comparator<T> criterion, boolean ascending, final SearchIterator<T>... iterators) throws OXException {
+        this(criterion, ascending, Arrays.asList(iterators));
     }
 
-    public MergingSearchIterator(final Comparator<T> criterion, final List<SearchIterator<T>> iterators) throws OXException {
+    public MergingSearchIterator(final Comparator<T> criterion, boolean ascending, final List<SearchIterator<T>> iterators) throws OXException {
         this.iterators = iterators;
         this.topmost = new ArrayList<T>(iterators.size());
         for(final SearchIterator<T> iterator : iterators) {
@@ -83,6 +84,7 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
             }
         }
         this.comparator = criterion;
+        this.ascending = ascending;
     }
 
 
@@ -136,9 +138,10 @@ public class MergingSearchIterator<T> implements SearchIterator<T> {
         T largest = null;
         int i = -1;
         int largestIndex = 0;
+        int direction = ascending ? 1 : -1;
         for(final T candidate : topmost) {
             i++;
-            if(candidate != null && (largest == null || 0 > comparator.compare(largest, candidate))) {
+            if (candidate != null && (largest == null || 0 > direction * comparator.compare(largest, candidate))) {
                 largest = candidate;
                 largestIndex = i;
             }

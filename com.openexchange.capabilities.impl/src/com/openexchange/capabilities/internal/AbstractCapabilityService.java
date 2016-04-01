@@ -385,6 +385,20 @@ public abstract class AbstractCapabilityService implements CapabilityService {
     }
 
     /**
+     * Reacts to a configuration reload by invalidating cached capabilities.
+     */
+    public void onReloadConfiguration() {
+        Cache cache = optCache();
+        if (null != cache) {
+            try {
+                cache.clear();
+            } catch (OXException e) {
+                LOG.warn("Failed to invalidate '{}' cache", REGION_NAME, e);
+            }
+        }
+    }
+
+    /**
      * Checks if autologin is enabled and adds the according capability to the passed set, if so.
      *
      * @param capabilities The capability set
@@ -573,7 +587,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
             final Map<String, ComposedConfigProperty<String>> all = view.all();
             for (Map.Entry<String, ComposedConfigProperty<String>> entry : all.entrySet()) {
                 final String propName = entry.getKey();
-                if (propName.startsWith("com.openexchange.capability.")) {
+                if (propName.startsWith("com.openexchange.capability.", 0)) {
                     boolean value = Boolean.parseBoolean(entry.getValue().get());
                     String name = toLowerCase(propName.substring(28));
                     if (value) {
@@ -604,31 +618,7 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      */
     private void applyContextCapabilities(CapabilitySet capabilities, int contextId, boolean allowCache) throws OXException {
         if (contextId > 0) {
-            final Set<String> set = new HashSet<String>();
-            final Set<String> removees = new HashSet<String>();
-            for (final String sCap : getContextCaps(contextId, allowCache)) {
-                if (!isEmpty(sCap)) {
-                    final char firstChar = sCap.charAt(0);
-                    if ('-' == firstChar) {
-                        final String val = toLowerCase(sCap.substring(1));
-                        set.remove(val);
-                        removees.add(val);
-                    } else {
-                        if ('+' == firstChar) {
-                            set.add(toLowerCase(sCap.substring(1)));
-                        } else {
-                            set.add(toLowerCase(sCap));
-                        }
-                    }
-                }
-            }
-            // Merge them into result set
-            for (final String sCap : removees) {
-                capabilities.remove(sCap);
-            }
-            for (final String sCap : set) {
-                capabilities.add(getCapability(sCap));
-            }
+            applySet(capabilities, getContextCaps(contextId, allowCache));
         }
     }
 
@@ -643,35 +633,40 @@ public abstract class AbstractCapabilityService implements CapabilityService {
      */
     private void applyUserCapabilities(CapabilitySet capabilities, int userId, int contextId, boolean allowCache) throws OXException {
         if (contextId > 0 && userId > 0) {
-            final Set<String> set = new HashSet<String>();
-            final Set<String> removees = new HashSet<String>();
-            for (final String sCap : getUserCaps(userId, contextId, allowCache)) {
-                if (!isEmpty(sCap)) {
-                    final char firstChar = sCap.charAt(0);
-                    if ('-' == firstChar) {
-                        final String val = toLowerCase(sCap.substring(1));
-                        set.remove(val);
-                        removees.add(val);
+            applySet(capabilities, getUserCaps(userId, contextId, allowCache));
+        }
+    }
+
+    private void applySet(CapabilitySet capabilities, Set<String> capabilitiesToApply) {
+        Set<String> set = new HashSet<String>();
+        Set<String> removees = new HashSet<String>();
+        for (String sCap : capabilitiesToApply) {
+            if (!isEmpty(sCap)) {
+                char firstChar = sCap.charAt(0);
+                if ('-' == firstChar) {
+                    String val = toLowerCase(sCap.substring(1));
+                    set.remove(val);
+                    removees.add(val);
+                } else {
+                    if ('+' == firstChar) {
+                        String cap = toLowerCase(sCap.substring(1));
+                        set.add(cap);
+                        removees.remove(cap);
                     } else {
-                        if ('+' == firstChar) {
-                            final String cap = toLowerCase(sCap.substring(1));
-                            set.add(cap);
-                            removees.remove(cap);
-                        } else {
-                            final String cap = toLowerCase(sCap);
-                            set.add(cap);
-                            removees.remove(cap);
-                        }
+                        String cap = toLowerCase(sCap);
+                        set.add(cap);
+                        removees.remove(cap);
                     }
                 }
             }
-            // Merge them into result set
-            for (final String sCap : removees) {
-                capabilities.remove(sCap);
-            }
-            for (final String sCap : set) {
-                capabilities.add(getCapability(sCap));
-            }
+        }
+
+        // Merge them into result set
+        for (String sCap : removees) {
+            capabilities.remove(sCap);
+        }
+        for (String sCap : set) {
+            capabilities.add(getCapability(sCap));
         }
     }
 

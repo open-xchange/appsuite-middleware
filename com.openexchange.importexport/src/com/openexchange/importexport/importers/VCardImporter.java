@@ -149,8 +149,6 @@ public class VCardImporter extends ContactImporter implements OXExceptionConstan
         return true;
     }
 
-    Logger myLog = LoggerFactory.getLogger("MyLog");
-
     @Override
     public List<ImportResult> importData(final ServerSession session, final Format format, final InputStream is, final List<String> folders, final Map<String, String[]> optionalParams) throws OXException {
 

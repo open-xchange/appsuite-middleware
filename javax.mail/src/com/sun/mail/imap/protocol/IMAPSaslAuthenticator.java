@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -140,8 +140,10 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	};
 
 	try {
+	    @SuppressWarnings("unchecked")
+	    Map<String, ?> propsMap = (Map) props;
 	    sc = Sasl.createSaslClient(mechs, authzid, name, host,
-					(Map)props, cbh);
+					propsMap, cbh);
 	} catch (SaslException sex) {
 	    logger.log(Level.FINE, "Failed to create SASL client", sex);
 	    throw new UnsupportedOperationException(sex.getMessage(), sex);
@@ -267,8 +269,8 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	pr.notifyResponseHandlers(responses);
 
 	// Handle the final OK, NO, BAD or BYE response
-	pr.handleResult(r);
-	pr.setCapabilities(r, false);
+	pr.handleLoginResult(r);
+	pr.setCapabilities(r);
 
 	/*
 	 * If we're using the Novell Groupwise XGWTRUSTEDAPP mechanism
@@ -287,7 +289,7 @@ public class IMAPSaslAuthenticator implements SaslAuthenticator {
 	    // Handle result of this command
 	    pr.handleResult(responses[responses.length-1]);
 	    // If the response includes a CAPABILITY response code, process it
-	    pr.setCapabilities(responses[responses.length-1], false);
+	    pr.setCapabilities(responses[responses.length-1]);
 	}
 	return true;
     }

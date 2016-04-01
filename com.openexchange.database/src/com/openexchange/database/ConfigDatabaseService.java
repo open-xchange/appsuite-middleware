@@ -97,6 +97,12 @@ public interface ConfigDatabaseService {
     void backWritable(Connection con);
 
     /**
+     * Returns a writable connection to the config database to the pool that was only used for reading information from the master database server.
+     * @param con Connection to return.
+     */
+    void backWritableAfterReading(Connection con);
+
+    /**
      * Returns a writable connection to the config database to the pool. This method must be used if
      * the connection is obtained with {@link #getForUpdateTask()}.
      * @param con Writable connection to return.

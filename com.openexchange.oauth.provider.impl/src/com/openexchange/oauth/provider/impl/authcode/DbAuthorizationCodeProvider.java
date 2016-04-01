@@ -58,8 +58,8 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
-import com.openexchange.oauth.provider.scope.Scope;
-import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.oauth.provider.impl.tools.UserizedToken;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 
 
@@ -71,11 +71,14 @@ import com.openexchange.server.ServiceLookup;
  */
 public class DbAuthorizationCodeProvider extends AbstractAuthorizationCodeProvider {
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link DbAuthorizationCodeProvider}.
      */
     public DbAuthorizationCodeProvider(ServiceLookup services) {
-        super(services);
+        super();
+        this.services = services;
     }
 
     private DatabaseService getDbService() throws OXException {

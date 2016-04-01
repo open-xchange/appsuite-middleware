@@ -72,6 +72,7 @@ import com.openexchange.java.SortableConcurrentList;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.config.MailReloadable;
+import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
@@ -86,6 +87,8 @@ import com.openexchange.server.services.ServerServiceRegistry;
  * <li>The file or resource named <i>META-INF/mimetypes.default</i>.</li>
  * <li>The file or resource denoted by property <i>MimeTypeFileName</i>.</li>
  * </ol>
+ * <p>
+ * Available as OSGi service through {@link MimeTypeMap} interface.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
@@ -206,8 +209,8 @@ public final class MimeType2ExtMap {
                         String mimeTypesFileName = SystemConfig.getProperty(SystemConfig.Property.MimeTypeFileName);
                         if ((mimeTypesFileName != null) && ((mimeTypesFileName = mimeTypesFileName.trim()).length() > 0)) {
                             ConfigurationService service = ServerServiceRegistry.getInstance().getService(ConfigurationService.class);
-                            File file = service.getFileByName(mimeTypesFileName);
-                            if (file.exists()) {
+                            File file = null == service ? null : service.getFileByName(mimeTypesFileName);
+                            if (null != file && file.exists()) {
                                 if (debugEnabled) {
                                     sb.setLength(0);
                                     LOG.debug(sb.append("Loading MIME type file \"").append(file.getPath()).append('"').toString());

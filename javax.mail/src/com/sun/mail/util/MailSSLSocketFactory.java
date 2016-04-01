@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -133,14 +133,14 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
 	sslcontext.init(keyManagers, trustManagers, secureRandom);
 
 	// Get SocketFactory and save it in our instance var
-	adapteeFactory = (SSLSocketFactory)sslcontext.getSocketFactory();
+	adapteeFactory = sslcontext.getSocketFactory();
     }
 
     /**
      * @return the keyManagers
      */
     public synchronized KeyManager[] getKeyManagers() {
-	return (KeyManager[])keyManagers.clone();
+	return keyManagers.clone();
     }
 
     /**
@@ -149,7 +149,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
      */
     public synchronized void setKeyManagers(KeyManager[] keyManagers)
 				throws GeneralSecurityException  {
-	this.keyManagers = (KeyManager[])keyManagers.clone();
+	this.keyManagers = keyManagers.clone();
 	newAdapteeFactory();
     }
 
@@ -205,14 +205,20 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
      * @return	the trusted hosts
      */
     public synchronized String[] getTrustedHosts() {
-	return (String[])trustedHosts.clone();
+	if (trustedHosts == null)
+	    return null;
+	else
+	    return trustedHosts.clone();
     }
 
     /**
      * @param	trustedHosts the hosts to trust
      */
     public synchronized void setTrustedHosts(String[] trustedHosts) {
-	this.trustedHosts = (String[])trustedHosts.clone();
+	if (trustedHosts == null)
+	    this.trustedHosts = null;
+	else
+	    this.trustedHosts = trustedHosts.clone();
     }
 
     /**
@@ -249,7 +255,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
      * @see javax.net.ssl.SSLSocketFactory#createSocket(java.net.Socket,
      *						java.lang.String, int, boolean)
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket(Socket socket, String s, int i,
 				boolean flag) throws IOException {
 	return adapteeFactory.createSocket(socket, s, i, flag);
@@ -258,7 +264,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
     /* (non-Javadoc)
      * @see javax.net.ssl.SSLSocketFactory#getDefaultCipherSuites()
      */
-    //@Override
+    @Override
     public synchronized String[] getDefaultCipherSuites() {
 	return adapteeFactory.getDefaultCipherSuites();
     }
@@ -266,7 +272,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
     /* (non-Javadoc)
      * @see javax.net.ssl.SSLSocketFactory#getSupportedCipherSuites()
      */
-    //@Override
+    @Override
     public synchronized String[] getSupportedCipherSuites() {
 	return adapteeFactory.getSupportedCipherSuites();
     }
@@ -274,7 +280,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
     /* (non-Javadoc)
      * @see javax.net.SocketFactory#createSocket()
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket() throws IOException {
 	return adapteeFactory.createSocket();
     }
@@ -283,7 +289,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
      * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int,
      *						java.net.InetAddress, int)
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket(InetAddress inetaddress, int i,
 			InetAddress inetaddress1, int j) throws IOException {
 	return adapteeFactory.createSocket(inetaddress, i, inetaddress1, j);
@@ -292,7 +298,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
     /* (non-Javadoc)
      * @see javax.net.SocketFactory#createSocket(java.net.InetAddress, int)
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket(InetAddress inetaddress, int i)
 				throws IOException {
 	return adapteeFactory.createSocket(inetaddress, i);
@@ -302,7 +308,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
      * @see javax.net.SocketFactory#createSocket(java.lang.String, int,
      *						java.net.InetAddress, int)
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket(String s, int i,
 				InetAddress inetaddress, int j)
 				throws IOException, UnknownHostException {
@@ -312,7 +318,7 @@ public class MailSSLSocketFactory extends SSLSocketFactory {
     /* (non-Javadoc)
      * @see javax.net.SocketFactory#createSocket(java.lang.String, int)
      */
-    //@Override
+    @Override
     public synchronized Socket createSocket(String s, int i)
 				throws IOException, UnknownHostException {
 	return adapteeFactory.createSocket(s, i);

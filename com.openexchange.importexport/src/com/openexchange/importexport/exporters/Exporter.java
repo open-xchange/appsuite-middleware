@@ -49,6 +49,7 @@
 
 package com.openexchange.importexport.exporters;
 
+import java.nio.charset.Charset;
 import java.util.Map;
 import com.openexchange.exception.OXException;
 import com.openexchange.importexport.formats.Format;
@@ -62,6 +63,11 @@ import com.openexchange.tools.session.ServerSession;
  * @see com.openexchange.groupware.Types
  */
 public interface Exporter {
+
+    /**
+     * The default character set used to generate output.
+     */
+    public static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
 
 	/**
 	 *

@@ -49,6 +49,7 @@
 
 package com.openexchange.snippet.json.action;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -136,6 +137,8 @@ public abstract class SnippetAction implements AJAXActionService {
             return perform(new SnippetRequest(requestData, session));
         } catch (final JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
+        } catch (final IOException e) {
+            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
     }
 
@@ -173,7 +176,7 @@ public abstract class SnippetAction implements AJAXActionService {
      * @return The AJAX result
      * @throws OXException If performing request fails
      */
-    protected abstract AJAXRequestResult perform(SnippetRequest snippetRequest) throws OXException, JSONException;
+    protected abstract AJAXRequestResult perform(SnippetRequest snippetRequest) throws OXException, JSONException, IOException;
 
     /**
      * Performs given snippet request in REST style.
@@ -184,7 +187,7 @@ public abstract class SnippetAction implements AJAXActionService {
      * @throws OXException If performing request fails for any reason
      * @throws JSONException If a JSON error occurs
      */
-    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException {
+    protected AJAXRequestResult performREST(final SnippetRequest snippetRequest, final Method method) throws OXException, JSONException, IOException {
         throw AjaxExceptionCodes.BAD_REQUEST.create();
     }
 

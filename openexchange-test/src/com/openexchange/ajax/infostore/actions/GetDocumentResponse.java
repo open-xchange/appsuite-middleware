@@ -103,4 +103,8 @@ public class GetDocumentResponse extends AbstractAJAXResponse {
         return HttpServletResponse.SC_OK != getStatusCode();
     }
 
+    public HttpResponse getHttpResponse() {
+        return response;
+    }
+
 }

@@ -87,9 +87,9 @@ public enum CalendarFacetType implements FacetType {
      */
     STATUS("status", CalendarStrings.FACET_TYPE_STATUS),
     /**
-     * The "date" facet
+     * The "range" facet
      */
-    RELATIVE_DATE("relative_date", CalendarStrings.FACET_TYPE_RELATIVE_DATE),
+    RANGE("range", CalendarStrings.FACET_TYPE_RANGE),
     /**
      * The "recurring type" facet
      */

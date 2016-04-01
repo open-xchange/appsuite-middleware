@@ -74,6 +74,7 @@ import com.openexchange.contact.storage.rdb.internal.Tools;
 import com.openexchange.contact.storage.rdb.mapping.Mappers;
 import com.openexchange.contact.storage.rdb.search.AutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.ContactSearchAdapter;
+import com.openexchange.contact.storage.rdb.search.FulltextAutocompleteAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchAdapter;
 import com.openexchange.contact.storage.rdb.search.SearchTermAdapter;
 import com.openexchange.exception.OXException;
@@ -210,7 +211,7 @@ public class Executor {
             stmt.setInt(1, contextID);
             stmt.setInt(2, objectID);
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContact(fields);
+            return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -231,7 +232,7 @@ public class Executor {
         stmt.setInt(2, FolderObject.VIRTUAL_GUEST_CONTACT_FOLDER_ID);
         stmt.setInt(3, userID);
         resultSet = logExecuteQuery(stmt);
-        return new ContactReader(contextID, connection, resultSet).readContact(fields);
+            return new ContactReader(contextID, connection, resultSet).readContact(fields, false);
     } finally {
         closeSQLStuff(resultSet, stmt);
     }
@@ -308,14 +309,18 @@ public class Executor {
      * @throws OXException
      */
     public <O> List<Contact> select(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified,
-    		ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws SQLException, OXException {
+        ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions, int forUser) throws SQLException, OXException {
         /*
          * construct query string
          */
     	SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
         StringBuilder StringBuilder = new StringBuilder(1024);
-        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
-            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields, table.getName() + ".")).append(",object_use_count.value").append(" FROM ").append(table)
+            .append(" LEFT JOIN ").append(Table.OBJECT_USE_COUNT).append(" ON ").append(table.getName()).append(".cid=").append(Table.OBJECT_USE_COUNT)
+            .append(".cid AND ").append(forUser).append("=").append(Table.OBJECT_USE_COUNT).append(".user AND ")
+            .append(table.getName()).append(".fid=").append(Table.OBJECT_USE_COUNT).append(".folder AND ")
+            .append(table).append(".intfield01=").append(Table.OBJECT_USE_COUNT).append(".object ")
+            .append(" WHERE ").append(table.getName()).append(".").append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
         if (Integer.MIN_VALUE != folderID) {
         	StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
         }
@@ -362,7 +367,84 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
+        } finally {
+            closeSQLStuff(resultSet, stmt);
+        }
+    }
+
+    /**
+     * Selects contacts from the database.
+     *
+     * @param connection
+     * @param table
+     * @param contextID
+     * @param folderID
+     * @param objectIDs
+     * @param minLastModified
+     * @param fields
+     * @param term
+     * @param sortOptions
+     * @return
+     * @throws SQLException
+     * @throws OXException
+     */
+    public <O> List<Contact> select(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long minLastModified,
+        ContactField[] fields, SearchTerm<O> term, SortOptions sortOptions) throws SQLException, OXException {
+        /*
+         * construct query string
+         */
+        SearchTermAdapter adapter = null != term ? new SearchTermAdapter(term, getCharset(sortOptions)) : null;
+        StringBuilder StringBuilder = new StringBuilder(1024);
+        StringBuilder.append("SELECT ").append(Mappers.CONTACT.getColumns(fields)).append(" FROM ").append(table).append(" WHERE ")
+            .append(Mappers.CONTACT.get(ContactField.CONTEXTID).getColumnLabel()).append("=?");
+        if (Integer.MIN_VALUE != folderID) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.FOLDER_ID).getColumnLabel()).append("=?");
+        }
+        if (null != objectIDs && 0 < objectIDs.length) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.OBJECT_ID).getColumnLabel());
+            if (1 == objectIDs.length) {
+                StringBuilder.append('=').append(objectIDs[0]);
+            } else {
+                StringBuilder.append(" IN (").append(Tools.toCSV(objectIDs)).append(')');
+            }
+        }
+        if (Long.MIN_VALUE != minLastModified) {
+            StringBuilder.append(" AND ").append(Mappers.CONTACT.get(ContactField.LAST_MODIFIED).getColumnLabel()).append(">?");
+        }
+        if (null != adapter) {
+            StringBuilder.append(" AND ").append(adapter.getClause());
+        }
+        if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
+            StringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            if (0 < sortOptions.getLimit()) {
+                StringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
+            }
+        }
+        StringBuilder.append(';');
+        /*
+         * prepare statement
+         */
+        PreparedStatement stmt = null;
+        int parameterIndex = 1;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(StringBuilder.toString());
+            stmt.setInt(parameterIndex++, contextID);
+            if (Integer.MIN_VALUE != folderID) {
+                stmt.setInt(parameterIndex++, folderID);
+            }
+            if (Long.MIN_VALUE != minLastModified) {
+                stmt.setLong(parameterIndex++, minLastModified);
+            }
+            if (null != adapter) {
+                adapter.setParameters(stmt, parameterIndex);
+            }
+            /*
+             * execute and read out results
+             */
+            resultSet = logExecuteQuery(stmt);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -431,7 +513,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -455,10 +537,15 @@ public class Executor {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter;
+        if (FulltextAutocompleteAdapter.hasFulltextIndex(connection, contextID)) {
+            adapter = new FulltextAutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        } else {
+            adapter = new AutocompleteAdapter(query, parameters, folderIDs,contextID, fields, getCharset(sortOptions));
+        }
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
-            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
+            stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions, true));
             if (0 < sortOptions.getLimit()) {
                 stringBuilder.append(' ').append(Tools.getLimitClause(sortOptions));
             }
@@ -477,18 +564,18 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, true);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
     }
 
     public List<Contact> select(Connection connection, Table table, int contextID, ContactSearchObject contactSearch,
-    		ContactField[] fields, SortOptions sortOptions) throws SQLException, OXException {
+        ContactField[] fields, SortOptions sortOptions, int forUser) throws SQLException, OXException {
         /*
          * construct query string
          */
-        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions));
+        SearchAdapter adapter = new ContactSearchAdapter(contactSearch, contextID, fields, getCharset(sortOptions), forUser);
         StringBuilder stringBuilder = adapter.getClause();
         if (null != sortOptions && false == SortOptions.EMPTY.equals(sortOptions)) {
             stringBuilder.append(' ').append(Tools.getOrderClause(sortOptions));
@@ -510,7 +597,7 @@ public class Executor {
              * execute and read out results
              */
             resultSet = logExecuteQuery(stmt);
-            return new ContactReader(contextID, connection, resultSet).readContacts(fields);
+            return new ContactReader(contextID, connection, resultSet).readContacts(fields, false);
         } finally {
             closeSQLStuff(resultSet, stmt);
         }
@@ -978,6 +1065,58 @@ public class Executor {
         }
     }
 
+    private void deleteFromObjectUseCountTable(Connection connection, int contextID, int folderID, int[] objectIDs) throws OXException, SQLException {
+        if (null != objectIDs && objectIDs.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("DELETE FROM object_use_count WHERE cid=?");
+            if (Integer.MIN_VALUE != folderID) {
+                sb.append(" AND folder=?");
+            }
+            sb.append(" AND object");
+            if (objectIDs.length == 1) {
+                sb.append("=").append(objectIDs[0]);
+            } else {
+                sb.append(" IN (").append(Tools.toCSV(objectIDs)).append(")");
+            }
+            sb.append(";");
+            PreparedStatement stmt = null;
+            try {
+                stmt = connection.prepareStatement(sb.toString());
+                stmt.setInt(1, contextID);
+                if (Integer.MIN_VALUE != folderID) {
+                    stmt.setInt(2, folderID);
+                }
+                logExecuteUpdate(stmt);
+                //} catch (SQLException e) {
+                //    LOG.warn("Could not delete contacts from object_use_count table: {}", e.getMessage());
+            } finally {
+                closeSQLStuff(stmt);
+            }
+        }
+    }
+
+    private void deleteSingleFromObjectUseCountTable(Connection connection, int contextID, int objectID) throws OXException, SQLException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("DELETE FROM object_use_count WHERE cid=?");
+        if (Integer.MIN_VALUE != objectID) {
+            sb.append(" AND object=?");
+        }
+        sb.append(";");
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(sb.toString());
+            stmt.setInt(1, contextID);
+            if (Integer.MIN_VALUE != objectID) {
+                stmt.setInt(2, objectID);
+            }
+            logExecuteUpdate(stmt);
+            //} catch (SQLException e) {
+            //    LOG.warn("Could not delete contact from object_use_count table: {}", e.getMessage());
+        } finally {
+            closeSQLStuff(stmt);
+        }
+    }
+
     public int delete(Connection connection, Table table, int contextID, int folderID, int[] objectIDs, long maxLastModified)
         throws SQLException, OXException {
         StringBuilder stringBuilder = new StringBuilder();
@@ -1012,7 +1151,9 @@ public class Executor {
             /*
              * execute and read out results
              */
-            return logExecuteUpdate(stmt);
+            int result = logExecuteUpdate(stmt);
+            deleteFromObjectUseCountTable(connection, contextID, folderID, objectIDs);
+            return result;
         } finally {
             closeSQLStuff(stmt);
         }
@@ -1040,7 +1181,9 @@ public class Executor {
             if (Long.MIN_VALUE != maxLastModified) {
                 stmt.setLong(3, maxLastModified);
             }
-            return logExecuteUpdate(stmt);
+            int result = logExecuteUpdate(stmt);
+            deleteSingleFromObjectUseCountTable(connection, contextID, objectID);
+            return result;
         } finally {
             closeSQLStuff(stmt);
         }

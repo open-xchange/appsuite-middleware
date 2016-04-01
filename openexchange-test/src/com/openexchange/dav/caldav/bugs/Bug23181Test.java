@@ -49,7 +49,9 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -144,7 +146,7 @@ public class Bug23181Test extends CalDAVTest {
             "TRANSP:OPAQUE" + "\r\n" +
             "CLASS:PUBLIC" + "\r\n" +
             "SUMMARY:" + summary + "\r\n" +
-            "LOCATION:abcdefg" + "\r\n" +
+            "LOCATION:" + location + "\r\n" +
             "DTSTAMP:" + formatAsUTC(new Date()) + "\r\n" +
             "DTSTART:" + formatAsUTC(start) + "\r\n" +
             "SEQUENCE:1" + "\r\n" +

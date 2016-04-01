@@ -63,11 +63,13 @@ import com.openexchange.filestore.FileStorageCodes;
 import com.openexchange.filestore.sproxyd.chunkstorage.Chunk;
 import com.openexchange.filestore.sproxyd.chunkstorage.ChunkStorage;
 import com.openexchange.filestore.sproxyd.impl.SproxydClient;
+import com.openexchange.filestore.utils.DefaultChunkedUpload;
+import com.openexchange.filestore.utils.UploadChunk;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 
 /**
- * {@link S3FileStorage}
+ * {@link SproxydFileStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
@@ -245,12 +247,13 @@ public class SproxydFileStorage implements FileStorage {
             throw FileStorageCodes.FILE_NOT_FOUND.create(name);
         }
 
-        if (1 == chunks.size()) {
+        int size = chunks.size();
+        if (1 == size) {
             /*
              * download parts of a single chunk
              */
             Chunk chunk = chunks.get(0);
-            if (offset > chunk.getLength() || -1 != length && length > chunk.getLength() - offset) {
+            if (offset >= chunk.getLength() || length >= 0 && length > chunk.getLength() - offset) {
                 throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, chunk.getLength());
             }
             long rangeStart = 0 < offset ? offset : 0;
@@ -261,9 +264,9 @@ public class SproxydFileStorage implements FileStorage {
         /*
          * download from multiple chunks
          */
-        Chunk lastChunk = chunks.get(chunks.size() - 1);
+        Chunk lastChunk = chunks.get(size - 1);
         long totalLength = lastChunk.getOffset() + lastChunk.getLength();
-        if (offset > totalLength || -1 != length && length > totalLength - offset) {
+        if (offset >= totalLength || length >= 0 && length > totalLength - offset) {
             throw FileStorageCodes.INVALID_RANGE.create(offset, length, name, totalLength);
         }
         long rangeStart = 0 < offset ? offset : 0;
@@ -282,10 +285,10 @@ public class SproxydFileStorage implements FileStorage {
      */
     private long upload(UUID documentId, InputStream data, long offset) throws OXException {
         boolean success = false;
-        ChunkedUpload chunkedUpload = null;
+        DefaultChunkedUpload chunkedUpload = null;
         List<UUID> scalityIds = new ArrayList<UUID>();
         try {
-            chunkedUpload = new ChunkedUpload(data);
+            chunkedUpload = new DefaultChunkedUpload(data);
             long off = offset;
             while (chunkedUpload.hasNext()) {
                 UploadChunk chunk = chunkedUpload.next();

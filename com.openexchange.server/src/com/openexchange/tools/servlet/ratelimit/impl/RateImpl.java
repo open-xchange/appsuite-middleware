@@ -49,12 +49,12 @@
 
 package com.openexchange.tools.servlet.ratelimit.impl;
 
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.tools.servlet.ratelimit.Rate;
+import gnu.trove.list.TLongList;
+import gnu.trove.list.array.TLongArrayList;
+import gnu.trove.procedure.TLongProcedure;
 
 /**
  * {@link RateImpl} - Implements time stamp based rate limit.
@@ -65,10 +65,35 @@ import com.openexchange.tools.servlet.ratelimit.Rate;
  */
 public class RateImpl implements Rate {
 
+    private static class MyProc implements TLongProcedure {
+        final long lastStart;
+        long firstPeriodCall;
+        int count;
+
+        MyProc(long lastStart) {
+            super();
+            this.lastStart = lastStart;
+            firstPeriodCall = lastStart;
+            count = 0;
+        }
+
+        @Override
+        public boolean execute(long call) {
+            if (call < lastStart) {
+                return false;
+            }
+            count++;
+            firstPeriodCall = call;
+            return true;
+        }
+    }
+
+    // ----------------------------------------------------------------------------------------------------------------------
+
     private final AtomicLong lastLogStamp;
-    private int permits;
+    private final int permits;
     private long timeInMillis;
-    private final Deque<Long> callHistory;
+    private final TLongList callHistory;
     private boolean deprecated;
 
     /**
@@ -82,16 +107,15 @@ public class RateImpl implements Rate {
         super();
         lastLogStamp = new AtomicLong(0L);
         deprecated = false;
-        callHistory = new LinkedList<Long>();
+        callHistory = new TLongArrayList();
         this.permits = permits;
         this.timeInMillis = timeUnit.toMillis(timeLength);
     }
 
     private void cleanOld(long now) {
-        final long threshold = now - timeInMillis;
-        Long first;
-        while ((first = callHistory.peekFirst()) != null && first.longValue() <= threshold) {
-            callHistory.pollFirst();
+        long threshold = now - timeInMillis;
+        while (!callHistory.isEmpty() && callHistory.get(0) <= threshold) {
+            callHistory.removeAt(0);
         }
     }
 
@@ -101,18 +125,11 @@ public class RateImpl implements Rate {
         if (size < permits) {
             return now;
         }
-        final long lastStart = callHistory.peekLast().longValue() - timeInMillis;
-        long firstPeriodCall = lastStart;
-        int count = 0;
-        for (final Iterator<Long> i = callHistory.descendingIterator(); i.hasNext();) {
-            final long call = i.next().longValue();
-            if (call < lastStart) {
-                break;
-            }
-            count++;
-            firstPeriodCall = call;
-        }
-        return count < permits ? (firstPeriodCall + 1) : (firstPeriodCall + timeInMillis + 1);
+        long lastStart = callHistory.get(size - 1) - timeInMillis;
+        MyProc procedure = new MyProc(lastStart);
+        callHistory.forEachDescending(procedure);
+
+        return procedure.count < permits ? (procedure.firstPeriodCall + 1) : (procedure.firstPeriodCall + timeInMillis + 1);
     }
 
     @Override
@@ -123,8 +140,7 @@ public class RateImpl implements Rate {
     @Override
     public long lastAccessTime() {
         synchronized (callHistory) {
-            final Long last = callHistory.peekLast();
-            return null == last ? Long.MIN_VALUE : last.longValue();
+            return callHistory.isEmpty() ? Long.MIN_VALUE : callHistory.get(callHistory.size() - 1);
         }
     }
 
@@ -138,8 +154,7 @@ public class RateImpl implements Rate {
     @Override
     public boolean markDeprecatedIfElapsed(final long threshold) {
         synchronized (callHistory) {
-            final Long last = callHistory.peekLast();
-            if (null != last && last.longValue() > threshold) {
+            if (!callHistory.isEmpty() && callHistory.get(callHistory.size() - 1) > threshold) {
                 return false;
             }
             deprecated = true;
@@ -154,7 +169,7 @@ public class RateImpl implements Rate {
                 return Result.DEPRECATED;
             }
             long callTime = callTime(now);
-            callHistory.offerLast(Long.valueOf(callTime));
+            callHistory.add(callTime);
             return ((callTime - now) <= 0) ? Result.SUCCESS : Result.FAILED;
         }
     }
@@ -166,13 +181,8 @@ public class RateImpl implements Rate {
 
     @Override
     public long getTimeInMillis() {
-        return timeInMillis;
-    }
-
-    @Override
-    public void setPermits(int permits) {
         synchronized (callHistory) {
-            this.permits = permits;
+            return timeInMillis;
         }
     }
 

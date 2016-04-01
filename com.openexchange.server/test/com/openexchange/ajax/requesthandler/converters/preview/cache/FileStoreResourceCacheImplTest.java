@@ -78,7 +78,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.file.FileStorage;
 
 
 /**
@@ -121,7 +120,7 @@ public class FileStoreResourceCacheImplTest {
 
         FileStoreResourceCacheImpl cache = spy(new FileStoreResourceCacheImpl(serviceLookupMock));
         mockStatic(FileStoreResourceCacheImpl.class);
-        FileStorage fileStorage = mock(FileStorage.class);
+        com.openexchange.filestore.FileStorage fileStorage = mock(com.openexchange.filestore.FileStorage.class);
         String fileId = "12345";
         when(fileStorage.saveNewFile(any(InputStream.class))).thenReturn(fileId);
         when(FileStoreResourceCacheImpl.class, "getFileStorage", anyInt(), anyBoolean()).thenReturn(fileStorage);

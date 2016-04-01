@@ -69,7 +69,7 @@ import com.openexchange.admin.rmi.OXPublicationInterface;
 import com.openexchange.admin.rmi.dataobjects.Publication;
 
 /**
- * 
+ *
  * {@link PublicationAbstraction}
  *
  * @author <a href="mailto:ioannis.chouklis@open-xchange.com">Ioannis Chouklis</a>
@@ -103,7 +103,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
      * then, the rootURL, the module identifier, the context identifier and the site name are retained,
      * i.e. '/publications/infostore/12345/shared' plus the ?secret=foobar
      * and everything else is dispersed.
-     * 
+     *
      * @param parser
      * @return The publication URL
      * @throws URISyntaxException If the URL is malformed.
@@ -149,11 +149,11 @@ public abstract class PublicationAbstraction extends UserAbstraction {
 
     /**
      * Prints the specified publications in a table
-     * 
+     *
      * @param publications The list with publications to print
      */
     protected void printList(List<Publication> publications) {
-        if (publications.isEmpty()) {
+        if (null == publications || publications.isEmpty()) {
             System.out.println("No publications found.");
             return;
         }
@@ -179,7 +179,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
 
     /**
      * Sort the publications and fetch the length of the widest URL string
-     * 
+     *
      * @param publications The publications to sort
      * @return The length of the widest URL
      */
@@ -200,7 +200,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
 
     /**
      * Get the OXPublicationInterface
-     * 
+     *
      * @return The OXPublicationInterface
      * @throws NotBoundException
      * @throws MalformedURLException
@@ -212,7 +212,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
 
     /**
      * Set CLT's options
-     * 
+     *
      * @param parser
      */
     protected final void setOptions(final AdminParser parser) {
@@ -231,7 +231,7 @@ public abstract class PublicationAbstraction extends UserAbstraction {
 
     /**
      * Set further options to the command line tool
-     * 
+     *
      * @param parser The admin parser to use
      */
     protected abstract void setFurtherOptions(final AdminParser parser);

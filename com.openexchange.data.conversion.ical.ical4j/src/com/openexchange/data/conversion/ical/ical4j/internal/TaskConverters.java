@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.fortuna.ical4j.model.component.VToDo;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Alarm;
+import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Attach;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Categories;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.CreatedAndDTStamp;
 import com.openexchange.data.conversion.ical.ical4j.internal.calendar.Duration;
@@ -105,6 +106,7 @@ public final class TaskConverters {
         tmp.add(new Uid<VToDo, Task>());
         tmp.add(new CreatedAndDTStamp<VToDo, Task>());
         tmp.add(new LastModified<VToDo, Task>());
+        tmp.add(new Attach<VToDo, Task>());
         ALL = tmp.toArray(new AttributeConverter[tmp.size()]);
     }
 }

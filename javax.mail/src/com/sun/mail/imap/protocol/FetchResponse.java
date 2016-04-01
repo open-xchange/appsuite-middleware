@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -65,7 +65,7 @@ public class FetchResponse extends IMAPResponse {
      * regular items and extension items.
      */
     private Item[] items;
-    private Map extensionItems;
+    private Map<String, Object> extensionItems;
     private final FetchItem[] fitems;
 
     public FetchResponse(Protocol p) 
@@ -84,6 +84,10 @@ public class FetchResponse extends IMAPResponse {
     /**
      * Construct a FetchResponse that handles the additional FetchItems.
      *
+     * @param	r	the IMAPResponse
+     * @param	fitems	the fetch items
+     * @exception	IOException	for I/O errors
+     * @exception	ProtocolException	for protocol failures
      * @since JavaMail 1.4.6
      */
     public FetchResponse(IMAPResponse r, FetchItem[] fitems)
@@ -114,6 +118,12 @@ public class FetchResponse extends IMAPResponse {
     /**
      * Return the first fetch response item of the given class
      * for the given message number.
+     *
+     * @param	r	the responses
+     * @param	msgno	the message number
+     * @param	c	the class
+     * @param	<T>	the type of fetch item
+     * @return		the fetch item
      */
     public static <T extends Item> T getItem(Response[] r, int msgno,
 				Class<T> c) {
@@ -164,6 +174,11 @@ public class FetchResponse extends IMAPResponse {
      * Return all fetch response items of the given class
      * for the given message number.
      *
+     * @param	r	the responses
+     * @param	msgno	the message number
+     * @param	c	the class
+     * @param	<T>	the type of fetch items
+     * @return		the list of fetch items
      * @since JavaMail 1.5.2
      */
     public static <T extends Item> List<T> getItems(Response[] r, int msgno,
@@ -222,11 +237,10 @@ public class FetchResponse extends IMAPResponse {
      * The map is indexed by extension item name.  Callers should not
      * modify the map.
      *
+     * @return	Map of extension items, or null if none
      * @since JavaMail 1.4.6
      */
-    public Map getExtensionItems() {
-	if (extensionItems == null)
-	    extensionItems = new HashMap();
+    public Map<String, Object> getExtensionItems() {
 	return extensionItems;
     }
 
@@ -253,7 +267,8 @@ public class FetchResponse extends IMAPResponse {
 		v.add(i);
 	    else if (!parseExtensionItem())
 		throw new ParsingException(
-		"error in FETCH parsing, unrecognized item at index " + index);
+		    "error in FETCH parsing, unrecognized item at index " +
+		    index + ", starts with \"" + next20() + "\"");
 	} while (buffer[index] != ')');
 
 	index++; // skip ')'
@@ -261,10 +276,21 @@ public class FetchResponse extends IMAPResponse {
     }
 
     /**
+     * Return the next 20 characters in the buffer, for exception messages.
+     */
+    private String next20() {
+	if (index + 20 > size)
+	    return ASCIIUtility.toString(buffer, index, index + size);
+	else
+	    return ASCIIUtility.toString(buffer, index, index + 20) + "...";
+    }
+
+    /**
      * Parse the item at the current position in the buffer,
      * skipping over the item if successful.  Otherwise, return null
      * and leave the buffer position unmodified.
      */
+    @SuppressWarnings("empty")
     private Item parseItem() throws ParsingException {
 	switch (buffer[index]) {
 	case 'E': case 'e':
@@ -297,7 +323,7 @@ public class FetchResponse extends IMAPResponse {
 		if (match(HEADER))
 		    isHeader = true;	// skip ".HEADER"
 		else if (match(TEXT))
-		    ;	// skip ".TEXT"
+		    isHeader = false;	// skip ".TEXT"
 		return new RFC822DATA(this, isHeader);
 	    }
 	    break;
@@ -333,7 +359,9 @@ public class FetchResponse extends IMAPResponse {
 	    return false;
 	for (int i = 0; i < fitems.length; i++) {
 	    if (match(fitems[i].getName())) {
-		getExtensionItems().put(fitems[i].getName(),
+		if (extensionItems == null)
+		    extensionItems = new HashMap<String, Object>();
+		extensionItems.put(fitems[i].getName(),
 				    fitems[i].parseItem(this));
 		return true;
 	    }

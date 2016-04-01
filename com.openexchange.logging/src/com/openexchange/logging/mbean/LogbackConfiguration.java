@@ -56,6 +56,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
@@ -64,6 +65,15 @@ import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.openexchange.log.LogProperties.Name;
+import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
+import com.openexchange.logging.filter.ExceptionCategoryFilter;
+import com.openexchange.logging.filter.ExtendedMDCFilter;
+import com.openexchange.logging.filter.MDCEnablerTurboFilter;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
+import com.openexchange.logging.filter.TurboFilterCache;
+import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
+import com.openexchange.management.MBeanMethodAnnotation;
 import ch.qos.logback.classic.AsyncAppender;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.LoggerContext;
@@ -71,10 +81,6 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.spi.FilterReply;
-import com.openexchange.log.LogProperties.Name;
-import com.openexchange.logback.extensions.logstash.LogstashSocketAppender;
-import com.openexchange.logging.mbean.LogbackMBeanResponse.MessageType;
-import com.openexchange.management.MBeanMethodAnnotation;
 
 /**
  * {@link LogbackConfiguration}
@@ -110,8 +116,10 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
 
     private final IncludeStackTraceServiceImpl traceServiceImpl;
 
+    private final MDCEnablerTurboFilter mdcEnablerTurboFilter;
+
     /**
-     * Initializes a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
+     * Initialises a new {@link LogbackConfiguration}. Reads the MBean annotations and adds those to the method* maps.
      *
      * @throws NotCompliantMBeanException
      */
@@ -121,18 +129,20 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         this.rankingAwareTurboFilterList = rankingAwareTurboFilterList;
         this.traceServiceImpl = traceServiceImpl;
 
-        // Initialize members
+        // Initialise members
         configurator = new JoranConfigurator();
         dynamicallyModifiedLoggers = new HashMap<String, Level>();
         methodDescriptions = new HashMap<String, String>();
         methodParameters = new HashMap<String, String[]>();
         methodParameterDescriptions = new HashMap<String, String[]>();
 
-        // Initialize & add turbo filter cache to list
-        final TurboFilterCache turboFilterCache = new TurboFilterCache();
-        this.turboFilterCache = turboFilterCache;
+        // Set the ranking aware turbo filter and initialise the turbo filter cache
+        turboFilterCache = new TurboFilterCache();
+        mdcEnablerTurboFilter = new MDCEnablerTurboFilter();
+
+        // Add turbo filter cache to list
         rankingAwareTurboFilterList.addTurboFilter(turboFilterCache);
-        rankingAwareTurboFilterList.addTurboFilter(new MDCEnablerTurboFilter());
+        rankingAwareTurboFilterList.addTurboFilter(mdcEnablerTurboFilter);
 
         configurator.setContext(loggerContext);
 
@@ -227,8 +237,9 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
     public LogbackMBeanResponse modifyLogLevels(Map<String, Level> loggers) {
         LogbackMBeanResponse response = new LogbackMBeanResponse();
         StringBuilder builder = new StringBuilder();
-        for (String s : loggers.keySet()) {
-            Level l = loggers.get(s);
+        for (Entry<String, Level> levelEntry : loggers.entrySet()) {
+            Level l = levelEntry.getValue();
+            String s = levelEntry.getKey();
             loggerContext.getLogger(s).setLevel(l);
             dynamicallyModifiedLoggers.put(s, l);
             builder.setLength(0);
@@ -310,9 +321,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 for (String s : loggers) {
                     filter.removeLogger(s);
                     builder.setLength(0);
-                    builder.append("Removed logger \"").append(s).append("\"").append(" from ")
-                            .append(" user filter for user with ID \"").append(userID)
-                            .append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
+                    builder.append("Removed logger \"").append(s).append("\"").append(" from ").append(" user filter for user with ID \"").append(userID).append("\", context with ID \"").append(contextID).append("\" and policy \"ACCEPT\"");
                     LOG.info(builder.toString());
                     response.addMessage(builder.toString(), MessageType.INFO);
                 }
@@ -346,9 +355,7 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
                 for (String s : loggers) {
                     filter.removeLogger(s);
                     builder.setLength(0);
-                    builder.append("Removed logger \"").append(s).append("\"").append(" from ")
-                        .append(" session filter with ID \"").append(sessionID)
-                        .append("\" and policy \"ACCEPT\"");
+                    builder.append("Removed logger \"").append(s).append("\"").append(" from ").append(" session filter with ID \"").append(sessionID).append("\" and policy \"ACCEPT\"");
                     response.addMessage(builder.toString(), MessageType.INFO);
                     LOG.info(builder.toString());
                 }
@@ -536,11 +543,13 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
      * @param response the response object
      */
     private static final void addLoggersToFilter(Set<String> whitelist, Map<String, Level> loggers, ExtendedMDCFilter filter, LogbackMBeanResponse response) {
-        for (String s : loggers.keySet()) {
+        for (Entry<String, Level> levelEntry : loggers.entrySet()) {
             boolean added = false;
+            String s = levelEntry.getKey();
+            Level level = levelEntry.getValue();
             for (String wl : whitelist) {
                 if (s.startsWith(wl)) {
-                    Level l = loggers.get(s);
+                    Level l = level;
                     filter.addLogger(s, l);
                     String msg = "Added logger \"" + s + "\" with level \"" + l + "\"";
                     response.addMessage(msg, MessageType.INFO);
@@ -556,4 +565,3 @@ public class LogbackConfiguration extends StandardMBean implements LogbackConfig
         }
     }
 }
-

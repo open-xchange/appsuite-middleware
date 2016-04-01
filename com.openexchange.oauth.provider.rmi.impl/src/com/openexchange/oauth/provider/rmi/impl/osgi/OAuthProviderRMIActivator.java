@@ -57,7 +57,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTracker;
-import com.openexchange.oauth.provider.OAuthProviderService;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 import com.openexchange.oauth.provider.rmi.impl.RemoteClientManagementImpl;
 
@@ -72,14 +72,14 @@ public class OAuthProviderRMIActivator implements BundleActivator {
 
     private ServiceRegistration<Remote> serviceRegistration;
 
-    private ServiceTracker<OAuthProviderService, OAuthProviderService> tracker;
+    private ServiceTracker<ClientManagement, ClientManagement> tracker;
 
     @Override
     public void start(BundleContext context) throws Exception {
-        tracker = new ServiceTracker<OAuthProviderService, OAuthProviderService>(context, OAuthProviderService.class, null) {
+        tracker = new ServiceTracker<ClientManagement, ClientManagement>(context, ClientManagement.class, null) {
             @Override
-            public OAuthProviderService addingService(ServiceReference<OAuthProviderService> reference) {
-                OAuthProviderService service = super.addingService(reference);
+            public ClientManagement addingService(ServiceReference<ClientManagement> reference) {
+                ClientManagement service = super.addingService(reference);
                 if (service != null) {
                     register(context, service);
                 }
@@ -88,7 +88,7 @@ public class OAuthProviderRMIActivator implements BundleActivator {
             }
 
             @Override
-            public void remove(ServiceReference<OAuthProviderService> reference) {
+            public void remove(ServiceReference<ClientManagement> reference) {
                 unregister();
                 super.remove(reference);
             }
@@ -104,11 +104,11 @@ public class OAuthProviderRMIActivator implements BundleActivator {
         tracker = null;
     }
 
-    private synchronized void register(BundleContext context, OAuthProviderService service) {
+    private synchronized void register(BundleContext context, ClientManagement clientManagement) {
         if (serviceRegistration == null) {
             Dictionary<String, Object> props = new Hashtable<String, Object>(2);
             props.put("RMIName", RemoteClientManagement.RMI_NAME);
-            serviceRegistration = context.registerService(Remote.class, new RemoteClientManagementImpl(service.getClientManagement()), props);
+            serviceRegistration = context.registerService(Remote.class, new RemoteClientManagementImpl(clientManagement), props);
         }
     }
 

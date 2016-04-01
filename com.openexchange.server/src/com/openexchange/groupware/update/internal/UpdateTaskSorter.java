@@ -54,7 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.update.UpdateExceptionCodes;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.java.Strings;
 
 /**
@@ -64,22 +64,22 @@ import com.openexchange.java.Strings;
  */
 public class UpdateTaskSorter {
 
-    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker(), new LowestVersionChecker() };
+    private static final DependencyChecker[] CHECKERS = { new DependenciesResolvedChecker() };
 
     public UpdateTaskSorter() {
         super();
     }
 
-    public List<UpdateTask> sort(String[] executed, List<UpdateTask> toExecute) throws OXException {
-        List<UpdateTask> retval = new ArrayList<UpdateTask>(toExecute.size());
+    public List<UpdateTaskV2> sort(String[] executed, List<UpdateTaskV2> toExecute) throws OXException {
+        List<UpdateTaskV2> retval = new ArrayList<UpdateTaskV2>(toExecute.size());
         boolean found = true;
         while (!toExecute.isEmpty() && found) {
             found = false;
-            Iterator<UpdateTask> iter = toExecute.iterator();
+            Iterator<UpdateTaskV2> iter = toExecute.iterator();
             while (iter.hasNext() && !found) {
-                UpdateTask task = iter.next();
-                UpdateTask[] retvalA = retval.toArray(new UpdateTask[retval.size()]);
-                UpdateTask[] toExecuteA = toExecute.toArray(new UpdateTask[toExecute.size()]);
+                UpdateTaskV2 task = iter.next();
+                UpdateTaskV2[] retvalA = retval.toArray(new UpdateTaskV2[retval.size()]);
+                UpdateTaskV2[] toExecuteA = toExecute.toArray(new UpdateTaskV2[toExecute.size()]);
                 for (int i = 0; i < CHECKERS.length && !found; i++) {
                     found = CHECKERS[i].check(task, executed, retvalA, toExecuteA);
                 }

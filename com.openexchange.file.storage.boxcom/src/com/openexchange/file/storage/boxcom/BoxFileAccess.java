@@ -90,6 +90,7 @@ import com.openexchange.file.storage.boxcom.access.BoxAccess;
 import com.openexchange.file.storage.boxcom.access.extended.requests.requestobjects.PreflightCheckRequestObject;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -371,7 +372,7 @@ public class BoxFileAccess extends AbstractBoxResourceAccess implements Thumbnai
 
                     BoxDefaultRequestObject versionRequest = new BoxDefaultRequestObject();
                     versionRequest.getRequestExtras().addQueryParam("version", version);
-                    return boxClient.getFilesManager().downloadFile(id, versionRequest);
+                    return new SizeKnowingInputStream(boxClient.getFilesManager().downloadFile(id, versionRequest), boxfile.getSize().longValue());
                 } catch (final BoxServerException e) {
                     throw handleHttpResponseError(id, account.getId(), e);
                 }

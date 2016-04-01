@@ -51,6 +51,7 @@ package com.openexchange.groupware.alias.impl;
 
 import java.sql.Connection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import com.openexchange.caching.Cache;
@@ -141,7 +142,7 @@ public class CachingAliasStorage implements UserAliasStorage {
         }
         return success;
     }
-
+    
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);
@@ -169,4 +170,8 @@ public class CachingAliasStorage implements UserAliasStorage {
         return success;
     }
 
+    @Override
+    public List<Integer> getUserIdsByAliasDomain(int contextId, String domain) throws OXException {
+        return delegate.getUserIdsByAliasDomain(contextId, domain);
+    }
 }

@@ -60,6 +60,7 @@ public final class FullnameArgument {
 
     private final int accountId;
     private final String fullName;
+    private final int hash;
 
     /**
      * Initializes a new {@link FullnameArgument} with default account ID.
@@ -80,12 +81,17 @@ public final class FullnameArgument {
         super();
         this.accountId = accountId;
         this.fullName = fullName;
+
+        int prime = 31;
+        int result = prime * 1 + accountId;
+        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+        hash = result;
     }
 
     /**
-     * Gets the account ID.
+     * Gets the account identifier.
      *
-     * @return The account ID
+     * @return The account identifier
      */
     public int getAccountId() {
         return accountId;
@@ -111,11 +117,7 @@ public final class FullnameArgument {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + accountId;
-        result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
-        return result;
+        return hash;
     }
 
     @Override
@@ -123,13 +125,11 @@ public final class FullnameArgument {
         if (this == obj) {
             return true;
         }
-        if (obj == null) {
+        if (!(obj instanceof FullnameArgument)) {
             return false;
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final FullnameArgument other = (FullnameArgument) obj;
+
+        FullnameArgument other = (FullnameArgument) obj;
         if (accountId != other.accountId) {
             return false;
         }
@@ -140,6 +140,7 @@ public final class FullnameArgument {
         } else if (!fullName.equals(other.fullName)) {
             return false;
         }
+
         return true;
     }
 

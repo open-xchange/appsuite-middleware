@@ -63,18 +63,6 @@ import com.openexchange.exception.OXExceptionStrings;
 public enum SchemaExceptionCodes implements DisplayableOXExceptionCode {
 
     /**
-     * No row found in table version in schema %1$s.
-     */
-    MISSING_VERSION_ENTRY("No row found in table version in schema %1$s.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
-        Category.CATEGORY_CONFIGURATION, 1),
-        
-    /**
-     * Multiple rows found in table version in schema %1$s.
-     */
-    MULTIPLE_VERSION_ENTRY("Multiple rows found in table version in schema %1$s.", SchemaExceptionMessages.DATABASE_ERROR_DISPLAY,
-        Category.CATEGORY_CONFIGURATION, 2),
-        
-    /**
      * Update conflict detected. Another process is currently updating schema %1$s.
      */
     ALREADY_LOCKED("Update conflict detected. Another process is currently updating schema %1$s.",

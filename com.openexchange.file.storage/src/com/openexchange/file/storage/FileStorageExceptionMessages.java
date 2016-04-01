@@ -156,6 +156,27 @@ public final class FileStorageExceptionMessages implements LocalizableStrings {
     // The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.
     public static final String FILE_SAVE_ABORTED_MSG = "The file \"%1$s\" was not saved due to possible data loss. Please review the warnings for details.";
 
+    // Bad or expired access token. Need to re-authenticate user.
+    public static final String UNLINKED_ERROR_MSG = "Bad or expired access token. Need to re-authenticate user.";
+
+    // Your rate limit has been exceeded and further access is not possible at the moment.
+    public static final String STORAGE_RATE_LIMIT_MSG = "Your rate limit has been exceeded and further access is not possible at the moment.";
+
+    // You need to get sufficient permissions to perform the operation on the specified entity.
+    public static final String INVALID_OBJECT_PERMISSIONS_SIMPLE_MSG = "You need to get sufficient permissions to perform the operation on the specified entity.";
+
+    // File name contains not allowed characters: \"%1$s\"
+    public static final String ILLEGAL_CHARACTERS_MSG = "File name contains illegal characters: \"%1$s\"";
+
+    // File name is a reserved name: \"%1$s\"
+    public static final String RESERVED_NAME_MSG = "File name is a reserved name: \"%1$s\"";
+
+    // File name must not be \".\" or \"..\".
+    public static final String ONLY_DOTS_MSG = "File name must not be \".\" or \"..\".";
+
+    // File name must not end with a dot or whitespace.
+    public static final String WHITESPACE_END_MSG = "File name must not end with a dot or whitespace.";
+
     /**
      * Initializes a new {@link OXExceptionMessages}.
      */

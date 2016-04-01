@@ -55,10 +55,15 @@ import java.util.Date;
 import java.util.List;
 import com.openexchange.caldav.GroupwareCaldavFactory;
 import com.openexchange.caldav.mixins.ScheduleDefaultCalendarURL;
+import com.openexchange.caldav.mixins.ScheduleDefaultTasksURL;
 import com.openexchange.caldav.mixins.ScheduleInboxURL;
-import com.openexchange.caldav.mixins.SyncToken;
 import com.openexchange.caldav.query.Filter;
 import com.openexchange.caldav.reports.FilteringResource;
+import com.openexchange.dav.mixins.SyncToken;
+import com.openexchange.dav.resources.DAVCollection;
+import com.openexchange.folderstorage.DefaultPermission;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.Permissions;
 import com.openexchange.webdav.protocol.Protocol.Property;
 import com.openexchange.webdav.protocol.WebdavPath;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
@@ -75,7 +80,7 @@ import com.openexchange.webdav.protocol.helpers.AbstractResource;
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */
-public class ScheduleInboxCollection extends CommonCollection implements FilteringResource {
+public class ScheduleInboxCollection extends DAVCollection implements FilteringResource {
 
     /**
      * Initializes a new {@link ScheduleInboxCollection}.
@@ -84,7 +89,15 @@ public class ScheduleInboxCollection extends CommonCollection implements Filteri
      */
     public ScheduleInboxCollection(GroupwareCaldavFactory factory) {
         super(factory, new WebdavPath(ScheduleInboxURL.SCHEDULE_INBOX));
-        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory));
+        includeProperties(new SyncToken(this), new ScheduleDefaultCalendarURL(factory), new ScheduleDefaultTasksURL(factory));
+    }
+
+    @Override
+    public Permission[] getPermissions() {
+        return new Permission[] {
+            new DefaultPermission(getFactory().getUser().getId(), false, Permissions.createPermissionBits(
+                Permission.READ_FOLDER, Permission.READ_ALL_OBJECTS, Permission.WRITE_ALL_OBJECTS, Permission.DELETE_ALL_OBJECTS, false))
+        };
     }
 
     @Override
@@ -148,7 +161,7 @@ public class ScheduleInboxCollection extends CommonCollection implements Filteri
 
     @Override
     public AbstractResource getChild(String name) throws WebdavProtocolException {
-        return null;
+        return new ScheduleInboxResource(getFactory(), constructPathForChildResource(name));
     }
 
     @Override

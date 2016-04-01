@@ -100,6 +100,8 @@ public class FolderExceptionMessages implements LocalizableStrings {
     // The folder was not updated due to possible data loss. Please review the warnings for details.
     public static final String FOLDER_UPDATE_ABORTED_MSG_DISPLAY = "The folder was not updated due to possible data loss. Please review the warnings for details.";
 
+    // Folder name contains not allowed characters: \"%1$s\"
+    public static final String ILLEGAL_CHARACTERS_MSG = "Folder name contains illegal characters: \"%1$s\"";
     /**
      * Initializes a new {@link FolderExceptionMessages}
      */

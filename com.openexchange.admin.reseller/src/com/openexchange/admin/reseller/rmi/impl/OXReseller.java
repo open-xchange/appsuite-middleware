@@ -52,6 +52,7 @@ package com.openexchange.admin.reseller.rmi.impl;
 import java.rmi.RemoteException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.admin.daemons.ClientAdminThread;
 import com.openexchange.admin.reseller.daemons.ClientAdminThreadExtended;
 import com.openexchange.admin.reseller.rmi.OXResellerInterface;
@@ -350,8 +351,8 @@ public class OXReseller extends OXCommonImpl implements OXResellerInterface {
             }
 
             final HashSet<Restriction> ret = new HashSet<Restriction>();
-            for (final String key : validRestrictions.keySet()) {
-                ret.add(validRestrictions.get(key));
+            for (final Entry<String, Restriction> entry : validRestrictions.entrySet()) {
+                ret.add(entry.getValue());
             }
             return ret.toArray(new Restriction[ret.size()]);
         } catch (final InvalidCredentialsException e) {

@@ -49,7 +49,11 @@
 
 package com.openexchange.ajax.oauth.provider;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.io.InputStreamReader;
 import java.rmi.Naming;
 import java.util.ArrayList;
@@ -80,10 +84,9 @@ import com.openexchange.ajax.oauth.provider.protocol.POSTResponse;
 import com.openexchange.ajax.oauth.provider.protocol.Protocol;
 import com.openexchange.configuration.AJAXConfig;
 import com.openexchange.configuration.AJAXConfig.Property;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.rmi.client.ClientDto;
-import com.openexchange.oauth.provider.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
 import com.openexchange.oauth.provider.impl.grant.OAuthGrantStorage;
+import com.openexchange.oauth.provider.rmi.client.ClientDto;
 import com.openexchange.oauth.provider.rmi.client.RemoteClientManagement;
 
 /**
@@ -246,8 +249,8 @@ public class ProtocolFlowTest extends EndpointTest {
         // A user must have at max. OAuthProviderService.MAX_CLIENTS_PER_USER grants for different clients
         Credentials masterAdminCredentials = AbstractOAuthTest.getMasterAdminCredentials();
         RemoteClientManagement clientManagement = (RemoteClientManagement) Naming.lookup("rmi://" + AJAXConfig.getProperty(Property.RMI_HOST) + ":1099/" + RemoteClientManagement.RMI_NAME);
-        List<ClientDto> clients = new ArrayList<>(OAuthProviderService.MAX_CLIENTS_PER_USER);
-        for (int i = 0; i < OAuthProviderService.MAX_CLIENTS_PER_USER; i++) {
+        List<ClientDto> clients = new ArrayList<>(ClientManagement.MAX_CLIENTS_PER_USER);
+        for (int i = 0; i < ClientManagement.MAX_CLIENTS_PER_USER; i++) {
             clients.add(clientManagement.registerClient(ClientManagement.DEFAULT_GID, prepareClient("testMaxNumberOfDistinctGrants " + i + " " + System.currentTimeMillis()), masterAdminCredentials));
         }
 

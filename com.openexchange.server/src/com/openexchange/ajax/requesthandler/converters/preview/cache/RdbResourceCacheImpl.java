@@ -108,7 +108,7 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
         final Connection con = dbService.getWritable(contextId);
         ResourceCacheMetadata existingMetadata = loadExistingEntry(metadataStore, con, contextId, userId, id);
         long existingSize = existingMetadata == null ? 0L : existingMetadata.getSize();
-        if (!ensureUnexceededContextQuota(con, bytes.length, contextId, existingSize)) {
+        if (!ensureUnexceededContextQuota(con, bytes.length, userId, contextId, existingSize)) {
             dbService.backWritable(contextId, con);
             return false;
         }
@@ -169,10 +169,10 @@ public class RdbResourceCacheImpl extends AbstractResourceCache {
         }
     }
 
-    private boolean ensureUnexceededContextQuota(final Connection con, final long desiredSize, final int contextId, final long existingSize) throws OXException {
+    private boolean ensureUnexceededContextQuota(Connection con, long desiredSize, int userId, int contextId, long existingSize) throws OXException {
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
-        final long total = getGlobalQuota();
-        final long totalPerDocument = getDocumentQuota();
+        final long total = getGlobalQuota(userId, contextId);
+        final long totalPerDocument = getDocumentQuota(userId, contextId);
         if (total > 0L || totalPerDocument > 0L) {
             if (total <= 0L) {
                 return (totalPerDocument <= 0 || desiredSize <= totalPerDocument);

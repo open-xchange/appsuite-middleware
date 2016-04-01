@@ -50,6 +50,7 @@
 package com.openexchange.ajax.requesthandler.responseRenderers;
 
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -57,7 +58,6 @@ import java.io.InputStream;
 import javax.servlet.http.sim.SimHttpServletRequest;
 import javax.servlet.http.sim.SimHttpServletResponse;
 import javax.servlet.sim.ByteArrayServletOutputStream;
-import junit.framework.TestCase;
 import org.apache.commons.io.IOUtils;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
 import com.openexchange.ajax.container.FileHolder;
@@ -74,18 +74,21 @@ import com.openexchange.config.SimConfigurationService;
 import com.openexchange.exception.OXException;
 import com.openexchange.html.HtmlService;
 import com.openexchange.html.SimHtmlService;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.TransformedImage;
+import com.openexchange.imagetransformation.BasicTransformedImage;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.server.services.ServerServiceRegistry;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.ImageTransformations;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.images.TransformedImage;
-import com.openexchange.tools.images.impl.JavaImageTransformationService;
+import com.openexchange.tools.image.WrappingImageTransformationService;
+import com.openexchange.tools.images.impl.JavaImageTransformationProvider;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.SimServerSession;
 import com.openexchange.tools.strings.BasicTypesStringParser;
 import com.openexchange.tools.strings.StringParser;
+import junit.framework.TestCase;
 
 /**
  * {@link FileResponseRendererTest}
@@ -488,7 +491,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         assertNotNull("Header content-type not found", resp.getContentType());
         assertEquals("Wrong Content-Type", "application/octet-stream", resp.getContentType());
@@ -511,7 +514,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
@@ -535,7 +538,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "image/jpeg", resp.getContentType());
@@ -561,7 +564,7 @@ public class FileResponseRendererTest extends TestCase {
         final SimHttpServletResponse resp = new SimHttpServletResponse();
         final ByteArrayServletOutputStream servletOutputStream = new ByteArrayServletOutputStream();
         resp.setOutputStream(servletOutputStream);
-        fileResponseRenderer.setScaler(new JavaImageTransformationService());
+        fileResponseRenderer.setScaler(new WrappingImageTransformationService(new JavaImageTransformationProvider()));
         fileResponseRenderer.writeFileHolder(fileHolder, requestData, result, req, resp);
         requestData.setSession(new SimServerSession(1, 1));
         assertEquals("Wrong Content-Type", "text/html", resp.getContentType());
@@ -898,7 +901,48 @@ public class FileResponseRendererTest extends TestCase {
         }
 
         @Override
-        public TransformedImage getTransformedImage(String formatName) throws IOException {
+        public BasicTransformedImage getTransformedImage(String formatName) throws IOException {
+            return new BasicTransformedImage() {
+
+                @Override
+                public int getTransformationExpenses() {
+                    return expenses;
+                }
+
+                @Override
+                public long getSize() {
+                    return 0;
+                }
+
+                @Override
+                public byte[] getImageData() {
+                    return imageData;
+                }
+
+                @Override
+                public InputStream getImageStream() throws OXException {
+                    return new ByteArrayInputStream(imageData);
+                }
+
+                @Override
+                public IFileHolder getImageFile() {
+                    return null;
+                }
+
+                @Override
+                public String getFormatName() {
+                    return null;
+                }
+
+                @Override
+                public void close() {
+                    // Nothing
+                }
+            };
+        }
+
+        @Override
+        public TransformedImage getFullTransformedImage(String formatName) throws IOException {
             return new TransformedImage() {
 
                 @Override
@@ -927,6 +971,16 @@ public class FileResponseRendererTest extends TestCase {
                 }
 
                 @Override
+                public InputStream getImageStream() throws OXException {
+                    return new ByteArrayInputStream(imageData);
+                }
+
+                @Override
+                public IFileHolder getImageFile() {
+                    return null;
+                }
+
+                @Override
                 public int getHeight() {
                     return 0;
                 }
@@ -934,6 +988,11 @@ public class FileResponseRendererTest extends TestCase {
                 @Override
                 public String getFormatName() {
                     return null;
+                }
+
+                @Override
+                public void close() {
+                    // Nothing
                 }
             };
         }

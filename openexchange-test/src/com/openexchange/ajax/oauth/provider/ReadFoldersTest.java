@@ -99,7 +99,7 @@ import com.openexchange.group.GroupStorage;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.java.util.TimeZones;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.tasks.json.TaskActionFactory;
 import com.openexchange.test.FolderTestManager;

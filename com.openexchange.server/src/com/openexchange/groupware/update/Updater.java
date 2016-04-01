@@ -100,7 +100,7 @@ public abstract class Updater {
      */
     public abstract void startUpdate(int contextId) throws OXException;
 
-    public abstract UpdateTask[] getAvailableUpdateTasks();
+    public abstract UpdateTaskV2[] getAvailableUpdateTasks();
 
     /**
      * Gets a list of schemas whose update tasks have been scheduled for execution

@@ -1,0 +1,24 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open-Xchange sipgate sms bundle
+Bundle-SymbolicName: com.openexchange.sms.sipgate
+Bundle-Version: 7.8.1
+Bundle-Vendor: OX Software GmbH
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ClassPath: .
+Import-Package: com.openexchange.config,
+ com.openexchange.exception,
+ com.openexchange.i18n,
+ com.openexchange.osgi,
+ com.openexchange.server,
+ com.openexchange.sms,
+ org.apache.commons.httpclient,
+ org.apache.commons.httpclient.auth,
+ org.apache.commons.httpclient.methods,
+ org.apache.commons.httpclient.params,
+ org.json,
+ org.osgi.framework,
+ org.slf4j,
+ org.xml.sax,
+ org.xml.sax.helpers
+Bundle-Activator: com.openexchange.sms.sipgate.osgi.SipgateSMSActivator

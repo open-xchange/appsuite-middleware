@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Imap Authentication Plug-in
 Bundle-SymbolicName: com.openexchange.authentication.imap
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.google.common.annotations,
@@ -45,4 +45,4 @@ Import-Package: com.google.common.annotations,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-Activator: com.openexchange.authentication.imap.osgi.ActivatorNew
+Bundle-Activator: com.openexchange.authentication.imap.osgi.IMAPAuthenticationActivator

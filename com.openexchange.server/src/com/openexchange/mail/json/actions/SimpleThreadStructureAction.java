@@ -354,21 +354,25 @@ public final class SimpleThreadStructureAction extends AbstractMailAction implem
                 more = null == i ? -1 : i.intValue();
             }
 
-            for (Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
-                List<MailMessage> list = iterator.next();
-                boolean foundUnseen = false;
-                for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
-                    final MailMessage message = tmp.next();
-                    if (discardMail(message, false, ignoreDeleted)) {
-                        // Ignore mail
-                        tmp.remove();
-                    } else {
-                        // Check if unseen
-                        foundUnseen |= !message.isSeen();
+            {
+                List<MailMessage> list;
+                boolean foundUnseen;
+                for (Iterator<List<MailMessage>> iterator = mails.iterator(); iterator.hasNext();) {
+                    list = iterator.next();
+                    foundUnseen = false;
+                    for (final Iterator<MailMessage> tmp = list.iterator(); tmp.hasNext();) {
+                        final MailMessage message = tmp.next();
+                        if (discardMail(message, false, ignoreDeleted)) {
+                            // Ignore mail
+                            tmp.remove();
+                        } else {
+                            // Check if unseen
+                            foundUnseen |= !message.isSeen();
+                        }
                     }
-                }
-                if (ignoreSeen && !foundUnseen) {
-                    iterator.remove();
+                    if ((ignoreSeen && !foundUnseen) || list.isEmpty()) {
+                        iterator.remove();
+                    }
                 }
             }
 

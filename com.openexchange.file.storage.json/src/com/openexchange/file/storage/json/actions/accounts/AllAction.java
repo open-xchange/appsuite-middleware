@@ -50,7 +50,9 @@
 package com.openexchange.file.storage.json.actions.accounts;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.slf4j.Logger;
@@ -59,8 +61,10 @@ import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.AccountAware;
+import com.openexchange.file.storage.CapabilityAware;
 import com.openexchange.file.storage.FileStorageAccount;
 import com.openexchange.file.storage.FileStorageAccountAccess;
+import com.openexchange.file.storage.FileStorageCapability;
 import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.json.FileStorageAccountConstants;
@@ -116,7 +120,12 @@ public class AllAction extends AbstractFileStorageAccountAction {
                 try {
                     access = fsService.getAccountAccess(account.getId(), session);
                     FileStorageFolder rootFolder = access.getRootFolder();
-                    result.put(writer.write(account, rootFolder));
+
+                    if (null != rootFolder) {
+                        // Check file storage capabilities
+                        Set<String> caps = determineCapabilities(access);
+                        result.put(writer.write(account, rootFolder, caps));
+                    }
                 } catch (OXException e) {
                     LOG.debug(e.getMessage());
                     if (e.equalsCode(6, "OAUTH")) {
@@ -127,14 +136,42 @@ public class AllAction extends AbstractFileStorageAccountAction {
                             // Ignore
                         }
                     } else {
-                        //add account with error
-                        result.put(writer.write(account, null, e, session));
+                        // Add account with error
+                        Set<String> caps = determineCapabilities(access);
+                        result.put(writer.write(account, null, caps, e, session));
                     }
                 }
             }
         }
 
         return requestResult;
+    }
+
+    private Set<String> determineCapabilities(FileStorageAccountAccess access) {
+        if (!(access instanceof CapabilityAware)) {
+            return null;
+        }
+
+        CapabilityAware capabilityAware = (CapabilityAware) access;
+        Set<String> caps = new HashSet<String>();
+        Boolean supported = capabilityAware.supports(FileStorageCapability.FILE_VERSIONS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.FILE_VERSIONS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.EXTENDED_METADATA);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.EXTENDED_METADATA.name());
+        }
+
+        supported = capabilityAware.supports(FileStorageCapability.RANDOM_FILE_ACCESS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.RANDOM_FILE_ACCESS.name());
+        }
+        supported = capabilityAware.supports(FileStorageCapability.LOCKS);
+        if (null != supported && supported.booleanValue()) {
+            caps.add(FileStorageCapability.LOCKS.name());
+        }
+        return caps;
     }
 
 }

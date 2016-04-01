@@ -127,8 +127,6 @@ public abstract class OXContextRestoreStorageInterface {
         }
     }
 
-
     public abstract String restorectx(final Context ctx, final PoolIdSchemaAndVersionInfo poolidandschema, String configdbname) throws SQLException, IOException, OXContextRestoreException, StorageException;
 
-    public abstract void checkVersion(final PoolIdSchemaAndVersionInfo poolIdAndSchema) throws SQLException, OXContextRestoreException, StorageException;
 }

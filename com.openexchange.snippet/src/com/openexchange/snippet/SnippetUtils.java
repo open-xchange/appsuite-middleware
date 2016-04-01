@@ -49,7 +49,6 @@
 
 package com.openexchange.snippet;
 
-import java.util.regex.Pattern;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.exception.OXException;
@@ -72,24 +71,44 @@ public final class SnippetUtils {
         super();
     }
 
-    private static final Pattern P_TAG_BODY = Pattern.compile("(?:\r?\n)?</?body[^<]*>(?:\r?\n)?", Pattern.CASE_INSENSITIVE);
-
     /**
      * Sanitizes given Snippet content.
      *
      * @param content The content
      * @return The sanitized content
      */
-    public static String sanitizeContent(final String content) {
+    public static String sanitizeContent(String content) {
         if (com.openexchange.java.Strings.isEmpty(content) || !HTMLDetector.containsHTMLTags(content, true)) {
             return content;
         }
-        final HtmlService service = Services.getService(HtmlService.class);
+
+        return sanitizeHtmlContent(content);
+    }
+
+    /**
+     * Sanitizes given Snippet HTML content.
+     *
+     * @param content The HTML content
+     * @return The sanitized HTML content
+     */
+    public static String sanitizeHtmlContent(String content) {
+        HtmlService service = Services.getService(HtmlService.class);
         if (null == service) {
             return content;
         }
+
+        return sanitizeHtmlContent(content, service);
+    }
+
+    /**
+     * Sanitizes given Snippet HTML content.
+     *
+     * @param content The HTML content
+     * @param service The HTML service to use
+     * @return The sanitized HTML content
+     */
+    public static String sanitizeHtmlContent(String content, HtmlService service) {
         try {
-            // String retval = service.getConformHTML(content, "UTF-8");
             String retval = service.sanitize(content, null, false, null, null);
 
             int start = retval.indexOf("<body>");

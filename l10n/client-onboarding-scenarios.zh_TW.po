@@ -1,0 +1,124 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"PO-Revision-Date: 2016-02-23 00:44+0800\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: \n"
+"X-Generator: Poedit 1.8.7\n"
+"Last-Translator: \n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: zh_TW\n"
+
+# Drive Application
+msgid "Drive Application"
+msgstr "Drive 應用程式"
+
+# Synchronize your files with our Drive application.
+msgid "Synchronize your files with our Drive application."
+msgstr "透過我們的 Drive 應用程式來同步檔案。"
+
+# Mail + Calendar + Address Book
+msgid "Mail + Calendar + Address Book"
+msgstr "郵件 + 行事曆 + 通訊錄"
+
+# To synchronize your Mail, Calendar, Tasks and Address Book data, download and install our desktop application.
+msgid ""
+"To synchronize your Mail, Calendar, Tasks and Address Book data, download "
+"and install our desktop application."
+msgstr "下載安裝我們的桌面應用程式來同步您的郵件、行事曆、任務與通訊錄資料。"
+
+# Drive App
+msgid "Drive App"
+msgstr "Drive 應用程式"
+
+# Synchronize your files with our Drive App.
+msgid "Synchronize your files with our Drive App."
+msgstr "使用我們的 Drive 應用程式來同步檔案。"
+
+# Mail App
+msgid "Mail App"
+msgstr "Mail 應用程式"
+
+# Synchronize your Mail with our Mail App.
+msgid "Synchronize your Mail with our Mail App."
+msgstr "使用我們的郵件應用程式來同步郵件。"
+
+# Calendar + Address Book
+msgid "Calendar + Address Book"
+msgstr "行事曆 + 通訊錄"
+
+# Synchronize your Calendar and Address Book data with your device.
+msgid "Synchronize your Calendar and Address Book data with your device."
+msgstr "與您的裝置同步行事曆與通訊錄資訊。"
+
+# OX Sync
+msgid "OX Sync"
+msgstr "OX Sync"
+
+# Synchronize all your appointments and contacts
+msgid "Synchronize all your appointments and contacts"
+msgstr "同步您所有約會與聯絡人。"
+
+# To manually setup your Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Calendar and Address Book accounts, please use the "
+"following information."
+msgstr "請使用下列設定來手動設定行事曆與通訊錄帳號。"
+
+# Updater
+msgid "Updater"
+msgstr "Updater"
+
+# When executing the downloaded file, an installation wizard will be launched. Follow the instructions and install the updater. Installs latest versions of Windows® client software. The Updater automatically informs about new updates. You can download the updates from within the Updater.
+msgid ""
+"When executing the downloaded file, an installation wizard will be launched. "
+"Follow the instructions and install the updater. Installs latest versions of "
+"Windows® client software. The Updater automatically informs about new "
+"updates. You can download the updates from within the Updater."
+msgstr ""
+"執行下載的檔案後，將啟動安裝精靈，請依照當中的指示安裝更新器。請安裝最新版的 "
+"Windows® 客戶端。Updater 將會自動通知您已推出更新版本，可於 Updater 中下載。"
+
+# Connector for Microsoft Outlook®
+msgid "Connector for Microsoft Outlook®"
+msgstr "Connector for Microsoft Outlook®"
+
+# Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, Shared and System Folders to Microsoft Outlook® clients.
+msgid ""
+"Synchronization of Mail, Calendar, Contacts and Tasks, along with Public, "
+"Shared and System Folders to Microsoft Outlook® clients."
+msgstr ""
+"同步郵件、行事曆、聯絡人與任務，以及公開、共享及系統資料夾至 Microsoft "
+"Outlook®。"
+
+# Synchronize your Mail, Calendar and Address Book data with your device.
+msgid "Synchronize your Mail, Calendar and Address Book data with your device."
+msgstr "同步郵件、行事曆、通訊錄資料至您的裝置。"
+
+# To manually setup your Mail, Calendar and Address Book accounts, please use the following information.
+msgid ""
+"To manually setup your Mail, Calendar and Address Book accounts, please use "
+"the following information."
+msgstr "請使用下列設定來手動設定郵件、行事曆與通訊錄帳號。"
+
+# Mail
+msgid "Mail"
+msgstr "郵件"
+
+# Synchronize your Mail with Apple Mail App.
+msgid "Synchronize your Mail with Apple Mail App."
+msgstr "使用 Apple Mail App 來同步郵件。"
+
+# To manually setup your Mail account, please use the following information
+msgid ""
+"To manually setup your Mail account, please use the following information"
+msgstr "請使用下列設定來手動設定郵件帳號。"

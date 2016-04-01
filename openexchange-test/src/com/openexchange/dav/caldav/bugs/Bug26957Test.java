@@ -49,7 +49,7 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import javax.servlet.http.HttpServletResponse;
 import org.junit.Test;
 import com.openexchange.dav.caldav.CalDAVTest;
@@ -70,7 +70,7 @@ public class Bug26957Test extends CalDAVTest {
          */
         String uid = randomUID();
         String iCal = "BEGIN:VCALENDAR\nCALSCALE:GREGORIAN\nVERSION:2.0\nMETHOD:PUBLISH\nPRODID:-//Apple Inc.//Mac OS X 10.8.4//EN\nEND:VCALENDAR\n";
-        assertEquals("response code wrong", HttpServletResponse.SC_BAD_REQUEST, super.putICal(uid, iCal));
+        assertEquals("response code wrong", HttpServletResponse.SC_FORBIDDEN, putICal(uid, iCal));
 	}
 
 }

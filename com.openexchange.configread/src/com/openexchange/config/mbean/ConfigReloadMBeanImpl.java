@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.management.MBeanException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
@@ -112,8 +113,8 @@ public class ConfigReloadMBeanImpl extends StandardMBean implements ConfigReload
             while (i.hasNext()) {
                 Map<String, String[]> configs = i.next().getConfigFileNames();
                 if (null != configs && !configs.isEmpty()) {
-                    for (String file : configs.keySet()) {
-                        map.put(file, Arrays.asList(configs.get(file)));
+                    for (Entry<String, String[]> fileEntry : configs.entrySet()) {
+                        map.put(fileEntry.getKey(), Arrays.asList(fileEntry.getValue()));
                     }
                 }
             }

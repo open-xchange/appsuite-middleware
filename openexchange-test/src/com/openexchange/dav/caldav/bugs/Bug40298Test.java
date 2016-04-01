@@ -87,7 +87,7 @@ public class Bug40298Test extends CalDAVTest {
         MultiStatusResponse response = assertSingleResponse(responses);
         String currentUserPrincipal = extractHref(PropertyNames.CURRENT_USER_PRINCIPAL, response);
         assertNotNull(currentUserPrincipal);
-        assertTrue(currentUserPrincipal.contains(getUsername()));
+        assertTrue(currentUserPrincipal.contains("/" + getClient().getValues().getUserId()));
 	}
 
 }

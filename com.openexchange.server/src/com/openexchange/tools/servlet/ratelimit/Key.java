@@ -50,6 +50,7 @@
 package com.openexchange.tools.servlet.ratelimit;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
@@ -99,32 +100,7 @@ public final class Key {
      * @param userAgent The User-Agent associated with the HTTP request
      */
     public Key(HttpServletRequest servletRequest, String userAgent) {
-        super();
-        remotePort = RateLimiter.considerRemotePort() ? servletRequest.getRemotePort() : 0;
-        remoteAddr = servletRequest.getRemoteAddr();
-        this.userAgent = userAgent;
-
-        List<String> parts;
-        {
-            List<KeyPartProvider> keyPartProviders = RateLimiter.keyPartProviders();
-            if (null == keyPartProviders || keyPartProviders.isEmpty()) {
-                parts = null;
-            } else {
-                parts = new ArrayList<String>(keyPartProviders.size());
-                for (KeyPartProvider keyPartProvider : keyPartProviders) {
-                    parts.add(keyPartProvider.getValue(servletRequest));
-                }
-            }
-        }
-        this.parts = parts;
-
-        int prime = 31;
-        int result = 1;
-        result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
-        result = prime * result + remotePort;
-        result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
-        result = prime * result + ((parts == null) ? 0 : hashCode(parts));
-        this.hash = result;
+        this(RateLimiter.considerRemotePort() ? servletRequest.getRemotePort() : 0, servletRequest.getRemoteAddr(), userAgent, extractParts(servletRequest));
     }
 
     /**
@@ -135,34 +111,23 @@ public final class Key {
      * @param parts Optional key parts to consider
      */
     public Key(HttpServletRequest servletRequest, String userAgent, String... parts) {
-        super();
-        remotePort = RateLimiter.considerRemotePort() ? servletRequest.getRemotePort() : 0;
-        remoteAddr = servletRequest.getRemoteAddr();
-        this.userAgent = userAgent;
+        this(RateLimiter.considerRemotePort() ? servletRequest.getRemotePort() : 0, servletRequest.getRemoteAddr(), userAgent,
+            null == parts || 0 == parts.length ? null : Arrays.asList(parts));
+    }
 
-        List<String> l;
-        {
-            if (null == parts || 0 == parts.length) {
-                l = null;
-            } else {
-                int length = parts.length;
-                l = new ArrayList<String>(length);
-                for (int i = 0; i < length; i++) {
-                    String part = parts[i];
-                    if (null != part) {
-                        l.add(part);
-                    }
-                }
-            }
-        }
-        this.parts = l;
+    Key(int remotePort, String remoteAddr, String userAgent, List<String> parts) {
+        super();
+        this.remotePort = remotePort;
+        this.remoteAddr = remoteAddr;
+        this.userAgent = userAgent;
+        this.parts = parts;
 
         int prime = 31;
         int result = 1;
         result = prime * result + ((remoteAddr == null) ? 0 : remoteAddr.hashCode());
         result = prime * result + remotePort;
         result = prime * result + ((userAgent == null) ? 0 : userAgent.hashCode());
-        result = prime * result + ((l == null) ? 0 : hashCode(l));
+        result = prime * result + ((parts == null) ? 0 : hashCode(parts));
         this.hash = result;
     }
 
@@ -225,6 +190,18 @@ public final class Key {
         }
         builder.append("hash=").append(hash).append("]");
         return builder.toString();
+    }
+
+    private static List<String> extractParts(HttpServletRequest servletRequest) {
+        List<KeyPartProvider> keyPartProviders = RateLimiter.keyPartProviders();
+        if (null == keyPartProviders || keyPartProviders.isEmpty()) {
+            return null;
+        }
+        List<String> parts = new ArrayList<String>(keyPartProviders.size());
+        for (KeyPartProvider keyPartProvider : keyPartProviders) {
+            parts.add(keyPartProvider.getValue(servletRequest));
+        }
+        return parts;
     }
 
 }

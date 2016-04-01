@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 1997-2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -69,7 +69,7 @@ public abstract class Service {
     /**
      * The <code>URLName</code> of this service.
      */
-    protected URLName	url = null;
+    protected volatile URLName	url = null;
 
     /**
      * Debug flag for this service.  Set from the session's debug
@@ -86,7 +86,8 @@ public abstract class Service {
      * (Sychronizing on the Service object itself can cause
      * deadlocks when notifying listeners.)
      */
-    private final Vector connectionListeners = new Vector();
+    private final Vector<ConnectionListener> connectionListeners
+	    = new Vector<ConnectionListener>();
 
     /**
      * The queue of events to be delivered.
@@ -261,7 +262,8 @@ public abstract class Service {
      * @see #connect(java.lang.String, java.lang.String, java.lang.String)
      * @since           JavaMail 1.4
      */
-    public void connect(String user, String password) throws MessagingException {
+    public void connect(String user, String password)
+	    throws MessagingException {
         connect(null, user, password);
     }
 
@@ -522,7 +524,8 @@ public abstract class Service {
      * @return	the URLName representing this service
      * @see	URLName
      */
-    public synchronized URLName getURLName() {
+    public URLName getURLName() {
+	URLName url = this.url;	// snapshot
 	if (url != null && (url.getPassword() != null || url.getFile() != null))
 	    return new URLName(url.getProtocol(), url.getHost(),
 			url.getPort(), null /* no file */,
@@ -549,7 +552,7 @@ public abstract class Service {
      * @param	url	the URLName
      * @see URLName
      */
-    protected synchronized void setURLName(URLName url) {
+    protected void setURLName(URLName url) {
 	this.url = url;
     }
 
@@ -634,6 +637,7 @@ public abstract class Service {
      * @param	event	the event
      * @param	vector	the vector of listeners
      */
+    @SuppressWarnings("rawtypes")
     protected void queueEvent(MailEvent event, Vector vector) {
 	/*
          * Copy the vector in order to freeze the state of the set
@@ -643,7 +647,8 @@ public abstract class Service {
          * of this event will not take effect until after the event is
          * delivered.
          */
-	Vector v = (Vector)vector.clone();
+	@SuppressWarnings("unchecked")
+	Vector<? extends EventListener> v = (Vector)vector.clone();
 	q.enqueue(event, v);
     }
 
@@ -651,8 +656,11 @@ public abstract class Service {
      * Stop the event dispatcher thread so the queue can be garbage collected.
      */
     protected void finalize() throws Throwable {
-	super.finalize();
-	q.terminateQueue();
+	try {
+	    q.terminateQueue();
+	} finally {
+	    super.finalize();
+	}
     }
 
     /**

@@ -51,7 +51,6 @@ package com.openexchange.quota.json.actions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.documentation.RequestMethod;
 import com.openexchange.documentation.annotations.Action;
@@ -83,7 +82,7 @@ public final class FilestoreAction extends AbstractQuotaAction {
 
     @Override
     protected AJAXRequestResult perform(final QuotaAJAXRequest req) throws OXException, JSONException {
-    	Quota storageQuota = req.getStorageQuota();
+        Quota storageQuota = req.getStorageQuota();
         JSONObject data = new JSONObject(4).put("quota", storageQuota.getLimit()).put("use", storageQuota.getUsage());
         return new AJAXRequestResult(data, "json");
     }

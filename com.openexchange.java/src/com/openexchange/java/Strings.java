@@ -123,6 +123,23 @@ public class Strings {
     }
 
     /**
+     * Builds up a string from passed strings.
+     *
+     * @param strings The strings
+     * @return The string build up from concatenating strings
+     */
+    public static String concat(String... strings) {
+        if (null == strings || 0 == strings.length) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder(2048);
+        for (String str : strings) {
+            sb.append(str == null ? "null" : str);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Builds up a string from passed objects.
      *
      * @param delimiter The delimiter string
@@ -381,6 +398,21 @@ public class Strings {
             return null;
         }
         return P_SPLIT_COMMA.split(s, 0);
+    }
+
+    private static final Pattern P_SPLIT_COLON = Pattern.compile("\\s*\\:\\s*");
+
+    /**
+     * Splits given string by colon separator.
+     *
+     * @param s The string to split
+     * @return The split string
+     */
+    public static String[] splitByColon(final String s) {
+        if (null == s) {
+            return null;
+        }
+        return P_SPLIT_COLON.split(s, 0);
     }
 
     private static final Pattern P_SPLIT_DOT = Pattern.compile("\\s*\\.\\s*");

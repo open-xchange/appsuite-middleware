@@ -180,13 +180,11 @@ public class ParticipantTools {
     }
 
     /**
-     * Gets a set of individual participants of an appointment, i.e. unique
-     * participants that are either internal or external users. Group- and
-     * resource-participants are excluded from the result.
+     * Gets a set of individual participants of an appointment, i.e. unique participants that are either internal or external users /
+     * resource. Group-participants are excluded from the result.
      *
-     * @param appointment the appointment to extract the participants from
-     * @return a set of individual participants, that may be empty, but
-     * never <code>null</code>
+     * @param appointment The appointment to extract the participants from
+     * @return A set of individual participants, that may be empty, but never <code>null</code>
      */
     public static Set<Participant> getIndividualParticipants(Appointment appointment) {
         Set<Participant> individualParticipants = new HashSet<Participant>();
@@ -199,7 +197,7 @@ public class ParticipantTools {
                         if (userIDs.add(Integer.valueOf(participant.getIdentifier()))) {
                             individualParticipants.add(participant);
                         }
-                    } else if (Participant.EXTERNAL_USER == participant.getType()) {
+                    } else if (Participant.EXTERNAL_USER == participant.getType() || Participant.RESOURCE == participant.getType()) {
                         individualParticipants.add(participant);
                     }
                 }
@@ -271,14 +269,26 @@ public class ParticipantTools {
      * @return The reminder minutes, or <code>-1</code> if not set
      */
     public static int getReminderMinutes(Appointment appointment, int userID) {
+        UserParticipant user = findUser(appointment, userID);
+        return null != user && user.containsAlarm() ? user.getAlarmMinutes() : -1;
+    }
+
+    /**
+     * Gets a specific user participant from an appointment.
+     *
+     * @param appointment The appointment
+     * @param userID The ID of the user to get
+     * @return The user particpant, or <code>null</code> if not found
+     */
+    public static UserParticipant findUser(Appointment appointment, int userID) {
         if (null != appointment && null != appointment.getUsers()) {
             for (UserParticipant user : appointment.getUsers()) {
                 if (user.getIdentifier() == userID) {
-                    return user.containsAlarm() ? user.getAlarmMinutes() : -1;
+                    return user;
                 }
             }
         }
-        return -1;
+        return null;
     }
 
     private ParticipantTools() {

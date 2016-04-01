@@ -82,6 +82,16 @@ public final class OXExceptions {
     }
 
     /**
+     * Checks if specified <code>OXException</code>'s (first) category matches {@link OXExceptionConstants#CATEGORY_PERMISSION_DENIED PERMISSION_DENIED category}.
+     *
+     * @param e The <code>OXException</code> instance to check
+     * @return <code>true</code> if category matches; otherwise <code>false</code>
+     */
+    public static boolean isPermissionDenied(OXException e) {
+        return isCategory(CATEGORY_PERMISSION_DENIED, e);
+    }
+
+    /**
      * Checks if specified <code>OXException</code>'s (first) category matches given category.
      *
      * @param category The category

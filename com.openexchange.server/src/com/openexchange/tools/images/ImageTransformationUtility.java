@@ -49,12 +49,9 @@
 
 package com.openexchange.tools.images;
 
-import static com.openexchange.java.Strings.toLowerCase;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import javax.imageio.ImageIO;
 import javax.servlet.http.HttpServletRequest;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
@@ -64,8 +61,9 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.jpeg.JpegDirectory;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.java.ByteArrayBufferedInputStream;
-import com.openexchange.java.FastBufferedInputStream;
+import com.openexchange.imagetransformation.ImageInformation;
+import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.transformations.RotateTransformation;
 
@@ -88,7 +86,7 @@ public class ImageTransformationUtility {
 
     // ----------------------------------------------------------------------------------------------------------------------------------------------
 
-    private static final String COVER = com.openexchange.tools.images.ScaleType.COVER.getKeyword();
+    private static final String COVER = ScaleType.COVER.getKeyword();
 
     /**
      * Check if given AJAX request data seems to be a thumbnail request.
@@ -121,32 +119,7 @@ public class ImageTransformationUtility {
      * @return The cleaned image format
      */
     public static String getImageFormat(final String value) {
-        if (null == value) {
-            LOG.debug("No format name specified, falling back to 'jpeg'.");
-            return "jpeg";
-        }
-        // Sanitize given image format
-        String val = value;
-        if (val.toLowerCase().startsWith("image/")) {
-            val = val.substring(6);
-        }
-        int idx = val.indexOf(';');
-        if (0 < idx) {
-            val = val.substring(0, idx);
-        }
-        if ("pjpeg".equals(val)) {
-            LOG.debug("Assuming 'jpeg' for image format {}", val);
-            return "jpeg";
-        }
-        if ("x-png".equals(val)) {
-            LOG.debug("Assuming 'png' for image format {}", val);
-            return "png";
-        }
-        if ("x-ms-bmp".equals(val)) {
-            LOG.debug("Assuming 'bmp' for image format {}", val);
-            return "bmp";
-        }
-        return val;
+        return Utility.getImageFormat(value);
     }
 
     /**
@@ -156,37 +129,8 @@ public class ImageTransformationUtility {
      * @return <code>true</code> if the image format can be read, <code>false</code>, otherwise
      */
     public static boolean canRead(String formatName) {
-        String tmp = toLowerCase(formatName);
-        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
-            return false;
-        }
-        //TODO: cache reader format names
-        for (String readerFormatName : ImageIO.getReaderFormatNames()) {
-            if (toLowerCase(readerFormatName).equals(tmp)) {
-                return true;
-            }
-        }
-        return false;
+        return Utility.canRead(formatName);
     }
-
-    /**
-     * Gets a value indicating whether an image format can be written or not.
-     *
-     * @param formatName The image format name
-     * @return <code>true</code> if the image format can be written, <code>false</code>, otherwise
-     */
-//    private static boolean canWrite(String formatName) {
-//        String tmp = toLowerCase(formatName);
-//        if ("vnd.microsoft.icon".equals(tmp) || "x-icon".equals(tmp)) {
-//            return false;
-//        }
-//        for (String writerFormatName : ImageIO.getWriterFormatNames()) {
-//            if (toLowerCase(writerFormatName).equals(tmp)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     /**
      * Gets a value indicating whether supplied image format is supposed to support transparency or not.
@@ -195,7 +139,7 @@ public class ImageTransformationUtility {
      * @return <code>true</code> if transparency is supported, <code>false</code>, otherwise
      */
     public static boolean supportsTransparency(String formatName) {
-        return false == "jpeg".equalsIgnoreCase(formatName) && false == "jpg".equalsIgnoreCase(formatName);
+        return Utility.supportsTransparency(formatName);
     }
 
     /**
@@ -205,16 +149,7 @@ public class ImageTransformationUtility {
      * @return A new buffered input stream
      */
     public static BufferedInputStream bufferedInputStreamFor(InputStream in) {
-        if (null == in) {
-            return null;
-        }
-        if ((in instanceof BufferedInputStream)) {
-            return (BufferedInputStream) in;
-        }
-        if ((in instanceof ByteArrayInputStream)) {
-            return new ByteArrayBufferedInputStream((ByteArrayInputStream) in);
-        }
-        return new FastBufferedInputStream(in, 65536);
+        return Utility.bufferedInputStreamFor(in);
     }
 
     /**
@@ -224,16 +159,7 @@ public class ImageTransformationUtility {
      * @return A mark-supporting input stream
      */
     public static InputStream markSupportingInputStreamFor(InputStream in) {
-        if (null == in) {
-            return null;
-        }
-        if ((in instanceof BufferedInputStream)) {
-            return in;
-        }
-        if ((in instanceof ByteArrayInputStream)) {
-            return in;
-        }
-        return new BufferedInputStream(in, 65536);
+        return Utility.markSupportingInputStreamFor(in);
     }
 
     /**
@@ -244,14 +170,7 @@ public class ImageTransformationUtility {
      * @throws IOException If an I/O error occurs
      */
     public static int readMagicNumber(BufferedInputStream inputStream) throws IOException {
-        if (null == inputStream) {
-            return -1;
-        }
-
-        inputStream.mark(2);
-        int magicNumber = inputStream.read() << 8 | inputStream.read();
-        inputStream.reset();
-        return magicNumber;
+        return Utility.readMagicNumber(inputStream);
     }
 
     /**
@@ -302,7 +221,7 @@ public class ImageTransformationUtility {
         } catch (ImageProcessingException e) {
             LOG.debug("error getting metadata.", e);
         } finally {
-        	Streams.close(in);
+            Streams.close(in);
         }
 
         // RotateTransformation does nothing if 'ImageInformation' is absent

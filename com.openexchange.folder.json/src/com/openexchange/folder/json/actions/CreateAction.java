@@ -69,9 +69,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -145,11 +145,11 @@ public final class CreateAction extends AbstractFolderAction {
     }
 
     @OAuthScopeCheck
-    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthAccess access) throws OXException {
         JSONObject folderObject = (JSONObject) request.requireData();
         Folder folder = new FolderParser(ServiceRegistry.getInstance().getService(ContentTypeDiscoveryService.class)).parseFolder(folderObject, getTimeZone(request, session));
         ContentType contentType = folder.getContentType();
-        return mayWriteViaOAuthRequest(contentType, grant);
+        return mayWriteViaOAuthRequest(contentType, access);
     }
 
 }

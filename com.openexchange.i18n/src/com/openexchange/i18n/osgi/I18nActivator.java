@@ -58,6 +58,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import org.osgi.framework.BundleContext;
@@ -160,7 +161,6 @@ public class I18nActivator extends HousekeepingActivator {
         final Map<Locale, List<I18nService>> locales = new HashMap<Locale, List<I18nService>>();
 
         for (final Translations tr : translations) {
-
             List<I18nService> list = locales.get(tr.getLocale());
             if (list == null) {
                 list = new ArrayList<I18nService>();
@@ -185,11 +185,11 @@ public class I18nActivator extends HousekeepingActivator {
 
         }
 
-        for (final Locale locale : locales.keySet()) {
-            final List<I18nService> list = locales.get(locale);
+        for (final Entry<Locale, List<I18nService>> localeEntry : locales.entrySet()) {
+            final List<I18nService> list = localeEntry.getValue();
 
             final Dictionary<String, Object> prop = new Hashtable<String, Object>(1);
-            prop.put(I18nService.LANGUAGE, locale);
+            prop.put(I18nService.LANGUAGE, localeEntry.getKey());
 
             final I18nService i18n;
             if (list.size() == 1) {

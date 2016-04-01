@@ -144,8 +144,11 @@ public class SharedFileInputStream extends BufferedInputStream
 	}
 
 	protected void finalize() throws Throwable {
-	    super.finalize();
-	    in.close();
+	    try {
+		in.close();
+	    } finally {
+		super.finalize();
+	    }
 	}
     }
 
@@ -490,7 +493,8 @@ public class SharedFileInputStream extends BufferedInputStream
      * @return  the current position
      */
     public long getPosition() {
-//System.out.println("getPosition: start " + start + " pos " + pos + " bufpos " + bufpos + " = " + (bufpos + pos - start));
+//System.out.println("getPosition: start " + start + " pos " + pos 
+//	+ " bufpos " + bufpos + " = " + (bufpos + pos - start));
 	if (in == null)
 	    throw new RuntimeException("Stream closed");
 	return bufpos + pos - start;
@@ -516,7 +520,7 @@ public class SharedFileInputStream extends BufferedInputStream
 	if (end == -1)
 	    end = datalen;
 	return new SharedFileInputStream(sf,
-			this.start + (int)start, (int)(end - start), bufsize);
+			this.start + start, end - start, bufsize);
     }
 
     // for testing...

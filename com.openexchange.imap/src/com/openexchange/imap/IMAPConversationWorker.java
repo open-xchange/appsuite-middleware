@@ -91,7 +91,6 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
-import com.openexchange.mail.dataobjects.IDMailMessage;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.dataobjects.ThreadSortMailMessage;
 import com.openexchange.mail.mime.ExtendedMimeMessage;
@@ -169,22 +168,6 @@ public final class IMAPConversationWorker {
     }
 
     private static final MailMessageComparator COMPARATOR_DESC = new MailMessageComparator(MailSortField.RECEIVED_DATE, true, null);
-
-    private static final Comparator<List<MailMessage>> LIST_COMPARATOR_ASC = new Comparator<List<MailMessage>>() {
-
-        @Override
-        public int compare(List<MailMessage> o1, List<MailMessage> o2) {
-            return (int) (((IDMailMessage) o2.get(0)).getUid() - ((IDMailMessage) o1.get(0)).getUid());
-        }
-    };
-
-    private static final Comparator<List<MailMessage>> LIST_COMPARATOR_DESC = new Comparator<List<MailMessage>>() {
-
-        @Override
-        public int compare(List<MailMessage> o1, List<MailMessage> o2) {
-            return (int) (((IDMailMessage) o1.get(0)).getUid() - ((IDMailMessage) o2.get(0)).getUid());
-        }
-    };
 
     private static final int CONVERSATION_CACHE_THRESHOLD = 10000;
 
@@ -377,7 +360,7 @@ public final class IMAPConversationWorker {
         // Sort root elements
         {
             MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, imapMessageStorage.getLocale());
+            Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, fullName, imapMessageStorage.getLocale());
             Collections.sort(list, listComparator);
         }
         // Slice & fill
@@ -656,7 +639,7 @@ public final class IMAPConversationWorker {
             // Sort root elements
             {
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-                final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, imapMessageStorage.getLocale());
+                final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, fullName, imapMessageStorage.getLocale());
                 Collections.sort(list, listComparator);
             }
             // Check for index range
@@ -700,13 +683,8 @@ public final class IMAPConversationWorker {
             // Sort root elements
             {
                 final MailSortField effectiveSortField = null == sortField ? MailSortField.RECEIVED_DATE : sortField;
-                if (MailSortField.RECEIVED_DATE.equals(effectiveSortField)) {
-                    final Comparator<List<MailMessage>> listComparator = OrderDirection.DESC.equals(order) ? LIST_COMPARATOR_DESC : LIST_COMPARATOR_ASC;
-                    Collections.sort(list, listComparator);
-                } else {
-                    final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, imapMessageStorage.getLocale());
-                    Collections.sort(list, listComparator);
-                }
+                final Comparator<List<MailMessage>> listComparator = getListComparator(effectiveSortField, order, fullName, imapMessageStorage.getLocale());
+                Collections.sort(list, listComparator);
             }
             // Check for index range
             if (null != indexRange) {
@@ -762,19 +740,21 @@ public final class IMAPConversationWorker {
         return sortRange;
     }
 
-    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final Locale locale) {
+    private Comparator<List<MailMessage>> getListComparator(final MailSortField sortField, final OrderDirection order, final String fullName, final Locale locale) {
         final MailMessageComparator comparator = new MailMessageComparator(sortField, OrderDirection.DESC.equals(order), locale);
-        final Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
+        Comparator<List<MailMessage>> listComparator = new Comparator<List<MailMessage>>() {
 
             @Override
             public int compare(final List<MailMessage> o1, final List<MailMessage> o2) {
-                int result = comparator.compare(o1.get(0), o2.get(0));
+                MailMessage msg1 = lookUpFirstBelongingToFolder(fullName, o1);
+                MailMessage msg2 = lookUpFirstBelongingToFolder(fullName, o2);
+
+                int result = comparator.compare(msg1, msg2);
                 if ((0 != result) || (MailSortField.RECEIVED_DATE != sortField)) {
                     return result;
                 }
+
                 // Zero as comparison result AND primarily sorted by received-date
-                final MailMessage msg1 = o1.get(0);
-                final MailMessage msg2 = o2.get(0);
                 final String inReplyTo1 = msg1.getInReplyTo();
                 final String inReplyTo2 = msg2.getInReplyTo();
                 if (null == inReplyTo1) {
@@ -783,6 +763,15 @@ public final class IMAPConversationWorker {
                     result = null == inReplyTo2 ? 1 : 0;
                 }
                 return 0 == result ? new MailMessageComparator(MailSortField.SENT_DATE, OrderDirection.DESC.equals(order), null).compare(msg1, msg2) : result;
+            }
+
+            private MailMessage lookUpFirstBelongingToFolder(String fullName, List<MailMessage> mails) {
+                for (MailMessage mail : mails) {
+                    if (fullName.equals(mail.getFolder())) {
+                        return mail;
+                    }
+                }
+                return mails.get(0);
             }
         };
         return listComparator;

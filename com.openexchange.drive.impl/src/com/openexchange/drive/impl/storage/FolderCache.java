@@ -131,4 +131,12 @@ public class FolderCache {
         }
     }
 
+    /**
+     * Removes any cached folder paths.
+     */
+    public void clear() {
+        knownFolders.clear();
+        knownPaths.clear();
+    }
+
 }

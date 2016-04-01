@@ -119,6 +119,8 @@ public class FileStorageCapabilityTools {
             return Boolean.valueOf(FileStorageRangeFileAccess.class.isAssignableFrom(fileAccessClass));
         case EXTENDED_METADATA:
             return Boolean.valueOf(FileStorageExtendedMetadata.class.isAssignableFrom(fileAccessClass));
+        case MULTI_MOVE:
+            return Boolean.valueOf(FileStorageMultiMove.class.isAssignableFrom(fileAccessClass));
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return Boolean.FALSE;
@@ -162,6 +164,8 @@ public class FileStorageCapabilityTools {
             return FileStorageRangeFileAccess.class.isInstance(fileAccess);
         case EXTENDED_METADATA:
             return FileStorageExtendedMetadata.class.isInstance(fileAccess);
+        case MULTI_MOVE:
+            return FileStorageMultiMove.class.isInstance(fileAccess);
         default:
             org.slf4j.LoggerFactory.getLogger(FileStorageCapabilityTools.class).warn("Unknown capability: {}", capability);
             return false;

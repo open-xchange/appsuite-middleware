@@ -102,7 +102,7 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
     public final static String CREATOR_IS_NOT_ADMIN_MSG = "The folder is a default folder. Hence its owner needs to hold administrative permissions.";
     public final static String SHARE_FORBIDDEN_MSG = "You do not have appropriate permissions to share the folder.";
     public final static String UNAPPLICABLE_FOLDER_PERM_MSG = "It is not possible to apply the changes due to limited permissions";
-    public final static String UNAPPLICABLE_FOLDER_PERM_MSG_EXTENDED = "It is not possible to apply the changes as a result of restricted permissions of the user \"%1s\".";
+    public final static String UNAPPLICABLE_FOLDER_PERM_MSG_EXTENDED = "It is not possible to apply the changes as a result of restricted permissions of the user \"%1$s\".";
     public final static String HIDDEN_FOLDER_ON_DELETION_MSG = "The folder cannot be deleted since it contains a hidden subfolder you don't have the appropriate permissions for.";
     public final static String NO_DEFAULT_INFOSTORE_CREATE_MSG = "The folder already contains a folder with such a name. Please choose a different name and try again.";
     public final static String INVALID_DATA_MSG = "The folder name contains invalid characters.";
@@ -128,5 +128,8 @@ public class OXFolderExceptionMessage implements LocalizableStrings {
 
     // You are not allowed to share the folder to "%2$s"; e.g. 'You are not allowed to share the folder to "Guests"'
     public static final String INVALID_ENTITY_FROM_USER_MSG = "You are not allowed to share the folder to \"%2$s\"";
+
+    // You are not allowed to change the permissions of the trash folder or any of its subfolders
+    public static final String NO_TRASH_PERMISSIONS_CHANGE_ALLOWED_MSG = "You are not allowed to change the permissions of the trash folder or any of its subfolders";
 
 }

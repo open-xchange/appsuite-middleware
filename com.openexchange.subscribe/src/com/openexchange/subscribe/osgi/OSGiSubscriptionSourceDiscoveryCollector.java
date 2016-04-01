@@ -78,9 +78,6 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
 
     private final CompositeSubscriptionSourceDiscoveryService delegate = new CompositeSubscriptionSourceDiscoveryService();
 
-
-    private final Set<SubscriptionSourceDiscoveryService> blacklist = new HashSet<SubscriptionSourceDiscoveryService>();
-
     public OSGiSubscriptionSourceDiscoveryCollector(final BundleContext context) {
         this.context = context;
         this.tracker = new ServiceTracker(context, SubscriptionSourceDiscoveryService.class.getName(), this);
@@ -98,7 +95,7 @@ public class OSGiSubscriptionSourceDiscoveryCollector implements ServiceTrackerC
     @Override
     public Object addingService(final ServiceReference reference) {
         final SubscriptionSourceDiscoveryService service = (SubscriptionSourceDiscoveryService) context.getService(reference);
-        if(blacklist.contains(service) || service.getClass() == getClass()) {
+        if(service.getClass() == getClass()) {
             context.ungetService(reference);
             return service;
         }

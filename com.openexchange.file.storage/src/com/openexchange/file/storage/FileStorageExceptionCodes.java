@@ -312,6 +312,38 @@ public enum FileStorageExceptionCodes implements DisplayableOXExceptionCode {
      * Invalid permissions (%1$d) for entity \"%2$d\" on object \"%3$s\".
      */
     INVALID_OBJECT_PERMISSIONS("Invalid permissions (%1$d) for entity (%2$d) on object %3$s.", Category.CATEGORY_PERMISSION_DENIED, 62),
+    /**
+     * Invalid permissions (%1$d) for entity \"%2$d\" on object \"%3$s\".
+     */
+    INVALID_OBJECT_PERMISSIONS_SIMPLE("The user does not have sufficient permissions for the entity specified in the query", Category.CATEGORY_PERMISSION_DENIED, 62, FileStorageExceptionMessages.INVALID_OBJECT_PERMISSIONS_SIMPLE_MSG),
+    /**
+     * The storage backend denied this request because of a exceeded rate limit.
+     */
+    STORAGE_RATE_LIMIT("The storage backend denied this request because of a exceeded rate limit.", Category.CATEGORY_CAPACITY, 63, FileStorageExceptionMessages.STORAGE_RATE_LIMIT_MSG),
+    /**
+     * Bad or expired access token. Need to re-authenticate user.
+     */
+    UNLINKED_ERROR("Bad or expired access token. Need to re-authenticate user.", Category.CATEGORY_USER_INPUT, 64, FileStorageExceptionMessages.UNLINKED_ERROR_MSG),
+
+    /**
+     * File name contains illegal characters: \"%1$s\"
+     */
+    ILLEGAL_CHARACTERS("File name contains illegal characters: \"%1$s\"", Category.CATEGORY_USER_INPUT, 65, FileStorageExceptionMessages.ILLEGAL_CHARACTERS_MSG),
+
+    /**
+     * File name is a reserved name: \"%1$s\"
+     */
+    RESERVED_NAME("File name is a reserved name: \"%1$s\"", Category.CATEGORY_USER_INPUT, 66, FileStorageExceptionMessages.RESERVED_NAME_MSG),
+
+    /**
+     * File name must not be \".\" or \"..\".
+     */
+    ONLY_DOTS_NAME("File name must not be \".\" or \"..\".", Category.CATEGORY_USER_INPUT, 67, FileStorageExceptionMessages.ONLY_DOTS_MSG),
+
+    /**
+     * File name must not end with a dot or whitespace.
+     */
+    WHITESPACE_END("File name must not end with a dot or whitespace.", Category.CATEGORY_USER_INPUT, 68, FileStorageExceptionMessages.WHITESPACE_END_MSG)
 
     ;
 

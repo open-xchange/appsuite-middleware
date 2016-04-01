@@ -53,8 +53,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import javax.mail.FolderClosedException;
 import javax.mail.MessagingException;
+import javax.mail.StoreClosedException;
 import javax.mail.internet.idn.IDNA;
+import com.openexchange.exception.ExceptionUtils;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.LdapExceptionCode;
@@ -107,6 +110,7 @@ public final class IMAPFolderConverter {
         private final String fullname;
         private final char separator;
         private final String otherUserNamespace;
+        private final String publicNamespace;
 
         /**
          * Initializes a new {@link Entity2ACLArgsImpl}.
@@ -118,7 +122,7 @@ public final class IMAPFolderConverter {
          * @param separator The separator character
          * @param otherUserNamespaces The namespace for other users
          */
-        Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces) {
+        Entity2ACLArgsImpl(int accountId, String serverUrl, int sessionUser, String fullname, char separator, String[] otherUserNamespaces, String[] publicNamespaces) {
             super();
             this.accountId = accountId;
             this.serverUrl = serverUrl;
@@ -126,17 +130,16 @@ public final class IMAPFolderConverter {
             this.fullname = fullname;
             this.separator = separator;
             this.otherUserNamespace = null == otherUserNamespaces || otherUserNamespaces.length == 0 ? null : otherUserNamespaces[0];
+            this.publicNamespace = null == publicNamespaces || publicNamespaces.length == 0 ? null : publicNamespaces[0];
         }
 
         @Override
         public Object[] getArguments(final IMAPServer imapServer) throws OXException {
-            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace);
+            return imapServer.getArguments(accountId, serverUrl, sessionUser, fullname, separator, otherUserNamespace, publicNamespace);
         }
     }
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderConverter.class);
-
-    private static final Rights RIGHTS_EMPTY = new Rights();
 
     /**
      * New mailbox attribute added by the "LIST-EXTENDED" extension.
@@ -178,7 +181,8 @@ public final class IMAPFolderConverter {
                 session.getUserId(),
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
-                NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
+                NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()),
+                NamespaceFoldersCache.getSharedNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         } catch (final MessagingException e) {
             throw MimeMailException.handleMessagingException(e, imapConfig, session);
         }
@@ -445,7 +449,7 @@ public final class IMAPFolderConverter {
                     final ACLPermission ownPermission = new ACLPermission();
                     ownPermission.setEntity(session.getUserId());
                     if (!exists || mailFolder.isNonExistent()) {
-                        ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
+                        ownPermission.parseRights((ownRights = new Rights()), imapConfig);
                     } else if (!selectable) {
                         ownRights = ownRightsFromProblematic(session, imapAccess, imapFullName, imapConfig, mailFolder, accountId, ownPermission);
                     } else {
@@ -552,29 +556,26 @@ public final class IMAPFolderConverter {
         return false;
     }
 
-    private static Rights ownRightsFromProblematic(final Session session, final IMAPAccess imapAccess, final String imapFullName, final IMAPConfig imapConfig, final IMAPMailFolder mailFolder, final int accountId, final ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
-        final Rights ownRights;
+    private static Rights ownRightsFromProblematic(Session session, IMAPAccess imapAccess, String imapFullName, IMAPConfig imapConfig, IMAPMailFolder mailFolder, int accountId, ACLPermission ownPermission) throws MessagingException, OXException, IMAPException {
+        Rights ownRights;
         /*
          * Distinguish between holds folders and none
          */
         if (mailFolder.isHoldsFolders()) {
             /*
-             * This is the tricky case: Allow subfolder creation for a common imap folder but deny it for imap server's
-             * namespace folders
+             * This is the tricky case: Allow subfolder creation for a common IMAP folder but deny it for namespace folders
              */
             if (checkForNamespaceFolder(imapFullName, imapAccess.getIMAPStore(), session, accountId, imapConfig.getIMAPProperties().isIgnoreSubscription())) {
-                ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
+                ownRights = new Rights();
+                ownPermission.parseRights(ownRights, imapConfig);
             } else {
-                ownPermission.setAllPermission(
-                    OCLPermission.CREATE_SUB_FOLDERS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS,
-                    OCLPermission.NO_PERMISSIONS);
+                ownPermission.setAllPermission(OCLPermission.CREATE_SUB_FOLDERS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
                 ownPermission.setFolderAdmin(false);
                 ownRights = ACLPermission.permission2Rights(ownPermission, imapConfig);
             }
         } else {
-            ownPermission.parseRights((ownRights = (Rights) RIGHTS_EMPTY.clone()), imapConfig);
+            ownRights = new Rights();
+            ownPermission.parseRights(ownRights, imapConfig);
         }
         return ownRights;
     }
@@ -709,7 +710,7 @@ public final class IMAPFolderConverter {
             }
             throw MimeMailException.handleMessagingException(e);
         }
-        Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator(), NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
+        Entity2ACLArgs args = new Entity2ACLArgsImpl(imapConfig.getAccountId(), new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(), session.getUserId(), imapFolder.getFullName(), listEntry.getSeparator(), NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()), NamespaceFoldersCache.getSharedNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()));
         boolean userPermAdded = false;
         for (int j = 0; j < acls.length; j++) {
             final ACLPermission aclPerm = new ACLPermission();
@@ -847,8 +848,9 @@ public final class IMAPFolderConverter {
      * @param session The session
      * @param imapConfig The IMAP configuration
      * @return The own rights
+     * @throws MessagingException In case an unrecoverable exception occurs
      */
-    public static Rights getOwnRights(final IMAPFolder folder, final Session session, final IMAPConfig imapConfig) {
+    public static Rights getOwnRights(final IMAPFolder folder, final Session session, final IMAPConfig imapConfig) throws MessagingException {
         if (folder instanceof DefaultFolder) {
             return null;
         }
@@ -856,27 +858,33 @@ public final class IMAPFolderConverter {
         if (imapConfig.isSupportsACLs()) {
             try {
                 retval = RightsCache.getCachedRights(folder, true, session, imapConfig.getAccountId());
-            } catch (final MessagingException e) {
-                final Exception nextException = e.getNextException();
+            } catch (FolderClosedException e) {
+                // Unable to recover...
+                throw e;
+            } catch (StoreClosedException e) {
+                // Unable to recover...
+                throw e;
+            } catch (MessagingException e) {
+                Exception nextException = e.getNextException();
                 if ((nextException instanceof com.sun.mail.iap.CommandFailedException)) {
                     /*
                      * Handle command failed exception
                      */
                     handleCommandFailedException(((com.sun.mail.iap.CommandFailedException) nextException), folder.getFullName());
                     return null;
-                } else {
-                    LOG.error("", e);
                 }
+                LOG.error("", e);
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!
                  */
-                return (Rights) RIGHTS_EMPTY.clone();
-            } catch (final Throwable t) {
+                return new Rights();
+            } catch (Throwable t) {
+                ExceptionUtils.handleThrowable(t);
                 LOG.error("", t);
                 /*
                  * Write empty string as rights. Nevertheless user may see folder!
                  */
-                return (Rights) RIGHTS_EMPTY.clone();
+                return new Rights();
             }
         } else {
             /*

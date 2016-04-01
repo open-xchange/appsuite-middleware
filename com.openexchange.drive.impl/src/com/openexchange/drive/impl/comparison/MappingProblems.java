@@ -64,8 +64,10 @@ public class MappingProblems<T> {
 
     private List<T> caseConflictingClientVersions;
     private List<T> unicodeConflictingClientVersions;
+    private List<T> duplicateClientVersions;
     private List<T> caseConflictingServerVersions;
     private List<T> unicodeConflictingServerVersions;
+    private List<T> duplicateServerVersions;
 
     /**
      * Initializes a new {@link MappingProblems}.
@@ -82,8 +84,11 @@ public class MappingProblems<T> {
     public boolean isEmpty() {
         return (null == caseConflictingClientVersions || 0 == caseConflictingClientVersions.size()) &&
             (null == unicodeConflictingClientVersions || 0 == unicodeConflictingClientVersions.size()) &&
+            (null == duplicateClientVersions || 0 == duplicateClientVersions.size()) &&
             (null == caseConflictingServerVersions || 0 == caseConflictingServerVersions.size()) &&
-            (null == unicodeConflictingServerVersions || 0 == unicodeConflictingServerVersions.size());
+            (null == unicodeConflictingServerVersions || 0 == unicodeConflictingServerVersions.size() &&
+            (null == duplicateServerVersions || 0 == duplicateServerVersions.size())
+        );
     }
 
     /**
@@ -105,6 +110,15 @@ public class MappingProblems<T> {
     }
 
     /**
+     * Gets the duplicateClientVersions
+     *
+     * @return The duplicateClientVersions
+     */
+    public List<T> getDuplicateClientVersions() {
+        return duplicateClientVersions;
+    }
+
+    /**
      * Gets the caseConflictingServerVersions
      *
      * @return The caseConflictingServerVersions
@@ -123,6 +137,15 @@ public class MappingProblems<T> {
     }
 
     /**
+     * Gets the duplicateServerVersions
+     *
+     * @return The duplicateServerVersions
+     */
+    public List<T> getDuplicateServerVersions() {
+        return duplicateServerVersions;
+    }
+
+    /**
      * Decides which of the two conflicting versions is chosen for synchronization, while the other one is recorded in an internal list of
      * problematic server versions.
      *
@@ -137,12 +160,25 @@ public class MappingProblems<T> {
         boolean key2Normalized = PathNormalizer.isNormalized(key2);
         if (key1Normalized && key2Normalized) {
             /*
-             * both keys already in normalized form, must be a case-conflict - choose the first version
+             * both keys already in normalized form
              */
-            if (null == caseConflictingServerVersions) {
-                caseConflictingServerVersions = new ArrayList<T>();
+            if (key1.equals(key2)) {
+                /*
+                 * both keys are equal in normalized form - choose the first version
+                 */
+                if (null == duplicateServerVersions) {
+                    duplicateServerVersions = new ArrayList<T>();
+                }
+                duplicateServerVersions.add(version2);
+            } else {
+                /*
+                 * consider as case-conflict - choose the first version
+                 */
+                if (null == caseConflictingServerVersions) {
+                    caseConflictingServerVersions = new ArrayList<T>();
+                }
+                caseConflictingServerVersions.add(version2);
             }
-            caseConflictingServerVersions.add(version2);
             return version1;
         } else {
             /*
@@ -176,12 +212,25 @@ public class MappingProblems<T> {
         boolean key2Normalized = PathNormalizer.isNormalized(key2);
         if (key1Normalized && key2Normalized) {
             /*
-             * both keys already in normalized form, must be a case-conflict - choose the first version
+             * both keys already in normalized form
              */
-            if (null == caseConflictingClientVersions) {
-                caseConflictingClientVersions = new ArrayList<T>();
+            if (key1.equals(key2)) {
+                /*
+                 * both keys are equal in normalized form - choose the first version
+                 */
+                if (null == duplicateClientVersions) {
+                    duplicateClientVersions = new ArrayList<T>();
+                }
+                duplicateClientVersions.add(version2);
+            } else {
+                /*
+                 * consider as case-conflict - choose the first version
+                 */
+                if (null == caseConflictingClientVersions) {
+                    caseConflictingClientVersions = new ArrayList<T>();
+                }
+                caseConflictingClientVersions.add(version2);
             }
-            caseConflictingClientVersions.add(version2);
             return version1;
         } else {
             /*
@@ -205,8 +254,10 @@ public class MappingProblems<T> {
         StringBuilder stringBuilder = new StringBuilder();
         appendVersions(stringBuilder, caseConflictingClientVersions, "Case conflicting client versions");
         appendVersions(stringBuilder, unicodeConflictingClientVersions, "Unicode conflicting client versions");
+        appendVersions(stringBuilder, duplicateClientVersions, "Duplicate client versions");
         appendVersions(stringBuilder, caseConflictingServerVersions, "Case conflicting server versions");
         appendVersions(stringBuilder, unicodeConflictingServerVersions, "Unicode conflicting server versions");
+        appendVersions(stringBuilder, duplicateServerVersions, "Duplicate server versions");
         return stringBuilder.toString();
     }
 

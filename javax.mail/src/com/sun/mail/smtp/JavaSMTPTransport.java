@@ -57,14 +57,14 @@ import com.sun.mail.smtp.SMTPTransport;
 
 /**
  * {@link JavaSMTPTransport}
- * 
+ *
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  */
 public class JavaSMTPTransport extends SMTPTransport {
 
     /**
      * Initializes a new {@link JavaSMTPTransport}.
-     * 
+     *
      * @param session
      * @param urlname
      * @param name
@@ -76,7 +76,7 @@ public class JavaSMTPTransport extends SMTPTransport {
 
     /**
      * Initializes a new {@link JavaSMTPTransport}.
-     * 
+     *
      * @param session
      * @param urlname
      */
@@ -84,16 +84,17 @@ public class JavaSMTPTransport extends SMTPTransport {
         super(session, urlname);
     }
 
+    @Override
     protected OutputStream data() throws MessagingException {
         OutputStream data = super.data();
 
         long maxMailSize = -1L;
         String sMaxMailSize = session.getProperty("com.openexchange.mail.maxMailSize");
         if (sMaxMailSize != null) {
-            maxMailSize = Long.valueOf(sMaxMailSize);
+            maxMailSize = Long.parseLong(sMaxMailSize);
         }
 
-        if (maxMailSize != -1) {
+        if (maxMailSize > 0) {
             return new CountingOutputStream(data, maxMailSize);
         }
 

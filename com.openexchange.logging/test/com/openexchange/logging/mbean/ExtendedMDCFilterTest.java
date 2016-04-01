@@ -58,6 +58,7 @@ import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.MDC;
+import com.openexchange.logging.filter.ExtendedMDCFilter;
 import static org.powermock.api.mockito.PowerMockito.*;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;

@@ -65,6 +65,8 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.management.ManagementService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.processing.ProcessorService;
+import com.openexchange.processing.internal.ProcessorServiceImpl;
 import com.openexchange.session.Session;
 import com.openexchange.session.SessionThreadCounter;
 import com.openexchange.sessionCount.SessionThreadCounterImpl;
@@ -89,9 +91,12 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
 
     public static final AtomicReference<TimerService> REF_TIMER = new AtomicReference<TimerService>();
 
+    public static final AtomicReference<ProcessorService> REF_PROCESSOR = new AtomicReference<ProcessorService>();
+
     public static final AtomicReference<CloseableControlService> REF_CLOSEABLE_CONTROL = new AtomicReference<CloseableControlService>();
-    
+
     private volatile ThreadPoolServiceImpl threadPool;
+    private volatile ProcessorServiceImpl processorService;
 
     /**
      * Initializes a new {@link ThreadPoolActivator}.
@@ -155,6 +160,13 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             final TimerService timerService = new CustomThreadPoolExecutorTimerService(threadPool.getThreadPoolExecutor());
             REF_TIMER.set(timerService);
             registerService(TimerService.class, timerService);
+            /*
+             * Register ProcessorService
+             */
+            ProcessorServiceImpl processorService = new ProcessorServiceImpl();
+            this.processorService = processorService;
+            REF_PROCESSOR.set(processorService);
+            registerService(ProcessorService.class, processorService);
             /*
              * Register SessionThreadCounter service
              */
@@ -247,8 +259,17 @@ public final class ThreadPoolActivator extends HousekeepingActivator {
             LOG.info("stopping bundle: com.openexchange.threadpool");
             REF_THREAD_POOL.set(null);
             REF_TIMER.set(null);
+            REF_PROCESSOR.set(null);
             cleanUp();
             SessionThreadCounter.REFERENCE.set(null);
+            /*
+             * Stop processor service
+             */
+            ProcessorServiceImpl processorService = this.processorService;
+            if (null != processorService) {
+                this.processorService = null;
+                processorService.shutDownAll();
+            }
             /*
              * Stop thread pool
              */

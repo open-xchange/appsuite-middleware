@@ -61,8 +61,8 @@ import org.apache.http.client.utils.URIBuilder;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.notify.hostname.HostnameService;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
+import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.oauth.provider.impl.osgi.Services;
 
 /**

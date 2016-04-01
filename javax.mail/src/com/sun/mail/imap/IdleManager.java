@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2014-2015 Oracle and/or its affiliates. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common Development
@@ -42,6 +42,7 @@ package com.sun.mail.imap;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
+import java.net.Socket;
 import java.nio.*;
 import java.nio.channels.*;
 import java.util.*;
@@ -82,8 +83,12 @@ import com.sun.mail.util.MailLogger;
  *		Message[] msgs = ev.getMessages();
  *		System.out.println("Folder: " + folder +
  *		    " got " + msgs.length + " new messages");
- *		// process new messages
- *		idleManager.watch(folder); // keep watching for new messages
+ *		try {
+ *		    // process new messages
+ *		    idleManager.watch(folder); // keep watching for new messages
+ *		} catch (MessagingException mex) {
+ *		    // handle exception related to the Folder
+ *		}
  *	    }
  *	});
  *	idleManager.watch(folder);
@@ -134,6 +139,7 @@ public class IdleManager {
     private Selector selector;
     private MailLogger logger;
     private volatile boolean die = false;
+    private volatile boolean running;
     private Queue<IMAPFolder> toWatch = new ConcurrentLinkedQueue<IMAPFolder>();
     private Queue<IMAPFolder> toAbort = new ConcurrentLinkedQueue<IMAPFolder>();
 
@@ -144,16 +150,38 @@ public class IdleManager {
      *
      * @param	session	the Session containing configuration information
      * @param	es	the Executor used to create threads
+     * @exception	IOException	for Selector failures
      */
     public IdleManager(Session session, Executor es) throws IOException {
-	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session);
 	this.es = es;
+	logger = new MailLogger(this.getClass(), "DEBUG IMAP", session);
 	selector = Selector.open();
 	es.execute(new Runnable() {
 	    public void run() {
-		select();
+		logger.fine("IdleManager select starting");
+		try {
+		    running = true;
+		    select();
+		} finally {
+		    running = false;
+		    logger.fine("IdleManager select terminating");
+		}
 	    }
 	});
+    }
+
+    /**
+     * Is the IdleManager currently running?  The IdleManager starts
+     * running when the Executor schedules its task.  The IdleManager
+     * stops running after its task detects the stop request from the
+     * {@link #stop stop} method, or if it terminates abnormally due
+     * to an unexpected error.
+     *
+     * @return	true if the IdleMaanger is running
+     * @since JavaMail 1.5.5
+     */
+    public boolean isRunning() {
+	return running;
     }
 
     /**
@@ -162,20 +190,45 @@ public class IdleManager {
      *
      * @param	folder	the folder to watch
      * @exception	MessagingException	for errors related to the folder
-     * @exception	IOException	for SocketChannel errors
      */
-    public synchronized void watch(Folder folder)
-				throws IOException, MessagingException {
+    public void watch(Folder folder)
+				throws MessagingException {
+	if (die)	// XXX - should be IllegalStateException?
+	    throw new MessagingException("IdleManager is not running");
 	if (!(folder instanceof IMAPFolder))
 	    throw new MessagingException("Can only watch IMAP folders");
 	IMAPFolder ifolder = (IMAPFolder)folder;
 	SocketChannel sc = ifolder.getChannel();
 	if (sc == null)
 	    throw new MessagingException("Folder is not using SocketChannels");
-	logger.log(Level.FINEST, "IdleManager watching {0}", ifolder);
-	ifolder.startIdle(this);
-	toWatch.add(ifolder);
-	selector.wakeup();
+	if (logger.isLoggable(Level.FINEST))
+	    logger.log(Level.FINEST, "IdleManager watching {0}",
+							folderName(ifolder));
+	// keep trying to start the IDLE command until we're successful.
+	// may block if we're in the middle of aborting an IDLE command.
+	int tries = 0;
+	while (!ifolder.startIdle(this)) {
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+			    "IdleManager.watch startIdle failed for {0}",
+			    folderName(ifolder));
+	    tries++;
+	}
+	if (logger.isLoggable(Level.FINEST)) {
+	    if (tries > 0)
+		logger.log(Level.FINEST,
+			"IdleManager.watch startIdle succeeded for {0}" +
+			" after " + tries + " tries",
+			folderName(ifolder));
+	    else
+		logger.log(Level.FINEST,
+			"IdleManager.watch startIdle succeeded for {0}",
+			folderName(ifolder));
+	}
+	synchronized (this) {
+	    toWatch.add(ifolder);
+	    selector.wakeup();
+	}
     }
 
     /**
@@ -186,7 +239,7 @@ public class IdleManager {
      * blocking I/O mode when not selecting, so wake up the selector,
      * which will process this request when it wakes up.
      */
-    synchronized void requestAbort(IMAPFolder folder) {
+    void requestAbort(IMAPFolder folder) {
 	toAbort.add(folder);
 	selector.wakeup();
     }
@@ -214,27 +267,35 @@ public class IdleManager {
 		 * need to continue watching that folder it's added
 		 * to the toWatch list again.  We can't actually
 		 * register that folder again until the previous
-		 * selectionkey is cancelled, so we call selectNow()
+		 * selection key is cancelled, so we call selectNow()
 		 * just for the side effect of cancelling the selection
 		 * keys.  But if selectNow() selects something, we
 		 * process it before adding folders from the toWatch
 		 * queue.  And so on until there is nothing to do, at
 		 * which point it's safe to register folders from the
-		 * toWatch queue.
+		 * toWatch queue.  This should be "fair" since each
+		 * selection key is used only once before being added
+		 * to the toWatch list.
 		 */
-		while (processKeys() && selector.selectNow() > 0)
-		    ;
+		do {
+		    processKeys();
+		} while (selector.selectNow() > 0 || !toAbort.isEmpty());
 	    }
 	} catch (InterruptedIOException ex) {
-	    logger.log(Level.FINE, "IdleManager interrupted", ex);
+	    logger.log(Level.FINEST, "IdleManager interrupted", ex);
 	} catch (IOException ex) {
-	    logger.log(Level.FINE, "IdleManager got exception", ex);
+	    logger.log(Level.FINEST, "IdleManager got I/O exception", ex);
+	} catch (Exception ex) {
+	    logger.log(Level.FINEST, "IdleManager got exception", ex);
 	} finally {
+	    die = true;	// prevent new watches in case of exception
+	    logger.finest("IdleManager unwatchAll");
 	    try {
 		unwatchAll();
 		selector.close();
 	    } catch (IOException ex2) {
 		// nothing to do...
+		logger.log(Level.FINEST, "IdleManager unwatch exception", ex2);
 	    }
 	    logger.fine("IdleManager exiting");
 	}
@@ -251,12 +312,13 @@ public class IdleManager {
 	 */
 	IMAPFolder folder;
 	while ((folder = toWatch.poll()) != null) {
-	    logger.log(Level.FINEST,
-		    "IdleManager adding {0} to selector", folder);
-	    SocketChannel sc = folder.getChannel();
-	    if (sc == null)
-		continue;
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+		    "IdleManager adding {0} to selector", folderName(folder));
 	    try {
+		SocketChannel sc = folder.getChannel();
+		if (sc == null)
+		    continue;
 		// has to be non-blocking to select
 		sc.configureBlocking(false);
 		sc.register(selector, SelectionKey.OP_READ, folder);
@@ -264,23 +326,77 @@ public class IdleManager {
 		// oh well, nothing to do
 		logger.log(Level.FINEST,
 		    "IdleManager can't register folder", ex);
+	    } catch (CancelledKeyException ex) {
+		// this should never happen
+		logger.log(Level.FINEST,
+		    "IdleManager can't register folder", ex);
 	    }
 	}
     }
 
     /**
-     * Process the selected keys, returning true if any folders have
-     * been added to the watch list.
+     * Process the selected keys.
      */
-    private boolean processKeys() throws IOException {
-	boolean more = false;
-	/*
-	 * First, process any folders that we need to abort.
-	 */
+    private void processKeys() throws IOException {
 	IMAPFolder folder;
+
+	/*
+	 * First, process any channels with data to read.
+	 */
+	Set<SelectionKey> selectedKeys = selector.selectedKeys();
+	/*
+	 * XXX - this is simpler, but it can fail with
+	 *	 ConncurentModificationException
+	 *
+	for (SelectionKey sk : selectedKeys) {
+	    selectedKeys.remove(sk);	// only process each key once
+	    ...
+	}
+	*/
+	Iterator<SelectionKey> it = selectedKeys.iterator();
+	while (it.hasNext()) {
+	    SelectionKey sk = it.next();
+	    it.remove();	// only process each key once
+	    // have to cancel so we can switch back to blocking I/O mode
+	    sk.cancel();
+	    folder = (IMAPFolder)sk.attachment();
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+		    "IdleManager selected folder: {0}", folderName(folder));
+	    SelectableChannel sc = sk.channel();
+	    // switch back to blocking to allow normal I/O
+	    sc.configureBlocking(true);
+	    try {
+		if (folder.handleIdle(false)) {
+		    if (logger.isLoggable(Level.FINEST))
+			logger.log(Level.FINEST,
+			    "IdleManager continue watching folder {0}",
+							folderName(folder));
+		    // more to do with this folder, select on it again
+		    toWatch.add(folder);
+		} else {
+		    // done watching this folder,
+		    if (logger.isLoggable(Level.FINEST))
+			logger.log(Level.FINEST,
+			    "IdleManager done watching folder {0}",
+							folderName(folder));
+		}
+	    } catch (MessagingException ex) {
+		// something went wrong, stop watching this folder
+		logger.log(Level.FINEST,
+		    "IdleManager got exception for folder: " +
+						    folderName(folder), ex);
+	    }
+	}
+
+	/*
+	 * Now, process any folders that we need to abort.
+	 */
 	while ((folder = toAbort.poll()) != null) {
-	    logger.log(Level.FINE,
-		"IdleManager aborting IDLE for folder: {0}", folder);
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+		    "IdleManager aborting IDLE for folder: {0}",
+							folderName(folder));
 	    SocketChannel sc = folder.getChannel();
 	    if (sc == null)
 		continue;
@@ -290,65 +406,79 @@ public class IdleManager {
 		sk.cancel();
 	    // switch back to blocking to allow normal I/O
 	    sc.configureBlocking(true);
-	    folder.idleAbort();	// send the DONE message
-	    // watch for OK response to DONE
-	    toWatch.add(folder);
-	    more = true;
-	}
 
-	/*
-	 * Now, process any channels with data to read.
-	 */
-	Set<SelectionKey> selectedKeys = selector.selectedKeys();
-	for (SelectionKey sk : selectedKeys) {
-	    selectedKeys.remove(sk);	// only process each key once
-	    // have to cancel so we can switch back to blocking I/O mode
-	    sk.cancel();
-	    folder = (IMAPFolder)sk.attachment();
-	    logger.log(Level.FINE,
-		"IdleManager selected folder: {0}", folder);
-	    SelectableChannel sc = sk.channel();
-	    // switch back to blocking to allow normal I/O
-	    sc.configureBlocking(true);
-	    try {
-		if (folder.handleIdle(false)) {
-		    // more to do with this folder, select on it again
-		    // XXX - what if we also added it above?
-		    toWatch.add(folder);
-		    more = true;
-		} else {
-		    // done watching this folder,
-		    logger.log(Level.FINE,
-			"IdleManager done watching folder {0}", folder);
-		}
-	    } catch (MessagingException ex) {
-		// something went wrong, stop watching this folder
-		logger.log(Level.FINE,
-		    "IdleManager got exception for folder: " + folder,
-		    ex);
+	    // if there's a read timeout, have to do the abort in a new thread
+	    Socket sock = sc.socket();
+	    if (sock != null && sock.getSoTimeout() > 0) {
+		logger.finest("IdleManager requesting DONE with timeout");
+		toWatch.remove(folder);
+		final IMAPFolder folder0 = folder;
+		es.execute(new Runnable() {
+		    //@Override
+		    public void run() {
+			// send the DONE and wait for the response
+			folder0.idleAbortWait();
+		    }
+		});
+	    } else {
+		folder.idleAbort();	// send the DONE message
+		// watch for OK response to DONE
+		// XXX - what if we also added it above?  should be a nop
+		toWatch.add(folder);
 	    }
 	}
-	return more;
     }
 
     /**
      * Stop watching all folders.  Cancel any selection keys and,
      * most importantly, switch the channel back to blocking mode.
+     * If there's any folders waiting to be watched, need to abort
+     * them too.
      */
     private void unwatchAll() {
+	IMAPFolder folder;
 	Set<SelectionKey> keys = selector.keys();
 	for (SelectionKey sk : keys) {
 	    // have to cancel so we can switch back to blocking I/O mode
 	    sk.cancel();
-	    IMAPFolder folder = (IMAPFolder)sk.attachment();
-	    logger.log(Level.FINE,
-		"IdleManager no longer watching folder: {0}", folder);
+	    folder = (IMAPFolder)sk.attachment();
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+		    "IdleManager no longer watching folder: {0}",
+							folderName(folder));
 	    SelectableChannel sc = sk.channel();
 	    // switch back to blocking to allow normal I/O
 	    try {
 		sc.configureBlocking(true);
+		folder.idleAbortWait();	// send the DONE message and wait
 	    } catch (IOException ex) {
 		// ignore it, channel might be closed
+		logger.log(Level.FINEST,
+		    "IdleManager exception while aborting idle for folder: " +
+						    folderName(folder), ex);
+	    }
+	}
+
+	/*
+	 * Finally, process any folders waiting to be watched.
+	 */
+	while ((folder = toWatch.poll()) != null) {
+	    if (logger.isLoggable(Level.FINEST))
+		logger.log(Level.FINEST,
+		    "IdleManager aborting IDLE for unwatched folder: {0}",
+							folderName(folder));
+	    SocketChannel sc = folder.getChannel();
+	    if (sc == null)
+		continue;
+	    try {
+		// channel should still be in blocking mode, but make sure
+		sc.configureBlocking(true);
+		folder.idleAbortWait();	// send the DONE message and wait
+	    } catch (IOException ex) {
+		// ignore it, channel might be closed
+		logger.log(Level.FINEST,
+		    "IdleManager exception while aborting idle for folder: " +
+						    folderName(folder), ex);
 	    }
 	}
     }
@@ -358,7 +488,21 @@ public class IdleManager {
      */
     public synchronized void stop() {
 	die = true;
-	logger.finest("IdleManager stopping");
+	logger.fine("IdleManager stopping");
 	selector.wakeup();
+    }
+
+    /**
+     * Return the fully qualified name of the folder, for use in log messages.
+     * Essentially just the getURLName method, but ignoring the
+     * MessagingException that can never happen.
+     */
+    private static String folderName(Folder folder) {
+	try {
+	    return folder.getURLName().toString();
+	} catch (MessagingException mex) {
+	    // can't happen
+	    return folder.getStore().toString() + "/" + folder.toString();
+	}
     }
 }

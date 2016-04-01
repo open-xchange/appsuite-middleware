@@ -183,11 +183,8 @@ public class OXFolderDeleteListener implements DeleteListener {
 		}
 	}
 
-	protected void handleUserDeletion(final DeleteEvent delEvent,
-			final Connection readCon, final Connection writeCon,
-			final Context ctx, final long lastModified)
-			throws OXException {
-		try {
+    protected void handleUserDeletion(DeleteEvent delEvent, Connection readCon, Connection writeCon, Context ctx, long lastModified) throws OXException {
+        try {
 		    final int userId = delEvent.getId();
 		    /*
 		     * Get context's admin
@@ -217,32 +214,16 @@ public class OXFolderDeleteListener implements DeleteListener {
 		         * Backup
 		         */
 		        OXFolderSQL.handleMailAdminPermissions(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-		    } else {
-		        /*
-		         * Working
-		         */
-		        OXFolderSQL.handleEntityPermissions(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_WORKING_FOLDER,
-		            TABLE_WORKING_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		        /*
-		         * Backup
-		         */
-		        OXFolderSQL.handleEntityPermissions(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_BACKUP_FOLDER,
-		            TABLE_BACKUP_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		    }
+            } else {
+                /*
+                 * Working
+                 */
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                /*
+                 * Backup
+                 */
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+            }
 		    /*
 		     * Handle user's folders
 		     */
@@ -255,32 +236,16 @@ public class OXFolderDeleteListener implements DeleteListener {
 		         * Backup
 		         */
 		        OXFolderSQL.handleMailAdminFolders(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-		    } else {
-		        /*
-		         * Working
-		         */
-		        OXFolderSQL.handleEntityFolders(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_WORKING_FOLDER,
-		            TABLE_WORKING_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		        /*
-		         * Backup
-		         */
-		        OXFolderSQL.handleEntityFolders(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_BACKUP_FOLDER,
-		            TABLE_BACKUP_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		    }
+            } else {
+                /*
+                 * Working
+                 */
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                /*
+                 * Backup
+                 */
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+            }
 		    if (!isMailAdmin) {
 		        /*
 		         * Update shared folder's last-modified timestamp to enforce a folder repaint in AJAX-UI

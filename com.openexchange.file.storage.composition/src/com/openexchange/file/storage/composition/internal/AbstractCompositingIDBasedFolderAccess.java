@@ -77,10 +77,12 @@ import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.PermissionAware;
 import com.openexchange.file.storage.Quota;
 import com.openexchange.file.storage.Quota.Type;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.file.storage.composition.FolderID;
 import com.openexchange.file.storage.composition.IDBasedFolderAccess;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.java.Collators;
+import com.openexchange.java.Strings;
 import com.openexchange.session.Session;
 
 /**
@@ -145,6 +147,12 @@ public abstract class AbstractCompositingIDBasedFolderAccess extends AbstractCom
 
     @Override
     public String createFolder(FileStorageFolder toCreate) throws OXException {
+
+        if (Strings.isNotEmpty(toCreate.getName())) {
+            FilenameValidationUtils.checkCharacters(toCreate.getName());
+            FilenameValidationUtils.checkName(toCreate.getName());
+        }
+
         FolderID parentFolderID = new FolderID(toCreate.getParentId());
         FileStorageFolderAccess folderAccess = getFolderAccess(parentFolderID);
         if (containsForeignPermissions(session.getUserId(), toCreate) && false == PermissionAware.class.isInstance(folderAccess)) {

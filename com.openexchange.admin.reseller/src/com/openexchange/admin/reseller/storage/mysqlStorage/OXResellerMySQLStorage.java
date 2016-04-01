@@ -115,7 +115,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
 
         try {
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
 
             final String name = adm.getName();
@@ -219,7 +219,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -229,7 +229,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
 
         try {
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
 
             final int adm_id = IDGenerator.getId(oxcon);
@@ -290,7 +290,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -303,7 +303,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
             final ResellerAdmin tmp = getData(new ResellerAdmin[] { adm })[0];
 
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
 
             prep = oxcon.prepareStatement("DELETE FROM subadmin_restrictions WHERE sid=?");
@@ -335,7 +335,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -349,7 +349,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             query += " AND pid=?";
         }
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             final String search_patterntmp = search_pattern.replace('*', '%');
             prep = con.prepareStatement(query);
             prep.setString(1, search_patterntmp);
@@ -379,7 +379,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -428,7 +428,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         try {
             final ArrayList<ResellerAdmin> ret = new ArrayList<ResellerAdmin>();
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             for (final ResellerAdmin adm : admins) {
                 ResellerAdmin newadm = new ResellerAdmin(adm.getId(), adm.getName());
                 String query = "SELECT * FROM subadmin WHERE ";
@@ -483,7 +483,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -509,7 +509,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
 
         final Credentials mastercreds = cache.getMasterCredentials();
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             for (final ResellerAdmin adm : admins) {
                 final String name = adm.getName();
                 // cannot create radm with same name like master admin
@@ -557,7 +557,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -570,7 +570,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (ctx.getId() == null) {
                 throw new InvalidDataException("ContextID must not be null");
             }
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
             prep = oxcon.prepareStatement("INSERT INTO context2subadmin (sid,cid) VALUES(?,?)");
             prep.setInt(1, adm.getId());
@@ -599,7 +599,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -625,7 +625,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (ctx.getId() == null) {
                 throw new InvalidDataException("ContextID must not be null");
             }
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
             prep = oxcon.prepareStatement("DELETE FROM context2subadmin WHERE sid=? AND cid=?");
             prep.setInt(1, adm.getId());
@@ -654,7 +654,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -667,7 +667,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             if (ctx.getId() == null) {
                 throw new InvalidDataException("ContextID must not be null");
             }
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getReadConnectionForConfigDB();
             prep = oxcon.prepareStatement("SELECT sid FROM context2subadmin WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
@@ -691,7 +691,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -701,7 +701,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getReadConnectionForConfigDB();
             if (ctx == null) {
                 prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
                 prep.setInt(1, admid);
@@ -735,7 +735,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -745,7 +745,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getReadConnectionForConfigDB();
             if (ctx == null) {
                 prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
                 prep.setInt(1, admid);
@@ -791,7 +791,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -802,7 +802,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         ResultSet rs = null;
         try {
             final ResellerAdmin adm = getData(new ResellerAdmin[] { new ResellerAdmin(creds.getLogin(), creds.getPassword()) })[0];
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getReadConnectionForConfigDB();
             if (ctx == null) {
                 prep = oxcon.prepareStatement("SELECT cid FROM context2subadmin WHERE sid=?");
                 prep.setInt(1, adm.getId());
@@ -847,7 +847,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep, rs);
+            cache.closeReadConfigDBSqlStuff(oxcon, prep, rs);
         }
     }
 
@@ -857,7 +857,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             final String search_patterntmp = search_pattern.replace('*', '%');
             prep = con.prepareStatement("SELECT * FROM restrictions WHERE rid LIKE ? OR name LIKE ?");
             prep.setString(1, search_patterntmp);
@@ -877,7 +877,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -913,7 +913,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -967,8 +967,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } finally {
             cache.closeContextSqlStuff(oxcon, cid, true);
-            cache.closeConfigDBSqlStuff(null, prep, rs);
-            cache.closeConfigDBSqlStuff(null, prep2, rs2);
+            cache.closeConfigDBSqlStuff(prep, rs);
+            cache.closeConfigDBSqlStuff(prep2, rs2);
         }
     }
 
@@ -1012,8 +1012,8 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             throw e;
         } finally {
             cache.closeContextSqlStuff(oxcon, cid, true);
-            cache.closeConfigDBSqlStuff(null, prep, rs);
-            cache.closeConfigDBSqlStuff(null, prep2, rs2);
+            cache.closeConfigDBSqlStuff(prep, rs);
+            cache.closeConfigDBSqlStuff(prep2, rs2);
         }
     }
 
@@ -1034,7 +1034,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1125,7 +1125,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1161,7 +1161,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
             cache.closeContextSqlStuff(oxcon, cid);
             // set to null to prevent double pushback in finally
             oxcon = null;
@@ -1226,7 +1226,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         if (restrictions != null && restrictions.size() > 0) {
             Connection con = null;
             try {
-                con = cache.getConnectionForConfigDB();
+                con = cache.getReadConnectionForConfigDB();
                 for (final Restriction res : restrictions) {
                     for (final String tocheck : restriction_types) {
                         final String name = res.getName();
@@ -1283,7 +1283,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, null);
+                cache.closeReadConfigDBSqlStuff(con, null);
             }
         }
     }
@@ -1299,7 +1299,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
 
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             final ResellerAdmin adm = getResellerAdminForContext(ctx, con);
             final Restriction[] admrestrictions = adm.getRestrictions();
             final Restriction[] ctxrestrictions = getRestrictionsFromContext(ctx, con);
@@ -1362,7 +1362,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, null);
+            cache.closeReadConfigDBSqlStuff(con, null);
         }
 
     }
@@ -1393,7 +1393,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw e;
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1408,7 +1408,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
 
         try {
-            oxcon = cache.getConnectionForConfigDB();
+            oxcon = cache.getWriteConnectionForConfigDB();
             oxcon.setAutoCommit(false);
 
             final int cid = ctx.getId();
@@ -1447,7 +1447,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(oxcon);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(oxcon, prep);
+            cache.closeWriteConfigDBSqlStuff(oxcon, prep);
         }
     }
 
@@ -1461,13 +1461,13 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
     public Restriction[] getRestrictionsFromContext(final Context ctx) throws StorageException {
         Connection con = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             return getRestrictionsFromContext(ctx, con);
         } catch (final PoolException e) {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, null, null);
+            cache.closeReadConfigDBSqlStuff(con, null, null);
         }
     }
 
@@ -1497,7 +1497,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(null, prep, rs);
+            cache.closeConfigDBSqlStuff(prep, rs);
         }
     }
 
@@ -1510,7 +1510,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
         PreparedStatement prep = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
             for (final String res : Restriction.ALL_RESTRICTIONS) {
                 final int rid = IDGenerator.getId(con);
@@ -1551,7 +1551,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep);
+            cache.closeWriteConfigDBSqlStuff(con, prep);
         }
     }
 
@@ -1564,7 +1564,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         Connection con = null;
         PreparedStatement prep = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             con.setAutoCommit(false);
             prep = con.prepareStatement("DELETE FROM restrictions");
             prep.executeUpdate();
@@ -1578,7 +1578,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep);
+            cache.closeWriteConfigDBSqlStuff(con, prep);
         }
     }
 
@@ -1591,7 +1591,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
             prep = con.prepareStatement("SELECT customid FROM context_customfields WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
@@ -1606,7 +1606,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeReadConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1621,7 +1621,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         final OXContextExtensionImpl contextExtension = (OXContextExtensionImpl) ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
         if( contextExtension != null && contextExtension.getCustomid() != null ) {
             try {
-                con = cache.getConnectionForConfigDB();
+                con = cache.getWriteConnectionForConfigDB();
                 prep = con.prepareStatement("SELECT cid FROM context_customfields WHERE cid=?");
                 prep.setInt(1, ctx.getId());
                 rs = prep.executeQuery();
@@ -1649,7 +1649,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 log.error("", e);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, prep, rs);
+                cache.closeWriteConfigDBSqlStuff(con, prep, rs);
             }
         }
     }
@@ -1660,7 +1660,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         final ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             prep = con.prepareStatement("DELETE FROM context_customfields WHERE cid=?");
             prep.setInt(1, ctx.getId());
             prep.executeUpdate();
@@ -1672,7 +1672,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1682,7 +1682,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         final ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             prep = con.prepareStatement("INSERT INTO context_customfields (cid,createTimestamp,modifyTimestamp) VALUES(?,?,?)");
             final long ctime = System.currentTimeMillis();
             prep.setInt(1, ctx.getId());
@@ -1697,7 +1697,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1707,7 +1707,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             prep = con.prepareStatement("SELECT * FROM context_customfields WHERE cid=?");
             prep.setInt(1, ctx.getId());
             rs = prep.executeQuery();
@@ -1732,7 +1732,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             log.error("", e);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1762,7 +1762,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         PreparedStatement prep = null;
         ResultSet rs = null;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getWriteConnectionForConfigDB();
             cache.initAccessCombinations();
             final HashSet<String> usedCombinations = new HashSet<String>();
             // find out, which restrictions are already used/referenced
@@ -1844,7 +1844,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
             doRollback(con);
             throw new StorageException(e.getMessage());
         } finally {
-            cache.closeConfigDBSqlStuff(con, prep, rs);
+            cache.closeWriteConfigDBSqlStuff(con, prep, rs);
         }
     }
 
@@ -1870,7 +1870,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
         }
         if( missingRestrictions.size() > 0 ) {
             try {
-                con = cache.getConnectionForConfigDB();
+                con = cache.getWriteConnectionForConfigDB();
                 con.setAutoCommit(false);
                 for (final String res : missingRestrictions) {
                     final int rid = IDGenerator.getId(con);
@@ -1890,7 +1890,7 @@ public final class OXResellerMySQLStorage extends OXResellerSQLStorage {
                 doRollback(con);
                 throw new StorageException(e.getMessage());
             } finally {
-                cache.closeConfigDBSqlStuff(con, prep);
+                cache.closeWriteConfigDBSqlStuff(con, prep);
             }
         }
     }

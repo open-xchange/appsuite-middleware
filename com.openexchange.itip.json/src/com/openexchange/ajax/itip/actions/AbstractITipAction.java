@@ -56,6 +56,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TimeZone;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -90,7 +91,7 @@ public abstract class AbstractITipAction implements AJAXActionService{
     protected static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractITipAction.class);
 
     protected ServiceLookup services;
-    
+
     protected RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing;
 
     public AbstractITipAction(final ServiceLookup services, RankingAwareNearRegistryServiceTracker<ITipAnalyzerService> analyzerListing) {
@@ -188,9 +189,10 @@ public abstract class AbstractITipAction implements AJAXActionService{
     private void fillMailHeader(final Data<InputStream> dsData, final Map<String, String> mailHeader) {
         final Map<String, String> properties = dsData.getDataProperties().toMap();
 
-        for (final String key : properties.keySet()) {
+        for (final Entry<String, String> entry : properties.entrySet()) {
+            String key = entry.getKey();
             if (key.startsWith(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX)) {
-                mailHeader.put(key.substring(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX.length() + 1, key.length()), properties.get(key));
+                mailHeader.put(key.substring(DataProperties.PROPERTY_EMAIL_HEADER_PREFIX.length() + 1, key.length()), entry.getValue());
             }
 
             if (key.equals(OWNER)) {

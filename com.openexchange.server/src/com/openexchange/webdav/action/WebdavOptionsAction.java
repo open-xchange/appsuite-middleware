@@ -49,30 +49,24 @@
 
 package com.openexchange.webdav.action;
 
-import com.openexchange.webdav.protocol.WebdavMethod;
+import com.openexchange.java.Strings;
 import com.openexchange.webdav.protocol.WebdavProtocolException;
 
 public class WebdavOptionsAction extends AbstractAction {
 
-	@Override
-    public void perform(final WebdavRequest req, final WebdavResponse res)
-			throws WebdavProtocolException {
-		res.setHeader("Content-Length","0");
-		res.setHeader("Allow", join(req.getResource().getOptions()));
-        res.setHeader("DAV", "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, "
-            + "calendar-schedule, calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search");
-		res.setHeader("Accept-Ranges", "bytes");
-		res.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
-	}
+    private static final String DAV_OPTIONS =
+        "1, 2, 3, access-control, calendar-access, addressbook, extended-mkcol, calendar-auto-schedule, calendar-schedule, " +
+        "calendarserver-sharing, calendarserver-principal-search, calendarserver-principal-property-search, " +
+        "calendarserver-private-comments, extended-mkcol, calendar-managed-attachments"
+    ;
 
-	private String join(final WebdavMethod[] options) {
-		final StringBuffer buffer = new StringBuffer();
-		for(final WebdavMethod m : options) {
-			buffer.append(m.toString());
-			buffer.append(", ");
-		}
-		buffer.setLength(buffer.length()-2);
-		return buffer.toString();
+	@Override
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+		response.setHeader("Content-Length", "0");
+		response.setHeader("Allow", Strings.join(request.getResource().getOptions(), ","));
+        response.setHeader("DAV", DAV_OPTIONS);
+		response.setHeader("Accept-Ranges", "bytes");
+		response.setHeader("MS-Author-Via", "DAV"); // Hack for Windows Webfolder
 	}
 
 }

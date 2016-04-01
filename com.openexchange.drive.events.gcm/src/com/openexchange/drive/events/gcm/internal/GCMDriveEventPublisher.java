@@ -226,7 +226,13 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
                  LOG.warn("Registration ID {} not updated.", oldRegistrationID);
              }
         } catch (OXException e) {
-            LOG.error("Error updating registration IDs", e);
+            if ("DRV-0037".equals(e.getErrorCode())) {
+                // Token is already registered, so delete obsolete registration instead
+                LOG.warn("Registration ID {} already exists, removing obsolete registration ID {} instead.", newRegistrationID, oldRegistrationID);
+                removeRegistrations(contextID, oldRegistrationID);
+            } else {
+                LOG.error("Error updating registration IDs", e);
+            }
         }
     }
 
@@ -235,7 +241,7 @@ public class GCMDriveEventPublisher implements DriveEventPublisher {
             if (0 < Services.getService(DriveSubscriptionStore.class, true).removeSubscriptions(contextID, SERIVCE_ID, registrationID)) {
                 LOG.info("Successfully removed registration ID {}.", registrationID);
             } else {
-                LOG.warn("Registration ID {} not removd.", registrationID);
+                LOG.warn("Registration ID {} not removed.", registrationID);
             }
         } catch (OXException e) {
             LOG.error("Error removing registrations", e);

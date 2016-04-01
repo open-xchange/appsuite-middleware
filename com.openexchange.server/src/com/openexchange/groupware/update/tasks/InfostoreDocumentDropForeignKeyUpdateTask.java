@@ -74,7 +74,7 @@ public class InfostoreDocumentDropForeignKeyUpdateTask extends UpdateTaskAdapter
 
     @Override
     public String[] getDependencies() {
-        return new String[] { CorrectIndexes6_10.class.getName() };
+        return new String[] {};
     }
 
 }

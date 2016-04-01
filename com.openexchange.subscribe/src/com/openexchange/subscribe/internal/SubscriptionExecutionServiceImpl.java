@@ -142,9 +142,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             final SubscribeService subscribeService = discoverer.getSource(sourceId).getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(session.getContext(), subscriptionId, null);
             subscription.setSession(session);
-            final boolean knowsSource =
-                discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(
-                    subscribeService.getSubscriptionSource().getId());
+            final boolean knowsSource = discoverer.filter(subscription.getUserId(), session.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
             if (!knowsSource) {
                 throw INACTIVE_SOURCE.create();
             }
@@ -222,9 +220,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
             final SubscribeService subscribeService = source.getSubscribeService();
             final Subscription subscription = subscribeService.loadSubscription(context, subscriptionId, null);
             subscription.setSession(session);
-            final boolean knowsSource =
-                discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(
-                    subscribeService.getSubscriptionSource().getId());
+            final boolean knowsSource = discoverer.filter(subscription.getUserId(), context.getContextId()).knowsSource(subscribeService.getSubscriptionSource().getId());
             if (!knowsSource) {
                 throw INACTIVE_SOURCE.create();
             }
@@ -240,7 +236,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
     @Override
     public int executeSubscriptions(List<Subscription> subscriptionsToRefresh, ServerSession session, Collection<OXException> optErrors) throws OXException {
         int sum = 0;
-        for (final Subscription subscription : subscriptionsToRefresh) {
+        for (Subscription subscription : subscriptionsToRefresh) {
             subscription.setSession(session);
             if (!subscription.isEnabled()) {
                 LOG.debug("Skipping subscription {} because it is disabled", subscription.getDisplayName());
@@ -295,6 +291,11 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
                         } finally {
                             SearchIterators.close(data);
                         }
+                    } catch (OXException oxException) {
+                        if (subscriptionsToRefresh.size() == 1) {
+                            throw oxException;
+                        }
+                        LOG.warn("Subscription for {} cannot be updated. Move to next one.", subscription.getSource().getId(), oxException);
                     } finally {
                         unlock(subscriptionId, session);
                     }
@@ -308,8 +309,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
         final List<SubscriptionSource> sources = discoverer.getSources();
         final List<Subscription> allSubscriptionsOnThisFolder = new ArrayList<Subscription>(10);
         for (final SubscriptionSource subscriptionSource : sources) {
-            final Collection<Subscription> subscriptions =
-                subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
+            final Collection<Subscription> subscriptions = subscriptionSource.getSubscribeService().loadSubscriptions(context, folder, secret);
             if (subscriptions != null) {
                 allSubscriptionsOnThisFolder.addAll(subscriptions);
             }
@@ -373,8 +373,7 @@ public class SubscriptionExecutionServiceImpl implements SubscriptionExecutionSe
 
         @Override
         public String toString() {
-            return new StringBuilder(32).append('{').append("subscriptionId=").append(subscriptionId).append(", userId=").append(userId).append(
-                ", contextId=").append(contextId).append('}').toString();
+            return new StringBuilder(32).append('{').append("subscriptionId=").append(subscriptionId).append(", userId=").append(userId).append(", contextId=").append(contextId).append('}').toString();
         }
 
     } // End of class SubscriptionKey

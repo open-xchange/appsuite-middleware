@@ -1600,6 +1600,12 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         if (tmp != null) {
             user.setMail_folder_trash_name(tmp);
         }
+
+        tmp = soapUser.getMailFolderArchiveFullName();
+        if (tmp != null) {
+            user.setMail_folder_archive_full_name(tmp);
+        }
+
         Boolean mailEnabled = soapUser.isMailenabled();
         if (null != mailEnabled) {
             user.setMailenabled(mailEnabled);
@@ -2097,6 +2103,7 @@ public class OXResellerUserServicePortTypeImpl implements OXResellerUserServiceP
         soapUser.setMailFolderSentName(user.getMail_folder_sent_name());
         soapUser.setMailFolderSpamName(user.getMail_folder_spam_name());
         soapUser.setMailFolderTrashName(user.getMail_folder_trash_name());
+        soapUser.setMailFolderArchiveFullName(user.getMail_folder_archive_full_name());
         soapUser.setMailenabled(user.getMailenabled());
         soapUser.setManagerName(user.getManager_name());
         soapUser.setMaritalStatus(user.getMarital_status());

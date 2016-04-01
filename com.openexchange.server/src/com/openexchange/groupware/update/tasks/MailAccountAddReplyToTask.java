@@ -80,18 +80,7 @@ public final class MailAccountAddReplyToTask extends UpdateTaskAdapter {
         return new Attributes(UpdateConcurrency.BLOCKING);
     }
 
-    @Override
-    public int addedWithVersion() {
-        return NO_VERSION;
-    }
-
-    @Override
-    public int getPriority() {
-        return UpdateTaskPriority.HIGH.priority;
-    }
-
-    private static final String[] DEPENDENCIES = {
-        GlobalAddressBookPermissionsResolverTask.class.getName(), MailAccountAddPersonalTask.class.getName() };
+    private static final String[] DEPENDENCIES = {};
 
     @Override
     public String[] getDependencies() {

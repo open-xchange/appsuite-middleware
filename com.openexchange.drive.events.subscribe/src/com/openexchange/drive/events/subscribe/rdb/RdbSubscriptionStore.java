@@ -125,18 +125,30 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
     @Override
     public boolean updateToken(int contextID, String serviceID, String oldToken, String newToken) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
+        int updated = 0;
         try {
             if (null == serviceID) {
                 // workaround for bug #33652
-                return 0 < updateToken(connection, contextID, oldToken, newToken);
+                if (existsToken(connection, contextID, newToken)) {
+                    throw DriveExceptionCodes.TOKEN_ALREADY_REGISTERED.create(newToken);
+                }
+                updated = updateToken(connection, contextID, oldToken, newToken);
             } else {
-                return 0 < updateToken(connection, contextID, serviceID, oldToken, newToken);
+                if (existsToken(connection, contextID, serviceID, newToken)) {
+                    throw DriveExceptionCodes.TOKEN_ALREADY_REGISTERED.create(newToken);
+                }
+                updated = updateToken(connection, contextID, serviceID, oldToken, newToken);
             }
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
-            databaseService.backWritable(contextID, connection);
+            if (0 < updated) {
+                databaseService.backWritable(contextID, connection);
+            } else {
+                databaseService.backWritableAfterReading(contextID, connection);
+            }
         }
+        return 0 < updated;
     }
 
     @Override
@@ -264,6 +276,21 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
         }
     }
 
+    private static boolean existsToken(Connection connection, int cid, String service, String token) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(SQL.EXISTS_TOKEN_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, service);
+            stmt.setString(3, token);
+            resultSet = SQL.logExecuteQuery(stmt);
+            return resultSet.next();
+        } finally {
+            DBUtils.closeSQLStuff(resultSet, stmt);
+        }
+    }
+
     private static int updateToken(Connection connection, int cid, String service, String oldToken, String newToken) throws SQLException {
         PreparedStatement stmt = null;
         try {
@@ -275,6 +302,20 @@ public class RdbSubscriptionStore implements DriveSubscriptionStore {
             return SQL.logExecuteUpdate(stmt);
         } finally {
             DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static boolean existsToken(Connection connection, int cid, String token) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
+        try {
+            stmt = connection.prepareStatement(SQL.EXISTS_TOKEN_WITHOUT_SERVICE_STMT);
+            stmt.setInt(1, cid);
+            stmt.setString(2, token);
+            resultSet = SQL.logExecuteQuery(stmt);
+            return resultSet.next();
+        } finally {
+            DBUtils.closeSQLStuff(resultSet, stmt);
         }
     }
 

@@ -367,7 +367,7 @@ public class CalendarTest extends TestCase {
         participants.add(p2);
 
         cdao.setParticipants(participants.getList());
-        CalendarOperation.fillUserParticipants(cdao);
+        CalendarOperation.fillUserParticipants(cdao, null);
 
         assertEquals("Check participant size", cdao.getParticipants().length, cdao.getUsers().length);
     }

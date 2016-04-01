@@ -72,6 +72,7 @@ import com.openexchange.exception.OXExceptionConstants;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.upload.impl.UploadException;
 import com.openexchange.i18n.LocaleTools;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.log.LogProperties;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -134,7 +135,7 @@ public abstract class SessionServlet extends AJAXServlet {
     }
 
     @Override
-    protected void service(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
+    protected void doService(HttpServletRequest req, HttpServletResponse resp, boolean checkRateLimit) throws ServletException, IOException {
         Tools.disableCaching(resp);
         AtomicInteger counter = null;
         final SessionThreadCounter threadCounter = SessionThreadCounter.REFERENCE.get();
@@ -187,7 +188,7 @@ public abstract class SessionServlet extends AJAXServlet {
             }
 
             // Invoke service() method
-            super.service(req, resp);
+            super.doService(req, resp, checkRateLimit);
         } catch (RateLimitedException e) {
             e.send(resp);
         } catch (final OXException e) {
@@ -265,6 +266,12 @@ public abstract class SessionServlet extends AJAXServlet {
      * @throws IOException If an I/O error occurs
      */
     protected void writeErrorAsJsCallback(OXException e, HttpServletRequest httpRequest, HttpServletResponse httpResponse) throws IOException {
+        if (httpResponse.isCommitted()) {
+            // Cannot do anything about it as response is already committed. Just log that OXException...
+            LOG.error("", e);
+            return;
+        }
+
         try {
             // As API response
             APIResponseRenderer.writeJsCallback(new Response().setException(e), Dispatchers.getActionFrom(httpRequest), httpRequest, httpResponse);
@@ -370,15 +377,49 @@ public abstract class SessionServlet extends AJAXServlet {
             if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
                 writeErrorAsJsCallback(e, req, resp);
             } else {
-                // No JSON response; either JavaScript call-back or regular HTML error (page)
-                if (USM_USER_AGENT.equals(req.getHeader("User-Agent"))) {
-                    writeErrorAsJsCallback(e, req, resp);
-                } else {
-                    String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
-                    resp.setStatus(statusCode);
-                    writeErrorPage(statusCode, desc, resp);
-                }
+                String desc = null == reasonPhrase ? "An error occurred inside the server which prevented it from fulfilling the request." : reasonPhrase;
+                resp.setStatus(statusCode);
+                writeErrorPage(statusCode, desc, resp);
             }
+        }
+    }
+
+    /**
+     * Sends error page to client
+     *
+     * @param statusCode The HTTP status code
+     * @param statusMsg The status message
+     * @param httpResponse The HTTP response
+     * @throws IOException If an I/O error occurs while sending the error page
+     */
+    public static void sendErrorAndPage(int statusCode, String statusMsg, HttpServletResponse httpResponse) throws IOException {
+        // Check if HTTP response is committed
+        if (httpResponse.isCommitted()) {
+            // Status code and headers already written. Nothing can be done anymore...
+            return;
+        }
+
+        // Try to write error page
+        try {
+            httpResponse.setStatus(statusCode);
+            writeErrorPage(statusCode, statusMsg, httpResponse);
+        } catch (Exception x) {
+            // Ignore
+            httpResponse.sendError(statusCode, null == statusMsg ? null : statusMsg.toString());
+            flushSafe(httpResponse);
+        }
+    }
+
+    private static void flushSafe(HttpServletResponse httpResponse) {
+        try {
+            try {
+                Streams.flush(httpResponse.getWriter());
+            } catch (IllegalStateException e) {
+                // getOutputStream has already been called
+                Streams.flush(httpResponse.getOutputStream());
+            }
+        } catch (Exception e) {
+            // Ignore
         }
     }
 

@@ -49,6 +49,8 @@
 
 package com.openexchange.dav.caldav;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -78,10 +80,11 @@ import org.junit.runners.Parameterized.Parameters;
 import com.openexchange.ajax.folder.actions.DeleteRequest;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.dav.Headers;
-import com.openexchange.dav.WebDAVTest;
 import com.openexchange.dav.PropertyNames;
 import com.openexchange.dav.StatusCodes;
 import com.openexchange.dav.SyncToken;
+import com.openexchange.dav.WebDAVTest;
+import com.openexchange.dav.caldav.ical.SimpleICal.Component;
 import com.openexchange.dav.caldav.methods.MkCalendarMethod;
 import com.openexchange.dav.caldav.reports.CalendarMultiGetReportInfo;
 import com.openexchange.dav.reports.SyncCollectionResponse;
@@ -93,9 +96,6 @@ import com.openexchange.java.Charsets;
 import com.openexchange.test.CalendarTestManager;
 import com.openexchange.test.PermissionTools;
 import com.openexchange.test.TaskTestManager;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 
 /**
  * {@link CalDAVTest} - Common base class for CalDAV tests
@@ -272,16 +272,29 @@ public abstract class CalDAVTest extends WebDAVTest {
         }
     }
 
-    protected ICalResource get(String resourceName, String ifNoneMatchEtag) throws Exception {
-        return get(getDefaultFolderID(), resourceName, ifNoneMatchEtag);
+    protected ICalResource get(String resourceName) throws Exception {
+        return get(getDefaultFolderID(), resourceName, null, null);
     }
 
-    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag) throws Exception {
+    protected ICalResource get(String folderID, String resourceName) throws Exception {
+        return get(folderID, resourceName, null, null);
+    }
+
+    protected ICalResource get(String folderID, String resourceName, String ifMatchEtag) throws Exception {
+        return get(folderID, resourceName, null, ifMatchEtag);
+    }
+
+    protected ICalResource get(String folderID, String resourceName, String ifNoneMatchEtag, String ifMatchEtag) throws Exception {
         GetMethod get = null;
         try {
             String href = "/caldav/" + folderID + "/" + urlEncode(resourceName) + ".ics";
             get = new GetMethod(getBaseUri() + href);
-            get.addRequestHeader(Headers.IF_NONE_MATCH, null != ifNoneMatchEtag ? ifNoneMatchEtag : "*");
+            if (null != ifNoneMatchEtag) {
+                get.addRequestHeader(Headers.IF_NONE_MATCH, ifNoneMatchEtag);
+            }
+            if (null != ifMatchEtag) {
+                get.addRequestHeader(Headers.IF_MATCH, ifMatchEtag);
+            }
             Assert.assertEquals("response code wrong", StatusCodes.SC_OK, getWebDAVClient().executeMethod(get));
             byte[] responseBody = get.getResponseBody();
             assertNotNull("got no response body", responseBody);
@@ -330,13 +343,26 @@ public abstract class CalDAVTest extends WebDAVTest {
 
     protected Appointment getAppointment(String folderID, String uid) throws OXException {
         Appointment[] appointments = this.testManager.all(parse(folderID), new Date(0), new Date(100000000000000L),
-            new int[] { Appointment.OBJECT_ID, Appointment.FOLDER_ID, Appointment.UID });
+            new int[] { Appointment.OBJECT_ID, Appointment.RECURRENCE_ID, Appointment.FOLDER_ID, Appointment.UID });
         for (Appointment appointment : appointments) {
             if (uid.equals(appointment.getUid())) {
-                return testManager.get(appointment);
+                if (0 >= appointment.getRecurrenceID() || appointment.getRecurrenceID() == appointment.getObjectID()) {
+                    return testManager.get(appointment);
+                }
             }
         }
         return null;
+    }
+
+    protected List<Appointment> getChangeExcpetions(Appointment appointment) throws OXException {
+        List<Appointment> exceptions = testManager.getChangeExceptions(
+            appointment.getParentFolderID(), appointment.getObjectID(), new int[] { Task.OBJECT_ID, Task.FOLDER_ID, Task.UID });
+        if (null != exceptions && 0 < exceptions.size()) {
+            for (int i = 0; i < exceptions.size(); i++) {
+                exceptions.set(i, testManager.get(exceptions.get(i)));
+            }
+        }
+        return exceptions;
     }
 
     protected Task getTask(String folderID, String uid) throws OXException {
@@ -552,5 +578,13 @@ public abstract class CalDAVTest extends WebDAVTest {
         return folder;
     }
 
+    protected static void assertDummyAlarm(Component component) {
+        List<Component> vAlarms = component.getVAlarms();
+        Assert.assertEquals("Expected exactly one VAlarm.", 1, vAlarms.size());
+        Component vAlarm = vAlarms.get(0);
+        Assert.assertEquals("Expected dummy trigger.", "19760401T005545Z", vAlarm.getProperty("TRIGGER").getValue());
+        Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-LOCAL-DEFAULT-ALARM").getValue());
+        Assert.assertEquals("Expected dummy property.", "TRUE", vAlarm.getProperty("X-APPLE-DEFAULT-ALARM").getValue());
+    }
 
 }

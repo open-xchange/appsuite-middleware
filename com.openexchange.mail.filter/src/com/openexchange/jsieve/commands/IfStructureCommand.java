@@ -53,15 +53,28 @@ import java.util.Collections;
 import java.util.List;
 import com.openexchange.jsieve.commands.ActionCommand.Commands;
 
+/**
+ * {@link IfStructureCommand}
+ */
 public abstract class IfStructureCommand extends ControlCommand {
 
-    private List<ActionCommand> actioncommands;
+    private List<ActionCommand> actionCommands;
 
+    /**
+     * Initializes a new {@link IfStructureCommand}.
+     */
     protected IfStructureCommand() {
+        super();
     }
 
-    protected IfStructureCommand(final List<ActionCommand> actioncommands) {
-        this.actioncommands = actioncommands;
+    /**
+     * Initializes a new {@link IfStructureCommand}.
+     *
+     * @param actionCommands The initial action commands
+     */
+    protected IfStructureCommand(final List<ActionCommand> actionCommands) {
+        super();
+        this.actionCommands = actionCommands;
     }
 
     /**
@@ -69,40 +82,58 @@ public abstract class IfStructureCommand extends ControlCommand {
      *
      * @return The first command or <code>null</code> (if there is no action command available)
      */
-    public final Commands getFirstCommand() {
-        final List<ActionCommand> thisActionCommands = this.actioncommands;
+    public Commands getFirstCommand() {
+        final List<ActionCommand> thisActionCommands = this.actionCommands;
         return null == thisActionCommands ? null : (thisActionCommands.isEmpty() ? null : thisActionCommands.get(0).getCommand());
     }
 
     /**
-     * Gets the action command
+     * Gets the action commands associated with this <code>"if"</code> command.
      *
-     * @return The list of action command; never <code>null</code>
+     * @return The list of action commands; never <code>null</code>
      */
-    public final List<ActionCommand> getActioncommands() {
-        final List<ActionCommand> thisActionCommands = this.actioncommands;
+    public List<ActionCommand> getActionCommands() {
+        List<ActionCommand> thisActionCommands = this.actionCommands;
         return null == thisActionCommands ? Collections.<ActionCommand> emptyList() : thisActionCommands;
     }
 
-    public final void setActioncommands(final List<ActionCommand> actioncommands) {
-        this.actioncommands = actioncommands;
+    /**
+     * Sets the action commands for this <code>"if"</code> command (replacing any existing commands).
+     *
+     * @param commands The action commands to set
+     */
+    public void setActionCommands(List<ActionCommand> commands) {
+        if (null == commands) {
+            this.actionCommands = null;
+        } else {
+            List<ActionCommand> actionCommands = this.actionCommands;
+            if (null == actionCommands) {
+                this.actionCommands = new ArrayList<ActionCommand>(commands);
+            } else {
+                actionCommands.addAll(commands);
+            }
+        }
     }
 
     /**
-     * @param o
-     * @return
-     * @see java.util.List#add(java.lang.Object)
+     * Adds specified action command to this <code>"if"</code> command.
+     *
+     * @param command The action command to add
      */
-    public boolean addActioncommands(final ActionCommand o) {
-        if (null == this.actioncommands) {
-            this.actioncommands = new ArrayList<ActionCommand>();
+    public void addActionCommand(final ActionCommand command) {
+        List<ActionCommand> actionCommands = this.actionCommands;
+        if (null == actionCommands) {
+            actionCommands = new ArrayList<ActionCommand>();
+            this.actionCommands = actionCommands;
         }
-        return this.actioncommands.add(o);
+        actionCommands.add(command);
+        this.actionCommands = actionCommands;
     }
 
     @Override
     public String toString() {
-        return (null != this.actioncommands) ? this.actioncommands.toString() : null;
+        List<ActionCommand> actionCommands = this.actionCommands;
+        return (null == actionCommands) ? "<empty>" : actionCommands.toString();
     }
 
 }

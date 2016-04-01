@@ -51,6 +51,7 @@ package com.openexchange.find;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
+import com.openexchange.exception.OXException;
 import com.openexchange.find.facet.ActiveFacet;
 
 /**
@@ -72,6 +73,7 @@ public class SearchResult implements Serializable {
     private final int start;
     private final List<Document> documents;
     private final List<ActiveFacet> facets;
+    private final List<OXException> warnings;
 
     /**
      * Initializes a new {@link SearchResult}.
@@ -82,11 +84,25 @@ public class SearchResult implements Serializable {
      * @param facets The active facets
      */
     public SearchResult(int numFound, int start, List<Document> documents, List<ActiveFacet> facets) {
+        this(numFound, start, documents, facets, null);
+    }
+
+    /**
+     * Initializes a new {@link SearchResult}.
+     *
+     * @param numFound The total number of found documents.
+     * @param start The start index within the set of total results
+     * @param documents The resulting documents
+     * @param facets The active facets
+     * @param warnings The warnings to include
+     */
+    public SearchResult(int numFound, int start, List<Document> documents, List<ActiveFacet> facets, List<OXException> warnings) {
         super();
         this.numFound = numFound;
         this.start = start;
         this.documents = documents;
         this.facets = facets;
+        this.warnings = warnings;
     }
 
     /**
@@ -129,6 +145,15 @@ public class SearchResult implements Serializable {
      */
     public List<ActiveFacet> getActiveFacets() {
         return facets;
+    }
+
+    /**
+     * Gets a list of warnings that occurred during search.
+     *
+     * @return The warnings, or <code>null</code> if not set
+     */
+    public List<OXException> getWarnings() {
+        return warnings;
     }
 
     @Override

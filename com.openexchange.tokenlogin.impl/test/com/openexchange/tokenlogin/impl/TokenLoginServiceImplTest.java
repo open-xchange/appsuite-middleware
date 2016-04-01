@@ -55,7 +55,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Before;
@@ -70,7 +70,8 @@ import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
@@ -387,7 +388,7 @@ public class TokenLoginServiceImplTest {
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
         Mockito.verify(this.session, Mockito.times(1)).getSessionID();
-        ConcurrentLinkedHashMap<String, String> token2sessionMap = (ConcurrentLinkedHashMap<String, String>) MockUtils.getValueFromField(
+        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(
             this.tokenLoginServiceImpl,
             "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
@@ -402,11 +403,21 @@ public class TokenLoginServiceImplTest {
 
         this.tokenLoginServiceImpl.removeTokenFor(this.session);
 
-        ConcurrentLinkedHashMap<String, String> token2sessionMap = (ConcurrentLinkedHashMap<String, String>) MockUtils.getValueFromField(
+        Cache<String, String> token2sessionMap = (Cache<String, String>) MockUtils.getValueFromField(
             this.tokenLoginServiceImpl,
             "token2sessionId");
         Assert.assertNotNull(token2sessionMap);
         Assert.assertEquals(0, token2sessionMap.size());
+    }
+
+    private Cache<String, String> buildCache() {
+        CacheBuilder<Object, Object> builder = CacheBuilder.newBuilder()
+            .concurrencyLevel(4)
+            .maximumSize(Integer.MAX_VALUE)
+            .initialCapacity(1024)
+            .expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
+        Cache<String, String> cache = builder.build();
+        return cache;
     }
 
     /**
@@ -414,13 +425,8 @@ public class TokenLoginServiceImplTest {
      *
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
-    private ConcurrentMap<String, String> createToken2SessionId() {
-        ConcurrentMap<String, String> token2sessionId = new ConcurrentLinkedHashMap<String, String>(
-            1024,
-            0.75f,
-            16,
-            Integer.MAX_VALUE,
-            new IdleExpirationPolicy(this.maxIdleTime));
+    private Cache<String, String> createToken2SessionId() {
+        Cache<String, String> token2sessionId = buildCache();
         token2sessionId.put(this.token, "8a07c5a2e4974a75ae70bd9a36198f03");
 
         return token2sessionId;
@@ -431,13 +437,8 @@ public class TokenLoginServiceImplTest {
      *
      * @return {@link ConcurrentMap<String, String>} with the desired mapping
      */
-    private ConcurrentMap<String, String> createSessionId2Token() {
-        ConcurrentMap<String, String> sessionId2Token = new ConcurrentLinkedHashMap<String, String>(
-            1024,
-            0.75f,
-            16,
-            Integer.MAX_VALUE,
-            new IdleExpirationPolicy(this.maxIdleTime));
+    private Cache<String, String> createSessionId2Token() {
+        Cache<String, String> sessionId2Token = buildCache();
         sessionId2Token.put("8a07c5a2e4974a75ae70bd9a36198f03", this.token);
 
         return sessionId2Token;

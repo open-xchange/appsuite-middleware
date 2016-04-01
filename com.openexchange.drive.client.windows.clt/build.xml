@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="com.openexchange.admin.console overrides">
+
+    <description>
+        Installs the scripts for the OAuth provider CLTs.
+    </description>
+
+    <import file="build-clt.xml" />
+
+    <!-- Constants -->
+    <property name="sbinDir" value="sbin" />
+
+    <target name="postInstall">
+        <antcall target="createLinks" />
+    </target>
+
+    <target name="createLinks">
+        <property name="brandingLinks" value="listdriveclients" />
+        <foreach list="${brandingLinks}" target="createContextLink" param="linkName" />
+    </target>
+
+    <target name="createContextLink">
+        <symlink resource="${prefix}/${sbinDir}/reloaddriveclients" link="${destDir}/${prefix}/${sbinDir}/${linkName}" overwrite="true" />
+    </target>
+
+</project>

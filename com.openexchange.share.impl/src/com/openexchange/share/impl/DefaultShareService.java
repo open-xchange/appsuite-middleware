@@ -188,16 +188,43 @@ public class DefaultShareService implements ShareService {
             connectionHelper.finish();
         }
         if (null != user && user.isGuest()) {
-            return removeExpired(new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user)));
+            DefaultGuestInfo guestInfo = new DefaultGuestInfo(services, session.getContextId(), user, getLinkTarget(session.getContextId(), user));
+            if (Boolean.TRUE.equals(session.getParameter("com.openexchange.share.administrativeUpdate"))) {
+                return guestInfo; // don't remove expired shares during administrative updates to avoid recursions
+            }
+            return removeExpired(guestInfo);
         }
         return null;
     }
 
     @Override
-    public Set<Integer> getSharingUsersFor(int contextId, int guestId) throws OXException {
-        User guestUser = services.getService(UserService.class).getUser(guestId, contextId);
-        //TODO: more distinct "created by" based on all share targets accessible by this guest?
-        return Collections.singleton(I(guestUser.getCreatedBy()));
+    public Set<Integer> getSharingUsersFor(int contextID, int guestID) throws OXException {
+        Set<Integer> userIDs = new HashSet<Integer>();
+        User guestUser = services.getService(UserService.class).getUser(guestID, contextID);
+        if (false == guestUser.isGuest()) {
+            throw ShareExceptionCodes.UNKNOWN_GUEST.create(I(guestID));
+        }
+        /*
+         * always add the user who created this guest
+         */
+        userIDs.add(I(guestUser.getCreatedBy()));
+        /*
+         * for invited guests, also add the user permission entities found in accessible targets
+         */
+        if (false == ShareTool.isAnonymousGuest(guestUser)) {
+            List<TargetProxy> targets = services.getService(ModuleSupport.class).listTargets(contextID, guestID);
+            for (TargetProxy target : targets) {
+                List<TargetPermission> permissions = target.getPermissions();
+                if (null != permissions && 0 < permissions.size()) {
+                    for (TargetPermission permission : permissions) {
+                        if (guestID != permission.getEntity() && false == permission.isGroup()) {
+                            userIDs.add(I(permission.getEntity()));
+                        }
+                    }
+                }
+            }
+        }
+        return userIDs;
     }
 
     @Override
@@ -310,6 +337,7 @@ public class DefaultShareService implements ShareService {
             connectionHelper.commit();
             if (guestUserUpdated) {
                 userService.invalidateUser(context, guest.getId());
+                return new DefaultShareLink(shareInfo, moduleSupport.load(target, session).getTimestamp(), false);
             }
             return new DefaultShareLink(shareInfo, targetProxy.getTimestamp(), false);
         } finally {

@@ -50,6 +50,7 @@
 package com.openexchange.ajax.container;
 
 import java.io.ByteArrayInputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -152,6 +153,7 @@ public class FileHolder implements IFileHolder {
 
     // --------------------------------------------------------------------------------- //
 
+    private final Closeable closeable;
     private InputStreamClosure isClosure;
     private InputStream is;
     private long length;
@@ -173,7 +175,7 @@ public class FileHolder implements IFileHolder {
      * @param contentType The stream's MIME type
      * @param name The stream's resource name
      */
-    public FileHolder(final InputStream is, final long length, final String contentType, final String name) {
+    public FileHolder(InputStream is, long length, String contentType, String name) {
         super();
         this.is = is;
         this.length = length;
@@ -181,6 +183,7 @@ public class FileHolder implements IFileHolder {
         this.name = name;
         tasks = new LinkedList<Runnable>();
         file = null;
+        closeable = null;
 
         if (is instanceof ByteArrayInputStream) {
             this.bytes = bytesFrom((ByteArrayInputStream) is);
@@ -202,6 +205,7 @@ public class FileHolder implements IFileHolder {
     public FileHolder(final InputStreamClosure isClosure, final long length, final String contentType, final String name) {
         super();
         this.isClosure = isClosure;
+        this.closeable = (isClosure instanceof Closeable) ? (Closeable) isClosure : null;
         this.length = length;
         this.contentType = contentType;
         this.name = name;
@@ -253,6 +257,7 @@ public class FileHolder implements IFileHolder {
         };
         this.file = file;
         bytes = null;
+        closeable = null;
     }
 
     @Override
@@ -296,7 +301,7 @@ public class FileHolder implements IFileHolder {
 
     @Override
     public void close() {
-        // Nope
+        Streams.close(closeable);
     }
 
     @Override

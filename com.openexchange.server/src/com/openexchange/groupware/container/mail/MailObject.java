@@ -428,12 +428,13 @@ public class MailObject {
              * Set subject
              */
             msg.setSubject(subject, ct.getCharsetParameter());
-            /*
+            /*-
              * Examine message's content type
-             */
+             *
             if (!"text".equalsIgnoreCase(ct.getPrimaryType())) {
                 //throw new OXException(OXException.Code.UNSUPPORTED_MIME_TYPE, ct.toString());
             }
+            */
             /*
              * Set content and its type
              */

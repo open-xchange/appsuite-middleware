@@ -51,8 +51,6 @@ package com.openexchange.tools.update;
 
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
-import java.io.File;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
@@ -65,18 +63,16 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
 import com.openexchange.java.Strings;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * This class contains some tools to ease update of database.
@@ -92,23 +88,39 @@ public final class Tools {
         super();
     }
 
+    /**
+     * Checks if specified column is nullable (<code>NULL</code> is allowed).
+     *
+     * @param con The connection to use
+     * @param table The table
+     * @param column The column
+     * @return <code>true</code> if nullable; otherwise <code>false</code>
+     * @throws SQLException If column cannot be checked if nullable
+     */
     public static final boolean isNullable(final Connection con, final String table, final String column) throws SQLException {
-        final DatabaseMetaData meta = con.getMetaData();
+        DatabaseMetaData meta = con.getMetaData();
         ResultSet result = null;
-        boolean retval = false;
         try {
             result = meta.getColumns(null, null, table, column);
-            if (result.next()) {
-                retval = DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
-            } else {
+            if (!result.next()) {
                 throw new SQLException("Can't get information for column " + column + " in table " + table + '.');
             }
+
+            return DatabaseMetaData.typeNullable == result.getInt(NULLABLE);
         } finally {
             closeSQLStuff(result);
         }
-        return retval;
     }
 
+    /**
+     * Checks if denoted table has its PRIMARY KEY set to specified columns.
+     *
+     * @param con The connection to use
+     * @param table The tanle to check
+     * @param columns The expected PRIMARY KEY
+     * @return <code>true</code> it denoted table has such a PRIMARY KEY; otherwise <code>false</code>
+     * @throws SQLException If PRIMARY KEY check fails
+     */
     public static final boolean existsPrimaryKey(final Connection con, final String table, final String[] columns) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         final List<String> foundColumns = new ArrayList<String>();
@@ -131,6 +143,30 @@ public final class Tools {
             matches = columns[i].equalsIgnoreCase(foundColumns.get(i));
         }
         return matches;
+    }
+
+    /**
+     * Lists the names of available indexes for specified table.
+     *
+     * @param con The connection to use
+     * @param table The table name
+     * @return The names of available indexes
+     * @throws SQLException If listing the names of available indexes fails
+     */
+    public static final String[] listIndexes(Connection con, String table) throws SQLException {
+        DatabaseMetaData metaData = con.getMetaData();
+        ResultSet result = null;
+        try {
+            result = metaData.getIndexInfo(null, null, table, false, false);
+            Set<String> names = new LinkedHashSet<String>();
+            while (result.next()) {
+                String indexName = result.getString(6);
+                names.add(indexName);
+            }
+            return names.toArray(new String[names.size()]);
+        } finally {
+            closeSQLStuff(result);
+        }
     }
 
     /**
@@ -237,6 +273,7 @@ public final class Tools {
     /**
      * This method drops the primary key on the table. Beware, this method is vulnerable to SQL injection because table and index name can
      * not be set through a {@link PreparedStatement}.
+     *
      * @param con writable database connection.
      * @param table table name that primary key should be dropped.
      * @throws SQLExceptionif some SQL problem occurs.
@@ -336,7 +373,7 @@ public final class Tools {
     public static final void createPrimaryKeyIfAbsent(final Connection con, final String table, final String[] columns) throws SQLException {
         if (!existsPrimaryKey(con, table, columns)) {
             if (hasPrimaryKey(con, table)) {
-               dropPrimaryKey(con, table);
+                dropPrimaryKey(con, table);
             }
             createPrimaryKey(con, table, columns);
         }
@@ -569,6 +606,15 @@ public final class Tools {
         }
     }
 
+    /**
+     * Gets the type of the denoted column in given table.
+     *
+     * @param con The connection to use
+     * @param table The table name
+     * @param column The column name
+     * @return The type or <code>null</code> if such a column does not exist
+     * @throws SQLException If an SQL error occurs
+     */
     public static final String getColumnTypeName(final Connection con, final String table, final String column) throws SQLException {
         if (!columnExists(con, table, column)) {
             return null;
@@ -579,6 +625,7 @@ public final class Tools {
         try {
             rs = metaData.getColumns(null, null, table, column);
             while (rs.next()) {
+                // TYPE_NAME String => Data source dependent type name, for a UDT the type name is fully qualified
                 typeName = rs.getString(6);
             }
         } finally {
@@ -587,6 +634,14 @@ public final class Tools {
         return typeName;
     }
 
+    /**
+     * Checks for existence of denoted table.
+     *
+     * @param con The connection to use
+     * @param table The table to check
+     * @return <code>true</code> if such a table exists; otherwise <code>false</code>
+     * @throws SQLException If an SQL error occurs
+     */
     public static final boolean tableExists(final Connection con, final String table) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
         ResultSet rs = null;
@@ -607,7 +662,7 @@ public final class Tools {
      * @param table The table name
      * @param column The column name
      * @return <code>true</code> if specified column exists; otherwise <code>false</code>
-     * @throws SQLException If a SQL error occurs
+     * @throws SQLException If an SQL error occurs
      */
     public static boolean columnExists(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData metaData = con.getMetaData();
@@ -625,18 +680,7 @@ public final class Tools {
     }
 
     private static final int NULLABLE = 11;
-
     private static final String TABLE = "TABLE";
-
-    public static void removeFile(final int cid, final String fileStoreLocation) throws OXException {
-        final Context ctx = ContextStorage.getInstance().loadContext(cid);
-        final URI fileStorageURI = FilestoreStorage.createURI(ctx);
-        final File file = new File(fileStorageURI);
-        if (file.exists()) {
-            final FileStorage fs = QuotaFileStorage.getInstance(fileStorageURI, ctx);
-            fs.deleteFile(fileStoreLocation);
-        }
-    }
 
     public static boolean hasSequenceEntry(final String sequenceTable, final Connection con, final int ctxId) throws SQLException {
         PreparedStatement stmt = null;
@@ -658,7 +702,7 @@ public final class Tools {
         try {
             stmt = con.prepareStatement("SELECT DISTINCT cid FROM user");
             rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 contextIds.add(I(rs.getInt(1)));
             }
             return contextIds;
@@ -667,12 +711,12 @@ public final class Tools {
         }
     }
 
-    public static void exec(final Connection con, final String sql, final Object...args) throws SQLException {
+    public static void exec(final Connection con, final String sql, final Object... args) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(sql);
             int i = 1;
-            for(final Object arg : args) {
+            for (final Object arg : args) {
                 stmt.setObject(i++, arg);
             }
             stmt.execute();
@@ -876,14 +920,52 @@ public final class Tools {
      * @throws SQLException If operation fails
      */
     public static void checkAndModifyColumns(final Connection con, final String tableName, boolean ignore, final Column... cols) throws SQLException {
-        final List<Column> toDo = new ArrayList<Column>();
+        final List<Column> toDo = new ArrayList<Column>(cols.length);
         for (final Column col : cols) {
-            if (!col.getDefinition().contains(getColumnTypeName(con, tableName, col.getName()))) {
+            String columnTypeName = getColumnTypeName(con, tableName, col.getName());
+            if ((null != columnTypeName) && (false == col.getDefinition().contains(columnTypeName))) {
                 toDo.add(col);
             }
         }
         if (!toDo.isEmpty()) {
             modifyColumns(con, tableName, ignore, toDo.toArray(new Column[toDo.size()]));
+        }
+    }
+
+    /**
+     * Changes the column to a new size
+     *
+     * @param colName The column to enlarge
+     * @param newSize The new size to set the column to
+     * @param tableName The table name
+     * @param con The connection to use
+     * @throws OXException
+     */
+    public static void changeVarcharColumnSize(final String colName, final int newSize, final String tableName, final Connection con) throws OXException {
+        ResultSet rsColumns = null;
+        boolean doAlterTable = false;
+        try {
+            DatabaseMetaData meta = con.getMetaData();
+            rsColumns = meta.getColumns(null, null, tableName, null);
+            while (rsColumns.next()) {
+                final String columnName = rsColumns.getString("COLUMN_NAME");
+                if (colName.equals(columnName)) {
+                    doAlterTable = true;
+                    break;
+                }
+            }
+            Databases.closeSQLStuff(rsColumns);
+            rsColumns = null;
+
+            if (doAlterTable) {
+                modifyColumns(con, tableName, new Column(colName, "VARCHAR(" + newSize + ")"));
+            }
+        } catch (final SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (final RuntimeException e) {
+            throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
+        } finally {
+            Databases.closeSQLStuff(rsColumns);
         }
     }
 }

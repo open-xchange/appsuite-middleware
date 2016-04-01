@@ -70,9 +70,9 @@ import com.openexchange.folderstorage.FolderService;
 import com.openexchange.folderstorage.FolderServiceDecorator;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.annotations.OAuthAction;
-import com.openexchange.oauth.provider.annotations.OAuthScopeCheck;
-import com.openexchange.oauth.provider.grant.OAuthGrant;
+import com.openexchange.oauth.provider.resourceserver.OAuthAccess;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthAction;
+import com.openexchange.oauth.provider.resourceserver.annotations.OAuthScopeCheck;
 import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
@@ -206,7 +206,7 @@ public final class UpdateAction extends AbstractFolderAction {
     }
 
     @OAuthScopeCheck
-    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthGrant grant) throws OXException {
+    public boolean accessAllowed(final AJAXRequestData request, final ServerSession session, final OAuthAccess access) throws OXException {
         String treeId = request.getParameter("tree");
         if (null == treeId) {
             treeId = getDefaultTreeIdentifier();
@@ -219,7 +219,7 @@ public final class UpdateAction extends AbstractFolderAction {
 
         final FolderService folderService = ServiceRegistry.getInstance().getService(FolderService.class, true);
         ContentType contentType = folderService.getFolder(treeId, id, session, new FolderServiceDecorator()).getContentType();
-        return mayWriteViaOAuthRequest(contentType, grant);
+        return mayWriteViaOAuthRequest(contentType, access);
     }
 
 }

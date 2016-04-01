@@ -50,16 +50,19 @@
 package com.openexchange.cli;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.PosixParser;
 
 
 /**
- * {@link AbstractCLI}
+ * {@link AbstractCLI} - The basic super class for command-line tools.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public abstract class AbstractCLI {
+public abstract class AbstractCLI<R, C> {
 
     /** The associated options */
     protected Options options;
@@ -72,6 +75,80 @@ public abstract class AbstractCLI {
     }
 
     /**
+     * Executes the command-line tool.
+     *
+     * @param args The arguments
+     * @return The return value
+     */
+    public R execute(final String[] args) {
+        Options options = newOptions();
+        boolean error = true;
+        try {
+            // Option for help
+            options.addOption("h", "help", false, "Prints a help text");
+
+            // Add other options
+            addOptions(options);
+
+            // Initialize command-line parser & parse arguments
+            final CommandLineParser parser = new PosixParser();
+            final CommandLine cmd = parser.parse(options, args);
+
+            // Check if help output is requested
+            if (cmd.hasOption('h')) {
+                printHelp(options);
+                System.exit(0);
+                return null;
+            }
+
+            // Check other mandatory options
+            checkOptions(cmd, options);
+
+            R retval = null;
+            try {
+                retval = invoke(options, cmd, null);
+            } catch (Exception e) {
+                Throwable t = e.getCause();
+                throw new ExecutionFault(null == t ? e : t);
+            }
+
+            error = false;
+            return retval;
+        } catch (final ExecutionFault e) {
+            final Throwable t = e.getCause();
+            final String message = t.getMessage();
+            System.err.println(null == message ? "An error occurred." : message);
+        } catch (final ParseException e) {
+            System.err.println("Unable to parse command line: " + e.getMessage());
+            printHelp(options);
+        } catch (final RuntimeException e) {
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
+            System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } catch (final Throwable t) {
+            String message = t.getMessage();
+            String clazzName = t.getClass().getName();
+            System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } finally {
+            if (error) {
+                System.exit(1);
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Invokes the CLI method.
+     *
+     * @param option The options
+     * @param cmd The command line providing parameters/options
+     * @param context The execution context; always <code>null</code>
+     * @return The return value
+     * @throws Exception If invocation fails
+     */
+    protected abstract R invoke(Options option, CommandLine cmd, C context) throws Exception;
+
+    /**
      * Creates an initially empty {@link ReservedOptions} instance.
      *
      * @return The new options
@@ -81,6 +158,18 @@ public abstract class AbstractCLI {
         this.options = options;
         return options;
     }
+
+    /**
+     * Adds this command-line tool's options.
+     * <p>
+     * Note following options are reserved:
+     * <ul>
+     * <li>-h / --help
+     * </ul>
+     *
+     * @param options The options
+     */
+    protected abstract void addOptions(Options options);
 
     /**
      * Checks other mandatory options.
@@ -99,13 +188,6 @@ public abstract class AbstractCLI {
      * @param options The associated options
      */
     protected abstract void checkOptions(CommandLine cmd);
-
-    /**
-     * Signals if this command-line tool requires administrative permission.
-     *
-     * @return <code>true</code> for administrative permission; otherwise <code>false</code>
-     */
-    protected abstract boolean requiresAdministrativePermission();
 
     /**
      * Prints the <code>--help</code> text.

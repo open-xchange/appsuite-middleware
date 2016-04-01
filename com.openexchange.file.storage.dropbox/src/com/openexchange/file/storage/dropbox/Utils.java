@@ -53,6 +53,7 @@ import java.util.Date;
 import com.dropbox.client2.RESTUtility;
 import com.dropbox.client2.exception.DropboxException;
 import com.dropbox.client2.exception.DropboxServerException;
+import com.dropbox.client2.exception.DropboxUnlinkedException;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
 import com.openexchange.file.storage.FileStorageFolder;
@@ -66,6 +67,8 @@ import com.openexchange.oauth.OAuthExceptionCodes;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
 public final class Utils {
+
+    private static final String RATE_LIMIT_MSG = "oauth_accesses_per_access_token";
 
     /**
      * Initializes a new {@link Utils}.
@@ -179,8 +182,32 @@ public final class Utils {
             if (DropboxServerException._403_FORBIDDEN == serverException.error && Strings.asciiLowerCase(e.toString()).indexOf("access token") >= 0) {
                 return OAuthExceptionCodes.INVALID_ACCOUNT.create();
             }
-            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(),
-                null == serverException.body.userError ? serverException.body.error : serverException.body.userError);
+            if (DropboxServerException._503_SERVICE_UNAVAILABLE == serverException.error && serverException.body != null) {
+                String error = serverException.body.error;
+                if (error != null && error.contains(RATE_LIMIT_MSG)) {
+                    return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create();
+                }
+            }
+            if (429 == serverException.error) {
+                return FileStorageExceptionCodes.STORAGE_RATE_LIMIT.create();
+            }
+
+            String msg = null;
+            if (serverException.body != null) {
+                msg = serverException.body.userError;
+                if (msg == null) {
+                    msg = serverException.body.error;
+                }
+            }
+
+            if (msg == null) {
+                msg = "unknown error";
+            }
+
+            return FileStorageExceptionCodes.PROTOCOL_ERROR.create(serverException, new StringBuilder("HTTP (").append(serverException.error).append(')').toString(), msg);
+        }
+        if (DropboxUnlinkedException.class.isInstance(e)) {
+            return FileStorageExceptionCodes.UNLINKED_ERROR.create(e, new Object[0]);
         }
         if (DropboxException.class.isInstance(e)) {
             return FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, DropboxConstants.ID, e.getMessage());

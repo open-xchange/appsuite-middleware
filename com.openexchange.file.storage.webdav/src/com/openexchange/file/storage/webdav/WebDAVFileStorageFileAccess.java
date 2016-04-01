@@ -51,6 +51,7 @@ package com.openexchange.file.storage.webdav;
 
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.checkFolderId;
 import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.getHref;
+import static com.openexchange.file.storage.webdav.WebDAVFileStorageResourceUtil.parseIntProperty;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ import com.openexchange.file.storage.search.SearchTerm;
 import com.openexchange.file.storage.webdav.workarounds.LiberalUnLockMethod;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.session.Session;
 import com.openexchange.tools.iterator.SearchIterator;
@@ -692,34 +694,86 @@ public final class WebDAVFileStorageFileAccess extends AbstractWebDAVAccess impl
         } catch (final Exception e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
-        final GetMethod getMethod = new GetMethod(uri.toString());
         try {
-            // initMethod(folderId, id, getMethod);
-            client.executeMethod(getMethod);
-            /*
-             * Check if request was successfully executed
-             */
-            if (HttpServletResponse.SC_NOT_FOUND == getMethod.getStatusCode()) {
-                throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fid, id);
+            long size = -1;
+
+            DavMethod propFindMethod = new PropFindMethod(fid, DavConstants.PROPFIND_ALL_PROP, DavConstants.DEPTH_1);
+            try {
+                initMethod(fid, id, propFindMethod);
+                client.executeMethod(propFindMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                propFindMethod.checkSuccess();
+                /*
+                 * Get MultiStatus response
+                 */
+                final MultiStatus multiStatus = propFindMethod.getResponseBodyAsMultiStatus();
+                /*
+                 * Find MultiStatus for specified folder URI
+                 */
+                URI tmp = new URI(fid, true);
+                MultiStatusResponse[] responses = multiStatus.getResponses();
+                boolean found = false;
+                for (int i = 0; i < responses.length && !found; i++) {
+                    final MultiStatusResponse multiStatusResponse = responses[i];
+                    /*
+                     * Get the DAV property set for 200 (OK) status
+                     */
+                    final DavPropertySet propertySet = multiStatusResponse.getProperties(HttpServletResponse.SC_OK);
+                    final String href = getHref(multiStatusResponse.getHref(), propertySet);
+                    tmp.setEscapedPath(href);
+                    if (uri.equals(tmp)) {
+                        /*
+                         * Check for file
+                         */
+                        if (href.endsWith(SLASH)) {
+                            /*
+                             * Not a file
+                             */
+                            throw FileStorageExceptionCodes.NOT_A_FILE.create(WebDAVConstants.ID, id);
+                        }
+                        /*
+                         * Found file
+                         */
+                        size = parseIntProperty(DavConstants.PROPERTY_GETCONTENTLENGTH, propertySet);
+                        found = true;
+                    }
+                }
+            } finally {
+                closeHttpMethod(propFindMethod);
+                propFindMethod = null;
             }
-            if (HttpServletResponse.SC_OK != getMethod.getStatusCode()) {
-                throw FileStorageExceptionCodes.PROTOCOL_ERROR.create("HTTP", getMethod.getStatusText());
+
+            GetMethod getMethod = new GetMethod(uri.toString());
+            try {
+                // initMethod(folderId, id, getMethod);
+                client.executeMethod(getMethod);
+                /*
+                 * Check if request was successfully executed
+                 */
+                if (HttpServletResponse.SC_NOT_FOUND == getMethod.getStatusCode()) {
+                    throw FileStorageExceptionCodes.FILE_NOT_FOUND.create(fid, id);
+                }
+                if (HttpServletResponse.SC_OK != getMethod.getStatusCode()) {
+                    throw FileStorageExceptionCodes.PROTOCOL_ERROR.create("HTTP", getMethod.getStatusText());
+                }
+                /*
+                 * Return as stream
+                 */
+                HttpMethodInputStream stream = new HttpMethodInputStream(getMethod);
+                getMethod = null;
+                return new SizeKnowingInputStream(stream, size);
+            } finally {
+                closeHttpMethod(getMethod);
             }
-            /*
-             * Return as stream
-             */
-            return new HttpMethodInputStream(getMethod);
-        } catch (final OXException e) {
-            closeHttpMethod(getMethod);
-            throw e;
-        } catch (final HttpException e) {
-            closeHttpMethod(getMethod);
+        } catch (HttpException e) {
             throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "HTTP", e.getMessage());
-        } catch (final IOException e) {
-            closeHttpMethod(getMethod);
+        } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        } catch (final Exception e) {
-            closeHttpMethod(getMethod);
+        } catch (DavException e) {
+            throw FileStorageExceptionCodes.PROTOCOL_ERROR.create(e, "DAV", e.getMessage());
+        } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         }
     }

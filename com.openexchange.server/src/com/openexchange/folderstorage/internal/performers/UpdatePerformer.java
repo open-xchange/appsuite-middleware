@@ -57,6 +57,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import com.openexchange.exception.OXException;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.folderstorage.Folder;
 import com.openexchange.folderstorage.FolderExceptionErrorMessage;
 import com.openexchange.folderstorage.FolderServiceDecorator;
@@ -67,6 +68,7 @@ import com.openexchange.folderstorage.SetterAwareFolder;
 import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.StorageParametersUtility;
 import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.folderstorage.database.contentType.InfostoreContentType;
 import com.openexchange.folderstorage.filestorage.contentType.FileStorageContentType;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
@@ -74,7 +76,11 @@ import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
-import com.openexchange.share.ShareService;
+import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.share.GuestInfo;
+import com.openexchange.share.recipient.RecipientType;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.session.ServerSession;
 
@@ -154,6 +160,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
         }
 
         TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+        boolean rollbackTransaction = true;
         /*
          * Throws an exception if someone tries to add an element. If this happens, you found a bug.
          * As long as a TransactionManager is present, every storage has to add itself to the
@@ -198,6 +205,10 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (null != checkForReservedName(treeId, storageFolder.getParentID(), folder, storageFolder.getContentType(), false)) {
                         throw FolderExceptionErrorMessage.RESERVED_NAME.create(folder.getName());
                     }
+                    if (InfostoreContentType.getInstance().equals(storageFolder.getContentType()) && Strings.isNotEmpty(newName)) {
+                        FilenameValidationUtils.checkCharacters(newName);
+                        FilenameValidationUtils.checkName(newName);
+                    }
                 }
             }
             boolean changeSubscription = false;
@@ -225,8 +236,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                 }
             }
 
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder, shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, folder, storageFolder);
             boolean addedDecorator = false;
             FolderServiceDecorator decorator = storageParameters.getDecorator();
             if (decorator == null) {
@@ -325,6 +335,16 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                         doRenameVirtual(folder, storage, openedStorages);
                     }
                 } else if (comparedPermissions.hasChanges() || cascadePermissions) {
+
+                    ObjectUseCountService useCountService = FolderStorageServices.requireService(ObjectUseCountService.class);
+                    List<Integer> addedUsers = comparedPermissions.getAddedUsers();
+                    if (null != useCountService && null != addedUsers && !addedUsers.isEmpty()) {
+                        for (Integer i : addedUsers) {
+                            IncrementArguments arguments = new IncrementArguments.Builder(i.intValue()).build();
+                            useCountService.incrementObjectUseCount(session, arguments);
+                        }
+                    }
+
                     /*
                      * Check permissions of anonymous guest users
                      */
@@ -366,14 +386,28 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
                     if (cascadePermissions) {
                         boolean ignoreWarnings = StorageParametersUtility.getBoolParameter("ignoreWarnings", storageParameters);
                         checkOpenedStorage(storage, openedStorages);
-                        List<String> ids = new ArrayList<String>();
+                        List<String> subfolderIDs = new ArrayList<String>();
                         try {
-                            gatherSubfolders(folder, storage, treeId, ids, ignoreWarnings);
-                            cascadeFolderPermissions(folder, storage, treeId, ids);
+                            gatherSubfolders(folder, storage, treeId, subfolderIDs, ignoreWarnings);
+                            if (0 < subfolderIDs.size()) {
+                                /*
+                                 * prepare target permissions: remove any anonymous link permission entities
+                                 */
+                                List<Permission> permissions = new ArrayList<Permission>(folder.getPermissions().length);
+                                for (Permission permission : folder.getPermissions()) {
+                                    if (false == permission.isGroup()) {
+                                        GuestInfo guest = comparedPermissions.getGuestInfo(permission.getEntity());
+                                        if (null != guest && RecipientType.ANONYMOUS.equals(guest.getRecipientType())) {
+                                            continue;
+                                        }
+                                    }
+                                    permissions.add(permission);
+                                }
+                                updatePermissions(storage, treeId, subfolderIDs, permissions.toArray(new Permission[permissions.size()]));
+                            }
                         } catch (OXException e) {
                             if (OXFolderExceptionCode.NO_ADMIN_ACCESS.equals(e)) {
                                 addWarning(e);
-                                transactionManager.rollback();
                                 return;
                             }
                             throw e;
@@ -437,6 +471,7 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
              * Commit
              */
             transactionManager.commit();
+            rollbackTransaction = false;
 
             final Set<OXException> warnings = storageParameters.getWarnings();
             if (null != warnings) {
@@ -446,11 +481,13 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
             }
 
         } catch (final OXException e) {
-            transactionManager.rollback();
             throw e;
         } catch (final Exception e) {
-            transactionManager.rollback();
             throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (rollbackTransaction) {
+                transactionManager.rollback();
+            }
         }
     } // End of doUpdate()
 
@@ -490,19 +527,20 @@ public final class UpdatePerformer extends AbstractUserizedFolderPerformer {
     }
 
     /**
-     * Cascade folder permissions
+     * Updates the permissions for multiple folders.
      *
-     * @param folder The folder
      * @param storage The folder storage
      * @param treeId The tree identifier
+     * @param folderIDs The identifiers of the folders to update the permissions
+     * @param permissions The target permissions to apply for all folders
      * @throws OXException If applying the permissions fails.
      */
-    private void cascadeFolderPermissions(Folder folder, FolderStorage storage, String treeId, List<String> ids) throws OXException {
-        for (String id : ids) {
+    private void updatePermissions(FolderStorage storage, String treeId, List<String> folderIDs, Permission[] permissions) throws OXException {
+        for (String id : folderIDs) {
             UpdateFolder toUpdate = new UpdateFolder();
             toUpdate.setTreeID(treeId);
             toUpdate.setID(id);
-            toUpdate.setPermissions(folder.getPermissions());
+            toUpdate.setPermissions(permissions);
             storage.updateFolder(toUpdate, storageParameters);
         }
     }

@@ -66,6 +66,7 @@ import com.openexchange.realtime.packet.ID;
  */
 public class IDMap<T> implements Map<ID, T> {
 
+    /** The delegate {@code java.util.Map} instance */
     protected final Map<ID, T> delegate;
 
     /**

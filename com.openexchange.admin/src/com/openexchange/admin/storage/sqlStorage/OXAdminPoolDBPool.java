@@ -97,6 +97,30 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
     }
 
     @Override
+    public Connection getWriteConnectionForConfigDB() throws PoolException {
+        final Connection con;
+        try {
+            con = getService().getWritable();
+        } catch (OXException e) {
+            log.error("Error pickup configdb database write connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
+    @Override
+    public Connection getReadConnectionForConfigDB() throws PoolException {
+        final Connection con;
+        try {
+            con = getService().getReadOnly();
+        } catch (OXException e) {
+            log.error("Error pickup configdb database read connection from pool!", e);
+            throw new PoolException(e.getMessage());
+        }
+        return con;
+    }
+
+    @Override
     public Connection getConnectionForContext(int contextId) throws PoolException {
         final Connection con;
         try {
@@ -134,6 +158,36 @@ public class OXAdminPoolDBPool implements OXAdminPoolInterface {
 
     @Override
     public boolean pushConnectionForConfigDB(Connection con) throws PoolException {
+        try {
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb write connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backWritable(con);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pushReadConnectionForConfigDB(Connection con) throws PoolException {
+        try {
+            if (con != null && !con.getAutoCommit() && !con.isClosed()) {
+                con.setAutoCommit(true);
+            }
+        } catch (SQLException e) {
+            log.error("Error pushing configdb read connection to pool!", e);
+            throw new PoolException(e.getMessage());
+        } finally {
+            getService().backReadOnly(con);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean pushWriteConnectionForConfigDB(Connection con) throws PoolException {
         try {
             if (con != null && !con.getAutoCommit() && !con.isClosed()) {
                 con.setAutoCommit(true);

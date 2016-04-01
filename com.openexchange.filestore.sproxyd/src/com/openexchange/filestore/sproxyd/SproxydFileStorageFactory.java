@@ -77,7 +77,7 @@ import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
 
 /**
- * {@link S3FileStorageFactory}
+ * {@link SproxydFileStorageFactory}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  */

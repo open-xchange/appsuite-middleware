@@ -84,14 +84,17 @@ public class LastLoginRecorder implements LoginHandlerService {
     @Override
     public void handleLogin(final LoginResult login) throws OXException {
         final LoginRequest request = login.getRequest();
+
         // Determine client
         String client = request.getClient();
         if (null == client) {
-            client = request.getInterface().toString();
+            Interface interfaze = request.getInterface();
+            client = null == interfaze ? null : interfaze.toString();
         }
         if (null == client) {
             return;
         }
+
         Context context = login.getContext();
         User user = login.getUser();
         if (!isWhitelistedClient(client) && maxClientCount > 0) {

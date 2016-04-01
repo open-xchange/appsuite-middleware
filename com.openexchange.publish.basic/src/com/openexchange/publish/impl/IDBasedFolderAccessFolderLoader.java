@@ -123,6 +123,8 @@ public class IDBasedFolderAccessFolderLoader implements PublicationDataLoaderSer
 
     private static final class EscapingDocumentMetadata implements DocumentMetadata {
 
+        private static final long serialVersionUID = -3488647212373469569L;
+
         private final DocumentMetadata documentMetadata;
         private final EscapeMode escapeMode;
 

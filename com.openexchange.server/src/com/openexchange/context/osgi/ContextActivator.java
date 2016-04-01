@@ -62,8 +62,8 @@ import com.openexchange.database.CreateTableService;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeCreateTable;
 import com.openexchange.groupware.contexts.impl.sql.ContextAttributeTableUpdateTask;
-import com.openexchange.groupware.update.UpdateTask;
 import com.openexchange.groupware.update.UpdateTaskProviderService;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.management.ManagementService;
 import com.openexchange.management.Managements;
 import com.openexchange.osgi.HousekeepingActivator;
@@ -98,7 +98,7 @@ public class ContextActivator extends HousekeepingActivator {
         registerService(UpdateTaskProviderService.class, new UpdateTaskProviderService() {
 
             @Override
-            public Collection<? extends UpdateTask> getUpdateTasks() {
+            public Collection<? extends UpdateTaskV2> getUpdateTasks() {
                 return Arrays.asList(updateTask);
             }
 

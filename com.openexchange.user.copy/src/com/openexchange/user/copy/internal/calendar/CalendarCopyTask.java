@@ -67,6 +67,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.calendar.CalendarDataObject;
@@ -237,9 +238,9 @@ public class CalendarCopyTask implements CopyUserTaskService {
         writeParticipantsToDB(dstCon, appointments, i(dstCtxId));
 
         final IntegerMapping mapping = new IntegerMapping();
-        for (final Integer appointmentId : appointments.keySet()) {
-            final CalendarDataObject appointment = appointments.get(appointmentId);
-            mapping.addMapping(appointmentId, I(appointment.getObjectID()));
+        for (final Entry<Integer, CalendarDataObject> appointmentEntry : appointments.entrySet()) {
+            final CalendarDataObject appointment = appointmentEntry.getValue();
+            mapping.addMapping(appointmentEntry.getKey(), I(appointment.getObjectID()));
         }
 
         final Map<Integer, ExternalDate> externalDates = loadExternalDatesFromDB(srcCon, i(srcCtxId), appointmentIds);
@@ -252,11 +253,11 @@ public class CalendarCopyTask implements CopyUserTaskService {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(INSERT_DATE_EXTERNAL);
-            for (final int dateId : dates.keySet()) {
-                final Integer destination = mapping.getDestination(I(dateId));
+            for (final Entry<Integer, ExternalDate> dateEntry : dates.entrySet()) {
+                final Integer destination = mapping.getDestination(dateEntry.getKey());
                 if (destination != null) {
                     int i = 1;
-                    final ExternalDate date = dates.get(dateId);
+                    final ExternalDate date = dateEntry.getValue();
                     stmt.setInt(i++, cid);
                     stmt.setInt(i++, i(destination));
                     stmt.setString(i++, date.getMailAddress());
@@ -315,8 +316,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
         try {
             mstmt = dstCon.prepareStatement(INSERT_MEMBER);
             rstmt = dstCon.prepareStatement(INSERT_RIGHT);
-            for (final Integer appointmentId : appointments.keySet()) {
-                final CalendarDataObject appointment = appointments.get(appointmentId);
+            for (final CalendarDataObject appointment : appointments.values()) {
                 final Participant[] participants = appointment.getParticipants();
                 if (participants != null) {
                     for (final Participant participant : participants) {
@@ -361,9 +361,8 @@ public class CalendarCopyTask implements CopyUserTaskService {
         PreparedStatement stmt = null;
         try {
             stmt = dstCon.prepareStatement(INSERT_APPOINTMENT);
-            for (final Integer appointmentId : appointments.keySet()) {
+            for (final CalendarDataObject appointment : appointments.values()) {
                 int i = 1;
-                final CalendarDataObject appointment = appointments.get(appointmentId);
                 stmt.setTimestamp(i++, SQLTools.toTimestamp(appointment.getCreationDate()));
                 stmt.setInt(i++, dstUsrId);
                 stmt.setLong(i++, appointment.getLastModified().getTime());
@@ -413,14 +412,14 @@ public class CalendarCopyTask implements CopyUserTaskService {
     private void exchangeIds(final Map<Integer, CalendarDataObject> appointments, final ObjectMapping<FolderObject> folderMapping, final int dstUsrId, final int dstCtxId, final Connection dstCon, final int srcUsrId) throws OXException {
         try {
             final Map<Integer, CalendarDataObject> seriesAppointments = new HashMap<Integer, CalendarDataObject>();
-            for (final Integer appointmentId : appointments.keySet()) {
+            for (final Entry<Integer, CalendarDataObject> appointmentEntry : appointments.entrySet()) {
                 final int newAppointmentId = IDGenerator.getId(dstCtxId, com.openexchange.groupware.Types.APPOINTMENT, dstCon);
-                final CalendarDataObject appointment = appointments.get(appointmentId);
+                final CalendarDataObject appointment = appointmentEntry.getValue();
                 appointment.setObjectID(newAppointmentId);
                 appointment.setCreatedBy(dstUsrId);
                 appointment.setModifiedBy(dstUsrId);
                 if (appointment.getRecurrenceID() != -1) {
-                    seriesAppointments.put(appointmentId, appointment);
+                    seriesAppointments.put(appointmentEntry.getKey(), appointment);
                 }
 
                 final FolderObject sourceFolder = folderMapping.getSource(appointment.getParentFolderID());
@@ -472,8 +471,7 @@ public class CalendarCopyTask implements CopyUserTaskService {
     }
 
     void addParticipants(final Map<Integer, CalendarDataObject> appointments, final Connection srcCon, final Integer srcCtxId, final Integer srcUsrId) throws OXException {
-        for (final Integer appointmentId : appointments.keySet()) {
-            final CalendarDataObject appointment = appointments.get(appointmentId);
+        for (final CalendarDataObject appointment : appointments.values()) {
             final List<Participant> participants = fetchMoveableParticipants(appointment, srcCon, srcCtxId, srcUsrId);
             appointment.setParticipants(participants);
         }
@@ -481,10 +479,11 @@ public class CalendarCopyTask implements CopyUserTaskService {
 
     private void checkAppointmentsForMissingRecurrenceMasters(final Map<Integer, CalendarDataObject> appointments) {
         final List<Integer> toRemove = new ArrayList<Integer>();
-        for (final Integer appointmentId : appointments.keySet()) {
-            final CalendarDataObject appointment = appointments.get(appointmentId);
+        for (final Entry<Integer, CalendarDataObject> appointmentEntry : appointments.entrySet()) {
+            final CalendarDataObject appointment = appointmentEntry.getValue();
             final int recurrenceId = appointment.getRecurrenceID();
-            if (recurrenceId != -1 && recurrenceId != appointmentId) {
+            Integer appointmentId = appointmentEntry.getKey();
+            if (recurrenceId != -1 && recurrenceId != appointmentId.intValue()) {
                 /*
                  * This is a change exception.
                  * We have to check if there is an existing master appointment.

@@ -49,7 +49,9 @@
 
 package com.openexchange.groupware.infostore.validation;
 
+import java.util.Set;
 import com.openexchange.groupware.infostore.DocumentMetadata;
+import com.openexchange.groupware.infostore.utils.Metadata;
 import com.openexchange.tools.session.ServerSession;
 
 /**
@@ -72,9 +74,11 @@ public interface InfostoreValidator {
 	 *
      * @param session The session
      * @param metadata The DocumentMetadata to check
+     * @param originalDocument The original document in case of an update, or <code>null</code> for new documents
+     * @param updatedColumns The updated columns, or <code>null</code> for new documents
 	 * @return A DocumentMetadataValidation filled with the relevant errors
 	 */
-	DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata);
+	DocumentMetadataValidation validate(ServerSession session, DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns);
 
 	/**
 	 * Returns the name used for displaying error messages

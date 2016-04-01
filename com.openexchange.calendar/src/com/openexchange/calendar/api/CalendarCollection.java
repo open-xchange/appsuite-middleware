@@ -72,6 +72,8 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.openexchange.api2.ReminderService;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.calendar.CachedCalendarIterator;
@@ -2920,11 +2922,25 @@ public final class CalendarCollection implements CalendarCollectionService {
                 target.setEndDate(new Date(rs.getEnd()));
             }
         } else {
-            if (!target.containsStartDate()) {
-                target.setStartDate(source.getStartDate());
+            boolean success = false;
+            if (source.getRecurrenceType() != CalendarDataObject.NO_RECURRENCE && target.containsRecurrenceType() && target.getRecurrenceType() == CalendarDataObject.NO_RECURRENCE) { // Series -> Single
+                RecurringResultsInterface rss = recColl.calculateFirstRecurring(source);
+                if (rss != null && rss.size() > 0) {
+                    RecurringResultInterface rs = rss.getRecurringResult(0);
+                    if (rs != null) {
+                        target.setStartDate(new Date(rs.getStart()));
+                        target.setEndDate(new Date(rs.getEnd()));
+                        success = true;
+                    }
+                }
             }
-            if (!target.containsEndDate()) {
-                target.setEndDate(source.getEndDate());
+            if (!success) {
+                if (!target.containsStartDate()) {
+                    target.setStartDate(source.getStartDate());
+                }
+                if (!target.containsEndDate()) {
+                    target.setEndDate(source.getEndDate());
+                }
             }
         }
     }
@@ -3120,6 +3136,8 @@ public final class CalendarCollection implements CalendarCollectionService {
 
     private boolean seriesChangeEnd(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         CalendarDataObject clone = cdao.clone();
+        edao.setStartDate(new Date(edao.getStartDate().getTime()));
+        edao.setEndDate(new Date(edao.getEndDate().getTime()));
         if (clone.getEndDate() == null) {
             return false;
         }
@@ -3129,7 +3147,7 @@ public final class CalendarCollection implements CalendarCollectionService {
         RecurringResultsInterface resultsOld = calculateRecurringIgnoringExceptions(edao, 0, 0, 0);
         RecurringResultInterface lastOccurrenceOld = resultsOld.getRecurringResult(resultsOld.size() - 1);
         if (lastOccurrenceNew.getEnd() != lastOccurrenceOld.getEnd()) {
-            LOG.debug(cdao.getObjectID() + ": End changed (" + lastOccurrenceNew.getEnd() + ")->(" + lastOccurrenceOld.getEnd() + ")");
+            LOG.debug(cdao.getObjectID() + ": End changed (" + new Date(lastOccurrenceNew.getEnd()) + ")->(" + new Date(lastOccurrenceOld.getEnd()) + ")");
             return true;
         }
         return false;
@@ -3158,6 +3176,9 @@ public final class CalendarCollection implements CalendarCollectionService {
         }
         if (!cdao.containsUntil() && edao.containsUntil()) {
             cdao.setUntil(edao.getUntil());
+        }
+        if (!cdao.containsFullTime() && edao.containsFullTime()) {
+            cdao.setFullTime(edao.getFullTime());
         }
     }
 
@@ -3745,7 +3766,7 @@ public final class CalendarCollection implements CalendarCollectionService {
     public void checkAndRemovePastReminders(final CalendarDataObject cdao, final CalendarDataObject edao) {
         if (CalendarConfig.getCheckAndRemovePastReminders() && cdao.containsAlarm() && cdao.getAlarm() >= 0) {
             long reminder = 0;
-            if (cdao.containsStartDate()) {
+            if (cdao.containsStartDateAndIsNotNull()) {
                 reminder = cdao.getStartDate().getTime();
             } else {
                 reminder = edao.getStartDate().getTime();

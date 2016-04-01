@@ -75,7 +75,7 @@ public final class UnifiedINBOXRenamerTask extends UpdateTaskAdapter {
 
     @Override
     public String[] getDependencies() {
-        return new String[] { MailAccountMigrationTask.class.getName() };
+        return new String[] {};
     }
 
     @Override

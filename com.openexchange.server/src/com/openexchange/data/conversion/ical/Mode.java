@@ -62,4 +62,6 @@ public interface Mode {
      */
     ZoneInfo getZoneInfo();
 
+    Object getParameter(String name);
+
 }

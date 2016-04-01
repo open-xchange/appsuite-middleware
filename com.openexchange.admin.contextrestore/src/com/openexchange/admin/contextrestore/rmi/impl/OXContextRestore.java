@@ -69,7 +69,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.io.output.NullWriter;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskEntry;
 import com.openexchange.admin.contextrestore.dataobjects.UpdateTaskInformation;
-import com.openexchange.admin.contextrestore.dataobjects.VersionInformation;
 import com.openexchange.admin.contextrestore.osgi.Activator;
 import com.openexchange.admin.contextrestore.rmi.OXContextRestoreInterface;
 import com.openexchange.admin.contextrestore.rmi.exceptions.OXContextRestoreException;
@@ -102,13 +101,10 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         private final UpdateTaskInformation updateTaskInfo;
 
-        private final VersionInformation versionInfo;
-
-        public RunParserResult(PoolIdSchemaAndVersionInfo result, UpdateTaskInformation updateTaskInfo, VersionInformation versionInfo) {
+        public RunParserResult(PoolIdSchemaAndVersionInfo result, UpdateTaskInformation updateTaskInfo) {
             super();
             this.result = result;
             this.updateTaskInfo = updateTaskInfo;
-            this.versionInfo = versionInfo;
         }
 
         public PoolIdSchemaAndVersionInfo getResult() {
@@ -117,10 +113,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
         public UpdateTaskInformation getUpdateTaskInfo() {
             return updateTaskInfo;
-        }
-
-        public VersionInformation getVersionInfo() {
-            return versionInfo;
         }
 
     }
@@ -180,16 +172,14 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             private final String fileName;
 
             private Map<String, File> tempfilemap;
-            private VersionInformation versionInformation;
             private UpdateTaskInformation updateTaskInformation;
 
-            protected PoolIdSchemaAndVersionInfo(final String fileName, final int contextId, int poolId, String schema, VersionInformation versionInformation, UpdateTaskInformation updateTaskInformation) {
+            protected PoolIdSchemaAndVersionInfo(final String fileName, final int contextId, int poolId, String schema, UpdateTaskInformation updateTaskInformation) {
                 super();
                 this.fileName = fileName;
                 this.contextId = contextId;
                 this.poolId = poolId;
                 this.schema = schema;
-                this.versionInformation = versionInformation;
                 this.updateTaskInformation = updateTaskInformation;
             }
 
@@ -217,14 +207,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 this.tempfilemap = tempfilemap;
             }
 
-            public final VersionInformation getVersionInformation() {
-                return versionInformation;
-            }
-
-            public final void setVersionInformation(VersionInformation versionInformation) {
-                this.versionInformation = versionInformation;
-            }
-
             public UpdateTaskInformation getUpdateTaskInformation() {
                 return updateTaskInformation;
             }
@@ -247,9 +229,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             Pattern.compile("^\\s+CONSTRAINT.*FOREIGN KEY\\s+\\(`([^`]*)`(?:,\\s+`([^`]*)`)*\\)\\s+REFERENCES `([^`]*)`.*$");
 
         private final static Pattern datadump = Pattern.compile("^Dumping\\s+data\\s+for\\s+table\\s+`([^`]*)`.*$");
-
-        private final static Pattern insertIntoVersion =
-            Pattern.compile("^INSERT INTO `version` VALUES \\((?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)(?:([^\\),]*),)([^\\),]*)\\).*$");
 
         /**
          * Starts parsing named MySQL dump file
@@ -275,7 +254,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             boolean searchcontext = false;
             // boolean searchdbpool = false;
             int poolId = -1;
-            VersionInformation versionInformation = null;
             UpdateTaskInformation updateTaskInformation = null;
 
             final BufferedReader in = new BufferedReader(new FileReader(fileName));
@@ -342,10 +320,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                                 if ("updateTask".equals(tableName)) {
                                     // One or more entries for 'updateTask' table
                                     updateTaskInformation = searchAndCheckUpdateTask(in, cid);
-                                }
-                                if ("version".equals(tableName)) {
-                                    // The version table is quite small so it is safe to read the whole line here:
-                                    versionInformation = searchAndCheckVersion(in);
                                 }
                                 if ("context_server2db_pool".equals(tableName)) {
                                     searchcontext = true;
@@ -428,34 +402,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             //if (null == updateTaskInformation) {
             //    throw new OXContextRestoreException(Code.NO_UPDATE_TASK_INFORMATION_FOUND);
             // }
-            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, versionInformation, updateTaskInformation);
-        }
-
-        /**
-         * @param in
-         * @return
-         * @throws IOException
-         */
-        private VersionInformation searchAndCheckVersion(final BufferedReader in) throws IOException {
-            String readLine2 = in.readLine();
-            while ((readLine2 = in.readLine()) != null && !readLine2.equals("--")) {
-                final Matcher matcher = insertIntoVersion.matcher(readLine2);
-                if (matcher.matches()) {
-                    final int version = Integer.parseInt(matcher.group(1));
-                    final int locked = Integer.parseInt(matcher.group(2));
-                    final int gw_compatible = Integer.parseInt(matcher.group(3));
-                    final int admin_compatible = Integer.parseInt(matcher.group(4));
-                    final String server = matcher.group(5);
-
-                    return new VersionInformation(
-                        admin_compatible,
-                        gw_compatible,
-                        locked,
-                        server.substring(1, server.length() - 1),
-                        version);
-                }
-            }
-            return null;
+            return new PoolIdSchemaAndVersionInfo(fileName, cid, poolId, schema, updateTaskInformation);
         }
 
         private final static String REGEX_VALUE = "([^\\),]*)";
@@ -732,7 +679,12 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             LOG.error("", e);
             throw e;
         }
-
+        
+        final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
+        if (storage.isLastContextInSchema(ctx)) {
+            throw new OXContextRestoreException(Code.LAST_CONTEXT_IN_SCHEMA, ctx.getIdAsString());
+        }
+        
         LOG.info("Context: {}", ctx);
         LOG.info("Filenames: {}", java.util.Arrays.toString(fileNames));
 
@@ -742,10 +694,10 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             if (null == test.getResult()) {
                 throw new OXContextRestoreException(Code.NO_CONFIGDB_FOUND);
             }
-            if (null == test.getUpdateTaskInfo() && null == test.getVersionInfo()) {
+            if (null == test.getUpdateTaskInfo()) {
                 // Trigger seconds round because the user database can be located before the configdb entries
                 test = runParser(ctx, fileNames, optConfigDbName, test.getResult().getSchema(), tempfilemap);
-                if (null == test.getUpdateTaskInfo() && null == test.getVersionInfo()) {
+                if (null == test.getUpdateTaskInfo()) {
                     // Still no user database found. Exiting
                     throw new OXContextRestoreException(Code.NO_USER_DATA_DB_FOUND);
                 }
@@ -753,10 +705,8 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
             final PoolIdSchemaAndVersionInfo result = test.getResult();
 
             final OXContextRestoreStorageInterface instance = OXContextRestoreStorageInterface.getInstance();
-            result.setVersionInformation(test.getVersionInfo());
             result.setUpdateTaskInformation(test.getUpdateTaskInfo());
             result.setTempfilemap(tempfilemap);
-            instance.checkVersion(result);
 
             if (dryrun) {
                 return "Done nothing (dry run)";
@@ -764,7 +714,6 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
 
             final OXContextInterface contextInterface = Activator.getContextInterface();
 
-            final OXToolStorageInterface storage = OXToolStorageInterface.getInstance();
             // We have to do the exists check beforehand otherwise you'll find a stack trace in the logs
             if (storage.existsContext(ctx)) {
                 try {
@@ -797,16 +746,11 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
     }
 
     private RunParserResult runParser(final Context ctx, final String[] fileNames, final String optConfigDbName, String schema, Map<String, File> filemap) throws IOException, OXContextRestoreException {
-        VersionInformation versionInfo = null;
         UpdateTaskInformation updateTaskInfo = null;
         PoolIdSchemaAndVersionInfo result = null;
         for (final String fileName : fileNames) {
             final PoolIdSchemaAndVersionInfo infoObject = new Parser().start(ctx.getId().intValue(), fileName, optConfigDbName, schema, filemap);
-            final VersionInformation versionInformation = infoObject.getVersionInformation();
             final UpdateTaskInformation updateTaskInformation = infoObject.getUpdateTaskInformation();
-            if (null != versionInformation) {
-                versionInfo = versionInformation;
-            }
             if (null != updateTaskInformation) {
                 updateTaskInfo = updateTaskInformation;
             }
@@ -814,7 +758,7 @@ public class OXContextRestore extends OXCommonImpl implements OXContextRestoreIn
                 result = infoObject;
             }
         }
-        return new RunParserResult(result, updateTaskInfo, versionInfo);
+        return new RunParserResult(result, updateTaskInfo);
     }
 
     private static String getConfigDbName(final String optConfigDbName) {

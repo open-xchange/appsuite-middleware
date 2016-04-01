@@ -50,8 +50,10 @@
 package com.openexchange.share.servlet.auth;
 
 import com.openexchange.authentication.GuestAuthenticated;
+import com.openexchange.authentication.SessionEnhancement;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.session.Session;
 import com.openexchange.share.AuthenticationMode;
 
 /**
@@ -60,21 +62,24 @@ import com.openexchange.share.AuthenticationMode;
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @since v7.8.0
  */
-public class ShareAuthenticated implements GuestAuthenticated {
+public class ShareAuthenticated implements GuestAuthenticated, SessionEnhancement {
 
     private final User user;
     private final Context context;
+    private final SessionEnhancement enhancement;;
 
     /**
      * Initializes a new {@link ShareAuthenticated}.
      *
      * @param user The user
      * @param context The context
+     * @param enhancement The session enhancement delegate, or <code>null</code> if not applicable
      */
-    public ShareAuthenticated(User user, Context context) {
+    public ShareAuthenticated(User user, Context context, SessionEnhancement enhancement) {
         super();
         this.user = user;
         this.context = context;
+        this.enhancement = enhancement;
     }
 
     /**
@@ -114,6 +119,13 @@ public class ShareAuthenticated implements GuestAuthenticated {
     @Override
     public int getUserID() {
         return user.getId();
+    }
+
+    @Override
+    public void enhanceSession(Session session) {
+        if (null != enhancement) {
+            enhancement.enhanceSession(session);
+        }
     }
 
 }

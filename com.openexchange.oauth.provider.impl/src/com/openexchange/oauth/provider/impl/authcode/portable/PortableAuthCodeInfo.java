@@ -53,7 +53,7 @@ import java.io.IOException;
 import com.hazelcast.nio.serialization.PortableReader;
 import com.hazelcast.nio.serialization.PortableWriter;
 import com.openexchange.hazelcast.serialization.CustomPortable;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 /**
  * {@link PortableAuthCodeInfo}

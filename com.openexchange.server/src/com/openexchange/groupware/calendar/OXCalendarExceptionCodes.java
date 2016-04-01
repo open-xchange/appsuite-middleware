@@ -514,6 +514,14 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
      * Unknown recurrence type: %1$d
      */
     UNKNOWN_RECURRENCE_TYPE(OXCalendarExceptionCodes.UNKNOWN_RECURRENCE_TYPE_MSG, 109, Category.CATEGORY_USER_INPUT),
+    /**
+     * The value 'null' is not allowed for the field \"%s\".
+     */
+    FIELD_NULL_VALUE(OXCalendarExceptionCodes.FIELD_NULL_VALUE_MSG, 110, Category.CATEGORY_ERROR),
+    /**
+     * Sequence number is outdated.
+     */
+    OUTDATED_SEQUENCE(OXCalendarExceptionMessage.OUTDATED_SEQUENCE, OXCalendarExceptionMessage.OUTDATED_SEQUENCE, 111, Category.CATEGORY_USER_INPUT),
 
     ;
 
@@ -566,6 +574,8 @@ public enum OXCalendarExceptionCodes implements DisplayableOXExceptionCode {
     private static final String UNSUPPORTED_PRIVATE_FLAG_MSG = "Unsupported private flag value %d";
 
     private static final String UNSUPPORTED_SHOWN_AS_MSG = "Unsupported \"shown as\" value %d.";
+
+    private static final String FIELD_NULL_VALUE_MSG = "The value 'null' is not allowed for the field \"%s\".";
 
     private static final String MANDATORY_FIELD_START_DATE_MSG = "Required  value \"Start Date\" was not supplied.";
 

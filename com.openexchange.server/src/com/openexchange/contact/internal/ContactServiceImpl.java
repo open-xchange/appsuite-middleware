@@ -75,11 +75,14 @@ import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.groupware.search.ContactSearchObject;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.objectusecount.SetArguments;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.AbstractTask;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -267,6 +270,13 @@ public class ContactServiceImpl extends DefaultContactService {
                 throw e;
             }
         }
+        if (delta.containsUseCount()) {
+            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != service) {
+                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(targetFolderId), delta.getUseCount()).build();
+                service.setObjectUseCount(session, arguments);
+            }
+        }
         /*
          * broadcast event
          */
@@ -345,6 +355,13 @@ public class ContactServiceImpl extends DefaultContactService {
          * pass through to storage
          */
         storage.update(session, folderID, objectID, delta, lastRead);
+        if (delta.containsUseCount()) {
+            ObjectUseCountService service = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
+            if (null != service) {
+                SetArguments arguments = new SetArguments.Builder(Integer.parseInt(objectID), Integer.parseInt(folderID), delta.getUseCount()).build();
+                service.setObjectUseCount(session, arguments);
+            }
+        }
         /*
          * merge back differences to supplied contact
          */
@@ -1000,6 +1017,7 @@ public class ContactServiceImpl extends DefaultContactService {
     protected SearchIterator<Contact> doAutocompleteContacts(final Session session, List<String> folderIDs, final String query, final AutocompleteParameters parameters, ContactField[] fields, SortOptions sortOptions) throws OXException {
         int userID = session.getUserId();
         int contextID = session.getContextId();
+        parameters.put(AutocompleteParameters.USER_ID, userID);
         /*
          * check supplied search
          */
@@ -1007,8 +1025,11 @@ public class ContactServiceImpl extends DefaultContactService {
         /*
          * determine queried storages according to searched folders
          */
-        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session,
-            (null != folderIDs && 0 < folderIDs.size()) ? folderIDs : Tools.getSearchFolders(contextID, userID, true));
+        List<String> searchFolders = null != folderIDs && 0 < folderIDs.size() ? folderIDs : Tools.getSearchFolders(contextID, userID, true);
+        if (null == searchFolders || 0 == searchFolders.size()) {
+            return SearchIteratorAdapter.emptyIterator();
+        }
+        Map<ContactStorage, List<String>> queriedStorages = Tools.getStorages(session, searchFolders);
         Check.hasStorages(queriedStorages);
         /*
          * prepare fields and sort options

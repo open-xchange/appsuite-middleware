@@ -52,8 +52,8 @@ package com.openexchange.ajax.find.calendar;
 import static com.openexchange.find.calendar.CalendarFacetType.DESCRIPTION;
 import static com.openexchange.find.calendar.CalendarFacetType.LOCATION;
 import static com.openexchange.find.calendar.CalendarFacetType.PARTICIPANT;
+import static com.openexchange.find.calendar.CalendarFacetType.RANGE;
 import static com.openexchange.find.calendar.CalendarFacetType.RECURRING_TYPE;
-import static com.openexchange.find.calendar.CalendarFacetType.RELATIVE_DATE;
 import static com.openexchange.find.calendar.CalendarFacetType.STATUS;
 import static com.openexchange.find.calendar.CalendarFacetType.SUBJECT;
 import java.util.ArrayList;
@@ -102,7 +102,7 @@ public class QueryTest extends CalendarFindTest {
         facets.add(createActiveFieldFacet(SUBJECT, "subject", randomSubstring(appointment.getTitle())));
         facets.add(createActiveFieldFacet(LOCATION, "location", randomSubstring(appointment.getLocation())));
         facets.add(createActiveFieldFacet(DESCRIPTION, "description", randomSubstring(appointment.getNote())));
-        facets.add(createActiveFacet(RELATIVE_DATE, "future", "relative_date", "future"));
+        facets.add(createActiveFacet(RANGE, "one_month", "range", "one_month"));
         facets.add(createActiveFacet(STATUS, "accepted", "status", "accepted"));
         facets.add(createActiveFacet(RECURRING_TYPE, "single", "type", "single"));
         facets.add(createActiveFacet(PARTICIPANT, String.valueOf(client.getValues().getUserId()), "users", String.valueOf(client.getValues().getUserId())));
@@ -148,25 +148,25 @@ public class QueryTest extends CalendarFindTest {
         assertNotNull("appointment not found", findByProperty(documents, "note", appointment.getNote()));
     }
 
-    public void testFilterRelativeDate() throws Exception {
-        Appointment comingAppointment = randomPrivateAppointment();
-        comingAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
-        comingAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
-        comingAppointment = manager.insert(comingAppointment);
-        Appointment pastAppointment = randomPrivateAppointment();
-        pastAppointment.setStartDate(TimeTools.D("yesterday at noon"));
-        pastAppointment.setEndDate(TimeTools.D("yesterday at noon"));
-        pastAppointment = manager.insert(pastAppointment);
+    public void testFilterRange() throws Exception {
+        Appointment soonAppointment = randomPrivateAppointment();
+        soonAppointment.setStartDate(TimeTools.D("tomorrow at noon"));
+        soonAppointment.setEndDate(TimeTools.D("tomorrow at noon"));
+        soonAppointment = manager.insert(soonAppointment);
+        Appointment lateAppointment = randomPrivateAppointment();
+        lateAppointment.setStartDate(TimeTools.D("in 8 months"));
+        lateAppointment.setEndDate(TimeTools.D("in 8 months"));
+        lateAppointment = manager.insert(lateAppointment);
 
-        List<PropDocument> comingDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "future", "relative_date", "future")));
-        assertTrue("no appointments found", 0 < comingDocuments.size());
-        assertNotNull("coming appointment not found", findByProperty(comingDocuments, "title", comingAppointment.getTitle()));
-        assertNull("past appointment found", findByProperty(comingDocuments, "title", pastAppointment.getTitle()));
+        List<PropDocument> oneMonthDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_month", "range", "one_month")));
+        assertTrue("no appointments found", 0 < oneMonthDocuments.size());
+        assertNotNull("expected appointment not found", findByProperty(oneMonthDocuments, "title", soonAppointment.getTitle()));
+        assertNull("unexpected appointment found", findByProperty(oneMonthDocuments, "title", lateAppointment.getTitle()));
 
-        List<PropDocument> pastDocuments = query(Collections.singletonList(createActiveFacet(RELATIVE_DATE, "past", "relative_date", "past")));
-        assertTrue("no appointments found", 0 < pastDocuments.size());
-        assertNotNull("past appointment not found", findByProperty(pastDocuments, "title", pastAppointment.getTitle()));
-        assertNull("coming appointment found", findByProperty(pastDocuments, "title", comingAppointment.getTitle()));
+        List<PropDocument> oneYearDocuments = query(Collections.singletonList(createActiveFacet(RANGE, "one_year", "range", "one_year")));
+        assertTrue("no appointments found", 0 < oneYearDocuments.size());
+        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "title", lateAppointment.getTitle()));
+        assertNotNull("expected appointment not found", findByProperty(oneYearDocuments, "title", soonAppointment.getTitle()));
     }
 
     public void testFilterStatus() throws Exception {

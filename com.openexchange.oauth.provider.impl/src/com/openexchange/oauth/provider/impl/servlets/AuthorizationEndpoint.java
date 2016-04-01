@@ -62,7 +62,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -93,18 +92,20 @@ import com.openexchange.java.util.UUIDs;
 import com.openexchange.log.LogProperties;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.internal.LoginPerformer;
-import com.openexchange.oauth.provider.OAuthProviderConstants;
-import com.openexchange.oauth.provider.OAuthProviderService;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagement;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.grant.GrantManagement;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionCodes;
 import com.openexchange.oauth.provider.exceptions.OAuthProviderExceptionMessages;
+import com.openexchange.oauth.provider.impl.OAuthProviderConstants;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
+import com.openexchange.oauth.provider.impl.ScopeProviderRegistry;
 import com.openexchange.oauth.provider.impl.notification.OAuthMailNotificationService;
 import com.openexchange.oauth.provider.impl.tools.URLHelper;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.serverconfig.ServerConfigService;
@@ -138,12 +139,12 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     /**
      * Initializes a new {@link AuthorizationEndpoint}.
      */
-    public AuthorizationEndpoint(OAuthProviderService oAuthProvider, ServiceLookup services) {
-        super(oAuthProvider, services);
+    public AuthorizationEndpoint(ClientManagement clientManagement, GrantManagement grantManagement, ServiceLookup services) {
+        super(clientManagement, grantManagement, services);
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
         if (!Tools.considerSecure(request)) {
@@ -200,7 +201,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         Tools.disableCaching(response);
         applyFrameOptions(response);
         if (!Tools.considerSecure(request)) {
@@ -388,7 +389,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             }
 
             // Everything OK, send notification mail and do the redirect with authorization code & state
-            String code = oAuthProvider.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), session);
+            String code = grantManagement.generateAuthorizationCodeFor(authRequest.getClient().getId(), authRequest.getRedirectURI(), authRequest.getScope(), session);
             String redirectLocation = URLHelper.getRedirectLocation(
                 authRequest.getRedirectURI(),
                 OAuthProviderConstants.PARAM_CODE,
@@ -426,7 +427,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * @throws OXException
      * @throws IOException
      */
-    private String compileLoginPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, LoginError error) throws OXException, IOException {
+    private String compileLoginPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, LoginError error) throws OXException {
         ServerConfigService serverConfigService = requireService(ServerConfigService.class, services);
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         TemplateService templateService = requireService(TemplateService.class, services);
@@ -532,7 +533,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * @throws OXException
      * @throws IOException
      */
-    private String compileAuthorizationPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, Session session) throws OXException, IOException {
+    private String compileAuthorizationPage(HttpServletRequest request, AuthorizationRequest authRequest, String csrfToken, Session session) throws OXException {
         TranslatorFactory translatorFactory = requireService(TranslatorFactory.class, services);
         TemplateService templateService = requireService(TemplateService.class, services);
         OXTemplate loginPage = templateService.loadTemplate("oauth-provider-authorization.tmpl", OXTemplateExceptionHandler.RETHROW_HANDLER);
@@ -564,7 +565,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         vars.put("introPost", introPost);
         List<String> descriptions = new ArrayList<>(authRequest.getScope().size());
         for (String token : authRequest.getScope().get()) {
-            OAuthScopeProvider scopeProvider = oAuthProvider.getScopeProvider(token);
+            OAuthScopeProvider scopeProvider = grantManagement.getScopeProvider(token);
             if (scopeProvider == null) {
                 LOG.warn("No scope provider available for token {}", token);
                 descriptions.add(token);
@@ -597,7 +598,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
      * @return A URI in the form of <code>data:image/png;charset=UTF-8;base64,iVBORw0KGgoAAAANS...</code>
      * @throws IOException
      */
-    private static String icon2HTMLDataSource(Icon icon) throws IOException {
+    private static String icon2HTMLDataSource(Icon icon) {
         return "data:" + icon.getMimeType() + ";charset=UTF-8;base64," + Base64.encodeBase64String(icon.getData());
     }
 
@@ -795,7 +796,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         }
 
         try {
-            Client client = oAuthProvider.getClientManagement().getClientById(clientId);
+            Client client = clientManagement.getClientById(clientId);
             if (client == null || !client.isEnabled()) {
                 respondWithErrorPage(request, response, HttpServletResponse.SC_BAD_REQUEST, "Invalid client ID: " + clientId);
                 return null;
@@ -920,7 +921,7 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
         String scopeStr = request.getParameter(OAuthProviderConstants.PARAM_SCOPE);
         if (Strings.isEmpty(scopeStr)) {
             scope = client.getDefaultScope();
-        } else if (oAuthProvider.isValidScope(scopeStr)) {
+        } else if (isValidScope(scopeStr)) {
             scope = Scope.parseScope(scopeStr);
         } else {
             response.sendRedirect(URLHelper.getErrorRedirectLocation(redirectURI, "invalid_scope", "Invalid scope: " + scopeStr, OAuthProviderConstants.PARAM_STATE, state));
@@ -1052,6 +1053,25 @@ public class AuthorizationEndpoint extends OAuthEndpoint {
             "The user denied your request.",
             OAuthProviderConstants.PARAM_STATE,
             authRequest.getState());
+    }
+
+    private static boolean isValidScope(String scopeString) {
+        if (Scope.isValidScopeString(scopeString)) {
+            Scope scope = Scope.parseScope(scopeString);
+            if (scope.size() == 0) {
+                return false;
+            }
+
+            for (String token : scope.get()) {
+                if (!ScopeProviderRegistry.getInstance().hasScopeProvider(token)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

@@ -52,6 +52,7 @@ package com.openexchange.cli;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.rmi.AccessException;
+import java.rmi.ConnectException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -72,7 +73,7 @@ import com.openexchange.java.Strings;
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since 7.6.2
  */
-public abstract class AbstractRmiCLI<R> extends AbstractCLI {
+public abstract class AbstractRmiCLI<R> extends AbstractAdministrativeCLI<R, String> {
 
     protected static final AtomicReference<String> RMI_HOSTNAME = new AtomicReference<String>("rmi://localhost:1099/");
 
@@ -125,6 +126,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @param args The arguments
      * @return The return value
      */
+    @Override
     public R execute(final String[] args) {
         Options options = newOptions();
         boolean error = true;
@@ -221,6 +223,8 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
                 throw x;
             } catch (NotBoundException x) {
                 throw x;
+            } catch (ConnectException x) {
+                throw x;
             } catch (Exception e) {
                 Throwable t = e.getCause();
                 throw new ExecutionFault(null == t ? e : t);
@@ -239,13 +243,17 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
             System.err.println("Remote stub not found: " + e.getMessage());
         } catch (final MalformedURLException e) {
             System.err.println("URL to connect to server is invalid: " + e.getMessage());
+        } catch (final ConnectException e) {
+            System.err.println("Unable to connect to server");
         } catch (final IOException e) {
             System.err.println("Unable to communicate with the server: " + e.getMessage());
         } catch (final RuntimeException e) {
-            System.err.println("Problem in runtime: " + e.getMessage());
-        } catch (final Error t) {
-            String message = t.getMessage();
-            String clazzName = t.getClass().getName();
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
+            System.err.println("A runtime error occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
+        } catch (final Error e) {
+            String message = e.getMessage();
+            String clazzName = e.getClass().getName();
             System.err.println("A JVM problem occurred: " + (null == message ? clazzName : new StringBuilder(clazzName).append(": ").append(message).toString()));
         } catch (final Throwable t) {
             String message = t.getMessage();
@@ -312,10 +320,11 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      *
      * @param options The options
      */
+    @Override
     protected abstract void addOptions(Options options);
 
     /**
-     * Invokes the MBean's method.
+     * Invokes the RMI method.
      *
      * @param options The options
      * @param cmd The command line providing parameters/options
@@ -323,6 +332,7 @@ public abstract class AbstractRmiCLI<R> extends AbstractCLI {
      * @return The return value
      * @throws Exception If invocation fails
      */
+    @Override
     protected abstract R invoke(Options options, CommandLine cmd, String optRmiHostName) throws Exception;
 
     /**

@@ -86,12 +86,6 @@ public class LostAndFoundUnitTests {
         tests.addTestSuite(com.openexchange.groupware.calendar.CalendarMoveTest.class);
         tests.addTestSuite(com.openexchange.groupware.contexts.LoginTest.class);
         tests.addTestSuite(com.openexchange.groupware.reminder.ReminderTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.ClearLeftoverAttachmentsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.ClearOrphanedInfostoreDocumentsTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.CreateGenconfTablesTaskTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.CreatePublishTablesTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.CreateSubscribeTableTest.class);
-        tests.addTestSuite(com.openexchange.groupware.update.RenamePersonalInfostoreFoldersTest.class);
         tests.addTestSuite(com.openexchange.mail.MailAccessTest.class);
         tests.addTestSuite(com.openexchange.mail.MailFolderTest.class);
         tests.addTestSuite(com.openexchange.mail.MailJSONHandlerTest.class);

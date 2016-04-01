@@ -74,14 +74,14 @@ import com.openexchange.contact.vcard.impl.internal.VCardExceptionCodes;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.Contact;
+import com.openexchange.imagetransformation.ImageTransformationService;
+import com.openexchange.imagetransformation.ScaleType;
+import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.java.Charsets;
 import com.openexchange.java.Streams;
 import com.openexchange.mail.mime.MimeType2ExtMap;
 import com.openexchange.tools.ImageTypeDetector;
 import com.openexchange.tools.encoding.Base64;
-import com.openexchange.tools.images.ImageTransformationService;
-import com.openexchange.tools.images.ScaleType;
-import com.openexchange.tools.images.TransformedImage;
 import ezvcard.VCard;
 import ezvcard.parameter.ImageType;
 import ezvcard.property.Photo;
@@ -133,18 +133,25 @@ public class PhotoMapping extends AbstractMapping {
             ImageType imageType = getImageType(contact.getImageContentType());
             TransformedImage transformedImage = null;
             try {
-                transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), parameters, warnings);
-            } catch (OXException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            } catch (RuntimeException e) {
-                addConversionWarning(warnings, e, "PHOTO", e.getMessage());
-            }
-            if (null != transformedImage) {
-                Photo photo = new Photo(transformedImage.getImageData(), imageType);
-                photo.addParameter(X_ABCROP_RECTANGLE, getABCropRectangle(transformedImage));
-                return photo;
-            } else {
-                return new Photo(contactImage, imageType);
+                try {
+                    transformedImage = scaleImageIfNeeded(contactImage, getFormatName(imageType), parameters, warnings);
+                } catch (OXException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                } catch (RuntimeException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                }
+                if (null == transformedImage) {
+                    return new Photo(contactImage, imageType);
+                }
+                try {
+                    Photo photo = new Photo(transformedImage.getImageData(), imageType);
+                    photo.addParameter(X_ABCROP_RECTANGLE, getABCropRectangle(transformedImage));
+                    return photo;
+                } catch (OXException e) {
+                    addConversionWarning(warnings, e, "PHOTO", e.getMessage());
+                }
+            } finally {
+                Streams.close(transformedImage);
             }
         }
         return null;
@@ -243,7 +250,7 @@ public class PhotoMapping extends AbstractMapping {
         }
         try {
             return imageService.transfom(imageBytes, getSource(parameters))
-                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getTransformedImage(formatName);
+                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getFullTransformedImage(formatName);
         } catch (IOException e) {
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

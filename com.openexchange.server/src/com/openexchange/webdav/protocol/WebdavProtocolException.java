@@ -234,18 +234,13 @@ public class WebdavProtocolException extends OXException implements WebdavStatus
         public WebdavProtocolException create(final WebdavPath url, final int status, final Throwable cause, final Object... args) {
             final Category category = getCategory();
             final WebdavProtocolException ret;
+            String message = getMessage() + " (HTTP " + status + ')';
             if (category.getLogLevel().implies(LogLevel.DEBUG)) {
-                ret = new WebdavProtocolException(status, url, getNumber(), getMessage(), cause, args);
+                ret = new WebdavProtocolException(status, url, getNumber(), message, cause, args);
             } else {
-                ret =
-                    new WebdavProtocolException(
-                        status,
-                        url,
-                        getNumber(),
-                        Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE,
-                            cause,
-                            new Object[0]);
-                ret.setLogMessage(getMessage(), args);
+                String displayMessage = Category.EnumType.TRY_AGAIN.equals(category.getType()) ? OXExceptionStrings.MESSAGE_RETRY : OXExceptionStrings.MESSAGE;
+                ret = new WebdavProtocolException(status, url, getNumber(), displayMessage, cause, new Object[0]);
+                ret.setLogMessage(message, args);
             }
             ret.addCategory(category);
             ret.setPrefix(getPrefix());

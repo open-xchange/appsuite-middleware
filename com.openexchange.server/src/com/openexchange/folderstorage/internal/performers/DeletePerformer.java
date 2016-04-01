@@ -61,8 +61,6 @@ import com.openexchange.folderstorage.FolderStorageDiscoverer;
 import com.openexchange.folderstorage.FolderType;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.folderstorage.SortableId;
-import com.openexchange.folderstorage.StorageParameters;
-import com.openexchange.folderstorage.cache.CacheFolderStorageRegistry;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.tx.TransactionManager;
 import com.openexchange.folderstorage.virtual.VirtualFolderStorage;
@@ -142,6 +140,7 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
             }
 
             TransactionManager transactionManager = TransactionManager.initTransaction(storageParameters);
+            boolean rollbackTransaction = true;
             /*
              * Throws an exception if someone tries to add an element. If this happens, you found a bug.
              * As long as a TransactionManager is present, every storage has to add itself to the
@@ -179,12 +178,15 @@ public final class DeletePerformer extends AbstractUserizedFolderPerformer {
                  * Commit
                  */
                 transactionManager.commit();
+                rollbackTransaction = false;
             } catch (final OXException e) {
-                transactionManager.rollback();
                 throw e;
             } catch (final Exception e) {
-                transactionManager.rollback();
                 throw FolderExceptionErrorMessage.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                if (rollbackTransaction) {
+                    transactionManager.rollback();
+                }
             }
         } else if (VirtualFolderStorage.FOLDER_TREE_EAS.equals(treeId)) {
             FolderStorage folderStorage = folderStorageDiscoverer.getFolderStorage(treeId, folderId);

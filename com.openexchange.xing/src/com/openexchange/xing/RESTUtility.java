@@ -94,6 +94,7 @@ import com.openexchange.xing.exception.XingApiException;
 import com.openexchange.xing.exception.XingException;
 import com.openexchange.xing.exception.XingIOException;
 import com.openexchange.xing.exception.XingParseException;
+import com.openexchange.xing.exception.XingPermissionDeniedException;
 import com.openexchange.xing.exception.XingSSLException;
 import com.openexchange.xing.exception.XingServerException;
 import com.openexchange.xing.exception.XingUnlinkedException;
@@ -292,6 +293,7 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException if any network-related error occurs.
      * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingPermissionDeniedException if XING denies the requested action due to insufficient permissions granted to the associated XING app.
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
@@ -351,6 +353,7 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException if any network-related error occurs.
      * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingPermissionDeniedException if XING denies the requested action due to insufficient permissions granted to the associated XING app.
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
@@ -400,6 +403,7 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException if any network-related error occurs while reading in content from the {@link HttpResponse}.
      * @throws XingUnlinkedException if the user has revoked access.
+     * @throws XingPermissionDeniedException if XING denies the requested action due to insufficient permissions granted to the associated XING app.
      * @throws XingParseException if a malformed or unknown response was received from the server.
      * @throws XingException for any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
@@ -454,10 +458,13 @@ public class RESTUtility {
         return result;
     }
 
-    private static void checkForError(final JSONObject responseObject) throws XingApiException, XingUnlinkedException {
+    private static void checkForError(final JSONObject responseObject) throws XingApiException, XingUnlinkedException, XingPermissionDeniedException {
         if (responseObject.has("error_name")) {
             if ("Invalid OAuth token".equals(responseObject.optString("message"))) {
                 throw new XingUnlinkedException("Invalid OAuth token");
+            }
+            if ("INSUFFICIENT_PRIVILEGES".equals(responseObject.optString("error_name"))) {
+                throw new XingPermissionDeniedException("Insufficient Privileges");
             }
             throw new XingApiException(responseObject);
         }
@@ -509,6 +516,7 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException If any network-related error occurs.
      * @throws XingUnlinkedException If the user has revoked access.
+     * @throws XingPermissionDeniedException if XING denies the requested action due to insufficient permissions granted to the associated XING app.
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */
@@ -528,6 +536,7 @@ public class RESTUtility {
      *             meaning of each error code.
      * @throws XingIOException If any network-related error occurs.
      * @throws XingUnlinkedException If the user has revoked access.
+     * @throws XingPermissionDeniedException if XING denies the requested action due to insufficient permissions granted to the associated XING app.
      * @throws XingException For any other unknown errors. This is also a superclass of all other XING exceptions, so you may want to only
      *             catch this exception which signals that some kind of error occurred.
      */

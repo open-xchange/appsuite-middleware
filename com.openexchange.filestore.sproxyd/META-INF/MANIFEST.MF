@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: The Sproxyd file storage
 Bundle-SymbolicName: com.openexchange.filestore.sproxyd
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.ajax.container,
@@ -14,6 +14,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.database,
  com.openexchange.exception,
  com.openexchange.filestore,
+ com.openexchange.filestore.utils,
  com.openexchange.groupware.contexts,
  com.openexchange.groupware.delete,
  com.openexchange.groupware.filestore,

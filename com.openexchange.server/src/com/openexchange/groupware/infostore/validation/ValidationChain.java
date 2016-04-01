@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.infostore.DocumentMetadata;
 import com.openexchange.groupware.infostore.InfostoreExceptionCodes;
@@ -89,12 +90,12 @@ public class ValidationChain {
         validators.add(validator);
     }
 
-    public void validate(ServerSession session, DocumentMetadata metadata) throws OXException {
+    public void validate(ServerSession session, DocumentMetadata metadata, DocumentMetadata originalDocument, Set<Metadata> updatedColumns) throws OXException {
         final StringBuilder message = new StringBuilder();
         boolean failed = false;
         OXException exception = null;
         for (final InfostoreValidator validator : validators) {
-            final DocumentMetadataValidation validation = validator.validate(session, metadata);
+            final DocumentMetadataValidation validation = validator.validate(session, metadata, originalDocument, updatedColumns);
             if (!validation.isValid()) {
                 {
                     OXException fatalException = validation.getFatalException();

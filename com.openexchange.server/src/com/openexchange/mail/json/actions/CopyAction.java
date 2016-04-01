@@ -89,19 +89,16 @@ public final class CopyAction extends AbstractMailAction {
     @Override
     protected AJAXRequestResult perform(final MailRequest req) throws OXException {
         try {
-            //final ServerSession session = req.getSession();
-            /*
-             * Read in parameters
-             */
-            final String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
-            final String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
-            final String destFolder = ((JSONObject) req.getRequest().requireData()).getString(FolderChildFields.FOLDER_ID);
-            /*
-             * Get mail interface
-             */
-            final MailServletInterface mailInterface = getMailInterface(req);
-            final String msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, false)[0];
-            final JSONObject data = new JSONObject();
+            //Read in parameters
+            String uid = req.checkParameter(AJAXServlet.PARAMETER_ID);
+            String sourceFolder = req.checkParameter(AJAXServlet.PARAMETER_FOLDERID);
+            String destFolder = ((JSONObject) req.getRequest().requireData()).getString(FolderChildFields.FOLDER_ID);
+
+            // Get mail interface
+            MailServletInterface mailInterface = getMailInterface(req);
+            String msgUID = mailInterface.copyMessages(sourceFolder, destFolder, new String[] { uid }, false)[0];
+
+            JSONObject data = new JSONObject(4);
             data.put(FolderChildFields.FOLDER_ID, destFolder);
             data.put(DataFields.ID, msgUID);
             return new AJAXRequestResult(data, "json");

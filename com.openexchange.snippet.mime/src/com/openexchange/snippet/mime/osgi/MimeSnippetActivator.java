@@ -54,6 +54,7 @@ import java.util.Hashtable;
 import org.osgi.framework.Constants;
 import com.openexchange.caching.CacheService;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.config.cascade.ConfigViewFactory;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
 import com.openexchange.database.CreateTableService;
@@ -65,11 +66,13 @@ import com.openexchange.groupware.update.UpdateTaskProviderService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.id.IDGeneratorService;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.snippet.SnippetService;
 import com.openexchange.snippet.mime.MimeSnippetService;
 import com.openexchange.snippet.mime.Services;
 import com.openexchange.snippet.mime.groupware.MimeSnippetCreateTableTask;
 import com.openexchange.snippet.mime.groupware.MimeSnippetDeleteListener;
+import com.openexchange.snippet.mime.groupware.MimeSnippetQuotaProvider;
 
 /**
  * {@link MimeSnippetActivator} - The activator for MIME Snippet bundle.
@@ -89,7 +92,7 @@ public class MimeSnippetActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class<?>[] {
             DatabaseService.class, ContextService.class, CacheService.class, CryptoService.class, IDGeneratorService.class,
-            ConfigurationService.class, ManagedFileManagement.class, HtmlService.class };
+            ConfigurationService.class, ManagedFileManagement.class, HtmlService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -125,9 +128,15 @@ public class MimeSnippetActivator extends HousekeepingActivator {
             /*
              * Register
              */
-            final Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
+            MimeSnippetQuotaProvider quotaProvider = new MimeSnippetQuotaProvider();
+            MimeSnippetService snippetService = new MimeSnippetService(quotaProvider);
+
+            Dictionary<String, Object> properties = new Hashtable<String, Object>(2);
             properties.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
-            registerService(SnippetService.class, new MimeSnippetService(), properties);
+            registerService(SnippetService.class, snippetService, properties);
+
+            quotaProvider.setSnippetService(snippetService);
+            registerService(QuotaProvider.class, quotaProvider);
         } catch (final Exception e) {
             logger.error("Error starting bundle: com.openexchange.snippet.mime", e);
             throw e;

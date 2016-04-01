@@ -124,29 +124,38 @@ public class GoogleApiClients {
         OAuthAccount defaultAccount = oAuthService.getDefaultAccount(API.GOOGLE, session);
 
         if (reacquireIfExpired) {
-            // Create Scribe Google OAuth service
-            final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
-            serviceBuilder.apiKey(defaultAccount.getMetaData().getAPIKey(session)).apiSecret(defaultAccount.getMetaData().getAPISecret(session));
-            Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
+            try {
+                // Create Scribe Google OAuth service
+                final ServiceBuilder serviceBuilder = new ServiceBuilder().provider(Google2Api.class);
+                serviceBuilder.apiKey(defaultAccount.getMetaData().getAPIKey(session)).apiSecret(defaultAccount.getMetaData().getAPISecret(session));
+                Google2Api.GoogleOAuth2Service scribeOAuthService = (Google2Api.GoogleOAuth2Service) serviceBuilder.build();
 
-            // Check expiry
-            int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
-            if (expiry < 300) {
-                // Less than 5 minutes to live -> refresh token!
-                String refreshToken = defaultAccount.getSecret();
-                Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
-                if (!Strings.isEmpty(accessToken.getSecret())) {
-                    refreshToken = accessToken.getSecret();
+                // Check expiry
+                int expiry = scribeOAuthService.getExpiry(defaultAccount.getToken());
+                if (expiry < 300) {
+                    // Less than 5 minutes to live -> refresh token!
+                    String refreshToken = defaultAccount.getSecret();
+                    Token accessToken = scribeOAuthService.getAccessToken(new Token(defaultAccount.getToken(), defaultAccount.getSecret()), null);
+                    if (!Strings.isEmpty(accessToken.getSecret())) {
+                        refreshToken = accessToken.getSecret();
+                    }
+                    // Update account
+                    int accountId = defaultAccount.getId();
+                    Map<String, Object> arguments = new HashMap<String, Object>(3);
+                    arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
+                    arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
+                    oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
+
+                    // Reload
+                    defaultAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
                 }
-                // Update account
-                int accountId = defaultAccount.getId();
-                Map<String, Object> arguments = new HashMap<String, Object>(3);
-                arguments.put(OAuthConstants.ARGUMENT_REQUEST_TOKEN, new DefaultOAuthToken(accessToken.getToken(), refreshToken));
-                arguments.put(OAuthConstants.ARGUMENT_SESSION, session);
-                oAuthService.updateAccount(accountId, arguments, session.getUserId(), session.getContextId());
-
-                // Reload
-                defaultAccount = oAuthService.getAccount(accountId, session, session.getUserId(), session.getContextId());
+            } catch (org.scribe.exceptions.OAuthException e) {
+                // Failed to request new access token
+                if (e.getMessage().indexOf("\"invalid_grant\"") >= 0) {
+                    // Refresh token in use is invalid/expired
+                    throw OAuthExceptionCodes.INVALID_ACCOUNT_EXTENDED.create(e, defaultAccount.getDisplayName(), defaultAccount.getId());
+                }
+                throw OAuthExceptionCodes.OAUTH_ERROR.create(e, e.getMessage());
             }
         }
 

@@ -122,10 +122,12 @@ import com.openexchange.event.impl.osgi.OSGiEventDispatcher;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.composition.IDBasedFileAccessFactory;
+import com.openexchange.file.storage.composition.IDBasedFolderAccessFactory;
 import com.openexchange.file.storage.parse.FileMetadataParserService;
 import com.openexchange.file.storage.registry.FileStorageServiceRegistry;
 import com.openexchange.filemanagement.DistributedFileManagement;
 import com.openexchange.filemanagement.ManagedFileManagement;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.folder.FolderDeleteListenerService;
 import com.openexchange.folder.FolderService;
 import com.openexchange.folder.internal.FolderDeleteListenerServiceTrackerCustomizer;
@@ -162,11 +164,14 @@ import com.openexchange.guest.GuestService;
 import com.openexchange.html.HtmlService;
 import com.openexchange.i18n.I18nService;
 import com.openexchange.id.IDGeneratorService;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.lock.LockService;
 import com.openexchange.lock.impl.LockServiceImpl;
 import com.openexchange.log.Slf4jLogger;
 import com.openexchange.login.BlockingLoginHandlerService;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.login.internal.LoginNameRecorder;
+import com.openexchange.login.listener.LoginListener;
 import com.openexchange.mail.MailCounterImpl;
 import com.openexchange.mail.MailIdleCounterImpl;
 import com.openexchange.mail.MailQuotaProvider;
@@ -201,8 +206,9 @@ import com.openexchange.messaging.registry.MessagingServiceRegistry;
 import com.openexchange.mime.MimeTypeMap;
 import com.openexchange.multiple.MultipleHandlerFactoryService;
 import com.openexchange.multiple.internal.MultipleHandlerServiceTracker;
-import com.openexchange.oauth.provider.OAuthResourceService;
-import com.openexchange.oauth.provider.OAuthSessionProvider;
+import com.openexchange.oauth.provider.resourceserver.OAuthResourceService;
+import com.openexchange.objectusecount.ObjectUseCountService;
+import com.openexchange.objectusecount.service.ObjectUseCountServiceTracker;
 import com.openexchange.osgi.BundleServiceTracker;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
@@ -228,7 +234,6 @@ import com.openexchange.systemname.SystemNameService;
 import com.openexchange.textxtraction.TextXtractService;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.images.ImageTransformationService;
 import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tools.strings.StringParser;
 import com.openexchange.uadetector.UserAgentParser;
@@ -292,10 +297,10 @@ public final class ServerActivator extends HousekeepingActivator {
         ConfigurationService.class, DatabaseService.class, CacheService.class, EventAdmin.class, SessiondService.class, SpringParser.class,
         JDOMParser.class, TimerService.class, ThreadPoolService.class, CalendarAdministrationService.class,
         AppointmentSqlFactoryService.class, CalendarCollectionService.class, MessagingServiceRegistry.class, HtmlService.class,
-        IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
-        CryptoService.class, HttpService.class, SystemNameService.class, ImageTransformationService.class, ConfigViewFactory.class,
-        StringParser.class, PreviewService.class, TextXtractService.class, SecretEncryptionFactoryService.class,
-        SearchService.class, DispatcherPrefixService.class, UserAgentParser.class, PasswordMechFactory.class };
+        IDBasedFolderAccessFactory.class, IDBasedFileAccessFactory.class, FileStorageServiceRegistry.class, FileStorageAccountManagerLookupService.class,
+        CryptoService.class, HttpService.class, SystemNameService.class, ConfigViewFactory.class, StringParser.class, PreviewService.class,
+        TextXtractService.class, SecretEncryptionFactoryService.class, SearchService.class, DispatcherPrefixService.class,
+        UserAgentParser.class, PasswordMechFactory.class };
 
     private static volatile BundleContext CONTEXT;
 
@@ -416,6 +421,9 @@ public final class ServerActivator extends HousekeepingActivator {
         track(CapabilityService.class, new MailCapabilityServiceTracker(context));
         track(AttachmentTokenService.class, new RegistryCustomizer<AttachmentTokenService>(context, AttachmentTokenService.class));
 
+        // Image transformation service
+        track(ImageTransformationService.class, new RegistryCustomizer<ImageTransformationService>(context, ImageTransformationService.class));
+
         // Transport provider service tracker
         track(TransportProvider.class, new TransportProviderServiceTracker(context));
 
@@ -524,6 +532,8 @@ public final class ServerActivator extends HousekeepingActivator {
         // Login handler
         track(LoginHandlerService.class, new LoginHandlerCustomizer(context));
         track(BlockingLoginHandlerService.class, new BlockingLoginHandlerCustomizer(context));
+        // Login listener
+        track(LoginListener.class, new LoginListenerCustomizer(context));
         // Multiple handler factory services
         track(MultipleHandlerFactoryService.class, new MultipleHandlerServiceTracker(context));
 
@@ -559,7 +569,11 @@ public final class ServerActivator extends HousekeepingActivator {
          * Track OAuth provider services
          */
         track(OAuthResourceService.class, new RegistryCustomizer<OAuthResourceService>(context, OAuthResourceService.class));
-        track(OAuthSessionProvider.class, new RegistryCustomizer<OAuthSessionProvider>(context, OAuthSessionProvider.class));
+
+        /*
+         * Track QuotaFileStorageService
+         */
+        track(QuotaFileStorageService.class, new RegistryCustomizer<QuotaFileStorageService>(context, QuotaFileStorageService.class));
 
         /*
          * User Alias Service
@@ -596,6 +610,8 @@ public final class ServerActivator extends HousekeepingActivator {
         UserService userService = new UserServiceImpl(interceptorRegistry, getService(PasswordMechFactory.class));
         ServerServiceRegistry.getInstance().addService(UserService.class, userService);
 
+        track(ObjectUseCountService.class, new ObjectUseCountServiceTracker(context));
+
         // Start up server the usual way
         starter.start();
         // Open service trackers
@@ -615,14 +631,13 @@ public final class ServerActivator extends HousekeepingActivator {
         ServerServiceRegistry.getInstance().addService(GroupService.class, groupService);
         registerService(ResourceService.class, ServerServiceRegistry.getInstance().getService(ResourceService.class, true));
         ServerServiceRegistry.getInstance().addService(UserConfigurationService.class, new UserConfigurationServiceImpl());
-        registerService(
-            UserConfigurationService.class,
-            ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
+        registerService(UserConfigurationService.class, ServerServiceRegistry.getInstance().getService(UserConfigurationService.class, true));
 
         ServerServiceRegistry.getInstance().addService(UserPermissionService.class, new UserPermissionServiceImpl());
         registerService(UserPermissionService.class, ServerServiceRegistry.getInstance().getService(UserPermissionService.class, true));
 
-        registerService(ContextService.class, ServerServiceRegistry.getInstance().getService(ContextService.class, true));
+        ContextService contextService = ServerServiceRegistry.getInstance().getService(ContextService.class, true);
+        registerService(ContextService.class, contextService);
         // Register mail stuff
         MailServiceImpl mailService = new MailServiceImpl();
         {
@@ -655,10 +670,11 @@ public final class ServerActivator extends HousekeepingActivator {
                 }
             });
         }
-        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(this));
+        registerService(NoReplyConfigFactory.class, new DefaultNoReplyConfigFactory(contextService, getService(ConfigViewFactory.class)));
         // TODO: Register server's login handler here until its encapsulated in an own bundle
         registerService(LoginHandlerService.class, new MailLoginHandler());
         registerService(LoginHandlerService.class, new TransportLoginHandler());
+        registerService(LoginHandlerService.class, new LoginNameRecorder(userService));
         // registrationList.add(context.registerService(LoginHandlerService.class.getName(), new PasswordCrypter(), null));
         // Register table creation for mail account storage.
         registerService(CreateTableService.class, new CreateMailAccountTables());

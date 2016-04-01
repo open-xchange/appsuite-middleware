@@ -136,7 +136,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         /*
          * background
          */
-        values.add("Nc");
+        values.add("iNc");
         values.add("scroll");
         values.add("fixed");
         values.add("transparent");
@@ -154,7 +154,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
         /*
          * background-image
          */
-        values.add("d"); // delete
+        values.add("i"); // Only "cid:" URLs
         IMAGE_STYLE_MAP.put("background-image", values);
         /*
          * ALL tags
@@ -717,7 +717,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                 // Allow inline images
                                 attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                             } else {
-                                attrBuilder.append(' ').append(attr).append("=\"\"");
+                                attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
                                 imageURLFound = true;
                                 // return;
                             }
@@ -745,7 +745,7 @@ public final class FilterJerichoHandler implements JerichoHandler {
                                             // Allow inline images
                                             attrBuilder.append(' ').append(attr).append("=\"").append(CharacterReference.encode(val)).append('"');
                                         } else {
-                                            attrBuilder.append(' ').append(attr).append("=\"\"");
+                                            attrBuilder.append(' ').append(attr).append("=\"\" data-original-src=\"").append(CharacterReference.encode(val)).append('"');
                                             imageURLFound = true;
                                             // return;
                                         }

@@ -101,7 +101,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
     private void loadLoginInfo(final Map<Integer, Context> contexts) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             throw new StorageException(e);
         }
@@ -129,7 +129,7 @@ public class LoginInfoLoader implements Filter<Context, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("", e);
             }

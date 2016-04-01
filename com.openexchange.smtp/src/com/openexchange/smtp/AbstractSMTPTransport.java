@@ -93,12 +93,14 @@ import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.groupware.notify.hostname.HostnameService;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.java.UnsynchronizedByteArrayInputStream;
 import com.openexchange.java.util.MsisdnCheck;
 import com.openexchange.log.LogProperties;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailPath;
+import com.openexchange.mail.api.MailAccess;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailMessage;
@@ -118,6 +120,7 @@ import com.openexchange.mail.transport.MtaStatusInfo;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.mail.transport.listener.Reply;
 import com.openexchange.mail.transport.listener.Result;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mailaccount.MailAccount;
 import com.openexchange.session.Session;
 import com.openexchange.smtp.config.ISMTPProperties;
@@ -220,7 +223,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
      */
     protected abstract void setReplyHeaders(MimeMessage mimeMessage, MailPath msgref) throws OXException, MessagingException;
 
-    protected abstract SMTPMessageFiller createSMTPMessageFiller() throws OXException;
+    protected abstract SMTPMessageFiller createSMTPMessageFiller(UserSettingMail optMailSettings) throws OXException;
 
     protected abstract SMTPConfig createSMTPConfig() throws OXException;
 
@@ -476,7 +479,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPHOST, smtpConfig.getServer());
                     // smtpProps.put(MIMESessionPropertyNames.PROP_SMTPPORT, sPort);
                     smtpSession = javax.mail.Session.getInstance(smtpProps, null);
-                    smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "OX Software GmbH", "7.2.2"));
+                    smtpSession.addProvider(new Provider(Provider.Type.TRANSPORT, "smtp", JavaSMTPTransport.class.getName(), "OX Software GmbH", MailAccess.getVersion()));
                 }
             }
         }
@@ -728,7 +731,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                         /*
                          * Set common headers
                          */
-                        final SMTPMessageFiller smtpFiller = createSMTPMessageFiller();
+                        final SMTPMessageFiller smtpFiller = createSMTPMessageFiller(null);
                         smtpFiller.setAccountId(accountId);
                         smtpFiller.setCommonHeaders(mimeMessage);
                     }
@@ -745,7 +748,7 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
                 /*
                  * Fill message dependent on send type
                  */
-                final SMTPMessageFiller smtpFiller = createSMTPMessageFiller();
+                final SMTPMessageFiller smtpFiller = createSMTPMessageFiller(composedMail.getMailSettings());
                 smtpFiller.setAccountId(accountId);
                 composedMail.setFiller(smtpFiller);
                 try {
@@ -847,6 +850,63 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
     }
 
     @Override
+    public void sendRawMessage(InputStream stream, SendRawProperties properties) throws OXException {
+        if (properties.isSanitizeHeaders()) {
+            // Cannot sanitize stream...
+            try {
+                sendRawMessage(Streams.stream2bytes(stream), properties);
+            } catch (IOException e) {
+                throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
+            }
+            return;
+        }
+
+        final SMTPConfig smtpConfig = getTransportConfig();
+        try {
+            final SMTPMessage smtpMessage = new SMTPMessage(getSMTPSession(), stream);
+            InternetAddress sender = properties.getSender();
+            if (sender != null) {
+                smtpMessage.setEnvelopeFrom(sender.getAddress());
+            }
+            /*
+             * Check recipients
+             */
+            Address[] recipients = properties.getRecipients();
+            if (recipients == null) {
+                recipients = smtpMessage.getAllRecipients();
+            }
+            if (properties.isValidateAddressHeaders()) {
+                processAddressHeader(smtpMessage);
+            }
+            final boolean poisoned = checkRecipients(recipients);
+            if (poisoned) {
+                saveChangesSafe(smtpMessage, true);
+            } else {
+                try {
+                    final long start = System.currentTimeMillis();
+                    final Transport transport = getSMTPSession().getTransport(SMTP);
+                    try {
+                        connectTransport(transport, smtpConfig);
+                        saveChangesSafe(smtpMessage, true);
+                        transport(smtpMessage, recipients, transport, smtpConfig);
+                        mailInterfaceMonitor.addUseTime(System.currentTimeMillis() - start);
+                    } catch (final javax.mail.AuthenticationFailedException e) {
+                        throw MimeMailExceptionCode.TRANSPORT_INVALID_CREDENTIALS.create(e, smtpConfig.getServer(), e.getMessage());
+                    } finally {
+                        transport.close();
+                    }
+                } catch (final MessagingException e) {
+                    throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+                }
+            }
+        } catch (final MessagingException e) {
+            throw MimeMailException.handleMessagingException(e, smtpConfig, session);
+        } finally {
+            Streams.close(stream);
+        }
+    }
+
+    @Override
     public MailMessage sendRawMessage(final byte[] asciiBytes, final Address[] allRecipients) throws OXException {
         final SMTPConfig smtpConfig = getTransportConfig();
         final SMTPMessage smtpMessage;
@@ -859,6 +919,20 @@ abstract class AbstractSMTPTransport extends MailTransport implements MimeSuppor
 
         MimeMessage sentMimeMessage = sendMimeMessage(smtpMessage, allRecipients, null);
         return MimeMessageConverter.convertMessage(sentMimeMessage);
+    }
+
+    @Override
+    public void sendRawMessage(InputStream stream, Address[] allRecipients) throws OXException {
+        SMTPConfig smtpConfig = getTransportConfig();
+        final SMTPMessage smtpMessage;
+        try {
+            smtpMessage = new SMTPMessage(getSMTPSession(), stream);
+            smtpMessage.removeHeader("x-original-headers");
+        } catch (final MessagingException e) {
+            throw handleMessagingException(e, smtpConfig);
+        }
+
+        sendMimeMessage(smtpMessage, allRecipients, null);
     }
 
     @Override

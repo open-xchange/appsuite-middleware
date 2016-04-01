@@ -1,0 +1,70 @@
+#!/usr/bin/perl
+#%# family=auto
+#%# capabilities=autoconf
+
+use strict;
+
+use LWP;
+use JSON;
+
+###
+# Infos about HTTP keepalive:
+#   hits count:    Requests that get handled via a "keep-alive" enabled connection.
+#   live count:    The number of live keep-alive connections.
+#   refuses count: the number of times keep-alive mode was refused.
+#   timeouts cout: Connections that weren't closed to signal completion according to HTTP1.0/1.1 but simply timed out. 
+###
+
+if ( $ARGV[0] and $ARGV[0] eq "autoconf")
+{
+    print "yes\n";
+    exit 0;
+}
+
+if ( $ARGV[0] and $ARGV[0] eq "config") {
+	print "graph_title Rate Limiter\n";
+	print "graph_category Open Xchange\n";
+	print "graph_vlabel Number\n";
+	print "a.label Requests per minute\n";
+	print "a.draw LINE1\n";
+	print "b.label Client slot count\n";
+	print "b.draw LINE1\n";
+	exit 0;    
+}
+
+my $url = $ENV{oxJolokiaUrl};
+my $username = $ENV{oxJolokiaUser};
+my $password = $ENV{oxJolokiaPassword};
+
+callUrl("a","/read/com.openexchange.monitoring:name=RateLimiterMonitor/ProcessedRequestsPerMinute");
+callUrl("b","/read/com.openexchange.monitoring:name=RateLimiterMonitor/SlotCount");
+
+sub callUrl {
+	my $ua = LWP::UserAgent->new();
+	my $req = HTTP::Request->new(GET => "$url$_[1]");
+	$req->authorization_basic($username,$password);
+	
+	$req->header('Accept', => 'text/html');
+	
+	my $response = $ua->request($req);
+	
+	if ($response->is_success) {
+		my $json = decode_json($response->decoded_content);
+		if (defined $json->{value}){
+			print "$_[0].value ";
+			print $json->{value},"\n";
+		}
+	}
+	else {
+		my $status = $response->status_line;
+		if ($status == 404) {
+			die "Link to servlet might not be set correctly, this can be done by altering /etc/munin/plugin-conf.d/ox and setting the correct path to your jolokia servlet";
+		}
+		elsif ($status == 401) {
+			die "Credentials to login might be not set correctly. The credentials are set inside /opt/open-xchange/etc/jolokia.properties on the OX, for munin, those need to be altered at /etc/munin/plugin-conf.d/ox";
+		}
+		else {
+			die "Something went wrong:\n",$status;
+		}
+	}
+}

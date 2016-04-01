@@ -49,8 +49,11 @@
 
 package com.openexchange.halo.pictures;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
 import com.openexchange.ajax.container.ByteArrayFileHolder;
+import com.openexchange.ajax.helper.DownloadUtility;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.DispatcherNotes;
@@ -62,6 +65,7 @@ import com.openexchange.halo.Picture;
 import com.openexchange.java.Strings;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.servlet.http.Tools;
 import com.openexchange.tools.session.ServerSession;
 
@@ -74,8 +78,26 @@ import com.openexchange.tools.session.ServerSession;
 @DispatcherNotes(allowPublicSession=true, defaultFormat="file")
 public class GetPictureAction implements ETagAwareAJAXActionService {
 
+    private static final byte[] TRANSPARENT_GIF = { 71, 73, 70, 56, 57, 97, 1, 0, 1, 0, -128, 0, 0, 0, 0, 0, -1, -1, -1, 33, -7, 4, 1, 0, 0, 0, 0, 44, 0, 0, 0, 0, 1, 0, 1, 0, 0, 2, 1, 68, 0, 59 };
+
+    private static final Picture FALLBACK_PICTURE;
+
+    static {
+        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
+        fileHolder.setContentType("image/gif");
+        fileHolder.setName("image.gif");
+        FALLBACK_PICTURE = new Picture(null, fileHolder);
+    }
+
+    // -----------------------------------------------------------------------------------------------------------------------------
+
     private final ServiceLookup services;
 
+    /**
+     * Initializes a new {@link GetPictureAction}.
+     *
+     * @param services The OSGi service look-up
+     */
     public GetPictureAction(ServiceLookup services) {
         super();
         this.services = services;
@@ -90,10 +112,34 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
             result.setHttpStatusCode(HttpServletResponse.SC_NOT_FOUND);
             return result;
         }
+
+        if (FALLBACK_PICTURE == picture) {
+            ByteArrayFileHolder fileHolder = (ByteArrayFileHolder) picture.getFileHolder();
+            if (requestData.setResponseHeader("Content-Type", fileHolder.getContentType())) {
+                // Set HTTP response headers
+                {
+                    final StringBuilder sb = new StringBuilder(256);
+                    sb.append("inline");
+                    DownloadUtility.appendFilenameParameter(fileHolder.getName(), fileHolder.getContentType(), requestData.getUserAgent(), sb);
+                    requestData.setResponseHeader("Content-Disposition", sb.toString());
+                }
+
+                // Write image file
+                try {
+                    OutputStream out = requestData.optOutputStream();
+                    out.write(fileHolder.getBytes());
+                    out.flush();
+                } catch (IOException e) {
+                    throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
+                }
+
+                // Signal direct response
+                return new AJAXRequestResult(AJAXRequestResult.DIRECT_OBJECT, "direct").setType(AJAXRequestResult.ResultType.DIRECT);
+            }
+        }
+
         AJAXRequestResult result = new AJAXRequestResult(picture.getFileHolder(), "file");
-
         setETag(picture.getEtag(), Tools.getDefaultImageExpiry(), result);
-
         return result;
     }
 
@@ -195,12 +241,8 @@ public class GetPictureAction implements ETagAwareAJAXActionService {
         }
     }
 
-    private static final byte[] TRANSPARENT_GIF = new byte[]{71,73,70,56,57,97,1,0,1,0,-128,0,0,0,0,0,-1,-1,-1,33,-7,4,1,0,0,0,0,44,0,0,0,0,1,0,1,0,0,2,1,68,0,59};
-
     private Picture fallbackPicture() {
-        ByteArrayFileHolder fileHolder = new ByteArrayFileHolder(TRANSPARENT_GIF);
-        fileHolder.setContentType("image/gif");
-        return new Picture(null, fileHolder);
+        return FALLBACK_PICTURE;
     }
 
 }

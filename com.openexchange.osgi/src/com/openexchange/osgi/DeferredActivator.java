@@ -63,6 +63,7 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
+import com.openexchange.exception.OXException;
 import com.openexchange.osgi.annotation.SingletonService;
 import com.openexchange.osgi.console.DeferredActivatorServiceStateLookup;
 import com.openexchange.osgi.console.ServiceStateLookup;
@@ -213,12 +214,12 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
     /**
      * The bit mask reflecting already tracked needed services.
      */
-    private int availability;
+    private long availability;
 
     /**
      * The bit mask if all needed services are available.
      */
-    private int allAvailable;
+    private long allAvailable;
 
     /**
      * The execution context of the bundle.
@@ -302,7 +303,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(1, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[0];
             availability = allAvailable = 0;
-            startUp(false);
+            startUp();
         } else {
             final int len = classes.length;
             if (len > 0 && new HashSet<Class<?>>(Arrays.asList(classes)).size() != len) {
@@ -318,7 +319,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
             services = new ConcurrentHashMap<Class<?>, ServiceProvider<?>>(len, 0.9f, 1);
             neededServiceTrackers = new ServiceTracker[len];
             availability = 0;
-            allAvailable = (1 << len) - 1;
+            allAvailable = (1L << len) - 1;
             /*
              * Initialize service trackers for needed services
              */
@@ -335,7 +336,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                 }
             }
             if (len == 0) {
-                startUp(false);
+                startUp();
             }
         }
     }
@@ -413,7 +414,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param clazz The service's class
      */
     protected final void signalAvailability(final int index, final Class<?> clazz) {
-        availability |= (1 << index);
+        availability |= (1L << index);
         if (started.get()) {
             /*
              * Signal availability of single service
@@ -425,7 +426,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                  * Start bundle
                  */
                 try {
-                    startUp(false);
+                    startUp();
                 } catch (final Exception e) {
                     Throwable t = e;
                     if (t.getCause() instanceof BundleException) {
@@ -434,7 +435,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
                     final Bundle bundle = context.getBundle();
                     final StringBuilder errorBuilder = new StringBuilder(64);
                     errorBuilder.append("\nStart-up of bundle \"").append(bundle.getSymbolicName()).append("\" failed: ");
-                    final String errorMsg = t.getMessage();
+                    final String errorMsg = t instanceof OXException ? ((OXException) t).getLogMessage() : t.getMessage();
                     if (null == errorMsg || "null".equals(errorMsg)) {
                         errorBuilder.append(t.getClass().getName());
                     } else {
@@ -493,7 +494,7 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
      * @param stop Whether to stop this activator
      */
     final void signalUnavailability(int index, Class<?> clazz, boolean stop) {
-        availability &= ~(1 << index);
+        availability &= ~(1L << index);
         if (started.get()) {
             if (stop) {
                 try {
@@ -521,27 +522,10 @@ public abstract class DeferredActivator implements BundleActivator, ServiceLooku
         }
     }
 
-    private void startUp(final boolean async) throws Exception {
+    private void startUp() throws Exception {
         stopPerformed = false;
-        if (async) {
-            final Runnable task = new Runnable() {
-
-                @Override
-                public void run() {
-                    try {
-                        startBundle();
-                        started.set(true);
-                    } catch (final Throwable t) {
-                        ExceptionUtils.handleThrowable(t);
-                        LOG.error("", t);
-                    }
-                }
-            };
-            new Thread(task).run();
-        } else {
-            startBundle();
-            started.set(true);
-        }
+        startBundle();
+        started.set(true);
     }
 
     /**

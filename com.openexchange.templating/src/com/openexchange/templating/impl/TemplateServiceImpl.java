@@ -148,7 +148,16 @@ public class TemplateServiceImpl implements TemplateService {
 
         retval.setLevel(TemplateLevel.SERVER);
         Properties properties = new Properties();
-        retval.setTemplate(loadTemplate(templatePath, templateName, properties));
+
+        // Load template
+        {
+            Template template = loadTemplate(templatePath, templateName, properties);
+            if (null == template) {
+                throw TemplateErrorMessage.TemplateNotFound.create(templatePath + File.separator + templateName);
+            }
+            retval.setTemplate(template);
+        }
+
         checkTrustLevel(retval);
         retval.setProperties(properties);
         return retval;
@@ -569,12 +578,14 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         final List<String> basicTemplateNames = getBasicTemplateNames(filter);
-        final ArrayList<String> userTemplates = new ArrayList<String>(names);
-        Collections.sort(userTemplates);
-        basicTemplateNames.addAll(userTemplates);
+        if (!names.isEmpty()) {
+            final ArrayList<String> userTemplates = new ArrayList<String>(names);
+            Collections.sort(userTemplates);
+            basicTemplateNames.addAll(userTemplates);
+        }
         return basicTemplateNames;
     }
-    
+
     @Override
     public Pair<String, String> encodeTemplateImage(String imageName) throws OXException {
         try {

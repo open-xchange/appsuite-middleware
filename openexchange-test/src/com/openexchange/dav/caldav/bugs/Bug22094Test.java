@@ -49,7 +49,10 @@
 
 package com.openexchange.dav.caldav.bugs;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import java.util.Date;
 import org.apache.jackrabbit.webdav.DavConstants;
 import org.apache.jackrabbit.webdav.MultiStatusResponse;
@@ -132,7 +135,7 @@ public class Bug22094Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        ICalResource iCalResource = super.get(uid, null);
+        ICalResource iCalResource = super.get(uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         /*
@@ -159,7 +162,7 @@ public class Bug22094Test extends CalDAVTest {
         /*
          * verify appointment on client
          */
-        iCalResource = super.get(subfolderID, uid, iCalResource.getETag());
+        iCalResource = get(subfolderID, uid);
         assertNotNull("No VEVENT in iCal found", iCalResource.getVEvent());
         assertEquals("UID wrong", uid, iCalResource.getVEvent().getUID());
         /*

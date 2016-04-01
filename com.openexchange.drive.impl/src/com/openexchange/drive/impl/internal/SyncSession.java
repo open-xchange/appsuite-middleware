@@ -57,11 +57,9 @@ import java.util.Map;
 import jonelo.jacksum.algorithm.MD;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
-import com.openexchange.drive.DirectoryPattern;
 import com.openexchange.drive.DriveExceptionCodes;
 import com.openexchange.drive.DriveFileField;
 import com.openexchange.drive.DriveSession;
-import com.openexchange.drive.FilePattern;
 import com.openexchange.drive.checksum.rdb.RdbChecksumStore;
 import com.openexchange.drive.impl.DriveUtils;
 import com.openexchange.drive.impl.checksum.ChecksumProvider;
@@ -77,6 +75,7 @@ import com.openexchange.drive.impl.storage.StorageOperation;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.File;
 import com.openexchange.file.storage.FileStorageFolder;
+import com.openexchange.file.storage.composition.FilenameValidationUtils;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.share.core.tools.PermissionResolver;
 import com.openexchange.tools.session.ServerSession;
@@ -294,10 +293,20 @@ public class SyncSession {
         if (-1 != maxFilesPerDirectory && files.size() > maxFilesPerDirectory) {
             throw DriveExceptionCodes.TOO_MANY_FILES.create(maxFilesPerDirectory, path);
         }
+        StringBuilder stringBuilder = isTraceEnabled() ? new StringBuilder("Server files in path \"").append(path).append("\":\n") : null;
         List<FileChecksum> checksums = ChecksumProvider.getChecksums(this, folder.getId(), files);
         List<ServerFileVersion> serverFiles = new ArrayList<ServerFileVersion>(files.size());
         for (int i = 0; i < files.size(); i++) {
-            serverFiles.add(new ServerFileVersion(files.get(i), checksums.get(i)));
+            ServerFileVersion fileVersion = new ServerFileVersion(files.get(i), checksums.get(i));
+            serverFiles.add(fileVersion);
+            if (isTraceEnabled()) {
+                stringBuilder.append(" [").append(fileVersion.getFileChecksum().getFileID()).append("] ")
+                    .append(fileVersion.getName()).append(" | ").append(fileVersion.getChecksum())
+                    .append(" (").append(fileVersion.getFileChecksum().getSequenceNumber()).append(")\n");
+            }
+        }
+        if (isTraceEnabled()) {
+            trace(stringBuilder);
         }
         return serverFiles;
     }
@@ -340,7 +349,7 @@ public class SyncSession {
         for (Map.Entry<String, FileStorageFolder> entry : folders.entrySet()) {
             String path = entry.getKey();
             String folderID = entry.getValue().getId();
-            if (DriveUtils.isInvalidPath(path) || DriveUtils.isInvalidFolderName(entry.getValue().getName())) {
+            if (DriveUtils.isInvalidPath(path) || FilenameValidationUtils.isInvalidFolderName(entry.getValue().getName())) {
                 trace("Skipping invalid server directory: " + entry.getKey());
             } else if (DriveUtils.isIgnoredPath(this, path)) {
                 trace("Skipping ignored server directory: " + entry.getKey());
@@ -371,29 +380,6 @@ public class SyncSession {
             trace(stringBuilder);
         }
         return serverDirectories;
-    }
-
-    /**
-     * Calculates a hash code for the (client-side) file- and directory exclusion filters.
-     *
-     * @return The hash code for the exclusion filters, or <code>0</code> if no filters are defined
-     */
-    public int getExclusionFilterHash() {
-        final int prime = 31;
-        int result = 1;
-        List<DirectoryPattern> directoryExclusions = session.getDirectoryExclusions();
-        if (null != directoryExclusions && 0 < directoryExclusions.size()) {
-            for (DirectoryPattern directoryPattern : directoryExclusions) {
-                result = prime * result + directoryPattern.hashCode();
-            }
-        }
-        List<FilePattern> fileExclusions = session.getFileExclusions();
-        if (null != fileExclusions && 0 < fileExclusions.size()) {
-            for (FilePattern filePattern : fileExclusions) {
-                result = prime * result + filePattern.hashCode();
-            }
-        }
-        return 1 == result ? 0 : result;
     }
 
     /**

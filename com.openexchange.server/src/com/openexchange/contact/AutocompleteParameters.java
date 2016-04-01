@@ -86,6 +86,8 @@ public class AutocompleteParameters implements Map<String, Object> {
 	 */
 	public static final String IGNORE_DISTRIBUTION_LISTS = "ignore_distribution_lists";
 
+    public static final String USER_ID = "user_id";
+
 	private final Map<String, Object> parameters = new HashMap<String, Object>();
 	private List<OXException> warnings;
 

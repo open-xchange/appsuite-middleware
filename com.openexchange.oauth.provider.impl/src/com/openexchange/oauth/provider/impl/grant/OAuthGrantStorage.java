@@ -51,7 +51,7 @@ package com.openexchange.oauth.provider.impl.grant;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.oauth.provider.tools.UserizedToken;
+import com.openexchange.oauth.provider.impl.tools.UserizedToken;
 
 
 /**

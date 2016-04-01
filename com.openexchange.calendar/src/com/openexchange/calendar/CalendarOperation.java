@@ -86,6 +86,7 @@ import com.openexchange.groupware.container.DataObject;
 import com.openexchange.groupware.container.ExternalUserParticipant;
 import com.openexchange.groupware.container.FolderChildObject;
 import com.openexchange.groupware.container.FolderObject;
+import com.openexchange.groupware.container.GroupParticipant;
 import com.openexchange.groupware.container.Participant;
 import com.openexchange.groupware.container.Participants;
 import com.openexchange.groupware.container.UserParticipant;
@@ -500,6 +501,16 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 checkGeneralPermissions(oid, inFolder, readcon, so, ctx, action_folder, check_permissions, cdao, check_special_action, organizer, uniqueId);
                 cdao.setPrincipal(setString(i++, load_resultset));
                 cdao.setPrincipalId(setInt(i++, load_resultset));
+
+                // ensure shared folder owner is set prior loading users
+                if (FolderObject.SHARED == cdao.getFolderType() && 0 >= cdao.getSharedFolderOwner()) {
+                    OXFolderAccess ofa = new OXFolderAccess(readcon, cdao.getContext());
+                    if (cdao.containsParentFolderID() && 0 < cdao.getParentFolderID()) {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(cdao.getParentFolderID()));
+                    } else {
+                        cdao.setSharedFolderOwner(ofa.getFolderOwner(inFolder));
+                    }
+                }
                 cdao.setUsers(cimp.getUserParticipants(cdao, readcon, so.getUserId()).getUsers());
 
                 //Context of check is critical. TODO: Make independent!
@@ -845,6 +856,15 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             if (!cdao.containsModifiedBy()) {
                 cdao.setModifiedBy(uid);
             }
+
+            if (cdao.containsStartDate() && cdao.getStartDate() == null) {
+                throw OXCalendarExceptionCodes.FIELD_NULL_VALUE.create("Start Date");
+            }
+
+            if (cdao.containsEndDate() && cdao.getEndDate() == null) {
+                throw OXCalendarExceptionCodes.FIELD_NULL_VALUE.create("End Date");
+            }
+
             /*
              * if (!cdao.containsStartDate() || cdao.getStartDate() == null) { cdao.setStartDate((Date) edao.getStartDate().clone()); } if
              * (!cdao.containsEndDate() || cdao.getEndDate() == null) { cdao.setEndDate((Date) edao.getEndDate().clone()); }
@@ -988,7 +1008,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
             cdao.setTimezone(timezone);
         }
         simpleDataCheck(cdao, edao, uid);
-        fillUserParticipants(cdao);
+        fillUserParticipants(cdao, edao);
         if (isInsert) {
             recColl.updateDefaultStatus(cdao, cdao.getContext(), uid, inFolder);
         }
@@ -1005,7 +1025,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
      */
     private static final void handleFullTime(final CalendarDataObject cdao, final CalendarDataObject edao) throws OXException {
         if (cdao.getFullTime()) {
-            if (cdao.containsStartDate() && cdao.containsEndDate()) {
+            if (cdao.getStartDate() != null && cdao.getEndDate() != null) {
                 final long mod = cdao.getStartDate().getTime() % Constants.MILLI_DAY;
                 if (mod != 0) {
                     cdao.setStartDate(new Date(cdao.getStartDate().getTime() - mod));
@@ -1418,7 +1438,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         this.oids = oids;
     }
 
-    public static final void fillUserParticipants(final CalendarDataObject cdao) throws OXException {
+    public static final void fillUserParticipants(CalendarDataObject cdao, CalendarDataObject edao) throws OXException {
         final Participant participants[] = cdao.getParticipants();
         final UserParticipant[] users = cdao.getUsers();
         if (participants == null) {
@@ -1435,7 +1455,7 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
                 final int m[] = g.getMember();
                 for (int element : m) {
                     final UserParticipant up = new UserParticipant(element);
-                    if (!userparticipants.containsUserParticipant(up)) {
+                    if (!userparticipants.containsUserParticipant(up) && shouldAdd((GroupParticipant) p, up, edao)) {
                         userparticipants.add(up, users);
                     }
                 }
@@ -1452,6 +1472,46 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
         if (userparticipants != null) {
             cdao.setUsers(userparticipants.getUsers());
         }
+    }
+
+    /**
+     * Checks if a user participant should be added to the new list of users.
+     * Depends on the existtence of the user in the old Calendar Object and if the user is participant of the group.
+     *
+     * @param gp
+     * @param up
+     * @param edao
+     * @return
+     */
+    private static boolean shouldAdd(GroupParticipant gp, UserParticipant up, CalendarDataObject edao) {
+        if (edao == null) {
+            return true;
+        }
+        boolean containsGroup = false;
+        boolean containsUser = false;
+        for (Participant p : edao.getParticipants()) {
+            if (p.getType() == Participant.GROUP && p.getIdentifier() == gp.getIdentifier()) {
+                containsGroup = true;
+            }
+            if (p.getType() == Participant.USER && p.getIdentifier() == up.getIdentifier()) {
+                containsUser = true;
+            }
+        }
+        if (!containsUser) { //double check
+            for (UserParticipant u : edao.getUsers()) {
+                if (u.getIdentifier() == up.getIdentifier()) {
+                    containsUser = true;
+                    break;
+                }
+            }
+        }
+        if (containsUser) {
+            return true;
+        }
+        if (containsGroup && !containsUser) {
+            return false;
+        }
+        return true;
     }
 
     static final Set<Participant> getNewParticipants(final Participant np[], final Participant op[]) {
@@ -2050,10 +2110,10 @@ public class CalendarOperation implements SearchIterator<CalendarDataObject> {
     }
 
     private static final void checkInsertMandatoryFields(final CalendarDataObject cdao) throws OXException {
-        if (!cdao.containsStartDate()) {
+        if (!cdao.containsStartDate() || cdao.getStartDate() == null) {
             throw OXCalendarExceptionCodes.MANDATORY_FIELD_START_DATE.create();
         }
-        if (!cdao.containsEndDate()) {
+        if (!cdao.containsEndDate() || cdao.getEndDate() == null) {
             throw OXCalendarExceptionCodes.MANDATORY_FIELD_END_DATE.create();
         }
         if (!cdao.containsTitle()) {

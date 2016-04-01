@@ -160,6 +160,12 @@ public class AppointmentBugTestSuite extends TestSuite {
         tests.addTestSuite(WeirdRecurrencePatternTest.class); // Is also a bug test. Related to 37668 and 38079.
         tests.addTestSuite(Bug39571Test.class);
         tests.addTestSuite(Bug38404Test.class);
+        tests.addTestSuite(Bug41794Test.class);
+        tests.addTestSuite(Bug42018Test.class);
+        tests.addTestSuite(Bug41995Test.class);
+        tests.addTestSuite(Bug42018Test.class);
+        tests.addTestSuite(Bug42775Test.class);
+        tests.addTestSuite(Bug44002Test.class);
         return tests;
     }
 }

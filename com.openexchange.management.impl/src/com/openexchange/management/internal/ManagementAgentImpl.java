@@ -292,7 +292,7 @@ public final class ManagementAgentImpl extends AbstractAgent implements Manageme
                 final JMXServiceURL jmxServiceURL = jmxServiceUrlFor(ip, jmxServerPort, jmxPort);
                 jmxURL = addConnectorServer(jmxServiceURL, jmxLogin, jmxPassword);
             }
-            LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this url: {}\n", jmxURL);
+            LOG.info("\n\n\tUse JConsole or MC4J to connect to MBeanServer with this URL: {}\n", jmxURL);
             running.set(true);
         } catch (final MalformedURLException e) {
             LOG.error("", e);

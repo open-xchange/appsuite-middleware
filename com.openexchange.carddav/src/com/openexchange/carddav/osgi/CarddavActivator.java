@@ -59,12 +59,13 @@ import com.openexchange.contact.ContactService;
 import com.openexchange.contact.vcard.VCardService;
 import com.openexchange.contact.vcard.storage.VCardStorageFactory;
 import com.openexchange.folderstorage.FolderService;
+import com.openexchange.group.GroupService;
 import com.openexchange.groupware.userconfiguration.Permission;
-import com.openexchange.oauth.provider.scope.AbstractScopeProvider;
-import com.openexchange.oauth.provider.scope.OAuthScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.AbstractScopeProvider;
+import com.openexchange.oauth.provider.resourceserver.scope.OAuthScopeProvider;
 import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.resource.ResourceService;
 import com.openexchange.user.UserService;
-import com.openexchange.webdav.directory.PathRegistration;
 import com.openexchange.webdav.protocol.osgi.OSGiPropertyMixin;
 
 /**
@@ -78,7 +79,10 @@ public class CarddavActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class, VCardService.class };
+        return new Class[] {
+            HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class,
+            ResourceService.class, VCardService.class, GroupService.class
+        };
     }
 
     @Override
@@ -95,9 +99,7 @@ public class CarddavActivator extends HousekeepingActivator {
             /*
              * register CardDAV servlet & WebDAV path
              */
-            CardDAV servlet = new CardDAV(this, performer);
-            getService(HttpService.class).registerServlet("/servlet/dav/carddav", servlet, null, null);
-            registerService(PathRegistration.class, new PathRegistration("carddav"));
+            getService(HttpService.class).registerServlet("/servlet/dav/carddav", new CardDAV(performer), null, null);
             registerService(OAuthScopeProvider.class, new AbstractScopeProvider(Tools.OAUTH_SCOPE, OAuthStrings.SYNC_CONTACTS) {
                 @Override
                 public boolean canBeGranted(CapabilitySet capabilities) {

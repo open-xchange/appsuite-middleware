@@ -96,13 +96,13 @@ public class FileStorageTools {
     }
 
     /**
-     * Gets a value indicating whether a specific account supports storing a specific file metadata field.
+     * Gets a value indicating whether a specific account supports storing a specific file meta-data field.
      *
      * @param fileAccess The file access reference to check the capability for
      * @param field The field to check
-     * @return <code>true</code> if extended metadata and the field itself is supported, <code>false</code>, otherwise
+     * @return <code>true</code> if extended meta-data and the field itself is supported, <code>false</code>, otherwise
      */
-    public static boolean supports(FileStorageFileAccess fileAccess, File.Field field) throws OXException {
+    public static boolean supports(FileStorageFileAccess fileAccess, File.Field field) {
         if (supports(fileAccess, FileStorageCapability.EXTENDED_METADATA)) {
             List<Field> supportedFields = ((FileStorageExtendedMetadata) fileAccess).getSupportedFields();
             return null != supportedFields && supportedFields.contains(field);
@@ -126,21 +126,21 @@ public class FileStorageTools {
             return columns;
         }
 
-        columns = new ArrayList<File.Field>(columns);
+        List<File.Field> cols = new ArrayList<File.Field>(columns);
 
         if (!hasID) {
-            columns.add(File.Field.ID);
+            cols.add(File.Field.ID);
         }
 
         if (!hasFolder) {
-            columns.add(File.Field.FOLDER_ID);
+            cols.add(File.Field.FOLDER_ID);
         }
 
         if (!hasLastModified) {
-            columns.add(File.Field.LAST_MODIFIED);
+            cols.add(File.Field.LAST_MODIFIED);
         }
 
-        return columns;
+        return cols;
     }
 
     /**

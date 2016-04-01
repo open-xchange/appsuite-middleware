@@ -126,6 +126,7 @@ public class DeleteMultipleReminderTest extends ReminderTest {
     
     @Override
     public void tearDown() throws Exception {
+        appointment.setLastModified(new Date(Long.MAX_VALUE));
         com.openexchange.ajax.appointment.action.DeleteRequest aDelReq = new com.openexchange.ajax.appointment.action.DeleteRequest(appointment);
         client.execute(aDelReq);
 

@@ -695,6 +695,11 @@ public class LoginServlet extends AJAXServlet {
     }
 
     @Override
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        doService(req, resp, false);
+    }
+
+    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws IOException {
         try {
             Tools.checkNonExistence(req, PARAMETER_PASSWORD);
@@ -785,8 +790,29 @@ public class LoginServlet extends AJAXServlet {
         doCookieReWrite(req, resp, CookieType.SECRET);
     }
 
-    public static void logAndSendException(final HttpServletResponse resp, final OXException e) throws IOException {
+    /**
+     * Logs specified exceptions and responds an appropriate error to the client.
+     *
+     * @param resp The HTTP response
+     * @param e The exception
+     * @throws IOException If exception cannot be send due to an I/O error
+     */
+    public static void logAndSendException(HttpServletResponse resp, OXException e) throws IOException {
         LOG.debug("", e);
+
+        if (AjaxExceptionCodes.BAD_REQUEST.equals(e)) {
+            SessionServlet.sendErrorAndPage(HttpServletResponse.SC_BAD_REQUEST, e.getMessage(), resp);
+            return;
+        }
+
+        if (AjaxExceptionCodes.HTTP_ERROR.equals(e)) {
+            Object[] logArgs = e.getLogArgs();
+            Object statusMsg = logArgs.length > 1 ? logArgs[1] : null;
+            int sc = ((Integer) logArgs[0]).intValue();
+            SessionServlet.sendErrorAndPage(sc, null == statusMsg ? null : statusMsg.toString(), resp);
+            return;
+        }
+
         Send.sendResponse(new Response().setException(e), resp);
     }
 

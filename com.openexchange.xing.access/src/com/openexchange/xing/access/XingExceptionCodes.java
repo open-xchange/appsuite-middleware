@@ -163,6 +163,14 @@ public enum XingExceptionCodes implements DisplayableOXExceptionCode {
      * A XING account has already been requested for E-Mail address %1$s.
      */
     LEAD_ALREADY_EXISTS("A XING account has already been requested for E-Mail address %1$s.", Category.CATEGORY_USER_INPUT, 28, XingExceptionMessages.LEAD_ALREADY_EXISTS_MSG),
+    /**
+     * Insufficient privileges. The associated XING app does not hold the required permissions in order to perform the requested action.
+     */
+    INSUFFICIENT_PRIVILEGES("Insufficient privileges. The associated XING app does not hold the required permissions in order to perform the requested action.", Category.CATEGORY_PERMISSION_DENIED, 29, XingExceptionMessages.INSUFFICIENT_PRIVILEGES_MSG),
+    /**
+     * No XING OAuth access available for user %1$s in context %2$s.
+     */
+    NO_OAUTH_ACCOUNT("No XING OAuth access available for user %1$s in context %2$s.", Category.CATEGORY_CONFIGURATION, 30, XingExceptionMessages.NO_OAUTH_ACCOUNT_MSG),
 
     ;
 

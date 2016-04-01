@@ -121,6 +121,7 @@ final class ListLsubCollection implements Serializable {
     private final ConcurrentMap<String, ListLsubEntry> junkEntries;
     private final ConcurrentMap<String, ListLsubEntry> sentEntries;
     private final ConcurrentMap<String, ListLsubEntry> trashEntries;
+    private final ConcurrentMap<String, ListLsubEntry> archiveEntries;
 
     /**
      * Initializes a new {@link ListLsubCollection}.
@@ -141,6 +142,7 @@ final class ListLsubCollection implements Serializable {
         junkEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        archiveEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
@@ -166,6 +168,7 @@ final class ListLsubCollection implements Serializable {
         junkEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         sentEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         trashEntries = new ConcurrentHashMap<String, ListLsubEntry>();
+        archiveEntries = new ConcurrentHashMap<String, ListLsubEntry>();
         deprecated = new AtomicBoolean();
         this.shared = shared == null ? new String[0] : shared;
         this.user = user == null ? new String[0] : user;
@@ -213,6 +216,12 @@ final class ListLsubCollection implements Serializable {
 
         builder.append(lf).append("\\Trash:");
         sm = new TreeMap<String, ListLsubEntry>(trashEntries);
+        for (ListLsubEntry entry : sm.values()) {
+            builder.append(lf).append("    ").append(entry);
+        }
+
+        builder.append(lf).append("\\Archive:");
+        sm = new TreeMap<String, ListLsubEntry>(archiveEntries);
         for (ListLsubEntry entry : sm.values()) {
             builder.append(lf).append("    ").append(entry);
         }
@@ -356,6 +365,7 @@ final class ListLsubCollection implements Serializable {
             junkEntries.clear();
             sentEntries.clear();
             trashEntries.clear();
+            archiveEntries.clear();
             if (imapStore.getCapabilities().containsKey("SPECIAL-USE")) {
                 /*
                  * Perform LIST (SPECIAL-USE) "" "*"
@@ -476,6 +486,7 @@ final class ListLsubCollection implements Serializable {
             junkEntries.clear();
             sentEntries.clear();
             trashEntries.clear();
+            archiveEntries.clear();
         } else if (ignoreSubscriptions) {
             lsubMap.clear();
         }
@@ -883,6 +894,7 @@ final class ListLsubCollection implements Serializable {
     private static final String ATTRIBUTE_JUNK = "\\junk";
     private static final String ATTRIBUTE_SENT = "\\sent";
     private static final String ATTRIBUTE_TRASH = "\\trash";
+    private static final String ATTRIBUTE_ARCHIVE = "\\archive";
 
     private static final String[] ATTRIBUTES_SPECIAL_USE = { ATTRIBUTE_DRAFTS, ATTRIBUTE_JUNK, ATTRIBUTE_SENT, ATTRIBUTE_TRASH };
 
@@ -917,6 +929,8 @@ final class ListLsubCollection implements Serializable {
                                 this.sentEntries.put(entryImpl.getFullName(), entryImpl);
                             } else if (attrs.contains(ATTRIBUTE_TRASH)) {
                                 this.trashEntries.put(entryImpl.getFullName(), entryImpl);
+                            } else if (attrs.contains(ATTRIBUTE_ARCHIVE)) {
+                                this.archiveEntries.put(entryImpl.getFullName(), entryImpl);
                             }
                         }
                     }
@@ -1017,6 +1031,8 @@ final class ListLsubCollection implements Serializable {
                             this.sentEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         } else if (attrs.contains(ATTRIBUTE_TRASH)) {
                             this.trashEntries.put(listLsubEntry.getFullName(), listLsubEntry);
+                        } else if (attrs.contains(ATTRIBUTE_ARCHIVE)) {
+                            this.archiveEntries.put(listLsubEntry.getFullName(), listLsubEntry);
                         }
                     }
                 }
@@ -1720,6 +1736,17 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Gets the LIST entries marked with "\Archive" attribute.
+     * <p>
+     * Needs the <code>"SPECIAL-USE"</code> capability.
+     *
+     * @return The entries
+     */
+    public Collection<ListLsubEntry> getArchiveEntry() {
+        return Collections.unmodifiableCollection(archiveEntries.values());
+    }
+
+    /**
      * Gets the LIST entry for specified full name.
      *
      * @param fullName The full name
@@ -1730,6 +1757,19 @@ final class ListLsubCollection implements Serializable {
             return null;
         }
         checkDeprecated();
+        return listMap.get(fullName);
+    }
+
+    /**
+     * Like {@link #getList(String)} but ignores if the collection is deprecated
+     *
+     * @param fullName The full name
+     * @return The LIST entry for specified full name or <code>null</code>
+     */
+    public ListLsubEntry getListIgnoreDeprecated(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
         return listMap.get(fullName);
     }
 
@@ -1748,6 +1788,19 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Like {@link #getLsub(String))} but ignores if the collection is deprecated.
+     *
+     * @param fullName The full name
+     * @return The LSUB entry for specified full name or <code>null</code>
+     */
+    public ListLsubEntry getLsubIgnoreDeprecated(final String fullName) {
+        if (null == fullName) {
+            return null;
+        }
+        return lsubMap.get(fullName);
+    }
+
+    /**
      * Gets the LSUB entries.
      *
      * @return The LSUB entries
@@ -1758,12 +1811,30 @@ final class ListLsubCollection implements Serializable {
     }
 
     /**
+     * Like {@link #getLsubs()} but ignores if the collection is deprecated
+     *
+     * @return The LSUB entries
+     */
+    public List<ListLsubEntry> getLsubsIgnoreDeprecated() {
+        return new ArrayList<ListLsubEntry>(lsubMap.values());
+    }
+
+    /**
      * Gets the LIST entries.
      *
      * @return The LIST entries
      */
     public List<ListLsubEntry> getLists() {
         checkDeprecated();
+        return new ArrayList<ListLsubEntry>(listMap.values());
+    }
+
+    /**
+     * Like {@link #getLists()} but ignores if the collection is deprecated
+     *
+     * @return The LIST entries
+     */
+    public List<ListLsubEntry> getListsIgnoreDeprecated() {
         return new ArrayList<ListLsubEntry>(listMap.values());
     }
 

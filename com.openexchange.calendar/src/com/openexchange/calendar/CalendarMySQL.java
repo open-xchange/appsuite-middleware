@@ -194,10 +194,6 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     private static final String PDM_ORDER_BY = " ORDER BY ";
 
-    private static final String PDM_GROUP_BY_PD_INTFIELD01 = " GROUP BY pd.intfield01 ";
-
-    private static final String PDM_GROUP_BY_INTFIELD01 = " GROUP BY intfield01";
-
     private static final String PD_FID_IS_NULL = " AND pd.fid = 0 ";
 
     private static final String PD_CREATED_FROM_IS = " AND pd.created_from = ";
@@ -581,7 +577,6 @@ public class CalendarMySQL implements CalendarSqlImp {
                 sb.append(CalendarObject.DECLINE).append(", ").append(CalendarObject.NONE).append(')');
             }
         } else {
-            sb.append(PDM_GROUP_BY_PD_INTFIELD01);
             sb.append(ORDER_BY);
         }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
@@ -766,7 +761,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(" AND pd.intfield06 != ");
         sb.append(Appointment.FREE);
 
-        sb.append(PDM_GROUP_BY_INTFIELD01);
         sb.append(ORDER_BY_TS1);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -790,7 +784,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdm.confirm != ");
         sb.append(com.openexchange.groupware.container.CalendarObject.DECLINE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -812,7 +805,6 @@ public class CalendarMySQL implements CalendarSqlImp {
         sb.append(uid);
         sb.append(" AND pdr.type = ");
         sb.append(Participant.RESOURCE);
-        sb.append(PDM_GROUP_BY_PD_INTFIELD01);
         sb.append(ORDER_BY);
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         pst.setTimestamp(1, new Timestamp(d2.getTime()));
@@ -1212,6 +1204,40 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
+    public PreparedStatement getPrivateFolderSequenceNumber(int cid, int uid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM prg_dates pd JOIN prg_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0),")
+            .append("COALESCE((SELECT MAX(pd.changing_date) FROM del_dates pd JOIN del_dates_members pdm")
+            .append(" ON pd.cid=pdm.cid AND pd.intfield01=pdm.object_id WHERE pd.cid=? AND pd.fid=0 AND pdm.cid=? AND pdm.pfid=? AND pdm.member_uid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, cid, fid, uid, cid, cid, fid, uid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
+    public PreparedStatement getPublicFolderSequenceNumber(int cid, int fid, Connection readcon) throws SQLException {
+        StringBuilder stringBuilder = new StringBuilder()
+            .append("SELECT GREATEST(")
+            .append("COALESCE((SELECT MAX(changing_date) FROM prg_dates WHERE cid=? AND fid=?),0),")
+            .append("COALESCE((SELECT MAX(changing_date) FROM del_dates WHERE cid=? AND fid=?),0)")
+            .append(");"
+        );
+        PreparedStatement stmt = readcon.prepareStatement(stringBuilder.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        int[] parameters = { cid, fid, cid, fid };
+        for (int i = 0; i < parameters.length; i++) {
+            stmt.setInt(i + 1, parameters[i]);
+        }
+        return stmt;
+    }
+
+    @Override
     public final String getObjectsByidSQL(final int oids[][], final int cid, final String select) {
         final StringBuilder sb = new StringBuilder(64);
         sb.append(parseSelect(select));
@@ -1368,7 +1394,7 @@ public class CalendarMySQL implements CalendarSqlImp {
     }
 
     @Override
-    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, final Context ctx, final Connection readcon) throws SQLException, OXException {
+    public PreparedStatement getSearchStatement(final int uid, final AppointmentSearchObject searchObj, final CalendarFolderObject cfo, final OXFolderAccess folderAccess, final String columns, final int orderBy, final Order orderDir, int limit, final Context ctx, final Connection readcon) throws SQLException, OXException {
         List<Object> searchParameters = new ArrayList<Object>();
         Integer contextID = Integer.valueOf(ctx.getContextId());
         final StringBuilder sb = new StringBuilder(512);
@@ -1653,15 +1679,16 @@ public class CalendarMySQL implements CalendarSqlImp {
                 searchParameters.add(preparedPattern);
             }
         }
-
-        sb.append(" ORDER BY ");
-        String orderby = COLLECTION.getFieldName(orderBy);
-        if (orderby == null) {
-            orderby = COLLECTION.getFieldName(CalendarObject.START_DATE);
+        /*
+         * order by & limit
+         */
+        String orderByField = COLLECTION.getFieldName(orderBy);
+        if (null != orderByField) {
+            sb.append(" ORDER BY pd.").append(orderByField).append(DBUtils.forSQLCommand(orderDir));
         }
-        sb.append("pd." + orderby);
-        sb.append(DBUtils.forSQLCommand(orderDir));
-
+        if (0 < limit) {
+            sb.append(" LIMIT ").append(limit);
+        }
         final PreparedStatement pst = readcon.prepareStatement(sb.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
         if (0 < searchParameters.size()) {
             int parameterIndex = 0;
@@ -3039,13 +3066,20 @@ public class CalendarMySQL implements CalendarSqlImp {
                     }
                     statementFiller.fillStatement(pst, a + 1, cdao);
                 }
-                if (!skipParticipants) {
-                    final boolean temp = updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
-                    realChange = realChange || temp;
-                }
                 final int ret = pst.executeUpdate();
                 if (ret == 0) {
                     throw OXException.conflict();
+                }
+                if (!skipParticipants) {
+                    final boolean temp = updateParticipants(cdao, edao, so.getUserId(), so.getContextId(), writecon, cup);
+                    realChange = realChange || temp;
+                    /*
+                     * reload new last modification timestamp (as it might have changed implicitly through reminder updates)
+                     */
+                    long lastModified = getLastModified(edao.getObjectID(), so.getContextId(), writecon);
+                    if (0 < lastModified) {
+                        cdao.setLastModified(new Date(lastModified));
+                    }
                 }
                 if (edao.isException()) {
                     // Update last-modified of master
@@ -3195,7 +3229,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         if (users == null && cdao.getFolderMoveAction() != CalendarOperation.NO_MOVE_ACTION) {
             users = edao.getUsers();
-            CalendarOperation.fillUserParticipants(cdao);
+            CalendarOperation.fillUserParticipants(cdao, edao);
         }
 
         final Participant[] old_participants = edao.getParticipants();
@@ -3703,13 +3737,13 @@ public class CalendarMySQL implements CalendarSqlImp {
                     if (mup.getAlarmMinutes() >= 0 && mup.containsAlarm()) {
                         java.util.Date calc_date = null;
                         java.util.Date end_date = null;
-                        if (cdao.containsStartDate()) {
+                        if (cdao.getStartDate() != null) {
                             calc_date = cdao.getStartDate();
                         } else {
                             calc_date = edao.getStartDate();
                         }
 
-                        if (cdao.containsEndDate()) {
+                        if (cdao.getEndDate() != null) {
                             end_date = cdao.getEndDate();
                         } else {
                             end_date = edao.getEndDate();
@@ -3836,17 +3870,26 @@ public class CalendarMySQL implements CalendarSqlImp {
                     closeSQLStuff(pidm);
                 }
                 try {
-                    pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, cid, pflag) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                    pidm = writecon.prepareStatement("insert into del_dates (creating_date, created_from, changing_date, changed_from, fid, intfield01, intfield02, cid, pflag, uid, filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                     pidm.setTimestamp(1, SQLTools.toTimestamp(System.currentTimeMillis()));
                     pidm.setInt(2, uid);
                     pidm.setLong(3, System.currentTimeMillis());
                     pidm.setInt(4, uid);
-                    pidm.setInt(5, cdao.getGlobalFolderID());
+                    if (FolderObject.PUBLIC != cdao.getFolderType()) {
+                        pidm.setInt(5, 0);
+                    } else {
+                        pidm.setInt(5, cdao.getGlobalFolderID());
+                    }
                     pidm.setInt(6, cdao.getObjectID());
-                    pidm.setInt(7, cid);
-                    pidm.setInt(8, I(cdao.getPrivateFlag()));
+                    pidm.setInt(7, edao.getRecurrenceID());
+                    pidm.setInt(8, cid);
+                    pidm.setInt(9, I(cdao.getPrivateFlag()));
+                    pidm.setString(10, edao.getUid());
+                    pidm.setString(11, edao.getFilename());
                     pidm.addBatch();
-                    pidm.executeBatch();
+                    int[] a = pidm.executeBatch();
+                    System.out.println(a);
+
                 } finally {
                     COLLECTION.closePreparedStatement(pidm);
                 }
@@ -3861,7 +3904,7 @@ public class CalendarMySQL implements CalendarSqlImp {
                     pid.setInt(1, cdao.getObjectID());
                     cleanStatement.setInt(2, element.getIdentifier());
                     pid.setInt(2, element.getIdentifier());
-                    if (cdao.getGlobalFolderID() == 0) {
+                    if (FolderObject.PUBLIC != cdao.getFolderType()) {
                         pid.setInt(3, element.getPersonalFolderId());
                     } else {
                         pid.setInt(3, -2);
@@ -4042,7 +4085,7 @@ public class CalendarMySQL implements CalendarSqlImp {
 
     @Override
     public final Date setUserConfirmation(final int oid, final int folderId, final int uid, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
-        checkConfirmPermission(folderId, uid, so, ctx);
+        checkConfirmPermission(folderId, uid, so, ctx, false);
         Connection writecon = null;
         PreparedStatement pu = null;
         PreparedStatement mo = null;
@@ -4138,7 +4181,7 @@ public class CalendarMySQL implements CalendarSqlImp {
      */
     @Override
     public Date setExternalConfirmation(final int oid, final int folderId, final String mail, final int confirm, final String message, final Session so, final Context ctx) throws OXException {
-        checkConfirmPermission(folderId, -1, so, ctx);
+        checkConfirmPermission(folderId, -1, so, ctx, true);
 
         final String insert = "INSERT INTO dateExternal (confirm, reason, objectId, cid, mailAddress) VALUES (?, ?, ?, ?, ?)"; // this is a
         // party
@@ -4209,12 +4252,12 @@ public class CalendarMySQL implements CalendarSqlImp {
         return changeTimestamp;
     }
 
-    private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx) throws OXException {
+    private void checkConfirmPermission(final int folderId, final int uid, final Session so, final Context ctx, boolean extern) throws OXException {
         if (uid != so.getUserId()) {
             final UserConfiguration userConfig = Tools.getUserConfiguration(ctx, so.getUserId());
             final OXFolderAccess ofa = new OXFolderAccess(ctx);
             final EffectivePermission oclp = ofa.getFolderPermission(folderId, so.getUserId(), userConfig);
-            if (ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
+            if (!extern && ofa.getFolderType(folderId, so.getUserId()) == FolderObject.PUBLIC) {
                 throw OXCalendarExceptionCodes.LOAD_PERMISSION_EXCEPTION_1.create();
             }
             if (!oclp.canWriteAllObjects()) {
@@ -4567,6 +4610,23 @@ public class CalendarMySQL implements CalendarSqlImp {
             stmt.setLong(pos++, lastModified); // LAST_MODIFIED
             stmt.executeUpdate();
         } finally {
+            COLLECTION.closePreparedStatement(stmt);
+        }
+    }
+
+    private static final String SQL_GET_LAST_MODIFIED = "SELECT " + COLLECTION.getFieldName(Appointment.LAST_MODIFIED) + " FROM prg_dates AS pd WHERE cid = ? AND " + COLLECTION.getFieldName(Appointment.OBJECT_ID) + " = ?;";
+
+    private static long getLastModified(int oid, int cid, Connection connection) throws SQLException {
+        PreparedStatement stmt = null;
+        ResultSet result = null;
+        try {
+            stmt = connection.prepareStatement(SQL_GET_LAST_MODIFIED);
+            stmt.setInt(1, cid);
+            stmt.setInt(2, oid);
+            result = stmt.executeQuery();
+            return result.next() ? result.getLong(1) : -1L;
+        } finally {
+            COLLECTION.closeResultSet(result);
             COLLECTION.closePreparedStatement(stmt);
         }
     }

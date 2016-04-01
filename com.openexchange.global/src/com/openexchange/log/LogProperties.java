@@ -790,7 +790,7 @@ public final class LogProperties {
         return new Props();
     }
 
-    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password")));
+    private static final Set<String> SANITIZE = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList("password", "epassword")));
     private static final String REPLACEMENT = "xxx";
 
     /**

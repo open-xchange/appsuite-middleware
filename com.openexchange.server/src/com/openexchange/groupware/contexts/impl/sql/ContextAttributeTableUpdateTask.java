@@ -51,7 +51,6 @@ package com.openexchange.groupware.contexts.impl.sql;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
-import com.openexchange.groupware.update.Schema;
 
 
 /**
@@ -62,6 +61,6 @@ import com.openexchange.groupware.update.Schema;
 public class ContextAttributeTableUpdateTask extends CreateTableUpdateTask {
 
     public ContextAttributeTableUpdateTask(DatabaseService dbService) {
-        super(new ContextAttributeCreateTable(), new String[0], Schema.NO_VERSION, dbService);
+        super(new ContextAttributeCreateTable(), new String[0], dbService);
     }
 }

@@ -49,9 +49,6 @@
 
 package com.openexchange.database.internal;
 
-import static com.openexchange.database.internal.DBUtils.autocommit;
-import static com.openexchange.database.internal.DBUtils.closeSQLStuff;
-import static com.openexchange.database.internal.DBUtils.rollback;
 import static com.openexchange.java.Autoboxing.I;
 import static com.openexchange.java.Autoboxing.L;
 import java.sql.Connection;
@@ -62,6 +59,7 @@ import java.sql.Savepoint;
 import java.util.concurrent.atomic.AtomicLong;
 import com.openexchange.database.Assignment;
 import com.openexchange.database.DBPoolingExceptionCodes;
+import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.pooling.PoolingException;
 
@@ -171,7 +169,7 @@ public class ReplicationMonitor {
                     throw createException(assign, true, e2);
                 }
             }
-            if (!write && assign.isTransactionInitialized() && false == assign.isToConfigDB()) {
+            if (!write && assign.isTransactionInitialized()) {
                 try {
                     clientTransaction = readTransaction(retval, assign.getContextId());
                 } catch (final OXException e) {
@@ -231,7 +229,7 @@ public class ReplicationMonitor {
         final int poolId;
         if (write) {
             poolId = assign.getWritePoolId();
-            if (!assign.isToConfigDB() && !state.isUsedAsRead()) {
+            if (!state.isUsedAsRead()) {
                 // ConfigDB has no replication monitor and for master fallback connections the counter must not be incremented.
                 if (state.isUsedForUpdate()) {
                     // Data on the master has been changed without using a transaction, so we need to increment the counter here.
@@ -282,7 +280,7 @@ public class ReplicationMonitor {
             try {
                 pool.back(con);
             } catch (final PoolingException e) {
-                DBUtils.close(con);
+                Databases.close(con);
                 final OXException e1 = DBPoolingExceptionCodes.RETURN_FAILED.create(e, con.toString());
                 LOG.error("", e1);
             }
@@ -305,7 +303,7 @@ public class ReplicationMonitor {
         } catch (SQLException e) {
             throw DBPoolingExceptionCodes.SQL_ERROR.create(e, e.getMessage());
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
         return retval;
     }
@@ -330,8 +328,13 @@ public class ReplicationMonitor {
             } else {
                 LOG.error("Updating transaction for replication monitor failed for context {}.", I(contextId));
             }
+        } catch (SQLException e) {
+            if ((e.getErrorCode() == 1146) && (e.getSQLState().equalsIgnoreCase("42S02")) && (org.apache.commons.lang.StringUtils.containsIgnoreCase(e.getMessage(), "replicationMonitor"))) {
+                return;
+            }
+            throw e;
         } finally {
-            closeSQLStuff(result, stmt);
+            Databases.closeSQLStuff(result, stmt);
         }
     }
 
@@ -344,7 +347,7 @@ public class ReplicationMonitor {
         } catch (SQLException e) {
             if (1213 != e.getErrorCode()) {
                 // In case of a transaction deadlock MySQL already rolled the transaction back. Then the savepoint does not exist anymore.
-                rollback(con, save);
+                Databases.rollback(con, save);
             }
             throw e;
         }
@@ -356,7 +359,7 @@ public class ReplicationMonitor {
             increaseCounter(assign, con);
             con.commit();
         } catch (SQLException e) {
-            rollback(con);
+            Databases.rollback(con);
             if (1146 == e.getErrorCode()) {
                 if (lastLogged + 300000 < System.currentTimeMillis()) {
                     lastLogged = System.currentTimeMillis();
@@ -368,7 +371,7 @@ public class ReplicationMonitor {
                 LOG.error("", e1);
             }
         } finally {
-            autocommit(con);
+            Databases.autocommit(con);
         }
     }
 

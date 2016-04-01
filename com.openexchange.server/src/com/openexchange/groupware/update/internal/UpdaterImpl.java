@@ -56,7 +56,7 @@ import com.openexchange.groupware.update.SchemaStore;
 import com.openexchange.groupware.update.SchemaUpdateState;
 import com.openexchange.groupware.update.SeparatedTasks;
 import com.openexchange.groupware.update.UpdateStatus;
-import com.openexchange.groupware.update.UpdateTask;
+import com.openexchange.groupware.update.UpdateTaskV2;
 import com.openexchange.groupware.update.Updater;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.timer.TimerService;
@@ -122,9 +122,9 @@ public class UpdaterImpl extends Updater {
     }
 
     @Override
-    public UpdateTask[] getAvailableUpdateTasks() {
-        final List<UpdateTask> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
-        return retval.toArray(new UpdateTask[retval.size()]);
+    public UpdateTaskV2[] getAvailableUpdateTasks() {
+        final List<UpdateTaskV2> retval = UpdateTaskCollection.getInstance().getListWithoutExcludes();
+        return retval.toArray(new UpdateTaskV2[retval.size()]);
     }
 
     @Override

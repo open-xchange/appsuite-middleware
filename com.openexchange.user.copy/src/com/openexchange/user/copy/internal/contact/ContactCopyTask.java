@@ -265,7 +265,7 @@ public class ContactCopyTask implements CopyUserTaskService {
                 final Contact contact = contacts.get(contactId);
                 int i = 1;
                 for (final ContactField field : contactFields) {
-                    if (field.isDBField()) {
+                    if (field.isDBField() && !field.getDbName().equals("value")) {
                         if (contact.contains(field.getNumber())) {
                             final Object value = field.doSwitch(getter, contact);
                             stmt.setObject(i++, value, field.getSQLType());
@@ -443,7 +443,7 @@ public class ContactCopyTask implements CopyUserTaskService {
             while (rs.next()) {
                 final Contact contact = new Contact();
                 for (final ContactField field : contactFields) {
-                    if (field.isDBField()) {
+                    if (field.isDBField() && !field.getDbName().equals("value")) {
                         final Object value = rs.getObject(field.getDbName());
                         if (!rs.wasNull()) {
                             field.doSwitch(setter, contact, value);
@@ -472,7 +472,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         final StringBuilder sb = new StringBuilder("SELECT ");
         boolean first = true;
         for (final ContactField field : contactFields) {
-            if (field.isDBField()) {
+            if (field.isDBField() && !field.getDbName().equals("value")) {
                 final String dbName = field.getDbName();
                 if (first) {
                     sb.append(dbName);
@@ -494,7 +494,7 @@ public class ContactCopyTask implements CopyUserTaskService {
         boolean first = true;
         int count = 0;
         for (final ContactField field : contactFields) {
-            if (field.isDBField()) {
+            if (field.isDBField() && !field.getDbName().equals("value")) {
                 count++;
                 final String dbName = field.getDbName();
                 if (first) {

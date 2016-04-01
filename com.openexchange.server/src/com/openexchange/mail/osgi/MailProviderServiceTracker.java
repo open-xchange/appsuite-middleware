@@ -55,7 +55,6 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
-
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.MailProviderRegistration;
 import com.openexchange.mail.MailProviderRegistry;
@@ -68,7 +67,7 @@ import com.openexchange.mail.api.MailProvider;
  */
 public final class MailProviderServiceTracker implements ServiceTrackerCustomizer<MailProvider,MailProvider> {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderServiceTracker.class);
+    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailProviderServiceTracker.class);
 
     private final Map<String, ServiceRegistration<MailProviderRegistration>> registrations;
     private final BundleContext context;

@@ -56,8 +56,8 @@ import com.openexchange.ajax.response.IncludeStackTraceService;
 import com.openexchange.config.ConfigurationService;
 import com.openexchange.config.PropertyEvent;
 import com.openexchange.config.PropertyListener;
-import com.openexchange.logging.mbean.ExceptionCategoryFilter;
-import com.openexchange.logging.mbean.RankingAwareTurboFilterList;
+import com.openexchange.logging.filter.ExceptionCategoryFilter;
+import com.openexchange.logging.filter.RankingAwareTurboFilterList;
 
 /**
  * {@link ExceptionCategoryFilterRegisterer}
@@ -68,7 +68,7 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
 
     private final BundleContext context;
     private volatile ExceptionCategoryFilter exceptionCategoryFilter = null;
-    private final RankingAwareTurboFilterList rankingAwareTurboFilterList;
+    private RankingAwareTurboFilterList rankingAwareTurboFilterList;
     private final IncludeStackTraceService traceService;
 
     public ExceptionCategoryFilterRegisterer(final BundleContext context, final RankingAwareTurboFilterList rankingAwareTurboFilterList, final IncludeStackTraceService traceService) {
@@ -122,15 +122,14 @@ public class ExceptionCategoryFilterRegisterer implements ServiceTrackerCustomiz
     @Override
     public void onPropertyChange(PropertyEvent event) {
         switch (event.getType()) {
-        case CHANGED:
-            ExceptionCategoryFilter.setCategories(event.getValue());
-            break;
-        case DELETED:
-            ExceptionCategoryFilter.setCategories("USER_INPUT");
-            break;
-        default:
-            break;
+            case CHANGED:
+                ExceptionCategoryFilter.setCategories(event.getValue());
+                break;
+            case DELETED:
+                ExceptionCategoryFilter.setCategories("USER_INPUT");
+                break;
+            default:
+                break;
         }
     }
-
 }

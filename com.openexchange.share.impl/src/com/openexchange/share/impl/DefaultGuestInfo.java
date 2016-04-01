@@ -54,12 +54,15 @@ import java.util.Date;
 import java.util.Locale;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.passwordmechs.PasswordMechFactory;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.share.AuthenticationMode;
 import com.openexchange.share.GuestInfo;
 import com.openexchange.share.ShareTarget;
+import com.openexchange.share.ShareTargetPath;
+import com.openexchange.share.core.tools.ShareLinks;
 import com.openexchange.share.core.tools.ShareToken;
 import com.openexchange.share.core.tools.ShareTool;
 import com.openexchange.share.recipient.RecipientType;
@@ -209,6 +212,11 @@ public class DefaultGuestInfo implements GuestInfo {
     @Override
     public ShareTarget getLinkTarget() {
         return linkTarget;
+    }
+
+    @Override
+    public String generateLink(HostData hostData, ShareTargetPath targetPath) {
+        return ShareLinks.generateExternal(hostData, getBaseToken(), targetPath);
     }
 
     @Override

@@ -1,3 +1,4 @@
+%define __jar_repack %{nil}
 
 Name:          open-xchange-subscribe
 BuildArch:     noarch
@@ -14,7 +15,7 @@ BuildRequires: java7-devel
 BuildRequires: java-devel >= 1.7.0
 %endif
 Version:       @OXVERSION@
-%define        ox_release 27
+%define        ox_release 7
 Release:       %{ox_release}_<CI_CNT>.<B_CNT>
 Group:         Applications/Productivity
 License:       GPL-2.0
@@ -166,6 +167,22 @@ if [ ${1:-0} -eq 2 ]; then
     rm -f /opt/open-xchange/etc/crawlers/t-online.yml
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de $pfile
     ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval $pfile
+
+    # SoftwareChange_Request-2865
+    ox_remove_property com.openexchange.subscribe.crawler.yahoocom /opt/open-xchange/etc/crawler.properties
+    ox_remove_property com.openexchange.subscribe.crawler.gmx.autorunInterval /opt/open-xchange/etc/crawler.properties
+    ox_remove_property com.openexchange.subscribe.crawler.t-online.de.autorunInterval /opt/open-xchange/etc/crawler.properties
+    ox_add_property com.openexchange.subscribe.crawler.web.de.autorunInterval 1d /opt/open-xchange/etc/crawler.properties
+    VALUE=$( ox_read_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties )
+    if [ "" != "$VALUE" ]; then
+        ox_set_property com.openexchange.subscribe.crawler.web.de.autorunInterval "$VALUE" /opt/open-xchange/etc/crawler.properties
+    fi
+    ox_remove_property com.openexchange.subscribe.crawler.webde.autorunInterval /opt/open-xchange/etc/crawler.properties
+
+    # SoftwareChange_Request-2942
+    ox_add_property com.openexchange.subscribe.google.calendar.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
+    ox_add_property com.openexchange.subscribe.google.contact.autorunInterval 1d /opt/open-xchange/etc/googlesubscribe.properties
+    ox_add_property com.openexchange.subscribe.socialplugin.xing.autorunInterval 1d /opt/open-xchange/etc/xingsubscribe.properties
 fi
 
 %clean
@@ -185,23 +202,38 @@ fi
 %config(noreplace) /opt/open-xchange/etc/microformatSubscription.properties
 %config(noreplace) /opt/open-xchange/etc/xingsubscribe.properties
 %config(noreplace) /opt/open-xchange/etc/yahoosubscribe.properties
+%config(noreplace) /opt/open-xchange/etc/mslivesubscribe.properties
 %doc docs/
 
 %changelog
+* Wed Mar 30 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.1 release
+* Fri Mar 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.1 release
 * Wed Mar 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-03-29 (3188)
+* Tue Mar 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Fifth preview for 7.8.1 release
 * Mon Mar 07 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-03-14 (3148)
+* Fri Mar 04 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Fourth preview for 7.8.1 release
 * Fri Feb 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-02-29 (3141)
 * Mon Feb 22 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-02-29 (3121)
+* Sat Feb 20 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Third candidate for 7.8.1 release
 * Mon Feb 15 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-02-18 (3106)
 * Wed Feb 10 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-02-08 (3073)
+* Wed Feb 03 2016 Marcus Klein <marcus.klein@open-xchange.com>
+Second candidate for 7.8.1 release
 * Tue Jan 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-01-19 (3062)
+* Tue Jan 26 2016 Marcus Klein <marcus.klein@open-xchange.com>
+First candidate for 7.8.1 release
 * Mon Jan 25 2016 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2016-01-25 (3031)
 * Sat Jan 23 2016 Marcus Klein <marcus.klein@open-xchange.com>
@@ -228,10 +260,20 @@ Build for patch 2015-11-23 (2878)
 Build for patch 2015-11-09 (2840)
 * Fri Oct 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-11-02 (2853)
+* Tue Oct 20 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-26 (2813)
+* Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-30 (2818)
 * Mon Oct 19 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-10-26 (2812)
+* Mon Oct 12 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-23 (2806)
+* Thu Oct 08 2015 Marcus Klein <marcus.klein@open-xchange.com>
+prepare for 7.8.1
 * Fri Oct 02 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Sixth candidate for 7.8.0 release
+* Wed Sep 30 2015 Marcus Klein <marcus.klein@open-xchange.com>
+Build for patch 2015-10-12 (2784)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>
 Build for patch 2015-09-28  (2767)
 * Fri Sep 25 2015 Marcus Klein <marcus.klein@open-xchange.com>

@@ -1,3 +1,21 @@
+open-xchange-freebusy-ews (7.8.1-2) stable; urgency=medium
+
+  * Second candidate for 7.8.1 release
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Wed, 03 Feb 2016 10:46:24 +0100
+
+open-xchange-freebusy-ews (7.8.1-1) stable; urgency=medium
+
+  * First candidate for 7.8.1 release
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Tue, 26 Jan 2016 10:12:53 +0100
+
+open-xchange-freebusy-ews (7.8.1-0) unstable; urgency=medium
+
+  * prepare for 7.8.1
+
+ -- Markus Wagner <markus.wagner@open-xchange.com>  Thu, 08 Oct 2015 10:46:53 +0200
+
 open-xchange-freebusy-ews (7.8.0-21) stable; urgency=medium
 
   * Build for patch 2016-01-19 (3062)

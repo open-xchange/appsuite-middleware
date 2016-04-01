@@ -61,34 +61,34 @@ public class UseCountComparator implements Comparator<Contact> {
 
     private Comparator<Contact> contactComparator;
 
-    private final boolean specialSort;
-
-    public UseCountComparator(final boolean specialSort, final Locale locale) {
+    public UseCountComparator(final Locale locale) {
         super();
-        this.specialSort = specialSort;
         this.contactComparator = new SpecialAlphanumSortContactComparator(locale);
     }
 
-    public UseCountComparator(final boolean specialSort, final Comparator<Contact> comp) {
-        this(specialSort, Locale.US);
+    public UseCountComparator(final Comparator<Contact> comp) {
+        this(Locale.US);
         this.contactComparator = comp;
     }
 
     @Override
     public int compare(final Contact o1, final Contact o2) {
-        if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            if (specialSort) {
-                return contactComparator.compare(o1, o2);
-            }
-            return 0;
-        } else if (o1.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID && o2.getParentFolderID() != FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            return o2.getUseCount() - o1.getUseCount();
-        } else if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            return -1;
-        } else if (o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
-            return 1;
+        int comp = o2.getUseCount() - o1.getUseCount();
+        if (0 != comp) {
+            return comp;
         }
-        return 0;
+        if (o1.getParentFolderID() != o2.getParentFolderID()) {
+            if (o1.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+                return -1;
+            }
+            if (o2.getParentFolderID() == FolderObject.SYSTEM_LDAP_FOLDER_ID) {
+                return 1;
+            }
+        }
+        if (null != contactComparator) {
+            return contactComparator.compare(o1, o2);
+        }
+        return o2.getDisplayName().compareTo(o1.getDisplayName());
     }
 
 }

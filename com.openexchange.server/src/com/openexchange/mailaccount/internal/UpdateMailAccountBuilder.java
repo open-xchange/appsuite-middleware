@@ -131,7 +131,7 @@ public class UpdateMailAccountBuilder implements AttributeSwitch {
 
     @Override
     public String toString() {
-        return bob.toString();
+        return getUpdateQuery();
     }
 
     @Override

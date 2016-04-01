@@ -108,7 +108,7 @@ public class ContextLoader implements Filter<Integer, Context> {
     private List<Context> loadContexts(final Collection<Integer> cids) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (final PoolException e) {
             throw new StorageException(e);
         }
@@ -151,7 +151,7 @@ public class ContextLoader implements Filter<Integer, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (final PoolException e) {
                 LOG.error("", e);
             }

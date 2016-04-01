@@ -93,6 +93,8 @@ public final class ShareExceptionMessages implements LocalizableStrings {
 
     public static final String LINK_ALREADY_EXISTS_MSG = "You cannot create more than one link per folder or item.";
 
+    public static final String INVALID_LINK_PERMISSIONS_MSG = "The set permissions for the link are invalid.";
+
     /**
      * Prevent instantiation.
      */

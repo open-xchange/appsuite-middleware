@@ -43,7 +43,7 @@
         </copy>
         <chmod perm="755" file="${sbinInstallDir}/checkconfigconsistency"/>
         <chmod perm="755" file="${sbinInstallDir}/clearpreviewcache"/>
-    	<chmod perm="755" file="${sbinInstallDir}/heapdump"/>
+        <chmod perm="755" file="${sbinInstallDir}/heapdump"/>
         <chmod perm="755" file="${sbinInstallDir}/sanitizefilemimetypes"/>
         <chmod perm="755" file="${sbinInstallDir}/closesessions"/>
         <chmod perm="755" file="${sbinInstallDir}/forceupdatetask"/>

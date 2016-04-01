@@ -130,6 +130,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
 
     // --------------------------------------------------------------------------------------------------------------------------------
 
+    private final String name;
     private final ServiceLookup services;
     private final Map<SimpleKey, DovecotPushListener> listeners;
     private final DovecotPushClusterLock clusterLock;
@@ -142,6 +143,7 @@ public class DovecotPushManagerService implements PushManagerExtendedService {
      */
     private DovecotPushManagerService(String endPoint, DovecotPushClusterLock clusterLock, ServiceLookup services) throws OXException {
         super();
+        name = "Dovecot Push Manager";
         this.services = services;
         this.clusterLock = clusterLock;
         listeners = new HashMap<SimpleKey, DovecotPushListener>(512, 0.9F);

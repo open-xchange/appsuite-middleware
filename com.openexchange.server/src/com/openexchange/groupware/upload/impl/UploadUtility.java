@@ -279,8 +279,9 @@ public final class UploadUtility {
         // Parse the upload request
         FileItemIterator iter;
         try {
-            // Get file upload
-            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize);
+            // Get file upload...
+            // ... and add some "extra space" as Apache Fileupload considers the maximum allowed size of a complete request (incl. form fields)
+            ServletFileUpload upload = newFileUploadBase(maxFileSize, maxOverallSize > 0 ? maxOverallSize + 1024 : maxOverallSize);
             // Check request's character encoding
             if (null == req.getCharacterEncoding()) {
                 String defaultEnc = ServerConfig.getProperty(Property.DefaultEncoding);
@@ -389,6 +390,10 @@ public final class UploadUtility {
             }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (IOException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof java.util.concurrent.TimeoutException) {
+                throw UploadException.UploadCode.UNEXPECTED_TIMEOUT.create(e, new Object[0]);
+            }
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
         } catch (RuntimeException e) {
             throw UploadException.UploadCode.UPLOAD_FAILED.create(e, action);
@@ -444,25 +449,9 @@ public final class UploadUtility {
         // Create temporary file
         File tmpFile = File.createTempFile(PREFIX, null, new File(uploadDir));
         tmpFile.deleteOnExit();
-        {
-            ScheduledTimerTask timerTask = TIMER_TASK_REFERENCE.get();
-            if (null == timerTask) {
-                synchronized (UploadUtility.class) {
-                    timerTask = TIMER_TASK_REFERENCE.get();
-                    if (null == timerTask) {
-                        try {
-                            UploadEvicter evicter = new UploadEvicter(PREFIX, LOG);
-                            TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
-                            long delay = 300000; // 5 minutes
-                            timerTask = timerService.scheduleWithFixedDelay(evicter, 3000, delay);
-                            TIMER_TASK_REFERENCE.set(timerTask);
-                        } catch (Exception e) {
-                            LOG.warn("Failed to initialze {}", UploadEvicter.class.getSimpleName(), e);
-                        }
-                    }
-                }
-            }
-        }
+
+        // Start upload evicter (if not yet done)
+        startUploadEvicterIfNotYetDone();
 
         // Write to temporary file
         InputStream in = null;
@@ -516,6 +505,26 @@ public final class UploadUtility {
         retval.setSize(size);
         retval.setTmpFile(tmpFile);
         return retval;
+    }
+
+    private static void startUploadEvicterIfNotYetDone() {
+        ScheduledTimerTask timerTask = TIMER_TASK_REFERENCE.get();
+        if (null == timerTask) {
+            synchronized (UploadUtility.class) {
+                timerTask = TIMER_TASK_REFERENCE.get();
+                if (null == timerTask) {
+                    try {
+                        UploadEvicter evicter = new UploadEvicter(PREFIX, LOG);
+                        TimerService timerService = ServerServiceRegistry.getInstance().getService(TimerService.class);
+                        long delay = 300000; // 5 minutes
+                        timerTask = timerService.scheduleWithFixedDelay(evicter, 3000, delay);
+                        TIMER_TASK_REFERENCE.set(timerTask);
+                    } catch (Exception e) {
+                        LOG.warn("Failed to initialze {}", UploadEvicter.class.getSimpleName(), e);
+                    }
+                }
+            }
+        }
     }
 
     // ------------------------------------------------------------------------------------------------------------------------------

@@ -73,6 +73,7 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     private final Date lastModified;
     private Transport notificationTransport;
     private String notificationMessage;
+    private long offset;
 
     public UpdateInfostoreRequest(String id, Date lastModified, java.io.File upload) {
         this.id = id;
@@ -119,6 +120,24 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
         notificationMessage = message;
     }
 
+    /**
+     * Gets the offset
+     *
+     * @return The offset
+     */
+    public long getOffset() {
+        return offset;
+    }
+
+    /**
+     * Sets the offset
+     *
+     * @param offset The offset to set
+     */
+    public void setOffset(long offset) {
+        this.offset = offset;
+    }
+
     public File getMetadata() {
         return metadata;
     }
@@ -153,6 +172,9 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
             tmp.add(new FieldParameter("json", getBody()));
             tmp.add(new FileParameter("file", upload.getName(), new FileInputStream(upload), metadata.getFileMIMEType()));
         }
+        if (0 < offset) {
+            tmp.add(new Parameter("offset", String.valueOf(offset)));
+        }
         return tmp.toArray(new Parameter[tmp.size()]);
     }
 
@@ -160,4 +182,5 @@ public class UpdateInfostoreRequest extends AbstractInfostoreRequest<UpdateInfos
     public UpdateInfostoreParser getParser() {
         return new UpdateInfostoreParser(getFailOnError(), null != upload);
     }
+
 }

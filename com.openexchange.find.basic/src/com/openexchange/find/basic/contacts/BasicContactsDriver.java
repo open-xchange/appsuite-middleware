@@ -59,6 +59,9 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import com.openexchange.config.ConfigurationService;
 import com.openexchange.configuration.ServerConfig;
 import com.openexchange.contact.AutocompleteParameters;
 import com.openexchange.contact.ContactFieldOperand;
@@ -109,9 +112,18 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
 
     static final ContactField[] ADDRESSBOOK_FIELDS = merge(
         AddressFacet.ADDRESS_FIELDS, EmailFacet.EMAIL_FIELDS, NameFacet.NAME_FIELDS, PhoneFacet.PHONE_FIELDS,
-        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.COMMERCIAL_REGISTER }
+        new ContactField[] { ContactField.CATEGORIES, ContactField.COMPANY, ContactField.DEPARTMENT, ContactField.COMMERCIAL_REGISTER }
         //TOD=: more fields
     );
+
+    private static final String ADDRESS_FIELDS_NAME = "ADDRESS_FIELDS";
+    private static final String EMAIL_FIELDS_NAME = "EMAIL_FIELDS";
+    private static final String NAME_FIELDS_NAME = "NAME_FIELDS";
+    private static final String PHONE_FIELDS_NAME = "PHONE_FIELDS";
+
+    private static final String ADDRESSBOOK_FIELDS_CONFIG = "com.openexchange.contact.search.fields";
+
+    private static final Logger LOG = LoggerFactory.getLogger(BasicContactsDriver.class);
 
     /**
      * Contact fields that are required to perform a {@link Contact#SPECIAL_SORTING} of search results.
@@ -178,7 +190,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
         /*
          * combine with addressbook queries
          */
-        SearchTerm<?> term = Utils.getSearchTerm(session, ADDRESSBOOK_FIELDS, searchRequest.getQueries());
+        SearchTerm<?> term = Utils.getSearchTerm(session, getConfiguredAddressbookFields(), searchRequest.getQueries());
         if (null != term) {
             searchTerm.addSearchTerm(term);
         }
@@ -269,6 +281,7 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             facets.add(new NameFacet(prefix, prefixTokens));
             facets.add(new EmailFacet(prefix, prefixTokens));
             facets.add(new PhoneFacet(prefix, prefixTokens));
+            facets.add(new DepartmentFacet(prefix, prefixTokens));
             facets.add(new AddressFacet(prefix, prefixTokens));
 
             AutocompleteParameters parameters = AutocompleteParameters.newInstance();
@@ -342,23 +355,25 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
         switch (type) {
-        case ADDRESS:
-            return Utils.getSearchTerm(session, AddressFacet.ADDRESS_FIELDS, queries);
-        case CONTACT:
-            SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
-            searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
-            searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
-            return searchTerm;
-        case CONTACT_TYPE:
-            return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
-        case EMAIL:
-            return Utils.getSearchTerm(session, EmailFacet.EMAIL_FIELDS, queries);
-        case NAME:
-            return Utils.getSearchTerm(session, NameFacet.NAME_FIELDS, queries);
-        case PHONE:
-            return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
-        default:
-            throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
+            case ADDRESS:
+                return Utils.getSearchTerm(session, AddressFacet.ADDRESS_FIELDS, queries);
+            case CONTACT:
+                SingleSearchTerm searchTerm = new SingleSearchTerm(SingleOperation.EQUALS);
+                searchTerm.addOperand(new ContactFieldOperand(ContactField.OBJECT_ID));
+                searchTerm.addOperand(new ConstantOperand<Integer>(Integer.valueOf(queries.get(0))));
+                return searchTerm;
+            case CONTACT_TYPE:
+                return ContactTypeFacet.getInstance().getSearchTerm(session, queries);
+            case EMAIL:
+                return Utils.getSearchTerm(session, EmailFacet.EMAIL_FIELDS, queries);
+            case NAME:
+                return Utils.getSearchTerm(session, NameFacet.NAME_FIELDS, queries);
+            case PHONE:
+                return Utils.getSearchTerm(session, PhoneFacet.PHONE_FIELDS, queries);
+            case DEPARTMENT:
+                return Utils.getSearchTerm(session, DepartmentFacet.DEPARTMENT_FIELDS, queries);
+            default:
+                throw FindExceptionCode.UNSUPPORTED_FILTER_FIELD.create(field);
         }
     }
 
@@ -392,6 +407,44 @@ public class BasicContactsDriver extends AbstractContactFacetingModuleSearchDriv
             mergedFields.addAll(Arrays.asList(contactFields));
         }
         return mergedFields.toArray(new ContactField[mergedFields.size()]);
+    }
+
+    private static ContactField[] getConfiguredAddressbookFields() {
+
+        ArrayList<ContactField> contacFields = new ArrayList<ContactField>();
+        try {
+            ConfigurationService confServ = Services.getConfigurationService();
+            List<String> fields = confServ.getProperty(ADDRESSBOOK_FIELDS_CONFIG, "", ",");
+            if (fields == null || fields.isEmpty()) {
+                return ADDRESSBOOK_FIELDS;
+            }
+            for (String field : fields) {
+                switch (field) {
+
+                    case ADDRESS_FIELDS_NAME:
+                        contacFields.addAll(Arrays.asList(AddressFacet.ADDRESS_FIELDS));
+                        continue;
+                    case EMAIL_FIELDS_NAME:
+                        contacFields.addAll(Arrays.asList(EmailFacet.EMAIL_FIELDS));
+                        continue;
+                    case NAME_FIELDS_NAME:
+                        contacFields.addAll(Arrays.asList(NameFacet.NAME_FIELDS));
+                        continue;
+                    case PHONE_FIELDS_NAME:
+                        contacFields.addAll(Arrays.asList(PhoneFacet.PHONE_FIELDS));
+                        continue;
+                }
+                try {
+                    contacFields.add(ContactField.valueOf(field));
+                } catch (IllegalArgumentException ex) {
+                    LOG.warn("\"" + field + "\" is not a valid column or group and will be skipped!");
+                }
+            }
+        } catch (OXException ex) {
+            LOG.error(ex.getMessage());
+            return ADDRESSBOOK_FIELDS;
+        }
+        return contacFields.toArray(new ContactField[contacFields.size()]);
     }
 
 }

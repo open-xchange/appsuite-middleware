@@ -166,6 +166,10 @@ public class RssAction implements AJAXActionService {
                     feeds.add(fetcher.retrieveFeed(url));
                 } catch (java.net.SocketTimeoutException e) {
                     throw RssExceptionCodes.TIMEOUT_ERROR.create(e, url.toString());
+                } catch (UnsupportedEncodingException e) {
+                    /* yeah, right... not happening for UTF-8 */
+                } catch (IOException e) {
+                    throw RssExceptionCodes.IO_ERROR.create(e, e.getMessage(), url.toString());
                 } catch (ParsingFeedException parsingException) {
                     final OXException oxe = RssExceptionCodes.INVALID_RSS.create(parsingException, url.toString());
                     if (1 == urls.size()) {
@@ -204,14 +208,10 @@ public class RssAction implements AJAXActionService {
                 }
             }
 
-        } catch (UnsupportedEncodingException e) {
-            /* yeah, right... not happening for UTF-8 */
         } catch (MalformedURLException e) {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, urlString);
         } catch (IllegalArgumentException e) {
             throw AjaxExceptionCodes.IMVALID_PARAMETER.create(e, e.getMessage());
-        } catch (IOException e) {
-            throw AjaxExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (JSONException e) {
             throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
         }
@@ -233,7 +233,7 @@ public class RssAction implements AJAXActionService {
                 // Check possible image
                 SyndImage image = feed.getImage();
                 if (image != null) {
-                    result.setImageUrl(image.getLink());
+                    result.setImageUrl(image.getUrl());
                 }
 
                 // Add to results list

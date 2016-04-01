@@ -63,8 +63,6 @@ public abstract class SchemaImpl implements Schema {
 
     private boolean locked;
 
-    private int dbVersion = NO_VERSION;
-
     private boolean groupwareCompatible;
 
     private boolean adminCompatible;
@@ -77,10 +75,9 @@ public abstract class SchemaImpl implements Schema {
         super();
     }
 
-    public SchemaImpl(boolean locked, int dbVersion, boolean groupwareCompatible, boolean adminCompatible) {
+    public SchemaImpl(boolean locked, boolean groupwareCompatible, boolean adminCompatible) {
         super();
         this.locked = locked;
-        this.dbVersion = dbVersion;
         this.groupwareCompatible = groupwareCompatible;
         this.adminCompatible = adminCompatible;
     }
@@ -88,20 +85,10 @@ public abstract class SchemaImpl implements Schema {
     public SchemaImpl(Schema schema) {
         super();
         this.locked = schema.isLocked();
-        this.dbVersion = schema.getDBVersion();
         this.groupwareCompatible = schema.isGroupwareCompatible();
         this.adminCompatible = schema.isAdminCompatible();
         this.server = schema.getServer();
         this.schema = schema.getSchema();
-    }
-
-    @Override
-    public int getDBVersion() {
-        return dbVersion;
-    }
-
-    public void setDBVersion(final int dbVersion) {
-        this.dbVersion = dbVersion;
     }
 
     @Override

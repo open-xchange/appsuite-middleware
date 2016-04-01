@@ -54,8 +54,9 @@ import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import com.openexchange.tools.images.ImageInformation;
-import com.openexchange.tools.images.ImageTransformations;
+import com.openexchange.imagetransformation.ImageInformation;
+import com.openexchange.imagetransformation.ImageTransformations;
+import com.openexchange.imagetransformation.TransformationContext;
 
 /**
  * {@link RotateTransformation}

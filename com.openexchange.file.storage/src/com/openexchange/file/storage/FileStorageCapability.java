@@ -120,11 +120,16 @@ public enum FileStorageCapability {
      * Support for pagination/ranges.
      */
     RANGES,
-    
+
     /**
      * Support for storing extended metadata attributes like notes or categories for files.
      */
     EXTENDED_METADATA,
+
+    /**
+     * Support for moving multiple files at once.
+     */
+    MULTI_MOVE,
 
     ;
 }

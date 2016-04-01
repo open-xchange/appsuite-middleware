@@ -57,8 +57,9 @@ import com.openexchange.capabilities.Capability;
 import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.capabilities.CapabilitySet;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorage;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.report.appsuite.ContextReport;
 import com.openexchange.report.appsuite.ContextReportCumulator;
 import com.openexchange.report.appsuite.ReportContextHandler;
@@ -68,7 +69,7 @@ import com.openexchange.report.appsuite.Services;
 import com.openexchange.report.appsuite.UserReport;
 import com.openexchange.report.appsuite.UserReportCumulator;
 import com.openexchange.report.appsuite.serialization.Report;
-import com.openexchange.tools.file.QuotaFileStorage;
+import com.openexchange.server.ServiceExceptionCode;
 
 /**
  * The {@link CapabilityHandler} analyzes a users capabilities and filestore quota. It sums up unique combinations of capabilities and quota and gives counts for
@@ -89,14 +90,20 @@ public class CapabilityHandler implements ReportUserHandler, ReportContextHandle
     @Override
     public void runContextReport(ContextReport contextReport) {
         // Grab the file store quota from the context and save them in the report
-        Context ctx = contextReport.getContext();
         try {
-            long quota = QuotaFileStorage.getInstance(FilestoreStorage.createURI(ctx), ctx).getQuota();
+            long quota = getFileStorage(0, contextReport.getContext().getContextId()).getQuota();
             contextReport.set("macdetail-quota", "quota", quota);
-
         } catch (OXException e) {
             LOG.error("", e);
         }
+    }
+
+    private QuotaFileStorage getFileStorage(int userId, int contextId) throws OXException {
+        QuotaFileStorageService storageService = FileStorages.getQuotaFileStorageService();
+        if (null == storageService) {
+            throw ServiceExceptionCode.absentService(QuotaFileStorageService.class);
+        }
+        return storageService.getQuotaFileStorage(userId, contextId);
     }
 
     @Override

@@ -50,6 +50,7 @@
 package com.openexchange.legacy;
 
 import java.io.IOException;
+import java.util.Arrays;
 import com.hazelcast.nio.serialization.ClassDefinition;
 import com.hazelcast.nio.serialization.ClassDefinitionBuilder;
 import com.hazelcast.nio.serialization.Portable;
@@ -156,7 +157,7 @@ public class PortableCacheEvent extends AbstractCustomPortable {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((groupName == null) ? 0 : groupName.hashCode());
-        result = prime * result + ((keys == null) ? 0 : keys.hashCode());
+        result = prime * result + ((keys == null) ? 0 : Arrays.hashCode(keys));
         result = prime * result + ((operationId == null) ? 0 : operationId.hashCode());
         result = prime * result + ((region == null) ? 0 : region.hashCode());
         return result;
@@ -174,6 +175,16 @@ public class PortableCacheEvent extends AbstractCustomPortable {
             return false;
         }
         PortableCacheEvent other = (PortableCacheEvent) obj;
+        if (operationId != other.operationId) {
+            return false;
+        }
+        if (region == null) {
+            if (other.region != null) {
+                return false;
+            }
+        } else if (!region.equals(other.region)) {
+            return false;
+        }
         if (groupName == null) {
             if (other.groupName != null) {
                 return false;
@@ -185,17 +196,7 @@ public class PortableCacheEvent extends AbstractCustomPortable {
             if (other.keys != null) {
                 return false;
             }
-        } else if (!keys.equals(other.keys)) {
-            return false;
-        }
-        if (operationId != other.operationId) {
-            return false;
-        }
-        if (region == null) {
-            if (other.region != null) {
-                return false;
-            }
-        } else if (!region.equals(other.region)) {
+        } else if (!Arrays.deepEquals(keys, other.keys)) {
             return false;
         }
         return true;

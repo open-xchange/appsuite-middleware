@@ -67,16 +67,16 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
 import com.openexchange.java.Strings;
-import com.openexchange.oauth.provider.client.Client;
-import com.openexchange.oauth.provider.client.ClientData;
-import com.openexchange.oauth.provider.client.ClientManagementException;
-import com.openexchange.oauth.provider.client.ClientManagementException.Reason;
-import com.openexchange.oauth.provider.client.DefaultClient;
-import com.openexchange.oauth.provider.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.Client;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientData;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException;
+import com.openexchange.oauth.provider.authorizationserver.client.DefaultClient;
+import com.openexchange.oauth.provider.authorizationserver.client.Icon;
+import com.openexchange.oauth.provider.authorizationserver.client.ClientManagementException.Reason;
 import com.openexchange.oauth.provider.impl.OAuthProviderProperties;
 import com.openexchange.oauth.provider.impl.client.LazyIcon;
 import com.openexchange.oauth.provider.impl.client.Obfuscator;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 import com.openexchange.server.ServiceLookup;
 
 /**

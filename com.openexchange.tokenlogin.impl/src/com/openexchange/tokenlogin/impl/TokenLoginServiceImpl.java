@@ -57,15 +57,16 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IMap;
-import com.javacodegeeks.concurrent.ConcurrentLinkedHashMap;
 import com.openexchange.concurrent.Blocker;
 import com.openexchange.concurrent.ConcurrentBlocker;
 import com.openexchange.config.ConfigurationService;
@@ -99,9 +100,9 @@ public class TokenLoginServiceImpl implements TokenLoginService {
 
     private volatile String token2sessionIdMapName;
 
-    private final ConcurrentMap<String, String> token2sessionId;
+    private final Cache<String, String> token2sessionId;
 
-    private final ConcurrentMap<String, String> sessionId2token;
+    private final Cache<String, String> sessionId2token;
 
     private final Map<String, TokenLoginSecret> secrets;
 
@@ -122,10 +123,24 @@ public class TokenLoginServiceImpl implements TokenLoginService {
     public TokenLoginServiceImpl(final int maxIdleTime, final ConfigurationService configService, final HazelcastInstanceNotActiveExceptionHandler notActiveExceptionHandler) throws OXException {
         super();
         Validate.notNull(configService);
-
-        final IdleExpirationPolicy evictionPolicy = new IdleExpirationPolicy(maxIdleTime);
-        token2sessionId = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
-        sessionId2token = new ConcurrentLinkedHashMap<String, String>(1024, 0.75f, 16, Integer.MAX_VALUE, evictionPolicy);
+        {
+            CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .maximumSize(Integer.MAX_VALUE)
+                .initialCapacity(1024)
+                .expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
+            Cache<String, String> token2sessionId = cacheBuilder.build();
+            this.token2sessionId = token2sessionId;
+        }
+        {
+            CacheBuilder<Object, Object> cacheBuilder = CacheBuilder.newBuilder()
+                .concurrencyLevel(4)
+                .maximumSize(Integer.MAX_VALUE)
+                .initialCapacity(1024)
+                .expireAfterAccess(maxIdleTime, TimeUnit.MILLISECONDS);
+            Cache<String, String> sessionId2token = cacheBuilder.build();
+            this.sessionId2token = sessionId2token;
+        }
         // Parse app secrets
         secrets = initSecrets(configService.getFileByName("tokenlogin-secrets"));
 
@@ -412,7 +427,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             if (useHzMap) {
                 return putToHzMapIfAbsent(sessionId2tokenMapName, sessionId, newToken);
             } else {
-                return sessionId2token.putIfAbsent(sessionId, newToken);
+                return sessionId2token.asMap().putIfAbsent(sessionId, newToken);
             }
         } finally {
             blocker.release();
@@ -429,7 +444,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             if (useHzMap) {
                 return getFromHzMap(sessionId2tokenMapName, sessionId);
             } else {
-                return sessionId2token.get(sessionId);
+                return sessionId2token.getIfPresent(sessionId);
             }
         } finally {
             blocker.release();
@@ -446,7 +461,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             if (useHzMap) {
                 return removeFromHzMap(sessionId2tokenMapName, sessionId);
             } else {
-                return sessionId2token.remove(sessionId);
+                return sessionId2token.asMap().remove(sessionId);
             }
         } finally {
             blocker.release();
@@ -463,7 +478,7 @@ public class TokenLoginServiceImpl implements TokenLoginService {
             if (useHzMap) {
                 return removeFromHzMap(token2sessionIdMapName, token);
             } else {
-                return token2sessionId.remove(token);
+                return token2sessionId.asMap().remove(token);
             }
         } finally {
             blocker.release();
@@ -514,8 +529,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                     if (null == hzMap) {
                         LOG.trace("Hazelcast map for remote token logins is not available.");
                     } else {
-                        hzMap.putAll(sessionId2token);
-                        sessionId2token.clear();
+                        hzMap.putAll(sessionId2token.asMap());
+                        sessionId2token.invalidateAll();
                     }
                 }
                 if (0 < token2sessionId.size()) {
@@ -523,8 +538,8 @@ public class TokenLoginServiceImpl implements TokenLoginService {
                     if (null == hzMap) {
                         LOG.trace("Hazelcast map for remote token logins is not available.");
                     } else {
-                        hzMap.putAll(token2sessionId);
-                        token2sessionId.clear();
+                        hzMap.putAll(token2sessionId.asMap());
+                        token2sessionId.invalidateAll();
                     }
                 }
                 useHzMap = true;

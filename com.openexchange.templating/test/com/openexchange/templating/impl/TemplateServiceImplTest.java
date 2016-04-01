@@ -76,7 +76,6 @@ import com.openexchange.templating.OXTemplateImpl;
 import com.openexchange.tools.session.ServerSession;
 import com.openexchange.tools.session.ServerSessionAdapter;
 
-
 /**
  * Unit tests for {@link TemplateServiceImpl}
  * 
@@ -171,15 +170,7 @@ public class TemplateServiceImplTest {
 
             @Override
             public List<String> getBasicTemplateNames(final String... filter) {
-                return new ArrayList<String>(Arrays.asList(
-                    "contacts.tmpl",
-                    "contacts_hcard_censored.tmpl",
-                    "contacts_hcard_uncensored.tmpl",
-                    "contacts_oxmf_censored.tmpl",
-                    "contacts_oxmf_uncensored.tmpl",
-                    "iPhoneTemplate.tmpl",
-                    "infostore.tmpl",
-                    "infostore_gallery.tmpl"));
+                return new ArrayList<String>(Arrays.asList("contacts.tmpl", "contacts_hcard_censored.tmpl", "contacts_hcard_uncensored.tmpl", "contacts_oxmf_censored.tmpl", "contacts_oxmf_uncensored.tmpl", "iPhoneTemplate.tmpl", "infostore.tmpl", "infostore_gallery.tmpl"));
             }
 
             @Override
@@ -200,15 +191,7 @@ public class TemplateServiceImplTest {
 
             @Override
             public List<String> getBasicTemplateNames(final String... filter) {
-                return new ArrayList<String>(Arrays.asList(
-                    "contacts.tmpl",
-                    "contacts_hcard_censored.tmpl",
-                    "contacts_hcard_uncensored.tmpl",
-                    "contacts_oxmf_censored.tmpl",
-                    "contacts_oxmf_uncensored.tmpl",
-                    "iPhoneTemplate.tmpl",
-                    "infostore.tmpl",
-                    "infostore_gallery.tmpl"));
+                return new ArrayList<String>(Arrays.asList("contacts.tmpl", "contacts_hcard_censored.tmpl", "contacts_hcard_uncensored.tmpl", "contacts_oxmf_censored.tmpl", "contacts_oxmf_uncensored.tmpl", "iPhoneTemplate.tmpl", "infostore.tmpl", "infostore_gallery.tmpl"));
             }
         };
 
@@ -223,16 +206,7 @@ public class TemplateServiceImplTest {
 
             @Override
             public List<String> getBasicTemplateNames(final String... filter) {
-                return new ArrayList<String>(Arrays.asList(
-                    "contacts.tmpl",
-                    "contacts_hcard_censored.tmpl",
-                    "contacts_hcard_uncensored.tmpl",
-                    "contacts_oxmf_censored.tmpl",
-                    "contacts_oxmf_uncensored.tmpl",
-                    "iPhoneTemplate.tmpl",
-                    "infostore.tmpl",
-                    "infostore_gallery.tmpl",
-                    userDefinedTemplateName));
+                return new ArrayList<String>(Arrays.asList("contacts.tmpl", "contacts_hcard_censored.tmpl", "contacts_hcard_uncensored.tmpl", "contacts_oxmf_censored.tmpl", "contacts_oxmf_uncensored.tmpl", "iPhoneTemplate.tmpl", "infostore.tmpl", "infostore_gallery.tmpl", userDefinedTemplateName));
             }
 
             @Override
@@ -252,16 +226,7 @@ public class TemplateServiceImplTest {
 
             @Override
             public List<String> getBasicTemplateNames(final String... filter) {
-                return new ArrayList<String>(Arrays.asList(
-                    "contacts.tmpl",
-                    "contacts_hcard_censored.tmpl",
-                    "contacts_hcard_uncensored.tmpl",
-                    "contacts_oxmf_censored.tmpl",
-                    "contacts_oxmf_uncensored.tmpl",
-                    "iPhoneTemplate.tmpl",
-                    "infostore.tmpl",
-                    "infostore_gallery.tmpl",
-                    userDefinedTemplateName));
+                return new ArrayList<String>(Arrays.asList("contacts.tmpl", "contacts_hcard_censored.tmpl", "contacts_hcard_uncensored.tmpl", "contacts_oxmf_censored.tmpl", "contacts_oxmf_uncensored.tmpl", "iPhoneTemplate.tmpl", "infostore.tmpl", "infostore_gallery.tmpl", userDefinedTemplateName));
             }
 
             @Override
@@ -275,7 +240,7 @@ public class TemplateServiceImplTest {
         Assert.assertFalse(adminTemplate);
     }
 
-    @Test
+    @Test(expected = OXException.class)
     public void testLoadTemplate_userTemplateNull_returnDefaultTemplate() throws OXException {
         this.templateService = new TemplateServiceImpl(this.configService) {
 
@@ -287,54 +252,39 @@ public class TemplateServiceImplTest {
         };
         this.templateService.setOXFolderHelper(folders);
 
-        OXTemplate template = this.templateService.loadTemplate(null, this.defaultTemplateName, this.session, true);
-
-        Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.never()).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        this.templateService.loadTemplate(null, this.defaultTemplateName, this.session, true);
     }
 
-    @Test
+    @Test(expected = OXException.class)
     public void testLoadTemplate_userTemplateEmptyString_returnDefaultTemplate() throws OXException {
         this.templateService = new TemplateServiceImpl(this.configService);
         this.templateService.setOXFolderHelper(folders);
 
-        OXTemplate template = this.templateService.loadTemplate("", this.defaultTemplateName, this.session, true);
-
-        Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.never()).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        this.templateService.loadTemplate("", this.defaultTemplateName, this.session, true);
     }
 
-    @Test
+    @Test(expected = OXException.class)
     public void testLoadTemplate_defaultTemplateNull_returnDefaultTemplate() throws OXException {
         this.templateService = new TemplateServiceImpl(this.configService);
         this.templateService.setOXFolderHelper(folders);
 
-        OXTemplate template = this.templateService.loadTemplate(this.userDefinedTemplateName, null, this.session, true);
-
-        Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.never()).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        this.templateService.loadTemplate(this.userDefinedTemplateName, null, this.session, true);
     }
 
-    @Test
+    @Test(expected = OXException.class)
     public void testLoadTemplate_defaultTemplateEmptyString_returnDefaultTemplate() throws OXException {
         this.templateService = new TemplateServiceImpl(this.configService);
         this.templateService.setOXFolderHelper(folders);
 
-        OXTemplate template = this.templateService.loadTemplate(this.userDefinedTemplateName, "", this.session, true);
-
-        Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.never()).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        this.templateService.loadTemplate(this.userDefinedTemplateName, "", this.session, true);
     }
 
-    @Test
+    @Test(expected = OXException.class)
     public void testLoadTemplate_SessionNull_returnDefaultTemplate() throws OXException {
         this.templateService = new TemplateServiceImpl(this.configService);
         this.templateService.setOXFolderHelper(folders);
 
-        OXTemplate template = this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, null, true);
-
-        Assert.assertNotNull(template);
-        Mockito.verify(folders, Mockito.never()).getPrivateTemplateFolder((ServerSession) Matchers.any());
+        this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, null, true);
     }
 
     @Test
@@ -417,11 +367,7 @@ public class TemplateServiceImplTest {
         this.templateService.setInfostoreHelper(infostore);
         Mockito.when(folders.getGlobalTemplateFolder((ServerSession) Matchers.any())).thenReturn(new FolderObject());
 
-        OXTemplateImpl template = (OXTemplateImpl) this.templateService.loadTemplate(
-            this.userDefinedTemplateName,
-            this.defaultTemplateName,
-            this.session,
-            true);
+        OXTemplateImpl template = (OXTemplateImpl) this.templateService.loadTemplate(this.userDefinedTemplateName, this.defaultTemplateName, this.session, true);
 
         Assert.assertEquals(this.userDefinedTemplateName, template.getTemplate().getName().toString());
     }

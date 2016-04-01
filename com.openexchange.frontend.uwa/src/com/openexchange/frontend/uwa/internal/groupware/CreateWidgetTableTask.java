@@ -51,7 +51,6 @@ package com.openexchange.frontend.uwa.internal.groupware;
 
 import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.update.CreateTableUpdateTask;
-import com.openexchange.groupware.update.Schema;
 
 
 /**
@@ -62,7 +61,7 @@ import com.openexchange.groupware.update.Schema;
 public class CreateWidgetTableTask extends CreateTableUpdateTask {
 
     public CreateWidgetTableTask(DatabaseService databaseService) {
-        super(new CreateWidgetTable(),  new String[0], Schema.NO_VERSION, databaseService);
+        super(new CreateWidgetTable(), new String[0], databaseService);
     }
 
 }

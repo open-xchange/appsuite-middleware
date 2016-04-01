@@ -61,8 +61,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import com.openexchange.exception.OXException;
+import com.openexchange.processing.ProcessorService;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.threadpool.internal.CustomThreadFactory;
 import com.openexchange.threadpool.osgi.ThreadPoolActivator;
@@ -175,6 +175,15 @@ public final class ThreadPools {
      */
     public static TimerService getTimerService() {
         return ThreadPoolActivator.REF_TIMER.get();
+    }
+
+    /**
+     * Gets registered processor service.
+     *
+     * @return The processor service or <code>null</code>
+     */
+    public static ProcessorService getProcessorService() {
+        return ThreadPoolActivator.REF_PROCESSOR.get();
     }
 
     /**
@@ -490,15 +499,15 @@ public final class ThreadPools {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (TimeoutException e) {
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (CancellationException e) {
             f.cancel(true);
-            throw factory.newUnexpectedError(e);
+            throw fac.newUnexpectedError(e);
         } catch (ExecutionException e) {
-            throw launderThrowable(e, factory.getType());
+            throw launderThrowable(e, fac.getType());
         }
     }
 
@@ -863,5 +872,5 @@ public final class ThreadPools {
             return result;
         }
     }
-    
+
 }

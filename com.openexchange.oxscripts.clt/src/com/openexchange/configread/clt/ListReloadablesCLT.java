@@ -51,6 +51,7 @@ package com.openexchange.configread.clt;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import javax.management.MBeanServerConnection;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
@@ -102,10 +103,11 @@ public class ListReloadablesCLT extends AbstractMBeanCLI<Void> {
         result = mbsc.invoke(getObjectName(ConfigReloadMBean.class.getName(), ConfigReloadMBean.DOMAIN), "listReloadables", null, null);
         Map<String, List<String>> res = (Map<String, List<String>>) result;
         StringBuilder sb = new StringBuilder();
-        for (String configfile : res.keySet()) {
+        for (Entry<String, List<String>> configfileEntry : res.entrySet()) {
+            String configfile = configfileEntry.getKey();
             if (null != configfile && !configfile.isEmpty()) {
                 sb.append(configfile).append(":\n");
-                for (String property : res.get(configfile)) {
+                for (String property : configfileEntry.getValue()) {
                     sb.append(property).append("\n");
                 }
                 sb.append("\n");

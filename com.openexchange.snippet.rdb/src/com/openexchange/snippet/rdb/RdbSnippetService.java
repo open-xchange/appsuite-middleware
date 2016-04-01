@@ -51,6 +51,7 @@ package com.openexchange.snippet.rdb;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
+import com.openexchange.quota.QuotaProvider;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.snippet.SnippetManagement;
@@ -65,18 +66,20 @@ import com.openexchange.snippet.SnippetService;
 public final class RdbSnippetService implements SnippetService {
 
     private final ServiceLookup services;
+    private final QuotaProvider quotaProvider;
 
     /**
      * Initializes a new {@link RdbSnippetService}.
      */
-    public RdbSnippetService(ServiceLookup services) {
+    public RdbSnippetService(QuotaProvider quotaProvider, ServiceLookup services) {
         super();
         this.services = services;
+        this.quotaProvider = quotaProvider;
     }
 
     @Override
     public SnippetManagement getManagement(final Session session) throws OXException {
-        return new RdbSnippetManagement(session, services);
+        return new RdbSnippetManagement(session, quotaProvider, services);
     }
 
     @Override

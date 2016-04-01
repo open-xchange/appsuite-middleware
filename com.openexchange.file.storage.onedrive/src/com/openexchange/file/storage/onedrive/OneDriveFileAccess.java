@@ -102,6 +102,7 @@ import com.openexchange.file.storage.onedrive.rest.file.RestFileResponse;
 import com.openexchange.groupware.results.Delta;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.java.Charsets;
+import com.openexchange.java.SizeKnowingInputStream;
 import com.openexchange.java.Streams;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.mail.mime.MimeType2ExtMap;
@@ -349,11 +350,15 @@ public class OneDriveFileAccess extends AbstractOneDriveResourceAccess implement
                 HttpGet request = null;
                 boolean error = true;
                 try {
+                    request = new HttpGet(buildUri(id, initiateQueryString()));
+                    RestFile restFile = handleHttpResponse(execute(request, httpClient), RestFile.class);
+                    reset(request);
+
                     request = new HttpGet(buildUri(id + "/content", initiateQueryString()));
                     HttpResponse httpResponse = execute(request, httpClient);
                     InputStream content = httpResponse.getEntity().getContent();
                     error = false;
-                    return content;
+                    return new SizeKnowingInputStream(content, restFile.getSize());
                 } finally {
                     if (error) {
                         reset(request);

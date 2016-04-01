@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Open-Xchange Preview Bundle
 Bundle-SymbolicName: com.openexchange.preview
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Activator: com.openexchange.preview.osgi.PreviewActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
@@ -102,5 +102,4 @@ Bundle-ClassPath: .,
  lib/juh-3.2.1.jar,
  lib/jurt-3.2.1.jar,
  lib/ridl-3.2.1.jar,
- lib/unoil-3.2.1.jar,
  lib/jodreports-2.4.0.jar

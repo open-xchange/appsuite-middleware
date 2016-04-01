@@ -50,6 +50,7 @@
 package com.openexchange.calendar.itip.generators;
 
 import java.util.Locale;
+import com.openexchange.calendar.itip.ContextSensitiveMessages;
 import com.openexchange.calendar.itip.Messages;
 import com.openexchange.i18n.tools.StringHelper;
 
@@ -73,13 +74,13 @@ public class ParticipantHelper {
         final String sConfirmStatus;
         switch (participant.getConfirmStatus()) {
         case ACCEPT:
-            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.ACCEPTED);
+            sConfirmStatus = ContextSensitiveMessages.accepted(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
             break;
         case DECLINE:
-            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.DECLINED);
+            sConfirmStatus = ContextSensitiveMessages.declined(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
             break;
         case TENTATIVE:
-            sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.TENTATIVELY_ACCEPTED);
+            sConfirmStatus = ContextSensitiveMessages.tentative(recipientLocale, ContextSensitiveMessages.Context.ADJECTIVE);
             break;
         default:
             sConfirmStatus = StringHelper.valueOf(recipientLocale).getString(Messages.WAITING);

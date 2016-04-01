@@ -59,6 +59,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.contexts.impl.ContextStorage;
 import com.openexchange.mail.dataobjects.MailPart;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.session.Session;
 
 /**
@@ -120,6 +121,24 @@ public class ContentAwareComposedMailMessage extends ComposedMailMessage impleme
             ret[i] = (InternetAddress) a[i];
         }
         return ret;
+    }
+
+    /**
+     * Throws <code>UnsupportedOperationException</code>.
+     */
+    @Override
+    public void setMailSettings(UserSettingMail mailSettings) {
+        // Not applicable
+        throw new UnsupportedOperationException("ContentAwareComposedMailMessage.setMailSettings()");
+    }
+
+    /**
+     * Returns <code>null</code>.
+     */
+    @Override
+    public UserSettingMail getMailSettings() {
+        // Not applicable
+        return null;
     }
 
     @Override

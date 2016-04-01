@@ -111,7 +111,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }, 1);
                 LOG.info("Successfully registered APN certificate provider for iOS.");
             } else {
-                LOG.info("No APN access confgiured for iOS, skipping certificate provider registration.");
+                LOG.info("No default APN access configured for iOS in \"Push\" section in file 'drive.properties', skipping registration for default iOS certificate provider.");
             }
             /*
              * register publisher
@@ -142,7 +142,7 @@ public class APNDriveEventsActivator extends HousekeepingActivator {
                 }, 1);
                 LOG.info("Successfully registered APN certificate provider for Mac OS.");
             } else {
-                LOG.info("No APN access confgiured for Mac OS, skipping certificate provider registration.");
+                LOG.info("No default APN access configured for Mac OS in \"Push\" section in file 'drive.properties', skipping registration for default Mac OS certificate provider.");
             }
             /*
              * register publisher

@@ -49,6 +49,7 @@
 
 package com.openexchange.ajax.share.tests;
 
+import java.util.Date;
 import com.openexchange.ajax.folder.actions.EnumAPI;
 import com.openexchange.ajax.folder.actions.OCLGuestPermission;
 import com.openexchange.ajax.passwordchange.actions.PasswordChangeUpdateRequest;
@@ -57,6 +58,7 @@ import com.openexchange.ajax.share.GuestClient;
 import com.openexchange.ajax.share.ShareTest;
 import com.openexchange.ajax.share.actions.ExtendedPermissionEntity;
 import com.openexchange.ajax.share.actions.UpdateLinkRequest;
+import com.openexchange.ajax.share.actions.UpdateLinkResponse;
 import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.share.ShareTarget;
@@ -109,11 +111,12 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * update recipient, set a password for the anonymous guest
          */
-        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(
-            new ShareTarget(module, String.valueOf(folder.getObjectID())), client.getValues().getTimeZone(), System.currentTimeMillis());
+        ShareTarget shareTarget = new ShareTarget(module, String.valueOf(folder.getObjectID()));
+        UpdateLinkRequest updateLinkRequest = new UpdateLinkRequest(shareTarget, client.getValues().getTimeZone(), System.currentTimeMillis());
         updateLinkRequest.setPassword("secret");
         ((AnonymousRecipient) guestPermission.getRecipient()).setPassword("secret"); // for subsequent comparison
-        client.execute(updateLinkRequest);
+        UpdateLinkResponse updateLinkResponse = client.execute(updateLinkRequest);
+        Date clientTimestamp = updateLinkResponse.getTimestamp();
         /*
          * discover & check guest
          */
@@ -125,9 +128,11 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * update recipient, change password for the anonymous guest
          */
+        updateLinkRequest = new UpdateLinkRequest(shareTarget, client.getValues().getTimeZone(), clientTimestamp.getTime());
         updateLinkRequest.setPassword("geheim");
         ((AnonymousRecipient) guestPermission.getRecipient()).setPassword("geheim"); // for subsequent comparison
-        client.execute(updateLinkRequest);
+        updateLinkResponse = client.execute(updateLinkRequest);
+        clientTimestamp = updateLinkResponse.getTimestamp();
         /*
          * discover & check guest
          */
@@ -139,9 +144,11 @@ public class AnonymousGuestPasswordTest extends ShareTest {
         /*
          * update recipient remove password for the anonymous guest
          */
+        updateLinkRequest = new UpdateLinkRequest(shareTarget, client.getValues().getTimeZone(), clientTimestamp.getTime());
         updateLinkRequest.setPassword(null);
         ((AnonymousRecipient) guestPermission.getRecipient()).setPassword(null); // for subsequent comparison
-        client.execute(updateLinkRequest);
+        updateLinkResponse = client.execute(updateLinkRequest);
+        clientTimestamp = updateLinkResponse.getTimestamp();
         /*
          * discover & check guest
          */

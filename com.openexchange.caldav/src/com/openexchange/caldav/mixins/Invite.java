@@ -50,10 +50,10 @@
 package com.openexchange.caldav.mixins;
 
 import com.openexchange.caldav.CalDAVPermission;
-import com.openexchange.caldav.CalDAVServiceLookup;
 import com.openexchange.caldav.CaldavProtocol;
 import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.caldav.resources.CommonFolderCollection;
+import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
 import com.openexchange.group.Group;
@@ -116,12 +116,12 @@ public class Invite extends SingleXMLPropertyMixin {
         String commonName;
         String uri;
         if (permission.isGroup()) {
-            Group group = CalDAVServiceLookup.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
-            uri = "/principals/groups/" + group.getIdentifier();
+            uri = PrincipalURL.forGroup(permission.getEntity());
+            Group group = factory.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
             commonName = " + " + group.getDisplayName();
         } else {
+            uri = PrincipalURL.forUser(permission.getEntity());
             User user = factory.resolveUser(permission.getEntity());
-            uri = "/principals/users/" + user.getLoginInfo();
             commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {
                 commonName = user.getMail();

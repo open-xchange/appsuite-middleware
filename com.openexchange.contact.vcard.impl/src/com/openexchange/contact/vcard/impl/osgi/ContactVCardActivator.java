@@ -57,8 +57,8 @@ import com.openexchange.contact.vcard.impl.internal.DefaultVCardService;
 import com.openexchange.contact.vcard.impl.internal.VCardParametersFactoryImpl;
 import com.openexchange.contact.vcard.impl.internal.VCardServiceLookup;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.ImageTransformationService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.tools.images.ImageTransformationService;
 
 /**
  * {@link ContactVCardActivator}

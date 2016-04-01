@@ -50,7 +50,6 @@
 package com.openexchange.ajax.requesthandler.converters.preview.cache;
 
 import static com.openexchange.ajax.requesthandler.cache.ResourceCacheProperties.QUOTA_AWARE;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.sql.Connection;
@@ -65,6 +64,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.RejectedExecutionException;
+import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.requesthandler.cache.AbstractResourceCache;
 import com.openexchange.ajax.requesthandler.cache.CachedResource;
 import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadata;
@@ -72,16 +72,14 @@ import com.openexchange.ajax.requesthandler.cache.ResourceCacheMetadataStore;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.database.Databases;
 import com.openexchange.exception.OXException;
+import com.openexchange.filestore.FileStorage;
 import com.openexchange.filestore.FileStorageCodes;
-import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.contexts.impl.ContextStorage;
-import com.openexchange.groupware.filestore.FilestoreStorage;
+import com.openexchange.filestore.FileStorages;
+import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.java.Streams;
 import com.openexchange.preview.PreviewExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.timer.TimerService;
-import com.openexchange.tools.file.FileStorage;
-import com.openexchange.tools.file.QuotaFileStorage;
 
 /**
  * {@link FileStoreResourceCacheImpl} - The filestore-backed preview cache implementation for documents.
@@ -90,17 +88,67 @@ import com.openexchange.tools.file.QuotaFileStorage;
  */
 public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
-    protected static long ALIGNMENT_DELAY = 10000L;
-
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(FileStoreResourceCacheImpl.class);
 
-    private static FileStorage getFileStorage(final Context ctx, final boolean quotaAware) throws OXException {
-        final URI uri = FilestoreStorage.createURI(ctx);
-        return quotaAware ? QuotaFileStorage.getInstance(uri, ctx) : FileStorage.getInstance(uri);
+    protected static long ALIGNMENT_DELAY = 10000L;
+
+    private static FileStorage getFileStorage(int contextId, boolean quotaAware) throws OXException {
+        QuotaFileStorageService qfss = FileStorages.getQuotaFileStorageService();
+        if (quotaAware) {
+            return qfss.getQuotaFileStorage(contextId);
+        }
+
+        URI uri = qfss.getFileStorageUriFor(0, contextId);
+        return FileStorages.getFileStorageService().getFileStorage(uri);
     }
 
-    private static FileStorage getFileStorage(final int contextId, final boolean quotaAware) throws OXException {
-        return getFileStorage(ContextStorage.getStorageContext(contextId), quotaAware);
+    private static interface DataProvider {
+
+        InputStream getStream() throws OXException;
+
+        long getSize();
+    }
+
+    private static class ByteArrayDataProvider implements DataProvider {
+
+        private final byte[] bytes;
+
+        ByteArrayDataProvider(byte[] bytes) {
+            super();
+            this.bytes = bytes;
+        }
+
+        @Override
+        public InputStream getStream() {
+            return Streams.newByteArrayInputStream(bytes);
+        }
+
+        @Override
+        public long getSize() {
+            return bytes.length;
+        }
+    }
+
+    private static class StreamingDataProvider implements DataProvider {
+
+        private final ThresholdFileHolder sink;
+
+        StreamingDataProvider(InputStream in) throws OXException {
+            super();
+            ThresholdFileHolder sink = new ThresholdFileHolder();
+            sink.write(in);
+            this.sink = sink;
+        }
+
+        @Override
+        public InputStream getStream() throws OXException {
+            return sink.getClosingStream();
+        }
+
+        @Override
+        public long getSize() {
+            return sink.getLength();
+        }
     }
 
     // ------------------------------------------------------------------------------- //
@@ -130,7 +178,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     try {
                         fileStorage.deleteFile(id);
                     } catch (final Exception x) {
-                        LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id);
+                        LOG.warn("Could not remove preview file '{}'. Consider using 'checkconsistency' to clean up the filestore.", id, x);
                     }
                 }
             }
@@ -139,43 +187,35 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
     @Override
     public boolean save(final String id, final CachedResource resource, final int userId, final int contextId) throws OXException {
-        final InputStream in = resource.getInputStream();
-        if (null == in) {
-            return save(id, resource.getBytes(), resource.getFileName(), resource.getFileType(), userId, contextId);
-        }
-        return save(id, in, resource.getFileName(), resource.getFileType(), userId, contextId);
-    }
-
-    private boolean save(final String id, final InputStream in, final String optName, final String optType, final int userId, final int contextId) throws OXException {
-        try {
-            return save(id, Streams.stream2bytes(in), optName, optType, userId, contextId);
-        } catch (final IOException e) {
-            throw PreviewExceptionCodes.IO_ERROR.create(e, e.getMessage());
-        }
+        InputStream in = resource.getInputStream();
+        DataProvider dataProvider = null == in ? new ByteArrayDataProvider(resource.getBytes()) : new StreamingDataProvider(in);
+        return save(id, dataProvider, resource.getFileName(), resource.getFileType(), userId, contextId);
     }
 
     private static final Object SCHEDULED = new Object();
     private static final Object RUNNING = new Object();
     private final ConcurrentMap<Integer, Object> alignmentRequests = new ConcurrentHashMap<Integer, Object>();
 
-    private boolean save(final String id, final byte[] bytes, final String optName, final String optType, final int userId, final int contextId) throws OXException {
+    private boolean save(String id, DataProvider dataProvider, String optName, String optType, int userId, int contextId) throws OXException {
         LOG.debug("Trying to cache resource {}.", id);
         final ResourceCacheMetadataStore metadataStore = getMetadataStore();
         final FileStorage fileStorage = getFileStorage(contextId, quotaAware);
         final DatabaseService dbService = getDBService();
-        if (fitsQuotas(bytes.length)) {
+        long globalQuota = getGlobalQuota(userId, contextId);
+
+        if (fitsQuotas(dataProvider.getSize(), globalQuota, userId, contextId)) {
             /*
              * If the resource fits the quotas we store it even if we exceed the quota when storing it.
              * Removing old cache entries is done asynchronously in the finally block.
              */
-            final String refId = fileStorage.saveNewFile(Streams.newByteArrayInputStream(bytes));
+            final String refId = fileStorage.saveNewFile(dataProvider.getStream());
             final ResourceCacheMetadata newMetadata = new ResourceCacheMetadata();
             newMetadata.setContextId(contextId);
             newMetadata.setUserId(userId);
             newMetadata.setResourceId(id);
             newMetadata.setFileName(prepareFileName(optName));
             newMetadata.setFileType(prepareFileType(optType));
-            newMetadata.setSize(bytes.length);
+            newMetadata.setSize(dataProvider.getSize());
             newMetadata.setCreatedAt(System.currentTimeMillis());
             newMetadata.setRefId(refId);
 
@@ -204,7 +244,6 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     metadataStore.store(con, newMetadata);
                 }
 
-                long globalQuota = getGlobalQuota();
                 if (globalQuota > 0) {
                     long usedSize = metadataStore.getUsedSize(con, contextId);
                     if (usedSize > globalQuota) {
@@ -246,7 +285,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                     }
 
                     // Storing the resource exceeded the quota. We schedule an alignment task if this wasn't already done.
-                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(contextId)) {
+                    if (triggerAlignment && alignmentRequests.putIfAbsent(contextId, SCHEDULED) == null && scheduleAlignmentTask(globalQuota, contextId)) {
                         LOG.debug("Scheduling alignment task for context {}.", contextId);
                     } else {
                         LOG.debug("Skipping scheduling of alignment task for context {}.", contextId);
@@ -276,29 +315,31 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return false;
     }
 
-    protected boolean scheduleAlignmentTask(final int contextId) {
+    protected boolean scheduleAlignmentTask(final long globalQuota, final int contextId) {
         try {
             TimerService timerService = optTimerService();
             if (timerService != null) {
                 timerService.schedule(new Runnable() {
                     @Override
                     public void run() {
-                        alignToQuota(contextId);
+                        alignToQuota(globalQuota, contextId);
                     }
                 }, ALIGNMENT_DELAY);
 
                 return true;
             }
         } catch (RejectedExecutionException e) {
-            alignmentRequests.remove(contextId);
-            LOG.warn("Could not schedule alignment task for context {}.", contextId, e);
+            Integer iContextId = Integer.valueOf(contextId);
+            alignmentRequests.remove(iContextId);
+            LOG.warn("Could not schedule alignment task for context {}.", iContextId, e);
         }
 
         return false;
     }
 
-    protected void alignToQuota(final int contextId) {
-        if (!alignmentRequests.replace(contextId, SCHEDULED, RUNNING)) {
+    protected void alignToQuota(long globalQuota, int contextId) {
+        Integer iContextId = Integer.valueOf(contextId);
+        if (!alignmentRequests.replace(iContextId, SCHEDULED, RUNNING)) {
             return;
         }
 
@@ -308,8 +349,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             final Connection con = dbService.getWritable(contextId);
             final Set<String> refIds = new HashSet<String>();
             boolean transactionStarted = false;
+            boolean rollback = false;
             try {
-                long globalQuota = getGlobalQuota();
                 long usedContextQuota = metadataStore.getUsedSize(con, contextId);
                 if (globalQuota > 0 && usedContextQuota > globalQuota) {
                     long neededSpace = usedContextQuota - globalQuota;
@@ -317,6 +358,7 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
 
                     Databases.startTransaction(con);
                     transactionStarted = true;
+                    rollback = true;
                     List<ResourceCacheMetadata> entries = metadataStore.loadForCleanUp(con, contextId);
                     Iterator<ResourceCacheMetadata> it = entries.iterator();
                     while (collected < neededSpace && it.hasNext()) {
@@ -332,14 +374,15 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
                         metadataStore.removeByRefIds(con, contextId, refIds);
                     }
                     con.commit();
+                    rollback = false;
                 }
             } catch (SQLException s) {
-                if (transactionStarted) {
+                LOG.error("Could not align preview cache for context {} to quota.", iContextId, s);
+            } finally {
+                if (rollback) {
                     Databases.rollback(con);
                 }
-                LOG.error("Could not align preview cache for context {} to quota.", contextId, s);
-            } finally {
-                alignmentRequests.remove(contextId);
+                alignmentRequests.remove(iContextId);
                 if (transactionStarted) {
                     Databases.autocommit(con);
                 }
@@ -352,13 +395,13 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
             }
 
             if (refIds.isEmpty()) {
-                LOG.debug("No need to align preview cache for context {} to quota.", contextId);
+                LOG.debug("No need to align preview cache for context {} to quota.", iContextId);
             } else {
-                LOG.debug("Aligning preview cache for context {} to quota.", contextId);
+                LOG.debug("Aligning preview cache for context {} to quota.", iContextId);
                 batchDeleteFiles(refIds, getFileStorage(contextId, quotaAware));
             }
         } catch (Exception e) {
-            LOG.error("Could not align preview cache for context {} to quota.", contextId, e);
+            LOG.error("Could not align preview cache for context {} to quota.", iContextId, e);
         }
     }
 
@@ -424,8 +467,17 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         }
 
         FileStorage fileStorage = getFileStorage(contextId, quotaAware);
-        InputStream file = fileStorage.getFile(metadata.getRefId());
-        return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
+        try {
+            InputStream file = fileStorage.getFile(metadata.getRefId());
+            return new CachedResource(file, metadata.getFileName(), metadata.getFileType(), metadata.getSize());
+        } catch (OXException e) {
+            if (!FileStorageCodes.FILE_NOT_FOUND.equals(e)) {
+                throw e;
+            }
+            // Drop invalid entry
+            metadataStore.remove(contextId, userId, id);
+            return null;
+        }
     }
 
     @Override
@@ -461,9 +513,8 @@ public class FileStoreResourceCacheImpl extends AbstractResourceCache {
         return true;
     }
 
-    private boolean fitsQuotas(final long desiredSize) {
-        final long globalQuota = getGlobalQuota();
-        final long documentQuota = getDocumentQuota();
+    private boolean fitsQuotas(long desiredSize, long globalQuota, int userId, int contextId) throws OXException {
+        long documentQuota = getDocumentQuota(userId, contextId);
         if (globalQuota > 0L || documentQuota > 0L) {
             if (globalQuota <= 0L) {
                 return (documentQuota <= 0 || desiredSize <= documentQuota);

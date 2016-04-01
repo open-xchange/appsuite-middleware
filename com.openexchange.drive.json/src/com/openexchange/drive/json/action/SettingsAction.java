@@ -54,8 +54,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
-import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.DriveQuota;
+import com.openexchange.drive.DriveSettings;
 import com.openexchange.drive.json.internal.DefaultDriveSession;
 import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.Quota;
@@ -110,6 +110,8 @@ public class SettingsAction extends AbstractDriveAction {
                 jsonObject.put("serverVersion", settings.getServerVersion());
                 jsonObject.put("supportedApiVersion", settings.getSupportedApiVersion());
                 jsonObject.put("minApiVersion", settings.getMinApiVersion());
+                jsonObject.put("localizedFolderNames", settings.getLocalizedFolders());
+                jsonObject.put("capabilities", settings.getCapabilities());
             } catch (JSONException e) {
                 throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
             }

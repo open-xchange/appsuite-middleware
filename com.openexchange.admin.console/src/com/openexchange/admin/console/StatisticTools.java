@@ -147,7 +147,7 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static final char OPT_NIO_BUFFER_STATS_SHORT = 'n';
     private static final String OPT_NIO_BUFFER_STATS_LONG = "niobufferstats";
-    
+
     private static final char OPT_RT_BUFFER_STATS_SHORT= 'R';
     private static final String OPT_RT_BUFFER_STATS_LONG = "rtstats";
 
@@ -599,6 +599,7 @@ public class StatisticTools extends AbstractJMXTools {
         sb.append(showGeneralMonitor(con));
         sb.append(showMailInterfaceMonitor(con));
         sb.append(showPooling(con));
+        sb.append(showRateLimiterMonitor(con));
         return sb.toString();
     }
 
@@ -612,6 +613,10 @@ public class StatisticTools extends AbstractJMXTools {
 
     private static StringBuffer showGeneralMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
         return getStats(con, "com.openexchange.monitoring:name=GeneralMonitor");
+    }
+
+    private static StringBuffer showRateLimiterMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
+        return getStats(con, "com.openexchange.monitoring:name=RateLimiterMonitor");
     }
 
     private static StringBuffer showCallMonitor(MBeanServerConnection con) throws IOException, InstanceNotFoundException, MBeanException, AttributeNotFoundException, ReflectionException, IntrospectionException, MalformedObjectNameException {
@@ -899,7 +904,7 @@ public class StatisticTools extends AbstractJMXTools {
         .append(getStats(mbeanServerConnection, "java.nio:type=BufferPool,name=mapped"))
         .toString();
     }
-    
+
     static String showRtData(final MBeanServerConnection mbeanServerConnection) {
         String runLoopFillSum = "RunLoopFillSum";
         StringBuilder sb = new StringBuilder();

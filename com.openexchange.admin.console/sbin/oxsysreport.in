@@ -85,6 +85,7 @@ EXCLUDE_SECRETS_VALUES="true false"
 KEEP_LOGS_ALWAYS="open-xchange.log.0 open-xchange-console.log open-xchange-osgi.log ox-udm-modules-switch.log"
 READEREINGINE_CACHE_DIR=/var/spool/open-xchange/documentconverter/readerengine.cache
 PROCS='
+    cat /proc/cpuinfo;
     df;
     dmesg;
     free;
@@ -93,6 +94,7 @@ PROCS='
     listbundles;
     listconfigdiff;
     listservices;
+    logconf -ll;
     mount;
     netstat -putane;
     ox_java_vm_limits;
@@ -114,7 +116,7 @@ LONGOPTS='$TMP_LONG:,$LOGDIR_LONG:,$LOGARC_LONG:,$KEEP_TMP_LONG:,$CREATE_THREAD_
 EARLY_NEEDED_TOOLS="basename cat echo dirname java pwd tr date"
 NEEDED_TOOLS="awk bzip2 cat cp df du egrep find grep gzip head mkdir mktemp rm rmdir sed sleep tail tar xargs"
 OX_LOG_DIR=/var/log/open-xchange
-OX_CONFIG_DIRS="/opt/open-xchange/etc /opt/open-xchange/guard/etc"
+OX_CONFIG_DIRS="/opt/open-xchange/etc"
 OTHER_CONFIGS="/etc/security/limits.conf"
 
 ###############################################################################
@@ -582,8 +584,6 @@ identify_and_move_ibm_dumps() {
             if [ -f "${file}" ]; then
                 mkdir -p ${TMP}/${LOGDIR}/$(dirname ${file})
                 mv -v ${file} $( normalize_path ${TMP}/${LOGDIR}/${file}) | \
-                sed 's|„||g' | \
-                sed 's|“||g' | \
                 sed 's|^|  |g'
             fi
         done

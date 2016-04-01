@@ -66,6 +66,7 @@ public class RevokeAction extends AbstractOAuthProviderAction {
 
     /**
      * Initializes a new {@link RevokeAction}.
+     *
      * @param services
      */
     public RevokeAction(ServiceLookup services) {
@@ -75,7 +76,7 @@ public class RevokeAction extends AbstractOAuthProviderAction {
     @Override
     public AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
         String clientId = requestData.requireParameter("client");
-        getOAuthProvider().revokeGrants(clientId, session.getContextId(), session.getUserId());
+        getGrantManagement().revokeGrants(clientId, session.getContextId(), session.getUserId());
         return new AJAXRequestResult();
     }
 

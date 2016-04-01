@@ -241,4 +241,9 @@ public class PortableReport extends AbstractCustomPortable {
         }
         return true;
     }
+    
+    @Override
+    public String toString() {
+        return "PortableReport [UUID=" + uuid + ", tasks=" + numberOfTasks + ", tasksToDo=" + pendingTasks + "]";
+    }
 }

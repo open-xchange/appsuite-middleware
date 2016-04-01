@@ -49,6 +49,7 @@
 
 package com.openexchange.file.storage.json.actions.files;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -149,18 +150,18 @@ public class MoveAction extends AbstractWriteAction {
     private AJAXRequestResult handlePairs(List<IdVersionPair> pairs, InfostoreRequest request) throws OXException {
         request.require(Param.FOLDER_ID);
 
+        boolean adjustFilenamesAsNeeded = AJAXRequestDataTools.parseBoolParameter("autorename", request.getRequestData(), true);
+
         IDBasedFileAccess fileAccess = request.getFileAccess();
         IDBasedFolderAccess folderAccess = request.getFolderAccess();
         String destFolder = request.getFolderId();
 
-        List<String> newFiles = new LinkedList<String>();
-        List<String> newFolders = new LinkedList<String>();
-
         List<String> oldFiles = new LinkedList<String>();
-        List<String> oldFolders = new LinkedList<String>();
+        LinkedList<String> deleteableFolders = new LinkedList<String>();
 
         boolean error = true;
         try {
+            List<String> conflicting = new ArrayList<String>(pairs.size());
             for (IdVersionPair pair : pairs) {
                 if (pair.getIdentifier() == null) {
                     // Resource denotes a folder
@@ -175,48 +176,49 @@ public class MoveAction extends AbstractWriteAction {
                         newFolder.addPermission(permission);
                     }
 
-                    String newFolderID = folderAccess.createFolder(srcFolder);
-                    newFolders.add(newFolderID);
-
-                    TimedResult<File> documents = fileAccess.getDocuments(folderId);
-                    SearchIterator<File> iter = documents.results();
-                    try {
-                        while (iter.hasNext()) {
-                            File file = iter.next();
-                            moveFile(file.getId(), newFolderID, fileAccess);
+                    String newFolderID = folderAccess.createFolder(newFolder);
+                    List<String> fileIds = new ArrayList<String>();
+                    {
+                        TimedResult<File> documents = fileAccess.getDocuments(folderId);
+                        SearchIterator<File> iter = documents.results();
+                        try {
+                            while (iter.hasNext()) {
+                                File file = iter.next();
+                                fileIds.add(file.getId());
+                            }
+                        } finally {
+                            SearchIterators.close(iter);
                         }
-                    } finally {
-                        SearchIterators.close(iter);
                     }
 
-                    oldFolders.add(folderId);
+                    deleteableFolders.addLast(newFolderID);
+                    conflicting.addAll(fileAccess.move(fileIds, FileStorageFileAccess.DISTANT_FUTURE, newFolderID, adjustFilenamesAsNeeded));
+
+                    deleteableFolders.removeLast();
+                    deleteableFolders.addLast(folderId);
                 } else {
                     // Resource denotes a file
                     String id = pair.getIdentifier();
-                    String newFileId = moveFile(id, destFolder, fileAccess);
-                    newFiles.add(newFileId);
                     oldFiles.add(id);
                 }
             }
 
+            if (!oldFiles.isEmpty()) {
+                conflicting.addAll(fileAccess.move(oldFiles, FileStorageFileAccess.DISTANT_FUTURE, destFolder, adjustFilenamesAsNeeded));
+            }
+
             {
-                for (String folderId : oldFolders) {
+                for (String folderId : deleteableFolders) {
                     try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
-                }
-                for (String fileId : oldFiles) {
-                    try { fileAccess.removeDocument(Collections.singletonList(fileId), FileStorageFileAccess.DISTANT_FUTURE, true); } catch (Exception e) {/* ignore */}
                 }
             }
 
             error = false;
-            return new AJAXRequestResult(Boolean.TRUE, "native");
+            return result(conflicting, request);
         } finally {
             if (error) {
-                for (String folderId : newFolders) {
+                for (String folderId : deleteableFolders) {
                     try { folderAccess.deleteFolder(folderId, true); } catch (Exception e) {/* ignore */}
-                }
-                for (String fileId : newFiles) {
-                    try { fileAccess.removeDocument(Collections.singletonList(fileId), FileStorageFileAccess.DISTANT_FUTURE, true); } catch (Exception e) {/* ignore */}
                 }
             }
         }

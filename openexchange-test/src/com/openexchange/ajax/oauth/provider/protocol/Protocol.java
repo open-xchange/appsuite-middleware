@@ -50,6 +50,7 @@
 package com.openexchange.ajax.oauth.provider.protocol;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -104,6 +105,8 @@ public class Protocol {
             .setSessionId(sessionId);
         POSTRequest authRequest = getAuthForm.execute(client).preparePOSTRequest();
         POSTResponse authResponse = authRequest.submit(client);
+        assertEquals(302, authResponse.getStatusCode());
+        
         URI redirectLocation = authResponse.getRedirectLocation();
         assertTrue("Unexpected redirect location: " + redirectLocation, redirectLocation.toString().startsWith(params.getRedirectURI()));
         Map<String, String> redirectParams = HttpTools.extractQueryParams(redirectLocation);

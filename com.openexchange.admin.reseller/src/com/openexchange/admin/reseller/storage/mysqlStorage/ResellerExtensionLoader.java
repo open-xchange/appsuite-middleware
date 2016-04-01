@@ -60,6 +60,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import com.openexchange.admin.reseller.rmi.OXResellerTools;
 import com.openexchange.admin.reseller.rmi.dataobjects.ResellerAdmin;
 import com.openexchange.admin.reseller.rmi.dataobjects.Restriction;
@@ -107,7 +108,7 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
     private void loadExtensionsForContexts(Map<Integer, Context> contexts) throws StorageException {
         final Connection con;
         try {
-            con = cache.getConnectionForConfigDB();
+            con = cache.getReadConnectionForConfigDB();
         } catch (PoolException e) {
             throw new StorageException(e);
         }
@@ -116,15 +117,15 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
         try {
             stmt = con.prepareStatement(getIN(SQL, contexts.size()));
             int pos = 1;
-            for (Integer cid : contexts.keySet()) {
-                final Context ctx = contexts.get(cid);
+            for (Entry<Integer, Context> cidEntry : contexts.entrySet()) {
+                final Context ctx = cidEntry.getValue();
                 OXContextExtensionImpl ctxext = (OXContextExtensionImpl)ctx.getFirstExtensionByName(OXContextExtensionImpl.class.getName());
                 // add extension of none present (Bug 18881)
                 if( null == ctxext ) {
                     ctxext = new OXContextExtensionImpl();
                     ctx.addExtension(ctxext);
                 }
-                stmt.setInt(pos++, cid.intValue());
+                stmt.setInt(pos++, cidEntry.getKey().intValue());
             }
             rs = stmt.executeQuery();
 
@@ -159,9 +160,9 @@ public class ResellerExtensionLoader implements Filter<Context, Context> {
         } finally {
             closeSQLStuff(rs, stmt);
             try {
-                cache.pushConnectionForConfigDB(con);
+                cache.pushReadConnectionForConfigDB(con);
             } catch (PoolException e) {
-                LOG.error("", e);
+                LOG.error("Error pushing connection to pool!", e);
             }
         }
     }

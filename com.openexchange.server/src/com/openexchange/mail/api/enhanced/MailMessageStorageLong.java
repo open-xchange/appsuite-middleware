@@ -613,15 +613,16 @@ public abstract class MailMessageStorageLong extends MailMessageStorage {
         if (null == longs) {
             return null;
         }
-        final int len = longs.length;
-        final String[] retval = new String[len];
+
+        int len = longs.length;
+        if (len <= 0) {
+            return new String[0];
+        }
+
+        String[] retval = new String[len];
         for (int i = 0; i < len; i++) {
-            final long l = longs[i];
-            if (l < 0) {
-                retval[i] = null;
-            } else {
-                retval[i] = Long.toString(longs[i], RADIX);
-            }
+            long l = longs[i];
+            retval[i] = (l < 0) ? null : Long.toString(l, RADIX);
         }
         return retval;
     }

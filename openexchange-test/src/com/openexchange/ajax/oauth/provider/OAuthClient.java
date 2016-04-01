@@ -76,7 +76,7 @@ import com.openexchange.oauth.provider.exceptions.OAuthInvalidRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException;
 import com.openexchange.oauth.provider.exceptions.OAuthRequestException;
 import com.openexchange.oauth.provider.exceptions.OAuthInvalidTokenException.Reason;
-import com.openexchange.oauth.provider.scope.Scope;
+import com.openexchange.oauth.provider.resourceserver.scope.Scope;
 
 /**
  * {@link OAuthClient}

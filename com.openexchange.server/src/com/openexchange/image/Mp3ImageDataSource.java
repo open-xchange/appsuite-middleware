@@ -338,12 +338,12 @@ public final class Mp3ImageDataSource implements ImageDataSource {
             String fileMIMEType = Strings.asciiLowerCase(mp3File.getFileMIMEType());
             if (null != fileMIMEType) {
                 if (!isSupported(fileMIMEType)) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File \"" + mp3File.getFileName() + "\" [context " + session.getContextId() + ", id " + mp3File.getId() + "] is not a supported audio MIME type: " + fileMIMEType);
                 }
             } else {
                 String fileName = Strings.asciiLowerCase(mp3File.getFileName());
                 if (null != fileName && !isSupportedFileExt(fileName)) {
-                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File is not a supported audio file: " + fileMIMEType);
+                    throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create("File \"" + mp3File.getFileName() + "\" [context " + session.getContextId() + ", id " + mp3File.getId() + "] has no supported audio file extension.");
                 }
             }
             return mp3File;

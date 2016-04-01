@@ -59,6 +59,7 @@ import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.transport.config.ITransportProperties;
 import com.openexchange.mail.transport.config.NoReplyConfig;
 import com.openexchange.mail.transport.config.NoReplyConfig.SecureMode;
+import com.openexchange.mail.usersetting.UserSettingMail;
 import com.openexchange.mail.transport.config.NoReplyConfigFactory;
 import com.openexchange.mail.transport.config.TransportProperties;
 import com.openexchange.server.ServiceExceptionCode;
@@ -97,7 +98,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
     }
 
     @Override
-    protected SMTPMessageFiller createSMTPMessageFiller() throws OXException {
+    protected SMTPMessageFiller createSMTPMessageFiller(UserSettingMail optMailSettings) throws OXException {
         return new SMTPMessageFiller(getTransportConfig().getSMTPProperties(), new NoReplyCompositionParameters());
     }
 
@@ -149,7 +150,7 @@ public class NoReplySMTPTransport extends AbstractSMTPTransport {
          * @param serverProperties
          * @param smtpProperties
          */
-        private NoReplySMTPProperties() {
+        NoReplySMTPProperties() {
             this.smtpProperties = SMTPProperties.getInstance();
             this.serverProperties = TransportProperties.getInstance();
         }

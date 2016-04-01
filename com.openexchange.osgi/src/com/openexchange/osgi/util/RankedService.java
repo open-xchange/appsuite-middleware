@@ -69,21 +69,24 @@ public final class RankedService<S> implements Comparable<RankedService<S>> {
      */
     public final int ranking;
 
+    private final int hash;
+
     /**
      * Initializes a new {@link RankedService}.
      *
-     * @param service
-     * @param ranking
+     * @param service The associated service
+     * @param ranking The service ranking
      */
     public RankedService(final S service, final int ranking) {
         super();
         this.service = service;
         this.ranking = ranking;
+        hash = 31 + ((service == null) ? 0 : service.hashCode());
     }
 
     @Override
     public int hashCode() {
-        return 31 + ((service == null) ? 0 : service.hashCode());
+        return hash;
     }
 
     @Override

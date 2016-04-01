@@ -105,8 +105,8 @@ public abstract class TaskStorage {
      * @param type storage type of the task (one of ACTIVE, DELETED).
      * @throws OXException if inserting the task fails.
      */
-    public void insertTask(Context ctx, Connection con, Task task, StorageType type, boolean checkUID) throws OXException {
-        insertTask(ctx, con, task, type, null, checkUID);
+    public void insertTask(Context ctx, Connection con, Task task, StorageType type) throws OXException {
+        insertTask(ctx, con, task, type, null);
     }
 
     /**
@@ -119,7 +119,7 @@ public abstract class TaskStorage {
      * @param columns Columns of the tasks that should be stored, or <code>null</code> if not restricted.
      * @throws OXException if inserting the task fails.
      */
-    public abstract void insertTask(Context ctx, Connection con, Task task, StorageType type, int[] columns, boolean checkUID) throws OXException;
+    public abstract void insertTask(Context ctx, Connection con, Task task, StorageType type, int[] columns) throws OXException;
 
     /**
      * Stores a task object.
@@ -138,10 +138,10 @@ public abstract class TaskStorage {
             if (exists) {
                 updateTask(ctx, con, task, new Date(Long.MAX_VALUE), UPDATE_DUMMY_ATTRS, type);
             } else {
-                insertTask(ctx, con, task, type, columns, false);
+                insertTask(ctx, con, task, type, columns);
             }
         } else {
-            insertTask(ctx, con, task, type, columns, false);
+            insertTask(ctx, con, task, type, columns);
         }
     }
 

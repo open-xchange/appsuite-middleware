@@ -66,6 +66,7 @@ import com.openexchange.user.copy.internal.oauth.osgi.OAuthCopyActivator;
 import com.openexchange.user.copy.internal.reminder.osgi.ReminderCopyActivator;
 import com.openexchange.user.copy.internal.subscription.osgi.SubscriptionCopyActivator;
 import com.openexchange.user.copy.internal.tasks.osgi.TaskCopyActivator;
+import com.openexchange.user.copy.internal.usecount.osgi.UseCountCopyActivator;
 import com.openexchange.user.copy.internal.user.osgi.UserCopyActivator;
 import com.openexchange.user.copy.internal.usersettings.osgi.UserSettingsActivator;
 import com.openexchange.user.copy.internal.uwa.osgi.UWAActivator;
@@ -97,7 +98,8 @@ public class Activator extends CompositeBundleActivator {
             new CommandActivator(),
             new MailAccountCopyActivator(),
             new ReminderCopyActivator(),
-            new UWAActivator()
+            new UWAActivator(),
+            new UseCountCopyActivator()
         };
     }
 

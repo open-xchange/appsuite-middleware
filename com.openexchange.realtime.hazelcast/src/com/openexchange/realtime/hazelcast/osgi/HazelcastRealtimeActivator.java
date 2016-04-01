@@ -180,7 +180,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
     }
 
     @Override
-    public void stopBundle() throws Exception {
+    protected void stopBundle() throws Exception {
         if (isStopped.compareAndSet(false, true)) {
             LOG.info("Stopping bundle: {}", getClass().getCanonicalName());
 
@@ -201,10 +201,9 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
             ManagementHouseKeeper.getInstance().cleanup();
             Services.setServiceLookup(null);
-            cleanUp();
+            super.stopBundle();
         }
     }
-
 
     @Override
     protected void handleAvailability(Class<?> clazz) {
@@ -220,10 +219,7 @@ public class HazelcastRealtimeActivator extends HousekeepingActivator {
 
     @Override
     protected void handleUnavailability(Class<?> clazz) {
-        LOG.warn(
-            "{} is handling unavailibility of needed service {}. Going to stop bundle.",
-            this.getClass().getSimpleName(),
-            clazz.getSimpleName());
+        LOG.warn("{} is handling unavailibility of needed service {}. Going to stop bundle.", this.getClass().getSimpleName(), clazz.getSimpleName());
         try {
             this.stopBundle();
         } catch (Exception e) {

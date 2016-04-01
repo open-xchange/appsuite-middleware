@@ -2,9 +2,10 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Generic ConfigJump
 Bundle-SymbolicName: com.openexchange.configjump.generic
-Bundle-Version: 7.8.0
+Bundle-Version: 7.8.1
 Bundle-Vendor: OX Software GmbH
 Bundle-Activator: com.openexchange.configjump.generic.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Import-Package: com.openexchange.config,
  com.openexchange.configjump,
  com.openexchange.exception,
@@ -14,4 +15,3 @@ Import-Package: com.openexchange.config,
  org.osgi.framework,
  org.osgi.util.tracker,
  org.slf4j
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7

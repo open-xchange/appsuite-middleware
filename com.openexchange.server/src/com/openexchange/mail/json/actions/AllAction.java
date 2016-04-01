@@ -85,8 +85,8 @@ import com.openexchange.mail.json.MailRequest;
 import com.openexchange.mail.json.MailRequestSha1Calculator;
 import com.openexchange.mail.json.converters.MailConverter;
 import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.BooleanTerm;
 import com.openexchange.mail.search.FlagTerm;
+import com.openexchange.mail.search.ORTerm;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.threadpool.ThreadPools;
@@ -316,7 +316,12 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
                         }
                     }
                 } else {
-                    int sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                    int sortCol;
+                    try {
+                        sortCol = sort == null ? MailListField.RECEIVED_DATE.getField() : Integer.parseInt(sort);
+                    } catch (NumberFormatException e) {
+                        throw MailExceptionCode.INVALID_INT_VALUE.create(e, AJAXServlet.PARAMETER_SORT);
+                    }
 
                     if (filterApplied) {
                         mailInterface.openFor(folderId);
@@ -324,9 +329,9 @@ public final class AllAction extends AbstractMailAction implements MailRequestSh
 
                         SearchTerm<?> searchTerm;
                         {
-                            SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : BooleanTerm.TRUE;
-                            SearchTerm<?> second = ignoreDeleted ? new FlagTerm(MailMessage.FLAG_DELETED, false) : BooleanTerm.TRUE;
-                            searchTerm = new ANDTerm(first, second);
+                            SearchTerm<?> first = ignoreSeen ? new FlagTerm(MailMessage.FLAG_SEEN, false) : null;
+                            SearchTerm<?> second = ignoreDeleted ? (ignoreSeen ? null /* Already filtered by unseen, thus OR term will always be true */: new ORTerm(new FlagTerm(MailMessage.FLAG_DELETED, false), new FlagTerm(MailMessage.FLAG_SEEN, false))) : null;
+                            searchTerm = null != first && null != second ? new ANDTerm(first, second) : (null == first ? second : first);
                         }
 
                         FullnameArgument fa = prepareMailFolderParam(folderId);
