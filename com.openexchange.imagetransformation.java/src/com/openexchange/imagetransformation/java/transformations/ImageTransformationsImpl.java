@@ -51,10 +51,10 @@ package com.openexchange.imagetransformation.java.transformations;
 
 import static com.openexchange.tools.images.ImageTransformationUtility.*;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
-import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,9 +64,13 @@ import java.util.List;
 import java.util.Map;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
+import net.coobird.thumbnailator.util.exif.ExifUtils;
+import net.coobird.thumbnailator.util.exif.Orientation;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
@@ -83,7 +87,6 @@ import com.openexchange.imagetransformation.ScaleType;
 import com.openexchange.imagetransformation.TransformationContext;
 import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.java.osgi.Services;
-import com.openexchange.java.BoolReference;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -161,6 +164,30 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
         }
         return tmp.longValue();
+    }
+
+    private static volatile Float preferThumbnailThreshold;
+    static float preferThumbnailThreshold() {
+        Float tmp = preferThumbnailThreshold;
+        if (null == tmp) {
+            synchronized (ImageTransformationsTask.class) {
+                tmp = preferThumbnailThreshold;
+                if (null == tmp) {
+                    float defaultValue = 0.8f;
+                    ConfigurationService configService = Services.getService(ConfigurationService.class);
+                    if (null == configService) {
+                        return defaultValue;
+                    }
+                    try {
+                        tmp = Float.valueOf(configService.getProperty("com.openexchange.tools.images.transformations.preferThumbnailThreshold", String.valueOf(defaultValue)));
+                        preferThumbnailThreshold = tmp;
+                    } catch (NumberFormatException e) {
+                        LOG.warn("error parsing \"com.openexchange.tools.images.transformations.preferThumbnailThreshold\", sticking to defaults.", e);
+                    }
+                }
+            }
+        }
+        return tmp.floatValue();
     }
 
     static {
@@ -560,8 +587,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
         ThresholdFileHolder sink = new ThresholdFileHolder();
         try {
             sink.write(maxSize > 0 ? new CountingInputStream(inputStream, maxSize, IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR) : inputStream);
-
-            return readAndExtractMetadataFromFile0(sink, formatName, maxResolution, signaler);
+            return readAndExtractMetadataFromFile(sink, formatName, maxSize, maxResolution, signaler);
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
@@ -582,62 +608,79 @@ public class ImageTransformationsImpl implements ImageTransformations {
      * @param maxResolution The max. resolution for an image or less than/equal to 0 (zero) for no resolution limitation
      * @param signaler The optional signaler or <code>null</code>
      * @return The buffered image
-     * @throws IOException
      */
     private BufferedImage readAndExtractMetadataFromFile(IFileHolder imageFile, String formatName, long maxSize, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        if (maxSize > 0 && imageFile.getLength() > maxSize) {
-            throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
-        }
-
-        return readAndExtractMetadataFromFile0(imageFile, formatName, maxResolution, signaler);
-    }
-
-    /**
-     * Reads a buffered image from the supplied stream and closes the stream afterwards, trying to extract meta-data information.
-     *
-     * @param imageFile The image file to read from
-     * @param formatName The format name
-     * @param maxSize The max. size for an image or less than/equal to 0 (zero) for no size limitation
-     * @param signaler The optional signaler or <code>null</code>
-     * @return The buffered image
-     * @throws IOException
-     */
-    private BufferedImage readAndExtractMetadataFromFile0(IFileHolder imageFile, String formatName, long maxResolution, ImageTransformationSignaler signaler) throws IOException {
-        BufferedInputStream bufferedStream = ImageTransformationUtility.bufferedInputStreamFor(getFileStream(imageFile));
+        ImageInputStream input = null;
+        ImageReader reader = null;
         try {
-            // Read image metadata
-            {
-                BoolReference reset = new BoolReference();
-                try {
-                    imageInformation = ImageTransformationUtility.readImageInformation(bufferedStream, reset);
-                } finally {
-                    // Try to reset stream; otherwise re-instantiate
-                    if (reset.getValue()) {
-                        try {
-                            bufferedStream.reset();
-                        } catch (IOException e) {
-                            // The mark has been invalidated or stream has been closed
-                            LOG.debug("Error resetting image stream", e);
-                            Streams.close(bufferedStream);
-                            bufferedStream = ImageTransformationUtility.bufferedInputStreamFor(getFileStream(imageFile));
+            /*
+             * create reader from image input stream
+             */
+            input = ImageIO.createImageInputStream(getFileStream(imageFile));
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
+            if (false == readers.hasNext()) {
+                throw new IllegalArgumentException("No reader for: " + imageFile);
+            }
+            reader = readers.next();
+            reader.setInput(input);
+            /*
+             * read original image dimensions & check against required dimensions for transformations
+             */
+            int width = reader.getWidth(0);
+            int height = reader.getHeight(0);
+            int orientation = readExifOrientation(reader, 0);
+            /*
+             * prefer a suitable thumbnail in stream if possible when downscaling images
+             */
+            float preferThumbnailThreshold = preferThumbnailThreshold();
+            if (0 <= preferThumbnailThreshold && reader.hasThumbnails(0)) {
+                Dimension requiredResolution = getRequiredResolution(transformations, width, height);
+                if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
+                    int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
+                    int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
+                    for (int i = 0; i < reader.getNumThumbnails(0); i++) {
+                        int thumbnailWidth = reader.getThumbnailWidth(0, i);
+                        int thumbnailHeight = reader.getThumbnailHeight(0, i);
+                        if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
+                            LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)",
+                                thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
+                            /*
+                             * use thumbnail & skip any additional scale transformations / compressions
+                             */
+                            compress = false;
+                            for (Iterator<ImageTransformation> iterator = transformations.iterator(); iterator.hasNext();) {
+                                ImageTransformation transformation = iterator.next();
+                                if (ScaleTransformation.class.isInstance(transformation)) {
+                                    iterator.remove();
+                                }
+                            }
+                            imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
+                            onImageRead(signaler);
+                            return reader.readThumbnail(0, i);
                         }
                     }
                 }
             }
-
-            if (maxResolution > 0 && null != imageInformation) {
-                int resolution = imageInformation.height * imageInformation.width;
+            /*
+             * check image size against limitations prior reading source image
+             */
+            if (0 < maxSize && maxSize < imageFile.getLength()) {
+                throw IMAGE_SIZE_EXCEEDED_EXCEPTION_CREATOR.createIOException(imageFile.getLength(), maxSize);
+            }
+            if (0 < maxResolution) {
+                int resolution = height * width;
                 if (resolution > maxResolution) {
                     throw createResolutionExceededIOException(maxResolution, resolution);
                 }
             }
-
-            return imageIoRead(bufferedStream, signaler);
-        } catch (IllegalArgumentException e) {
-            LOG.debug("Error reading image for {}", formatName, e);
-            return null;
+            imageInformation = new ImageInformation(orientation, width, height);
+            onImageRead(signaler);
+            return reader.read(0);
         } finally {
-            Streams.close(bufferedStream);
+            if (null != reader) {
+                reader.dispose();
+            }
+            Streams.close(input);
         }
     }
 
@@ -706,6 +749,37 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
             throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
         }
+    }
+
+    private static int readExifOrientation(ImageReader reader, int imageIndex) {
+        try {
+            Orientation exifOrientation = ExifUtils.getExifOrientation(reader, imageIndex);
+            if (null != exifOrientation) {
+                return exifOrientation.ordinal() + 1;
+            }
+        } catch (Exception e) {
+            LOG.debug("error reading Exif orientation from stream", e);
+        }
+        return 0;
+    }
+
+    private static Dimension getRequiredResolution(List<ImageTransformation> transformations, int originalWidth, int originalHeight) {
+        Dimension originalResolution = new Dimension(originalWidth, originalHeight);
+        Dimension requiredResolution = null;
+        for (ImageTransformation transformation : transformations) {
+            Dimension resolution = transformation.getRequiredResolution(originalResolution);
+            if (null == requiredResolution) {
+                requiredResolution = resolution;
+            } else if (null != resolution) {
+                if (requiredResolution.height < resolution.height) {
+                    requiredResolution.height = resolution.height;
+                }
+                if (requiredResolution.width < resolution.width) {
+                    requiredResolution.width = resolution.width;
+                }
+            }
+        }
+        return requiredResolution;
     }
 
 }
