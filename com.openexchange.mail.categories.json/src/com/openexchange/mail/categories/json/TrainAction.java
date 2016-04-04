@@ -49,63 +49,64 @@
 
 package com.openexchange.mail.categories.json;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import org.json.JSONException;
+import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
+import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.documentation.RequestMethod;
+import com.openexchange.documentation.annotations.Action;
+import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
+import com.openexchange.mail.categories.MailCategoriesConfigService;
+import com.openexchange.mail.categories.ReorganizeParameter;
+import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
+import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link MailCategoriesActionFactory}
+ * {@link TrainAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
  * @since v7.8.2
  */
-public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
-
-    private static final AtomicReference<MailCategoriesActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailCategoriesActionFactory>();
-
-    public static MailCategoriesActionFactory initMailCategoriesActionFactory(final ServiceLookup services) {
-        try {
-        MailCategoriesActionFactory actionFactory = new MailCategoriesActionFactory(services);
-        INSTANCE_REFERENCE.set(actionFactory);
-        return actionFactory;
-        } catch (Throwable t) {
-            throw t;
-        }
-    }
-
-    private final Map<String, AbstractCategoriesAction> actions;
+@Action(method = RequestMethod.PUT, name = "train", description = "Trains an existing mail user category.", parameters = {
+    @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "category", description = "The category identifier"),
+    @Parameter(name = "mail", description = "The mail address that should be trained"),
+    @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized."),
+}, responseDescription = "Response: Empty")
+public class TrainAction extends AbstractCategoriesAction {
 
     /**
-     * Initializes a new {@link MailCategoriesActionFactory}.
+     * Initializes a new {@link TrainAction}.
      *
-     * @param services The service look-up
+     * @param services
      */
-    private MailCategoriesActionFactory(final ServiceLookup services) {
-        super();
-        actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
-        AbstractCategoriesAction switchAction = new SwitchAction(services);
-        actions.put("enable", switchAction);
-        actions.put("disable", switchAction);
-        actions.put("unread", new UnreadAction(services));
-        actions.put("new", new NewAction(services));
-        actions.put("remove", new RemoveAction(services));
-        actions.put("update", new UpdateAction(services));
-        actions.put("train", new TrainAction(services));
+    protected TrainAction(ServiceLookup services) {
+        super(services);
     }
 
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
-    }
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
+        MailCategoriesConfigService mailCategoriesService = services.getService(MailCategoriesConfigService.class);
+        if (mailCategoriesService == null) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
+        }
 
-    @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+        String category = requestData.requireParameter("category");
+        String mail = requestData.requireParameter("mail");
+
+        // Check for re-organize flag
+        boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
+        ReorganizeParameter reorganizeParameter = ReorganizeParameter.getParameterFor(reorganize);
+
+        mailCategoriesService.trainCategory(category, mail, reorganizeParameter, session);
+
+        AJAXRequestResult result = new AJAXRequestResult();
+        if (reorganizeParameter.hasWarnings()) {
+            result.addWarnings(reorganizeParameter.getWarnings());
+        }
+        return result;
     }
 
 }

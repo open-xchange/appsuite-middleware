@@ -160,8 +160,14 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         List<String> flagList = new ArrayList<>();
         flagList.add(rule.getFlag());
         argList.add(flagList);
+        List<ActionCommand> actionCommands = new ArrayList<>();
         ActionCommand addFlagAction = new ActionCommand(ActionCommand.Commands.ADDFLAG, argList);
-        IfCommand ifCommand = new IfCommand(getCommand(rule), Collections.singletonList(addFlagAction));
+        actionCommands.add(addFlagAction);
+        String[] flagsToRemove = rule.getFlagsToRemove();
+        if (flagsToRemove != null) {
+            //TODO add remove flags action
+        }
+        IfCommand ifCommand = new IfCommand(getCommand(rule), actionCommands);
         ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
         int linenumber = 0;
         boolean commented = false;

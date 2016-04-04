@@ -91,6 +91,8 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
 
     private final static String FLAG_PREFIX = "$ox_";
 
+    private static final String FROM_HEADER = "from";
+
     public MailCategoriesConfigServiceImpl() {
         super();
     }
@@ -522,6 +524,51 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
         }
         return result;
+    }
+
+    @Override
+    public void trainCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException {
+        String flag = generateFlag(category);
+
+        // Update rule
+
+        MailCategoryRule oldRule = getRule(session, category);
+        MailCategoryRule newRule = null;
+        if (null == oldRule) {        // Create new rule
+            newRule = new MailCategoryRule(FROM_HEADER, email, flag);
+        } else {
+            if (oldRule.hasSubRules() && oldRule.isAND() == false) {
+                oldRule.addSubRule(new MailCategoryRule(FROM_HEADER, email, flag));
+                newRule = oldRule;
+            } else {
+                newRule = new MailCategoryRule(flag, false);
+                newRule.addSubRule(oldRule);
+                newRule.addSubRule(new MailCategoryRule(FROM_HEADER, email, flag));
+            }
+        }
+
+        if (isSystemCategory(category, session)) {
+            newRule.addFlagsToRemove(getSystemCategoryNames(session));
+        }
+
+        setRule(session, category, newRule);
+
+        // Reorganize if necessary
+        if (reorganize.isReorganize()) {
+            List<OXException> warnings = reorganize.getWarnings();
+            try {
+                SearchTerm<?> searchTerm = getSearchTerm(newRule);
+                FullnameArgument fa = new FullnameArgument("INBOX");
+                if (searchTerm != null) {
+                    MailCategoriesOrganizer.organizeExistingMails(session, fa.getFullName(), searchTerm, flag, true);
+                }
+            } catch (OXException e) {
+                if (warnings.isEmpty()) {
+                    warnings.add(MailCategoriesOrganizeExceptionCodes.UNABLE_TO_ORGANIZE.create());
+                }
+            }
+        }
+
     }
 
 }

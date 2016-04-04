@@ -151,7 +151,7 @@ public interface MailCategoriesConfigService {
      * @param category The category identifier
      * @param flag The category flag
      * @param name The category name
-     * @param filterDesc The filter description
+     * @param rule The new rule of the category
      * @param reorganize Whether to re-organize existing messages
      * @param session The user session
      * @throws OXException if a category with this identifier already exists
@@ -159,16 +159,27 @@ public interface MailCategoriesConfigService {
     void addUserCategory(String category, String flag, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
-     * Updates the name of a user category
+     * Updates the user category
      *
      * @param category The category identifier
      * @param name The category name
-     * @param filterDesc The filter description
+     * @param rule The new rule of the category
      * @param reorganize Whether to re-organize existing messages
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
      */
     void updateUserCategory(String category, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException;
+
+    /**
+     * Trains the given category with the given mail address
+     *
+     * @param category The category identifier
+     * @param email The email address
+     * @param reorganize Whether to re-organize existing messages
+     * @param session The user session
+     * @throws OXException if a category with this identifier does not exist
+     */
+    void trainCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
      * Removes the given user categories

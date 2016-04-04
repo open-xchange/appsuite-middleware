@@ -66,6 +66,7 @@ public class MailCategoryRule {
     private boolean isAND;
     private String header;
     private String value;
+    private String[] flagsToRemove;
 
     /**
      * Initializes a new {@link MailCategoryRule} with subrules.
@@ -115,6 +116,14 @@ public class MailCategoryRule {
 
     public String getValue() {
         return value;
+    }
+
+    public void addFlagsToRemove(String... flags) {
+        this.flagsToRemove = flags;
+    }
+
+    public String[] getFlagsToRemove() {
+        return flagsToRemove;
     }
 
     /**
