@@ -49,6 +49,7 @@
 
 package com.openexchange.report.appsuite.management;
 
+import java.util.HashMap;
 import java.util.Map;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -92,7 +93,11 @@ public class JMXReport {
             Map<String, Map<String, Object>> lData = report.getData();
             
             boolean adminMailLoginEnabled = Services.getService(ConfigurationService.class).getBoolProperty("com.openexchange.mail.adminMailLoginEnabled", false);
-            lData.get("configs").put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
+            Map<String, Object> configs = lData.get("configs");
+            if (configs == null) {
+                configs = new HashMap<String, Object>();
+            }
+            configs.put("com.openexchange.mail.adminMailLoginEnabled", Boolean.toString(adminMailLoginEnabled));
             
             JSONObject jsonData = (JSONObject) JSONCoercion.coerceToJSON(lData);
             jsonData.put("uuid", uuid);
