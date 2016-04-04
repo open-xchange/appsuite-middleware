@@ -67,6 +67,7 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
+import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import net.coobird.thumbnailator.util.exif.ExifUtils;
@@ -93,6 +94,7 @@ import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tools.stream.CountingInputStream.IOExceptionCreator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
+import com.twelvemonkeys.imageio.stream.ByteArrayImageInputStream;
 
 /**
  * {@link ImageTransformationsImpl}
@@ -617,10 +619,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             /*
              * create reader from image input stream
              */
-            input = ImageIO.createImageInputStream(getFileStream(imageFile));
+            input = getImageInputStream(imageFile);
             Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
             if (false == readers.hasNext()) {
-                throw new IllegalArgumentException("No reader for: " + imageFile);
+                throw new IOException(new IllegalArgumentException("No reader for: " + imageFile));
             }
             reader = readers.next();
             reader.setInput(input);
@@ -743,6 +745,38 @@ public class ImageTransformationsImpl implements ImageTransformations {
         }
         try {
             return imageFile.getStream();
+        } catch (OXException e) {
+            Throwable cause = e.getCause();
+            if (cause instanceof IOException) {
+                throw (IOException) cause;
+            }
+            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
+        }
+    }
+
+    /**
+     * Gets the {@code ImageInputStream} from specified image file.
+     *
+     * @param imageFile The image file
+     * @return The image input stream
+     * @throws IOException If input stream cannot be returned
+     */
+    private static ImageInputStream getImageInputStream(IFileHolder imageFile) throws IOException {
+        try {
+            /*
+             * prefer 'optimized' image input streams for threshold file holders
+             */
+            if (ThresholdFileHolder.class.isInstance(imageFile)) {
+                ThresholdFileHolder fileHolder = (ThresholdFileHolder) imageFile;
+                if (fileHolder.isInMemory()) {
+                    return new ByteArrayImageInputStream(fileHolder.toByteArray());
+                }
+                return new FileImageInputStream(fileHolder.getTempFile());
+            }
+            /*
+             * fallback to default spi-based image input stream instantiation
+             */
+            return ImageIO.createImageInputStream(imageFile.getStream());
         } catch (OXException e) {
             Throwable cause = e.getCause();
             if (cause instanceof IOException) {
