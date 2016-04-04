@@ -198,6 +198,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 waitTimeoutSeconds = null;
                 maxSize = null;
                 maxResolution = null;
+                preferThumbnailThreshold = null;
             }
 
             @Override
