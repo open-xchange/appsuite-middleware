@@ -49,6 +49,8 @@
 
 package com.openexchange.file.storage.mail;
 
+import static com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess.getIMAPStore;
+import static com.openexchange.file.storage.mail.AbstractMailDriveResourceAccess.getImapMessageStorageFrom;
 import java.io.IOException;
 import javax.mail.MessagingException;
 import com.openexchange.exception.OXException;
@@ -89,26 +91,25 @@ public abstract class MailDriveClosure<R> {
     /**
      * Performs this closure's operation.
      *
-     * @param resourceAccess The associated resource access
-     * @param httpClient The HTTP client to use
      * @param session The associated session
+     * @param httpClient The HTTP client to use
      * @return The return value
      * @throws OXException If operation fails
      */
-    public R perform(AbstractMailDriveResourceAccess resourceAccess, Session session) throws OXException {
-        return innerPerform(resourceAccess, session);
+    public R perform(Session session) throws OXException {
+        return innerPerform(session);
     }
 
-    private R innerPerform(AbstractMailDriveResourceAccess resourceAccess, Session session) throws OXException {
+    private R innerPerform(Session session) throws OXException {
         MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
         try {
             mailAccess = MailAccess.getInstance(session);
             mailAccess.connect();
-            return doPerform(resourceAccess.getIMAPStore(mailAccess), mailAccess);
+            return doPerform(getIMAPStore(mailAccess), mailAccess);
         } catch (IOException e) {
             throw FileStorageExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } catch (MessagingException e) {
-            throw resourceAccess.getImapMessageStorageFrom(mailAccess).handleMessagingException(e);
+            throw getImapMessageStorageFrom(mailAccess).handleMessagingException(e);
         } catch (RuntimeException e) {
             throw FileStorageExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {

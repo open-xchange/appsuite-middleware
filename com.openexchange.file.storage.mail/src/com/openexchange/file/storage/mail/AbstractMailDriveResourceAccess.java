@@ -110,7 +110,7 @@ public abstract class AbstractMailDriveResourceAccess {
      * @throws OXException If performing closure fails
      */
     protected <R> R perform(MailDriveClosure<R> closure) throws OXException {
-        return closure.perform(this, session);
+        return closure.perform(session);
     }
 
     /**
