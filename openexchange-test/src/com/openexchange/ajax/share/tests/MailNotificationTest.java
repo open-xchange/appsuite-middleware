@@ -552,7 +552,9 @@ public class MailNotificationTest extends ShareTest {
             file = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, new RequestCustomizer<UpdateInfostoreRequest>() {
                 @Override
                 public void customize(UpdateInfostoreRequest request) {
-                    request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    if (null != shareMessage) {
+                        request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    }
                 }
             });
         } else {
@@ -565,7 +567,9 @@ public class MailNotificationTest extends ShareTest {
             updateFolder(EnumAPI.OX_NEW, toUpdate, new RequestCustomizer<UpdateRequest>() {
                 @Override
                 public void customize(UpdateRequest request) {
-                    request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    if (null != shareMessage) {
+                        request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
+                    }
                 }
             });
         }

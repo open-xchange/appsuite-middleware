@@ -554,7 +554,7 @@ public abstract class ShareTest extends AbstractAJAXSession {
      */
     protected FolderObject updateFolder(EnumAPI api, FolderObject folder, RequestCustomizer<UpdateRequest> customizer) throws Exception {
         UpdateRequest request = new UpdateRequest(api, folder);
-        request.setNotifyPermissionEntities(Transport.MAIL);
+        // request.setNotifyPermissionEntities(Transport.MAIL);
         if (customizer != null) {
             customizer.customize(request);
         }
