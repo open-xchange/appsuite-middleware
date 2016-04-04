@@ -209,7 +209,7 @@ public final class MailDriveFile extends DefaultFile {
         }
         {
             String origFolder = (String) message.getItem("X-MAILBOX");
-            map.put("id",null == origFolder ? JSONObject.NULL : origFolder);
+            map.put("folder",null == origFolder ? JSONObject.NULL : origFolder);
         }
         {
             InternetAddress[] fromHeaders = getAddressHeader("From", message);
