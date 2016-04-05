@@ -158,6 +158,8 @@ public class DefaultNotificationService implements ShareNotificationService {
 
         GuestInfo guestInfo = link.getGuest();
         List<OXException> warnings = new ArrayList<OXException>();
+        Set<InternetAddress> collectedAddresses = new HashSet<InternetAddress>();
+
         for (Object transportInfoObj : transportInfos) {
             InternetAddress transportInfo = null;
             try {
@@ -176,12 +178,33 @@ public class DefaultNotificationService implements ShareNotificationService {
                     .setPassword(guestInfo.getPassword())
                     .build();
                 send(notification);
+
+                collectedAddresses.add(transportInfo);
             } catch (Exception e) {
                 String mailAddress = null;
                 if (transportInfo != null) {
                     mailAddress = transportInfo.getAddress();
                 }
                 collectWarning(warnings, e, mailAddress);
+            }
+        }
+
+        ContactCollectorService ccs = serviceLookup.getOptionalService(ContactCollectorService.class);
+        if ((null != ccs) && !collectedAddresses.isEmpty()) {
+            ccs.memorizeAddresses(new ArrayList<InternetAddress>(collectedAddresses), session);
+        }
+
+        ObjectUseCountService service = serviceLookup.getOptionalService(ObjectUseCountService.class);
+        if ((null != service) && !collectedAddresses.isEmpty()) {
+            try {
+                Set<String> addrs = new LinkedHashSet<String>(collectedAddresses.size());
+                for (InternetAddress address : collectedAddresses) {
+                    addrs.add(address.getAddress());
+                }
+                IncrementArguments arguments = new IncrementArguments.Builder(addrs).setThrowException(true).build();
+                service.incrementObjectUseCount(session, arguments);
+            } catch (OXException e) {
+                warnings.add(e);
             }
         }
 
