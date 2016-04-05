@@ -5,7 +5,8 @@ Bundle-SymbolicName: com.openexchange.chronos.storage.rdb
 Bundle-Version: 7.10.0
 Bundle-Vendor: Open-Xchange Inc.
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Import-Package: com.openexchange.ajax.container,
+Import-Package: com.mysql.jdbc;version="5.1.30",
+ com.openexchange.ajax.container,
  com.openexchange.ajax.fileholder,
  com.openexchange.chronos,
  com.openexchange.chronos.compat,
@@ -15,6 +16,7 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.exception,
  com.openexchange.groupware,
  com.openexchange.groupware.impl,
+ com.openexchange.groupware.update,
  com.openexchange.i18n,
  com.openexchange.java,
  com.openexchange.java.util,
@@ -22,10 +24,11 @@ Import-Package: com.openexchange.ajax.container,
  com.openexchange.osgi.annotation,
  com.openexchange.osgi.util,
  com.openexchange.server,
+ com.openexchange.server.services,
  com.openexchange.session,
  com.openexchange.tools.sql,
  javax.mail.internet,
  org.osgi.framework,
  org.osgi.service.event,
  org.slf4j
-Bundle-Activator: com.openexchange.chronos.storage.rdb.RdbCalendarStorageActivator
+Bundle-Activator: com.openexchange.chronos.storage.rdb.osgi.RdbCalendarStorageActivator

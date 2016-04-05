@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the Open-Xchange, Inc. group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2016-2020 OX Software GmbH
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,59 +47,57 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb;
+package com.openexchange.chronos.storage.rdb.tables;
 
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.Event;
+import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
+import static com.openexchange.tools.sql.DBUtils.tableExists;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
+import com.openexchange.groupware.update.PerformParameters;
+import com.openexchange.groupware.update.UpdateExceptionCodes;
+import com.openexchange.groupware.update.UpdateTaskAdapter;
+import com.openexchange.server.services.ServerServiceRegistry;
 
 /**
- * {@link RdbCalendarStorageActivator}
+ * {@link AlarmTableUpdateTask}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageActivator extends HousekeepingActivator {
-
-    /**
-     * Initializes a new {@link RdbCalendarStorageActivator}.
-     */
-    public RdbCalendarStorageActivator() {
-        super();
-    }
+public class AlarmTableUpdateTask extends UpdateTaskAdapter {
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
+    public void perform(PerformParameters params) throws OXException {
+        int contextId = params.getContextId();
+        DatabaseService dbService = ServerServiceRegistry.getInstance().getService(DatabaseService.class, true);
+        Connection writeCon = dbService.getForUpdateTask(contextId);
+        PreparedStatement stmt = null;
         try {
-            LoggerFactory.getLogger(RdbCalendarStorageActivator.class).info("starting bundle: com.openexchange.calendar.storage.rdb");
-            Services.set(this);
-            /*
-             * register services
-             */
-            RdbCalendarStorage storage = new RdbCalendarStorage(1);
-            Event loadEvent = storage.loadEvent(20178);
+            CreateAlarmTable tmp = new CreateAlarmTable();
+            String createStmt = tmp.getCreateStatements()[0];
+            String tableName = tmp.tablesToCreate()[0];
 
-//            new RdbCalendarStorage(contextID)
-//
-//            getService(DatabaseService.class)
-//
-//            registerService(CalendarStorage.class, registry);
-        } catch (final Exception e) {
-            LoggerFactory.getLogger(RdbCalendarStorageActivator.class).error("error starting \"com.openexchange.contact.storage\"", e);
-            throw e;
+            if (!tableExists(writeCon, tableName)) {
+                stmt = writeCon.prepareStatement(createStmt);
+                stmt.executeUpdate();
+                closeSQLStuff(stmt);
+            }
+        } catch (SQLException e) {
+            throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
+        } catch (RuntimeException e) {
+            throw UpdateExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            closeSQLStuff(null, stmt);
+            dbService.backForUpdateTask(contextId, writeCon);
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LoggerFactory.getLogger(RdbCalendarStorageActivator.class).info("stopping bundle: com.openexchange.calendar.storage.rdb");
-        super.stopBundle();
+    public String[] getDependencies() {
+        return new String[] {};
     }
 
 }
