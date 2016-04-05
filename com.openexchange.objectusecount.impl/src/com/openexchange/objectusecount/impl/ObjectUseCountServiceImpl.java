@@ -279,6 +279,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                     stmt.setInt(4, iterator.key());
                     stmt.setInt(5, 1);
                     stmt.addBatch();
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}", userId, iterator.value(), iterator.key(), contextId);
                 }
                 stmt.executeBatch();
             } else {
@@ -401,6 +402,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             stmt.setInt(5, value);
             stmt.setInt(6, value);
             stmt.executeUpdate();
+            LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}", value, userId, folderId, objectId, contextId);
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
