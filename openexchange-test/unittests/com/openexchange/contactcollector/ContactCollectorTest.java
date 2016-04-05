@@ -151,7 +151,6 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting setting = ServerUserSetting.getInstance();
         assertNotNull("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId));
         assertTrue("No folder for contact collection", setting.getContactCollectionFolder(ctx.getContextId(), userId) > 0);
-        assertFalse("Feature should be switched off", setting.isContactCollectionEnabled(ctx.getContextId(), userId));
         assertFalse("Should not collect on incoming mail", setting.isContactCollectOnMailAccess(ctx.getContextId(), userId));
         assertFalse("Should not collect on outgoing mail", setting.isContactCollectOnMailTransport(ctx.getContextId(), userId));
     }

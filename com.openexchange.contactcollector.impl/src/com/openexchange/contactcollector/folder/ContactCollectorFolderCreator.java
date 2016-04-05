@@ -72,6 +72,7 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderExceptionCode;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.oxfolder.OXFolderSQL;
+import com.openexchange.tools.session.ServerSessionAdapter;
 
 /**
  * {@link ContactCollectorFolderCreator}
@@ -151,7 +152,7 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
                 return true;
             }
         }
-        if (!serverUserSetting.isContactCollectionEnabled(contextId, userId).booleanValue() && (null != folderId)) {
+        if (!isContactCollectionEnabled(session) && (null != folderId)) {
             // Both - collect-on-mail-access and collect-on-mail-transport - disabled
             LOG.debug("Considering contact-collect folder {} as existent as contact-collect feature NOT enabled for user {} in context {}", folderId, userId, contextId);
             return true;
@@ -161,6 +162,15 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
             LOG.debug("Considering contact-collect folder as absent as contact-collect feature enabled for user {} in context {}", userId, contextId);
         } else {
             LOG.debug("Considering contact-collect folder {} as absent as contact-collect feature enabled for user {} in context {}", folderId, userId, contextId);
+        }
+        return false;
+    }
+
+    private static boolean isContactCollectionEnabled(final Session session) {
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
+        } catch (final OXException e) {
+            LOG.error("", e);
         }
         return false;
     }

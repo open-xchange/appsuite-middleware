@@ -290,27 +290,6 @@ public class ServerUserSetting {
     }
 
     /**
-     * Complete <i>contact-collect</i> feature is enabled if one of its sub switches is enabled (<i>collect-on-mail-access</i> OR <i>collect-on-mail-transport</i>).
-     *
-     * @param contextId The context identifier
-     * @param userId The user identifier
-     * @return The value or <code>false</code> if no entry is found.
-     */
-    public Boolean isContactCollectionEnabled(final int contextId, final int userId) throws OXException {
-        Boolean contactCollectOnMailAccess = isContactCollectOnMailAccess(contextId, userId);
-        if (contactCollectOnMailAccess.booleanValue()) {
-            return Boolean.TRUE;
-        }
-
-        Boolean contactCollectOnMailTransport = isContactCollectOnMailTransport(contextId, userId);
-        if (contactCollectOnMailTransport.booleanValue()) {
-            return Boolean.TRUE;
-        }
-
-        return Boolean.FALSE;
-    }
-
-    /**
      * Sets the folder used to store collected contacts.
      *
      * @param contextId The context identifier

@@ -456,12 +456,7 @@ public final class MemorizerWorker {
 
     private static boolean isEnabled(final Session session) {
         try {
-            if (!ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses()) {
-                return false;
-            }
-
-            Boolean enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            return enabled != null && enabled.booleanValue();
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
             LOG.error("", e);
         }

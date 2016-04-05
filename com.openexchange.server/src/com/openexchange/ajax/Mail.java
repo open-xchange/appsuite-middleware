@@ -1152,7 +1152,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
                             triggerContactCollector(session, mail);
@@ -1412,7 +1412,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
                             triggerContactCollector(session, mail);
@@ -1484,7 +1484,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
                             triggerContactCollector(session, mail);
@@ -3753,7 +3753,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final ServerUserSetting setting = ServerUserSetting.getInstance();
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
-                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                    if (setting.isContactCollectOnMailTransport(
                         contextId,
                         userId).booleanValue()) {
                         triggerContactCollector(session, composedMail);
@@ -4974,7 +4974,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 final ServerUserSetting setting = ServerUserSetting.getInstance();
                                 final int contextId = session.getContextId();
                                 final int userId = session.getUserId();
-                                if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                                if (setting.isContactCollectOnMailTransport(
                                     contextId,
                                     userId).booleanValue()) {
                                     triggerContactCollector(session, composedMails[0]);
