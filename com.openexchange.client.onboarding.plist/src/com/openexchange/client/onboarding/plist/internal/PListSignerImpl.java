@@ -174,6 +174,8 @@ public final class PListSignerImpl implements PListSigner {
             aOut.flush();
             error = false; // Avoid preliminary closing
             return sink;
+        } catch (OXException e) {
+            throw e;
         } catch (Exception e) {
             throw OnboardingExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
         } finally {
