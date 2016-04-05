@@ -537,7 +537,7 @@ public final class ThresholdFileHolder implements IFileHolder {
             copy.buf = new UnsynchronizedByteArrayOutputStream(buf);
         } else if (null != tempFile) {
             try {
-                final File newTempFile = TmpFileFileHolder.newTempFile();
+                final File newTempFile = TmpFileFileHolder.newTempFile(autoManaged);
                 copyFile(tempFile, newTempFile);
                 copy.tempFile = newTempFile;
             } catch (final IOException e) {
