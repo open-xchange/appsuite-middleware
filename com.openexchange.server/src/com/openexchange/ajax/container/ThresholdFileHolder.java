@@ -281,7 +281,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         }
         if (null == tempFile && null == buf && bytes.length > threshold) {
             // Nothing written & content does exceed threshold
-            final File tempFile = TmpFileFileHolder.newTempFile();
+            final File tempFile = TmpFileFileHolder.newTempFile(autoManaged);
             this.tempFile = tempFile;
             OutputStream out = null;
             try {
