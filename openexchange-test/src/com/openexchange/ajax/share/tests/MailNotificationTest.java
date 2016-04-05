@@ -337,7 +337,7 @@ public class MailNotificationTest extends ShareTest {
             String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
             String.format(NotificationStrings.HAS_SHARED_IMAGE_NO_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
             NotificationStrings.VIEW_IMAGE,
-            null);
+            null, true);
     }
 
     public void testUserGotAnImageAndMessage() throws Exception {
@@ -347,7 +347,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_IMAGE, clientFullName, image1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_PHOTO_AND_MESSAGE, clientFullName, clientEmail, image1.getFileName()),
         		NotificationStrings.VIEW_IMAGE,
-        		clientShareMessage);
+        		clientShareMessage, true);
     }
 
     //---FILES------------------------------------------------------------------------------------------------------------------------------
@@ -359,7 +359,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_NO_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		null);
+        		null, true);
     }
 
     public void testUserGotAFileAndMessage() throws Exception {
@@ -369,7 +369,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FILE, clientFullName, file1.getFileName()),
         		String.format(NotificationStrings.HAS_SHARED_FILE_AND_MESSAGE, clientFullName, clientEmail, file1.getFileName()),
         		NotificationStrings.VIEW_FILE,
-        		clientShareMessage);
+        		clientShareMessage, true);
     }
 
     //---FOLDER-----------------------------------------------------------------------------------------------------------------------------
@@ -381,7 +381,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_NO_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		null);
+        		null, true);
     }
 
     public void testUserGotAFolderAndMessage() throws Exception {
@@ -391,7 +391,7 @@ public class MailNotificationTest extends ShareTest {
         		String.format(NotificationStrings.SUBJECT_SHARED_FOLDER, clientFullName, testFolder1.getFolderName()),
         		String.format(NotificationStrings.HAS_SHARED_FOLDER_AND_MESSAGE, clientFullName, clientEmail, testFolder1.getFolderName()),
         		NotificationStrings.VIEW_FOLDER,
-        		clientShareMessage);
+        		clientShareMessage, true);
     }
 
     public void testAnonymousGotAFolder() throws Exception {
@@ -482,8 +482,8 @@ public class MailNotificationTest extends ShareTest {
 
     //---HELPERS----------------------------------------------------------------------------------------------------------------------------
 
-    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, final String shareMessage) throws Exception {
-        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null), shareMessage);
+    public void testUserGotA(FolderObject testFolder, File file, String initialSubject, String hasSharedString, String viewItemString, String shareMessage, boolean notify) throws Exception {
+        share(testFolder, file, createNamedGuestPermission(randomUID() + "@example.com", "TestUser_" + System.currentTimeMillis(), null), shareMessage, notify);
         assertGotA(
             initialSubject,
             hasSharedString,
@@ -497,7 +497,7 @@ public class MailNotificationTest extends ShareTest {
         OCLGuestPermission permission = createAnonymousGuestPermission();
         ((AnonymousRecipient) permission.getRecipient()).setPassword(password);
         ((AnonymousRecipient) permission.getRecipient()).setExpiryDate(expiryDate);
-        share(testFolder, file, permission, shareMessage);
+        share(testFolder, file, permission, shareMessage, true);
         ShareTarget target = new ShareTarget(
             testFolder.getModule(),
             Integer.toString(testFolder.getObjectID()),
@@ -535,7 +535,7 @@ public class MailNotificationTest extends ShareTest {
         }
     }
 
-    private void share(FolderObject testFolder, File file, OCLPermission guestPermission, final String shareMessage) throws Exception {
+    private void share(FolderObject testFolder, File file, OCLPermission guestPermission, final String shareMessage, final boolean notify) throws Exception {
         if (null != file) {
             DefaultFile toUpdate = new DefaultFile();
             toUpdate.setId(file.getId());
@@ -552,7 +552,7 @@ public class MailNotificationTest extends ShareTest {
             file = updateFile(toUpdate, new Field[] { Field.OBJECT_PERMISSIONS }, new RequestCustomizer<UpdateInfostoreRequest>() {
                 @Override
                 public void customize(UpdateInfostoreRequest request) {
-                    if (null != shareMessage) {
+                    if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
                     }
                 }
@@ -567,7 +567,7 @@ public class MailNotificationTest extends ShareTest {
             updateFolder(EnumAPI.OX_NEW, toUpdate, new RequestCustomizer<UpdateRequest>() {
                 @Override
                 public void customize(UpdateRequest request) {
-                    if (null != shareMessage) {
+                    if (notify) {
                         request.setNotifyPermissionEntities(Transport.MAIL, shareMessage);
                     }
                 }
@@ -582,7 +582,7 @@ public class MailNotificationTest extends ShareTest {
         OCLPermission permission = new OCLPermission();
         permission.setEntity(internalUserId);
         permission.setAllPermission(OCLPermission.READ_FOLDER, OCLPermission.READ_ALL_OBJECTS, OCLPermission.NO_PERMISSIONS, OCLPermission.NO_PERMISSIONS);
-        share(testFolder, file, permission, null);
+        share(testFolder, file, permission, null, false);
         List<Message> messages = client.execute(new GetMailsRequest()).getMessages();
         assertEquals(0, messages.size());
     }
