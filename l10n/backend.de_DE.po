@@ -19,7 +19,7 @@ msgstr ""
 "Project-Id-Version: errors.de_DE\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: \n"
-"PO-Revision-Date: 2016-03-15 09:55+0100\n"
+"PO-Revision-Date: 2016-04-04 12:37+0100\n"
 "Last-Translator: \n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de_DE\n"
@@ -2155,7 +2155,7 @@ msgstr "im Ort"
 #. The 'user input' part is always prepended, please heed this in translations.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:79 /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/tasks/TasksStrings.java:88
 msgid "in attachment name"
-msgstr "Im Anlagenamen"
+msgstr "Im Anhangnamen"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.find/src/com/openexchange/find/calendar/CalendarStrings.java:81
 msgid "My Status"
@@ -2917,7 +2917,7 @@ msgstr "Die Rohdaten des Inhalts des Eingabestreams konnten nicht gelesen werden
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:136 /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.pop3/src/com/openexchange/pop3/POP3ExceptionMessage.java:209
 msgid "No attachment was found with id %1$s in message"
-msgstr "Keine Anlage mit der ID %1$s in der Nachricht gefunden"
+msgstr "Kein Anhang mit der ID %1$s in der Nachricht gefunden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.imap/src/com/openexchange/imap/IMAPExceptionMessages.java:138
 msgid "Versit object could not be saved"
@@ -3232,7 +3232,7 @@ msgstr "Ungültige Sortierspalte. Nach %1$s kann nicht sortiert werden."
 #. No attachment found with section identifier %1$s in message %2$s in folder %3$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:94
 msgid "No attachment found with section identifier %1$s in message %2$s in folder %3$s."
-msgstr "Keine Anlage mit der Section ID %1$s in Nachricht %2$s im Ordner %3$s gefunden."
+msgstr "Kein Anhang mit der Section ID %1$s in Nachricht %2$s im Ordner %3$s gefunden."
 
 #. Message %1$s not found in folder %2$s.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.messaging/src/com/openexchange/messaging/MessagingExceptionMessages.java:97
@@ -3929,7 +3929,7 @@ msgstr "Quota für Dateien überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitt
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:72
 msgid "Quota exceeded for attachments. Quota limit: %2$s. Quota used: %1$s. Please delete some attachments in order to create new ones. Please note: The quota refers to all attachments of all users in this context."
-msgstr "Quota für Anlagen überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte löschen Sie einige Anlagen, um neue anlegen zu können. Bitte beachten: Die Quota bezieht sich auf alle Anlagen aller Benutzer in diesem Kontext."
+msgstr "Quota für Anhänge überschritten. Quota-Limit: %2$s. Belegt: %1$s. Bitte löschen Sie einige Anhänge, um neue anlegen zu können. Bitte beachten: Die Quota bezieht sich auf alle Anhänge aller Benutzer in diesem Kontext."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.quota/src/com/openexchange/quota/QuotaExceptionMessages.java:74
 msgid "Quota exceeded for shares. Quota limit: %2$s. Quota used: %1$s. Please delete some shares in order to create new ones. Please note: The quota refers to all shares of one user in this context."
@@ -4277,7 +4277,7 @@ msgstr "Datei konnte nicht in Dateispeicher gespeichert werden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:65
 msgid "Attachments must contain a file."
-msgstr "Anlagen müssen eine Datei enthalten"
+msgstr "Anhänge müssen eine Datei enthalten"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:67
 msgid "Could not retrieve file."
@@ -4285,15 +4285,15 @@ msgstr "Datei konnte nicht geholt werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:69
 msgid "The attachment you requested no longer exists. Please refresh the view."
-msgstr "Die von Ihnen angeforderte Anlage ist nicht mehr vorhanden. Aktualisieren Sie die Ansicht."
+msgstr "Der von Ihnen angeforderte Anhang ist nicht mehr vorhanden. Aktualisieren Sie die Ansicht."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:71
 msgid "Could not delete attachment."
-msgstr "Anlage konnte nicht gelöscht werden"
+msgstr "Anhang konnte nicht gelöscht werden"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:73
 msgid "Attachment metadata contains invalid characters."
-msgstr "Die Metadaten der Anlage enthalten unzulässige Zeichen."
+msgstr "Die Metadaten des Anhangs enthalten unzulässige Zeichen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/AttachmentExceptionMessages.java:77
 msgid "Invalid parameter sent in request. Parameter '%1$s' was '%2$s' which does not look like a number."
@@ -4302,7 +4302,7 @@ msgstr "Ungültiger Parameter in Anfrage. Parameter '%1$s' war '%2$s', sollte je
 #. The module attachments
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/attach/impl/AttachmentStrings.java:62
 msgid "Attachments"
-msgstr "Anlagen"
+msgstr "Anhänge"
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/CalendarFieldStrings.java:64
 msgid "Label"
@@ -4406,7 +4406,7 @@ msgstr "Verschieben aus freigegebenen Ordnern ist nicht erlaubt."
 #.
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/calendar/OXCalendarExceptionMessage.java:133
 msgid "No permissions for attachments granted."
-msgstr "Es wurden keine Berechtigungen für Anlagen erteilt."
+msgstr "Es wurden keine Berechtigungen für Anhänge erteilt."
 
 #. *
 #. * Insufficient read rights for this folder.
@@ -4667,7 +4667,7 @@ msgstr "Benutzerkontakte können nicht gelöscht werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:125
 msgid "Number of documents attached to this contact is below zero. You can not remove any more attachments."
-msgstr "Anzahl der an diesen Kontakt angehängten Dokumente ist weniger Null. Sie können keine weiteren Anlagen entfernen."
+msgstr "Anzahl der an diesen Kontakt angehängten Dokumente ist weniger Null. Sie können keine weiteren Anhänge entfernen."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/groupware/contact/ContactExceptionMessages.java:127
 msgid "Setting %s requires at least a contact and a value."
@@ -6965,11 +6965,11 @@ msgstr "Fehler beim Konviertieren des Kontakts in ein Versit-Objekt."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:78
 msgid "No attachment was found with id \"%1$s\" in message."
-msgstr "Es konnte keine Anlage mit der ID \"%1$s\" in der Nachricht gefunden werden."
+msgstr "Es konnte kein Anhang mit der ID \"%1$s\" in der Nachricht gefunden werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:80
 msgid "Versit attachment could not be saved due to an unsupported MIME type."
-msgstr "Die Versit-Anlage konnte wegen einem nicht unterstützten MIME-Typ nicht gespeichert werden."
+msgstr "Der Versit-Anhang konnte wegen einem nicht unterstützten MIME-Typ nicht gespeichert werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:82
 msgid "Upload quota (%1$s) exceeded for file %2$s (size=%3$s)."
@@ -7013,7 +7013,7 @@ msgstr "Eine Antwort auf mehrere E-Mails ist nicht möglich."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:102
 msgid "Attachment \"%1$s\" not found inside mail \"%2$s\" of mail folder \"%3$s\"."
-msgstr "Die Anlage \"%1$s\" konnte nicht in der E-Mail \"%2$s\" des E-Mail-Ordners \"%3$s\" gefunden werden."
+msgstr "Der Anhang \"%1$s\" konnte nicht in der E-Mail \"%2$s\" des E-Mail-Ordners \"%3$s\" gefunden werden."
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.server/src/com/openexchange/mail/MailExceptionStrings.java:104
 msgid "Folder \"%1$s\" does not hold messages and is therefore not selectable"
