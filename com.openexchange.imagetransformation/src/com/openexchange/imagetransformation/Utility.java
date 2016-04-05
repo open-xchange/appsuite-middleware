@@ -110,6 +110,10 @@ public class Utility {
             LOG.debug("Assuming 'bmp' for image format {}", val);
             return "bmp";
         }
+        if ("svg+xml".equals(val)) {
+            LOG.debug("Assuming 'svg' for image format {}", val);
+            return "svg";
+        }
         return val;
     }
 

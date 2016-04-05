@@ -49,12 +49,10 @@
 
 package com.openexchange.imagetransformation.java.transformations;
 
+import static com.openexchange.imagetransformation.java.transformations.Utils.*;
 import static com.openexchange.tools.images.ImageTransformationUtility.*;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -67,11 +65,8 @@ import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
-import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
-import net.coobird.thumbnailator.util.exif.ExifUtils;
-import net.coobird.thumbnailator.util.exif.Orientation;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.config.ConfigurationService;
@@ -90,11 +85,9 @@ import com.openexchange.imagetransformation.TransformedImage;
 import com.openexchange.imagetransformation.java.osgi.Services;
 import com.openexchange.java.Streams;
 import com.openexchange.tools.images.DefaultTransformedImageCreator;
-import com.openexchange.tools.images.ImageTransformationUtility;
 import com.openexchange.tools.stream.CountingInputStream;
 import com.openexchange.tools.stream.CountingInputStream.IOExceptionCreator;
 import com.openexchange.tools.stream.UnsynchronizedByteArrayOutputStream;
-import com.twelvemonkeys.imageio.stream.ByteArrayImageInputStream;
 
 /**
  * {@link ImageTransformationsImpl}
@@ -622,7 +615,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
             input = getImageInputStream(imageFile);
             Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
             if (false == readers.hasNext()) {
-                throw new IOException(new IllegalArgumentException("No reader for: " + imageFile));
+                throw new IOException("No image reader available for content type " + imageFile.getContentType() + " (" + imageFile.getName() + ')');
             }
             reader = readers.next();
             reader.setInput(input);
@@ -631,19 +624,20 @@ public class ImageTransformationsImpl implements ImageTransformations {
              */
             int width = reader.getWidth(0);
             int height = reader.getHeight(0);
-            int orientation = readExifOrientation(reader, 0);
+            Dimension requiredResolution = getRequiredResolution(transformations, width, height);
+            int imageIndex = selectImage(reader, requiredResolution, maxResolution);
+            int orientation = readExifOrientation(reader, imageIndex);
             /*
              * prefer a suitable thumbnail in stream if possible when downscaling images
              */
             float preferThumbnailThreshold = preferThumbnailThreshold();
-            if (0 <= preferThumbnailThreshold && reader.hasThumbnails(0)) {
-                Dimension requiredResolution = getRequiredResolution(transformations, width, height);
+            if (0 <= preferThumbnailThreshold && reader.hasThumbnails(imageIndex)) {
                 if (null != requiredResolution && (requiredResolution.width < width || requiredResolution.height < height)) {
                     int requiredWidth = (int) (preferThumbnailThreshold * requiredResolution.width);
                     int requiredHeight = (int) (preferThumbnailThreshold * requiredResolution.height);
-                    for (int i = 0; i < reader.getNumThumbnails(0); i++) {
-                        int thumbnailWidth = reader.getThumbnailWidth(0, i);
-                        int thumbnailHeight = reader.getThumbnailHeight(0, i);
+                    for (int i = 0; i < reader.getNumThumbnails(imageIndex); i++) {
+                        int thumbnailWidth = reader.getThumbnailWidth(imageIndex, i);
+                        int thumbnailHeight = reader.getThumbnailHeight(imageIndex, i);
                         if (thumbnailWidth >= requiredWidth && thumbnailHeight >= requiredHeight) {
                             LOG.trace("Using thumbnail of {}x{}px (requested: {}x{}px)",
                                 thumbnailWidth, thumbnailHeight, requiredResolution.width, requiredResolution.height);
@@ -659,7 +653,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
                             }
                             imageInformation = new ImageInformation(orientation, thumbnailWidth, thumbnailHeight);
                             onImageRead(signaler);
-                            return reader.readThumbnail(0, i);
+                            return reader.readThumbnail(imageIndex, i);
                         }
                     }
                 }
@@ -678,7 +672,10 @@ public class ImageTransformationsImpl implements ImageTransformations {
             }
             imageInformation = new ImageInformation(orientation, width, height);
             onImageRead(signaler);
-            return reader.read(0);
+            return reader.read(imageIndex);
+        } catch (RuntimeException e) {
+            LOG.debug("error reading image from stream for {}", formatName, e);
+            return null;
         } finally {
             if (null != reader) {
                 reader.dispose();
@@ -708,113 +705,6 @@ public class ImageTransformationsImpl implements ImageTransformations {
                 LOG.debug("Signaler could not be called", e);
             }
         }
-    }
-
-    /**
-     * Removes the transparency from the given image if necessary, i.e. the color model has an alpha channel and the supplied image
-     * format is supposed to not support transparency.
-     *
-     * @param image The image
-     * @param formatName The image format name, e.g. "jpeg" or "tiff"
-     * @return The processed buffered image, or the previous image if no processing was necessary
-     */
-    private static BufferedImage removeTransparencyIfNeeded(BufferedImage image, String formatName) {
-        if (null != image && null != formatName && false == ImageTransformationUtility.supportsTransparency(formatName)) {
-            ColorModel colorModel = image.getColorModel();
-            if (null != colorModel && colorModel.hasAlpha()) {
-                BufferedImage targetImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-                Graphics2D graphics = targetImage.createGraphics();
-                graphics.drawImage(image, 0, 0, Color.WHITE, null);
-                graphics.dispose();
-                return targetImage;
-            }
-        }
-        return image;
-    }
-
-    /**
-     * Gets the {@code InputStream} from specified image file.
-     *
-     * @param imageFile The image file
-     * @return The input stream
-     * @throws IOException If input stream cannot be returned
-     */
-    private static InputStream getFileStream(IFileHolder imageFile) throws IOException {
-        if (null == imageFile) {
-            return null;
-        }
-        try {
-            return imageFile.getStream();
-        } catch (OXException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
-            }
-            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
-        }
-    }
-
-    /**
-     * Gets the {@code ImageInputStream} from specified image file.
-     *
-     * @param imageFile The image file
-     * @return The image input stream
-     * @throws IOException If input stream cannot be returned
-     */
-    private static ImageInputStream getImageInputStream(IFileHolder imageFile) throws IOException {
-        try {
-            /*
-             * prefer 'optimized' image input streams for threshold file holders
-             */
-            if (ThresholdFileHolder.class.isInstance(imageFile)) {
-                ThresholdFileHolder fileHolder = (ThresholdFileHolder) imageFile;
-                if (fileHolder.isInMemory()) {
-                    return new ByteArrayImageInputStream(fileHolder.toByteArray());
-                }
-                return new FileImageInputStream(fileHolder.getTempFile());
-            }
-            /*
-             * fallback to default spi-based image input stream instantiation
-             */
-            return ImageIO.createImageInputStream(imageFile.getStream());
-        } catch (OXException e) {
-            Throwable cause = e.getCause();
-            if (cause instanceof IOException) {
-                throw (IOException) cause;
-            }
-            throw null == cause ? new IOException(e.getMessage(), e) : new IOException(cause.getMessage(), cause);
-        }
-    }
-
-    private static int readExifOrientation(ImageReader reader, int imageIndex) {
-        try {
-            Orientation exifOrientation = ExifUtils.getExifOrientation(reader, imageIndex);
-            if (null != exifOrientation) {
-                return exifOrientation.ordinal() + 1;
-            }
-        } catch (Exception e) {
-            LOG.debug("error reading Exif orientation from stream", e);
-        }
-        return 0;
-    }
-
-    private static Dimension getRequiredResolution(List<ImageTransformation> transformations, int originalWidth, int originalHeight) {
-        Dimension originalResolution = new Dimension(originalWidth, originalHeight);
-        Dimension requiredResolution = null;
-        for (ImageTransformation transformation : transformations) {
-            Dimension resolution = transformation.getRequiredResolution(originalResolution);
-            if (null == requiredResolution) {
-                requiredResolution = resolution;
-            } else if (null != resolution) {
-                if (requiredResolution.height < resolution.height) {
-                    requiredResolution.height = resolution.height;
-                }
-                if (requiredResolution.width < resolution.width) {
-                    requiredResolution.width = resolution.width;
-                }
-            }
-        }
-        return requiredResolution;
     }
 
 }

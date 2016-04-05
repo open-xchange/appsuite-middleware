@@ -91,7 +91,7 @@ public interface ImageTransformation {
      * Gets the resolution that is required for this transformation to operate on, based on the input image's dimensions.
      *
      * @param originalResolution The dimension of the source image
-     * @return The required transformation, or <code>null</code> if not relevant
+     * @return The required resolution, or <code>null</code> if not relevant
      */
     Dimension getRequiredResolution(Dimension originalResolution);
 
