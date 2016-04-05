@@ -291,9 +291,9 @@ public class Autoconfig {
             builder.append("transportProtocol=").append(transportProtocol).append(", ");
         }
         builder.append("mailPort=").append(mailPort).append(", transportPort=").append(transportPort).append(", mailSecure=").append(mailSecure).append(", transportSecure=").append(
-            transportSecure).append(", ");
+            transportSecure).append(", mailStartTls=").append(mailStartTls).append(", transportStartTls=").append(transportStartTls);
         if (username != null) {
-            builder.append("username=").append(username);
+            builder.append(", username=").append(username);
         }
         builder.append("]");
         return builder.toString();
