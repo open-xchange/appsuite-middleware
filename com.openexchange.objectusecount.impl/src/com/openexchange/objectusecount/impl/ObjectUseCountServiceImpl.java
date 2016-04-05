@@ -288,6 +288,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                 stmt.setInt(4, iterator.key());
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}", userId, iterator.value(), iterator.key(), contextId);
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
