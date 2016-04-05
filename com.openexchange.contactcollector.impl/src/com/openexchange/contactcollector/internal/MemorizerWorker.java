@@ -85,7 +85,6 @@ import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
 import com.openexchange.search.SingleSearchTerm;
 import com.openexchange.search.SingleSearchTerm.SingleOperation;
 import com.openexchange.search.internal.operands.ConstantOperand;
-import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.threadpool.ThreadPoolService;
@@ -324,19 +323,26 @@ public final class MemorizerWorker {
         final Set<InternetAddress> aliases;
         final UserConfiguration userConfig;
         try {
-            final ServiceLookup serviceRegistry = CCServiceRegistry.getInstance();
-            final ContextService contextService = serviceRegistry.getService(ContextService.class);
+            // Acquire needed services
+            ContextService contextService = CCServiceRegistry.getInstance().getService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");
                 return;
             }
-            ctx = contextService.getContext(session.getContextId());
 
-            final UserService userService = serviceRegistry.getService(UserService.class);
+            UserService userService = CCServiceRegistry.getInstance().getService(UserService.class);
             if (null == userService) {
                 LOG.warn("Contact collector run aborted: missing user service");
                 return;
             }
+
+            UserConfigurationService userConfigurationService = CCServiceRegistry.getInstance().getService(UserConfigurationService.class);
+            if (null == userConfigurationService) {
+                LOG.warn("Contact collector run aborted: missing user configuration service");
+                return;
+            }
+
+            ctx = contextService.getContext(session.getContextId());
             if (ALL_ALIASES) {
                 // All context-known users' aliases
                 aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService);
@@ -344,16 +350,7 @@ public final class MemorizerWorker {
                 // Only aliases of session user
                 aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx));
             }
-
-            final UserConfigurationService userConfigurationService = serviceRegistry.getService(UserConfigurationService.class);
-            if (null == userConfigurationService) {
-                LOG.warn("Contact collector run aborted: missing user configuration service");
-                return;
-            }
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
-        } catch (final OXException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
