@@ -542,6 +542,10 @@ public class CalendarAdministration implements CalendarAdministrationService {
     private static final String SQL_DEL_REMINDER = "DELETE FROM reminder WHERE cid = ? AND module = ? AND userid = ?";
 
     private void deleteUserFromAppointments(final DeleteEvent deleteEvent, final Connection readcon, final Connection writecon) throws SQLException, OXException {
+        Integer destUser = deleteEvent.getDestinationUserID();
+        if (destUser == null || destUser <= 0) {
+            destUser = deleteEvent.getContext().getMailadmin();
+        }
         PreparedStatement pst2 = null;
         ResultSet rs2 = null;
         PreparedStatement pst3 = null;
@@ -580,10 +584,11 @@ public class CalendarAdministration implements CalendarAdministrationService {
             sb2.append(deleteEvent.getId());
             pst2 = readcon.prepareStatement(sb2.toString(), ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY);
             rs2 = new CalendarMySQL().getResultSet(pst2);
+
             final PreparedStatement update = getUpdatePreparedStatement(writecon);
             while (rs2.next()) {
                 final int object_id = rs2.getInt(1);
-                addUpdateMasterObjectBatch(update, deleteEvent.getContext().getMailadmin(), deleteEvent.getContext().getContextId(), object_id);
+                addUpdateMasterObjectBatch(update, destUser, deleteEvent.getContext().getContextId(), object_id);
                 eventHandling(object_id, 0, deleteEvent.getContext(), deleteEvent.getSession(), CalendarOperation.UPDATE, readcon);
             }
             update.executeBatch();
@@ -657,7 +662,7 @@ public class CalendarAdministration implements CalendarAdministrationService {
             replaceOrganizerId.append(" pd SET ");
             replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER_ID));
             replaceOrganizerId.append(" = ");
-            replaceOrganizerId.append(deleteEvent.getContext().getMailadmin());
+            replaceOrganizerId.append(destUser);
             replaceOrganizerId.append(", ");
             replaceOrganizerId.append(collection.getFieldName(CalendarObject.ORGANIZER));
             replaceOrganizerId.append(" = ");
@@ -725,8 +730,8 @@ public class CalendarAdministration implements CalendarAdministrationService {
         }
     }
 
-    private final void addUpdateMasterObjectBatch(final PreparedStatement update, final int mailadmin, final int cid, final int oid) throws SQLException {
-        update.setInt(1, mailadmin);
+    private final void addUpdateMasterObjectBatch(final PreparedStatement update, final int destUser, final int cid, final int oid) throws SQLException {
+        update.setInt(1, destUser);
         update.setLong(2, System.currentTimeMillis());
         update.setInt(3, cid);
         update.setInt(4, oid);

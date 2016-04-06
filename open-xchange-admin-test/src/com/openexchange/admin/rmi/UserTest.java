@@ -254,7 +254,7 @@ public class UserTest extends AbstractTest {
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, id(createduser), cred);
+        oxu.delete(ctx, id(createduser), null, cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -280,7 +280,7 @@ public class UserTest extends AbstractTest {
         User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, createduser, cred);
+        oxu.delete(ctx, createduser, null, cred);
 
         // create same user again, this failes as described in the bug
         createduser = oxu.create(ctx, urs, access, cred);
@@ -301,7 +301,7 @@ public class UserTest extends AbstractTest {
         final User createduser = oxu.create(ctx, urs, access, cred);
 
         // delete user
-        oxu.delete(ctx, new User[0], cred);
+        oxu.delete(ctx, new User[0], null, cred);
 
         // try to load user, this MUST fail
         oxu.getData(ctx, createduser, cred);
@@ -1796,7 +1796,7 @@ public class UserTest extends AbstractTest {
             e.printStackTrace();
         }
         // delete user
-        oxu.delete(ctx, createduser, cred);
+        oxu.delete(ctx, createduser, null, cred);
 
         try {
             assertFalse("nonexisting user must not exist", oxu.exists(ctx, notexists, cred));

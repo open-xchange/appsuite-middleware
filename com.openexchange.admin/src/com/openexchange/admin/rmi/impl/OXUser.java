@@ -1688,7 +1688,8 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                 }
                                 try {
-                                    oxu.delete(ctx, usr);
+
+                                    oxu.delete(ctx, usr, -1);
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1706,7 +1707,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                                     }
                                 }
                                 try {
-                                    oxu.delete(ctx, usr);
+                                    oxu.delete(ctx, usr, -1);
                                 } catch (final StorageException e1) {
                                     LOGGER.error("Error doing rollback for creating user in database", e1);
                                 }
@@ -1726,7 +1727,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                             }
                         }
                         try {
-                            oxu.delete(ctx, usr);
+                            oxu.delete(ctx, usr, -1);
                         } catch (final StorageException e1) {
                             LOGGER.error("Error doing rollback for creating user in database", e1);
                         }
@@ -1762,12 +1763,12 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
     }
 
     @Override
-    public void delete(final Context ctx, final User user, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        delete(ctx, new User[]{user}, auth);
+    public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, new User[] { user }, destUser, auth);
     }
 
     @Override
-    public void delete(final Context ctx, final User[] users, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException,InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+    public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials credentials) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
         final Credentials auth = credentials == null ? new Credentials("","") : credentials;
 
         try {
@@ -1829,11 +1830,21 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     filestoreOwners.add(user);
                 }
             }
-
-            for (User filestoreOwner : filestoreOwners) {
-                LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
-                moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
-                LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+            if (destUser == null) { // Move to ctx store
+                for (User filestoreOwner : filestoreOwners) {
+                    LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to context filestore...", filestoreOwner.getId());
+                    moveFromUserToContextFilestore(ctx, filestoreOwner, credentials, true);
+                    LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                }
+            } else {
+                if (destUser > 0) { // Move to master store
+                    User masterUser = new User(destUser);
+                    for (User filestoreOwner : filestoreOwners) {
+                        LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
+                        moveFromUserFilestoreToMaster(ctx, filestoreOwner, masterUser, credentials);
+                        LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
+                    }
+                }
             }
         } catch (final InvalidDataException e) {
             LOGGER.error("", e);
@@ -1901,7 +1912,7 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         */
 
-        oxu.delete(ctx, users);
+        oxu.delete(ctx, users, destUser);
 
         // JCS
         final CacheService cacheService = AdminServiceRegistry.getInstance().getService(CacheService.class);;

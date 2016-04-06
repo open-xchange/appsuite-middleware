@@ -136,6 +136,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.handleEntityPermissions(
 		        groupId,
 		        mailadmin,
+                null,
 		        lastModified,
 		        TABLE_WORKING_FOLDER,
 		        TABLE_WORKING_PERMS,
@@ -148,6 +149,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.handleEntityPermissions(
 		        groupId,
 		        mailadmin,
+                null,
 		        lastModified,
 		        TABLE_BACKUP_FOLDER,
 		        TABLE_BACKUP_PERMS,
@@ -205,6 +207,9 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.cleanseSystemPermissions(userId, TABLE_WORKING_PERMS, writeCon, ctx);
 		    OXFolderSQL.cleanseSystemPermissions(userId, TABLE_BACKUP_PERMS, writeCon, ctx);
 		    final boolean isMailAdmin = (mailadmin == userId);
+
+            Integer destUserID = delEvent.getDestinationUserID();
+
 		    /*
 		     * Handle user's permissions
 		     */
@@ -217,32 +222,17 @@ public class OXFolderDeleteListener implements DeleteListener {
 		         * Backup
 		         */
 		        OXFolderSQL.handleMailAdminPermissions(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-		    } else {
-		        /*
-		         * Working
-		         */
-		        OXFolderSQL.handleEntityPermissions(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_WORKING_FOLDER,
-		            TABLE_WORKING_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		        /*
-		         * Backup
-		         */
-		        OXFolderSQL.handleEntityPermissions(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_BACKUP_FOLDER,
-		            TABLE_BACKUP_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		    }
+
+            } else {
+                /*
+                 * Working
+                 */
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, destUserID, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                /*
+                 * Backup
+                 */
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, destUserID, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+            }
 		    /*
 		     * Handle user's folders
 		     */
@@ -255,32 +245,17 @@ public class OXFolderDeleteListener implements DeleteListener {
 		         * Backup
 		         */
 		        OXFolderSQL.handleMailAdminFolders(userId, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
-		    } else {
-		        /*
-		         * Working
-		         */
-		        OXFolderSQL.handleEntityFolders(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_WORKING_FOLDER,
-		            TABLE_WORKING_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		        /*
-		         * Backup
-		         */
-		        OXFolderSQL.handleEntityFolders(
-		            userId,
-		            mailadmin,
-		            lastModified,
-		            TABLE_BACKUP_FOLDER,
-		            TABLE_BACKUP_PERMS,
-		            readCon,
-		            writeCon,
-		            ctx);
-		    }
+
+            } else {
+                /*
+                 * Working
+                 */
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, destUserID, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                /*
+                 * Backup
+                 */
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, destUserID, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+            }
 		    if (!isMailAdmin) {
 		        /*
 		         * Update shared folder's last-modified timestamp to enforce a folder repaint in AJAX-UI
