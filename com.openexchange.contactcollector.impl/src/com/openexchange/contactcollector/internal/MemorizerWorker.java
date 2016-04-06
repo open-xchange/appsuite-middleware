@@ -400,6 +400,11 @@ public final class MemorizerWorker {
         	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
             try {
                 if (iterator.hasNext()) {
+                    // At least one such contact found: If no use-count service was passed, then there is nothing to do.
+                    if (null == useCountService) {
+                        return;
+                    }
+
                     foundContacts = new LinkedList<Contact>();
                     do {
                         foundContacts.add(iterator.next());
