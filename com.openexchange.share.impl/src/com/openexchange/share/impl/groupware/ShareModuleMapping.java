@@ -69,7 +69,7 @@ public class ShareModuleMapping {
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ShareModuleMapping.class);
     private static final Map<Integer, String> moduleMapping2String = new HashMap<Integer, String>();
     private static final Map<String, Integer> moduleMapping2Int = new HashMap<String, Integer>();
-    private static final Module[] GROUPWARE_MODULES = { Module.CALENDAR, Module.TASK, Module.CONTACTS, Module.INFOSTORE };
+    private static final Module[] GROUPWARE_MODULES = { Module.CALENDAR, Module.TASK, Module.CONTACTS, Module.INFOSTORE, Module.MAIL };
 
     private static boolean initizialed = false;
 

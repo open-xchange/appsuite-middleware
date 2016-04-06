@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,62 +47,36 @@
  *
  */
 
-package com.openexchange.share.impl.groupware;
+package com.openexchange.mail.api;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleSupport;
-
 
 /**
- * {@link ModuleHandlerRegistry}
+ * {@link IMailSharedFolderPathResolver} - Extends {@link IMailFolderStorage} by the possibility to resolve a path for a folder path, which
+ * is about to be shared for a certain target user.
+ * <p>
+ * Requires that associated mail storage supports {@link com.openexchange.mail.api.MailCapabilities#hasPermissions() permissions}.
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class ModuleHandlerRegistry {
-
-    private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
-    private final ServiceLookup services;
+public interface IMailSharedFolderPathResolver extends IMailFolderStorage {
 
     /**
-     * Initializes a new {@link ModuleHandlerRegistry}.
+     * Whether this instance actually supports resolving a shared folder's path.
      *
-     * @param services A service lookup reference
+     * @param folder The identifier of the folder to resolve
+     * @return <code>true</code> if supported; otherwise <code>false</code>
      */
-    public ModuleHandlerRegistry(ServiceLookup services) {
-        super();
-        this.services = services;
-        handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
-    }
+    boolean isResolvingSharedFolderPathSupported(String folder);
 
     /**
-     * Gets the handler being responsible for a specific module, throwing an excpetion if there is none registered.
+     * Resolves the shared folder path for given target user.
      *
-     * @param module The module to get the handler for
-     * @return The handler
+     * @param folder The identifier of the folder to resolve
+     * @param targetUserId The target user identifier
+     * @return The resolved path
+     * @throws OXException If path cannot be resolved
      */
-    public ModuleHandler get(int module) throws OXException {
-        ModuleHandler handler = opt(module);
-        if (handler == null) {
-            String m = services.getService(ModuleSupport.class).getShareModule(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
-        }
-        return handler;
-    }
-
-    /**
-     * Optionally gets the handler being responsible for a specific module.
-     *
-     * @param module The module to get the handler for
-     * @return The handler, or <code>null</code> if there is none registered
-     */
-    public ModuleHandler opt(int module) {
-        return handlers.get(module);
-    }
-
+    String resolveSharedFolderPath(String folder, int targetUserId) throws OXException;
 }

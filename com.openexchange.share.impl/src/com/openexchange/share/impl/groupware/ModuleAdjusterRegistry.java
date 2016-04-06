@@ -59,50 +59,50 @@ import com.openexchange.share.groupware.ModuleSupport;
 
 
 /**
- * {@link ModuleHandlerRegistry}
+ * {@link ModuleAdjusterRegistry}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class ModuleHandlerRegistry {
+public class ModuleAdjusterRegistry {
 
-    private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
+    private final Map<Integer, ModuleAdjuster> adjusters = new HashMap<Integer, ModuleAdjuster>();
     private final ServiceLookup services;
 
     /**
-     * Initializes a new {@link ModuleHandlerRegistry}.
+     * Initializes a new {@link ModuleAdjusterRegistry}.
      *
      * @param services A service lookup reference
      */
-    public ModuleHandlerRegistry(ServiceLookup services) {
+    public ModuleAdjusterRegistry(ServiceLookup services) {
         super();
         this.services = services;
-        handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
+        adjusters.put(Module.MAIL.getFolderConstant(), new MailModuleAdjuster(services));
     }
 
     /**
-     * Gets the handler being responsible for a specific module, throwing an excpetion if there is none registered.
+     * Gets the adjuster being responsible for a specific module, throwing an exception if there is none registered.
      *
-     * @param module The module to get the handler for
-     * @return The handler
+     * @param module The module to get the adjuster for
+     * @return The adjuster
      */
-    public ModuleHandler get(int module) throws OXException {
-        ModuleHandler handler = opt(module);
-        if (handler == null) {
+    public ModuleAdjuster get(int module) throws OXException {
+        ModuleAdjuster adjuster = opt(module);
+        if (adjuster == null) {
             String m = services.getService(ModuleSupport.class).getShareModule(module);
             throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
         }
-        return handler;
+        return adjuster;
     }
 
     /**
-     * Optionally gets the handler being responsible for a specific module.
+     * Optionally gets the adjuster being responsible for a specific module.
      *
-     * @param module The module to get the handler for
-     * @return The handler, or <code>null</code> if there is none registered
+     * @param module The module to get the adjuster for
+     * @return The adjuster, or <code>null</code> if there is none registered
      */
-    public ModuleHandler opt(int module) {
-        return handlers.get(module);
+    public ModuleAdjuster opt(int module) {
+        return adjusters.get(module);
     }
 
 }

@@ -120,6 +120,7 @@ import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.IMailFolderStorageDefaultFolderAware;
 import com.openexchange.mail.api.IMailFolderStorageEnhanced2;
 import com.openexchange.mail.api.IMailFolderStorageInfoSupport;
+import com.openexchange.mail.api.IMailSharedFolderPathResolver;
 import com.openexchange.mail.api.MailFolderStorage;
 import com.openexchange.mail.config.MailProperties;
 import com.openexchange.mail.dataobjects.MailFolder;
@@ -149,7 +150,7 @@ import com.sun.mail.imap.Rights;
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  */
-public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware {
+public final class IMAPFolderStorage extends MailFolderStorage implements IMailFolderStorageEnhanced2, IMailFolderStorageInfoSupport, IMailFolderStorageDefaultFolderAware, IMailSharedFolderPathResolver {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(IMAPFolderStorage.class);
 
@@ -325,6 +326,57 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             separator = Character.valueOf(sep);
         }
         return separator.charValue();
+    }
+
+    @Override
+    public boolean isResolvingSharedFolderPathSupported(String folder) {
+        return imapConfig.getCapabilities().hasPermissions();
+    }
+
+    @Override
+    public String resolveSharedFolderPath(String fullName, int targetUserId) throws OXException {
+        if (!imapConfig.getCapabilities().hasPermissions()) {
+            return fullName;
+        }
+
+        try {
+            if (DEFAULT_FOLDER_ID.equals(fullName)) {
+                throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
+            }
+            IMAPFolderWorker.checkFailFast(imapStore, fullName);
+            IMAPFolder imapFolder = getIMAPFolder(fullName);
+            if (!doesExist(imapFolder, true)) {
+                imapFolder = checkForNamespaceFolder(fullName);
+                if (null == imapFolder) {
+                    throw IMAPException.create(IMAPException.Code.FOLDER_NOT_FOUND, imapConfig, session, fullName);
+                }
+            }
+
+            char separator = imapFolder.getSeparator();
+            Entity2ACLArgs entity2AclArgs = IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig);
+            String aclName = Entity2ACL.getInstance(imapStore, imapConfig).getACLName(targetUserId, ctx, entity2AclArgs);
+            String[] userNamespaces = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
+            if (null == userNamespaces || userNamespaces.length == 0) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("IMAP account has no user namespace");
+            }
+            String namespace = userNamespaces[0];
+            if (namespace.endsWith(Character.toString(separator))) {
+                namespace = namespace.substring(0, namespace.length() - 1);
+            }
+
+            StringBuilder fullNameBuilder = new StringBuilder(namespace).append(separator).append(aclName);
+            if (STR_INBOX.equals(fullName)) {
+                return fullNameBuilder.toString();
+            }
+
+            return fullNameBuilder.append(separator).append(fullName).toString();
+        } catch (final MessagingException e) {
+            throw handleMessagingException(fullName, e);
+        } catch (final IMAPException e) {
+            throw e;
+        } catch (final RuntimeException e) {
+            throw handleRuntimeException(e);
+        }
     }
 
     @Override

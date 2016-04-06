@@ -64,7 +64,7 @@ import com.openexchange.share.groupware.TargetProxy;
  * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
  * @since v7.8.0
  */
-public interface ModuleHandler {
+public interface ModuleHandler extends ModuleAdjuster {
 
     /**
      * Loads a list of target proxies, one for every passed share target.
@@ -196,24 +196,5 @@ public interface ModuleHandler {
      * @param guestID The guest users ID
      */
     ShareTargetPath getPath(ShareTarget target, int contextID, int guestID) throws OXException;
-
-    /**
-     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
-     *
-     * @param The target from the sharing users point of view
-     * @param session The sharing users session
-     * @param targetUserId The ID of the user to adjust the target for
-     */
-    ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException;
-
-    /**
-     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
-     *
-     * @param The target from the sharing users point of view
-     * @param contextId The context ID
-     * @param requestUserId The requesting users ID
-     * @param targetUserId The ID of the user to adjust the target for
-     */
-    ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException;
 
 }

@@ -49,60 +49,36 @@
 
 package com.openexchange.share.impl.groupware;
 
-import java.util.HashMap;
-import java.util.Map;
 import com.openexchange.exception.OXException;
-import com.openexchange.groupware.modules.Module;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.share.ShareExceptionCodes;
-import com.openexchange.share.groupware.ModuleSupport;
+import com.openexchange.session.Session;
+import com.openexchange.share.ShareTarget;
 
 
 /**
- * {@link ModuleHandlerRegistry}
+ * {@link ModuleAdjuster}
  *
- * @author <a href="mailto:steffen.templin@open-xchange.com">Steffen Templin</a>
- * @since v7.8.0
+ * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.2
  */
-public class ModuleHandlerRegistry {
-
-    private final Map<Integer, ModuleHandler> handlers = new HashMap<Integer, ModuleHandler>();
-    private final ServiceLookup services;
+public interface ModuleAdjuster {
 
     /**
-     * Initializes a new {@link ModuleHandlerRegistry}.
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param services A service lookup reference
+     * @param The target from the sharing users point of view
+     * @param session The sharing users session
+     * @param targetUserId The ID of the user to adjust the target for
      */
-    public ModuleHandlerRegistry(ServiceLookup services) {
-        super();
-        this.services = services;
-        handlers.put(Module.INFOSTORE.getFolderConstant(), new FileStorageHandler(services));
-    }
+    ShareTarget adjustTarget(ShareTarget target, Session session, int targetUserId) throws OXException;
 
     /**
-     * Gets the handler being responsible for a specific module, throwing an excpetion if there is none registered.
+     * Adjusts the IDs of a target to reflect the view of the the target user (i.e. the new permission entity).
      *
-     * @param module The module to get the handler for
-     * @return The handler
+     * @param The target from the sharing users point of view
+     * @param contextId The context ID
+     * @param requestUserId The requesting users ID
+     * @param targetUserId The ID of the user to adjust the target for
      */
-    public ModuleHandler get(int module) throws OXException {
-        ModuleHandler handler = opt(module);
-        if (handler == null) {
-            String m = services.getService(ModuleSupport.class).getShareModule(module);
-            throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(module) : m);
-        }
-        return handler;
-    }
-
-    /**
-     * Optionally gets the handler being responsible for a specific module.
-     *
-     * @param module The module to get the handler for
-     * @return The handler, or <code>null</code> if there is none registered
-     */
-    public ModuleHandler opt(int module) {
-        return handlers.get(module);
-    }
+    ShareTarget adjustTarget(ShareTarget target, int contextId, int requestUserId, int targetUserId) throws OXException;
 
 }
