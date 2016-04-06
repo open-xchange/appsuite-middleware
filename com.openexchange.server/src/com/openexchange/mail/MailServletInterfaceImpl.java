@@ -74,7 +74,6 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -195,8 +194,6 @@ import com.openexchange.mailaccount.MailAccountDescription;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.RdbMailAccountStorage;
-import com.openexchange.objectusecount.IncrementArguments;
-import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.push.PushEventConstants;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.services.ServerServiceRegistry;
@@ -3205,17 +3202,6 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             DataRetentionService retentionService = ServerServiceRegistry.getInstance().getService(DataRetentionService.class);
             if (null != retentionService) {
                 triggerDataRetention(transport, startTransport, sentMail, validRecipients, retentionService);
-            }
-
-            ObjectUseCountService objectUseCountService = ServerServiceRegistry.getInstance().getService(ObjectUseCountService.class);
-            if (null != objectUseCountService) {
-                InternetAddress[] addresses = composedMail.getAllRecipients();
-                Set<String> addrs = new LinkedHashSet<String>(addresses.length);
-                for (InternetAddress address : addresses) {
-                    addrs.add(address.getAddress());
-                }
-                IncrementArguments arguments = new IncrementArguments.Builder(addrs).build();
-                objectUseCountService.incrementObjectUseCount(session, arguments);
             }
             /*
              * Check for a reply/forward
