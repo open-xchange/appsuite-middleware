@@ -79,6 +79,8 @@ import com.openexchange.data.conversion.ical.ConversionError;
 import com.openexchange.data.conversion.ical.ConversionWarning;
 import com.openexchange.data.conversion.ical.ICalEmitter;
 import com.openexchange.data.conversion.ical.ICalSession;
+import com.openexchange.data.conversion.ical.SimpleMode;
+import com.openexchange.data.conversion.ical.ZoneInfo;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.PreconditionException;
@@ -624,7 +626,12 @@ public class AppointmentResource extends CalDAVResource<Appointment> {
     @Override
     protected String generateICal() throws OXException {
         ICalEmitter icalEmitter = factory.getIcalEmitter();
-        ICalSession session = icalEmitter.createSession();
+        ICalSession session;
+        if (CalDAVAgent.WINDOWS.equals(factory.getState().getUserAgent()) || CalDAVAgent.WINDOWS_PHONE.equals(factory.getState().getUserAgent())) {
+            session = icalEmitter.createSession(new SimpleMode(ZoneInfo.OUTLOOK));
+        } else {
+            session = icalEmitter.createSession();
+        }
         List<ConversionError> conversionErrors = new LinkedList<ConversionError>();
         List<ConversionWarning> conversionWarnings = new LinkedList<ConversionWarning>();
         try {

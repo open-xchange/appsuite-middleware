@@ -62,6 +62,8 @@ public enum CalDAVAgent {
     THUNDERBIRD_LIGHTNING,
     EM_CLIENT,
     SMOOTH_SYNC,
+    WINDOWS_PHONE,
+    WINDOWS,
     UNKNOWN
     ;
 
@@ -78,6 +80,12 @@ public enum CalDAVAgent {
             }
             if (userAgent.contains("iOS") && userAgent.contains("dataaccessd")) {
                 return IOS_CALENDAR;
+            }
+            if (userAgent.startsWith("MSFT-WP")) {
+                return WINDOWS_PHONE;
+            }
+            if (userAgent.startsWith("MSFT-WIN")) {
+                return WINDOWS;
             }
             if ((userAgent.contains("Mac OS") || userAgent.contains("Mac+OS")) &&
                 (userAgent.contains("CalendarStore") || (userAgent.contains("CalendarAgent")))) {
