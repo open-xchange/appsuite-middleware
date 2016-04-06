@@ -530,7 +530,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                             writecon.setAutoCommit(false);
                             try {
                                 final CalendarDataObject[] appointments = cimp.insertAppointment(cdao, writecon, session);
-                                collectAddresses(cdao);
+                                collectAddresses(cdao, false);
                                 countObjectUse(cdao, writecon);
                                 modificationPerformed = true;
                                 return appointments;
@@ -588,7 +588,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      *
      * @param cdao - the {@link CalendarDataObject} to collect addresses for
      */
-    private void collectAddresses(CalendarDataObject cdao) {
+    private void collectAddresses(CalendarDataObject cdao, boolean incrementUseCount) {
         if (cdao == null) {
             LOG.info("Provided CalendarDataObject object is null. Nothing to collect for the ContactCollector!");
             return;
@@ -610,7 +610,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
 
-            contactCollectorService.memorizeAddresses(addresses, session);
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 
@@ -649,7 +649,7 @@ public class CalendarSql implements AppointmentSQLInterface {
      *
      * @param addresses - List of addresses to be collected
      */
-    private void collectAddresses(List<Object> participants) {
+    private void collectAddresses(List<Object> participants, boolean incrementUseCount) {
         if (participants == null) {
             LOG.info("Provided list with participants is null. Nothing to collect for the ContactCollector!");
             return;
@@ -673,7 +673,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                 }
             }
 
-            contactCollectorService.memorizeAddresses(addresses, session);
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 
@@ -761,7 +761,7 @@ public class CalendarSql implements AppointmentSQLInterface {
                     Difference difference = participantsDiffer.getDifference(edao, cdao);
                     if (difference != null) {
                         List<Object> added = difference.getAdded();
-                        this.collectAddresses(added);
+                        this.collectAddresses(added, false);
                         countObjectUse(cdao, writecon);
                     }
 

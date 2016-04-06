@@ -304,7 +304,7 @@ public final class GetAction extends AbstractMailAction {
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
+                                triggerContactCollector(session, mail, true);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
@@ -390,7 +390,7 @@ public final class GetAction extends AbstractMailAction {
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
+                            triggerContactCollector(session, mail, true);
                         }
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
@@ -436,7 +436,7 @@ public final class GetAction extends AbstractMailAction {
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail);
+                                triggerContactCollector(session, mail, true);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);

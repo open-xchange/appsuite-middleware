@@ -65,8 +65,10 @@ import com.openexchange.contactcollector.preferences.ContactCollectOnMailAccess;
 import com.openexchange.contactcollector.preferences.ContactCollectOnMailTransport;
 import com.openexchange.context.ContextService;
 import com.openexchange.database.DatabaseService;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
@@ -97,9 +99,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
 
     @Override
     public void startBundle() throws Exception {
-        /*
-         * Check if disabled by configuration
-         */
+        // Check if disabled by configuration
         {
             final ConfigurationService cService = getService(ConfigurationService.class);
             if (!cService.getBoolProperty("com.openexchange.contactcollector.enabled", true)) {
@@ -109,18 +109,20 @@ public class ContactCollectorActivator extends HousekeepingActivator {
                 return;
             }
         }
-        /*
-         * Initialize service
-         */
+
+        // Track other services
+        trackService(ObjectUseCountService.class);
+        trackService(UserAliasStorage.class);
+        openTrackers();
+
+        // Initialize service
         final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl(this);
         collectorInstance.start();
         this.collectorInstance = collectorInstance;
-
         Dictionary<String, Object> props = new Hashtable<String, Object>(2);
         props.put(Constants.SERVICE_RANKING, ContactCollectorServiceImpl.RANKING); //Default
-        /*
-         * Register all
-         */
+
+        // Register services
         registerService(LoginHandlerService.class, new ContactCollectorFolderCreator(this));
         registerService(ContactCollectorService.class, collectorInstance, props);
         registerPreferenceItems();

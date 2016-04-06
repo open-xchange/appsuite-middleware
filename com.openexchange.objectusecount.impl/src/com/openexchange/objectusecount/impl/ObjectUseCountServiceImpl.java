@@ -91,7 +91,8 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ObjectUseCountServiceImpl.class);
 
-    private final ServiceLookup services;
+    /** The service look-up */
+    final ServiceLookup services;
 
     /**
      * Initializes a new {@link ObjectUseCountServiceImpl}.

@@ -99,6 +99,11 @@ public class CachingAliasStorage implements UserAliasStorage {
     }
 
     @Override
+    public Set<String> getAliases(int contextId) throws OXException {
+        return delegate.getAliases(contextId);
+    }
+
+    @Override
     public Set<String> getAliases(int contextId, int userId) throws OXException {
         CacheService cacheService = ServerServiceRegistry.getInstance().getService(CacheService.class);
         if (cacheService == null) {
@@ -142,7 +147,7 @@ public class CachingAliasStorage implements UserAliasStorage {
         }
         return success;
     }
-    
+
     @Override
     public boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException {
         boolean success = delegate.updateAlias(con, contextId, userId, oldAlias, newAlias);

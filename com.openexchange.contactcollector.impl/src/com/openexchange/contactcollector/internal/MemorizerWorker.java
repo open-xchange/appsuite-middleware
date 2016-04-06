@@ -51,6 +51,7 @@ package com.openexchange.contactcollector.internal;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -73,11 +74,14 @@ import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -312,6 +316,7 @@ public final class MemorizerWorker {
         Set<InternetAddress> aliases;
         UserConfiguration userConfig;
         ContactService contactService;
+        ObjectUseCountService useCountService = null;
         try {
             // Acquire needed services
             ContextService contextService = services.getOptionalService(ContextService.class);
@@ -338,13 +343,16 @@ public final class MemorizerWorker {
                 return;
             }
 
+            useCountService = memorizerTask.isIncrementUseCount() ? services.getOptionalService(ObjectUseCountService.class) : null;
+
             ctx = contextService.getContext(session.getContextId());
+            UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
             if (ALL_ALIASES) {
                 // All context-known users' aliases
-                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService);
+                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
             } else {
                 // Only aliases of session user
-                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx));
+                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
             }
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
         } catch (final Exception e) {
@@ -357,7 +365,7 @@ public final class MemorizerWorker {
             // Check if address is contained in user's aliases
             if (!aliases.contains(address)) {
                 try {
-                    memorizeContact(address, folderId, session, ctx, userConfig, contactService);
+                    memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCountService);
                 } catch (Exception e) {
                     LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
                 }
@@ -371,19 +379,19 @@ public final class MemorizerWorker {
 
 	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 
-    static int memorizeContact(InternetAddress address, int folderId, Session session, Context ctx, UserConfiguration userConfig, ContactService contactService) throws OXException {
+    static void memorizeContact(InternetAddress address, int folderId, Session session, Context ctx, UserConfiguration userConfig, ContactService contactService, ObjectUseCountService useCountService) throws OXException {
         // Convert email address to a contact
         Contact contact = transformInternetAddress(address, session);
         if (null == contact) {
-            return -1;
+            return;
         }
 
         // Check if such a contact already exists to either create a contact or increment its use count
-        Contact foundContact;
+        List<Contact> foundContacts = null;
         {
-        	final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : SEARCH_FIELDS) {
-        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+        	CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        	for (ContactField field : SEARCH_FIELDS) {
+        		SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         		term.addOperand(new ContactFieldOperand(field));
         		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
         		orTerm.addSearchTerm(term);
@@ -392,44 +400,53 @@ public final class MemorizerWorker {
         	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
             try {
                 if (iterator.hasNext()) {
-                    foundContact = iterator.next();
-                } else {
-                    foundContact = null;
+                    foundContacts = new LinkedList<Contact>();
+                    do {
+                        foundContacts.add(iterator.next());
+                    } while (iterator.hasNext());
                 }
             } finally {
                 SearchIterators.close(iterator);
             }
         }
 
-        // No such contact?
-        if (null == foundContact) {
+        // No such contacts?
+        if (null == foundContacts) {
             OXFolderAccess folderAccess = new OXFolderAccess(ctx);
             if (!folderAccess.exists(folderId)) {
                 // Contact collector folder does not exist
-                return -1;
+                return;
             }
 
             OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
             if (!perm.canCreateObjects()) {
                 // Insufficient permissions granted on contact collector folder
-                return -1;
+                return;
             }
 
-            contact.setUseCount(1);
             contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
-            return contact.getObjectID();
+            int objectId = contact.getObjectID();
+            incrementUseCount(objectId, folderId, session, useCountService);
+            return;
         }
 
-        // Such a contact already exists...
-        int currentCount = foundContact.getUseCount();
-        int newCount = currentCount + 1;
-        foundContact.setUseCount(newCount);
-        OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
-        if (perm.canWriteAllObjects()) {
-            contactService.updateContact(session, Integer.toString(foundContact.getParentFolderID()),
-            		Integer.toString(foundContact.getObjectID()), foundContact, foundContact.getLastModified());
+        // Such contacts already exists...
+        for (Contact foundContact : foundContacts) {
+            OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
+            if (perm.canWriteAllObjects()) {
+                incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+            }
         }
-        return foundContact.getObjectID();
+    }
+
+    static void incrementUseCount(int objectId, int folderId, Session session, ObjectUseCountService useCountService) {
+        if (null != useCountService) {
+            try {
+                useCountService.incrementObjectUseCount(session, new IncrementArguments.Builder(objectId, folderId).build());
+            } catch (Exception e) {
+                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", objectId, folderId, session.getUserId(), session.getContextId(), e);
+            }
+        }
     }
 
     static boolean isEnabled(final Session session) {
