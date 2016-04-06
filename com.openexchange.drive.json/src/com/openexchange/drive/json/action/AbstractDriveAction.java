@@ -173,7 +173,7 @@ public abstract class AbstractDriveAction implements AJAXActionService {
          * extract meta override parameter if present
          */
         if (requestData.containsParameter("driveMeta")) {
-            driveSession.setUseDriveMeta(requestData.getParameter("driveMeta", Boolean.class));
+            driveSession.setDriveMeta(requestData.getParameter("driveMeta"));
         }
         /*
          * extract push token if present

@@ -83,7 +83,8 @@ public class OptimizingFileSynchronizer extends FileSynchronizer {
                 new FileCopyOptimizer(mapper),
                 new FileMultipleUploadsOptimizer(mapper),
                 new FileDelayMetadataDownloadOptimizer(mapper),
-                new FileOrderOptimizer(mapper)
+                new FileOrderOptimizer(mapper),
+                new FileInlineMetadataOptimizer(mapper)
             };
             for (FileActionOptimizer optimizer : optimizers) {
                 result = optimizer.optimize(session, result);

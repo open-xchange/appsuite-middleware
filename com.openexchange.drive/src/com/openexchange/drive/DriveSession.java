@@ -158,4 +158,11 @@ public interface DriveSession {
      */
     boolean useDriveMeta();
 
+    /**
+     * Gets the desired mode to use for metadata synchronization.
+     *
+     * @return The <code>.drive-meta</code>-mode
+     */
+    DriveMetaMode getDriveMetaMode();
+
 }

@@ -49,72 +49,22 @@
 
 package com.openexchange.drive;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * {@link DriveAction}
+ * {@link DriveMetaMode}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public interface DriveAction<T extends DriveVersion> extends Comparable<DriveAction<T>> {
+public enum DriveMetaMode {
 
-    static final String PARAMETER_PATH = "path";
-    static final String PARAMETER_MODIFIED = "modified";
-    static final String PARAMETER_CREATED = "created";
-    static final String PARAMETER_TOTAL_LENGTH = "totalLength";
-    static final String PARAMETER_OFFSET = "offset";
-    static final String PARAMETER_CONTENT_TYPE = "contentType";
-    static final String PARAMETER_ERROR = "error";
-    static final String PARAMETER_QUARANTINE = "quarantine";
-    static final String PARAMETER_RESET = "reset";
-    static final String PARAMETER_LENGTH = "length";
-    static final String PARAMETER_STOP = "stop";
-    static final String PARAMETER_ACKNOWLEDGE = "acknowledge";
+    /** <code>.drive-meta</code>-synchronization is disabled */
+    DISABLED,
 
-    static final String PARAMETER_DIRECT_LINK = "directLink";
-    static final String PARAMETER_DIRECT_LINK_FRAGMENTS = "directLinkFragments";
-    static final String PARAMETER_PREVIEW_LINK = "previewLink";
-    static final String PARAMETER_THUMBNAIL_LINK = "thumbnailLink";
+    /** <code>.drive-meta</code>-synchronization is enabled in default mode */
+    DEFAULT,
 
-    static final String PARAMETER_DATA = "data";
-
-    static final Set<String> PARAMETER_NAMES = Collections.unmodifiableSet(new HashSet<String>(Arrays.asList(new String[] {
-        PARAMETER_PATH, PARAMETER_TOTAL_LENGTH, PARAMETER_OFFSET, PARAMETER_CONTENT_TYPE, PARAMETER_ERROR, PARAMETER_QUARANTINE,
-        PARAMETER_MODIFIED, PARAMETER_CREATED, PARAMETER_RESET, PARAMETER_LENGTH, PARAMETER_STOP, PARAMETER_ACKNOWLEDGE,
-        PARAMETER_DIRECT_LINK, PARAMETER_DIRECT_LINK_FRAGMENTS, PARAMETER_PREVIEW_LINK, PARAMETER_THUMBNAIL_LINK, PARAMETER_DATA
-    })));
-
-    /**
-     * Gets the action.
-     *
-     * @return The action
-     */
-    Action getAction();
-
-    /**
-     * Gets the version.
-     *
-     * @return The version, or <code>null</code> if not applicable
-     */
-    T getVersion();
-
-    /**
-     * Gets the new version.
-     *
-     * @return The new version, or <code>null</code> if not applicable
-     */
-    T getNewVersion();
-
-    /**
-     * Gets a map of additional parameters; possible parameters are defined in {@link DriveAction#PARAMETER_NAMES}.
-     *
-     * @return The parameters map
-     */
-    Map<String, Object> getParameters();
+    /** <code>.drive-meta</code>-synchronization is enabled in 'inline' mode */
+    INLINE
+    ;
 
 }
-
