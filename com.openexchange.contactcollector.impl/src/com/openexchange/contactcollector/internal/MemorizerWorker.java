@@ -431,10 +431,12 @@ public final class MemorizerWorker {
         }
 
         // Such contacts already exists...
-        for (Contact foundContact : foundContacts) {
-            OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
-            if (perm.canWriteAllObjects()) {
-                incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+        if (null != useCountService) {
+            for (Contact foundContact : foundContacts) {
+                OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
+                if (perm.canWriteAllObjects()) {
+                    incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+                }
             }
         }
     }
