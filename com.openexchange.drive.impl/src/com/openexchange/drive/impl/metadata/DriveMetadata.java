@@ -82,6 +82,7 @@ public class DriveMetadata extends DefaultFile {
     private final FileStorageFolder folder;
 
     private byte[] document;
+    private JSONObject jsonData;
     private Long contentsSequenceNumber;
 
     /**
@@ -108,6 +109,30 @@ public class DriveMetadata extends DefaultFile {
         this.session = session;
         this.folder = folder;
         this.contentsSequenceNumber = contentsSequenceNumber;
+    }
+
+    /**
+     * Gets the contents of the drive metadata file.
+     *
+     * @return The document data
+     */
+    public byte[] getDocumentData() throws OXException {
+        if (null == document) {
+            document = getJSONData().toString().getBytes(Charsets.UTF_8);
+        }
+        return document;
+    }
+
+    /**
+     * Gets the contents of the drive metadata file as JSON object.
+     *
+     * @return The JSON data
+     */
+    public JSONObject getJSONData() throws OXException {
+        if (null == jsonData) {
+            jsonData = generateJSONData();
+        }
+        return jsonData;
     }
 
     /**
@@ -208,19 +233,11 @@ public class DriveMetadata extends DefaultFile {
         }
     }
 
-    private byte[] getDocumentData() throws OXException {
-        if (null == document) {
-            document = generateDocumentData();
-        }
-        return document;
-    }
-
-    private byte[] generateDocumentData() throws OXException {
+    private JSONObject generateJSONData() throws OXException {
         int retryCount = 0;
         while (true) {
             try {
-                JSONObject jsonMetadata = new JsonDirectoryMetadata(session, folder).build();
-                return jsonMetadata.toString().getBytes(Charsets.UTF_8);
+                return new JsonDirectoryMetadata(session, folder).build();
             } catch (OXException e) {
                 if (retryCount < DriveConstants.MAX_RETRIES) {
                     retryCount++;
