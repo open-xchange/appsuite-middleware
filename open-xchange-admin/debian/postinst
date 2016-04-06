@@ -204,6 +204,13 @@ postFix() {
     ox_add_property ALLOW_CHANGING_QUOTA_IF_NO_FILESTORE_SET false /opt/open-xchange/etc/AdminUser.properties
 
     ox_add_property AVERAGE_USER_SIZE 100 /opt/open-xchange/etc/AdminUser.properties
+
+    # SoftwareChange_Request-3226
+    PFILE=/opt/open-xchange/etc/ModuleAccessDefinitions.properties
+    VALUE=$(ox_read_property drive $PFILE)
+    if [ "infostore,deniedportal,readcreatesharedfolders,editpublicfolders" = "$VALUE" ]; then
+        ox_set_property drive 'infostore,deniedportal,contacts,collectemailaddresses' $PFILE
+    fi
 }
 
 setConfigFilePermissions() {
