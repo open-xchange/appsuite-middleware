@@ -109,6 +109,8 @@ public class DeleteEvent extends EventObject {
 
     protected int subType;
 
+    protected Integer destUserID;
+
     private transient Session session;
 
     /**
@@ -135,7 +137,7 @@ public class DeleteEvent extends EventObject {
      * @param ctx the context
      */
     public DeleteEvent(final Object source, final int id, final int type, final Context ctx) {
-        this(source, id, type, 0, ctx);
+        this(source, id, type, 0, ctx, null);
     }
 
     /**
@@ -148,12 +150,13 @@ public class DeleteEvent extends EventObject {
      * @param type The object's subtype, or <code>0</code> if not specified
      * @param ctx the context
      */
-    public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx) {
+    public DeleteEvent(final Object source, final int id, final int type, int subType, final Context ctx, Integer destUserID) {
         super(source);
         this.id = id;
         this.type = type;
         this.subType = subType;
         this.ctx = ctx;
+        this.destUserID = destUserID;
     }
 
     /**
@@ -204,6 +207,10 @@ public class DeleteEvent extends EventObject {
             session = SessionObjectWrapper.createSessionObject(ctx.getMailadmin(), ctx, "DeleteEventSessionObject");
         }
         return session;
+    }
+
+    public Integer getDestinationUserID() {
+        return destUserID;
     }
 
 }

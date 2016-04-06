@@ -52,6 +52,7 @@ package com.openexchange.admin.console.user;
 import java.rmi.RemoteException;
 
 import com.openexchange.admin.console.AdminParser;
+import com.openexchange.admin.console.CLIOption;
 import com.openexchange.admin.rmi.OXUserInterface;
 import com.openexchange.admin.rmi.dataobjects.Context;
 import com.openexchange.admin.rmi.dataobjects.Credentials;
@@ -65,6 +66,12 @@ import com.openexchange.admin.rmi.exceptions.StorageException;
 
 public class Delete extends DeleteCore {
 
+    private static final String REASSIGN_LONG = "reassign";
+    private static final char REASSIGN_SHORT = 'r';
+    private static final String NO_REASSIGN_LONG = "no-reassign";
+    private CLIOption reassignCLI;
+    private CLIOption noReassignCLI;
+
     public static void main(final String[] args) {
         new Delete(args);
     }
@@ -72,16 +79,31 @@ public class Delete extends DeleteCore {
     public Delete(final String[] args2) {
 
         final AdminParser parser = new AdminParser("deleteuser");
-
         commonfunctions(parser, args2);
     }
 
     @Override
     protected void maincall(final AdminParser parser, final OXUserInterface oxusr, final Context ctx, final User usr, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        oxusr.delete(ctx, usr, auth);
+        Integer destUser = null;
+        if (parser.hasOption(noReassignCLI)) {
+            destUser = 0;
+        } else {
+            Object o = parser.getOptionValue(reassignCLI);
+            if (o != null) {
+                if (o instanceof String) {
+                    destUser = Integer.valueOf((String) o);
+                } else {
+                    destUser = Integer.valueOf((int) o);
+                }
+            }
+        }
+        oxusr.delete(ctx, usr, destUser, auth);
     }
 
     @Override
     protected void setFurtherOptions(AdminParser parser) {
+
+        reassignCLI = parser.addOption(REASSIGN_SHORT, REASSIGN_LONG, "The user id shared data will be assigned to. If omitted the context admin will be used instead.", false);
+        noReassignCLI = parser.addSettableBooleanOption(NO_REASSIGN_LONG, null, "If set all shared data will be deleted instead of being assigned.", false, false, false);
     }
 }

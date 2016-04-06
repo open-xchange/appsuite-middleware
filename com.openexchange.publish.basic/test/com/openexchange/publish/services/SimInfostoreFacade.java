@@ -195,7 +195,7 @@ public class SimInfostoreFacade implements InfostoreFacade {
     }
 
     @Override
-    public void removeUser(int userId, Context context, ServerSession session) throws OXException {
+    public void removeUser(int userId, Context context, final Integer destUser, ServerSession session) throws OXException {
         // Nothing to do
     }
 

@@ -250,7 +250,7 @@ public class MailAttachmentFolderTest extends AbstractRMITest {
     public void tearDown() throws Exception {
         try {
             if (ui != null && srcCtx != null) {
-                ui.delete(srcCtx, srcUser, getCredentials());
+                ui.delete(srcCtx, srcUser, null, getCredentials());
             }
         } catch (Exception e) {
             e.printStackTrace();

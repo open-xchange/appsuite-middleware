@@ -202,7 +202,7 @@ public class TestBug41727 {
         // 7) Delete master user
         try {
             long start = System.currentTimeMillis();
-            oxuser.delete(context, masterUser, getContextAdminCredentials());
+            oxuser.delete(context, masterUser, null, getContextAdminCredentials());
             System.out.println("Deleted master user '" + masterUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
@@ -212,7 +212,7 @@ public class TestBug41727 {
         // 8) Delete the other user
         try {
             long start = System.currentTimeMillis();
-            oxuser.delete(context, someUser, getContextAdminCredentials());
+            oxuser.delete(context, someUser, null, getContextAdminCredentials());
             System.out.println("Deleted user '" + someUser.getId() + "' in " + (System.currentTimeMillis() - start) + " msec.");
         } catch (Exception e) {
             e.printStackTrace();
