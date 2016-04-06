@@ -217,8 +217,8 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
         String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);
-        payloadContent.addStringValue("CardDAVHostName", cardDAVUrl);
-        payloadContent.addBooleanValue("CardDAVUseSSL", cardDAVUrl.startsWith("https://"));
+        payloadContent.addStringValue("CardDAVHostName", extractHostName(cardDAVUrl));
+        payloadContent.addBooleanValue("CardDAVUseSSL", impliesSsl(cardDAVUrl));
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CardDAV");
 
         // Add payload content dictionary to top-level dictionary
@@ -226,6 +226,20 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
         // Return result
         return pListDict;
+    }
+
+    private boolean impliesSsl(String cardDAVUrl) {
+        return !cardDAVUrl.startsWith("http://");
+    }
+
+    private String extractHostName(String cardDAVUrl) {
+        if (cardDAVUrl.startsWith("http://")) {
+            return cardDAVUrl.substring(7);
+        }
+        if (cardDAVUrl.startsWith("https://")) {
+            return cardDAVUrl.substring(8);
+        }
+        return cardDAVUrl;
     }
 
     private String getCardDAVUrl(boolean generateIfAbsent, HostData hostData, int userId, int contextId) throws OXException {
@@ -248,7 +262,7 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return value.trim();
     }
 
 }
