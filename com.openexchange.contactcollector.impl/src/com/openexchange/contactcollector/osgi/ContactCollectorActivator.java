@@ -68,7 +68,6 @@ import com.openexchange.database.DatabaseService;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.login.LoginHandlerService;
 import com.openexchange.osgi.HousekeepingActivator;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserConfigurationService;
@@ -90,44 +89,14 @@ public class ContactCollectorActivator extends HousekeepingActivator {
     }
 
     @Override
-    public <S> boolean addServiceAlt(Class<? extends S> clazz, S service) {
-        return super.addServiceAlt(clazz, service);
-    }
-
-    @Override
-    public <S> boolean removeService(Class<? extends S> clazz) {
-        return super.removeService(clazz);
+    protected Class<?>[] getNeededServices() {
+        return new Class<?>[] {
+            ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
+            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
     }
 
     @Override
     public void startBundle() throws Exception {
-        /*
-         * Initialize service registry with available services
-         */
-        final ContactCollectorActivator activator = this;
-        final ServiceRegistry serviceRegistry = new ServiceRegistry() {
-
-            @Override
-            public <S> S getOptionalService(final Class<? extends S> clazz) {
-                return activator.getOptionalService(clazz);
-            }
-
-            @Override
-            public <S> S getService(final Class<? extends S> clazz) {
-                return activator.getService(clazz);
-            }
-
-            @Override
-            public <S> void addService(final Class<? extends S> clazz, final S service) {
-                activator.addServiceAlt(clazz, service);
-            }
-
-            @Override
-            public void removeService(final Class<?> clazz) {
-                activator.removeService(clazz);
-            }
-        };
-        CCServiceRegistry.SERVICE_REGISTRY.set(serviceRegistry);
         /*
          * Check if disabled by configuration
          */
@@ -143,7 +112,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Initialize service
          */
-        final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collectorInstance = new ContactCollectorServiceImpl(this);
         collectorInstance.start();
         this.collectorInstance = collectorInstance;
 
@@ -152,7 +121,7 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         /*
          * Register all
          */
-        registerService(LoginHandlerService.class, new ContactCollectorFolderCreator());
+        registerService(LoginHandlerService.class, new ContactCollectorFolderCreator(this));
         registerService(ContactCollectorService.class, collectorInstance, props);
         registerPreferenceItems();
     }
@@ -163,34 +132,24 @@ public class ContactCollectorActivator extends HousekeepingActivator {
         registerService(PreferencesItemService.class, new ContactCollectEnabled());
         registerService(PreferencesItemService.class, new ContactCollectOnMailAccess());
         registerService(PreferencesItemService.class, new ContactCollectOnMailTransport());
-        registerService(PreferencesItemService.class, new ContactCollectFolderDeleteDenied());
+        registerService(PreferencesItemService.class, new ContactCollectFolderDeleteDenied(this));
     }
 
     @Override
     public void stopBundle() throws Exception {
         /*
-         * Unregister all
-         */
-        cleanUp();
-        /*
          * Stop service
          */
-        final ContactCollectorServiceImpl collectorInstance = this.collectorInstance;
+        ContactCollectorServiceImpl collectorInstance = this.collectorInstance;
         if (null != collectorInstance) {
             collectorInstance.stop();
             this.collectorInstance = null;
         }
-        /*
-         * Clear service registry
-         */
-        CCServiceRegistry.SERVICE_REGISTRY.set(null);
-    }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] {
-            ContextService.class, UserService.class, UserConfigurationService.class, ContactService.class,
-            ThreadPoolService.class, DatabaseService.class, ConfigurationService.class };
+        /*
+         * Unregister all
+         */
+        super.stopBundle();
     }
 
 }

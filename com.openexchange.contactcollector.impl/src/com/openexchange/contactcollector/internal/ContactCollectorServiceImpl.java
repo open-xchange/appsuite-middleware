@@ -53,6 +53,7 @@ import java.util.List;
 import javax.mail.internet.InternetAddress;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 
 /**
@@ -63,14 +64,18 @@ import com.openexchange.session.Session;
  */
 public class ContactCollectorServiceImpl implements ContactCollectorService {
 
-    public static final Integer RANKING = 0;
-    private MemorizerWorker worker;
+    /** This service's ranking */
+    public static final Integer RANKING = Integer.valueOf(0);
+
+    private final ServiceLookup services;
+    private volatile MemorizerWorker worker;
 
     /**
      * Initializes a new {@link ContactCollectorServiceImpl}.
      */
-    public ContactCollectorServiceImpl() {
+    public ContactCollectorServiceImpl(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -79,20 +84,25 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, final boolean background) {
-        if (background) {
-            /*
-             * Submit
-             */
-            try {
-                worker.submit(new MemorizerTask(addresses, session));
-            } catch (final OXException e) {
-                /*
-                 * Thread pool service is missing. Run with this thread
-                 */
-                MemorizerWorker.handleTask(new MemorizerTask(addresses, session));
-            }
-        } else {
-            MemorizerWorker.handleTask(new MemorizerTask(addresses, session));
+        if (!background) {
+            // Run with current thread
+            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
+            return;
+        }
+
+        // Submit...
+        MemorizerWorker worker = this.worker;
+        if (null == worker) {
+            // Worker not initialized. Run with current thread
+            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
+            return;
+        }
+
+        try {
+            worker.submit(new MemorizerTask(addresses, session));
+        } catch (Exception x) {
+            // Thread pool service is absent. Run with current thread
+            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
         }
     }
 
@@ -103,14 +113,18 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
      */
     public void start() throws OXException {
         AliasesProvider.getInstance().start();
-        worker = new MemorizerWorker();
+        worker = new MemorizerWorker(services);
     }
 
     /**
      * Stops this contact collector service implementation.
      */
     public void stop() {
-        worker.close();
+        MemorizerWorker worker = this.worker;
+        if (null != worker) {
+            this.worker = null;
+            worker.close();
+        }
         AliasesProvider.getInstance().stop();
     }
 }

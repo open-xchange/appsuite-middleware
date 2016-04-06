@@ -54,7 +54,6 @@ import java.sql.SQLException;
 import java.util.Collections;
 import com.openexchange.contactcollector.ContactCollectorService;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.database.DatabaseService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -65,6 +64,7 @@ import com.openexchange.login.LoginHandlerService;
 import com.openexchange.login.LoginResult;
 import com.openexchange.login.NonTransient;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
@@ -84,11 +84,14 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ContactCollectorFolderCreator.class);
 
+    private final ServiceLookup services;
+
     /**
      * Initializes a new {@link ContactCollectorFolderCreator}.
      */
-    public ContactCollectorFolderCreator() {
+    public ContactCollectorFolderCreator(ServiceLookup services) {
         super();
+        this.services = services;
     }
 
     @Override
@@ -96,38 +99,45 @@ public class ContactCollectorFolderCreator implements LoginHandlerService, NonTr
         if (!necessary()) {
             return;
         }
-        Session session = login.getSession();
-        Context ctx = login.getContext();
-        DatabaseService databaseService = CCServiceRegistry.getInstance().getService(DatabaseService.class);
-        final String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
 
-        Connection con = databaseService.getReadOnly(ctx);
-        try {
-            if (exists(session, ctx, con)) {
-                return;
-            }
-        } finally {
-            databaseService.backReadOnly(ctx, con);
+        DatabaseService databaseService = services.getOptionalService(DatabaseService.class);
+        if (null == databaseService) {
+            LOG.error("Cannot check for contact collector folder. Missing database service.");
+            return;
         }
 
-        con = databaseService.getWritable(ctx);
-        boolean modifiedData = false;
-        try {
-            modifiedData = create(login.getSession(), login.getContext(), folderName, con);
-        } catch (final SQLException e) {
-            throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
-        } finally {
-            if (modifiedData) {
-                databaseService.backWritable(ctx, con);
-            } else {
-                databaseService.backWritableAfterReading(ctx, con);
+        Context ctx = login.getContext();
+
+        {
+            Connection con = databaseService.getReadOnly(ctx);
+            try {
+                Session session = login.getSession();
+                if (exists(session, ctx, con)) {
+                    return;
+                }
+            } finally {
+                databaseService.backReadOnly(ctx, con);
+            }
+        }
+
+        {
+            Connection con = databaseService.getWritable(ctx);
+            boolean modifiedData = false;
+            try {
+                String folderName = StringHelper.valueOf(login.getUser().getLocale()).getString(FolderStrings.DEFAULT_CONTACT_COLLECT_FOLDER_NAME);
+                modifiedData = create(login.getSession(), login.getContext(), folderName, con);
+            } catch (final SQLException e) {
+                throw OXFolderExceptionCode.SQL_ERROR.create(e, e.getMessage());
+            } finally {
+                if (modifiedData) {
+                    databaseService.backWritable(ctx, con);
+                } else {
+                    databaseService.backWritableAfterReading(ctx, con);
+                }
             }
         }
     }
 
-    /**
-     * @return
-     */
     private boolean necessary() {
         ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (ContactCollectorServiceImpl.class.isInstance(ccs)) {
