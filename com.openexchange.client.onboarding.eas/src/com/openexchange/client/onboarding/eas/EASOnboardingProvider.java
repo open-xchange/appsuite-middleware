@@ -216,8 +216,8 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.addStringValue("UserName", OnboardingUtility.getUserLogin(userId, contextId));
         payloadContent.addStringValue("EmailAddress", OnboardingUtility.getUserMail(userId, contextId));
         String easUrl = getEASUrl(null, false, userId, contextId);
-        payloadContent.addStringValue("Host", easUrl);
-        payloadContent.addBooleanValue("SSL", easUrl.startsWith("https://"));
+        payloadContent.addStringValue("Host", extractHostName(easUrl));
+        payloadContent.addBooleanValue("SSL", impliesSsl(easUrl));
         {
             String description = OnboardingUtility.getProductName(hostName, userId, contextId) + " Exchange ActiveSync";
             payloadContent.setPayloadDisplayName(description);
@@ -228,6 +228,20 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);
         return pListDict;
+    }
+
+    private boolean impliesSsl(String easUrl) {
+        return !easUrl.startsWith("http://");
+    }
+
+    private String extractHostName(String easUrl) {
+        if (easUrl.startsWith("http://")) {
+            return easUrl.substring(7);
+        }
+        if (easUrl.startsWith("https://")) {
+            return easUrl.substring(8);
+        }
+        return easUrl;
     }
 
     private String getEASUrl(HostData hostData, boolean generateIfAbsent, int userId, int contextId) throws OXException {
@@ -250,7 +264,7 @@ public class EASOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return value.trim();
     }
 
 }

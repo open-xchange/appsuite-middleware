@@ -217,13 +217,27 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
         String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
-        payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
-        payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
+        payloadContent.addStringValue("CalDAVHostName", extractHostName(calDAVUrl));
+        payloadContent.addBooleanValue("CalDAVUseSSL", impliesSsl(calDAVUrl));
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CalDAV");
 
         // Add payload content dictionary to top-level dictionary
         pListDict.addPayloadContent(payloadContent);
         return pListDict;
+    }
+
+    private boolean impliesSsl(String calDAVUrl) {
+        return !calDAVUrl.startsWith("http://");
+    }
+
+    private String extractHostName(String calDAVUrl) {
+        if (calDAVUrl.startsWith("http://")) {
+            return calDAVUrl.substring(7);
+        }
+        if (calDAVUrl.startsWith("https://")) {
+            return calDAVUrl.substring(8);
+        }
+        return calDAVUrl;
     }
 
     private String getCalDAVUrl(HostData hostData, boolean generateIfAbsent, int userId, int contextId) throws OXException {
@@ -246,7 +260,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return value.trim();
     }
 
 }
