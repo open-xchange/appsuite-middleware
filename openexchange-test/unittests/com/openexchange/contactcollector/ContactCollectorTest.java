@@ -62,7 +62,7 @@ import junit.framework.TestCase;
 import com.openexchange.contact.ContactService;
 import com.openexchange.contactcollector.folder.ContactCollectorFolderCreator;
 import com.openexchange.contactcollector.internal.ContactCollectorServiceImpl;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
+import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Init;
 import com.openexchange.groupware.contact.helpers.ContactField;
@@ -74,19 +74,26 @@ import com.openexchange.groupware.search.ContactSearchObject;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.java.util.UUIDs;
 import com.openexchange.preferences.ServerUserSetting;
+import com.openexchange.server.SimpleServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.OCLPermission;
 import com.openexchange.session.Session;
 import com.openexchange.setuptools.TestConfig;
 import com.openexchange.setuptools.TestContextToolkit;
+import com.openexchange.threadpool.ThreadPoolService;
+import com.openexchange.timer.TimerService;
 import com.openexchange.tools.iterator.SearchIterator;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
+import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserConfigurationService;
 
 /**
  * @author <a href="mailto:martin.herfurth@open-xchange.org">Martin Herfurth</a>
  */
 public class ContactCollectorTest extends TestCase {
+
+    private SimpleServiceLookup services;
 
     private String user;
 
@@ -105,6 +112,17 @@ public class ContactCollectorTest extends TestCase {
     @Override
     public void setUp() throws Exception {
         Init.startServer();
+
+        services = new SimpleServiceLookup();
+        {
+            services.add(TimerService.class, Init.LOOKUP.getService(TimerService.class));
+            services.add(ThreadPoolService.class, Init.LOOKUP.getService(ThreadPoolService.class));
+            services.add(ContextService.class, Init.LOOKUP.getService(ContextService.class));
+            services.add(UserConfigurationService.class, Init.LOOKUP.getService(UserConfigurationService.class));
+            services.add(UserService.class, Init.LOOKUP.getService(UserService.class));
+            services.add(ContactService.class, Init.LOOKUP.getService(ContactService.class));
+        }
+
         final TestConfig config = new TestConfig();
         user = prepareUser(config.getUser());
 
@@ -159,7 +177,7 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
 
-        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl(services);
         collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
@@ -178,7 +196,7 @@ public class ContactCollectorTest extends TestCase {
         ServerUserSetting.getInstance().setContactCollectionFolder(ctx.getContextId(), userId, I(contactFolder.getObjectID()));
         ServerUserSetting.getInstance().setContactCollectOnMailAccess(ctx.getContextId(), userId, true);
 
-        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl();
+        final ContactCollectorServiceImpl collector = new ContactCollectorServiceImpl(services);
         collector.start();
         try {
             final InternetAddress address = new InternetAddress(mail);
@@ -209,7 +227,7 @@ public class ContactCollectorTest extends TestCase {
 
     private List<Contact> searchContact(final String pattern) throws Exception {
 
-        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
+        ContactService contactService = services.getService(ContactService.class);
         final ContactSearchObject searchObject = new ContactSearchObject();
         searchObject.setEmail1(pattern);
         searchObject.setEmail2(pattern);
@@ -232,7 +250,7 @@ public class ContactCollectorTest extends TestCase {
 
     private void deleteContactFromFolder(final String pattern) throws Exception {
         final List<Contact> contacts = searchContact(pattern);
-        ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
+        ContactService contactService = services.getService(ContactService.class);
         for (final Contact contact : contacts) {
             contactService.deleteContact(session, String.valueOf(contactFolder.getObjectID()), String.valueOf(contact.getObjectID()),
                 contact.getLastModified());
