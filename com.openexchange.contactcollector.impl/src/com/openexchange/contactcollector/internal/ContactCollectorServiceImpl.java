@@ -79,14 +79,15 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
     }
 
     @Override
-    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session) {
-        memorizeAddresses(addresses, session, true);
+    public void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session) {
+        memorizeAddresses(addresses, incrementUseCount, session, true);
     }
 
-    public void memorizeAddresses(final List<InternetAddress> addresses, final Session session, final boolean background) {
+    public void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session, boolean background) {
+        MemorizerTask memorizerTask = new MemorizerTask(addresses, incrementUseCount, session);
         if (!background) {
             // Run with current thread
-            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
+            MemorizerWorker.handleTask(memorizerTask, services);
             return;
         }
 
@@ -94,15 +95,15 @@ public class ContactCollectorServiceImpl implements ContactCollectorService {
         MemorizerWorker worker = this.worker;
         if (null == worker) {
             // Worker not initialized. Run with current thread
-            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
+            MemorizerWorker.handleTask(memorizerTask, services);
             return;
         }
 
         try {
-            worker.submit(new MemorizerTask(addresses, session));
+            worker.submit(memorizerTask);
         } catch (Exception x) {
             // Thread pool service is absent. Run with current thread
-            MemorizerWorker.handleTask(new MemorizerTask(addresses, session), services);
+            MemorizerWorker.handleTask(memorizerTask, services);
         }
     }
 

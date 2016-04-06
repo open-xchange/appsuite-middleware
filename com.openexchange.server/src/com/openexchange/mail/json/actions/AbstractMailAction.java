@@ -260,15 +260,16 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      *
      * @param session The session
      * @param mail The mail
+     * @param incrementUseCount Whether the associated contacts' use-count is supposed to be incremented
      * @throws OXException
      */
-    public static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
+    public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
 
             if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
             }
         }
     }

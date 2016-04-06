@@ -210,16 +210,17 @@ public class TasksSQLImpl implements TasksSQLInterface {
         insert.createReminder();
         insert.sentEvent(session);
 
-        collectAddresses(task);
+        collectAddresses(task, false);
         countObjectUse(task);
     }
 
     /**
      * Tries to add addresses of external participants to the ContactCollector.
      *
-     * @param task - the {@link Task} to collect addresses for
+     * @param task The {@link Task} to collect addresses for
+     * @param incrementUseCount Whether the use-count is supposed to be incremented
      */
-    private void collectAddresses(Task task) {
+    private void collectAddresses(Task task, boolean incrementUseCount) {
         if ((task == null) || (task.getParticipants() == null)) {
             LOG.debug("Provided Task object or containing participants null. Nothing to collect for the ContactCollector!");
             return;
@@ -241,7 +242,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                 }
             }
 
-            contactCollectorService.memorizeAddresses(addresses, session);
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 
@@ -300,7 +301,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
             update.updateReminder();
             update.makeNextRecurrence(session);
 
-            collectAddresses(update);
+            collectAddresses(update, false);
             countObjectUse(task);
         } catch (final OXException e) {
             throw e;
@@ -310,10 +311,11 @@ public class TasksSQLImpl implements TasksSQLInterface {
     /**
      * Collects addresses from the given {@link UpdateData}
      *
-     * @param update - the {@link UpdateData} to get addresses from
+     * @param update The {@link UpdateData} to get addresses from
+     * @param incrementUseCount Whether use-count is supposed to be incremented
      * @throws OXException
      */
-    private void collectAddresses(UpdateData update) throws OXException {
+    private void collectAddresses(UpdateData update, boolean incrementUseCount) throws OXException {
         if (update == null) {
             LOG.info("Provided UpdateData object is null. Nothing to collect for the ContactCollector!");
             return;
@@ -337,7 +339,7 @@ public class TasksSQLImpl implements TasksSQLInterface {
                     }
                 }
             }
-            contactCollectorService.memorizeAddresses(addresses, session);
+            contactCollectorService.memorizeAddresses(addresses, incrementUseCount, session);
         }
     }
 

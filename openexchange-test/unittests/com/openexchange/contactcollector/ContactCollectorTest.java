@@ -183,10 +183,9 @@ public class ContactCollectorTest extends TestCase {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, false,  session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("No object found", 1, contacts.size());
-            assertEquals("Count does not match", 1, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
@@ -202,12 +201,11 @@ public class ContactCollectorTest extends TestCase {
             final InternetAddress address = new InternetAddress(mail);
             final List<InternetAddress> addresses = new ArrayList<InternetAddress>();
             addresses.add(address);
-            collector.memorizeAddresses(addresses, session, false);
-            collector.memorizeAddresses(addresses, session, false);
-            collector.memorizeAddresses(addresses, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
+            collector.memorizeAddresses(addresses, false, session, false);
             final List<Contact> contacts = searchContact(mail);
             assertEquals("Ammount of objects found is not correct", 1, contacts.size());
-            assertEquals("Count does not match", 3, contacts.get(0).getUseCount());
         } finally {
             collector.stop();
         }
@@ -234,8 +232,7 @@ public class ContactCollectorTest extends TestCase {
         searchObject.setEmail3(pattern);
         searchObject.setOrSearch(true);
         searchObject.addFolder(contactFolder.getObjectID());
-        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID,
-            ContactField.USERFIELD20 };
+        ContactField[] fields = new ContactField[] { ContactField.FOLDER_ID, ContactField.LAST_MODIFIED, ContactField.OBJECT_ID, ContactField.USERFIELD20 };
         SearchIterator<Contact> iterator = contactService.searchContacts(session, searchObject, fields);
 
         final List<Contact> contacts = new ArrayList<Contact>();
