@@ -115,7 +115,7 @@ public class DelUserFolderDiscovererTest extends TestCase{
 	}
 
 	public void testDiscoverFolders() throws Exception{
-		final List<FolderObject> folders = discoverer.discoverFolders(userIdA, ctx);
+        final List<FolderObject> folders = discoverer.discoverFolders(userIdA, ctx, false);
         boolean privateFolderFound = false;
         for(final FolderObject folder : folders) {
             assertFalse(folder.getObjectID() == this.folderWithOtherEntity.getObjectID());

@@ -51,6 +51,7 @@ package com.openexchange.tools.oxfolder;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Map;
 import com.openexchange.cache.impl.FolderCacheManager;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.container.FolderObject;
@@ -136,6 +137,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.handleEntityPermissions(
 		        groupId,
 		        mailadmin,
+                null,
 		        lastModified,
 		        TABLE_WORKING_FOLDER,
 		        TABLE_WORKING_PERMS,
@@ -148,6 +150,7 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.handleEntityPermissions(
 		        groupId,
 		        mailadmin,
+                null,
 		        lastModified,
 		        TABLE_BACKUP_FOLDER,
 		        TABLE_BACKUP_PERMS,
@@ -202,6 +205,9 @@ public class OXFolderDeleteListener implements DeleteListener {
 		    OXFolderSQL.cleanseSystemPermissions(userId, TABLE_WORKING_PERMS, writeCon, ctx);
 		    OXFolderSQL.cleanseSystemPermissions(userId, TABLE_BACKUP_PERMS, writeCon, ctx);
 		    final boolean isMailAdmin = (mailadmin == userId);
+
+            Integer destUserID = delEvent.getDestinationUserID();
+
 		    /*
 		     * Handle user's permissions
 		     */
@@ -218,11 +224,11 @@ public class OXFolderDeleteListener implements DeleteListener {
                 /*
                  * Working
                  */
-                OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, destUserID, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
                 /*
                  * Backup
                  */
-                OXFolderSQL.handleEntityPermissions(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+                OXFolderSQL.handleEntityPermissions(userId, mailadmin, destUserID, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
             }
 		    /*
 		     * Handle user's folders
@@ -240,11 +246,11 @@ public class OXFolderDeleteListener implements DeleteListener {
                 /*
                  * Working
                  */
-                OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, destUserID, lastModified, TABLE_WORKING_FOLDER, TABLE_WORKING_PERMS, readCon, writeCon, ctx);
                 /*
                  * Backup
                  */
-                OXFolderSQL.handleEntityFolders(userId, mailadmin, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
+                OXFolderSQL.handleEntityFolders(userId, mailadmin, destUserID, lastModified, TABLE_BACKUP_FOLDER, TABLE_BACKUP_PERMS, readCon, writeCon, ctx);
             }
 		    if (!isMailAdmin) {
 		        /*

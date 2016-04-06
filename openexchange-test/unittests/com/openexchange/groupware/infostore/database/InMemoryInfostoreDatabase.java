@@ -227,7 +227,7 @@ public class InMemoryInfostoreDatabase extends DatabaseImpl {
     }
 
     @Override
-    public void removeUser(final int id, final Context ctx, final ServerSession session, final EntityLockManager locks) {
+    public void removeUser(final int id, final Context ctx, final Integer destUser, final ServerSession session, final EntityLockManager locks) {
         throw new UnsupportedOperationException();
     }
 

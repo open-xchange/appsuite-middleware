@@ -91,6 +91,11 @@ public final class ContactDeleteListener implements DeleteListener {
     @Override
     public void deletePerformed(final DeleteEvent deleteEvent, final Connection readCon, final Connection writeCon) throws OXException {
         if (deleteEvent.getType() == DeleteEvent.TYPE_USER) {
+
+            Integer destUser = deleteEvent.getDestinationUserID();
+            if(destUser == null){
+                destUser = deleteEvent.getContext().getMailadmin();
+            }
             /*
              * Drop affected distribution list entries
              */
@@ -99,7 +104,7 @@ public final class ContactDeleteListener implements DeleteListener {
             /*
              * Proceed
              */
-            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), readCon, writeCon);
+            trashAllUserContacts(deleteEvent.getContext(), deleteEvent.getId(), deleteEvent.getSession(), destUser, readCon, writeCon);
         }
     }
 
@@ -179,7 +184,7 @@ public final class ContactDeleteListener implements DeleteListener {
         }
     }
 
-    private static void trashAllUserContacts(Context context, int userID, Session session, Connection readConnection, Connection writeConnection) throws OXException {
+    private static void trashAllUserContacts(Context context, int userID, Session session, final int destUser, Connection readConnection, Connection writeConnection) throws OXException {
         /*
          * get all contacts created by the user being deleted
          */
@@ -191,35 +196,35 @@ public final class ContactDeleteListener implements DeleteListener {
          * process contacts by their parent folder
          */
         Map<Integer, FolderObject> parentFolders = getParentFolders(contacts, context, readConnection);
-        List<Contact> toAdmin = new ArrayList<Contact>();
-        List<Contact> toAdminsFolder = new ArrayList<Contact>();
+        List<Contact> toUser = new ArrayList<Contact>();
+        List<Contact> toUsersFolder = new ArrayList<Contact>();
         List<Contact> toDelete = new ArrayList<Contact>();
         for (Map.Entry<FolderObject, List<Contact>> entry : mapToParentFolders(contacts, parentFolders).entrySet()) {
-            orderContacts(entry.getKey(), entry.getValue(), userID, toAdmin, toAdminsFolder, toDelete);
+            orderContacts(entry.getKey(), entry.getValue(), userID, toUser, toUsersFolder, toDelete);
         }
-        if (0 < toAdminsFolder.size()) {
+        if (0 < toUsersFolder.size()) {
             if (userID == context.getMailadmin()) {
-                toDelete.addAll(toAdminsFolder);
+                toDelete.addAll(toUsersFolder);
             }
             /*
-             * try to move stale contacts to admin's default folder
+             * try to move stale contacts to destUser's default folder
              */
             try {
-                int moved = moveToAdminsFolder(writeConnection, context, toAdminsFolder);
-                LOG.debug("Moved {} entries originally owned by user {} in context {} to context administrator's default folder.",
-                    I(moved), I(userID), I(context.getContextId()));
+                int moved = moveToUsersFolder(writeConnection, context, toUsersFolder, destUser);
+                LOG.debug("Moved {} entries originally owned by user {} in context {} to default folder of user {}.",
+                    I(moved), I(userID), I(context.getContextId()), I(destUser));
             } catch (OXException e) {
-                LOG.error("Error moving stale contacts to context administrator's default folder, deleting affected contacts.", e);
-                toDelete.addAll(toAdminsFolder);
+                LOG.error("Error moving stale contacts to user's default folder, deleting affected contacts.", e);
+                toDelete.addAll(toUsersFolder);
             }
         }
-        if (0 < toAdmin.size()) {
+        if (0 < toUser.size()) {
             /*
-             * transfer ownership to admin
+             * transfer ownership to user
              */
-            int updated = reassignContacts(writeConnection, "prg_contacts", context.getContextId(), userID, context.getMailadmin());
+            int updated = reassignContacts(writeConnection, "prg_contacts", context.getContextId(), userID, destUser);
             LOG.debug("Reassigned {} entries in 'prg_contacts' table to user {} originally owned by user {} in context {}.",
-                I(updated), I(context.getMailadmin()), I(userID), I(context.getContextId()));
+                I(updated), I(destUser), I(userID), I(context.getContextId()));
         }
         if (0 < toDelete.size()) {
             /*
@@ -254,9 +259,9 @@ public final class ContactDeleteListener implements DeleteListener {
             LOG.debug("Deleted {} entries from 'del_contacts' table originally owned by user {} in context {}.",
                 I(deleted), I(userID), I(context.getContextId()));
         } else {
-            int updated = reassignContacts(writeConnection, "del_contacts", context.getContextId(), userID, context.getMailadmin());
+            int updated = reassignContacts(writeConnection, "del_contacts", context.getContextId(), userID, destUser);
             LOG.debug("Reassigned {} entries in 'del_contacts' table to user {} originally owned by user {} in context {}.",
-                I(updated), I(context.getMailadmin()), I(userID), I(context.getContextId()));
+                I(updated), I(destUser), I(userID), I(context.getContextId()));
         }
     }
 
@@ -267,22 +272,22 @@ public final class ContactDeleteListener implements DeleteListener {
      * @param folder The parent folder of the contacts
      * @param contacts The contacts to order
      * @param userID The ID of the deleted user
-     * @param toAdmin The list to contain contacts where ownership should be transferred to the context administrator
-     * @param toAdminsFolder The list to contain contacts that should be moved to the context administrator's default folder
+     * @param toUser The list to contain contacts where ownership should be transferred to the user
+     * @param toUsersFolder The list to contain contacts that should be moved to the user's default folder
      * @param toDelete The list to contain contacts that should be deleted
      * @throws OXException
      */
-    private static void orderContacts(FolderObject folder, List<Contact> contacts, int userID, List<Contact> toAdmin, List<Contact> toAdminsFolder, List<Contact> toDelete) throws OXException {
+    private static void orderContacts(FolderObject folder, List<Contact> contacts, int userID, List<Contact> toUser, List<Contact> toUsersFolder, List<Contact> toDelete) throws OXException {
         for (Contact contact : contacts) {
             if (contact.getPrivateFlag()) {
                 LOG.debug("Contact marked as 'private' will be deleted [Context={} Folder={} User={} Contact={}].",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else if (null == folder) {
-                LOG.warn("Contact with no valid parent folder will be moved to context administrator's address book. " +
+                LOG.warn("Contact with no valid parent folder will be moved to user's address book. " +
                     "[Context={} Folder={} User={} Contact={}]",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
-                toAdminsFolder.add(contact);
+                toUsersFolder.add(contact);
             } else if (FolderObject.CONTACT != folder.getModule()) {
                 throw ContactExceptionCodes.NON_CONTACT_FOLDER.create(
                     I(folder.getObjectID()), I(contact.getContextId()), I(userID));
@@ -291,10 +296,10 @@ public final class ContactDeleteListener implements DeleteListener {
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
                 toDelete.add(contact);
             } else {
-                LOG.debug("Contact in non-'private' folder will be transferred to context administrator " +
+                LOG.debug("Contact in non-'private' folder will be transferred to user " +
                     "[Context={} Folder={} User={} Contact={}].",
                     I(contact.getContextId()), I(contact.getParentFolderID()), I(userID), I(contact.getObjectID()));
-                toAdmin.add(contact);
+                toUser.add(contact);
             }
         }
     }
@@ -446,18 +451,19 @@ public final class ContactDeleteListener implements DeleteListener {
     }
 
     /**
-     * Moves the supplied contacts to the context administrator's default contacts folder. The "created by" and "modified by" information,
+     * Moves the supplied contacts to the default contacts folder of the given user. The "created by" and "modified by" information,
      * as well as the last modification timestamp is updated accordingly.
      *
      * @param writeConnection The connection to use
      * @param context The context
      * @param contacts The contacts to move
      * @param newCreatedBy The new created by ID
+     * @param destUserId The id of the user
      * @return The number of updated rows
      * @throws OXException
      */
-    private static int moveToAdminsFolder(Connection writeConnection, Context context, List<Contact> contacts) throws OXException {
-        int targetFolderID = new OXFolderAccess(writeConnection, context).getDefaultFolderID(context.getMailadmin(), FolderObject.CONTACT);
+    private static int moveToUsersFolder(Connection writeConnection, Context context, List<Contact> contacts, int destUser) throws OXException {
+        int targetFolderID = new OXFolderAccess(writeConnection, context).getDefaultFolderID(destUser, FolderObject.CONTACT);
         StringBuilder stringBuilder = new StringBuilder()
             .append("UPDATE prg_contacts ")
             .append("SET fid=?,created_from=?,changed_from=?,changing_date=? ")
@@ -477,8 +483,8 @@ public final class ContactDeleteListener implements DeleteListener {
         try {
             stmt = writeConnection.prepareStatement(sql);
             stmt.setInt(1, targetFolderID);
-            stmt.setInt(2, context.getMailadmin());
-            stmt.setInt(3, context.getMailadmin());
+            stmt.setInt(2, destUser);
+            stmt.setInt(3, destUser);
             stmt.setLong(4, System.currentTimeMillis());
             stmt.setInt(5, context.getContextId());
             for (int i = 0; i < contacts.size(); i++) {

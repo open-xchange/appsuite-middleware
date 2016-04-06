@@ -75,7 +75,7 @@ public class DelUserFolderDiscoverer extends DBService {
         super(provider);
     }
 
-    public List<FolderObject> discoverFolders(final int userId, final Context ctx) throws OXException {
+    public List<FolderObject> discoverFolders(final int userId, final Context ctx, boolean includeShared) throws OXException {
         final List<FolderObject> discovered = new ArrayList<FolderObject>();
         final User user = UserStorage.getInstance().getUser(userId, ctx);
         int[] accessibleModules;
@@ -99,7 +99,7 @@ public class DelUserFolderDiscoverer extends DBService {
                 continue folder;
             }
             for (final OCLPermission perm : fo.getPermissionsAsArray()) {
-                if (someoneElseMayReadInfoitems(perm, userId)) {
+                if (!includeShared && someoneElseMayReadInfoitems(perm, userId)) {
                     continue folder;
                 }
             }

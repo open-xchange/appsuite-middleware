@@ -2831,7 +2831,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void delete(final Context ctx, final User[] users, final Connection write_ox_con) throws StorageException {
+    public void delete(final Context ctx, final User[] users, Integer destUser, final Connection write_ox_con) throws StorageException {
         PreparedStatement stmt = null;
         try {
             // delete all users
@@ -2840,7 +2840,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                 int userId = user.getId().intValue();
 
                 {
-                    DeleteEvent delev = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, contextId);
+                    DeleteEvent delev = new DeleteEvent(this, userId, DeleteEvent.TYPE_USER, 0, ContextStorage.getInstance().getContext(contextId), destUser);
                     DeleteRegistry.getInstance().fireDeleteEvent(delev, write_ox_con, write_ox_con);
                 }
 
@@ -3030,7 +3030,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void delete(final Context ctx, final User[] users) throws StorageException {
+    public void delete(final Context ctx, final User[] users, Integer destUser) throws StorageException {
         try {
             DBUtils.TransactionRollbackCondition condition = new DBUtils.TransactionRollbackCondition(3);
             do {
@@ -3041,7 +3041,7 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
                     con = cache.getConnectionForContextNoTimeout(ctx.getId().intValue());
                     DBUtils.startTransaction(con);
                     rollback = true;
-                    delete(ctx, users, con);
+                    delete(ctx, users, destUser, con);
                     for (final User user : users) {
                         log.info("User {} deleted!", user.getId());
                     }
@@ -3082,8 +3082,8 @@ public class OXUserMySQLStorage extends OXUserSQLStorage implements OXMySQLDefau
     }
 
     @Override
-    public void delete(final Context ctx, final User user) throws StorageException {
-        delete(ctx, new User[] { user });
+    public void delete(final Context ctx, final User user, Integer destUID) throws StorageException {
+        delete(ctx, new User[] { user }, destUID);
     }
 
     @Override
