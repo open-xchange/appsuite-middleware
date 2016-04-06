@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -47,61 +47,92 @@
  *
  */
 
-package com.openexchange.chronos.storage.rdb.osgi;
+package com.openexchange.chronos.storage.rdb;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.storage.rdb.tables.AlarmTableUpdateTask;
-import com.openexchange.chronos.storage.rdb.tables.CreateAlarmTable;
-import com.openexchange.database.CreateTableService;
+import java.sql.Connection;
+import java.sql.SQLException;
+import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
+import com.openexchange.chronos.storage.rdb.osgi.Services;
 import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import com.openexchange.exception.OXException;
 
 /**
- * {@link RdbCalendarStorageActivator}
+ * {@link AbstractRdbStorage}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
  * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageActivator extends HousekeepingActivator {
+public class AbstractRdbStorage implements TransactionallyStorage {
 
-    private static final Logger LOG = LoggerFactory.getLogger(RdbCalendarStorageActivator.class);
+    private Connection writeConnection;
+    private Connection readConnection;
+    protected DatabaseService dbService;
+    protected int contextID;
 
-    /**
-     * Initializes a new {@link RdbCalendarStorageActivator}.
-     */
-    public RdbCalendarStorageActivator() {
-        super();
+    protected AbstractRdbStorage(int contextId) throws OXException {
+        this.contextID = contextId;
+        this.dbService = Services.getService(DatabaseService.class, true);
     }
 
     @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
-    }
-
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.calendar.storage.rdb\"");
-            Services.set(this);
-            /*
-             * register services
-             */
-            registerService(CreateTableService.class, new CreateAlarmTable());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTableUpdateTask()));
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage\"", e);
-            throw e;
+    public void startTransaction() throws OXException {
+        if (writeConnection != null) {
+            try {
+                writeConnection.setAutoCommit(true);
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            }
         }
     }
 
     @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.calendar.storage.rdb\"");
-        super.stopBundle();
+    public void commit() throws OXException {
+        if (writeConnection != null) {
+            try {
+                writeConnection.commit();
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            }
+        }
+    }
+
+    @Override
+    public void endTransaction() throws OXException {
+        if (writeConnection != null) {
+            try {
+                commit();
+                writeConnection.setAutoCommit(false);
+            } catch (SQLException e) {
+                throw EventExceptionCode.MYSQL.create(e);
+            }
+        }
+    }
+
+    @Override
+    public void close() {
+        if (writeConnection != null) {
+            dbService.backWritable(contextID, writeConnection);
+            writeConnection = null;
+        }
+        if (readConnection != null) {
+            dbService.backReadOnly(contextID, readConnection);
+            readConnection = null;
+        }
+    }
+
+    protected Connection getConnection(boolean writeable) throws OXException {
+        if (writeable) {
+            if (writeConnection == null) {
+                writeConnection = dbService.getWritable(contextID);
+            }
+            return writeConnection;
+        } else {
+            if (readConnection == null) {
+                readConnection = dbService.getReadOnly(contextID);
+            }
+            return readConnection;
+        }
+
     }
 
 }

@@ -49,59 +49,64 @@
 
 package com.openexchange.chronos.storage.rdb.osgi;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import com.openexchange.chronos.storage.rdb.tables.AlarmTableUpdateTask;
-import com.openexchange.chronos.storage.rdb.tables.CreateAlarmTable;
-import com.openexchange.database.CreateTableService;
-import com.openexchange.database.DatabaseService;
-import com.openexchange.groupware.update.DefaultUpdateTaskProviderService;
-import com.openexchange.groupware.update.UpdateTaskProviderService;
-import com.openexchange.osgi.HousekeepingActivator;
+import java.util.concurrent.atomic.AtomicReference;
+import com.openexchange.exception.OXException;
+import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link RdbCalendarStorageActivator}
+ * {@link Services}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
- * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorageActivator extends HousekeepingActivator {
-
-    private static final Logger LOG = LoggerFactory.getLogger(RdbCalendarStorageActivator.class);
+public class Services {
 
     /**
-     * Initializes a new {@link RdbCalendarStorageActivator}.
+     * Initializes a new {@link Services}.
      */
-    public RdbCalendarStorageActivator() {
+    private Services() {
         super();
     }
 
-    @Override
-    protected Class<?>[] getNeededServices() {
-        return new Class<?>[] { DatabaseService.class };
+    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+
+    /**
+     * Gets the service look-up
+     *
+     * @return The service look-up or <code>null</code>
+     */
+    public static ServiceLookup get() {
+        return ref.get();
     }
 
-    @Override
-    protected void startBundle() throws Exception {
-        try {
-            LOG.info("starting bundle: \"com.openexchange.calendar.storage.rdb\"");
-            Services.set(this);
-            /*
-             * register services
-             */
-            registerService(CreateTableService.class, new CreateAlarmTable());
-            registerService(UpdateTaskProviderService.class, new DefaultUpdateTaskProviderService(new AlarmTableUpdateTask()));
-        } catch (final Exception e) {
-            LOG.error("error starting \"com.openexchange.contact.storage\"", e);
-            throw e;
+    /**
+     * Sets the service look-up
+     *
+     * @param serviceLookup The service look-up or <code>null</code>
+     */
+    public static void set(ServiceLookup serviceLookup) {
+        ref.set(serviceLookup);
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getService(c);
+        return service;
+    }
+
+    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
+        S service = getService(c);
+        if (null == service && throwOnAbsence) {
+            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
         }
+        return service;
     }
 
-    @Override
-    protected void stopBundle() throws Exception {
-        LOG.info("stopping bundle: \"com.openexchange.calendar.storage.rdb\"");
-        super.stopBundle();
+    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
+        ServiceLookup serviceLookup = ref.get();
+        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
+        return service;
     }
 
 }

@@ -28,7 +28,7 @@
  *    http://www.open-xchange.com/EN/developer/. The contributing author shall be
  *    given Attribution for the derivative code and a license granting use.
  *
- *     Copyright (C) 2004-2020 Open-Xchange, Inc.
+ *     Copyright (C) 2004-2015 Open-Xchange, Inc.
  *     Mail: info@open-xchange.com
  *
  *
@@ -49,64 +49,21 @@
 
 package com.openexchange.chronos.storage.rdb;
 
-import java.util.concurrent.atomic.AtomicReference;
+import java.io.Closeable;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceExceptionCode;
-import com.openexchange.server.ServiceLookup;
 
 /**
- * {@link Services}
+ * {@link TransactionallyStorage}
  *
- * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class Services {
+public interface TransactionallyStorage extends Closeable {
 
-    /**
-     * Initializes a new {@link Services}.
-     */
-    private Services() {
-        super();
-    }
+    public void startTransaction() throws OXException;
 
-    private static final AtomicReference<ServiceLookup> ref = new AtomicReference<ServiceLookup>();
+    public void commit() throws OXException;
 
-    /**
-     * Gets the service look-up
-     *
-     * @return The service look-up or <code>null</code>
-     */
-    public static ServiceLookup get() {
-        return ref.get();
-    }
-
-    /**
-     * Sets the service look-up
-     *
-     * @param serviceLookup The service look-up or <code>null</code>
-     */
-    public static void set(ServiceLookup serviceLookup) {
-        ref.set(serviceLookup);
-    }
-
-    public static <S extends Object> S getService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getService(c);
-        return service;
-    }
-
-    public static <S extends Object> S getService(Class<? extends S> c, boolean throwOnAbsence) throws OXException {
-        S service = getService(c);
-        if (null == service && throwOnAbsence) {
-            throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(c.getName());
-        }
-        return service;
-    }
-
-    public static <S extends Object> S getOptionalService(Class<? extends S> c) {
-        ServiceLookup serviceLookup = ref.get();
-        S service = null == serviceLookup ? null : serviceLookup.getOptionalService(c);
-        return service;
-    }
+    public void endTransaction() throws OXException;
 
 }

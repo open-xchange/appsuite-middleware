@@ -67,7 +67,7 @@ import com.openexchange.chronos.ParticipationStatus;
 import com.openexchange.chronos.UserizedEvent;
 import com.openexchange.chronos.compat.AppointmentConstants;
 import com.openexchange.chronos.compat.Recurrence;
-import com.openexchange.database.DatabaseService;
+import com.openexchange.chronos.storage.rdb.exception.EventExceptionCode;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.Types;
 import com.openexchange.groupware.impl.IDGenerator;
@@ -78,12 +78,10 @@ import com.openexchange.tools.sql.DBUtils;
  * {@link CalendarStorage}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @author <a href="mailto:martin.herfurth@open-xchange.com">Martin Herfurth</a>
  * @since v7.10.0
  */
-public class RdbCalendarStorage {
-
-    private final int contextID;
-    private final DatabaseService databaseService;
+public class RdbCalendarStorage extends AbstractRdbStorage {
 
     /**
      * Initializes a new {@link RdbChecksumStore}.
@@ -91,9 +89,7 @@ public class RdbCalendarStorage {
      * @param contextID The context ID
      */
     public RdbCalendarStorage(int contextID) throws OXException {
-        super();
-        this.contextID = contextID;
-        this.databaseService = Services.getService(DatabaseService.class, true);
+        super(contextID);
     }
 
     public UserizedEvent loadEvent(int userID, int objectID, int folderID) {
@@ -102,16 +98,14 @@ public class RdbCalendarStorage {
     }
 
     public List<Alarm> loadAlarms(int userID, int objectID) throws OXException {
-        Connection connection = databaseService.getReadOnly(contextID);
-        try {
+        try (Connection connection = getConnection(false)) {
             return loadAlarms(connection, userID, objectID);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
+        } catch (SQLException e) {
+            throw EventExceptionCode.MYSQL.create(e);
         }
     }
 
     public List<Alarm> loadAlarms(Connection connection, int userID, int objectID) {
-
 
         return null;
     }
@@ -121,30 +115,25 @@ public class RdbCalendarStorage {
     }
 
     public int createEvent(Event event) throws OXException {
-        Connection connection = databaseService.getWritable(contextID);
-        try {
+        try (Connection connection = getConnection(true)) {
+            startTransaction();
             int objectID = IDGenerator.getId(contextID, Types.APPOINTMENT, connection);
             insertEvent(connection, contextID, objectID, event);
-
+            endTransaction();
             return objectID;
         } catch (SQLException e) {
             throw new OXException(e);
-        } finally {
-            databaseService.backWritable(contextID, connection);
         }
     }
 
     public Event loadEvent(int objectID) throws OXException {
-        Connection connection = databaseService.getReadOnly(contextID);
-        try {
+        try (Connection connection = getConnection(false)) {
             Event event = selectEvent(connection, contextID, objectID);
             event.setAttendees(selectAttendees(connection, contextID, objectID));
 
             return event;
         } catch (SQLException e) {
             throw new OXException(e);
-        } finally {
-            databaseService.backReadOnly(contextID, connection);
         }
     }
 
