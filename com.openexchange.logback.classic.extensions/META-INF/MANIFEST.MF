@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: logback classic extensions
 Bundle-SymbolicName: com.openexchange.logback.classic.extensions
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Fragment-Host: ch.qos.logback.classic;bundle-version="[1.0.13,2.0.0)"

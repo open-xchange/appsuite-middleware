@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Microformats Publish Plug-in
 Bundle-SymbolicName: com.openexchange.publish.microformats
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.publish.microformats.osgi.ServletActivator
 Bundle-Vendor: OX Software GmbH
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

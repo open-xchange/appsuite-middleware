@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Rhino Bridge for easy HTTP-API
 Bundle-SymbolicName: com.openexchange.scripting.rhino.apiBridge
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Activator: com.openexchange.scripting.rhino.apibridge.APIBridgeActivator
 Bundle-Vendor: Open-Xchange
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7

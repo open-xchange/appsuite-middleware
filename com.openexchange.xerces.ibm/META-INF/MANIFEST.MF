@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: IBM Xerces compatibility plugin
 Bundle-SymbolicName: com.openexchange.xerces.ibm
-Bundle-Version: 7.8.1
+Bundle-Version: 7.8.2
 Bundle-Vendor: OX Software GmbH
 Fragment-Host: system.bundle
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
