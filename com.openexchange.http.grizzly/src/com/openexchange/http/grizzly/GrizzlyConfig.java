@@ -94,6 +94,9 @@ public class GrizzlyConfig implements Initialization, Reloadable {
     /** The default port for the http network listener. */
     private int httpPort = 8009;
 
+    /** The default port for the https network listener. */
+    private int httpsPort = 8010;
+
     /** Enable grizzly monitoring via JMX? */
     private boolean isJMXEnabled = false;
 
@@ -120,6 +123,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
 
     /** The maximum header size for an HTTP request in bytes. */
     private int maxHttpHeaderSize = 8192;
+
+    /** Enable SSL */
+    private boolean isSslEnabled = false;
+
+    /** Path to keystore with X.509 certificates */
+    private String keystorePath = "";
+
+    /** Keystore password */
+    private String keystorePassword = "";
 
     // server properties
 
@@ -208,6 +220,10 @@ public class GrizzlyConfig implements Initialization, Reloadable {
         this.isCometEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasCometEnabled", false);
         this.isAbsoluteRedirect = configService.getBoolProperty("com.openexchange.http.grizzly.doAbsoluteRedirect", false);
         this.maxHttpHeaderSize = configService.getIntProperty("com.openexchange.http.grizzly.maxHttpHeaderSize", 8192);
+        this.isSslEnabled = configService.getBoolProperty("com.openexchange.http.grizzly.hasSSLEnabled", false);
+        this.keystorePath = configService.getProperty("com.openexchange.http.grizzly.keystorePath", "");
+        this.keystorePassword = configService.getProperty("com.openexchange.http.grizzly.keystorePassword", "");
+
 
         // server properties
         this.cookieMaxAge = Integer.valueOf(ConfigTools.parseTimespanSecs(configService.getProperty("com.openexchange.cookie.ttl", "1W"))).intValue();
@@ -241,6 +257,7 @@ public class GrizzlyConfig implements Initialization, Reloadable {
             this.httpHost="0.0.0.0";
         }
         this.httpPort = configService.getIntProperty("com.openexchange.connector.networkListenerPort", 8009);
+        this.httpsPort = configService.getIntProperty("com.openexchange.connector.networkSslListenerPort", 8010);
         this.maxRequestParameters = configService.getIntProperty("com.openexchange.connector.maxRequestParameters", 30);
         this.backendRoute = configService.getProperty("com.openexchange.server.backendRoute", "OX0");
         this.echoHeader = configService.getProperty("com.openexchange.servlet.echoHeaderName","X-Echo-Header");
@@ -284,6 +301,15 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public int getHttpPort() {
         return instance.httpPort;
+    }
+
+    /**
+     * Gets the httpsPort
+     *
+     * @return The httpsPort
+     */
+    public int getHttpsPort() {
+        return instance.httpsPort;
     }
 
     /**
@@ -524,6 +550,18 @@ public class GrizzlyConfig implements Initialization, Reloadable {
      */
     public int getMaxHttpHeaderSize() {
         return maxHttpHeaderSize;
+    }
+
+    public boolean isSslEnabled() {
+        return isSslEnabled;
+    }
+
+    public String getKeystorePath() {
+        return keystorePath;
+    }
+
+    public String getKeystorePassword() {
+        return keystorePassword;
     }
 
     @Override
