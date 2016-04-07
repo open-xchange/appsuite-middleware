@@ -1,3 +1,9 @@
+open-xchange-filestore-swift (7.8.1-5) stable; urgency=medium
+
+  * Build for patch 2016-04-07 (3228)
+
+ -- Thorben Betten <thorben.betten@open-xchange.com>  Thu, 07 Apr 2016 18:13:34 +0200
+
 open-xchange-filestore-swift (7.8.1-4) stable; urgency=medium
 
   * Second candidate for 7.8.1 release
