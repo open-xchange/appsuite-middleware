@@ -174,11 +174,25 @@ public final class IMAPFolderConverter {
      * @throws OXException If IMAP folder's attributes cannot be accessed
      */
     public static Entity2ACLArgs getEntity2AclArgs(Session session, IMAPFolder imapFolder, IMAPConfig imapConfig) throws OXException {
+        return getEntity2AclArgs(session.getUserId(), session, imapFolder, imapConfig);
+    }
+
+    /**
+     * Creates an appropriate implementation of {@link Entity2ACLArgs}.
+     *
+     * @param userId The user identifier
+     * @param session The session
+     * @param imapFolder The IMAP folder
+     * @param imapConfig The IMAP configuration
+     * @return An appropriate implementation of {@link Entity2ACLArgs}
+     * @throws OXException If IMAP folder's attributes cannot be accessed
+     */
+    public static Entity2ACLArgs getEntity2AclArgs(int userId, Session session, IMAPFolder imapFolder, IMAPConfig imapConfig) throws OXException {
         try {
             return new Entity2ACLArgsImpl(
                 imapConfig.getAccountId(),
                 new StringBuilder(36).append(IDNA.toASCII(imapConfig.getServer())).append(':').append(imapConfig.getPort()).toString(),
-                session.getUserId(),
+                userId,
                 imapFolder.getFullName(),
                 ListLsubCache.getSeparator(imapConfig.getAccountId(), imapFolder, session, imapConfig.getIMAPProperties().isIgnoreSubscription()),
                 NamespaceFoldersCache.getUserNamespaces((IMAPStore) imapFolder.getStore(), true, session, imapConfig.getAccountId()),

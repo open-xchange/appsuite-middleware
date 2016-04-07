@@ -339,10 +339,11 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
             return fullName;
         }
 
+        if (DEFAULT_FOLDER_ID.equals(fullName)) {
+            throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
+        }
+
         try {
-            if (DEFAULT_FOLDER_ID.equals(fullName)) {
-                throw MailExceptionCode.NO_ROOT_FOLDER_MODIFY_DELETE.create();
-            }
             IMAPFolderWorker.checkFailFast(imapStore, fullName);
             IMAPFolder imapFolder = getIMAPFolder(fullName);
             if (!doesExist(imapFolder, true)) {
@@ -352,21 +353,33 @@ public final class IMAPFolderStorage extends MailFolderStorage implements IMailF
                 }
             }
 
-            char separator = imapFolder.getSeparator();
-            Entity2ACLArgs entity2AclArgs = IMAPFolderConverter.getEntity2AclArgs(session, imapFolder, imapConfig);
-            String aclName = Entity2ACL.getInstance(imapStore, imapConfig).getACLName(targetUserId, ctx, entity2AclArgs);
+            // Check for user namespace
             String[] userNamespaces = NamespaceFoldersCache.getUserNamespaces(imapStore, true, session, accountId);
             if (null == userNamespaces || userNamespaces.length == 0) {
                 throw MailExceptionCode.UNEXPECTED_ERROR.create("IMAP account has no user namespace");
             }
             String namespace = userNamespaces[0];
-            if (namespace.endsWith(Character.toString(separator))) {
+            if (Strings.isEmpty(namespace)) {
+                throw MailExceptionCode.UNEXPECTED_ERROR.create("IMAP account has no user namespace");
+            }
+            char separator = getSeparator();
+            if (namespace.charAt(namespace.length() - 1) ==  separator) {
                 namespace = namespace.substring(0, namespace.length() - 1);
             }
 
+            // Determines session user's ACL name
+            Entity2ACLArgs entity2AclArgs = IMAPFolderConverter.getEntity2AclArgs(targetUserId, session, imapFolder, imapConfig);
+            String aclName = Entity2ACL.getInstance(imapStore, imapConfig).getACLName(session.getUserId(), ctx, entity2AclArgs);
+
+            // Compose the full name from target user point of view
             StringBuilder fullNameBuilder = new StringBuilder(namespace).append(separator).append(aclName);
             if (STR_INBOX.equals(fullName)) {
                 return fullNameBuilder.toString();
+            }
+
+            String inboxPrefix = new StringBuilder(STR_INBOX).append(separator).toString();
+            if (fullName.startsWith(inboxPrefix)) {
+                fullName = fullName.substring(inboxPrefix.length());
             }
 
             return fullNameBuilder.append(separator).append(fullName).toString();
