@@ -118,7 +118,7 @@ public class MailModuleAdjuster implements ModuleAdjuster {
             }
 
             String resolvedFullName = pathResolver.resolveSharedFolderPath(fa.getFullname(), targetUserId);
-            return new ShareTarget(target.getModule(), MailFolderUtility.prepareFullname(fa.getAccountId(), resolvedFullName));
+            return new ShareTarget(target.getModule(), MailFolderUtility.prepareFullname(fa.getAccountId(), resolvedFullName), target.getFolder(), null);
         } finally {
             MailAccess.closeInstance(mailAccess);
         }

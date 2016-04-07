@@ -155,7 +155,7 @@ public class FileStorageHandler implements ModuleHandler {
     public TargetProxy loadTarget(ShareTarget target, Session session) throws OXException {
         FileID fileID = new FileID(target.getItem());
         if (fileID.getFolderId() == null) {
-            fileID.setFolderId(new FolderID(target.getFolder()).getFolderId());
+            fileID.setFolderId(new FolderID(target.getFolderToLoad()).getFolderId());
         }
 
         IDBasedFileAccess fileAccess = getFileAccess(session);

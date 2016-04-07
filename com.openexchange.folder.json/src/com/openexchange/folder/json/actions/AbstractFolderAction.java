@@ -85,7 +85,6 @@ import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.database.contentType.CalendarContentType;
 import com.openexchange.folderstorage.database.contentType.ContactContentType;
 import com.openexchange.folderstorage.database.contentType.TaskContentType;
-import com.openexchange.groupware.container.FolderObject;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.oauth.provider.exceptions.OAuthInsufficientScopeException;
@@ -504,27 +503,7 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("HostData was not available"));
         }
 
-        if (modified.getContentType().getModule() == FolderObject.MAIL) {
-            return Collections.singletonList(ShareNotifyExceptionCodes.UNEXPECTED_ERROR.create("Notifications are not supported for module mail"));
-        }
-
-        Permission[] oldPermissions = original == null ? new Permission[0] : original.getPermissions();
-        Permission[] newPermissions = modified.getPermissions();
-        List<Permission> addedPermissions = new ArrayList<>(newPermissions.length);
-        for (Permission permission : newPermissions) {
-            boolean isNew = true;
-            for (Permission existing : oldPermissions) {
-                if (existing.getEntity() == permission.getEntity() && existing.isGroup() == permission.isGroup() && existing.getSystem() == permission.getSystem() && permission.getSystem() == 0) {
-                    isNew = false;
-                    break;
-                }
-            }
-
-            if (isNew) {
-                addedPermissions.add(permission);
-            }
-        }
-
+        List<Permission> addedPermissions = determineAddedPermissions(original, modified);
         if (addedPermissions.isEmpty()) {
             return Collections.emptyList();
         }
@@ -550,6 +529,26 @@ public abstract class AbstractFolderAction implements AJAXActionService {
             new ShareTargetPath(modified.getContentType().getModule(), modified.getID(), null),
             session,
             hostData);
+    }
+
+    private List<Permission> determineAddedPermissions(UserizedFolder original, UserizedFolder modified) {
+        Permission[] oldPermissions = original == null ? new Permission[0] : original.getPermissions();
+        Permission[] newPermissions = modified.getPermissions();
+        List<Permission> addedPermissions = new ArrayList<>(newPermissions.length);
+        for (Permission p : newPermissions) {
+            boolean isNew = true;
+            for (int i = oldPermissions.length; isNew && i-- > 0;) {
+                Permission o = oldPermissions[i];
+                if (o.getEntity() == p.getEntity() && o.isGroup() == p.isGroup() && o.getSystem() == p.getSystem() && p.getSystem() == 0) {
+                    isNew = false;
+                }
+            }
+
+            if (isNew) {
+                addedPermissions.add(p);
+            }
+        }
+        return addedPermissions;
     }
 
     /**

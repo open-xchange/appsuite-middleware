@@ -124,7 +124,7 @@ public class ModuleSupportImpl implements ModuleSupport {
         }
 
         if (target.isFolder()) {
-            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolder(), session, null);
+            UserizedFolder folder = requireService(FolderService.class, services).getFolder(FolderStorage.REAL_TREE_ID, target.getFolderToLoad(), session, null);
             return new FolderTargetProxy(target.getModule(), folder);
         }
 
