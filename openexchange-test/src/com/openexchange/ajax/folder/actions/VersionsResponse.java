@@ -47,73 +47,37 @@
  *
  */
 
-package com.openexchange.ajax.infostore.actions;
+package com.openexchange.ajax.folder.actions;
 
+import java.util.ArrayList;
 import java.util.List;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest;
+import com.openexchange.ajax.container.Response;
 import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.file.storage.File;
-import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.json.FileMetadataWriter;
-import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * 
+ * {@link VersionsResponse}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class VersionsResponse extends AbstractAJAXResponse {
 
-    private boolean failOnError;
+    private List<com.openexchange.file.storage.File> versions = new ArrayList<>();
 
-    public static final String INFOSTORE_URL = "/ajax/infostore";
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
+    public VersionsResponse(final Response response) {
+        super(response);
     }
 
-    public boolean getFailOnError() {
-        return failOnError;
+    public List<com.openexchange.file.storage.File> getVersions() {
+        return versions;
     }
 
-    @Override
-    public String getServletPath() {
-        return INFOSTORE_URL;
+    public void setVersions(List<com.openexchange.file.storage.File> versions) {
+        this.versions = versions;
     }
 
-    @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
-    }
-
-    public JSONObject writeJSON(File data) throws JSONException {
-        return convertToJSON(data, null);
-    }
-
-    public JSONObject writeJSON(File data, Field[] fields) throws JSONException {
-        return convertToJSON(data,fields);
-    }
-
-    public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException{
-        FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
-        if (fields == null) {
-            return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
-        }
-
-        return writer.writeSpecific(new TestFriendlyInfostoreRequest("UTC"), data, fields, null);
-    }
-
-    public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {
-        JSONArray array = new JSONArray();
-        for (int i = 0, length = ids.size(); i < length; i++) {
-            JSONObject tuple = new JSONObject();
-            tuple.put(AJAXServlet.PARAMETER_ID, ids.get(i));
-            tuple.put(AJAXServlet.PARAMETER_FOLDERID, folders.get(i));
-            array.put(tuple);
-        }
-        return array;
+    public void addVersion(com.openexchange.file.storage.File version) {
+        this.versions.add(version);
     }
 }

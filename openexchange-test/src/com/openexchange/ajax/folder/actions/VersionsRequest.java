@@ -47,73 +47,69 @@
  *
  */
 
-package com.openexchange.ajax.infostore.actions;
+package com.openexchange.ajax.folder.actions;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import org.json.JSONArray;
+import org.apache.commons.lang.ArrayUtils;
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.AJAXServlet;
-import com.openexchange.ajax.framework.AJAXRequest;
-import com.openexchange.ajax.framework.AbstractAJAXResponse;
-import com.openexchange.ajax.framework.Header;
-import com.openexchange.file.storage.File;
+import com.openexchange.ajax.infostore.thirdparty.actions.AbstractFileRequest;
 import com.openexchange.file.storage.File.Field;
-import com.openexchange.file.storage.json.FileMetadataWriter;
-import com.openexchange.file.storage.json.actions.files.TestFriendlyInfostoreRequest;
 
 /**
- * @author <a href="mailto:tobias.prinz@open-xchange.com">Tobias Prinz</a>
+ * 
+ * {@link VersionsRequest}
+ *
+ * @author <a href="mailto:martin.schneider@open-xchange.com">Martin Schneider</a>
+ * @since v7.8.2
  */
-public abstract class AbstractInfostoreRequest<T extends AbstractAJAXResponse> implements AJAXRequest<T> {
+public class VersionsRequest extends AbstractFileRequest<VersionsResponse> {
 
-    private boolean failOnError;
+    private final String folderId;
+    private final int[] columns;
 
-    public static final String INFOSTORE_URL = "/ajax/infostore";
-
-    public void setFailOnError(boolean failOnError) {
-        this.failOnError = failOnError;
-    }
-
-    public boolean getFailOnError() {
-        return failOnError;
+    public VersionsRequest(String folderId, Field[] fields) {
+        super(true);
+        this.folderId = folderId;
+        
+        List<Integer> columnNumbers = new ArrayList<Integer>(fields.length);
+        for (Field field : fields) {
+            columnNumbers.add(field.getNumber());
+        }
+        int[] primitive = ArrayUtils.toPrimitive(columnNumbers.toArray(new Integer[columnNumbers.size()]));
+        Arrays.sort(primitive);
+        this.columns = primitive;
     }
 
     @Override
-    public String getServletPath() {
-        return INFOSTORE_URL;
+    public Method getMethod() {
+        return Method.GET;
     }
 
     @Override
-    public Header[] getHeaders() {
-        return NO_HEADER;
+    public Object getBody() throws IOException, JSONException {
+        return null;
     }
 
-    public JSONObject writeJSON(File data) throws JSONException {
-        return convertToJSON(data, null);
+    @Override
+    public VersionsParser getParser() {
+        return new VersionsParser(true, this.columns);
     }
 
-    public JSONObject writeJSON(File data, Field[] fields) throws JSONException {
-        return convertToJSON(data,fields);
-    }
-
-    public static JSONObject convertToJSON(File data, Field[] fields) throws JSONException{
-        FileMetadataWriter writer = new com.openexchange.file.storage.json.FileMetadataWriter(null);
-        if (fields == null) {
-            return writer.write(new TestFriendlyInfostoreRequest("UTC"), data);
+    @Override
+    public com.openexchange.ajax.framework.AJAXRequest.Parameter[] getParameters() throws IOException, JSONException {
+        List<Parameter> params = new ArrayList<>();
+        params.add(new Parameter(AJAXServlet.PARAMETER_ACTION, "versions"));
+        if (this.folderId != null) {
+            params.add(new Parameter("id", folderId));
         }
-
-        return writer.writeSpecific(new TestFriendlyInfostoreRequest("UTC"), data, fields, null);
-    }
-
-    public JSONArray writeFolderAndIDList(List<String> ids, List<String> folders) throws JSONException {
-        JSONArray array = new JSONArray();
-        for (int i = 0, length = ids.size(); i < length; i++) {
-            JSONObject tuple = new JSONObject();
-            tuple.put(AJAXServlet.PARAMETER_ID, ids.get(i));
-            tuple.put(AJAXServlet.PARAMETER_FOLDERID, folders.get(i));
-            array.put(tuple);
+        if ((this.columns != null) && (this.columns.length > 0)) {
+            String colsArray2String = com.openexchange.tools.URLParameter.colsArray2String(this.columns);
+            params.add(new Parameter(AJAXServlet.PARAMETER_COLUMNS, colsArray2String));
         }
-        return array;
+        return params.toArray(new Parameter[params.size()]);
     }
 }
