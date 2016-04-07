@@ -65,6 +65,8 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.net.HostAndPort;
+import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -216,9 +218,19 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CardDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
-        String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);
-        payloadContent.addStringValue("CardDAVHostName", extractHostName(cardDAVUrl));
-        payloadContent.addBooleanValue("CardDAVUseSSL", impliesSsl(cardDAVUrl));
+
+        {
+            String cardDAVUrl = getCardDAVUrl(false, null, userId, contextId);
+            boolean isSsl = NetUtility.impliesSsl(cardDAVUrl);
+            HostAndPort hostAndPort = NetUtility.parseHostNameString(cardDAVUrl);
+
+            payloadContent.addStringValue("CardDAVHostName", hostAndPort.getHost());
+            if (hostAndPort.getPort() > 0) {
+                payloadContent.addIntegerValue("CardDAVPort", hostAndPort.getPort());
+            }
+            payloadContent.addBooleanValue("CardDAVUseSSL", isSsl);
+        }
+
         payloadContent.addStringValue("CardDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CardDAV");
 
         // Add payload content dictionary to top-level dictionary
@@ -226,20 +238,6 @@ public class CardDAVOnboardingProvider implements OnboardingPlistProvider {
 
         // Return result
         return pListDict;
-    }
-
-    private boolean impliesSsl(String cardDAVUrl) {
-        return !cardDAVUrl.startsWith("http://");
-    }
-
-    private String extractHostName(String cardDAVUrl) {
-        if (cardDAVUrl.startsWith("http://")) {
-            return cardDAVUrl.substring(7);
-        }
-        if (cardDAVUrl.startsWith("https://")) {
-            return cardDAVUrl.substring(8);
-        }
-        return cardDAVUrl;
     }
 
     private String getCardDAVUrl(boolean generateIfAbsent, HostData hostData, int userId, int contextId) throws OXException {
