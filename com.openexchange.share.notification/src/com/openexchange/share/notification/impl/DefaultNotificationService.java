@@ -68,12 +68,14 @@ import com.openexchange.group.GroupService;
 import com.openexchange.groupware.container.ObjectPermission;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
+import com.openexchange.groupware.modules.Module;
 import com.openexchange.groupware.notify.hostname.HostData;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.mime.QuotedInternetAddress;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.session.Session;
 import com.openexchange.share.GuestInfo;
+import com.openexchange.share.ShareExceptionCodes;
 import com.openexchange.share.ShareInfo;
 import com.openexchange.share.ShareTarget;
 import com.openexchange.share.ShareTargetPath;
@@ -348,10 +350,15 @@ public class DefaultNotificationService implements ShareNotificationService {
             try {
                 int userId = it.key();
                 UserDetail userDetail = it.value();
-                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
                 user = userDetail.getUser();
+                ShareTarget dstTarget = moduleSupport.adjustTarget(srcTarget, session, userId);
                 String shareUrl;
                 if (user.isGuest()) {
+                    if (dstTarget.getModule() == Module.MAIL.getFolderConstant()) {
+                        String m = Module.getForFolderConstant(dstTarget.getModule()).getName();
+                        throw ShareExceptionCodes.SHARING_NOT_SUPPORTED.create(m == null ? Integer.toString(dstTarget.getModule()) : m);
+                    }
+
                     shareUrl = ShareLinks.generateExternal(hostData, new ShareToken(context.getContextId(), user).getToken(), targetPath);
                     String mail = user.getMail();
                     if (Strings.isNotEmpty(mail)) {
