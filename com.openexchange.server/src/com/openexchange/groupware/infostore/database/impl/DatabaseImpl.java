@@ -779,7 +779,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @return A sorted set of all document file store locations for the specified user in the specified context
@@ -796,7 +796,7 @@ public class DatabaseImpl extends DBService {
 
     /**
      * Get the document file store locations for the specified user in the specified context
-     * 
+     *
      * @param ctx The context
      * @param usr The user
      * @param connection A read-only database connection for the specified context
@@ -1126,7 +1126,7 @@ public class DatabaseImpl extends DBService {
             removeAll(ctx, session);
         }
         removeFromDel(id, ctx);
-        locks.transferLocks(ctx, id, ctx.getMailadmin());
+        locks.transferLocks(ctx, id, destUser.intValue());
     }
 
     private void removeFromDel(final int id, final Context ctx) throws OXException {
