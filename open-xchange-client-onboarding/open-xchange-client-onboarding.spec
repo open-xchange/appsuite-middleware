@@ -42,6 +42,38 @@ Authors:
 export NO_BRP_CHECK_BYTECODE_VERSION=true
 ant -lib build/lib -Dbasedir=build -DdestDir=%{buildroot} -DpackageName=%{name} -f build/build.xml clean build
 
+%post
+. /opt/open-xchange/lib/oxfunctions.sh
+
+# prevent bash from expanding, see bug 13316
+GLOBIGNORE='*'
+
+if [ ${1:-0} -eq 2 ]; then # only when updating
+
+    #Bug 44352, simply update documentation of properties
+    key=com.openexchange.client.onboarding.caldav.url
+    pfile=/opt/open-xchange/etc/client-onboarding-caldav.properties
+    oldValue=$(ox_read_property ${key} ${pfile}) 
+    if [ -n "${oldValue}" ]; then
+      ox_set_property ${key} "${oldValue}" ${pfile}
+    fi
+    
+    key=com.openexchange.client.onboarding.carddav.url
+    pfile=/opt/open-xchange/etc/client-onboarding-carddav.properties
+    oldValue=$(ox_read_property ${key} ${pfile}) 
+    if [ -n "${oldValue}" ]; then
+      ox_set_property ${key} "${oldValue}" ${pfile}
+    fi
+
+    key=com.openexchange.client.onboarding.eas.url
+    pfile=/opt/open-xchange/etc/client-onboarding-eas.properties
+    oldValue=$(ox_read_property ${key} ${pfile}) 
+    if [ -n "${oldValue}" ]; then
+      ox_set_property ${key} "${oldValue}" ${pfile}
+    fi
+
+fi
+
 %clean
 %{__rm} -rf %{buildroot}
 
