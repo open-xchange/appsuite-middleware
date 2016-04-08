@@ -337,7 +337,7 @@ public class NotificationMail {
             LOG.debug("NotificationMail.shouldBeSend (2), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
             return !aboutStateChangesOnly;
         }
-        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs());
+        LOG.debug("NotificationMail.shouldBeSend (3), User: {}, {}, {}, {}\nDiffering Fields: {}{}", id(), stateChanges(), changes(), aboutStateChangesOnly, diffs(), getUserDiff());
         return true;
     }
 
@@ -368,11 +368,13 @@ public class NotificationMail {
                         FieldUpdate userChange = getDiff().getUpdateFor(AppointmentFields.USERS);
                         Difference extraInfo = (Difference) userChange.getExtraInfo();
                         if (!extraInfo.getAdded().isEmpty()) {
+                            sb.append("A: ");
                             for (Object added : extraInfo.getAdded()) {
                                 sb.append(((UserParticipant) added).getIdentifier()).append(", ");
                             }
                         }
                         if (!extraInfo.getRemoved().isEmpty()) {
+                            sb.append("R: ");
                             for (Object removed : extraInfo.getRemoved()) {
                                 sb.append(((UserParticipant) removed).getIdentifier()).append(", ");
                             }
