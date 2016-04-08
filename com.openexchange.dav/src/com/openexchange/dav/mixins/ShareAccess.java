@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,69 @@
  *
  */
 
-package com.openexchange.caldav.action;
+package com.openexchange.dav.mixins;
 
-import java.io.IOException;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.dav.actions.POSTAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.dav.resources.CommonFolderCollection;
+import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.UserizedFolder;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CalDAVPOSTAction}
+ * {@link ShareAccess}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class CalDAVPOSTAction extends POSTAction {
-
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVPOSTAction.class);
-
-    protected final GroupwareCaldavFactory factory;
+public class ShareAccess extends SingleXMLPropertyMixin {
 
     /**
-     * Initializes a new {@link CalDAVPOSTAction}.
-     *
-     * @param factory The factory
+     * Used to indicate that the resource is not shared.  This is the default, which means that if the DAV:share-access is omitted, this value is implied.
      */
-    public CalDAVPOSTAction(GroupwareCaldavFactory factory) {
-        super(factory.getProtocol());
-	    this.factory = factory;
-	}
+    public static final String NOT_SHARED = "not-shared";
 
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handle(request, response)) {
-	        return;
-	    }
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		writeResource(resource, response);
-	}
+    /**
+     * Used to indicate that the resource is owned by the current user and is being shared by them.
+     */
+    public static final String SHARED_OWNER = "shared-owner";
+
+    /**
+     * Used to indicate that the resource is shared, and the current instance is the 'shared instance' which has read-write access.
+     */
+    public static final String READ_WRITE = "read-write";
+
+    /**
+     * Used to indicate that the resource is shared, and the current instance is the 'shared instance', and only read access is provided.
+     */
+    public static final String READ = "read";
+
+    private final CommonFolderCollection<?> collection;
+
+    /**
+     * Initializes a new {@link ShareAccess}.
+     *
+     * @param collection The collection
+     */
+    public ShareAccess(CommonFolderCollection<?> collection) {
+        super(DAVProtocol.DAV_NS.getURI(), "share-access");
+        this.collection = collection;
+    }
+
+    @Override
+    protected String getValue() {
+        UserizedFolder folder = collection.getFolder();
+        Permission[] permissions = folder.getPermissions();
+        if (null != permissions && 1 < permissions.length) {
+            Permission ownPermission = folder.getOwnPermission();
+            if (ownPermission.isAdmin()) {
+                return SHARED_OWNER;
+            } else if (Permission.WRITE_OWN_OBJECTS < ownPermission.getWritePermission()) {
+                return READ_WRITE;
+            } else {
+                return READ;
+            }
+        }
+        return NOT_SHARED;
+    }
 
 }

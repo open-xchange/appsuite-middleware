@@ -53,7 +53,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import javax.servlet.http.HttpServletResponse;
+import org.jdom2.Element;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.attachments.AttachmentUtils;
+import com.openexchange.dav.internal.ShareHelper;
+import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.dav.resources.CommonResource;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.attach.AttachmentMetadata;
@@ -82,6 +86,58 @@ public class POSTAction extends DAVAction {
         super(protocol);
     }
 
+    @Override
+    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        /*
+         * default handling
+         */
+        handle(request, response);
+    }
+
+    /**
+     * Tries to handle a common <code>POST</code> request. This includes:
+     * <ul>
+     * <li>attachment-related actions on {@link CommonResource}s</li>
+     * <li>sharing-related actions on {@link CommonFolderCollection}s</li>
+     * </ul>
+     *
+     * @param request The WebDAV request
+     * @param response The response
+     * @return <code>true</code> if a suitable request was detected and handled, <code>false</code>, otherwise
+     */
+    protected boolean handle(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        WebdavResource resource = request.getResource();
+        if (null != resource) {
+            String action = request.getParameter("action");
+            if (Strings.isNotEmpty(action) && CommonResource.class.isInstance(resource)) {
+                /*
+                 * handle special attachment action
+                 */
+                return handleAction(request, response);
+            }
+            Element rootElement = optRootElement(request, DAVProtocol.DAV_NS, "share-resource");
+            if (null != rootElement  && CommonFolderCollection.class.isInstance(resource)) {
+                /*
+                 * handle WebDAV share request
+                 */
+                ShareHelper.shareResource((CommonFolderCollection<?>) resource, rootElement);
+                response.setStatus(HttpServletResponse.SC_NO_CONTENT);
+                return true;
+            }
+            rootElement = optRootElement(request, DAVProtocol.CALENDARSERVER_NS, "share");
+            if (null != rootElement  && CommonFolderCollection.class.isInstance(resource)) {
+                /*
+                 * handle calendarserver share request
+                 */
+                ShareHelper.share((CommonFolderCollection<?>) resource, rootElement);
+                response.setStatus(HttpServletResponse.SC_OK);
+                return true;
+            }
+
+        }
+        return false;
+    }
+
     /**
      * Tries to handle a special action as indicated by the <code>action</code> query parameter.
      *
@@ -89,11 +145,8 @@ public class POSTAction extends DAVAction {
      * @param response The response
      * @return <code>true</code> if a special action was detected and handled, <code>false</code>, otherwise
      */
-    protected boolean handleAction(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        return handle(request.getParameter("action"), request, response);
-    }
-
-    protected boolean handle(String action, WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+    private boolean handleAction(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
+        String action = request.getParameter("action");
         if (Strings.isEmpty(action)) {
             return false;
         }
@@ -109,17 +162,6 @@ public class POSTAction extends DAVAction {
                 return true;
             default:
                 return false;
-        }
-    }
-
-    @Override
-    public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-        /*
-         * handle a special action separately if defined
-         */
-        String action = request.getParameter("action");
-        if (Strings.isNotEmpty(action)) {
-            handle(action, request, response);
         }
     }
 

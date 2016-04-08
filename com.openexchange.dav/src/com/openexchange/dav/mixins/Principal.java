@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,58 +47,36 @@
  *
  */
 
-package com.openexchange.caldav.action;
+package com.openexchange.dav.mixins;
 
-import java.io.IOException;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.dav.actions.POSTAction;
-import com.openexchange.webdav.action.WebdavRequest;
-import com.openexchange.webdav.action.WebdavResponse;
-import com.openexchange.webdav.protocol.WebdavProtocolException;
-import com.openexchange.webdav.protocol.WebdavResource;
+import com.openexchange.dav.DAVProtocol;
+import com.openexchange.groupware.ldap.User;
+import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
- * {@link CalDAVPOSTAction}
+ * {@link Principal}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
-public class CalDAVPOSTAction extends POSTAction {
+public class Principal extends SingleXMLPropertyMixin {
 
-	private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(CalDAVPOSTAction.class);
-
-    protected final GroupwareCaldavFactory factory;
+    private final User principal;
 
     /**
-     * Initializes a new {@link CalDAVPOSTAction}.
+     * Initializes a new {@link Principal}.
      *
-     * @param factory The factory
+     * @param factory The DAV factory
+     * @param collection The collection
      */
-    public CalDAVPOSTAction(GroupwareCaldavFactory factory) {
-        super(factory.getProtocol());
-	    this.factory = factory;
-	}
+    public Principal(User principal) {
+        super(DAVProtocol.DAV_NS.getURI(), "principal");
+        this.principal = principal;
+    }
 
-	@Override
-	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handle(request, response)) {
-	        return;
-	    }
-		WebdavResource resource = request.getResource();
-		if (null != request.getHeader("content-length")) {
-			resource.setLength(new Long(request.getHeader("content-length")));
-		}
-		/*
-		 * put request body
-		 */
-		try {
-			resource.putBodyAndGuessLength(request.getBody());
-		} catch (IOException e) {
-			LOG.debug("Client Gone?", e);
-		}
-		/*
-		 * write back response
-		 */
-		writeResource(resource, response);
-	}
+    @Override
+    protected String getValue() {
+        return "<D:href>" + PrincipalURL.forUser(principal.getId()) + "</D:href>";
+    }
 
 }

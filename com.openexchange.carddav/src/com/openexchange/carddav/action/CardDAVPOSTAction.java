@@ -97,7 +97,7 @@ public class CardDAVPOSTAction extends POSTAction {
 
 	@Override
 	public void perform(WebdavRequest request, WebdavResponse response) throws WebdavProtocolException {
-	    if (super.handleAction(request, response)) {
+	    if (super.handle(request, response)) {
 	        return;
 	    }
 	    if (ContactResource.CONTENT_TYPE.equalsIgnoreCase(getContentType(request))) {

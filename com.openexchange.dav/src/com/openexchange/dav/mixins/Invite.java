@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,41 +47,40 @@
  *
  */
 
-package com.openexchange.caldav.mixins;
+package com.openexchange.dav.mixins;
 
-import com.openexchange.caldav.CaldavProtocol;
-import com.openexchange.caldav.GroupwareCaldavFactory;
-import com.openexchange.dav.mixins.PrincipalURL;
+import com.openexchange.dav.DAVFactory;
+import com.openexchange.dav.DAVProtocol;
 import com.openexchange.dav.resources.CommonFolderCollection;
 import com.openexchange.exception.OXException;
 import com.openexchange.folderstorage.Permission;
+import com.openexchange.folderstorage.type.PublicType;
 import com.openexchange.group.Group;
 import com.openexchange.group.GroupService;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.java.Strings;
+import com.openexchange.user.UserService;
 import com.openexchange.webdav.protocol.helpers.SingleXMLPropertyMixin;
 
 /**
  * {@link Invite}
  *
  * @author <a href="mailto:tobias.friedrich@open-xchange.com">Tobias Friedrich</a>
+ * @since v7.8.2
  */
 public class Invite extends SingleXMLPropertyMixin {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Invite.class);
 
     private final CommonFolderCollection<?> collection;
-    private final GroupwareCaldavFactory factory;
 
     /**
      * Initializes a new {@link Invite}.
      *
-     * @param factory The CalDAV factory
      * @param collection The collection
      */
-    public Invite(GroupwareCaldavFactory factory, CommonFolderCollection<?> collection) {
-        super(CaldavProtocol.CALENDARSERVER_NS.getURI(), "invite");
-        this.factory = factory;
+    public Invite(CommonFolderCollection<?> collection) {
+        super(DAVProtocol.DAV_NS.getURI(), "invite");
         this.collection = collection;
     }
 
@@ -90,37 +89,36 @@ public class Invite extends SingleXMLPropertyMixin {
         if (null == collection || null == collection.getFolder() || null == collection.getFolder().getPermissions()) {
             return null;
         }
-        StringBuilder StringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
         Permission[] permissions = collection.getFolder().getPermissions();
-        for (Permission permission : permissions) {
-            try {
+        if (PublicType.getInstance().equals(collection.getFolder().getType())) {
+
+        } else {
+            for (Permission permission : permissions) {
                 if (permission.isAdmin()) {
-                    StringBuilder.append("<CS:organizer>").append(getEntityElements(permission)).append("</CS:organizer>");
-                } else if (impliesReadPermissions(permission)) {
-                    StringBuilder.append("<CS:user>").append(getEntityElements(permission)).append("<CS:invite-accepted/>")
-                        .append("<CS:access><CS:read");
-                    if (impliesReadWritePermissions(permission)) {
-                        StringBuilder.append("-write");
-                    }
-                    StringBuilder.append("/></CS:access></CS:user>");
+                    continue; // don't include "owner"
                 }
-            } catch (OXException e) {
-                LOG.warn("error resolving permission entity from '{}'", collection.getFolder(), e);
+                try {
+                    stringBuilder.append(getEntityElements(permission));
+                } catch (OXException e) {
+                    LOG.warn("error resolving permission entity from '{}'", collection.getFolder(), e);
+                }
             }
         }
-        return StringBuilder.toString();
+        return stringBuilder.toString();
     }
 
     private String getEntityElements(Permission permission) throws OXException {
+        DAVFactory factory = collection.getFactory();
         String commonName;
         String uri;
         if (permission.isGroup()) {
             uri = PrincipalURL.forGroup(permission.getEntity());
-            Group group = factory.getService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
+            Group group = factory.requireService(GroupService.class).getGroup(factory.getContext(), permission.getEntity());
             commonName = " + " + group.getDisplayName();
         } else {
             uri = PrincipalURL.forUser(permission.getEntity());
-            User user = factory.resolveUser(permission.getEntity());
+            User user = factory.requireService(UserService.class).getUser(permission.getEntity(), factory.getContext());
             commonName = user.getDisplayName();
             if (Strings.isEmpty(commonName)) {
                 commonName = user.getMail();
@@ -129,11 +127,20 @@ public class Invite extends SingleXMLPropertyMixin {
                 }
             }
         }
-        boolean mailtoPrefix = true; // bug #44264
-        return new StringBuilder()
-            .append("<D:href>").append(mailtoPrefix ? "mailto:" : "").append(uri).append("</D:href>")
-            .append("<CS:common-name>").append(commonName).append("</CS:common-name>")
-        .toString();
+        String shareAccess;
+        if (impliesReadWritePermissions(permission)) {
+            shareAccess = "read-write";
+        } else if (impliesReadPermissions(permission)) {
+            shareAccess = "read";
+        } else {
+            shareAccess = "no-access";
+        }
+        return new StringBuilder().append("<D:sharee>")
+            .append("<D:href>").append(uri).append("</D:href>")
+            .append("<D:invite-accepted />")
+            .append("<D:share-access>").append(shareAccess).append("</D:share-access>")
+//            .append("<CS:common-name>").append(commonName).append("</CS:common-name>")
+        .append("</D:sharee>").toString();
     }
 
     /**
