@@ -63,6 +63,7 @@ import com.openexchange.mail.categories.MailCategoriesConstants;
 import com.openexchange.mail.categories.MailCategoriesExceptionCodes;
 import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.MailCategoryConfig.Builder;
+import com.openexchange.mail.categories.MailObjectParameter;
 import com.openexchange.mail.categories.ReorganizeParameter;
 import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizeExceptionCodes;
 import com.openexchange.mail.categories.impl.mailfilter.MailCategoriesOrganizer;
@@ -436,6 +437,14 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
             }
         }
 
+    }
+
+    @Override
+    public void addMails(Session session, List<MailObjectParameter> mails, String category) throws OXException {
+        FullnameArgument fa = new FullnameArgument("INBOX");
+        String flag = getFlagByCategory(session, category);
+        String[] allFlags = getAllFlags(session, false, false);
+        MailCategoriesOrganizer.organizeMails(session, fa.getFullName(), mails, flag, allFlags);
     }
 
 }

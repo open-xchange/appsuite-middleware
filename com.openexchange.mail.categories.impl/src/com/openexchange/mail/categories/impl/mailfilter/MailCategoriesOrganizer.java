@@ -50,6 +50,7 @@
 package com.openexchange.mail.categories.impl.mailfilter;
 
 import static com.openexchange.mail.utils.MailFolderUtility.prepareMailFolderParam;
+import java.util.List;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.FullnameArgument;
 import com.openexchange.mail.IndexRange;
@@ -58,6 +59,7 @@ import com.openexchange.mail.OrderDirection;
 import com.openexchange.mail.api.IMailFolderStorage;
 import com.openexchange.mail.api.IMailMessageStorage;
 import com.openexchange.mail.api.MailAccess;
+import com.openexchange.mail.categories.MailObjectParameter;
 import com.openexchange.mail.dataobjects.MailMessage;
 import com.openexchange.mail.search.SearchTerm;
 import com.openexchange.session.Session;
@@ -70,6 +72,8 @@ import com.openexchange.session.Session;
  * @since v7.8.2
  */
 public class MailCategoriesOrganizer {
+
+    private static MailField[] FIELDS = new MailField[] { MailField.ID };
 
     /**
      * Searches for all mails in the given folder which matches the given search term and set or unset the given flag to them
@@ -89,13 +93,44 @@ public class MailCategoriesOrganizer {
             mailAccess.connect();
 
             IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
-            MailMessage[] messages = messageStorage.searchMessages(fa.getFullName(), IndexRange.NULL, null, OrderDirection.ASC, searchTerm, new MailField[] { MailField.ID });
+            MailMessage[] messages = messageStorage.searchMessages(fa.getFullName(), IndexRange.NULL, null, OrderDirection.ASC, searchTerm, FIELDS);
             String mailIds[] = new String[messages.length];
             for (int i = messages.length; i-- > 0;) {
                 MailMessage message = messages[i];
                 mailIds[i] = null == message ? null : message.getMailId();
             }
             messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, set);
+        } finally {
+            if (mailAccess != null) {
+                mailAccess.close();
+            }
+        }
+    }
+
+    /**
+     * Retrieves the given mails, removes all previous category flags and add the given flag.
+     *
+     * @param session The user session
+     * @param folder The folder id
+     * @param mails The mail to set the given flag to
+     * @param flag The flag
+     * @throws OXException If retrieving or setting fails
+     */
+    public static void organizeMails(Session session, String folder, List<MailObjectParameter> mailObjects, String flag, String[] flagsToRemove) throws OXException {
+        MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> mailAccess = null;
+        try {
+            FullnameArgument fa = prepareMailFolderParam(folder);
+            mailAccess = MailAccess.getInstance(session, fa.getAccountId());
+            mailAccess.connect();
+
+            String[] mailIds = new String[mailObjects.size()];
+            int x = 0;
+            for (MailObjectParameter mailObject : mailObjects) {
+                mailIds[x++] = String.valueOf(mailObject.getMailID());
+            }
+            IMailMessageStorage messageStorage = mailAccess.getMessageStorage();
+            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, flagsToRemove, false);
+            messageStorage.updateMessageFlags(fa.getFullName(), mailIds, 0, new String[] { flag }, true);
         } finally {
             if (mailAccess != null) {
                 mailAccess.close();

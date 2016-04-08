@@ -132,5 +132,14 @@ public interface MailCategoriesConfigService {
      */
     boolean isEnabled(Session session) throws OXException;
 
+    /**
+     * Remove all old category flags from the given emails and add the new one.
+     * 
+     * @param session The user session
+     * @param mails The mails to flag
+     * @param category The category identifier
+     * @throws OXException
+     */
+    void addMails(Session session, List<MailObjectParameter> mails, String category) throws OXException;
 
 }
