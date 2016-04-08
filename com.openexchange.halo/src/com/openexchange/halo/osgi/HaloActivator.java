@@ -61,13 +61,14 @@ import com.openexchange.osgi.HousekeepingActivator;
 import com.openexchange.osgi.SimpleRegistryListener;
 import com.openexchange.session.SessionSpecificContainerRetrievalService;
 import com.openexchange.user.UserService;
+import com.openexchange.userconf.UserPermissionService;
 
 public class HaloActivator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] {
-            UserService.class, ContactService.class, SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
+        return new Class[] { UserService.class, UserPermissionService.class, ContactService.class,
+            SessionSpecificContainerRetrievalService.class, ConfigViewFactory.class };
     }
 
     @Override
@@ -77,7 +78,7 @@ public class HaloActivator extends HousekeepingActivator {
         ContactDataSource cds = new ContactDataSource(this);
         halo.addContactDataSource(cds);
         halo.addContactImageSource(cds);
-        
+
         registerService(ContactHalo.class, halo);
 
         track(HaloContactDataSource.class, new SimpleRegistryListener<HaloContactDataSource>() {
@@ -93,7 +94,7 @@ public class HaloActivator extends HousekeepingActivator {
             }
 
         });
-        
+
         track(HaloContactImageSource.class, new SimpleRegistryListener<HaloContactImageSource>() {
 
             @Override
