@@ -145,6 +145,19 @@ public final class UpdateAction extends AbstractFolderAction {
          * Parse request body
          */
         UpdateData updateData = parseRequestBody(treeId, id, request, session);
+
+        /*-
+         * Uncomment this to artificially insert a notification
+         *
+        {
+            NotificationData notificationData = new NotificationData();
+            notificationData.setMessage("Watch this!");
+            notificationData.setTransport(Transport.MAIL);
+            updateData.setNotificationData(notificationData);
+        }
+         *
+         */
+
         ParsedFolder folder = updateData.getFolder();
         /*
          * Update
