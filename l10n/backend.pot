@@ -3431,30 +3431,31 @@ msgstr ""
 msgid "Reorganizing of mails failed. Please try again later."
 msgstr ""
 
-#. The user category %1$s already exists.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:64
-msgid "The user category %1$s already exists."
-msgstr ""
-
 #. The user category %1$s does not exist.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:67
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:63
 msgid "The user category %1$s does not exist."
 msgstr ""
 
 #. Invalid configuration: %1$s
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:70
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:66
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:69
 msgid "Invalid configuration: %1$s"
 msgstr ""
 
 #. The required service %1$s is temporary not available. Please try again later.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:73
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:72
 msgid ""
 "The required service %1$s is temporary not available. Please try again later."
 msgstr ""
 
-#. Unable to create category. Missing parameter %1$s.
-#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:76
-msgid "Unable to create category. Missing parameter %1$s."
+#. You are not allowed to change the name of the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:75
+msgid "You are not allowed to change the name of the category %1$s."
+msgstr ""
+
+#. You are not allowed to enable or disable the category %1$s.
+#: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.categories/src/com/openexchange/mail/categories/MailCategoriesExceptionStrings.java:78
+msgid "You are not allowed to enable or disable the category %1$s."
 msgstr ""
 
 #: /var/lib/jenkins/workspace/createPOT/backend/com.openexchange.mail.filter/src/com/openexchange/mailfilter/exceptions/MailFilterExceptionMessages.java:60
