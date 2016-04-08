@@ -426,6 +426,8 @@ public interface OXUserInterface extends Remote {
      *            user array containing user object.
      * @param auth
      *            Credentials for authenticating against server.
+     * @param destUser
+     *            The user id of the the user shared data is assigned to.
      *
      * @throws RemoteException
      *             General RMI Exception
@@ -440,7 +442,7 @@ public interface OXUserInterface extends Remote {
      * @throws DatabaseUpdateException
      * @throws NoSuchUserException
      */
-    public void delete(final Context ctx, final User[] users, Integer destUID, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
+    public void delete(final Context ctx, final User[] users, Integer destUser, final Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException;
 
     /**
      * Delete user from given context.
