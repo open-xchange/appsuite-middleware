@@ -89,6 +89,25 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         Logger logger = org.slf4j.LoggerFactory.getLogger(NoReplyConfig.class);
         ConfigViewFactory factory = services.getService(ConfigViewFactory.class);
         ConfigView view = factory.getView(ConfigProviderService.NO_USER, contextId);
+
+        /*-
+         * At least one user is needed from the specified context in order to properly support context-set-level properties:
+         *
+         * Seems to be "as designed".
+         *
+         * - "server", "context", "user" is set as precedence; consciously ignoring "contextSets"
+         * - Even directly accessing the provider for "contextSets" statically returns special constant "com.openexchange.config.cascade.ConfigProviderService.NO_PROPERTY"
+         *   when invoking "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)"
+         *
+         *
+         * The reason is determined by the implementation logic for "com.openexchange.config.cascade.context.ContextSetConfigProvider.get(String, Context, int)":
+         *
+         * The user-sensitive UserPermissionBits instance is needed in order to retrieve the applicable "specification" (the set of tags that do apply).
+         *
+         */
+
+        int contextAdminId = contextService.getContext(contextId).getMailadmin();
+        ConfigView view = configViewFactory.getView(contextAdminId, contextId);
         DefaultNoReplyConfig config = new DefaultNoReplyConfig();
 
         {
@@ -113,8 +132,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.login", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply login";
-                logger.error(msg, new Throwable(msg));
+                config.setLogin(null);
             } else {
                 config.setLogin(str.trim());
             }
@@ -123,8 +141,7 @@ public class DefaultNoReplyConfigFactory implements NoReplyConfigFactory {
         {
             String str = view.get("com.openexchange.noreply.password", String.class);
             if (Strings.isEmpty(str)) {
-                String msg = "Missing no-reply password";
-                logger.error(msg, new Throwable(msg));
+                config.setPassword(null);
             } else {
                 config.setPassword(str.trim());
             }
