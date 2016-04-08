@@ -293,13 +293,18 @@ public class ImageTransformationsImpl implements ImageTransformations {
 
     @Override
     public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType) {
+        return scale(maxWidth, maxHeight, scaleType, false);
+    }
+
+    @Override
+    public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType, boolean shrinkOnly) {
         if (maxWidth > Constants.getMaxWidth()) {
             throw new IllegalArgumentException("Width " + maxWidth + " exceeds max. supported width " + Constants.getMaxWidth());
         }
         if (maxHeight > Constants.getMaxHeight()) {
             throw new IllegalArgumentException("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
         }
-        transformations.add(new ScaleTransformation(maxWidth, maxHeight, scaleType));
+        transformations.add(new ScaleTransformation(maxWidth, maxHeight, scaleType, shrinkOnly));
         return this;
     }
 

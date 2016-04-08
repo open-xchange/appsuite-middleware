@@ -1088,7 +1088,7 @@ public class RdbContactStorage extends DefaultContactStorage implements ContactU
             if (oldImage == null || oldImage.getWidth() < image_width || oldImage.getHeight() < image_height) {
                 return;
             }
-            transform.scale(image_width, image_height, type);
+            transform.scale(image_width, image_height, type, true);
             final byte[] image = transform.getBytes("jpg");
             if (image != null && image.length != 0) {
                 contact.setImage1(image);

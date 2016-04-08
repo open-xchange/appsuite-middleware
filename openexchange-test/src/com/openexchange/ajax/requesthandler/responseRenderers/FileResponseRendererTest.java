@@ -876,6 +876,11 @@ public class FileResponseRendererTest extends TestCase {
         }
 
         @Override
+        public ImageTransformations scale(int maxWidth, int maxHeight, ScaleType scaleType, boolean shrinkOnly) {
+            return this;
+        }
+
+        @Override
         public ImageTransformations crop(int x, int y, int width, int height) {
             return this;
         }

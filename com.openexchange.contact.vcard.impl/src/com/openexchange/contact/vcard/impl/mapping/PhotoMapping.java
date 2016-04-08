@@ -250,7 +250,7 @@ public class PhotoMapping extends AbstractMapping {
         }
         try {
             return imageService.transfom(imageBytes, getSource(parameters))
-                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN).getFullTransformedImage(formatName);
+                .scale((int) targetDimension.getWidth(), (int) targetDimension.getHeight(), ScaleType.CONTAIN, true).getFullTransformedImage(formatName);
         } catch (IOException e) {
             throw VCardExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }

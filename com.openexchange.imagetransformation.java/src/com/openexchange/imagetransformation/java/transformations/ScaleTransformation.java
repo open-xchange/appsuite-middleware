@@ -72,12 +72,22 @@ public class ScaleTransformation implements ImageTransformation {
 
     private final int maxWidth, maxHeight;
     private final ScaleType scaleType;
+    private final boolean shrinkOnly;
 
-    public ScaleTransformation(int maxWidth, int maxHeight, ScaleType scaleType) {
+    /**
+     * Initializes a new {@link ScaleTransformation}.
+     *
+     * @param maxWidth The maximum width of the target image
+     * @param maxHeight The maximum height of the target image
+     * @param scaleType The scale type to use
+     * @param shrinkOnly <code>true</code> to only scale images 'greater than' target size, <code>false</code>, otherwise
+     */
+    public ScaleTransformation(int maxWidth, int maxHeight, ScaleType scaleType, boolean shrinkOnly) {
         super();
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
         this.scaleType = scaleType;
+        this.shrinkOnly = shrinkOnly;
     }
 
     @Override
@@ -88,9 +98,6 @@ public class ScaleTransformation implements ImageTransformation {
             constrain = new CoverDimensionConstrain(maxWidth, maxHeight);
             break;
         case CONTAIN:
-            if (null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
-                return sourceImage; // nothing to do
-            }
             constrain = new ContainDimensionConstrain(maxWidth, maxHeight);
             break;
         default:
@@ -101,6 +108,9 @@ public class ScaleTransformation implements ImageTransformation {
         Dimension dimension = constrain.getDimension(new Dimension(sourceImage.getWidth(), sourceImage.getHeight()));
         int targetWidth = (int) dimension.getWidth();
         int targetHeight = (int) dimension.getHeight();
+        if (shrinkOnly && null != sourceImage && maxWidth >= sourceImage.getWidth() && maxHeight >= sourceImage.getHeight()) {
+            return sourceImage; // nothing to do
+        }
         return Scalr.resize(sourceImage, Method.AUTOMATIC, targetWidth, targetHeight);
     }
 

@@ -311,9 +311,10 @@ public class TransformImageAction implements IFileResponseRendererAction {
             if (maxHeight > Constants.getMaxHeight()) {
                 throw AjaxExceptionCodes.BAD_REQUEST.create("Height " + maxHeight + " exceeds max. supported height " + Constants.getMaxHeight());
             }
+            boolean shrinkOnly = request.isSet("shrinkOnly") && Boolean.parseBoolean(request.getParameter("shrinkOnly"));
             ScaleType scaleType = ScaleType.getType(request.getParameter("scaleType"));
             try {
-                transformations.scale(maxWidth, maxHeight, scaleType);
+                transformations.scale(maxWidth, maxHeight, scaleType, shrinkOnly);
             } catch (final IllegalArgumentException e) {
                 throw AjaxExceptionCodes.BAD_REQUEST_CUSTOM.create(e, e.getMessage());
             }
