@@ -120,15 +120,55 @@ public final class XMLUtils {
             loader = XMLUtils.class.getClassLoader();
         }
         if (loader == null) {
-            return DocumentBuilderFactory.newInstance();
+            return safeDbf(DocumentBuilderFactory.newInstance());
         }
         DocumentBuilderFactory factory = DOCUMENT_BUILDER_FACTORIES.get(loader);
         if (factory == null) {
-            factory = DocumentBuilderFactory.newInstance();
+            factory = safeDbf(DocumentBuilderFactory.newInstance());
             factory.setNamespaceAware(true);
             DOCUMENT_BUILDER_FACTORIES.put(loader, factory);
         }
         return factory;
+    }
+
+    private static DocumentBuilderFactory safeDbf(DocumentBuilderFactory dbf) {
+        if (null == dbf) {
+            return dbf;
+        }
+
+        // From http://stackoverflow.com/questions/26488319/how-to-prevent-xml-injection-like-xml-bomb-and-xxe-attack
+        String FEATURE = null;
+        try {
+            // This is the PRIMARY defense. If DTDs (doctypes) are disallowed, almost all XML entity attacks are prevented
+            // Xerces 2 only - http://xerces.apache.org/xerces2-j/features.html#disallow-doctype-decl
+            FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
+            dbf.setFeature(FEATURE, true);
+
+            // If you can't completely disable DTDs, then at least do the following:
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-general-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-general-entities
+            FEATURE = "http://xml.org/sax/features/external-general-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // Xerces 1 - http://xerces.apache.org/xerces-j/features.html#external-parameter-entities
+            // Xerces 2 - http://xerces.apache.org/xerces2-j/features.html#external-parameter-entities
+            FEATURE = "http://xml.org/sax/features/external-parameter-entities";
+            dbf.setFeature(FEATURE, false);
+
+            // and these as well, per Timothy Morgan's 2014 paper: "XML Schema, DTD, and Entity Attacks" (see reference below)
+            dbf.setXIncludeAware(false);
+            dbf.setExpandEntityReferences(false);
+
+            // And, per Timothy Morgan: "If for some reason support for inline DOCTYPEs are a requirement, then
+            // ensure the entity settings are disabled (as shown above) and beware that SSRF attacks
+            // (http://cwe.mitre.org/data/definitions/918.html) and denial
+            // of service attacks (such as billion laughs or decompression bombs via "jar:") are a risk."
+
+        } catch (ParserConfigurationException e) {
+            LOGGER.warn("ParserConfigurationException was thrown. The feature '{}' is probably not supported by your XML processor.", FEATURE, e);
+        }
+
+        return dbf;
     }
 
     public static Transformer newTransformer() throws TransformerConfigurationException {
