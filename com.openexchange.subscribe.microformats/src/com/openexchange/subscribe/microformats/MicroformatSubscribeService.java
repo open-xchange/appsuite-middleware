@@ -128,7 +128,9 @@ public class MicroformatSubscribeService extends AbstractSubscribeService {
 
         for (ObjectParser objectParser : objectParsers) {
             Collection parsedObjects = objectParser.parse(new UnsynchronizedStringReader(data));
-            results.addAll(parsedObjects);
+            if (null != parsedObjects) {
+                results.addAll(parsedObjects);
+            }
         }
 
         return results;
