@@ -155,8 +155,15 @@ public class DriveUtilityImpl implements DriveUtility {
         if (1 < folders.size()) {
             Collections.sort(folders, new FolderComparator(session.getLocale()));
         }
-        for (FileStorageFolder subfolder : folders) {
-            metadata.add(new JsonDirectoryMetadata(syncSession, subfolder).build(false));
+        try {
+            for (FileStorageFolder subfolder : folders) {
+                JSONObject jsonObject = new JsonDirectoryMetadata(syncSession, subfolder).build(false);
+                jsonObject.put("path", syncSession.getStorage().getPath(subfolder.getId()));
+                jsonObject.put("name", subfolder.getName());
+                metadata.add(jsonObject);
+            }
+        } catch (JSONException e) {
+            throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         }
         return metadata;
     }
@@ -362,8 +369,11 @@ public class DriveUtilityImpl implements DriveUtility {
         List<DirectoryChecksum> checksums = ChecksumProvider.getChecksums(session, folderIDs);
         JSONArray jsonArray = new JSONArray(folders.size());
         for (int i = 0; i < folderIDs.size(); i++) {
-            JSONObject jsonObject = new JsonDirectoryMetadata(session, folders.get(i)).build(false);
+            FileStorageFolder folder = folders.get(i);
+            JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
             jsonObject.put("checksum", checksums.get(i).getChecksum());
+            jsonObject.put("path", session.getStorage().getPath(folder.getId()));
+            jsonObject.put("name", folder.getName());
             jsonArray.put(jsonObject);
         }
         return jsonArray;
@@ -385,6 +395,8 @@ public class DriveUtilityImpl implements DriveUtility {
         FileStorageFolder folder = session.getStorage().getFolder(serverVersion.getPath());
         JSONObject jsonObject = new JsonDirectoryMetadata(session, folder).build(false);
         jsonObject.put("checksum", serverVersion.getChecksum());
+        jsonObject.put("path", serverVersion.getPath());
+        jsonObject.put("name", folder.getName());
         return jsonObject;
     }
 
