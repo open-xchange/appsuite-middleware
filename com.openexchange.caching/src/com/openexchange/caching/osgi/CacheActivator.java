@@ -137,7 +137,7 @@ public final class CacheActivator extends HousekeepingActivator {
         /*
          * Register service
          */
-        if (null == service || service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
+        if (service.getBoolProperty("com.openexchange.caching.jcs.enabled", true)) {
             final Dictionary<String, Object> dictionary = new Hashtable<String, Object>(2);
             dictionary.put("name", "oxcache");
             dictionary.put(Constants.SERVICE_RANKING, Integer.valueOf(10));
