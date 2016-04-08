@@ -88,21 +88,16 @@ import com.openexchange.tools.sql.DBUtils;
  */
 public final class MailPasswordUtil {
 
-    private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailPasswordUtil.class);
+    /** The logger constant */
+    static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(MailPasswordUtil.class);
 
-    /**
-     * The key length.
-     */
+    /** The key length. */
     private static final int KEY_LENGTH = 8;
 
-    /**
-     * The DES algorithm.
-     */
+    /** The DES algorithm. */
     private static final String ALGORITHM_DES = "DES";
 
-    /**
-     * The transformation following pattern <i>"algorithm/mode/padding"</i>.
-     */
+    /** The transformation following pattern <i>"algorithm/mode/padding"</i>. */
     private static final String CIPHER_TYPE = ALGORITHM_DES + "/ECB/PKCS5Padding";
 
     /**
@@ -134,15 +129,15 @@ public final class MailPasswordUtil {
             PreparedStatement stmt = null;
             final Session session = customizationNote.session;
             final MailAccountStorageService service = ServerServiceRegistry.getInstance().getService(MailAccountStorageService.class);
-            MailAccount mailAccount = null;
-            try {
-                mailAccount = service.getMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
-            } catch (OXException e) {
-                LOG.warn("Could not update encrypted mail account password.", e);
-                return;
-            }
-
             if (null != service) {
+                MailAccount mailAccount = null;
+                try {
+                    mailAccount = service.getMailAccount(customizationNote.accountId, session.getUserId(), session.getContextId());
+                } catch (OXException e) {
+                    LOG.warn("Could not update encrypted mail account password.", e);
+                    return;
+                }
+
                 if (customizationNote.server != null) {
                     try {
                         if (customizationNote.server.equals(mailAccount.getMailServer())) {
