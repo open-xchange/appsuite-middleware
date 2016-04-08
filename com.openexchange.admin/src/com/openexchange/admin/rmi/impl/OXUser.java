@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
@@ -1765,13 +1764,6 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
-        if (user.getId() == destUser.intValue()) {
-            throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
-        }
-
-        if (!tool.existsUser(ctx, destUser)) {
-            throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
-        }
         delete(ctx, new User[] { user }, destUser, auth);
     }
 
@@ -1817,6 +1809,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
             Set<Integer> dubCheck = new HashSet<Integer>();
             List<User> filestoreOwners = new java.util.LinkedList<User>();
             for (final User user : users) {
+                if (destUser != null && user.getId() == destUser.intValue()) {
+                    throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
+                }
                 if (false == dubCheck.add(user.getId())) {
                     throw new InvalidDataException("User " + user.getId() + " is contained multiple times in delete request.");
                 }
@@ -1845,6 +1840,9 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
+                if (!tool.existsUser(ctx, destUser)) {
+                    throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                }
                 if (destUser > 0) { // Move to master store
                     User masterUser = new User(destUser);
                     for (User filestoreOwner : filestoreOwners) {
