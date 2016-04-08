@@ -66,6 +66,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import javax.imageio.metadata.IIOInvalidTreeException;
 import javax.mail.internet.idn.IDNA;
 import org.osgi.framework.BundleContext;
 import com.damienmiller.BCrypt;
@@ -1766,6 +1767,13 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
 
     @Override
     public void delete(final Context ctx, final User user, final Integer destUser, final Credentials auth) throws StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        if (user.getId() == destUser.intValue()) {
+            throw new InvalidDataException("It is not allowed to reassign the shared data to the user which should be deleted. Please choose a different reassign user.");
+        }
+
+        if (!tool.existsUser(ctx, destUser)) {
+            throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+        }
         delete(ctx, new User[] { user }, destUser, auth);
     }
 
