@@ -172,7 +172,7 @@ public final class IMAPAccess extends MailAccess<IMAPFolderStorage, IMAPMessageS
      */
     private static volatile ScheduledTimerTask cleanUpTimerTask;
 
-    private static Boolean checkConnectivityIfPolled;
+    private static volatile Boolean checkConnectivityIfPolled;
     private static boolean checkConnectivityIfPolled() {
         Boolean b = checkConnectivityIfPolled;
         if (null == b) {
