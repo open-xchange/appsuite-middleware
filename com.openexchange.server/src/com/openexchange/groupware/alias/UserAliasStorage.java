@@ -53,7 +53,6 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Set;
 import com.openexchange.exception.OXException;
-import com.openexchange.java.util.UUIDs;
 import com.openexchange.osgi.annotation.SingletonService;
 
 /**
@@ -67,12 +66,21 @@ import com.openexchange.osgi.annotation.SingletonService;
 public interface UserAliasStorage {
 
     /**
+     * Gets all aliases of the context.
+     *
+     * @param contextId The context identifier
+     * @return A <code>Set</code> of aliases belonging to given context
+     * @throws OXException If aliases cannot be returned
+     */
+    Set<String> getAliases(int contextId) throws OXException;
+
+    /**
      * Gets all aliases of the user.
      *
      * @param contextId The context identifier
      * @param userId The user identifier
      * @return A <code>Set</code> of aliases belonging to given user
-     * @throws OXException If an SQL error happened
+     * @throws OXException If aliases cannot be returned
      */
     Set<String> getAliases(int contextId, int userId) throws OXException;
 
@@ -82,7 +90,7 @@ public interface UserAliasStorage {
      * @param contextId The context identifier
      * @param alias The alias to search for
      * @return The user identifier or <code>-1</code> if this alias does not belong to any user
-     * @throws OXException If an SQL error happened
+     * @throws OXException If user cannot be returned
      */
     int getUserId(int contextId, String alias) throws OXException;
 
@@ -92,7 +100,7 @@ public interface UserAliasStorage {
      * @param contextId The context identifier
      * @param domain The domain to search for
      * @return The user identifiers
-     * @throws OXException If an SQL error happened
+     * @throws OXException If users cannot be returned
      */
     List<Integer> getUserIdsByAliasDomain(int contextId, String domain) throws OXException;
 
@@ -104,7 +112,7 @@ public interface UserAliasStorage {
      * @param userId The user identifier
      * @param alias The alias to create
      * @return <code>true</code> on successful creation; otherwise <code>false</code>
-     * @throws OXException If an SQL error happened
+     * @throws OXException If aliases cannot be created
      */
     boolean createAlias(Connection con, int contextId, int userId, String alias) throws OXException;
 
@@ -117,7 +125,7 @@ public interface UserAliasStorage {
      * @param oldAlias The old alias
      * @param newAlias The alias to update
      * @return <code>true</code> if update alias was successful; otherwise <code>false</code>
-     * @throws OXException If an SQL error happened
+     * @throws OXException If aliases cannot be updated
      */
     boolean updateAlias(Connection con, int contextId, int userId, String oldAlias, String newAlias) throws OXException;
 

@@ -160,7 +160,7 @@ public final class TransportMailAction extends AbstractMailAction {
                 final int contextId = session.getContextId();
                 final int userId = session.getUserId();
                 if (setting.isContactCollectOnMailTransport(contextId, userId).booleanValue()) {
-                    triggerContactCollector(session, composedMail);
+                    triggerContactCollector(session, composedMail, true);
                 }
             } catch (final OXException e) {
                 LOG.warn("Contact collector could not be triggered.", e);

@@ -1152,10 +1152,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
+                            triggerContactCollector(session, mail, true);
                         }
                         //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
@@ -1412,10 +1412,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
+                            triggerContactCollector(session, mail, true);
                         }
                         //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
@@ -1484,10 +1484,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                         final ServerUserSetting setting = ServerUserSetting.getInstance();
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
-                        if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailAccess(
+                        if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail);
+                            triggerContactCollector(session, mail, true);
                         }
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
@@ -1577,13 +1577,13 @@ public class Mail extends PermissionServlet implements UploadListener {
         return displayMode;
     }
 
-    private static void triggerContactCollector(final ServerSession session, final MailMessage mail) throws OXException {
+    private static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
             Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
 
             if (!addrs.isEmpty()) {
-                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), session);
+                ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
             }
         }
     }
@@ -3753,10 +3753,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                     final ServerUserSetting setting = ServerUserSetting.getInstance();
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
-                    if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                    if (setting.isContactCollectOnMailTransport(
                         contextId,
                         userId).booleanValue()) {
-                        triggerContactCollector(session, composedMail);
+                        triggerContactCollector(session, composedMail, true);
                     }
                 } catch (final OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);
@@ -4974,10 +4974,10 @@ public class Mail extends PermissionServlet implements UploadListener {
                                 final ServerUserSetting setting = ServerUserSetting.getInstance();
                                 final int contextId = session.getContextId();
                                 final int userId = session.getUserId();
-                                if (setting.isContactCollectionEnabled(contextId, userId).booleanValue() && setting.isContactCollectOnMailTransport(
+                                if (setting.isContactCollectOnMailTransport(
                                     contextId,
                                     userId).booleanValue()) {
-                                    triggerContactCollector(session, composedMails[0]);
+                                    triggerContactCollector(session, composedMails[0], true);
                                 }
                             } catch (final OXException e) {
                                 LOG.warn("Contact collector could not be triggered.", e);

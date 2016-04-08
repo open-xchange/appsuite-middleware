@@ -61,19 +61,30 @@ import com.openexchange.session.Session;
 public final class MemorizerTask {
 
     private final List<InternetAddress> addresses;
-
+    private final boolean incrementUseCount;
     private final Session session;
 
     /**
      * Initializes a new {@link MemorizerTask}.
      *
      * @param address The addresses to memorize
+     * @param incrementUseCount Whether use-count is supposed to be incremented
      * @param session The associated session
      */
-    public MemorizerTask(final List<InternetAddress> addresses, final Session session) {
+    public MemorizerTask(List<InternetAddress> addresses, boolean incrementUseCount, Session session) {
         super();
         this.addresses = addresses;
+        this.incrementUseCount = incrementUseCount;
         this.session = session;
+    }
+
+    /**
+     * Checks whether use-count is supposed to be incremented.
+     *
+     * @return <code>true</code> to increment; otherwise <code>false</code>
+     */
+    public boolean isIncrementUseCount() {
+        return incrementUseCount;
     }
 
     /**

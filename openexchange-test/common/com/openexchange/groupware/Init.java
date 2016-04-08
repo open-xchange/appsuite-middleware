@@ -98,7 +98,6 @@ import com.openexchange.contact.internal.ContactServiceLookup;
 import com.openexchange.contact.storage.internal.DefaultContactStorageRegistry;
 import com.openexchange.contact.storage.rdb.internal.RdbContactStorage;
 import com.openexchange.contact.storage.registry.ContactStorageRegistry;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.contacts.json.converters.ContactInsertDataHandler;
 import com.openexchange.context.ContextService;
 import com.openexchange.context.internal.ContextServiceImpl;
@@ -163,7 +162,6 @@ import com.openexchange.mail.transport.config.TransportPropertiesInit;
 import com.openexchange.mailaccount.MailAccountStorageService;
 import com.openexchange.mailaccount.UnifiedInboxManagement;
 import com.openexchange.mailaccount.internal.MailAccountStorageInit;
-import com.openexchange.osgi.ServiceRegistry;
 import com.openexchange.osgi.util.ServiceCallWrapperModifier;
 import com.openexchange.passwordmechs.PasswordMechFactoryImpl;
 import com.openexchange.push.udp.registry.PushServiceRegistry;
@@ -236,7 +234,7 @@ public final class Init {
 
     private static final Map<Class<?>, Object> services = new HashMap<Class<?>, Object>();
 
-    private static final ServiceLookup LOOKUP = new ServiceLookup() {
+    public static final ServiceLookup LOOKUP = new ServiceLookup() {
 
         @Override
         public <S> S getService(Class<? extends S> clazz) {
@@ -878,17 +876,7 @@ public final class Init {
     }
 
     private static void startAndInjectContactCollector() {
-        CCServiceRegistry.SERVICE_REGISTRY.set(new ServiceRegistry());
-        final ServiceRegistry reg = CCServiceRegistry.getInstance();
-        if (null == reg.getService(TimerService.class)) {
-            reg.addService(TimerService.class, services.get(TimerService.class));
-            reg.addService(ThreadPoolService.class, services.get(ThreadPoolService.class));
-            reg.addService(ContextService.class, services.get(ContextService.class));
-            reg.addService(UserConfigurationService.class, services.get(UserConfigurationService.class));
-            reg.addService(UserService.class, services.get(UserService.class));
-            //            reg.addService(ContactInterfaceDiscoveryService.class, services.get(ContactInterfaceDiscoveryService.class));
-            reg.addService(ContactService.class, services.get(ContactService.class));
-        }
+        // Nothing to do
     }
 
     private static void startAndInjectMailAccountStorageService() throws Exception {

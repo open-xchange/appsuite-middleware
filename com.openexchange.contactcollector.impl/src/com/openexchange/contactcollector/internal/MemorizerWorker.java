@@ -51,6 +51,7 @@ package com.openexchange.contactcollector.internal;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -71,14 +72,16 @@ import javax.mail.internet.ParseException;
 import javax.mail.internet.idn.IDNA;
 import com.openexchange.contact.ContactFieldOperand;
 import com.openexchange.contact.ContactService;
-import com.openexchange.contactcollector.osgi.CCServiceRegistry;
 import com.openexchange.context.ContextService;
 import com.openexchange.exception.OXException;
+import com.openexchange.groupware.alias.UserAliasStorage;
 import com.openexchange.groupware.contact.helpers.ContactField;
 import com.openexchange.groupware.container.Contact;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Strings;
+import com.openexchange.objectusecount.IncrementArguments;
+import com.openexchange.objectusecount.ObjectUseCountService;
 import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.search.CompositeSearchTerm;
 import com.openexchange.search.CompositeSearchTerm.CompositeOperation;
@@ -92,6 +95,7 @@ import com.openexchange.threadpool.ThreadPoolService;
 import com.openexchange.threadpool.ThreadPools;
 import com.openexchange.threadpool.behavior.CallerRunsBehavior;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.session.ServerSessionAdapter;
 import com.openexchange.user.UserService;
@@ -112,27 +116,24 @@ public final class MemorizerWorker {
      * Member stuff
      */
 
-    private final BlockingQueue<MemorizerTask> queue;
-
+    final ServiceLookup services;
+    final BlockingQueue<MemorizerTask> queue;
     private final AtomicReference<Future<Object>> mainFutureRef;
-
-    private final AtomicBoolean flag;
-
-    private final ReadWriteLock readWriteLock;
+    final AtomicBoolean flag;
+    final ReadWriteLock readWriteLock;
 
     /**
      * Initializes a new {@link MemorizerWorker}.
-     *
-     * @throws OXException If thread pool service is missing
      */
-    public MemorizerWorker() throws OXException {
+    public MemorizerWorker(ServiceLookup services) {
         super();
+        this.services = services;
         readWriteLock = new ReentrantReadWriteLock();
         this.flag = new AtomicBoolean(true);
         this.queue = new LinkedBlockingQueue<MemorizerTask>();
         final ThreadPoolService tps = ThreadPools.getThreadPool();
         mainFutureRef = new AtomicReference<Future<Object>>();
-        mainFutureRef.set(tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue, readWriteLock.writeLock()), "ContactCollector"), CallerRunsBehavior.<Object> getInstance()));
+        mainFutureRef.set(tps.submit(ThreadPools.task(new MemorizerCallable(), "ContactCollector"), CallerRunsBehavior.<Object> getInstance()));
     }
 
     /**
@@ -157,68 +158,59 @@ public final class MemorizerWorker {
      * Submits specified task.
      *
      * @param memorizerTask The task
-     * @throws OXException If thread pool service is missing
      */
-    public void submit(final MemorizerTask memorizerTask) throws OXException {
+    public void submit(final MemorizerTask memorizerTask) {
         final Lock readLock = readWriteLock.readLock();
         readLock.lock();
         try {
             if (!flag.get()) {
-                /*
-                 * Closed
-                 */
+                // Shut-down in the meantime
                 return;
             }
+
             Future<Object> f = mainFutureRef.get();
-            if (isDone(f)) {
-                /*-
-                 * Upgrade lock manually
-                 *
-                 * Must unlock first to obtain write lock
-                 */
-                readLock.unlock();
-                final Lock writeLock = readWriteLock.writeLock();
-                writeLock.lock();
-                try {
-                    if (!flag.get()) {
-                        /*
-                         * Closed
-                         */
-                        return;
-                    }
-                    f = mainFutureRef.get();
-                    if (isDone(f)) {
-                        /*
-                         * Check if needed service is present
-                         */
-                        final ThreadPoolService tps = ThreadPools.getThreadPool();
-                        /*
-                         * Offer task
-                         */
-                        queue.offer(memorizerTask);
-                        /*
-                         * Start new thread for processing tasks from queue
-                         */
-                        f = tps.submit(ThreadPools.task(new MemorizerCallable(flag, queue, writeLock), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
-                        mainFutureRef.set(f);
-                    } else {
-                        /*
-                         * Thread is running; offer task
-                         */
-                        queue.offer(memorizerTask);
-                    }
-                } finally {
-                    /*
-                     * Downgrade lock
-                     */
-                    readLock.lock();
-                    writeLock.unlock();
-                }
-            } else {
-                /*
-                 * Thread is running; offer task
-                 */
+            if (!isDone(f)) {
+                // Worker thread is running; offer task
                 queue.offer(memorizerTask);
+                return;
+            }
+
+            /*-
+             * Upgrade lock manually
+             *
+             * Must unlock first to obtain write lock
+             */
+            readLock.unlock();
+            final Lock writeLock = readWriteLock.writeLock();
+            writeLock.lock();
+            try {
+                if (!flag.get()) {
+                    // Shut-down in the meantime
+                    return;
+                }
+
+                f = mainFutureRef.get();
+                if (!isDone(f)) {
+                    // Worker thread got initialized meanwhile; offer task
+                    queue.offer(memorizerTask);
+                    return;
+                }
+
+                // Grab thread pool service
+                ThreadPoolService tps = ThreadPools.getThreadPool();
+
+                // Offer task
+                queue.offer(memorizerTask);
+
+                // Start new thread for processing tasks from queue
+                f = tps.submit(ThreadPools.task(new MemorizerCallable(), "ContactCollector"), CallerRunsBehavior.<Object> getInstance());
+                mainFutureRef.set(f);
+            } finally {
+                /*
+                 * Downgrade lock
+                 */
+                readLock.lock();
+                writeLock.unlock();
             }
         } finally {
             readLock.unlock();
@@ -229,19 +221,10 @@ public final class MemorizerWorker {
         return ((null == f) || f.isDone());
     }
 
-    private static final class MemorizerCallable implements Callable<Object> {
+    private final class MemorizerCallable implements Callable<Object> {
 
-        private final AtomicBoolean flag;
-
-        private final BlockingQueue<MemorizerTask> queue;
-
-        private final Lock writeLock;
-
-        public MemorizerCallable(final AtomicBoolean flag, final BlockingQueue<MemorizerTask> queue, final Lock writeLock) {
+        MemorizerCallable() {
             super();
-            this.flag = flag;
-            this.queue = queue;
-            this.writeLock = writeLock;
         }
 
         private final void waitForTasks(final List<MemorizerTask> tasks) throws InterruptedException {
@@ -285,6 +268,7 @@ public final class MemorizerWorker {
                     /*
                      * Wait time elapsed and no new tasks were offered
                      */
+                    Lock writeLock = readWriteLock.writeLock();
                     writeLock.lock();
                     try {
                         /*
@@ -301,174 +285,187 @@ public final class MemorizerWorker {
                 /*
                  * Process tasks
                  */
-                for (final MemorizerTask task : tasks) {
-                    handleTask(task);
+                for (MemorizerTask task : tasks) {
+                    handleTask(task, services);
                 }
             }
             return null;
         }
-
     }
+
+    // ------------------------------------------------------------------------------------------------------------------------------------
 
     /**
      * Handles specified task
      *
      * @param memorizerTask The task
+     * @param services The service look-up
      */
-    static void handleTask(final MemorizerTask memorizerTask) {
-        final Session session = memorizerTask.getSession();
-        if (!isEnabled(session) || getFolderId(session) == 0) {
+    static void handleTask(MemorizerTask memorizerTask, ServiceLookup services) {
+        Session session = memorizerTask.getSession();
+        if (!isEnabled(session)) {
             return;
         }
-        final Context ctx;
-        final Set<InternetAddress> aliases;
-        final UserConfiguration userConfig;
+
+        int folderId = getFolderId(session);
+        if (folderId == 0) {
+            return;
+        }
+
+        Context ctx;
+        Set<InternetAddress> aliases;
+        UserConfiguration userConfig;
+        ContactService contactService;
+        ObjectUseCountService useCountService = null;
         try {
-            final ServiceLookup serviceRegistry = CCServiceRegistry.getInstance();
-            final ContextService contextService = serviceRegistry.getService(ContextService.class);
+            // Acquire needed services
+            ContextService contextService = services.getOptionalService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");
                 return;
             }
-            ctx = contextService.getContext(session.getContextId());
 
-            final UserService userService = serviceRegistry.getService(UserService.class);
+            UserService userService = services.getOptionalService(UserService.class);
             if (null == userService) {
                 LOG.warn("Contact collector run aborted: missing user service");
                 return;
             }
-            if (ALL_ALIASES) {
-                // All context-known users' aliases
-                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService);
-            } else {
-                // Only aliases of session user
-                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx));
-            }
 
-            final UserConfigurationService userConfigurationService = serviceRegistry.getService(UserConfigurationService.class);
+            UserConfigurationService userConfigurationService = services.getOptionalService(UserConfigurationService.class);
             if (null == userConfigurationService) {
                 LOG.warn("Contact collector run aborted: missing user configuration service");
                 return;
             }
+
+            contactService = services.getOptionalService(ContactService.class);
+            if (null == contactService) {
+                LOG.warn("Contact collector run aborted: missing contact service");
+                return;
+            }
+
+            useCountService = memorizerTask.isIncrementUseCount() ? services.getOptionalService(ObjectUseCountService.class) : null;
+
+            ctx = contextService.getContext(session.getContextId());
+            UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
+            if (ALL_ALIASES) {
+                // All context-known users' aliases
+                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
+            } else {
+                // Only aliases of session user
+                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
+            }
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
-        } catch (final OXException e) {
-            LOG.error("Contact collector run aborted.", e);
-            return;
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
             return;
         }
-        /*
-         * Iterate addresses
-         */
-        for (final InternetAddress address : memorizerTask.getAddresses()) {
-            /*
-             * Check if address is contained in user's aliases
-             */
+
+        // Iterate addresses...
+        for (InternetAddress address : memorizerTask.getAddresses()) {
+            // Check if address is contained in user's aliases
             if (!aliases.contains(address)) {
                 try {
-                    memorizeContact(address, session, ctx, userConfig);
-                } catch (final OXException e) {
+                    memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCountService);
+                } catch (Exception e) {
                     LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
                 }
             }
         }
     }
 
-    private static final ContactField[] FIELDS = {
-        ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED };
+    // ------------------------------------------------------------------------------------------------------------------------------------
+
+    private static final ContactField[] FIELDS = { ContactField.OBJECT_ID, ContactField.FOLDER_ID, ContactField.LAST_MODIFIED };
 
 	private static final ContactField[] SEARCH_FIELDS = { ContactField.EMAIL1, ContactField.EMAIL2, ContactField.EMAIL3 };
 
-    private static int memorizeContact(final InternetAddress address, final Session session, final Context ctx, final UserConfiguration userConfig) throws OXException {
-        /*
-         * Convert email address to a contact
-         */
-        final Contact contact;
-        try {
-            contact = transformInternetAddress(address, session);
-        } catch (final ParseException e) {
-            // Decoding failed; ignore contact
-            LOG.warn("", e);
-            return -1;
-        } catch (final UnsupportedEncodingException e) {
-            // Decoding failed; ignore contact
-            LOG.warn("", e);
-            return -1;
+    static void memorizeContact(InternetAddress address, int folderId, Session session, Context ctx, UserConfiguration userConfig, ContactService contactService, ObjectUseCountService useCountService) throws OXException {
+        // Convert email address to a contact
+        Contact contact = transformInternetAddress(address, session);
+        if (null == contact) {
+            return;
         }
-        /*
-         * Check if such a contact already exists
-         */
-        final ContactService contactService = CCServiceRegistry.getInstance().getService(ContactService.class);
-        final Contact foundContact;
+
+        // Check if such a contact already exists to either create a contact or increment its use count
+        List<Contact> foundContacts = null;
         {
-        	final CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
-        	for (final ContactField field : SEARCH_FIELDS) {
-        		final SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
+        	CompositeSearchTerm orTerm = new CompositeSearchTerm(CompositeOperation.OR);
+        	for (ContactField field : SEARCH_FIELDS) {
+        		SingleSearchTerm term = new SingleSearchTerm(SingleOperation.EQUALS);
         		term.addOperand(new ContactFieldOperand(field));
         		term.addOperand(new ConstantOperand<String>(contact.getEmail1()));
         		orTerm.addSearchTerm(term);
         	}
-        	final SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
+
+        	SearchIterator<Contact> iterator = contactService.searchContacts(session, orTerm, FIELDS);
             try {
                 if (iterator.hasNext()) {
-                    foundContact = iterator.next();
-                } else {
-                    foundContact = null;
+                    // At least one such contact found: If no use-count service was passed, then there is nothing to do.
+                    if (null == useCountService) {
+                        return;
+                    }
+
+                    foundContacts = new LinkedList<Contact>();
+                    do {
+                        foundContacts.add(iterator.next());
+                    } while (iterator.hasNext());
                 }
             } finally {
-                iterator.close();
+                SearchIterators.close(iterator);
             }
         }
-        /*
-         * Either create contact or increment its use count
-         */
-        final int retval;
-        if (null == foundContact) {
-            final OXFolderAccess folderAccess = new OXFolderAccess(ctx);
-            final int folderId = getFolderId(session);
-            if (folderAccess.exists(folderId)) {
-                final OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
-                if (perm.canCreateObjects()) {
-                    contact.setUseCount(1);
-                    contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
-                    retval = contact.getObjectID();
-                } else {
-                    retval = -1;
+
+        // No such contacts?
+        if (null == foundContacts) {
+            OXFolderAccess folderAccess = new OXFolderAccess(ctx);
+            if (!folderAccess.exists(folderId)) {
+                // Contact collector folder does not exist
+                return;
+            }
+
+            OCLPermission perm = folderAccess.getFolderPermission(folderId, session.getUserId(), userConfig);
+            if (!perm.canCreateObjects()) {
+                // Insufficient permissions granted on contact collector folder
+                return;
+            }
+
+            contactService.createContact(session, Integer.toString(contact.getParentFolderID()), contact);
+            int objectId = contact.getObjectID();
+            incrementUseCount(objectId, folderId, session, useCountService);
+            return;
+        }
+
+        // Such contacts already exists...
+        if (null != useCountService) {
+            for (Contact foundContact : foundContacts) {
+                OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
+                if (perm.canWriteAllObjects()) {
+                    incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
                 }
-            } else {
-                retval = -1;
             }
-        } else {
-            final int currentCount = foundContact.getUseCount();
-            final int newCount = currentCount + 1;
-            foundContact.setUseCount(newCount);
-            final OCLPermission perm =
-                new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
-            if (perm.canWriteAllObjects()) {
-                contactService.updateContact(session, Integer.toString(foundContact.getParentFolderID()),
-                		Integer.toString(foundContact.getObjectID()), foundContact, foundContact.getLastModified());
-            }
-            retval = foundContact.getObjectID();
         }
-        return retval;
     }
 
-    private static boolean isEnabled(final Session session) {
-        try {
-            if (!ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses()) {
-                return false;
+    static void incrementUseCount(int objectId, int folderId, Session session, ObjectUseCountService useCountService) {
+        if (null != useCountService) {
+            try {
+                useCountService.incrementObjectUseCount(session, new IncrementArguments.Builder(objectId, folderId).build());
+            } catch (Exception e) {
+                LOG.warn("Failed to increment use count for contact {} inside folder {} for user {} in context {}", objectId, folderId, session.getUserId(), session.getContextId(), e);
             }
+        }
+    }
 
-            Boolean enabled = ServerUserSetting.getInstance().isContactCollectionEnabled(session.getContextId(), session.getUserId());
-            return enabled != null && enabled.booleanValue();
+    static boolean isEnabled(final Session session) {
+        try {
+            return ServerSessionAdapter.valueOf(session).getUserPermissionBits().isCollectEmailAddresses();
         } catch (final OXException e) {
             LOG.error("", e);
         }
         return false;
     }
 
-    private static int getFolderId(final Session session) {
+    static int getFolderId(final Session session) {
         try {
             final Integer folder = ServerUserSetting.getInstance().getContactCollectionFolder(session.getContextId(), session.getUserId());
             return null == folder ? 0 : folder.intValue();
@@ -478,19 +475,28 @@ public final class MemorizerWorker {
         }
     }
 
-    private static Contact transformInternetAddress(final InternetAddress address, final Session session) throws ParseException, UnsupportedEncodingException {
-        final Contact retval = new Contact();
-        retval.setParentFolderID(getFolderId(session));
-        final String addr = decodeMultiEncodedValue(IDNA.toIDN(address.getAddress()));
-        retval.setEmail1(addr);
-        if (false == Strings.isEmpty(address.getPersonal())) {
-            String displayName = decodeMultiEncodedValue(address.getPersonal());
-//            new ParsedDisplayName(displayName).applyTo(retval);
-            retval.setDisplayName(displayName);
-        } else {
-            retval.setDisplayName(addr);
+    private static Contact transformInternetAddress(final InternetAddress address, final Session session) {
+        try {
+            Contact retval = new Contact();
+            retval.setParentFolderID(getFolderId(session));
+            final String addr = decodeMultiEncodedValue(IDNA.toIDN(address.getAddress()));
+            retval.setEmail1(addr);
+            if (false == Strings.isEmpty(address.getPersonal())) {
+                String displayName = decodeMultiEncodedValue(address.getPersonal());
+                retval.setDisplayName(displayName);
+            } else {
+                retval.setDisplayName(addr);
+            }
+            return retval;
+        } catch (ParseException e) {
+            // Decoding failed; ignore contact
+            LOG.warn("", e);
+        } catch (UnsupportedEncodingException e) {
+            // Decoding failed; ignore contact
+            LOG.warn("", e);
         }
-        return retval;
+
+        return null;
     }
 
     private static final Pattern ENC_PATTERN = Pattern.compile("(=\\?\\S+?\\?\\S+?\\?)(.+?)(\\?=)");

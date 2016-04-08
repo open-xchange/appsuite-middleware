@@ -47,56 +47,41 @@
  *
  */
 
-package com.openexchange.contactcollector.preferences;
+package com.openexchange.groupware.delete;
 
-import com.openexchange.config.ConfigurationService;
+import java.sql.Connection;
 import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
-import com.openexchange.groupware.ldap.User;
-import com.openexchange.groupware.settings.IValueHandler;
-import com.openexchange.groupware.settings.PreferencesItemService;
-import com.openexchange.groupware.settings.ReadOnlyValue;
-import com.openexchange.groupware.settings.Setting;
-import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.server.ServiceLookup;
-import com.openexchange.session.Session;
+import com.openexchange.groupware.ldap.UserStorage;
+
 
 /**
- * {@link ContactCollectFolderDeleteDenied}
+ * {@link InvalidateUserCacheOnContextDelete} - Clears user cache on context delete.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since 7.8.2
  */
-public class ContactCollectFolderDeleteDenied implements PreferencesItemService {
+public final class InvalidateUserCacheOnContextDelete extends ContextDelete {
 
-    private static final String[] PATH = new String [] { "modules", "mail", "contactCollectFolderDeleteDenied" };
-
-    final ServiceLookup services;
-
-    public ContactCollectFolderDeleteDenied(ServiceLookup services) {
+    /**
+     * Initializes a new {@link InvalidateUserCacheOnContextDelete}.
+     */
+    public InvalidateUserCacheOnContextDelete() {
         super();
-        this.services = services;
     }
 
     @Override
-    public String[] getPath() {
-        return PATH;
+    public void deletePerformed(final DeleteEvent event, final Connection readCon, final Connection writeCon) throws OXException {
+        if (!isContextDelete(event)) {
+            return;
+        }
+
+        Context context = event.getContext();
+        UserStorage userStorage = UserStorage.getInstance();
+        int[] userIds = userStorage.listAllUser(writeCon, context, true, false);
+        for (int i = userIds.length; i-- > 0;) {
+            userStorage.invalidateUser(context, userIds[i]);
+        }
     }
 
-    @Override
-    public IValueHandler getSharedValue() {
-        return new ReadOnlyValue() {
-
-            @Override
-            public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                ConfigurationService service = services.getOptionalService(ConfigurationService.class);
-                Boolean value = Boolean.valueOf(null != service && service.getBoolProperty("com.openexchange.contactcollector.folder.deleteDenied", false));
-                setting.setSingleValue(value);
-            }
-
-            @Override
-            public boolean isAvailable(final UserConfiguration userConfig) {
-                return true;
-            }
-        };
-    }
 }

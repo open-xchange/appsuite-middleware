@@ -65,6 +65,8 @@ import com.openexchange.client.onboarding.OnboardingUtility;
 import com.openexchange.client.onboarding.Result;
 import com.openexchange.client.onboarding.ResultReply;
 import com.openexchange.client.onboarding.Scenario;
+import com.openexchange.client.onboarding.net.HostAndPort;
+import com.openexchange.client.onboarding.net.NetUtility;
 import com.openexchange.client.onboarding.plist.OnboardingPlistProvider;
 import com.openexchange.client.onboarding.plist.PlistResult;
 import com.openexchange.config.cascade.ComposedConfigProperty;
@@ -216,9 +218,19 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
         payloadContent.setPayloadVersion(1);
         payloadContent.addStringValue("PayloadOrganization", "Open-Xchange");
         payloadContent.addStringValue("CalDAVUsername", OnboardingUtility.getUserLogin(userId, contextId));
-        String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
-        payloadContent.addStringValue("CalDAVHostName", calDAVUrl);
-        payloadContent.addBooleanValue("CalDAVUseSSL", calDAVUrl.startsWith("https://"));
+
+        {
+            String calDAVUrl = getCalDAVUrl(null, false, userId, contextId);
+            boolean isSsl = NetUtility.impliesSsl(calDAVUrl);
+            HostAndPort hostAndPort = NetUtility.parseHostNameString(calDAVUrl);
+
+            payloadContent.addStringValue("CalDAVHostName", hostAndPort.getHost());
+            if (hostAndPort.getPort() > 0) {
+                payloadContent.addIntegerValue("CalDAVPort", hostAndPort.getPort());
+            }
+            payloadContent.addBooleanValue("CalDAVUseSSL", isSsl);
+        }
+
         payloadContent.addStringValue("CalDAVAccountDescription", OnboardingUtility.getProductName(hostName, userId, contextId) + " CalDAV");
 
         // Add payload content dictionary to top-level dictionary
@@ -246,7 +258,7 @@ public class CalDAVOnboardingProvider implements OnboardingPlistProvider {
             throw OnboardingExceptionCodes.MISSING_PROPERTY.create(propertyName);
         }
 
-        return value;
+        return value.trim();
     }
 
 }

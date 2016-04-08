@@ -8,7 +8,7 @@
  *
  *    In some countries OX, OX Open-Xchange, open xchange and OXtender
  *    as well as the corresponding Logos OX Open-Xchange and OX are registered
- *    trademarks of the OX Software GmbH group of companies.
+ *    trademarks of the OX Software GmbH. group of companies.
  *    The use of the Logos is not covered by the GNU General Public License.
  *    Instead, you are allowed to use these Logos according to the terms and
  *    conditions of the Creative Commons License, Version 2.5, Attribution,
@@ -47,34 +47,93 @@
  *
  */
 
-package com.openexchange.contactcollector.osgi;
+package com.openexchange.client.onboarding.net;
 
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.osgi.ServiceRegistry;
+import com.openexchange.java.Strings;
 
 /**
- * {@link CCServiceRegistry} - The service registry for contact collector.
+ * {@link HostAndPort} - An immutable representation of a host and port.
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
+ * @since v7.8.1
  */
-public final class CCServiceRegistry {
+public class HostAndPort {
 
-    public static final AtomicReference<ServiceRegistry> SERVICE_REGISTRY = new AtomicReference<ServiceRegistry>();
+    private final String host;
+    private final int port;
+    private final int hashCode;
 
     /**
-     * Gets the service registry instance.
+     * Initializes a new {@link HostAndPort} w/o a port.
      *
-     * @return The service registry instance.
+     * @param host The host name; e.g. <code>"dav.example.com"</code>
      */
-    public static ServiceRegistry getInstance() {
-        return SERVICE_REGISTRY.get();
+    public HostAndPort(String host) {
+        this(host, 0);
     }
 
     /**
-     * Initializes a new {@link CCServiceRegistry}.
+     * Initializes a new {@link HostAndPort}.
+     *
+     * @param host The host name; e.g. <code>"dav.example.com"</code>
+     * @param port The port; e.g. <code>8843</code>
      */
-    private CCServiceRegistry() {
+    public HostAndPort(String host, int port) {
         super();
+        if (port < 0 || port > 0xFFFF) {
+            throw new IllegalArgumentException("port out of range:" + port);
+        }
+        if (host == null) {
+            throw new IllegalArgumentException("hostname can't be null");
+        }
+        this.host = host;
+        this.port = port;
+        hashCode = (Strings.asciiLowerCase(host).hashCode()) ^ port;
+    }
+
+    /**
+     * Gets the host name
+     *
+     * @return The host name
+     */
+    public String getHost() {
+        return host;
+    }
+
+    /**
+     * Gets the port number
+     *
+     * @return The port number or <code>0</code> if not set
+     */
+    public int getPort() {
+        return port;
+    }
+
+    @Override
+    public int hashCode() {
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof HostAndPort)) {
+            return false;
+        }
+        HostAndPort other = (HostAndPort) obj;
+        if (port != other.port) {
+            return false;
+        }
+        if (host == null) {
+            if (other.host != null) {
+                return false;
+            }
+        } else if (!host.equals(other.host)) {
+            return false;
+        }
+        return true;
     }
 
 }

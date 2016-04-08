@@ -187,6 +187,7 @@ public final class DeleteRegistry {
             new AttachmentDelDelete(),
             new CacheClearerOnContextDelete(),
             new SessionClearerOnContextDelete(),
+            new InvalidateUserCacheOnContextDelete(),
             new ObjectPermissionDeleteListener(),
             /*
              * Insert folder delete listener

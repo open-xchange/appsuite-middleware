@@ -57,7 +57,6 @@ import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.groupware.settings.ReadOnlyValue;
 import com.openexchange.groupware.settings.Setting;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
-import com.openexchange.preferences.ServerUserSetting;
 import com.openexchange.session.Session;
 
 public class ContactCollectEnabled implements PreferencesItemService {
@@ -79,7 +78,7 @@ public class ContactCollectEnabled implements PreferencesItemService {
 
             @Override
             public void getValue(final Session session, final Context ctx, final User user, final UserConfiguration userConfig, final Setting setting) throws OXException {
-                final Boolean value = ServerUserSetting.getInstance().isContactCollectionEnabled(ctx.getContextId(), user.getId());
+                Boolean value = Boolean.valueOf(userConfig.isCollectEmailAddresses());
                 setting.setSingleValue(value);
             }
 

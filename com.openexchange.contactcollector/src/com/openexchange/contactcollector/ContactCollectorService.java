@@ -64,8 +64,9 @@ public interface ContactCollectorService {
      * Remembers specified addresses.
      *
      * @param addresses The addresses to remember
+     * @param incrementUseCount Whether use-count is supposed to be incremented
      * @param session The user-session
      */
-    void memorizeAddresses(List<InternetAddress> addresses, Session session);
+    void memorizeAddresses(List<InternetAddress> addresses, boolean incrementUseCount, Session session);
 
 }

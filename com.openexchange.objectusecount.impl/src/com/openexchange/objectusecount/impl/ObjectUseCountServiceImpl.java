@@ -91,7 +91,8 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(ObjectUseCountServiceImpl.class);
 
-    private final ServiceLookup services;
+    /** The service look-up */
+    final ServiceLookup services;
 
     /**
      * Initializes a new {@link ObjectUseCountServiceImpl}.
@@ -238,6 +239,10 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     }
 
     private void incrementObjectUseCount(TIntIntMap object2folder, int userId, int contextId) throws OXException {
+        if (null == object2folder || object2folder.isEmpty()) {
+            return;
+        }
+
         DatabaseService dbService = services.getService(DatabaseService.class);
         if (null == dbService) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(DatabaseService.class);
@@ -253,6 +258,10 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
     void incrementObjectUseCount(TIntIntMap contact2folder, int userId, int contextId, Connection con) throws OXException {
         if (null == con) {
             incrementObjectUseCount(contact2folder, userId, contextId);
+            return;
+        }
+
+        if (null == contact2folder || contact2folder.isEmpty()) {
             return;
         }
 
