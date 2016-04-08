@@ -1243,7 +1243,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // Apparently, no error occurred
                 contextCreated = true;
 
-                LOG.info("Context {} created!", retval.getId());
+                LOG.info("Context {} created with strategy {}!", retval.getId(), schemaResult.getStrategy().toString());
                 return retval;
             } catch (SQLException e) {
                 throw new StorageException(e.getMessage(), e);
