@@ -103,6 +103,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         p.put(Commands.VACATION.getJsonName(), new VacationActionCommandParser());
         p.put(Commands.ENOTIFY.getJsonName(), new EnotifyActionCommandParser());
         p.put(Commands.ADDFLAG.getJsonName(), new AddFlagActionCommandParser());
+        p.put(Commands.REMOVEFLAG.getJsonName(), new AddFlagActionCommandParser());
         p.put(Commands.PGP_ENCRYPT.getJsonName(), new PGPEncryptActionCommandParser());
         parsers = Collections.unmodifiableMap(p);
     }
@@ -246,7 +247,7 @@ public class ActionCommandRuleFieldMapper implements RuleFieldMapper {
         return ActionCommand.Commands.FILEINTO.equals(actionCommand.getCommand());
     }
 
-    private static final EnumSet<ActionCommand.Commands> MESSAGE_OPS = EnumSet.of(ActionCommand.Commands.ADDFLAG, ActionCommand.Commands.ADDHEADER, ActionCommand.Commands.DELETEHEADER);
+    private static final EnumSet<ActionCommand.Commands> MESSAGE_OPS = EnumSet.of(ActionCommand.Commands.REMOVEFLAG, ActionCommand.Commands.ADDFLAG, ActionCommand.Commands.ADDHEADER, ActionCommand.Commands.DELETEHEADER);
 
     private static boolean isMessageOp(ActionCommand actionCommand) {
         return MESSAGE_OPS.contains(actionCommand.getCommand());

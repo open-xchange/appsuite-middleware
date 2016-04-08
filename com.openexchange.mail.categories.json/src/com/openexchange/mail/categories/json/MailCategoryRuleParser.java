@@ -49,15 +49,13 @@
 
 package com.openexchange.mail.categories.json;
 
+import java.util.Arrays;
 import java.util.Map;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import com.openexchange.java.Strings;
 import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
-import com.openexchange.mail.search.ANDTerm;
-import com.openexchange.mail.search.HeaderTerm;
-import com.openexchange.mail.search.ORTerm;
-import com.openexchange.mail.search.SearchTerm;
 
 /**
  * {@link MailCategoryRuleParser}
@@ -82,7 +80,9 @@ public class MailCategoryRuleParser {
         MailCategoryRule result = null;
         boolean isAND = false;
         if (!json.has(SUBTESTS_STR)) {
-            return new MailCategoryRule(json.getString(HEADER_STR), json.getString(VALUE_STR), flag);
+            String[] headers = Strings.splitByComma(json.getString(HEADER_STR));
+            String[] values = Strings.splitByComma(json.getString(VALUE_STR));
+            return new MailCategoryRule(Arrays.asList(headers), Arrays.asList(values), flag);
         }
 
         if (json.has(OPERATOR_STR)) {
@@ -100,32 +100,6 @@ public class MailCategoryRuleParser {
 
             JSONObject subTest = new JSONObject((Map<String, ? extends Object>) subObject);
             result.addSubRule(parseJSON(subTest, flag));
-        }
-        return result;
-    }
-
-    public static SearchTerm<?> getSearchTerm(MailCategoryRule rule) {
-        if (!rule.hasSubRules()) {
-            return new HeaderTerm(rule.getHeader(), rule.getValue());
-        }
-
-        SearchTerm<?> result = null;
-        if (rule.isAND()) {
-            for (MailCategoryRule subRule : rule.getSubRules()) {
-                if (result == null) {
-                    result = getSearchTerm(subRule);
-                } else {
-                    result = new ANDTerm(result, getSearchTerm(subRule));
-                }
-            }
-        } else {
-            for (MailCategoryRule subRule : rule.getSubRules()) {
-                if (result == null) {
-                    result = getSearchTerm(subRule);
-                } else {
-                    result = new ORTerm(result, getSearchTerm(subRule));
-                }
-            }
         }
         return result;
     }

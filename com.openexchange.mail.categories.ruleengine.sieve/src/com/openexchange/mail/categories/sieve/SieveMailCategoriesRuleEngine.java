@@ -50,8 +50,11 @@
 package com.openexchange.mail.categories.sieve;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.security.auth.Subject;
 import org.apache.jsieve.SieveException;
 import org.apache.jsieve.TagArgument;
@@ -165,7 +168,9 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         actionCommands.add(addFlagAction);
         String[] flagsToRemove = rule.getFlagsToRemove();
         if (flagsToRemove != null) {
-            //TODO add remove flags action
+            ArrayList<Object> removeFlagArgList = new ArrayList<>();
+            removeFlagArgList.add(Arrays.asList(flagsToRemove));
+            actionCommands.add(0, new ActionCommand(ActionCommand.Commands.REMOVEFLAG, removeFlagArgList));
         }
         IfCommand ifCommand = new IfCommand(getCommand(rule), actionCommands);
         ArrayList<Command> commands = new ArrayList<Command>(Collections.singleton(ifCommand));
@@ -181,8 +186,8 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
         if (!rule.hasSubRules()) {
             List<Object> argList = new ArrayList<Object>(4);
             argList.add(createTagArgument("contains"));
-            argList.add(Collections.singletonList(rule.getHeader()));
-            argList.add(Collections.singletonList(rule.getValue()));
+            argList.add(rule.getHeaders());
+            argList.add(rule.getValues());
             return new TestCommand(Commands.HEADER, argList, new ArrayList<TestCommand>());
         }
 
@@ -252,12 +257,95 @@ public class SieveMailCategoriesRuleEngine implements MailCategoriesRuleEngine {
             throw MailCategoriesRuleEngineExceptionCodes.UNABLE_TO_RETRIEVE_RULE.create();
         }
 
-        List<String> list = (List<String>) argList.get(1);
-        String header = list.get(0);
-        list = (List<String>) argList.get(2);
-        String value = list.get(0);
-        return new MailCategoryRule(header, value, flag);
+        List<String> headers = (List<String>) argList.get(1);
+        List<String> values = (List<String>) argList.get(2);
+        return new MailCategoryRule(headers, values, flag);
 
+    }
+
+    @Override
+    public void removeValueFromHeader(Session session, String value, String header) throws OXException {
+        MailFilterService mailFilterService = services.getService(MailFilterService.class);
+        if (mailFilterService == null) {
+            throw MailCategoriesExceptionCodes.SERVICE_UNAVAILABLE.create(MailFilterService.class);
+        }
+        Credentials creds = getCredentials(session);
+        List<Rule> rules = mailFilterService.listRules(creds, "category");
+        List<Rule> rules2update = new ArrayList<>();
+        for (Rule rule : rules) {
+
+            TestCommand test = rule.getTestCommand();
+            Map<TestCommand, List<TestCommand>> toDeleteMap = new HashMap<>();
+            boolean removed = removeValueFromHeader(null, test, value, header, toDeleteMap, rule.getIfCommand());
+            if (removed) {
+                rules2update.add(rule);
+            }
+            for (TestCommand parent : toDeleteMap.keySet()) {
+                for (TestCommand deleteEntry : toDeleteMap.get(parent)) {
+                    parent.removeTestCommand(deleteEntry);
+                }
+            }
+        }
+
+        for (Rule rule : rules2update) {
+            TestCommand testCom = rule.getTestCommand();
+            if (testCom != null) {
+                if (testCom.getCommand() == TestCommand.Commands.ANYOF || testCom.getCommand() == TestCommand.Commands.ALLOF) {
+                    if (testCom.getTestCommands().isEmpty()) {
+                        mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
+                        continue;
+                    }
+                }
+            } else {
+                mailFilterService.deleteFilterRule(creds, rule.getUniqueId());
+                continue;
+            }
+            mailFilterService.updateFilterRule(creds, rule, rule.getUniqueId());
+        }
+
+    }
+
+    @SuppressWarnings("unchecked")
+    private boolean removeValueFromHeader(TestCommand parent, TestCommand child, String value, String header, Map<TestCommand, List<TestCommand>> deleteMap, IfCommand root) {
+        boolean result = false;
+        List<TestCommand> commands = child.getTestCommands();
+        if (commands != null && commands.isEmpty() == false) {
+
+            for (TestCommand subchild : commands) {
+                boolean tmpResult = removeValueFromHeader(child, subchild, value, header, deleteMap, root);
+                if (tmpResult) {
+                    result = true;
+                }
+            }
+
+        } else {
+            List<Object> args = child.getArguments();
+            if (!args.isEmpty()) {
+                List<String> headers = (List<String>) args.get(1);
+                if (headers.contains(header)) {
+                    List<String> values = (List<String>) args.get(2);
+                    while (values.contains(value)) {
+                        boolean tmpResult = values.remove(value);
+                        if (tmpResult == true) {
+                            result = true;
+                        }
+                    }
+                    if (values.isEmpty()) {
+                        if (parent != null) {
+                            List<TestCommand> deleteEntries = deleteMap.get(parent);
+                            if (deleteEntries == null) {
+                                deleteEntries = new ArrayList<>();
+                                deleteMap.put(parent, deleteEntries);
+                            }
+                            deleteEntries.add(child);
+                        } else {
+                            root.setTestcommand(null);
+                        }
+                    }
+                }
+            }
+        }
+        return result;
     }
 
 }

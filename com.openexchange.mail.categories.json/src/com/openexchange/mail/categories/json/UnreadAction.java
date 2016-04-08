@@ -81,6 +81,7 @@ import com.openexchange.tools.session.ServerSession;
  */
 @Action(method = RequestMethod.GET, name = "unread", description = "Retrieves the unread count of all categories", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
+    @Parameter(name = "category_ids", description = "A comma separated list of category identifiers. If set only the unread counters of this categories are retrieved.")
 }, responseDescription = "Response: A JSON Object containing the category identifiers and the corresponding unread count as key value pairs")
 public class UnreadAction extends AbstractCategoriesAction {
 

@@ -47,59 +47,65 @@
  *
  */
 
-package com.openexchange.mail.categories.json;
+package com.openexchange.mailfilter.json.ajax.json.mapper.parser.action;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicReference;
-import com.openexchange.ajax.requesthandler.AJAXActionService;
-import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
+import java.util.ArrayList;
+import java.util.List;
+import org.apache.jsieve.SieveException;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import com.openexchange.exception.OXException;
-import com.openexchange.server.ServiceLookup;
+import com.openexchange.jsieve.commands.ActionCommand;
+import com.openexchange.mailfilter.json.ajax.json.fields.AddFlagsActionField;
+import com.openexchange.mailfilter.json.ajax.json.fields.GeneralField;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParser;
+import com.openexchange.mailfilter.json.ajax.json.mapper.parser.CommandParserJSONUtil;
+import com.openexchange.tools.servlet.OXJSONExceptionCodes;
 
 /**
- * {@link MailCategoriesActionFactory}
+ * {@link RemoveFlagActionCommandParser}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @since v7.8.2
  */
-public class MailCategoriesActionFactory implements AJAXActionServiceFactory {
-
-    private static final AtomicReference<MailCategoriesActionFactory> INSTANCE_REFERENCE = new AtomicReference<MailCategoriesActionFactory>();
-
-    public static MailCategoriesActionFactory initMailCategoriesActionFactory(final ServiceLookup services) {
-        try {
-        MailCategoriesActionFactory actionFactory = new MailCategoriesActionFactory(services);
-        INSTANCE_REFERENCE.set(actionFactory);
-        return actionFactory;
-        } catch (Throwable t) {
-            throw t;
-        }
-    }
-
-    private final Map<String, AbstractCategoriesAction> actions;
+public class RemoveFlagActionCommandParser implements CommandParser<ActionCommand> {
 
     /**
-     * Initializes a new {@link MailCategoriesActionFactory}.
-     *
-     * @param services The service look-up
+     * Initialises a new {@link RemoveFlagActionCommandParser}.
      */
-    private MailCategoriesActionFactory(final ServiceLookup services) {
+    public RemoveFlagActionCommandParser() {
         super();
-        actions = new ConcurrentHashMap<String, AbstractCategoriesAction>(10, 0.9f, 1);
-        actions.put("unread", new UnreadAction(services));
-        actions.put("teach", new TeachAction(services));
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject)
+     */
     @Override
-    public Collection<? extends AJAXActionService> getSupportedServices() {
-        return java.util.Collections.unmodifiableCollection(actions.values());
+    public ActionCommand parse(JSONObject jsonObject) throws JSONException, SieveException, OXException {
+        final JSONArray array = jsonObject.getJSONArray(AddFlagsActionField.flags.name());
+        if (null == array) {
+            throw OXJSONExceptionCodes.JSON_READ_ERROR.create("Parameter " + AddFlagsActionField.flags + " is missing for " + ActionCommand.Commands.REMOVEFLAG.getJsonName() + " is missing in JSON-Object. This is a required field");
+        }
+        final ArrayList<Object> arrayList = new ArrayList<Object>();
+        arrayList.add(CommandParserJSONUtil.coerceToStringList(array));
+
+        return new ActionCommand(ActionCommand.Commands.REMOVEFLAG, arrayList);
     }
 
+    /*
+     * (non-Javadoc)
+     * 
+     * @see com.openexchange.mailfilter.json.ajax.json.mapper.parser.ActionCommandParser#parse(org.json.JSONObject, com.openexchange.jsieve.commands.ActionCommand)
+     */
+    @SuppressWarnings("unchecked")
     @Override
-    public AJAXActionService createActionService(final String action) throws OXException {
-        return actions.get(action);
+    public void parse(JSONObject jsonObject, ActionCommand actionCommand) throws JSONException, OXException {
+        ArrayList<Object> arguments = actionCommand.getArguments();
+
+        jsonObject.put(GeneralField.id.name(), ActionCommand.Commands.REMOVEFLAG.getJsonName());
+        jsonObject.put(AddFlagsActionField.flags.name(), (List<String>) arguments.get(0));
     }
 
 }

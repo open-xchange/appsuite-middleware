@@ -507,6 +507,10 @@ public class TestCommand extends Command {
         return testCommands;
     }
 
+    public final void removeTestCommand(TestCommand command) {
+        this.testCommands.remove(command);
+    }
+
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + ": " + this.command.getCommandName() + " : " + this.tagArguments + " : " + this.arguments + " : " + this.testCommands;

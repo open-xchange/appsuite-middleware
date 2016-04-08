@@ -51,7 +51,6 @@ package com.openexchange.mail.categories;
 
 import java.util.List;
 import com.openexchange.exception.OXException;
-import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.session.Session;
 
 /**
@@ -85,26 +84,6 @@ public interface MailCategoriesConfigService {
     String[] getAllFlags(Session session, boolean onlyEnabled, boolean onlyUserCategories) throws OXException;
 
     /**
-     * Retrieves the system category configuration for the given user
-     *
-     * @param session The user session
-     * @param category The category identifier
-     * @return The category configuration or null if no configuration exists for given category
-     * @throws OXException
-     */
-    MailCategoryConfig getConfigByCategory(Session session, String category) throws OXException;
-
-    /**
-     * Retrieves the user category configuration for the given user
-     *
-     * @param session The user session
-     * @param category The category identifier
-     * @return The category configuration or null if no configuration exists for given category
-     * @throws OXException
-     */
-    MailCategoryConfig getUserConfigByCategory(Session session, String category) throws OXException;
-
-    /**
      * Retrieves the category flag for the given user
      *
      * @param session The user session
@@ -115,25 +94,13 @@ public interface MailCategoriesConfigService {
     String getFlagByCategory(Session session, String category) throws OXException;
 
     /**
-     * Retrieves the category configuration with the given flag for the given user
+     * Updates the given configurations
      *
+     * @param configs A list of MailCategoryConfig's
      * @param session The user session
-     * @param flag The flag of the configuration
-     * @return The category configuration or null if no configuration exists with given flag
      * @throws OXException
      */
-    MailCategoryConfig getConfigByFlag(Session session, String flag) throws OXException;
-
-    /**
-     * Activates or deactivates given categories
-     *
-     * @param categories An array of category identifiers
-     * @param enable Boolean flag indicating activation or deactivation
-     * @param session The user session
-     * @return A list of all category configurations
-     * @throws OXException
-     */
-    List<MailCategoryConfig> changeConfigurations(String[] categories, boolean activate, Session session) throws OXException;
+    void updateConfigurations(List<MailCategoryConfig> configs, Session session) throws OXException;
 
     /**
      * Tests if the given category is a system category or not
@@ -146,32 +113,7 @@ public interface MailCategoriesConfigService {
     boolean isSystemCategory(String category, Session session) throws OXException;
 
     /**
-     * Adds a new user category.
-     *
-     * @param category The category identifier
-     * @param flag The category flag
-     * @param name The category name
-     * @param rule The new rule of the category
-     * @param reorganize Whether to re-organize existing messages
-     * @param session The user session
-     * @throws OXException if a category with this identifier already exists
-     */
-    void addUserCategory(String category, String flag, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException;
-
-    /**
-     * Updates the user category
-     *
-     * @param category The category identifier
-     * @param name The category name
-     * @param rule The new rule of the category
-     * @param reorganize Whether to re-organize existing messages
-     * @param session The user session
-     * @throws OXException if a category with this identifier does not exist
-     */
-    void updateUserCategory(String category, String name, MailCategoryRule rule, ReorganizeParameter reorganize, Session session) throws OXException;
-
-    /**
-     * Trains the given category with the given mail address
+     * Teach the given category with the given mail address
      *
      * @param category The category identifier
      * @param email The email address
@@ -179,17 +121,7 @@ public interface MailCategoriesConfigService {
      * @param session The user session
      * @throws OXException if a category with this identifier does not exist
      */
-    void trainCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException;
-
-    /**
-     * Removes the given user categories
-     *
-     * @param categories The category identifiers
-     * @param session The user session
-     * @return A list of result objects
-     * @throws OXException if a category with this identifier does not exist
-     */
-    List<MailCategoriesServiceResult> removeUserCategories(String[] categories, Session session) throws OXException;
+    void teachCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
      * Returns true if the mail categories feature is enabled for the given user
@@ -200,21 +132,5 @@ public interface MailCategoriesConfigService {
      */
     boolean isEnabled(Session session) throws OXException;
 
-    /**
-     * Returns true if the given user is allowed to create own categories
-     *
-     * @param session The user session
-     * @return true if allowed, otherwise false
-     * @throws OXException
-     */
-    boolean isAllowedToCreateUserCategories(Session session) throws OXException;
-
-    /**
-     * Generates a flag for the given category
-     *
-     * @param category The category identifier
-     * @return The flag
-     */
-    String generateFlag(String category);
 
 }

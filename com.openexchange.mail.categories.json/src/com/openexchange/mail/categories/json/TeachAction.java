@@ -50,7 +50,6 @@
 package com.openexchange.mail.categories.json;
 
 import org.json.JSONException;
-import org.json.JSONObject;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
 import com.openexchange.ajax.requesthandler.AJAXRequestDataTools;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
@@ -59,75 +58,55 @@ import com.openexchange.documentation.annotations.Action;
 import com.openexchange.documentation.annotations.Parameter;
 import com.openexchange.exception.OXException;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
-import com.openexchange.mail.categories.MailCategoryConfig;
 import com.openexchange.mail.categories.ReorganizeParameter;
-import com.openexchange.mail.categories.ruleengine.MailCategoryRule;
 import com.openexchange.server.ServiceExceptionCode;
 import com.openexchange.server.ServiceLookup;
-import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
 /**
- * {@link NewAction}
+ * {@link TeachAction}
  *
  * @author <a href="mailto:kevin.ruthmann@open-xchange.com">Kevin Ruthmann</a>
- * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-@Action(method = RequestMethod.PUT, name = "new", description = "Creates a new mail user category.", parameters = {
+@Action(method = RequestMethod.GET, name = "teach", description = "Trains an existing mail user category.", parameters = {
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category", description = "The category identifier"),
-    @Parameter(name = "name", description = "The name of the category"),
+    @Parameter(name = "mail", description = "The mail address that should be trained"),
     @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized."),
-}, responseDescription = "Response: The newly created category configuration")
-public class NewAction extends AbstractCategoriesAction {
+}, responseDescription = "Response: Empty")
+public class TeachAction extends AbstractCategoriesAction {
 
     /**
-     * Initializes a new {@link SwitchAction}.
+     * Initializes a new {@link TeachAction}.
+     *
+     * @param services
      */
-    public NewAction(ServiceLookup services) {
+    protected TeachAction(ServiceLookup services) {
         super(services);
     }
 
     @Override
-    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException {
+    protected AJAXRequestResult doPerform(AJAXRequestData requestData, ServerSession session) throws OXException, JSONException {
         MailCategoriesConfigService mailCategoriesService = services.getService(MailCategoriesConfigService.class);
         if (mailCategoriesService == null) {
             throw ServiceExceptionCode.SERVICE_UNAVAILABLE.create(MailCategoriesConfigService.class.getSimpleName());
         }
 
-        if (!mailCategoriesService.isAllowedToCreateUserCategories(session)) {
-            throw AjaxExceptionCodes.DISABLED_ACTION.create("new");
-        }
-
-        String category = requestData.getParameter("category");
-        String name = requestData.getParameter("name");
-        String flag = mailCategoriesService.generateFlag(category);
-
-        // Check for filter description
-        MailCategoryRule rule = null;
-        {
-            Object data = requestData.getData();
-            if (data instanceof JSONObject) {
-                try {
-                    rule = MailCategoryRuleParser.parseJSON((JSONObject) data, flag);
-                } catch (JSONException e) {
-                    throw AjaxExceptionCodes.JSON_ERROR.create(e, e.getMessage());
-                }
-            }
-        }
+        String category = requestData.requireParameter("category");
+        String mail = requestData.requireParameter("mail");
 
         // Check for re-organize flag
         boolean reorganize = AJAXRequestDataTools.parseBoolParameter("reorganize", requestData);
         ReorganizeParameter reorganizeParameter = ReorganizeParameter.getParameterFor(reorganize);
 
-        mailCategoriesService.addUserCategory(category, flag, name, rule, reorganizeParameter, session);
+        mailCategoriesService.teachCategory(category, mail, reorganizeParameter, session);
 
-        MailCategoryConfig config = mailCategoriesService.getConfigByCategory(session, category);
-        AJAXRequestResult result = new AJAXRequestResult(config, "mailCategoriesConfig");
+        AJAXRequestResult result = new AJAXRequestResult();
         if (reorganizeParameter.hasWarnings()) {
             result.addWarnings(reorganizeParameter.getWarnings());
         }
         return result;
     }
+
 }

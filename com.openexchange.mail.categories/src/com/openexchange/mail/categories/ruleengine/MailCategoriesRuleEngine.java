@@ -88,4 +88,14 @@ public interface MailCategoriesRuleEngine {
      */
     public MailCategoryRule getRule(Session session, String flag) throws OXException;
 
+    /**
+     * Removes the value from all condition headers
+     * 
+     * @param session The user session
+     * @param value The value to remove
+     * @param header The mail header name
+     * @throws OXException
+     */
+    public void removeValueFromHeader(Session session, String value, String header) throws OXException;
+
 }
