@@ -301,8 +301,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
     public static final FetchProfile FETCH_PROFILE_GET_FOR_VIRTUAL = new FetchProfile() {
         // Unnamed block
         {
-            add(FetchProfile.Item.SIZE);
-            add(IMAPFolder.FetchProfileItem.INTERNALDATE);
+            add(FetchProfile.Item.ENVELOPE);
             add(IMAPFolder.FetchProfileItem.HEADERS);
             add(UIDFolder.FetchProfileItem.UID);
             add(MimeStorageUtility.ORIGINAL_MAILBOX);
