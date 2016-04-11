@@ -73,7 +73,7 @@ import com.openexchange.tools.session.ServerSession;
     @Parameter(name = "session", description = "A session ID previously obtained from the login module."),
     @Parameter(name = "category_id", description = "The category identifier"),
     @Parameter(name = "mail", description = "The mail address that should be trained"),
-    @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized."),
+    @Parameter(name = "reorganize", description = "A optional flag indicating if old mails should be reorganized. Defaults to 'false'."),
 }, responseDescription = "Response: Empty")
 public class TeachAction extends AbstractCategoriesAction {
 
