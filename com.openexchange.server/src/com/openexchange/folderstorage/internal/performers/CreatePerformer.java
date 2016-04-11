@@ -64,7 +64,6 @@ import com.openexchange.folderstorage.SortableId;
 import com.openexchange.folderstorage.UserizedFolder;
 import com.openexchange.folderstorage.internal.CalculatePermission;
 import com.openexchange.folderstorage.mail.contentType.MailContentType;
-import com.openexchange.folderstorage.osgi.FolderStorageServices;
 import com.openexchange.folderstorage.outlook.DuplicateCleaner;
 import com.openexchange.folderstorage.outlook.OutlookFolderStorage;
 import com.openexchange.folderstorage.tx.TransactionManager;
@@ -73,7 +72,6 @@ import com.openexchange.groupware.ldap.User;
 import com.openexchange.mail.dataobjects.MailFolder;
 import com.openexchange.mail.utils.MailFolderUtility;
 import com.openexchange.mailaccount.MailAccount;
-import com.openexchange.share.ShareService;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -209,8 +207,7 @@ public final class CreatePerformer extends AbstractUserizedFolderPerformer {
              * check for any present guest permissions
              */
             Permission[] permissions = toCreate.getPermissions();
-            ShareService shareService = FolderStorageServices.requireService(ShareService.class);
-            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0], shareService);
+            ComparedFolderPermissions comparedPermissions = new ComparedFolderPermissions(session, permissions, new Permission[0]);
             final String newId;
             try {
                 /*
