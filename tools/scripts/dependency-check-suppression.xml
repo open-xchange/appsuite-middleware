@@ -26,10 +26,19 @@
    </suppress>
    <!-- False positive. Matches with some oracle client library. -->
    <suppress>
-   <notes><![CDATA[
+     <notes><![CDATA[
       file name: org.glassfish.jersey.core.jersey-client-2.17.jar
       ]]></notes>
       <sha1>e6f4d0ce184a497d56ba07adfca6a118d4e34be5</sha1>
       <cpe>cpe:/a:oracle:oracle_client:2.17</cpe>
+   </suppress>
+   <!-- False positive. Matches Safari related vuls but seems to be sorted incorrectly in vul library -->
+   <suppress>
+      <notes><![CDATA[
+         file name: imageio-icns-3.2.1.jar
+         ]]>
+      </notes>
+      <sha1>07cac950b5752e22fd266f5eb2365bf75c7ef22b</sha1>
+      <cpe>cpe:/a:apple:imageio:3.2.1</cpe>
    </suppress>
 </suppressions>
