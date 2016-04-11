@@ -52,6 +52,7 @@ package com.openexchange.configuration.clt;
 import static com.openexchange.configuration.clt.ConvertJUL2LogbackCLT.determineOutput;
 import static com.openexchange.configuration.clt.XMLModifierCLT.createOption;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Properties;
 import org.apache.commons.cli.CommandLine;
@@ -98,9 +99,12 @@ public class ExtractJULModificationsCLT {
         if (null == properties) {
             return 1;
         }
-        Properties original = new Properties();
+
+        InputStream resourceStream = null;
         try {
-            original.load(ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties"));
+            Properties original = new Properties();
+            resourceStream = ExtractJULModificationsCLT.class.getClassLoader().getResourceAsStream("file-logging.properties");
+            original.load(resourceStream);
             Properties added = new Properties();
             added.putAll(properties);
             // new
@@ -124,6 +128,14 @@ public class ExtractJULModificationsCLT {
             System.err.println("Can not read file: " + e.getMessage());
             e.printStackTrace();
             return 1;
+        } finally {
+            if (null != resourceStream) {
+                try {
+                    resourceStream.close();
+                } catch (IOException e) {
+                    // Ignore
+                }
+            }
         }
         return 0;
     }
