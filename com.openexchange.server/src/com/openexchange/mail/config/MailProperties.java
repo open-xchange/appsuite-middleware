@@ -665,7 +665,7 @@ public final class MailProperties implements IMailProperties {
             final String tmp = configuration.getProperty("com.openexchange.mail.archive.defaultDays", "90").trim();
             try {
                 defaultArchiveDays = Strings.parseInt(tmp);
-                logBuilder.append("\tDefault archive days: ").append(rateLimit).append('\n');
+                logBuilder.append("\tDefault archive days: ").append(defaultArchiveDays).append('\n');
             } catch (final NumberFormatException e) {
                 defaultArchiveDays = 90;
                 logBuilder.append("\tDefault archive days: Invalid value \"").append(tmp).append("\". Setting to fallback ").append(
