@@ -90,8 +90,12 @@ public class FullNameCollection implements Iterable<FullName> {
     public Iterator<FullName> iterator() {
         List<FullName> fullNames = new ArrayList<FullName>(3);
         fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
-        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
-        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        if (null != fullNameReceived) {
+            fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
+        }
+        if (null != fullNameSent) {
+            fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        }
         return fullNames.iterator();
     }
 
@@ -103,8 +107,12 @@ public class FullNameCollection implements Iterable<FullName> {
     public List<FullName> asList() {
         List<FullName> fullNames = new ArrayList<FullName>(3);
         fullNames.add(new FullName(fullNameAll, Type.ALL, MailFolderUtility.prepareFullname(0, fullNameAll)));
-        fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
-        fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        if (null != fullNameReceived) {
+            fullNames.add(new FullName(fullNameReceived, Type.RECEIVED, MailFolderUtility.prepareFullname(0, fullNameReceived)));
+        }
+        if (null != fullNameSent) {
+            fullNames.add(new FullName(fullNameSent, Type.SENT, MailFolderUtility.prepareFullname(0, fullNameSent)));
+        }
         return fullNames;
     }
 
