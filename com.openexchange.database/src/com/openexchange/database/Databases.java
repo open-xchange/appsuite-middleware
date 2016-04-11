@@ -327,10 +327,11 @@ public final class Databases {
      */
     public static int getColumnSize(Connection con, String table, String column) throws SQLException {
         DatabaseMetaData metas = con.getMetaData();
-        ResultSet result = metas.getColumns(null, null, table, column);
         int retval = -1;
-        if (result.next()) {
-            retval = result.getInt("COLUMN_SIZE");
+        try (ResultSet result = metas.getColumns(null, null, table, column)) {
+            if (result.next()) {
+                retval = result.getInt("COLUMN_SIZE");
+            }
         }
         return retval;
     }
