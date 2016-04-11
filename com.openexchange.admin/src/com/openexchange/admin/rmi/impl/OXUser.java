@@ -2772,4 +2772,14 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
         }
         return capabilitiesSource;
     }
+
+    @Override
+    public void delete(Context ctx, User[] users, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, users, null, auth);
+    }
+
+    @Override
+    public void delete(Context ctx, User user, Credentials auth) throws RemoteException, StorageException, InvalidCredentialsException, NoSuchContextException, InvalidDataException, DatabaseUpdateException, NoSuchUserException {
+        delete(ctx, user, null, auth);
+    }
 }
