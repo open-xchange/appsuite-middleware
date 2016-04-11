@@ -98,16 +98,18 @@ public class RecursiveFileProvider implements IConfigurationFileProvider {
         }
 
         for (File currentFile : filesToAdd) {
-            String fileContent;
+            FileReader fileReader = null;
             try {
-                fileContent = IOUtils.toString(new FileReader(currentFile));
-
+                fileReader = new FileReader(currentFile);
+                String fileContent = IOUtils.toString(fileReader);
                 ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                 ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
             } catch (FileNotFoundException e) {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
             } catch (IOException e) {
                 diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
+            } finally {
+                IOUtils.closeQuietly(fileReader);
             }
         }
     }
