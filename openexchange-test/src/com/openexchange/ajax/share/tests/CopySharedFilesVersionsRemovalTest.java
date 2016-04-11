@@ -134,7 +134,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             assertExistingVersions(file.getId(), 5);
 
             file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
-            
+
             CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(file.getId(), Integer.toString(userDestFolder.getObjectID()), file, "2");
             CopyInfostoreResponse copyResponse = client.execute(copyRequest);
             String newObjectId = copyResponse.getID();
@@ -147,7 +147,7 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             client2.logout();
         }
     }
-    
+
     private void assertExistingVersions(String id, int expectedVersions) throws OXException, IOException, JSONException {
         Field[] fields = new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY };
         VersionsResponse versions = client.execute(new VersionsRequest(id, fields));
@@ -155,11 +155,15 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
     }
 
     private void createNewFileVersions() throws OXException, IOException, JSONException, InterruptedException {
+        this.createNewFileVersions(client, file);
+    }
+
+    private void createNewFileVersions(AJAXClient theClient, File theFile) throws OXException, IOException, JSONException, InterruptedException {
         java.io.File upload = new java.io.File(TestInit.getTestProperty("ajaxPropertiesFile"));
-        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(file, Field.values(), upload, file.getLastModified());
+        UpdateInfostoreRequest updateInfostoreRequest = new UpdateInfostoreRequest(theFile, new Field[] { Field.NUMBER_OF_VERSIONS, Field.VERSION, Field.CURRENT_VERSION, Field.CREATED_BY, Field.CONTENT }, upload, theFile.getLastModified());
         // create new versions
         for (int i = 0; i < 4; i++) {
-            client.execute(updateInfostoreRequest);
+            theClient.execute(updateInfostoreRequest);
             Thread.sleep(1000L);
         }
     }
@@ -213,6 +217,59 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
         }
     }
 
+    public void testCopySharedFile_guestCreatesNewVersionAndCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
+        OCLGuestPermission lGuestPermission = createNamedAuthorPermission(randomUID() + "@example.com", "Test Guest", "secret");
+        userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), lGuestPermission);
+
+        AJAXClient client2 = new AJAXClient(User.User2);
+        GuestClient guestClient = null;
+        try {
+            addUserPermission(client2.getValues().getUserId());
+            addGuestPermission(lGuestPermission.getRecipient());
+            updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+
+            createNewFileVersions();
+            //pre assertions
+            assertExistingVersions(file.getId(), 5);
+
+            String sharedFileId = sharedFileId(file.getId());
+            file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
+
+            /*
+             * check permissions
+             */
+            OCLPermission matchingPermission = null;
+            for (OCLPermission permission : userDestFolder.getPermissions()) {
+                if (permission.getEntity() != client.getValues().getUserId()) {
+                    matchingPermission = permission;
+                    break;
+                }
+            }
+            ExtendedPermissionEntity guest = discoverGuestEntity(EnumAPI.OX_NEW, FolderObject.INFOSTORE, userDestFolder.getObjectID(), matchingPermission.getEntity());
+            checkGuestPermission(lGuestPermission, guest);
+            String shareURL = discoverShareURL(guest);
+
+            guestClient = resolveShare(shareURL, getUsername(lGuestPermission.getRecipient()), getPassword(lGuestPermission.getRecipient()));
+            File sharedFileToCopy = guestClient.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
+
+            createNewFileVersions(guestClient, sharedFileToCopy);
+            assertExistingVersions(file.getId(), 9);
+
+            CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(sharedFileId, SHARED_FOLDER, file);
+            copyRequest.setFailOnError(true);
+            CopyInfostoreResponse copyResponse = guestClient.execute(copyRequest);
+
+            File copiedFile1 = client.execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
+
+            assertExistingVersions(copiedFile1.getId(), 1);
+        } finally {
+            client2.logout();
+            if (guestClient != null) {
+                guestClient.logout();
+            }
+        }
+    }
+
     public void testCopySharedFile_internalUserCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
         AJAXClient client2 = new AJAXClient(User.User2);
         int userId = client2.getValues().getUserId();
@@ -242,6 +299,41 @@ public class CopySharedFilesVersionsRemovalTest extends AbstractSharedFilesTest 
             File copiedFile = client.execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
 
             assertExistingVersions(copiedFile.getId(), 1);
+        } finally {
+            client2.logout();
+        }
+    }
+
+    public void testCopySharedFile_internalUserCreatesNewVersionsAndCopiesFile_fileBecomesCopiedWithoutVersions() throws Exception {
+        AJAXClient client2 = new AJAXClient(User.User2);
+        int userId = client2.getValues().getUserId();
+
+        try {
+            OCLPermission permission = new OCLPermission(userId, 0);
+            permission.setAllPermission(OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS, OCLPermission.WRITE_ALL_OBJECTS);
+            userDestFolder = insertSharedFolder(EnumAPI.OX_NEW, FolderObject.INFOSTORE, getClient().getValues().getPrivateInfostoreFolder(), "dest_" + randomUID(), permission);
+
+            addUserPermission(client2.getValues().getUserId());
+            GuestRecipient recipient = new GuestRecipient();
+            recipient.setEmailAddress("test@invalid.invalid");
+            addGuestPermission(recipient);
+            file = updateFile(file, new Field[] { Field.OBJECT_PERMISSIONS });
+            String sharedFileId = sharedFileId(file.getId());
+
+            createNewFileVersions();
+            File copiedFile = client2.execute(new GetInfostoreRequest(sharedFileId)).getDocumentMetadata();
+            createNewFileVersions(client2, copiedFile);
+            //pre assertions
+            assertExistingVersions(file.getId(), 9);
+
+            file.setFolderId(Integer.toString(userDestFolder.getObjectID())); // set new target folder
+
+            CopyInfostoreRequest copyRequest = new CopyInfostoreRequest(sharedFileId, SHARED_FOLDER, file);
+            copyRequest.setFailOnError(true);
+            CopyInfostoreResponse copyResponse = client2.execute(copyRequest);
+
+            File copiedFile1 = client.execute(new GetInfostoreRequest(copyResponse.getID())).getDocumentMetadata();
+            assertExistingVersions(copiedFile1.getId(), 1);
         } finally {
             client2.logout();
         }

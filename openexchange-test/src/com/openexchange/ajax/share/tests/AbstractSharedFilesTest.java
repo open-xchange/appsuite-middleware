@@ -104,7 +104,7 @@ public abstract class AbstractSharedFilesTest extends ShareTest {
         List<FileStorageObjectPermission> permissions = new ArrayList<FileStorageObjectPermission>(2);
 
         DefaultFileStorageGuestObjectPermission guestPermission = new DefaultFileStorageGuestObjectPermission();
-        guestPermission.setPermissions(ObjectPermission.READ);
+        guestPermission.setPermissions(ObjectPermission.WRITE);
         guestPermission.setRecipient(shareRecipient);
         permissions.add(guestPermission);
 
