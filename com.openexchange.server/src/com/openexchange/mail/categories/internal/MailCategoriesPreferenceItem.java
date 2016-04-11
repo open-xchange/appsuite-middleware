@@ -93,7 +93,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
     }
 
     private static final String FIELD_LIST = "list";
-    private static final String FIELD_ENABLED = "enabled";
+    private static final String FIELD_FEATURE_ENABLED = "enabled";
     private static final String FIELD_ID = "id";
     private static final String FIELD_NAME = "name";
     private static final String FIELD_ACTIVE = "active";
@@ -119,7 +119,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     MailCategoriesConfigService service = lookupService.getOptionalService(MailCategoriesConfigService.class);
                     if (service != null) {
                         boolean mailCategoriesEnabled = service.isEnabled(session);
-                        item.put(FIELD_ENABLED, mailCategoriesEnabled);
+                        item.put(FIELD_FEATURE_ENABLED, mailCategoriesEnabled);
                         if (mailCategoriesEnabled) {
                             List<MailCategoryConfig> configs = service.getAllCategories(session, false);
                             JSONArray categories = new JSONArray();
@@ -147,7 +147,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                             item.put(FIELD_LIST, categories);
                         }
                     } else {
-                        item.put(FIELD_ENABLED, false);
+                        item.put(FIELD_FEATURE_ENABLED, false);
                     }
                     setting.setSingleValue(item);
                 } catch (JSONException e) {
@@ -170,7 +170,10 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
                     if (service == null) {
                         throw SettingExceptionCodes.SUBSYSTEM.create();
                     }
-
+                    
+                    boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
+                    service.enable(session, featureEnabled);                
+                    
                     JSONArray mailCategories = getType(config.get(FIELD_LIST), JSONArray.class, setting.getSingleValue(), setting.getName());
                     List<MailCategoryConfig> newConfigs = new ArrayList<>();
                     for (Object o : mailCategories.asList()) {

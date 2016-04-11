@@ -62,11 +62,6 @@ public class MailCategoriesConstants {
      * General mail categories switch property name
      */
     public static final String MAIL_CATEGORIES_SWITCH = "com.openexchange.mail.categories.enabled";
-    
-    /**
-     * General user mail categories switch property name
-     */
-    public static final String MAIL_CATEGORIES_USER_SWITCH = "com.openexchange.mail.user.categories.enabled";
 
     /**
      * The possible categories translation languages property name

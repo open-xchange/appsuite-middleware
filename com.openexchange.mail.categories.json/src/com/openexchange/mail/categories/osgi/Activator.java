@@ -53,6 +53,7 @@ import java.util.Dictionary;
 import java.util.Hashtable;
 import com.openexchange.ajax.requesthandler.AJAXActionServiceFactory;
 import com.openexchange.ajax.requesthandler.ResultConverter;
+import com.openexchange.capabilities.CapabilityService;
 import com.openexchange.mail.categories.MailCategoriesConfigService;
 import com.openexchange.mail.categories.json.MailCategoriesActionFactory;
 import com.openexchange.mail.categories.json.MailCategoriesConfigConverter;
@@ -68,7 +69,7 @@ public class Activator extends HousekeepingActivator {
 
     @Override
     protected Class<?>[] getNeededServices() {
-        return new Class[] { MailCategoriesConfigService.class };
+        return new Class[] { MailCategoriesConfigService.class, CapabilityService.class };
     }
 
     @Override

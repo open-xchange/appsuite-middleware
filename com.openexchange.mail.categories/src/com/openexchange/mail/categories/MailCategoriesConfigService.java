@@ -124,6 +124,15 @@ public interface MailCategoriesConfigService {
     void teachCategory(String category, String email, ReorganizeParameter reorganize, Session session) throws OXException;
 
     /**
+     * Enables or disables the mail categories feature for the given user
+     *
+     * @param session The user session
+     * @param enable A flag indicating if the feature should be enabled or disabled
+     * @throws OXException
+     */
+    void enable(Session session, boolean enable) throws OXException;
+
+    /**
      * Returns true if the mail categories feature is enabled for the given user
      *
      * @param session The user session

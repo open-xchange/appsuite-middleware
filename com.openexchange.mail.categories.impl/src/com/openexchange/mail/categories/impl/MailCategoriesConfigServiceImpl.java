@@ -268,6 +268,11 @@ public class MailCategoriesConfigServiceImpl implements MailCategoriesConfigServ
         return MailCategories.getBoolFromProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, false, session);
     }
 
+    @Override
+    public void enable(Session session, boolean enable) throws OXException {
+        MailCategories.setProperty(MailCategoriesConstants.MAIL_CATEGORIES_SWITCH, String.valueOf(enable), session);
+    }
+
     private String generateFlag(String category) {
         StringBuilder builder = new StringBuilder(FLAG_PREFIX);
         builder.append(category.hashCode());
