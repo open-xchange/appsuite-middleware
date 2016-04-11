@@ -61,6 +61,7 @@ import com.openexchange.file.storage.FileStorageFileAccess;
 import com.openexchange.file.storage.composition.IDBasedFileAccess;
 import com.openexchange.groupware.results.TimedResult;
 import com.openexchange.tools.iterator.SearchIterator;
+import com.openexchange.tools.iterator.SearchIterators;
 
 
 /**
@@ -87,23 +88,23 @@ public class RevertAction extends AbstractWriteAction {
         List<String> versionIdentifiers = new ArrayList<String>(10);
 
         final SearchIterator<File> results = versions.results();
-        while (results.hasNext()) {
-            String version = results.next().getVersion();
-            if (version != null && !version.equals("0")) {
-                versionIdentifiers.add(version);
+        try {
+            while (results.hasNext()) {
+                String version = results.next().getVersion();
+                if (version != null && !version.equals("0")) {
+                    versionIdentifiers.add(version);
+                }
             }
+            String[] toDelete = new String[versionIdentifiers.size()];
+            for(int i = 0; i < toDelete.length; i++) {
+                toDelete[i] = versionIdentifiers.get(i);
+            }
+            fileAccess.removeVersion(request.getId(), toDelete);
+            File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
+            return success(fileMetadata.getSequenceNumber());
+        } finally {
+            SearchIterators.close(results);
         }
-
-        String[] toDelete = new String[versionIdentifiers.size()];
-        for(int i = 0; i < toDelete.length; i++) {
-            toDelete[i] = versionIdentifiers.get(i);
-        }
-
-        fileAccess.removeVersion(request.getId(), toDelete);
-
-        File fileMetadata = fileAccess.getFileMetadata(request.getId(), FileStorageFileAccess.CURRENT_VERSION);
-
-        return success(fileMetadata.getSequenceNumber());
     }
 
 }
