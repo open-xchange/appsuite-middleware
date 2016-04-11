@@ -128,7 +128,7 @@ public class GlobalDatabaseServiceImpl implements GlobalDatabaseService {
         Map<String, GlobalDbConfig> newGlobalDbConfigs = GlobalDbInit.init(configurationService, configDatabaseService, pools, monitor);
         lGlobalDbConfigs.putAll(newGlobalDbConfigs);
 
-        for (String filename : lGlobalDbConfigs.keySet()) {
+        for (String filename : new ArrayList<String>(lGlobalDbConfigs.keySet())) {
             if (!newGlobalDbConfigs.containsKey(filename)) {
                 lGlobalDbConfigs.remove(filename);
             }
