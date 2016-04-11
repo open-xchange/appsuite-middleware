@@ -64,6 +64,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Queue;
 import java.util.Set;
 import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
@@ -208,6 +209,9 @@ public class AJAXRequestData {
     /** The maximum allowed size of a complete request or <code>-1</code> */
     private long maxUploadSize = -1L;
 
+    /** The clean-up tasks */
+    private final @NonNull Queue<AJAXRequestDataCleanup> cleanUps;
+
     /**
      * Initializes a new {@link AJAXRequestData}.
      *
@@ -241,6 +245,7 @@ public class AJAXRequestData {
         properties = new HashMap<String, Object>(4);
         files = new LinkedList<UploadFile>();
         decoratorIds = new LinkedList<String>();
+        cleanUps = new LinkedList<AJAXRequestDataCleanup>();
         expires = -1;
         serverPort = -1;
     }
@@ -262,6 +267,7 @@ public class AJAXRequestData {
         copy.headers.putAll(headers);
         copy.properties.putAll(properties);
         copy.decoratorIds.addAll(decoratorIds);
+        copy.cleanUps.addAll(cleanUps);
         copy.files.addAll(files);
         copy.parameterizable = parameterizable;
         copy.session = session;
@@ -372,6 +378,33 @@ public class AJAXRequestData {
             return;
         }
         this.parameterizable = servletRequest instanceof Parameterizable ? (Parameterizable) servletRequest : null;
+    }
+
+    /**
+     * Adds specified clean-up task.
+     *
+     * @param cleanup The clean-up task
+     * @return This instance
+     */
+    public @NonNull AJAXRequestData addCleanUp(AJAXRequestDataCleanup cleanup) {
+        if (null != cleanup) {
+            this.cleanUps.offer(cleanup);
+        }
+        return this;
+    }
+
+    /**
+     * Cleans-up this instance.
+     */
+    public void cleanUp() {
+        for (AJAXRequestDataCleanup cleanup; (cleanup = this.cleanUps.poll()) != null;) {
+            try {
+                cleanup.cleanUp(this);
+            } catch (Exception e) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
+                logger.warn("'{}' failed to perform clean-up", cleanup.getClass().getName(), e);
+            }
+        }
     }
 
     /**

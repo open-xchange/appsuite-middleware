@@ -140,6 +140,7 @@ public class DefaultDispatcher implements Dispatcher {
 
         addLogProperties(requestData, false);
         List<AJAXActionCustomizer> customizers = determineCustomizers(requestData, session);
+        AJAXRequestData toCleanUp = null;
         try {
             AJAXRequestData modifiedRequestData = customizeRequest(requestData, customizers, session);
 
@@ -204,6 +205,7 @@ public class DefaultDispatcher implements Dispatcher {
             /*
              * Perform request
              */
+            toCleanUp = modifiedRequestData;
             AJAXRequestResult result = callAction(action, modifiedRequestData, session);
             if (AJAXRequestResult.ResultType.DIRECT == result.getType()) {
                 // No further processing
@@ -231,13 +233,16 @@ public class DefaultDispatcher implements Dispatcher {
                 }
             }
 
-                // Wrap unchecked exception
-                addLogProperties(requestData, true);
-                throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-            } finally {
-                RequestContextHolder.reset();
+            // Wrap unchecked exception
+            addLogProperties(requestData, true);
+            throw AjaxExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+        } finally {
+            if (null != toCleanUp) {
+                toCleanUp.cleanUp();
             }
+            RequestContextHolder.reset();
         }
+    }
 
     private RequestContext buildRequestContext(AJAXRequestData requestData) throws OXException {
         HostData hostData = requestData.getHostData();

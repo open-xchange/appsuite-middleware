@@ -66,6 +66,7 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
+import com.openexchange.ajax.requesthandler.AJAXRequestDataCleanup;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.annotation.NonNull;
@@ -104,6 +105,20 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
+    private final class MailInterfaceCleanup implements AJAXRequestDataCleanup {
+
+        private final MailServletInterface newMailInterface;
+
+        MailInterfaceCleanup(MailServletInterface newMailInterface) {
+            this.newMailInterface = newMailInterface;
+        }
+
+        @Override
+        public void cleanUp(AJAXRequestData requestData) {
+            newMailInterface.close();
+        }
+    }
+
     private static final AJAXRequestResult RESULT_JSON_NULL = new AJAXRequestResult(JSONObject.NULL, "json");
 
     public static final @NonNull int[] FIELDS_ALL_ALIAS = new int[] { 600, 601 };
@@ -112,7 +127,11 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     public static final @NonNull Column[] COLUMNS_ALL_ALIAS = new Column[] { Column.field(600), Column.field(601) };
 
-    public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614), Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610), Column.field(608), Column.field(102) };
+    public static final @NonNull Column[] COLUMNS_LIST_ALIAS = new Column[] { Column.field(600), Column.field(601), Column.field(614),
+        Column.field(602), Column.field(611), Column.field(603), Column.field(612), Column.field(607), Column.field(652), Column.field(610),
+        Column.field(608), Column.field(102) };
+
+    // ----------------------------------------------------------------------------------------------------------------------------------
 
     private final ServiceLookup services;
 
@@ -155,8 +174,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         final AJAXState state = mailRequest.getRequest().getState();
         MailServletInterface mailInterface = null;
         if (state == null) {
-            return MailServletInterface.getInstance(mailRequest.getSession());
+            // No AJAX state
+            MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            mailRequest.getRequest().addCleanUp(new MailInterfaceCleanup(newMailInterface));
+            return newMailInterface;
         }
+
         mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
             final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
