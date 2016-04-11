@@ -883,12 +883,8 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
             enable(ctx);
         }
         if (LOG.isDebugEnabled()) {
-            double time = (System.currentTimeMillis() - start) / 1000;
-            LOG.debug(
-                "Data moving for context {} to target database system {} completed in {} seconds!",
-                ctx.getId(),
-                target_database_id,
-                time);
+            long time = (System.currentTimeMillis() - start);
+            LOG.debug("Data moving for context {} to target database system {} completed in {}msec!", ctx.getId(), target_database_id, Long.toString(time));
         }
     }
 
