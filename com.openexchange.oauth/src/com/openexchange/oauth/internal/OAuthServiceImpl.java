@@ -84,6 +84,7 @@ import org.scribe.model.Token;
 import org.scribe.model.Verifier;
 import com.openexchange.context.ContextService;
 import com.openexchange.crypto.CryptoService;
+import com.openexchange.database.Databases;
 import com.openexchange.database.provider.DBProvider;
 import com.openexchange.dispatcher.DispatcherPrefixService;
 import com.openexchange.exception.OXException;
@@ -970,6 +971,7 @@ public class OAuthServiceImpl implements OAuthService, SecretEncryptionStrategy<
         } catch (final SQLException e) {
             throw OAuthExceptionCodes.SQL_ERROR.create(e.getMessage());
         } finally {
+            Databases.closeSQLStuff(stmt);
             provider.releaseWriteConnection(context, con);
         }
     }
