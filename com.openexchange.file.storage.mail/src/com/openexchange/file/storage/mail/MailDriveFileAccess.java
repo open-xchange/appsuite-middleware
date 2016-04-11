@@ -302,6 +302,7 @@ public class MailDriveFileAccess extends AbstractMailDriveResourceAccess impleme
         // Unnamed block
         {
             add(FetchProfile.Item.ENVELOPE);
+            add(FetchProfile.Item.CONTENT_INFO);
             add(IMAPFolder.FetchProfileItem.HEADERS);
             add(UIDFolder.FetchProfileItem.UID);
             add(MimeStorageUtility.ORIGINAL_MAILBOX);
