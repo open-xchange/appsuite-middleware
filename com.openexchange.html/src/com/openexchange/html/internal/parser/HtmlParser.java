@@ -170,7 +170,7 @@ public final class HtmlParser {
                     }
                     if (cdataBuilder.length() > 0) {
                         handler.handleCDATA(cdataBuilder.toString());
-                        textBuilder.setLength(0);
+                        cdataBuilder.setLength(0);
                     }
                     /*
                      * Handle non-text event
