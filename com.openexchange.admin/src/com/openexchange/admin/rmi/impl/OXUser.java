@@ -1843,10 +1843,10 @@ public class OXUser extends OXCommonImpl implements OXUserInterface {
                     LOGGER.info("Moved all files from user {} to context filestore.", filestoreOwner.getId());
                 }
             } else {
-                if (!tool.existsUser(ctx, destUser)) {
-                    throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
-                }
                 if (destUser > 0) { // Move to master store
+                    if (!tool.existsUser(ctx, destUser)) {
+                        throw new InvalidDataException(String.format("The reassign user with id %1$s does not exist in context %2$s. Please choose a different reassign user.", destUser.intValue(), ctx.getId()));
+                    }
                     User masterUser = new User(destUser);
                     for (User filestoreOwner : filestoreOwners) {
                         LOGGER.info("User {} has an individual filestore set. Hence, moving user-associated files to filestore of user {}", filestoreOwner.getId(), masterUser.getId());
