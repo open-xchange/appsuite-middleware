@@ -168,7 +168,7 @@ public class MailCategoriesPreferenceItem implements PreferencesItemService {
 
                     MailCategoriesConfigService service = lookupService.getOptionalService(MailCategoriesConfigService.class);
                     if (service == null) {
-                        throw SettingExceptionCodes.SUBSYSTEM.create();
+                        return;
                     }
                     
                     boolean featureEnabled = config.getBoolean(FIELD_FEATURE_ENABLED);
