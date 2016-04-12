@@ -280,7 +280,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                     stmt.setInt(4, iterator.key());
                     stmt.setInt(5, 1);
                     stmt.addBatch();
-                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}", userId, iterator.value(), iterator.key(), contextId);
+                    LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}. {}", userId, iterator.value(), iterator.key(), contextId, getStackTrace());
                 }
                 stmt.executeBatch();
             } else {
@@ -289,7 +289,7 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
                 stmt.setInt(4, iterator.key());
                 stmt.setInt(5, 1);
                 stmt.executeUpdate();
-                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}", userId, iterator.value(), iterator.key(), contextId);
+                LOG.debug("Incremented object use count for user {}, folder {}, object {} in context {}. {}", userId, iterator.value(), iterator.key(), contextId, getStackTrace());
             }
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
@@ -404,12 +404,21 @@ public class ObjectUseCountServiceImpl implements ObjectUseCountService {
             stmt.setInt(5, value);
             stmt.setInt(6, value);
             stmt.executeUpdate();
-            LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}", value, userId, folderId, objectId, contextId);
+            LOG.debug("Set object use count to {} for user {}, folder {}, object {} in context {}. {}", value, userId, folderId, objectId, contextId, getStackTrace());
         } catch (SQLException e) {
             throw ObjectUseCountExceptionCode.SQL_ERROR.create(e, e.getMessage());
         } finally {
             closeSQLStuff(stmt);
         }
+    }
+
+    private String getStackTrace() {
+        Throwable t = new Throwable();
+        StringBuilder sb = new StringBuilder();
+        for (StackTraceElement e : t.getStackTrace()) {
+            sb.append(e.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
 }
