@@ -59,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.openexchange.drive.BrandedDriveVersionService;
 import com.openexchange.drive.client.windows.service.Constants;
+import com.openexchange.java.Streams;
 
 
 /**
@@ -69,19 +70,29 @@ import com.openexchange.drive.client.windows.service.Constants;
  */
 public class BrandingConfig {
 
-    private final Properties prop;
-    private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
-    private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
     private final static Logger LOG = LoggerFactory.getLogger(BrandingConfig.class);
 
+    private final static Map<String, BrandingConfig> CONFIGS = new HashMap<String, BrandingConfig>();
+    private final static String[] FIELDS = new String[] { Constants.BRANDING_NAME, Constants.BRANDING_VERSION, Constants.BRANDING_RELEASE };
+
+    // ------------------------------------------------------------------------------------------------------------------------------
+
+    private final Properties prop;
+
     private BrandingConfig(File file) throws IOException {
+        super();
         prop = new Properties();
-        prop.load(new FileInputStream(file));
+        FileInputStream fis = new FileInputStream(file);
+        try {
+            prop.load(fis);
+        } finally {
+            Streams.close(fis);
+        }
     }
 
     /**
      * Retrieves the branding properties
-     * 
+     *
      * @return The properties
      */
     public Properties getProperties() {
@@ -90,7 +101,7 @@ public class BrandingConfig {
 
     /**
      * Tests if this config contains the given property
-     * 
+     *
      * @param property The name of the property to check
      * @return true if it contains the property, false otherwise
      */
@@ -100,7 +111,7 @@ public class BrandingConfig {
 
     /**
      * Tests if the given file is a valid branding configuration and add it to the list of known configurations.
-     * 
+     *
      * @param file The branding configuration
      * @throws IOException if the file couldn't be found or if an error occurs while retrieving the properties
      */
@@ -134,7 +145,7 @@ public class BrandingConfig {
 
     /**
      * Retrieves the configuration for the given branding.
-     * 
+     *
      * @param branding The branding identifier
      * @return The configuration or null
      */
@@ -144,7 +155,7 @@ public class BrandingConfig {
 
     /**
      * Tests if the BrandingConfig contains the given branding
-     * 
+     *
      * @param branding The branding name
      * @return true if it contains the branding, false otherwise
      */

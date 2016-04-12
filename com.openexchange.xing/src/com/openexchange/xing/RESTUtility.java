@@ -51,6 +51,7 @@ package com.openexchange.xing;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -486,23 +487,28 @@ public class RESTUtility {
             throw new XingParseException("Bad response from Xing.");
         }
 
-        final Scanner scanner;
+        Scanner scanner = null;
+        InputStream contentStream = null;
         try {
-            scanner = new Scanner(entity.getContent()).useDelimiter("&");
+            contentStream = entity.getContent();
+            scanner = new Scanner(contentStream);
+            scanner.useDelimiter("&");
+
+            Map<String, String> result = new HashMap<String, String>();
+            while (scanner.hasNext()) {
+                final String nameValue = scanner.next();
+                final String[] parts = nameValue.split("=");
+                if (parts.length != 2) {
+                    throw new XingParseException("Bad query string from Xing.");
+                }
+                result.put(parts[0], parts[1]);
+            }
+            return result;
         } catch (final IOException e) {
             throw new XingIOException(e);
+        } finally {
+            Streams.close(contentStream, scanner);
         }
-
-        final Map<String, String> result = new HashMap<String, String>();
-        while (scanner.hasNext()) {
-            final String nameValue = scanner.next();
-            final String[] parts = nameValue.split("=");
-            if (parts.length != 2) {
-                throw new XingParseException("Bad query string from Xing.");
-            }
-            result.put(parts[0], parts[1]);
-        }
-        return result;
     }
 
     /**

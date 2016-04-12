@@ -32,6 +32,7 @@
 package net.fortuna.ical4j.model;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
@@ -65,7 +66,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     private static final String DEFAULT_RESOURCE_PREFIX = "zoneinfo/";
 
     private static final Pattern TZ_ID_SUFFIX = Pattern.compile("(?<=/)[^/]*/[^/]*$");
-    
+
     private static final String UPDATE_ENABLED = "net.fortuna.ical4j.timezone.update.enabled";
 
     private static final Map DEFAULT_TIMEZONES = new ConcurrentHashMap();
@@ -79,18 +80,26 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
             LogFactory.getLog(TimeZoneRegistryImpl.class).warn(
                     "Error loading timezone aliases: " + ioe.getMessage());
         }
+
+        InputStream resourceStream = null;
         try {
-        	ALIASES.load(ResourceLoader.getResourceAsStream("tz.alias"));
+        	resourceStream = ResourceLoader.getResourceAsStream("tz.alias");
+            ALIASES.load(resourceStream);
         }
         catch (Exception e) {
         	LogFactory.getLog(TimeZoneRegistryImpl.class).debug(
         			"Error loading custom timezone aliases: " + e.getMessage());
         }
+        finally {
+            if (null != resourceStream) {
+                try { resourceStream.close(); } catch (Exception x) { /*ignore*/ }
+            }
+        }
     }
 
-    private Map timezones;
+    private final Map timezones;
 
-    private String resourcePrefix;
+    private final String resourcePrefix;
 
     /**
      * Default constructor.
@@ -111,14 +120,16 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void register(final TimeZone timezone) {
     	// for now we only apply updates to included definitions by default..
     	register(timezone, false);
     }
-    
+
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void register(final TimeZone timezone, boolean update) {
     	if (update) {
             // load any available updates for the timezone..
@@ -132,6 +143,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final void clear() {
         timezones.clear();
     }
@@ -139,6 +151,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
     /**
      * {@inheritDoc}
      */
+    @Override
     public final TimeZone getTimeZone(final String id) {
         TimeZone timezone = (TimeZone) timezones.get(id);
         if (timezone == null) {
@@ -200,7 +213,7 @@ public class TimeZoneRegistryImpl implements TimeZoneRegistry {
         }
         return null;
     }
-    
+
     /**
      * @param vTimeZone
      * @return

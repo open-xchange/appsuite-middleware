@@ -75,19 +75,25 @@ public class RemoveAliasInUserAttributesTable extends UpdateTaskAdapter {
     public void perform(PerformParameters params) throws OXException {
         int ctxId = params.getContextId();
         Connection conn = Database.getNoTimeout(ctxId, true);
+        Statement stmt = null;
+        boolean rollback = false;
         try {
             conn.setAutoCommit(false);
-            Statement stmt = conn.createStatement();
+            rollback = true;
+            stmt = conn.createStatement();
             stmt.execute(DELETE_ALIAS_STMT);
             conn.commit();
+            rollback = false;
         } catch (SQLException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.SQL_PROBLEM.create(e, e.getMessage());
         } catch (RuntimeException e) {
-            DBUtils.rollback(conn);
             throw UpdateExceptionCodes.OTHER_PROBLEM.create(e, e.getMessage());
         } finally {
+            if (rollback) {
+                DBUtils.rollback(conn);
+            }
             DBUtils.autocommit(conn);
+            DBUtils.closeSQLStuff(stmt);
             Database.backNoTimeout(ctxId, true, conn);
         }
     }

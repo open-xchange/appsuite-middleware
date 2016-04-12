@@ -145,47 +145,50 @@ public class CopyAction extends ContactAction {
          */
         final AttachmentBase attachmentBase = Attachments.getInstance();
         final SearchIterator<?> iterator = attachmentBase.getAttachments(session, origFolderId, origObjectId, Types.CONTACT, ctx, user, uc).results();
-        if (iterator.hasNext()) {
-            try {
-                attachmentBase.startTransaction();
-                do {
-                    final AttachmentMetadataFactory factory = new AttachmentMetadataFactory();
-                    final AttachmentMetadata orig = (AttachmentMetadata) iterator.next();
-                    final AttachmentMetadata copy = factory.newAttachmentMetadata(orig);
-                    copy.setFolderId(folderId);
-                    copy.setAttachedId(contactObj.getObjectID());
-                    copy.setId(AttachmentBase.NEW);
-                    InputStream file = null;
+        try {
+            if (iterator.hasNext()) {
+                try {
+                    attachmentBase.startTransaction();
+                    do {
+                        final AttachmentMetadataFactory factory = new AttachmentMetadataFactory();
+                        final AttachmentMetadata orig = (AttachmentMetadata) iterator.next();
+                        final AttachmentMetadata copy = factory.newAttachmentMetadata(orig);
+                        copy.setFolderId(folderId);
+                        copy.setAttachedId(contactObj.getObjectID());
+                        copy.setId(AttachmentBase.NEW);
+                        InputStream file = null;
+                        try {
+                            file = attachmentBase.getAttachedFile(session, origFolderId, origObjectId, Types.CONTACT, orig.getId(), ctx, user, uc);
+                            attachmentBase.attachToObject(copy, file, session, ctx, user, uc);
+                        } finally {
+                            Streams.close(file);
+                        }
+                    } while (iterator.hasNext());
+                    attachmentBase.commit();
+                } catch (final SearchIteratorException e) {
                     try {
-                        file = attachmentBase.getAttachedFile(session, origFolderId, origObjectId, Types.CONTACT, orig.getId(), ctx, user, uc);
-                        attachmentBase.attachToObject(copy, file, session, ctx, user, uc);
-                    } finally {
-                        Streams.close(file);
+                        attachmentBase.rollback();
+                    } catch (final OXException e1) {
+                        LOG.error("Attachment transaction rollback failed", e);
                     }
-                } while (iterator.hasNext());
-                attachmentBase.commit();
-            } catch (final SearchIteratorException e) {
-                try {
-                    attachmentBase.rollback();
-                } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
-                }
-                throw e;
-            } catch (final OXException e) {
-                try {
-                    attachmentBase.rollback();
-                } catch (final OXException e1) {
-                    LOG.error("Attachment transaction rollback failed", e);
-                }
-                throw e;
-            } finally {
-                SearchIterators.close(iterator);
-                try {
-                    attachmentBase.finish();
+                    throw e;
                 } catch (final OXException e) {
-                    LOG.error("Attachment transaction finish failed", e);
+                    try {
+                        attachmentBase.rollback();
+                    } catch (final OXException e1) {
+                        LOG.error("Attachment transaction rollback failed", e);
+                    }
+                    throw e;
+                } finally {
+                    try {
+                        attachmentBase.finish();
+                    } catch (final OXException e) {
+                        LOG.error("Attachment transaction finish failed", e);
+                    }
                 }
             }
+        } finally {
+            SearchIterators.close(iterator);
         }
     }
 

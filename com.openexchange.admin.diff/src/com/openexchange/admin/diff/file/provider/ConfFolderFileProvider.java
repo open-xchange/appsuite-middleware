@@ -106,9 +106,12 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
 
         for (File currentFile : filesToAdd) {
             if (currentFile.getAbsolutePath().contains("/conf/")) {
-                String fileContent;
+                FileReader fileReader = null;
                 try {
-                    fileContent = IOUtils.toString(new FileReader(currentFile));
+                    fileReader = new FileReader(currentFile);
+                    String fileContent = IOUtils.toString(fileReader);
+                    fileReader.close();
+                    fileReader = null;
 
                     ConfigurationFile configurationFile = new ConfigurationFile(currentFile.getName(), rootDirectory.getAbsolutePath(), FilenameUtils.getFullPath(FileProviderUtil.removeRootFolder(currentFile.getAbsolutePath(), rootDirectory.getAbsolutePath())), fileContent, isOriginal);
                     ConfFileHandler.addConfigurationFile(diffResult, configurationFile);
@@ -116,6 +119,10 @@ public class ConfFolderFileProvider implements IConfigurationFileProvider {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
                 } catch (IOException e) {
                     diffResult.getProcessingErrors().add("Error adding configuration file to queue: " + e.getLocalizedMessage() + ". Please run with root.\n");
+                } finally {
+                    if (null != fileReader) {
+                        try { fileReader.close(); } catch (Exception e) { /*ignore*/ }
+                    }
                 }
             }
         }

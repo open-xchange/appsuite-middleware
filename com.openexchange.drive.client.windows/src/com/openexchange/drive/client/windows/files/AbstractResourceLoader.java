@@ -56,6 +56,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import org.apache.commons.codec.binary.Hex;
+import com.openexchange.java.Streams;
 
 /**
  * {@link AbstractResourceLoader}
@@ -64,12 +65,12 @@ import org.apache.commons.codec.binary.Hex;
  */
 public abstract class AbstractResourceLoader implements ResourceLoader {
 
-    private Map<String, String> md5Cache = new HashMap<String, String>();
+    private final Map<String, String> md5Cache = new HashMap<String, String>();
 
 
     /**
      * Initializes a new {@link AbstractResourceLoader}.
-     * 
+     *
      * @param fileNamePattern
      */
     public AbstractResourceLoader() {
@@ -91,19 +92,23 @@ public abstract class AbstractResourceLoader implements ResourceLoader {
         if (inputStream == null) {
             return null;
         }
-        MessageDigest digest;
         try {
-            digest = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            IOException e1 = new IOException(e.getMessage());
-            e1.initCause(e);
-            throw e1;
+            MessageDigest digest;
+            try {
+                digest = MessageDigest.getInstance("MD5");
+            } catch (NoSuchAlgorithmException e) {
+                IOException e1 = new IOException(e.getMessage());
+                e1.initCause(e);
+                throw e1;
+            }
+            int length = -1;
+            byte[] buf = new byte[4096];
+            while ((length = inputStream.read(buf)) != -1) {
+                digest.update(buf, 0, length);
+            }
+            return new String(Hex.encodeHex(digest.digest()));
+        } finally {
+            Streams.close(inputStream);
         }
-        int length = -1;
-        byte[] buf = new byte[4096];
-        while ((length = inputStream.read(buf)) != -1) {
-            digest.update(buf, 0, length);
-        }
-        return new String(Hex.encodeHex(digest.digest()));
     }
 }

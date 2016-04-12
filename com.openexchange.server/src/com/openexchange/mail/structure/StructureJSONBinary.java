@@ -112,10 +112,11 @@ public final class StructureJSONBinary implements JSONBinary {
 
     @Override
     public String toString() {
+        InputStream in = null;
         try {
-            InputStream in = this.in;
+            in = this.in;
             if (null == in) {
-                in = tfh.getClosingStream();
+                in = tfh.getStream();
             }
             ByteArrayOutputStream bout = Streams.newByteArrayOutputStream(8192);
             Base64OutputStream base64Out = new Base64OutputStream(bout, true, -1, null);
@@ -130,6 +131,8 @@ public final class StructureJSONBinary implements JSONBinary {
         } catch (final Exception e) {
             LOG.error("", e);
             return "";
+        } finally {
+            Streams.close(in);
         }
     }
 

@@ -133,7 +133,8 @@ public class ICalUtil {
         List<CalendarObject> calendarItems = new ArrayList<CalendarObject>();
         ThresholdFileHolder fileHolder = null;
         try {
-            fileHolder = new ThresholdFileHolder().write(inputStream);
+            fileHolder = new ThresholdFileHolder();
+            fileHolder.write(inputStream);
             calendarItems.addAll(importAppointments(fileHolder.getStream(), session, calendarFolder.getObjectID()));
             calendarItems.addAll(importTasks(fileHolder.getStream(), session, taskFolder.getObjectID()));
         } finally {

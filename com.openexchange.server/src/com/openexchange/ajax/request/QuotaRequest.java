@@ -61,6 +61,7 @@ import com.openexchange.filestore.QuotaFileStorageService;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.MailServletInterface;
 import com.openexchange.server.ServiceExceptionCode;
+import com.openexchange.session.Session;
 import com.openexchange.tools.servlet.AjaxExceptionCodes;
 import com.openexchange.tools.session.ServerSession;
 
@@ -137,37 +138,41 @@ public class QuotaRequest {
     }
 
     private JSONObject mail() throws JSONException {
+        long[][] quotaInfo;
+        try {
+            quotaInfo = getQuotaInfo(session);
+        } catch (OXException e) {
+            if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
+                LOG.debug("", e);
+            } else {
+                LOG.error("", e);
+            }
+            quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
+        }
+
+        final JSONObject data = new JSONObject();
+        // STORAGE
+        data.put("quota", quotaInfo[0][0] << 10);
+        data.put("use", quotaInfo[0][1] << 10);
+        // MESSAGE
+        data.put("countquota", quotaInfo[1][0]);
+        data.put("countuse", quotaInfo[1][1]);
+        /*
+         * Write JSON object into writer as data content of a response object
+         */
+        return data;
+    }
+
+    private long[][] getQuotaInfo(Session session) throws OXException {
         MailServletInterface mi = null;
         try {
-            long[][] quotaInfo = null;
-            try {
-                mi = MailServletInterface.getInstance(this.session);
-                quotaInfo = mi.getQuotas(new int[] {
-                    MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
-            } catch (final OXException e) {
-                if (MailExceptionCode.ACCOUNT_DOES_NOT_EXIST.equals(e)) {
-                    LOG.debug("", e);
-                } else {
-                    LOG.error("", e);
-                }
-                quotaInfo = new long[][] { { UNLIMITED_QUOTA, UNLIMITED_QUOTA }, { UNLIMITED_QUOTA, UNLIMITED_QUOTA } };
-            }
-            final JSONObject data = new JSONObject();
-            // STORAGE
-            data.put("quota", quotaInfo[0][0] << 10);
-            data.put("use", quotaInfo[0][1] << 10);
-            // MESSAGE
-            data.put("countquota", quotaInfo[1][0]);
-            data.put("countuse", quotaInfo[1][1]);
-            /*
-             * Write JSON object into writer as data content of a response object
-             */
-            return data;
+            mi = MailServletInterface.getInstance(session);
+            return mi.getQuotas(new int[] { MailServletInterface.QUOTA_RESOURCE_STORAGE, MailServletInterface.QUOTA_RESOURCE_MESSAGE });
         } finally {
             if (mi != null) {
                 try {
                     mi.close(false);
-                } catch (final OXException e) {
+                } catch (Exception e) {
                     // Ignore
                 }
             }

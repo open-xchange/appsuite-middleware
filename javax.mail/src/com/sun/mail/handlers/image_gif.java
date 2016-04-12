@@ -58,6 +58,7 @@ public class image_gif extends handler_base {
 
     public Object getContent(DataSource ds) throws IOException {
 	InputStream is = ds.getInputStream();
+	try {
 	int pos = 0;
 	int count;
 	byte buf[] = new byte[1024];
@@ -77,6 +78,9 @@ public class image_gif extends handler_base {
 	}
 	Toolkit tk = Toolkit.getDefaultToolkit();
 	return tk.createImage(buf, 0, pos);
+	} finally {
+	    is.close();
+	}
     }
 
     /**

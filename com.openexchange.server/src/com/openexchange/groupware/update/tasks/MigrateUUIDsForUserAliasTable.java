@@ -81,7 +81,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -117,7 +117,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
@@ -127,7 +127,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /**
      * Insert random UUIDs to the 'uuid' column of the 'user_alias' table for all aliases that have none
-     * 
+     *
      * @param connection The writable connection
      * @throws SQLException If an SQL error occurs
      */
@@ -144,13 +144,14 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
             }
             preparedStatment.executeBatch();
         } finally {
+            DBUtils.closeSQLStuff(resultSet, statement);
             DBUtils.closeSQLStuff(preparedStatment);
         }
     }
 
     /**
      * Migrate the existing UUIDs from the 'user_attribute' table to the 'user_alias' table only if not previously migrated
-     * 
+     *
      * @param connection The writable connection
      * @param aliases The set of a
      * @throws SQLException
@@ -170,7 +171,7 @@ public class MigrateUUIDsForUserAliasTable extends AbstractUserAliasTableUpdateT
 
     /**
      * Add a batch to the prepared statement
-     * 
+     *
      * @param preparedStatement The prepared statement
      * @param contextId The context identifier
      * @param userId The user identifier
