@@ -2755,7 +2755,7 @@ public final class OXFolderSQL {
                 final int type = rs.getInt(2);
                 final int module = rs.getInt(3);
                 final boolean defaultFlag = rs.getInt(4) > 0;
-                if (destUser < 0 || isMailAdmin || markForDeletion(type, module, defaultFlag)) {
+                if (destUser <= 0 || isMailAdmin || markForDeletion(type, module, defaultFlag)) {
                     deleteFolders.add(fuid);
                 } else {
                     reassignFolders.add(fuid);
