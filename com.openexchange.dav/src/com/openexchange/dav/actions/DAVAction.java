@@ -167,7 +167,7 @@ public abstract class DAVAction extends AbstractAction {
         try {
             return request.getBodyAsDocument();
         } catch (JDOMException | IOException e) {
-            org.slf4j.LoggerFactory.getLogger(DAVAction.class).warn("Error getting WebDAV request body", e);
+            org.slf4j.LoggerFactory.getLogger(DAVAction.class).debug("Error getting WebDAV request body", e);
             return null;
         }
     }
