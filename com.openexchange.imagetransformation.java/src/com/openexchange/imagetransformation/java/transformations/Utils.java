@@ -56,9 +56,15 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
+import javax.imageio.spi.IIORegistry;
+import javax.imageio.spi.ImageReaderSpi;
 import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
@@ -67,6 +73,21 @@ import com.openexchange.exception.OXException;
 import com.openexchange.imagetransformation.java.exif.ExifTool;
 import com.openexchange.imagetransformation.java.exif.Orientation;
 import com.openexchange.tools.images.ImageTransformationUtility;
+import com.twelvemonkeys.imageio.plugins.bmp.BMPImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.bmp.CURImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.bmp.ICOImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.dcx.DCXImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.hdr.HDRImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.icns.ICNSImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.iff.IFFImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.jpeg.JPEGImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.pcx.PCXImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.pict.PICTImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.psd.PSDImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.sgi.SGIImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.tga.TGAImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.thumbsdb.ThumbsDBImageReaderSpi;
+import com.twelvemonkeys.imageio.plugins.tiff.TIFFImageReaderSpi;
 import com.twelvemonkeys.imageio.stream.ByteArrayImageInputStream;
 
 /**
@@ -78,6 +99,68 @@ import com.twelvemonkeys.imageio.stream.ByteArrayImageInputStream;
 public class Utils {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
+
+    private static final Map<String, ImageReaderSpi> READER_SPI_BY_FORMAT_NAME;
+    static {
+        /*
+         * prepare custom reader SPIs & remember by supported format name
+         */
+        List<ImageReaderSpi> readerSpis = Arrays.<ImageReaderSpi>asList(
+            new JPEGImageReaderSpi(), new TIFFImageReaderSpi(), new BMPImageReaderSpi(), new PSDImageReaderSpi(),
+            new ICOImageReaderSpi(), new CURImageReaderSpi(), new DCXImageReaderSpi(), new HDRImageReaderSpi(),
+            new ICNSImageReaderSpi(), new IFFImageReaderSpi(), new PCXImageReaderSpi(), new PICTImageReaderSpi(),
+            new SGIImageReaderSpi(), new TGAImageReaderSpi(), new ThumbsDBImageReaderSpi()
+        );
+        Map<String, ImageReaderSpi> readerSpiByFormatName = new HashMap<String, ImageReaderSpi>();
+        IIORegistry registry = IIORegistry.getDefaultInstance();
+        for (ImageReaderSpi readerSpi : readerSpis) {
+            readerSpi.onRegistration(registry, ImageReaderSpi.class);
+            for (String formatName : readerSpi.getFormatNames()) {
+                readerSpiByFormatName.put(formatName, readerSpi);
+            }
+        }
+        READER_SPI_BY_FORMAT_NAME = readerSpiByFormatName;
+    }
+
+    /**
+     * Gets an image reader suitable for the supplied image input stream.
+     *
+     * @param inputStream The image input stream to create the reader for
+     * @param formatName The indicated format name, or <code>null</code> if no available
+     * @return The image reader
+     */
+    public static ImageReader getImageReader(ImageInputStream inputStream, String formatName) throws IOException {
+        if (null != formatName) {
+            /*
+             * prefer alternative image readers if possible
+             */
+            ImageReaderSpi readerSpi = READER_SPI_BY_FORMAT_NAME.get(formatName);
+            if (null != readerSpi) {
+                try {
+                    inputStream.mark();
+                    if (readerSpi.canDecodeInput(inputStream)) {
+                        ImageReader reader = readerSpi.createReaderInstance();
+                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), formatName);
+                        return reader;
+                    }
+                } catch (IOException e) {
+                    LOG.debug("Error probing for suitable image reader", e);
+                } finally {
+                    inputStream.reset();
+                }
+            }
+        }
+        /*
+         * fallback to regularly registered readers
+         */
+        Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
+        if (false == readers.hasNext()) {
+            throw new IOException("No image reader available for format " + formatName);
+        }
+        ImageReader reader = readers.next();
+        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), formatName);
+        return reader;
+    }
 
     /**
      * Removes the transparency from the given image if necessary, i.e. the color model has an alpha channel and the supplied image

@@ -618,11 +618,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
              * create reader from image input stream
              */
             input = getImageInputStream(imageFile);
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(input);
-            if (false == readers.hasNext()) {
-                throw new IOException("No image reader available for content type " + imageFile.getContentType() + " (" + imageFile.getName() + ')');
-            }
-            reader = readers.next();
+            reader = getImageReader(input, getImageFormat(imageFile.getContentType()));
             reader.setInput(input);
             /*
              * read original image dimensions & check against required dimensions for transformations

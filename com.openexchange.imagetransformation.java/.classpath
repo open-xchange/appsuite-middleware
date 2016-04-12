@@ -8,13 +8,13 @@
 	<classpathentry kind="lib" path="lib/imageio-jpeg-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-metadata-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-thumbsdb-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-tiff-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-bmp-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-hdr-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-icns-3.2.1.jar"/>
-	<classpathentry kind="lib" path="lib/imageio-iff-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-iff-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-pcx-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
-	<classpathentry kind="lib" path="lib/imageio-pict-3.2.1.jar"/>
+	<classpathentry kind="lib" path="lib/imageio-pict-3.2.1.jar" sourcepath="lib/source/twelvemonkeys-3.2.1-sources.zip"/>
 	<classpathentry kind="lib" path="lib/imageio-pnm-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-psd-3.2.1.jar"/>
 	<classpathentry kind="lib" path="lib/imageio-sgi-3.2.1.jar"/>
