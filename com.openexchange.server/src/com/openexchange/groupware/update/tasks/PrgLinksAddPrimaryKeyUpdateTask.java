@@ -64,7 +64,6 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link PrgLinksAddPrimaryKeyUpdateTask}
  *
@@ -114,9 +113,9 @@ public class PrgLinksAddPrimaryKeyUpdateTask extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("SELECT firstid, firstmodule, firstfolder, secondid, secondmodule, secondfolder, cid, last_modified, created_by FROM prg_links WHERE uuid IS NULL FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE prg_links SET uuid = ? WHERE firstid ");
                     oldPos = 1;
@@ -196,9 +195,9 @@ public class PrgLinksAddPrimaryKeyUpdateTask extends UpdateTaskAdapter {
                     stmt2.setLong(newPos++, lastModified);
                     stmt2.setInt(newPos++, createdBy);
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);

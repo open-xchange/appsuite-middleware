@@ -65,7 +65,6 @@ import com.openexchange.tools.sql.DBUtils;
 import com.openexchange.tools.update.Column;
 import com.openexchange.tools.update.Tools;
 
-
 /**
  * {@link UserSettingServerAddUuidUpdateTask}
  *
@@ -80,7 +79,9 @@ public class UserSettingServerAddUuidUpdateTask extends UpdateTaskAdapter {
         super();
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#perform(com.openexchange.groupware.update.PerformParameters)
      */
     @Override
@@ -107,14 +108,16 @@ public class UserSettingServerAddUuidUpdateTask extends UpdateTaskAdapter {
         }
     }
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     *
      * @see com.openexchange.groupware.update.UpdateTaskV2#getDependencies()
      */
     @Override
     public String[] getDependencies() {
         return new String[0];
     }
-    
+
     private void setUUID(Connection con) throws SQLException {
         PreparedStatement stmt = null;
         int oldPos, newPos;
@@ -122,9 +125,9 @@ public class UserSettingServerAddUuidUpdateTask extends UpdateTaskAdapter {
         try {
             stmt = con.prepareStatement("SELECT cid, user, contact_collect_folder, contact_collect_enabled, defaultStatusPrivate, defaultStatusPublic, contactCollectOnMailTransport, contactCollectOnMailAccess, folderTree FROM user_setting_server FOR UPDATE");
             rs = stmt.executeQuery();
-            PreparedStatement stmt2 = null;
-            try {
-                while (rs.next()) {
+            while (rs.next()) {
+                PreparedStatement stmt2 = null;
+                try {
                     StringBuilder sb = new StringBuilder();
                     sb.append("UPDATE user_setting_server SET uuid = ? WHERE cid ");
                     oldPos = 1;
@@ -249,9 +252,9 @@ public class UserSettingServerAddUuidUpdateTask extends UpdateTaskAdapter {
                         stmt2.setNull(newPos++, Types.INTEGER);
                     }
                     stmt2.execute();
+                } finally {
+                    DBUtils.closeSQLStuff(stmt2);
                 }
-            } finally {
-                DBUtils.closeSQLStuff(stmt2);
             }
         } finally {
             DBUtils.closeSQLStuff(rs, stmt);
