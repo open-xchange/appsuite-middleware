@@ -148,7 +148,7 @@ public final class GetStructureAction extends AbstractMailAction {
                     final int contextId = session.getContextId();
                     final int userId = session.getUserId();
                     if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                        triggerContactCollector(session, mail, true);
+                        triggerContactCollector(session, mail, false);
                     }
                 } catch (final OXException e) {
                     LOG.warn("Contact collector could not be triggered.", e);

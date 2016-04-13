@@ -51,6 +51,8 @@ package com.openexchange.contactcollector.internal;
 
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -312,25 +314,60 @@ public final class MemorizerWorker {
             return;
         }
 
+        // Get associated context
         Context ctx;
-        Set<InternetAddress> aliases;
-        UserConfiguration userConfig;
-        ContactService contactService;
-        ObjectUseCountService useCountService = null;
         try {
-            // Acquire needed services
             ContextService contextService = services.getOptionalService(ContextService.class);
             if (null == contextService) {
                 LOG.warn("Contact collector run aborted: missing context service");
                 return;
             }
+            ctx = contextService.getContext(session.getContextId());
+        } catch (final Exception e) {
+            LOG.error("Contact collector run aborted.", e);
+            return;
+        }
 
+        // Strip by well-known aliases
+        final Set<InternetAddress> addresses = new LinkedHashSet<InternetAddress>(memorizerTask.getAddresses());
+        try {
             UserService userService = services.getOptionalService(UserService.class);
             if (null == userService) {
                 LOG.warn("Contact collector run aborted: missing user service");
                 return;
             }
 
+            UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
+            Set<InternetAddress> aliases;
+            if (ALL_ALIASES) {
+                // All context-known users' aliases
+                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
+            } else {
+                // Only aliases of session user
+                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
+            }
+            addresses.removeAll(aliases);
+        } catch (final Exception e) {
+            LOG.error("Contact collector run aborted.", e);
+            return;
+        }
+
+        if (addresses.isEmpty()) {
+            return;
+        }
+
+        LOG.debug("Contact collector run for addresses: {}", new Object() {
+
+            @Override
+            public String toString() {
+                return addresses.toString();
+            }
+        });
+
+        UserConfiguration userConfig;
+        ContactService contactService;
+        ObjectUseCountService useCountService = null;
+        try {
             UserConfigurationService userConfigurationService = services.getOptionalService(UserConfigurationService.class);
             if (null == userConfigurationService) {
                 LOG.warn("Contact collector run aborted: missing user configuration service");
@@ -344,16 +381,6 @@ public final class MemorizerWorker {
             }
 
             useCountService = memorizerTask.isIncrementUseCount() ? services.getOptionalService(ObjectUseCountService.class) : null;
-
-            ctx = contextService.getContext(session.getContextId());
-            UserAliasStorage aliasStorage = services.getOptionalService(UserAliasStorage.class);
-            if (ALL_ALIASES) {
-                // All context-known users' aliases
-                aliases = AliasesProvider.getInstance().getContextAliases(ctx, userService, aliasStorage);
-            } else {
-                // Only aliases of session user
-                aliases = AliasesProvider.getInstance().getAliases(userService.getUser(session.getUserId(), ctx), ctx, aliasStorage);
-            }
             userConfig = userConfigurationService.getUserConfiguration(session.getUserId(), ctx);
         } catch (final Exception e) {
             LOG.error("Contact collector run aborted.", e);
@@ -361,14 +388,11 @@ public final class MemorizerWorker {
         }
 
         // Iterate addresses...
-        for (InternetAddress address : memorizerTask.getAddresses()) {
-            // Check if address is contained in user's aliases
-            if (!aliases.contains(address)) {
-                try {
-                    memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCountService);
-                } catch (Exception e) {
-                    LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
-                }
+        for (InternetAddress address : addresses) {
+            try {
+                memorizeContact(address, folderId, session, ctx, userConfig, contactService, useCountService);
+            } catch (Exception e) {
+                LOG.warn("Contact collector run aborted for address: {}", address.toUnicodeString(), e);
             }
         }
     }
@@ -435,12 +459,28 @@ public final class MemorizerWorker {
             return;
         }
 
-        // Such contacts already exists...
+        // Such contacts already exists. Increment their use count
         if (null != useCountService) {
-            for (Contact foundContact : foundContacts) {
-                OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
-                if (perm.canWriteAllObjects()) {
-                    incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+            int numOfFoundContacts = foundContacts.size();
+            if (numOfFoundContacts > 0) {
+                if (1 == numOfFoundContacts) {
+                    Contact foundContact = foundContacts.get(0);
+                    OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(foundContact.getParentFolderID(), session.getUserId(), userConfig);
+                    if (perm.canWriteAllObjects()) {
+                        incrementUseCount(foundContact.getObjectID(), foundContact.getParentFolderID(), session, useCountService);
+                    }
+                } else {
+                    Set<IntPair> alreadyProcessed = new HashSet<IntPair>(foundContacts.size(), 0.9F);
+                    for (Contact foundContact : foundContacts) {
+                        int objectID = foundContact.getObjectID();
+                        int parentFolderID = foundContact.getParentFolderID();
+                        if (alreadyProcessed.add(new IntPair(objectID, parentFolderID))) {
+                            OCLPermission perm = new OXFolderAccess(ctx).getFolderPermission(parentFolderID, session.getUserId(), userConfig);
+                            if (perm.canWriteAllObjects()) {
+                                incrementUseCount(objectID, parentFolderID, session, useCountService);
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -531,6 +571,51 @@ public final class MemorizerWorker {
             return sa.toString();
         }
         return val;
+    }
+
+    private static final class IntPair {
+
+        private final int i1;
+        private final int i2;
+        private final int hash;
+
+        IntPair(int i1, int i2) {
+            super();
+            this.i1 = i1;
+            this.i2 = i2;
+
+            int prime = 31;
+            int result = prime * 1 + i1;
+            result = prime * result + i2;
+            this.hash = result;
+        }
+
+        @Override
+        public int hashCode() {
+            return hash;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            IntPair other = (IntPair) obj;
+            if (i1 != other.i1) {
+                return false;
+            }
+            if (i2 != other.i2) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder builder = new StringBuilder();
+            builder.append("IntPair [i1=").append(i1).append(", i2=").append(i2).append("]");
+            return builder.toString();
+        }
     }
 
 }
