@@ -78,7 +78,6 @@ import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.oxfolder.OXFolderManager;
 import com.openexchange.tools.session.ServerSession;
 
-
 /**
  * {@link OXIntegration}
  *
@@ -144,9 +143,9 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
 
     private FolderObject findTemplatesSubfolder(final FolderObject folderObject, final OXFolderAccess access, final Context ctx) throws OXException {
         try {
-            for(final int id : folderObject.getSubfolderIds(true, ctx)) {
+            for (final int id : folderObject.getSubfolderIds(true, ctx)) {
                 final FolderObject child = access.getFolderObject(id);
-                if(child.getFolderName().equals(TEMPLATE_FOLDER_NAME)) {
+                if (child.getFolderName().equals(TEMPLATE_FOLDER_NAME)) {
                     return child;
                 }
             }
@@ -170,15 +169,15 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             }
         }
 
-        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL}, session).results();
+        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[] { Metadata.ID_LITERAL, Metadata.TITLE_LITERAL, Metadata.FILENAME_LITERAL }, session).results();
         try {
             final DocumentMetadataMatcher matcher = new DocumentMetadataMatcher(name);
-            while(iterator.hasNext() && !matcher.hasPerfectMatch()) {
+            while (iterator.hasNext() && !matcher.hasPerfectMatch()) {
                 matcher.propose(iterator.next());
             }
             final DocumentMetadata metadata = matcher.getBestMatch();
 
-            if(metadata == null) {
+            if (metadata == null) {
                 return null;
             }
 
@@ -186,7 +185,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             return asString(is);
 
         } finally {
-            if (iterator != null){
+            if (iterator != null) {
                 iterator.close();
             }
         }
@@ -198,7 +197,7 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
             reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             final StringBuilder builder = new StringBuilder();
             String line = null;
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 builder.append(line).append('\n');
             }
             return builder.toString();
@@ -227,24 +226,31 @@ public class OXIntegration implements OXFolderHelper, OXInfostoreHelper {
     }
 
     @Override
-    public List<String> getNames(final ServerSession session, final FolderObject folder, final String ... filter) throws OXException {
-    	final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
+    public List<String> getNames(final ServerSession session, final FolderObject folder, final String... filter) throws OXException {
+        final HashSet<String> sieve = new HashSet<String>(Arrays.asList(filter));
 
-        final SearchIterator<DocumentMetadata> iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[]{Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL}, session).results();
+        SearchIterator<DocumentMetadata> iterator = null;
         final List<String> names = new ArrayList<String>(30);
-        while(iterator.hasNext()) {
-            final DocumentMetadata doc = iterator.next();
-            Set<String> categories = null;
+        try {
+            iterator = infostore.getDocuments(folder.getObjectID(), new Metadata[] { Metadata.FILENAME_LITERAL, Metadata.CATEGORIES_LITERAL }, session).results();
 
-            if(doc.getCategories() != null && doc.getCategories().length() > 0){
-                categories = new HashSet<String>(Arrays.asList(doc.getCategories().split("\\s*,\\s*")));
+            while (iterator.hasNext()) {
+                final DocumentMetadata doc = iterator.next();
+                Set<String> categories = null;
+
+                if (doc.getCategories() != null && doc.getCategories().length() > 0) {
+                    categories = new HashSet<String>(Arrays.asList(doc.getCategories().split("\\s*,\\s*")));
+                }
+
+                if (categories == null || categories.containsAll(sieve)) {
+                    names.add(doc.getFileName());
+                }
             }
-
-			if(categories == null || categories.containsAll(sieve)) {
-				names.add(doc.getFileName());
-			}
+        } finally {
+            if (iterator != null) {
+                iterator.close();
+            }
         }
         return names;
     }
-
 }
