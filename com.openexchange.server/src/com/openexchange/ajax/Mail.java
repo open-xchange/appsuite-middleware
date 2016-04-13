@@ -1155,7 +1155,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail, true);
+                            triggerContactCollector(session, mail, false);
                         }
                         //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
@@ -1415,7 +1415,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail, true);
+                            triggerContactCollector(session, mail, false);
                         }
                         //                        countObjectUse(session, mail);
                     } catch (final OXException e) {
@@ -1487,7 +1487,7 @@ public class Mail extends PermissionServlet implements UploadListener {
                         if (setting.isContactCollectOnMailAccess(
                             contextId,
                             userId).booleanValue()) {
-                            triggerContactCollector(session, mail, true);
+                            triggerContactCollector(session, mail, false);
                         }
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
@@ -1580,7 +1580,7 @@ public class Mail extends PermissionServlet implements UploadListener {
     private static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
+            Set<InternetAddress> addrs = AddressUtility.getAddresses(mail, session);
 
             if (!addrs.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);

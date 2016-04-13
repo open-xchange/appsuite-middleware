@@ -304,7 +304,7 @@ public final class GetAction extends AbstractMailAction {
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail, true);
+                                triggerContactCollector(session, mail, false);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);
@@ -390,7 +390,7 @@ public final class GetAction extends AbstractMailAction {
                         final int contextId = session.getContextId();
                         final int userId = session.getUserId();
                         if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                            triggerContactCollector(session, mail, true);
+                            triggerContactCollector(session, mail, false);
                         }
                     } catch (final OXException e) {
                         LOG.warn("Contact collector could not be triggered.", e);
@@ -427,16 +427,15 @@ public final class GetAction extends AbstractMailAction {
                         fileHolder = getMimeSource(mail, mimeFilter);
                     }
                     /*
-                     * Restore \Seen flag
+                     * Check whether to trigger contact collector
                      */
-                    final boolean wasUnseen = (unseen ? !mail.isSeen() : mail.containsPrevSeen() && !mail.isPrevSeen());
-                    if (wasUnseen) {
+                    if (!unseen && (mail.containsPrevSeen() && !mail.isPrevSeen())) {
                         try {
                             final ServerUserSetting setting = ServerUserSetting.getInstance();
                             final int contextId = session.getContextId();
                             final int userId = session.getUserId();
                             if (setting.isContactCollectOnMailAccess(contextId, userId).booleanValue()) {
-                                triggerContactCollector(session, mail, true);
+                                triggerContactCollector(session, mail, false);
                             }
                         } catch (final OXException e) {
                             LOG.warn("Contact collector could not be triggered.", e);

@@ -266,7 +266,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
     public static void triggerContactCollector(ServerSession session, MailMessage mail, boolean incrementUseCount) throws OXException {
         final ContactCollectorService ccs = ServerServiceRegistry.getInstance().getService(ContactCollectorService.class);
         if (null != ccs) {
-            Set<InternetAddress> addrs = AddressUtility.getUnknownAddresses(mail, session);
+            Set<InternetAddress> addrs = AddressUtility.getAddresses(mail, session);
 
             if (!addrs.isEmpty()) {
                 ccs.memorizeAddresses(new ArrayList<InternetAddress>(addrs), incrementUseCount, session);
