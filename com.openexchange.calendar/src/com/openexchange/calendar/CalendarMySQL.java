@@ -131,6 +131,7 @@ import com.openexchange.groupware.search.AppointmentSearchObject;
 import com.openexchange.groupware.search.Order;
 import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
@@ -2734,7 +2735,7 @@ public class CalendarMySQL implements CalendarSqlImp {
         CalendarVolatileCache.getInstance().invalidateGroup(String.valueOf(cdao.getContextID()));
 
         final CalendarOperation co = new CalendarOperation();
-
+        try {
         if (isForbiddenPrivateMoveToPublicFolder(cdao, edao)) {
             throw OXCalendarExceptionCodes.PRIVATE_MOVE_TO_PUBLIC.create();
         }
@@ -3205,6 +3206,9 @@ public class CalendarMySQL implements CalendarSqlImp {
 
         }
         return null;
+        } finally {
+            Streams.close(co);
+        }
     }
 
     /**
