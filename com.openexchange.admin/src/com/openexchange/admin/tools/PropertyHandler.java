@@ -59,6 +59,7 @@ import java.util.Properties;
 import com.openexchange.admin.properties.AdminProperties;
 import com.openexchange.admin.services.AdminServiceRegistry;
 import com.openexchange.config.ConfigurationService;
+import com.openexchange.java.Streams;
 
 public class PropertyHandler {
 
@@ -366,9 +367,7 @@ public class PropertyHandler {
             in = new FileInputStream(file);
             configprops.load(in);
         } finally {
-            if (null != in) {
-                in.close();
-            }
+            Streams.close(in);
         }
 
         final Enumeration<?> enumi = configprops.propertyNames();
@@ -390,9 +389,7 @@ public class PropertyHandler {
                     in = new FileInputStream(value);
                     customprops.load(in);
                 } finally {
-                    if (null != in) {
-                        in.close();
-                    }
+                    Streams.close(in);
                 }
                 final Enumeration<?> enuma = customprops.propertyNames();
                 Hashtable<String, String> custconfig = new Hashtable<String, String>();

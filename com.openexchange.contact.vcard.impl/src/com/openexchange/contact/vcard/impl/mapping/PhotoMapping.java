@@ -189,9 +189,7 @@ public class PhotoMapping extends AbstractMapping {
                         }
                     }
                 } finally {
-                    if (null != fileHolder) {
-                        fileHolder.close();
-                    }
+                    Streams.close(fileHolder);
                 }
             } catch (IOException e) {
                 addConversionWarning(warnings, e, "PHOTO", e.getMessage());

@@ -89,6 +89,7 @@ import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.exception.OXException;
 import com.openexchange.i18n.LocaleTools;
 import com.openexchange.java.CountingOutputStream;
+import com.openexchange.java.Streams;
 import com.openexchange.mail.MailExceptionCode;
 import com.openexchange.mail.api.MailConfig;
 import com.openexchange.mail.config.MailProperties;
@@ -813,9 +814,7 @@ public final class MailMessageParser {
                                 attachment.writeTo(counter);
                                 bodyPart.setSize((int) counter.getCount());
                             } finally {
-                                if (null != counter) {
-                                    counter.close();
-                                }
+                                Streams.close(counter);
                             }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
