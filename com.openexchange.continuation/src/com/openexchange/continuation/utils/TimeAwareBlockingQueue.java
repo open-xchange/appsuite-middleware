@@ -828,12 +828,17 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
 
         @Override
         public void remove() {
-            if (lastRet == null) {
+            Node<E> node = lastRet;
+            if (node == null) {
                 throw new IllegalStateException();
             }
+
             fullyLock();
             try {
-                final Node<E> node = lastRet;
+                node = lastRet;
+                if (node == null) {
+                    throw new IllegalStateException();
+                }
                 lastRet = null;
                 for (Node<E> trail = head, p = trail.next; p != null; trail = p, p = p.next) {
                     if (p == node) {
