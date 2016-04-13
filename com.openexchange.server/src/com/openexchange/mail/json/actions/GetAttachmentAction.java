@@ -419,8 +419,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             IFileHolder fileHolder;
             if (saveToDisk) {
                 if (null == sink) {
-                    @SuppressWarnings("resource")
-                    FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
+                    @SuppressWarnings("resource") FileHolder tmp = new FileHolder(isClosure, size, MimeType2ExtMap.getContentType(filename), filename);
                     tmp.setDelivery("download");
                     fileHolder = tmp;
                 } else {
@@ -663,9 +662,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     return tfh.getStream();
                 }
             }
+            PushbackInputStream in = null;
             try {
                 // Try to read first byte and push back immediately
-                PushbackInputStream in = new PushbackInputStream(mailPart.getInputStream());
+                in = new PushbackInputStream(mailPart.getInputStream());
                 int read = in.read();
                 if (read < 0) {
                     return Streams.EMPTY_INPUT_STREAM;
@@ -691,6 +691,10 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     if (null != ma) {
                         ma.close(true);
                     }
+                }
+            } finally {
+                if (in != null) {
+                    in.close();
                 }
             }
         }
