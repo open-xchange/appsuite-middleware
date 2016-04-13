@@ -55,10 +55,10 @@ import com.openexchange.exception.OXException;
 import com.openexchange.file.storage.DefaultFileStorageFolder;
 import com.openexchange.file.storage.DefaultFileStoragePermission;
 import com.openexchange.file.storage.FileStorageExceptionCodes;
-import com.openexchange.file.storage.FileStorageFolder;
 import com.openexchange.file.storage.FileStorageFolderType;
 import com.openexchange.file.storage.FileStoragePermission;
 import com.openexchange.file.storage.TypeAware;
+import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.osgi.Services;
 import com.openexchange.i18n.tools.StringHelper;
 import com.openexchange.session.Session;
@@ -74,8 +74,6 @@ import com.openexchange.user.UserService;
 public final class MailDriveFolder extends DefaultFileStorageFolder implements TypeAware {
 
     /** The constant for full name of an account's root folder. */
-    private static final String _ROOT_FULLNAME = FileStorageFolder.ROOT_FULLNAME;
-
     private final FileStorageFolderType type;
     private final DefaultFileStoragePermission permission;
 
@@ -124,17 +122,16 @@ public final class MailDriveFolder extends DefaultFileStorageFolder implements T
         try {
             rootFolder = fullName.isDefaultFolder();
             b_rootFolder = true;
+            id = fullName.getFolderId();
 
             if (rootFolder) {
-                id = _ROOT_FULLNAME;
                 setParentId(null);
                 setName(StringHelper.valueOf(getSessionUserLocale(session)).getString(MailDriveStrings.ACCOUNT_DISPLAY_NAME));
                 setSubfolders(true);
                 setSubscribedSubfolders(true);
                 permission.setReadPermission(FileStoragePermission.NO_PERMISSIONS);
             } else {
-                id = fullName.getFolderId();
-                setParentId(_ROOT_FULLNAME);
+                setParentId(Type.DEFAULT.getFolderId());
                 setName(getLocalizedNameFor(fullName, session));
                 setSubfolders(false);
                 setSubscribedSubfolders(false);
