@@ -1054,6 +1054,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
              * Check if appointment has attachments
              */
             Multipart mixedMultipart = null;
+            SearchIterator<?> iterator = null;
             try {
                 final AttachmentBase attachmentBase = Attachment.ATTACHMENT_BASE;
                 final int folderId = app.getParentFolderID();
@@ -1061,7 +1062,7 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 final Context context = session.getContext();
                 final User user = session.getUser();
                 final UserConfiguration config = session.getUserConfiguration();
-                final SearchIterator<?> iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
+                iterator = attachmentBase.getAttachments(session, folderId, objectId, Types.APPOINTMENT, context, user, config).results();
                 if (iterator.hasNext()) {
                     try {
                         attachmentBase.startTransaction();
@@ -1118,7 +1119,6 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                         }
                         LOG.error("File attachment(s) cannot be added.", e);
                     } finally {
-                        SearchIterators.close(iterator);
                         try {
                             attachmentBase.finish();
                         } catch (final OXException e) {
@@ -1128,6 +1128,8 @@ public class ParticipantNotify implements AppointmentEventInterface2, TaskEventI
                 }
             } catch (final Exception e) {
                 LOG.error("File attachment(s) cannot be added.", e);
+            } finally {
+                SearchIterators.close(iterator);
             }
             /*
              * Generate iCal for appointment
