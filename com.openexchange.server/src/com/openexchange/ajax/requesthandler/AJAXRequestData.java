@@ -201,7 +201,7 @@ public class AJAXRequestData {
     private @Nullable Long lastModified;
 
     /** The requests host data **/
-    private @Nullable HostData hostData;
+    private @Nullable volatile HostData hostData;
 
     /** The maximum allowed size of a single uploaded file or <code>-1</code> */
     private long maxUploadFileSize = -1L;
@@ -1526,12 +1526,15 @@ public class AJAXRequestData {
      * @return The host data
      */
     public @Nullable HostData getHostData() {
+        HostData hostData = this.hostData;
         if (hostData == null) {
             synchronized (this) {
+                hostData = this.hostData;
                 if (hostData == null && hostname != null && route != null && prefix != null) {
                     String httpSesssionID = this.route;
                     String route = Tools.extractRoute(httpSesssionID);
                     hostData = new HostDataImpl(secure, hostname, serverPort, httpSesssionID, route, prefix);
+                    this.hostData = hostData;
                 }
             }
         }
