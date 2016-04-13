@@ -771,8 +771,8 @@ public class TimeAwareBlockingQueue<E> extends AbstractQueue<E> implements Block
          * Basic weakly-consistent iterator. At all times hold the next item to hand out so that if hasNext() reports true, we will still
          * have it to return even if lost race with a take etc.
          */
-        private Node<E> current;
-        private Node<E> lastRet;
+        private volatile Node<E> current;
+        private volatile Node<E> lastRet;
         private E currentElement;
 
         Itr() {
