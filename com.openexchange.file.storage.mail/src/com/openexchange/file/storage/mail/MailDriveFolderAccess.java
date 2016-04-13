@@ -133,7 +133,7 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
 
     @Override
     public FileStorageFolder getRootFolder() throws OXException {
-        return parsedFolder(new FullName("", FullName.Type.DEFAULT, FileStorageFolder.ROOT_FULLNAME));
+        return parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.DEFAULT));
     }
 
     @Override
@@ -200,7 +200,7 @@ public final class MailDriveFolderAccess extends AbstractMailDriveResourceAccess
 
         List<FileStorageFolder> folders = new ArrayList<FileStorageFolder>(3);
         folders.add(parsedFolder(fullName));
-        folders.add(parsedFolder(new FullName("", FullName.Type.DEFAULT, FileStorageFolder.ROOT_FULLNAME)));
+        folders.add(parsedFolder(fullNameCollection.getFullNameFor(FullName.Type.DEFAULT)));
         return folders.toArray(new FileStorageFolder[folders.size()]);
     }
 

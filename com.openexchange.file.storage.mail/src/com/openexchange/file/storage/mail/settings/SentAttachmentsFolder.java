@@ -53,17 +53,17 @@ import com.openexchange.file.storage.mail.FullName.Type;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
 
 /**
- * {@link AllAttachmentsFolder}
+ * {@link SentAttachmentsFolder}
  *
  * @author <a href="mailto:thorben.betten@open-xchange.com">Thorben Betten</a>
  * @since v7.8.2
  */
-public class AllAttachmentsFolder extends AbstractMailDriveSetting {
+public class SentAttachmentsFolder extends AbstractMailDriveSetting {
 
     /**
-     * Initializes a new {@link AllAttachmentsFolder}.
+     * Initializes a new {@link SentAttachmentsFolder}.
      */
-    public AllAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
-        super("allattachments", Type.ALL, mailDriveService);
+    public SentAttachmentsFolder(MailDriveFileStorageService mailDriveService) {
+        super("sentattachments", Type.SENT, mailDriveService);
     }
 }

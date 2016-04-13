@@ -57,7 +57,10 @@ import com.openexchange.file.storage.FileStorageAccountManagerLookupService;
 import com.openexchange.file.storage.FileStorageService;
 import com.openexchange.file.storage.mail.MailDriveFileStorageService;
 import com.openexchange.file.storage.mail.find.MailDriveDriver;
+import com.openexchange.file.storage.mail.settings.AbstractMailDriveSetting;
 import com.openexchange.file.storage.mail.settings.AllAttachmentsFolder;
+import com.openexchange.file.storage.mail.settings.ReceivedAttachmentsFolder;
+import com.openexchange.file.storage.mail.settings.SentAttachmentsFolder;
 import com.openexchange.groupware.settings.PreferencesItemService;
 import com.openexchange.jslob.ConfigTreeEquivalent;
 import com.openexchange.mime.MimeTypeMap;
@@ -99,7 +102,15 @@ public final class MailDriveActivator extends HousekeepingActivator {
 
             registerService(FileStorageService.class, service, null);
 
-            AllAttachmentsFolder setting = new AllAttachmentsFolder(service);
+            AbstractMailDriveSetting setting = new AllAttachmentsFolder(service);
+            registerService(PreferencesItemService.class, setting, null);
+            registerService(ConfigTreeEquivalent.class, setting, null);
+
+            setting = new ReceivedAttachmentsFolder(service);
+            registerService(PreferencesItemService.class, setting, null);
+            registerService(ConfigTreeEquivalent.class, setting, null);
+
+            setting = new SentAttachmentsFolder(service);
             registerService(PreferencesItemService.class, setting, null);
             registerService(ConfigTreeEquivalent.class, setting, null);
         } catch (Exception e) {
