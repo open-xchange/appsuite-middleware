@@ -83,6 +83,7 @@ import com.openexchange.exception.OXException;
 import com.openexchange.groupware.contexts.Context;
 import com.openexchange.groupware.ldap.User;
 import com.openexchange.html.HtmlService;
+import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
 import com.openexchange.mail.dataobjects.compose.ComposedMailMessage;
 import com.openexchange.mail.dataobjects.compose.ContentAwareComposedMailMessage;
@@ -373,12 +374,16 @@ public class NotificationMailFactoryImpl implements NotificationMailFactory {
         }
 
         File image = new File(new File(templatesPath), imageName);
+        FileInputStream in = null;
         try {
-            byte[] imageBytes = ByteStreams.toByteArray(new FileInputStream(image));
+            in = new FileInputStream(image);
+            byte[] imageBytes = ByteStreams.toByteArray(in);
             return new FooterImage(mimeType, "footer_image." + MimeType2ExtMap.getFileExtension(mimeType), imageBytes);
         } catch (IOException e) {
             LOG.warn("Could not load and convert footer image {} from path {}.", imageName, templatesPath, e);
             return null;
+        } finally {
+            Streams.close(in);
         }
     }
 
