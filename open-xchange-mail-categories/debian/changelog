@@ -1,10 +1,10 @@
-open-xchange-mail-categories-impl (7.8.2-0) unstable; urgency=medium
+open-xchange-mail-categories (7.8.2-0) unstable; urgency=medium
 
   * prepare for 7.8.2 release
 
  -- Kevin Ruthmann <kevin.ruthmann@open-xchange.com>  Wed, 06 Apr 2016 10:25:11 +0200
 
-open-xchange-mail-categories-impl (7.8.1-0) unstable; urgency=low
+open-xchange-mail-categories (7.8.1-0) unstable; urgency=low
 
   * Initial release
 

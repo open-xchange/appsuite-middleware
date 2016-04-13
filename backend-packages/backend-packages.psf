@@ -57,7 +57,7 @@
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-l10n"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-linkedin"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mailfilter"/>
-<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mail-categories-impl"/>
+<project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-mail-categories"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-manage-group-resource"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging"/>
 <project reference="1.0,https://git.open-xchange.com/git/wd/backend,develop,open-xchange-messaging-sms"/>
