@@ -353,7 +353,7 @@ public class DirectoryActionExecutor extends BatchActionExecutor<DirectoryVersio
          * update checksums
          */
         if (0 < removedFolderIDs.size()) {
-            session.getChecksumStore().removeDirectoryChecksums(removedFolderIDs);
+            session.getChecksumStore().removeAllDirectoryChecksums(removedFolderIDs);
             session.getChecksumStore().removeFileChecksumsInFolders(removedFolderIDs);
         }
         if (0 < updatedFolderIDs.size()) {

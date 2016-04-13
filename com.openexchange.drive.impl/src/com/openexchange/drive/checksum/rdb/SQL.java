@@ -222,7 +222,7 @@ public class SQL {
      * DELETE FROM directoryChecksums
      * WHERE cid=? AND folder IN (?,?,...);"
      */
-    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
+    public static final String DELETE_DIRECTORY_CHECKSUMS_FOR_FOLDER_STMT(int length) {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND folder");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
@@ -240,6 +240,22 @@ public class SQL {
     }
 
     /**
+     * SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) FROM directoryChecksums
+     * WHERE cid=? AND folder IN (?,?,...);"
+     */
+    public static final String SELECT_ALL_DIRECTORY_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) FROM directoryChecksums ");
+        stringBuilder.append("WHERE cid=? AND folder");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
+
+    public static final String SELECT_UNUSED_DIRECTORY_CHECKSUMS_STMT =
+        "SELECT LOWER(HEX(uuid)),REVERSE(folder),sequence,etag,user,view,LOWER(HEX(checksum)) " +
+        "FROM directoryChecksums WHERE cid=? AND used<?;"
+    ;
+
+    /**
      * SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) FROM fileChecksums
      * WHERE cid=? AND checksum IN (?,?,...);"
      */
@@ -247,6 +263,13 @@ public class SQL {
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT LOWER(HEX(uuid)),REVERSE(folder),REVERSE(file),version,sequence,LOWER(HEX(checksum)) ");
         stringBuilder.append("FROM fileChecksums WHERE cid=? AND checksum");
+        return appendPlaceholders(stringBuilder, length).append(';').toString();
+    }
+
+    /** DELETE FROM directoryChecksums WHERE cid=? AND uuid IN (?,?,...);" */
+    public static final String DELETE_DIRECTORY_CHECKSUMS_STMT(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("DELETE FROM directoryChecksums WHERE cid=? AND uuid");
         return appendPlaceholders(stringBuilder, length).append(';').toString();
     }
 

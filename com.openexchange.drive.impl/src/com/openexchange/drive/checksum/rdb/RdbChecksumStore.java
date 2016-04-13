@@ -403,11 +403,11 @@ public class RdbChecksumStore implements ChecksumStore {
 
     @Override
     public boolean removeDirectoryChecksum(FolderID folderID) throws OXException {
-        return 0 < removeDirectoryChecksums(Collections.singletonList(folderID));
+        return 0 < removeAllDirectoryChecksums(Collections.singletonList(folderID));
     }
 
     @Override
-    public int removeDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
+    public int removeAllDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
         Connection connection = databaseService.getWritable(contextID);
         try {
             return deleteDirectoryChecksums(connection, contextID, folderIDs.toArray(new FolderID[folderIDs.size()]));
@@ -460,6 +460,72 @@ public class RdbChecksumStore implements ChecksumStore {
                 touched += touchDirectoryChecksums(connection, contextID, uuids);
             }
             return touched;
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backWritable(contextID, connection);
+        }
+    }
+
+    @Override
+    public List<DirectoryChecksum> getUnusedDirectoryChecksums(long unusedSince) throws OXException {
+        Connection connection = databaseService.getReadOnly(contextID);
+        try {
+            return selectUnusedDirectoryChecksums(connection, contextID, unusedSince);
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public List<DirectoryChecksum> getDirectoryChecksums(List<FolderID> folderIDs) throws OXException {
+        if (null == folderIDs) {
+            return Collections.emptyList();
+        }
+        List<DirectoryChecksum> checksums = new ArrayList<DirectoryChecksum>();
+        Connection connection = databaseService.getReadOnly(contextID);
+        try {
+            /*
+             * select chunk-wise
+             */
+            for (int i = 0; i < checksums.size(); i += SELECT_WHERE_IN_CHUNK_SIZE) {
+                int length = Math.min(checksums.size(), i + SELECT_WHERE_IN_CHUNK_SIZE) - i;
+                checksums.addAll(selectDirectoryChecksums(connection, contextID, folderIDs.subList(i, i + length)));
+            }
+            return checksums;
+        } catch (SQLException e) {
+            throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
+        } finally {
+            databaseService.backReadOnly(contextID, connection);
+        }
+    }
+
+    @Override
+    public int removeDirectoryChecksums(List<DirectoryChecksum> directoryChecksums) throws OXException {
+        Connection connection = databaseService.getWritable(contextID);
+        try {
+            int deleted = 0;
+            for (int i = 0; i < directoryChecksums.size(); i += DELETE_CHUNK_SIZE) {
+                /*
+                 * prepare chunk
+                 */
+                int length = Math.min(directoryChecksums.size(), i + DELETE_CHUNK_SIZE) - i;
+                String[] uuids = new String[length];
+                for (int j = 0; j < length; j++) {
+                    String uuid = directoryChecksums.get(i + j).getUuid();
+                    if (null == uuid) {
+                        throw new IllegalArgumentException("Removing directory checksums requires an existing UUID");
+                    }
+                    uuids[j] = uuid;
+                }
+                /*
+                 * delete chunk
+                 */
+                deleted += deleteDirectoryChecksums(connection, contextID, uuids);
+            }
+            return deleted;
         } catch (SQLException e) {
             throw DriveExceptionCodes.DB_ERROR.create(e, e.getMessage());
         } finally {
@@ -751,7 +817,7 @@ public class RdbChecksumStore implements ChecksumStore {
     private static int deleteDirectoryChecksums(Connection connection, int cid, FolderID[] folderIDs) throws SQLException, OXException {
         PreparedStatement stmt = null;
         try {
-            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_STMT(folderIDs.length));
+            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_FOR_FOLDER_STMT(folderIDs.length));
             stmt.setInt(1, cid);
             for (int i = 0; i < folderIDs.length; i++) {
                 stmt.setString(i + 2, reverse(escapeFolder(folderIDs[i])));
@@ -800,6 +866,73 @@ public class RdbChecksumStore implements ChecksumStore {
             stmt.setInt(2, cid);
             for (int i = 0; i < uuids.length; i++) {
                 stmt.setBytes(i + 3, SQL.getBytes(uuids[i]));
+            }
+            return SQL.logExecuteUpdate(stmt);
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+    }
+
+    private static List<DirectoryChecksum> selectUnusedDirectoryChecksums(Connection connection, int cid, long unusedSince) throws SQLException, OXException {
+        List<DirectoryChecksum> directoryChecksums = new ArrayList<DirectoryChecksum>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_UNUSED_DIRECTORY_CHECKSUMS_STMT);
+            stmt.setInt(1, cid);
+            stmt.setLong(2, unusedSince);
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                DirectoryChecksum directoryChecksum = new DirectoryChecksum();
+                directoryChecksum.setUuid(resultSet.getString(1));
+                directoryChecksum.setFolderID(unescapeFolder(resultSet.getString(2)));
+                directoryChecksum.setSequenceNumber(resultSet.getLong(3));
+                directoryChecksum.setETag(resultSet.getString(4));
+                directoryChecksum.setUserID(resultSet.getInt(5));
+                directoryChecksum.setView(resultSet.getInt(6));
+                directoryChecksum.setChecksum(resultSet.getString(7));
+                directoryChecksums.add(directoryChecksum);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return directoryChecksums;
+    }
+
+    private static List<DirectoryChecksum> selectDirectoryChecksums(Connection connection, int cid, List<FolderID> folderIDs) throws SQLException, OXException {
+        List<DirectoryChecksum> directoryChecksums = new ArrayList<DirectoryChecksum>();
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.SELECT_ALL_DIRECTORY_CHECKSUMS_STMT(folderIDs.size()));
+            int parameterIndex = 1;
+            stmt.setInt(parameterIndex++, cid);
+            for (FolderID folderID : folderIDs) {
+                stmt.setString(parameterIndex++, reverse(escapeFolder(folderID)));
+            }
+            ResultSet resultSet = SQL.logExecuteQuery(stmt);
+            while (resultSet.next()) {
+                DirectoryChecksum directoryChecksum = new DirectoryChecksum();
+                directoryChecksum.setUuid(resultSet.getString(1));
+                directoryChecksum.setFolderID(unescapeFolder(resultSet.getString(2)));
+                directoryChecksum.setSequenceNumber(resultSet.getLong(3));
+                directoryChecksum.setETag(resultSet.getString(4));
+                directoryChecksum.setUserID(resultSet.getInt(5));
+                directoryChecksum.setView(resultSet.getInt(6));
+                directoryChecksum.setChecksum(resultSet.getString(7));
+                directoryChecksums.add(directoryChecksum);
+            }
+        } finally {
+            DBUtils.closeSQLStuff(stmt);
+        }
+        return directoryChecksums;
+    }
+
+    private static int deleteDirectoryChecksums(Connection connection, int cid, String[] uuids) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = connection.prepareStatement(SQL.DELETE_DIRECTORY_CHECKSUMS_STMT(uuids.length));
+            stmt.setInt(1, cid);
+            for (int i = 0; i < uuids.length; i++) {
+                stmt.setBytes(i + 2, SQL.getBytes(uuids[i]));
             }
             return SQL.logExecuteUpdate(stmt);
         } finally {

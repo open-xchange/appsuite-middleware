@@ -49,6 +49,7 @@
 
 package com.openexchange.drive.impl.internal;
 
+import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -366,9 +367,12 @@ public class UploadHelper {
     }
 
     private String saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
+        BufferedInputStream bufferedStream = null;
         DigestInputStream digestStream = null;
         try {
-            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            bufferedStream = new BufferedInputStream(inputStream);
+            digestStream = new DigestInputStream(bufferedStream, MessageDigest.getInstance("MD5"));
+//            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
             if (ignoreVersion && session.getStorage().supports(new FolderID(file.getFolderId()), FileStorageCapability.IGNORABLE_VERSION)) {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
@@ -380,6 +384,7 @@ public class UploadHelper {
         } catch (NoSuchAlgorithmException e) {
             throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
+            Streams.close(bufferedStream);
             Streams.close(digestStream);
         }
     }
@@ -392,7 +397,7 @@ public class UploadHelper {
         String uploadPath;
         File uploadFile;
         if (session.getTemp().supported()) {
-            boolean existedBefore = session.getTemp().exists(); 
+            boolean existedBefore = session.getTemp().exists();
             uploadPath = session.getTemp().getPath(true);
             if (null == uploadPath) {
                 session.trace("Unable to get path to temp folder, falling back to direct upload.");
@@ -402,7 +407,7 @@ public class UploadHelper {
         } else {
             uploadPath = path;
             uploadFile = session.getStorage().getFileByName(path, uploadFileName);
-        }       
+        }
         if (null == uploadFile) {
             /*
              * create new upload file
@@ -453,7 +458,7 @@ public class UploadHelper {
         String uploadPath;
         if (session.getTemp().supported()) {
             /*
-             * partial uploads would be stored in temp folder, if it exists 
+             * partial uploads would be stored in temp folder, if it exists
              */
             if (false == session.getTemp().exists()) {
                 return Collections.emptyList();

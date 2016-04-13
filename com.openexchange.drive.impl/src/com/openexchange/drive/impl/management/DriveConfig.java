@@ -125,6 +125,8 @@ public class DriveConfig implements Initialization {
     private int maxFilesPerDirectory;
     private Set<String> enabledServices;
     private Set<String> excludedFolders;
+    private long checksumCleanerInterval;
+    private long checksumCleanerMaxAge;
 
     private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
     private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
@@ -434,6 +436,24 @@ public class DriveConfig implements Initialization {
     }
 
     /**
+     * Gets the checksumCleanerInterval
+     *
+     * @return The checksumCleanerInterval
+     */
+    public long getChecksumCleanerInterval() {
+        return checksumCleanerInterval;
+    }
+
+    /**
+     * Gets the checksumCleanerMaxAge
+     *
+     * @return The checksumCleanerMaxAge
+     */
+    public long getChecksumCleanerMaxAge() {
+        return checksumCleanerMaxAge;
+    }
+
+    /**
      * Loads all relevant drive properties from the configuration service.
      *
      * @param configService The configuration service
@@ -482,6 +502,32 @@ public class DriveConfig implements Initialization {
         if (MILLIS_PER_HOUR > cleanerMaxAge) {
             LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", cleanerMaxAgeValue);
             cleanerMaxAge = MILLIS_PER_HOUR;
+        }
+        /*
+         * checksum cleaner
+         */
+        final long MILLIS_PER_DAY = MILLIS_PER_HOUR * 24;
+        String checksumCleanerIntervalValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.interval", "1D");
+        try {
+            checksumCleanerInterval = TimeSpanParser.parseTimespan(checksumCleanerIntervalValue);
+        } catch (IllegalArgumentException e) {
+            throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerIntervalValue);
+        }
+        if (0 < checksumCleanerInterval) {
+            if (MILLIS_PER_HOUR > checksumCleanerInterval) {
+                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one hour. Falling back to ''1h'' instead.", checksumCleanerIntervalValue);
+                checksumCleanerInterval = MILLIS_PER_HOUR;
+            }
+            String checksumCleanerMaxAgeValue = configService.getProperty("com.openexchange.drive.checksum.cleaner.maxAge", "4W");
+            try {
+                checksumCleanerMaxAge = TimeSpanParser.parseTimespan(checksumCleanerMaxAgeValue);
+            } catch (IllegalArgumentException e) {
+                throw ConfigurationExceptionCodes.INVALID_CONFIGURATION.create(e, checksumCleanerMaxAgeValue);
+            }
+            if (MILLIS_PER_DAY > checksumCleanerMaxAge) {
+                LOG.warn("The configured interval of ''{}'' is smaller than the allowed minimum of one day. Falling back to ''1D'' instead.", checksumCleanerMaxAgeValue);
+                checksumCleanerMaxAge = MILLIS_PER_DAY;
+            }
         }
         /*
          * throttling

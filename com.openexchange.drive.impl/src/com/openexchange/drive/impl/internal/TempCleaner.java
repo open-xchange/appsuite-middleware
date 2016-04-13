@@ -223,7 +223,7 @@ public class TempCleaner implements Runnable {
                 }
                 folderAccess.deleteFolder(tempFolder.getId(), true);
                 checksumStore.removeFileChecksumsInFolders(folderIDs);
-                checksumStore.removeDirectoryChecksums(folderIDs);
+                checksumStore.removeAllDirectoryChecksums(folderIDs);
             } else if (0 < foldersToDelete.size() || 0 < filesToDelete.size()) {
                 LOG.debug("Detected {} folder(s) and {} file(s) in temp folder being outdated, cleaning up.", foldersToDelete.size(), filesToDelete.size());
                 for (FileStorageFolder folder : foldersToDelete) {

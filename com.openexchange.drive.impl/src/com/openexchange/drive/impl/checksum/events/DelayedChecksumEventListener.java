@@ -288,7 +288,7 @@ public class DelayedChecksumEventListener implements EventHandler, Initializatio
                     RdbChecksumStore checksumStore = new RdbChecksumStore(entry.getKey().intValue());
                     LOG.debug("Invalidating directory checksums for {} folders in context {}...",
                         entry.getValue().size(), entry.getKey().intValue());
-                    checksumStore.removeDirectoryChecksums(new ArrayList<FolderID>(entry.getValue()));
+                    checksumStore.removeAllDirectoryChecksums(new ArrayList<FolderID>(entry.getValue()));
                 }
             } catch (OXException e) {
                 LOG.warn("Error invalidating directory checksums", e);
