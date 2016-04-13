@@ -2702,6 +2702,7 @@ public class CalendarMySQL implements CalendarSqlImp {
             if (pushCon && readcon != null) {
                 DBPool.push(ctx, readcon);
             }
+            Streams.close(co);
         }
         return edao;
     }
