@@ -77,6 +77,7 @@ import com.openexchange.groupware.userconfiguration.UserPermissionBits;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.session.Session;
 import com.openexchange.tools.arrays.Arrays;
+import com.openexchange.tools.iterator.SearchIterators;
 
 /**
  * This class contains the logic for updating tasks. It calculates what is to modify.
@@ -793,11 +794,10 @@ class UpdateData {
                     Task.PERCENT_COMPLETED, DataObject.CREATED_BY, CalendarObject.START_DATE, CalendarObject.TITLE }, listWithFolder, emptyList, emptyList);
             }
 
-            final boolean next = TaskLogic.makeRecurrence(updated);
-
-            boolean duplicateExists = false;
-            while (ti.hasNext()) {
-                try {
+            try {
+                final boolean next = TaskLogic.makeRecurrence(updated);
+                boolean duplicateExists = false;
+                while (ti.hasNext()) {
                     final Task actual = ti.next();
                     final boolean percentComplete = actual.getPercentComplete() == updated.getPercentComplete();
                     final boolean createdBy = actual.getCreatedBy() == updated.getCreatedBy();
@@ -820,15 +820,17 @@ class UpdateData {
                         duplicateExists = true;
                         break;
                     }
-                } catch (final OXException e) {
-                    throw e;
                 }
-            }
+                SearchIterators.close(ti);
+                ti = null;
 
-            if (!duplicateExists && next) {
-                Task recurrence = getUpdated();
-                recurrence.removeUid();
-                insertNextRecurrence(session, ctx, getUserId(), permissionBits, folder, recurrence, getUpdatedParticipants(), getUpdatedFolder());
+                if (!duplicateExists && next) {
+                    Task recurrence = getUpdated();
+                    recurrence.removeUid();
+                    insertNextRecurrence(session, ctx, getUserId(), permissionBits, folder, recurrence, getUpdatedParticipants(), getUpdatedFolder());
+                }
+            } finally {
+                SearchIterators.close(ti);
             }
         }
     }
