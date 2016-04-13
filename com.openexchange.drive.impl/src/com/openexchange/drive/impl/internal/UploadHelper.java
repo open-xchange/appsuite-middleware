@@ -49,7 +49,6 @@
 
 package com.openexchange.drive.impl.internal;
 
-import java.io.BufferedInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -367,12 +366,9 @@ public class UploadHelper {
     }
 
     private String saveDocumentAndChecksum(File file, InputStream inputStream, long sequenceNumber, List<Field> modifiedFields, boolean ignoreVersion) throws OXException {
-        BufferedInputStream bufferedStream = null;
         DigestInputStream digestStream = null;
         try {
-            bufferedStream = new BufferedInputStream(inputStream);
-            digestStream = new DigestInputStream(bufferedStream, MessageDigest.getInstance("MD5"));
-//            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
+            digestStream = new DigestInputStream(inputStream, MessageDigest.getInstance("MD5"));
             IDBasedFileAccess fileAccess = session.getStorage().getFileAccess();
             if (ignoreVersion && session.getStorage().supports(new FolderID(file.getFolderId()), FileStorageCapability.IGNORABLE_VERSION)) {
                 fileAccess.saveDocument(file, digestStream, sequenceNumber, modifiedFields, true);
@@ -384,7 +380,6 @@ public class UploadHelper {
         } catch (NoSuchAlgorithmException e) {
             throw DriveExceptionCodes.IO_ERROR.create(e, e.getMessage());
         } finally {
-            Streams.close(bufferedStream);
             Streams.close(digestStream);
         }
     }
