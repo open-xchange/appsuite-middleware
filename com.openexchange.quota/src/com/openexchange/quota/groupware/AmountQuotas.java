@@ -90,16 +90,17 @@ public class AmountQuotas {
      * @throws OXException
      */
     public static void setLimit(int contextID, List<String> moduleIDs, long limit, Connection connection) throws OXException {
-        PreparedStatement stmt = null;
-        try {
-            for (final String module : moduleIDs) {
+        for (final String module : moduleIDs) {
+            PreparedStatement stmt = null;
+            ResultSet rs = null;
+            try {
                 // Determine if already present
                 final boolean exists;
                 {
                     stmt = connection.prepareStatement("SELECT 1 FROM quota_context WHERE cid=? AND module=?");
                     stmt.setInt(1, contextID);
                     stmt.setString(2, module);
-                    ResultSet rs = stmt.executeQuery();
+                    rs = stmt.executeQuery();
                     exists = rs.next();
                     Databases.closeSQLStuff(rs, stmt);
                     stmt = null;
@@ -131,11 +132,11 @@ public class AmountQuotas {
                         stmt.executeUpdate();
                     }
                 }
+            } catch (final SQLException e) {
+                throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
+            } finally {
+                Databases.closeSQLStuff(rs, stmt);
             }
-        } catch (final SQLException e) {
-            throw QuotaExceptionCodes.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            Databases.closeSQLStuff(stmt);
         }
     }
 
