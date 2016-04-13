@@ -361,7 +361,15 @@ public class PropertyHandler {
 
     protected void addpropsfromfile(final String file) throws FileNotFoundException, IOException {
         final Properties configprops  = new Properties();
-        configprops.load( new FileInputStream(file) );
+        FileInputStream in = null;
+        try {
+            in = new FileInputStream(file);
+            configprops.load(in);
+        } finally {
+            if (null != in) {
+                in.close();
+            }
+        }
 
         final Enumeration<?> enumi = configprops.propertyNames();
         while ( enumi.hasMoreElements() ) {
@@ -378,7 +386,14 @@ public class PropertyHandler {
 
             if ( param.toLowerCase().endsWith( "_prop" ) ) {
                 final Properties customprops = new Properties();
-                customprops.load( new FileInputStream( value ) );
+                try {
+                    in = new FileInputStream(value);
+                    customprops.load(in);
+                } finally {
+                    if (null != in) {
+                        in.close();
+                    }
+                }
                 final Enumeration<?> enuma = customprops.propertyNames();
                 Hashtable<String, String> custconfig = new Hashtable<String, String>();
                 if ( this.allPropValues.containsKey( param + "_CONFIG" ) ) {
