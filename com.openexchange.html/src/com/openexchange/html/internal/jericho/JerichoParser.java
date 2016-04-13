@@ -49,12 +49,17 @@
 
 package com.openexchange.html.internal.jericho;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.openexchange.html.HtmlServices;
+import com.openexchange.html.internal.parser.HtmlHandler;
+import com.openexchange.java.Streams;
+import com.openexchange.java.Strings;
 import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
@@ -64,10 +69,6 @@ import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
 import net.htmlparser.jericho.Tag;
 import net.htmlparser.jericho.TagType;
-import com.openexchange.html.HtmlServices;
-import com.openexchange.html.internal.parser.HtmlHandler;
-import com.openexchange.java.Streams;
-import com.openexchange.java.Strings;
 
 /**
  * {@link JerichoParser} - Parses specified real-life HTML document.
@@ -159,7 +160,6 @@ public final class JerichoParser {
         return (html.indexOf("<body") >= 0) || (html.indexOf("<BODY") >= 0);
     }
 
-    private static final Pattern INVALID_DELIM = Pattern.compile("\" *, *\"");
     private static final Pattern FIX_START_TAG = Pattern.compile("\\s*(<[^?][^>]+)(>?)\\s*");
 
     /**
@@ -243,23 +243,23 @@ public final class JerichoParser {
                 }
             } else {
                 switch (enumType) {
-                case START_TAG:
-                    handler.handleStartTag((StartTag) tag);
-                    break;
-                case END_TAG:
-                    handler.handleEndTag((EndTag) tag);
-                    break;
-                case DOCTYPE_DECLARATION:
-                    handler.handleDocDeclaration(segment.toString());
-                    break;
-                case CDATA_SECTION:
-                    handler.handleCData(segment.toString());
-                    break;
-                case COMMENT:
-                    handler.handleComment(segment.toString());
-                    break;
-                default:
-                    break;
+                    case START_TAG:
+                        handler.handleStartTag((StartTag) tag);
+                        break;
+                    case END_TAG:
+                        handler.handleEndTag((EndTag) tag);
+                        break;
+                    case DOCTYPE_DECLARATION:
+                        handler.handleDocDeclaration(segment.toString());
+                        break;
+                    case CDATA_SECTION:
+                        handler.handleCData(segment.toString());
+                        break;
+                    case COMMENT:
+                        handler.handleComment(segment.toString());
+                        break;
+                    default:
+                        break;
                 }
             }
         } else if (segment instanceof CharacterReference) {
@@ -294,16 +294,17 @@ public final class JerichoParser {
                         }
                     }
 
-                    @SuppressWarnings("resource")
-                    StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag));
-                    Thread thread = Thread.currentThread();
-                    for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                        Segment nestedSegment = iter.next();
-                        handleSegment(handler, nestedSegment, false);
-                    }
-
-                    if (null != remainder) {
-                        handler.handleSegment(remainder);
+                    try (StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag))) {
+                        Thread thread = Thread.currentThread();
+                        for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                            Segment nestedSegment = iter.next();
+                            handleSegment(handler, nestedSegment, false);
+                        }
+                        if (null != remainder) {
+                            handler.handleSegment(remainder);
+                        }
+                    } catch (IOException e) {
+                        // may only happen within StreamedSource.close()
                     }
                 } else {
                     handler.handleSegment(segment);
@@ -312,33 +313,6 @@ public final class JerichoParser {
                 handler.handleSegment(segment);
             }
         }
-    }
-
-    private String fixStyleAttribute(String startTag) {
-        if (startTag.indexOf("style=") <= 0) {
-            return startTag;
-        }
-        return INVALID_DELIM.matcher(startTag).replaceAll("; ");
-    }
-
-    private static boolean startsWith(char startingChar, CharSequence toCheck) {
-        if (null == toCheck) {
-            return false;
-        }
-        final int len = toCheck.length();
-        if (len <= 0) {
-            return false;
-        }
-        int i = 0;
-        if (Strings.isWhitespace(toCheck.charAt(i))) {
-            do {
-                i++;
-            } while (i < len && Strings.isWhitespace(toCheck.charAt(i)));
-        }
-        if (i >= len) {
-            return false;
-        }
-        return startingChar == toCheck.charAt(i);
     }
 
     private static boolean contains(char c, CharSequence toCheck) {
