@@ -164,9 +164,10 @@ public class DBDocVisitor implements ChangeSetVisitor {
     }
 
     private void copyFile(String fileToCopy, File rootOutputDir) throws IOException {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
+        InputStream inputStream = null;
         FileOutputStream outputStream = null;
         try {
+            inputStream = getClass().getClassLoader().getResourceAsStream(fileToCopy);
             if (inputStream == null) {
                 throw new IOException("Can not find " + fileToCopy);
             }
@@ -175,6 +176,9 @@ public class DBDocVisitor implements ChangeSetVisitor {
         } finally {
             if (outputStream != null) {
                 outputStream.close();
+            }
+            if (inputStream != null) {
+                inputStream.close();
             }
         }
     }
