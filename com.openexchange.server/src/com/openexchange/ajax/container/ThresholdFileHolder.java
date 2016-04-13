@@ -528,7 +528,7 @@ public final class ThresholdFileHolder implements IFileHolder {
         // Check if content is available
         if (count <= 0) {
             // No content to make a copy of
-            return new ThresholdFileHolder();
+            return copy;
         }
 
         // Check internal buffer vs temp. file
