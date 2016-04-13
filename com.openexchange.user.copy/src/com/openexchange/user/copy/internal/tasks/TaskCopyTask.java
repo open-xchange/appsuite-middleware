@@ -112,20 +112,18 @@ public class TaskCopyTask implements CopyUserTaskService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.user.copy.CopyUserTaskService#getAlreadyCopied()
      */
     @Override
     public String[] getAlreadyCopied() {
-        return new String[] {
-            UserCopyTask.class.getName(),
-            ContextLoadTask.class.getName(),
-            ConnectionFetcherTask.class.getName(),
-            FolderCopyTask.class.getName()
+        return new String[] { UserCopyTask.class.getName(), ContextLoadTask.class.getName(), ConnectionFetcherTask.class.getName(), FolderCopyTask.class.getName()
         };
     }
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.user.copy.CopyUserTaskService#getObjectName()
      */
     @Override
@@ -135,6 +133,7 @@ public class TaskCopyTask implements CopyUserTaskService {
 
     /*
      * (non-Javadoc)
+     * 
      * @see com.openexchange.user.copy.CopyUserTaskService#copyUser(java.util.Map)
      */
     @Override
@@ -170,21 +169,16 @@ public class TaskCopyTask implements CopyUserTaskService {
         final Map<Integer, Task> tasks = new HashMap<Integer, Task>();
         try {
             for (final int folderId : folderIds) {
-                final TaskIterator taskIterator = TaskStorage.getInstance().list(
-                    srcCtx,
-                    folderId,
-                    0,
-                    -1,
-                    0,
-                    Order.NO_ORDER,
-                    Task.ALL_COLUMNS,
-                    false,
-                    srcUserId,
-                    false,
-                    con);
-                while (taskIterator.hasNext()) {
-                    final Task task = taskIterator.next();
-                    tasks.put(task.getObjectID(), task);
+                final TaskIterator taskIterator = TaskStorage.getInstance().list(srcCtx, folderId, 0, -1, 0, Order.NO_ORDER, Task.ALL_COLUMNS, false, srcUserId, false, con);
+                try {
+                    while (taskIterator.hasNext()) {
+                        final Task task = taskIterator.next();
+                        tasks.put(task.getObjectID(), task);
+                    }
+                } finally {
+                    if (taskIterator != null) {
+                        taskIterator.close();
+                    }
                 }
             }
         } catch (final OXException e) {
