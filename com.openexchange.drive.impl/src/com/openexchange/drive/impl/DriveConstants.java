@@ -114,12 +114,6 @@ public class DriveConstants {
     public static final int RETRY_BASEDELAY = 1000;
 
     /**
-     * The maximum file length of uploads to be stored directly at the target location - others are going to be written to a temporary
-     * upload file first.
-     */
-    public static final long OPTIMISTIC_UPLOAD_SIZE_THRESHOLD = 64 * 1024; // 64K
-
-    /**
      * The maximum allowed length of any synchronized path segment, i.e. the parts in a path separated by the {@link #PATH_SEPARATOR}
      * character.
      */

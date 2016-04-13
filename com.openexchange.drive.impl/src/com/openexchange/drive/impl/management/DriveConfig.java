@@ -127,6 +127,8 @@ public class DriveConfig implements Initialization {
     private Set<String> excludedFolders;
     private long checksumCleanerInterval;
     private long checksumCleanerMaxAge;
+    private long optimisticSaveThresholdMobile;
+    private long optimisticSaveThresholdDesktop;
 
     private EnumMap<DriveClientType, DriveClientVersion> softMinimumVersions;
     private EnumMap<DriveClientType, DriveClientVersion> hardMinimumVersions;
@@ -454,6 +456,24 @@ public class DriveConfig implements Initialization {
     }
 
     /**
+     * Gets the optimisticSaveThresholdMobile
+     *
+     * @return The optimisticSaveThresholdMobile
+     */
+    public long getOptimisticSaveThresholdMobile() {
+        return optimisticSaveThresholdMobile;
+    }
+
+    /**
+     * Gets the optimisticSaveThresholdDesktop
+     *
+     * @return The optimisticSaveThresholdDesktop
+     */
+    public long getOptimisticSaveThresholdDesktop() {
+        return optimisticSaveThresholdDesktop;
+    }
+
+    /**
      * Loads all relevant drive properties from the configuration service.
      *
      * @param configService The configuration service
@@ -603,6 +623,15 @@ public class DriveConfig implements Initialization {
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.android.hardMinimum", "0")));
         hardMinimumVersions.put(DriveClientType.IOS,
             parseClientVersion(configService.getProperty("com.openexchange.drive.version.ios.hardMinimum", "0")));
+        /*
+         * optimistic save thresholds
+         */
+        String optimisticSaveThresholdDesktopValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdDesktop", "1MB");
+        optimisticSaveThresholdDesktop = Strings.isEmpty(optimisticSaveThresholdDesktopValue) || "-1".equals(optimisticSaveThresholdDesktopValue) ? -1 :
+            parseBytes(optimisticSaveThresholdDesktopValue);
+        String optimisticSaveThresholdMobileValue = configService.getProperty("com.openexchange.drive.optimisticSaveThresholdMobile", "100kB");
+        optimisticSaveThresholdMobile = Strings.isEmpty(optimisticSaveThresholdMobileValue) || "-1".equals(optimisticSaveThresholdMobileValue) ? -1 :
+            parseBytes(optimisticSaveThresholdMobileValue);
     }
 
     private static DriveClientVersion parseClientVersion(String value) throws OXException {
