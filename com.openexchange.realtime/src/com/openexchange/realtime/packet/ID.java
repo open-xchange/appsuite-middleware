@@ -105,13 +105,12 @@ public class ID implements Serializable {
 
     public static final String INTERNAL_CONTEXT = "internal";
 
-    protected String protocol;
-    protected String component;
-    protected String user;
-    protected String context;
-    protected String resource;
-    protected String cachedStringRepresentation;
-    private boolean stringRepresentationInSync = false;
+    protected volatile String protocol;
+    protected volatile String component;
+    protected volatile String user;
+    protected volatile String context;
+    protected volatile String resource;
+    protected volatile String cachedStringRepresentation;
 
     /**
      * Initializes a new {@link ID}.
@@ -132,13 +131,9 @@ public class ID implements Serializable {
         protocol = idComponents.protocol;
         component = idComponents.component;
         user = idComponents.user;
-        context = idComponents.context;
+        String context = idComponents.context;
+        this.context = context == null ? defaultContext : context;
         resource = idComponents.resource;
-
-        if (context == null) {
-            context = defaultContext;
-        }
-
         sanitize();
         validate();
 
@@ -215,30 +210,29 @@ public class ID implements Serializable {
         this.context = context;
         this.resource = resource;
         this.component = component;
-        this.cachedStringRepresentation = cachedStringRepresentation;
-        if(!Strings.isEmpty(cachedStringRepresentation)) {
-            stringRepresentationInSync = true;
-        }
+        this.cachedStringRepresentation = Strings.isEmpty(cachedStringRepresentation) ? null : cachedStringRepresentation;
         sanitize();
         validate();
     }
 
     /**
-     * Check optional id components for emtpy strings and sanitize by setting to null or default values.
+     * Check optional id components for empty strings and sanitize by setting to null or default values.
      */
     protected void sanitize() {
+        String protocol = this.protocol;
         if (Strings.isEmpty(protocol)) {
-            protocol = null;
+            this.protocol = null;
         }
 
+        String resource = this.resource;
         if (Strings.isEmpty(resource)) {
-            resource = null;
+            this.resource = null;
         }
 
+        String component = this.component;
         if (Strings.isEmpty(component)) {
-            component = null;
+            this.component = null;
         }
-
     }
 
     /*
@@ -261,7 +255,7 @@ public class ID implements Serializable {
     public synchronized void setProtocol(final String protocol) {
         this.protocol = protocol;
         validate();
-        stringRepresentationInSync = false;
+        cachedStringRepresentation = null;
     }
 
     public String getUser() {
@@ -271,7 +265,7 @@ public class ID implements Serializable {
     public synchronized void setUser(final String user) {
         this.user = user;
         validate();
-        stringRepresentationInSync = false;
+        cachedStringRepresentation = null;
     }
 
     public String getContext() {
@@ -281,7 +275,7 @@ public class ID implements Serializable {
     public synchronized void setContext(final String context) {
         this.context = context;
         validate();
-        stringRepresentationInSync = false;
+        cachedStringRepresentation = null;
     }
 
     public String getResource() {
@@ -291,7 +285,7 @@ public class ID implements Serializable {
     public synchronized void setResource(final String resource) {
         this.resource = resource;
         validate();
-        stringRepresentationInSync = false;
+        cachedStringRepresentation = null;
     }
 
     public String getComponent() {
@@ -300,7 +294,7 @@ public class ID implements Serializable {
 
     public synchronized void setComponent(String component) {
         this.component = component;
-        stringRepresentationInSync = false;
+        cachedStringRepresentation = null;
     }
 
     public String getCachedStringRepresentation() {
@@ -311,11 +305,21 @@ public class ID implements Serializable {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
+        String context = this.context;
         result = prime * result + ((context == null) ? 0 : context.hashCode());
+
+        String protocol = this.protocol;
         result = prime * result + ((protocol == null) ? 0 : protocol.hashCode());
+
+        String resource = this.resource;
         result = prime * result + ((resource == null) ? 0 : resource.hashCode());
+
+        String user = this.user;
         result = prime * result + ((user == null) ? 0 : user.hashCode());
+
+        String component = this.component;
         result = prime * result + ((component == null) ? 0 : component.hashCode());
+
         return result;
     }
 
@@ -328,6 +332,7 @@ public class ID implements Serializable {
             return false;
         }
         final ID other = (ID) obj;
+        String context = this.context;
         if (context == null) {
             if (other.context != null) {
                 return false;
@@ -335,6 +340,7 @@ public class ID implements Serializable {
         } else if (!context.equals(other.context)) {
             return false;
         }
+        String protocol = this.protocol;
         if (protocol == null) {
             if (other.protocol != null) {
                 return false;
@@ -342,6 +348,7 @@ public class ID implements Serializable {
         } else if (!protocol.equals(other.protocol)) {
             return false;
         }
+        String resource = this.resource;
         if (resource == null) {
             if (other.resource != null) {
                 return false;
@@ -349,6 +356,7 @@ public class ID implements Serializable {
         } else if (!resource.equals(other.resource)) {
             return false;
         }
+        String user = this.user;
         if (user == null) {
             if (other.user != null) {
                 return false;
@@ -356,6 +364,7 @@ public class ID implements Serializable {
         } else if (!user.equals(other.user)) {
             return false;
         }
+        String component = this.component;
         if (component == null) {
             if (other.component != null) {
                 return false;
@@ -368,14 +377,17 @@ public class ID implements Serializable {
 
     @Override
     public String toString() {
-        if (cachedStringRepresentation == null || !stringRepresentationInSync) {
+        String tmp = this.cachedStringRepresentation;
+        if (tmp == null) {
             synchronized (this) {
                 final StringBuilder b = new StringBuilder(32);
                 boolean needSep = false;
+                String protocol = this.protocol;
                 if (protocol != null) {
                     b.append(protocol);
                     needSep = true;
                 }
+                String component = this.component;
                 if (component != null) {
                     if (protocol != null) {
                         b.append(".");
@@ -390,11 +402,11 @@ public class ID implements Serializable {
                 if (resource != null) {
                     b.append('/').append(resource);
                 }
-                cachedStringRepresentation = b.toString();
-                stringRepresentationInSync = true;
+                tmp = b.toString();
+                this.cachedStringRepresentation = tmp;
             }
         }
-        return cachedStringRepresentation;
+        return tmp;
     }
 
     private Object getStackTraceString() {
