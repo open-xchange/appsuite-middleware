@@ -807,9 +807,16 @@ public final class MailMessageParser {
                                     HDR_CONTENT_DISPOSITION,
                                     MimeMessageUtility.foldContentDisposition(cd.toString()));
                             }
-                            CountingOutputStream counter = new CountingOutputStream();
-                            attachment.writeTo(counter);
-                            bodyPart.setSize((int) counter.getCount());
+                            CountingOutputStream counter = null;
+                            try {
+                                counter = new CountingOutputStream();
+                                attachment.writeTo(counter);
+                                bodyPart.setSize((int) counter.getCount());
+                            } finally {
+                                if (null != counter) {
+                                    counter.close();
+                                }
+                            }
                             parseMailContent(MimeMessageConverter.convertPart(bodyPart), handler, prefix, partCount++);
                         } else {
                             /*
