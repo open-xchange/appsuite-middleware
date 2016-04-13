@@ -609,7 +609,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 // DO NOT RETURN THE CONTEXT ID AS A MAPPING!!
                 // THIS CAN CAUSE ERRORS IF CHANGING LOGINMAPPINGS AFTERWARDS!
                 // SEE #11094 FOR DETAILS!
-                if (null != loginMapping && !idAsString.equals(loginMapping)){
+                if (null != loginMapping && !idAsString.equals(loginMapping)) {
                     loginMappings.add(loginMapping);
                 }
             } while (rs.next());
@@ -793,9 +793,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                 LOG.error("Now revoking entries in configdb (cs2dbpool) for context {}", ctx.getId());
                 updateContextServer2DbPool(dbHandleBackup, configdb_write_con, i(ctx.getId()));
             } catch (PoolException e) {
-                LOG.error(
-                    "!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!",
-                    e);
+                LOG.error("!!!!!!WARNING!!!!! Could not revoke configdb entries for " + ctx.getId() + "!!!!!!WARNING!!! INFORM ADMINISTRATOR!!!!!!", e);
             }
             throw new StorageException(tde);
         } catch (final SQLException sql) {
@@ -958,11 +956,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
         final boolean failOnMissing = false;
 
-        return contextCommon.loadContexts(
-            filteredCids != null ? filteredCids : cids,
-            Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")),
-            loaders,
-            failOnMissing);
+        return contextCommon.loadContexts(filteredCids != null ? filteredCids : cids, Long.parseLong(prop.getProp("AVERAGE_CONTEXT_SIZE", "100")), loaders, failOnMissing);
     }
 
     @Override
@@ -1032,9 +1026,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
 
             stmt = con.prepareStatement("SELECT context.cid, context.name, context.enabled, context.reason_id, context.filestore_id, context.filestore_name, context.quota_max, context_server2db_pool.write_db_pool_id, context_server2db_pool.read_db_pool_id, context_server2db_pool.db_schema FROM context LEFT JOIN ( context_server2db_pool, server ) ON ( context.cid = context_server2db_pool.cid AND context_server2db_pool.server_id = server.server_id ) WHERE server.name = ? AND context.filestore_id = ?");
             logininfo = con.prepareStatement("SELECT login_info FROM `login2context` WHERE cid=?");
-            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(
-                AdminProperties.Prop.SERVER_NAME,
-                "local");
+            final String serverName = AdminServiceRegistry.getInstance().getService(ConfigurationService.class).getProperty(AdminProperties.Prop.SERVER_NAME, "local");
             stmt.setString(1, serverName);
             stmt.setInt(2, filestore.getId().intValue());
             rs = stmt.executeQuery();
@@ -1776,43 +1768,40 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         // this.dbmetadata = this.dbConnection.getMetaData();
         final DatabaseMetaData db_metadata = ox_db_write_connection.getMetaData();
         // get the tables to check
-        // final ResultSet rs2 = this.dbmetadata.getTables(null, null, null,
-        // null);
-        final ResultSet rs2 = db_metadata.getTables(null, null, null, null);
-        TableObject to = null;
-        while (rs2.next()) {
-            final String table_name = rs2.getString("TABLE_NAME");
-            to = new TableObject();
-            to.setName(table_name);
-            // fetch all columns from table and see if it contains matching
-            // column
-            // final ResultSet columns_res =
-            // this.dbmetadata.getColumns(this.catalogname, null, table_name,
-            // null);
+        ResultSet rs2 = null;
+        try {
+            rs2 = db_metadata.getTables(null, null, null, null);
+            TableObject to = null;
+            while (rs2.next()) {
+                final String table_name = rs2.getString("TABLE_NAME");
+                to = new TableObject();
+                to.setName(table_name);
+                // fetch all columns from table and see if it contains matching column
+                final ResultSet columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
 
-            final ResultSet columns_res = db_metadata.getColumns(ox_db_write_connection.getCatalog(), null, table_name, null);
+                boolean table_matches = false;
+                while (columns_res.next()) {
 
-            boolean table_matches = false;
-            while (columns_res.next()) {
+                    final TableColumnObject tco = new TableColumnObject();
+                    final String column_name = columns_res.getString("COLUMN_NAME");
+                    tco.setName(column_name);
+                    tco.setType(columns_res.getInt("DATA_TYPE"));
+                    tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
 
-                final TableColumnObject tco = new TableColumnObject();
-                final String column_name = columns_res.getString("COLUMN_NAME");
-                tco.setName(column_name);
-                tco.setType(columns_res.getInt("DATA_TYPE"));
-                tco.setColumnSize(columns_res.getInt("COLUMN_SIZE"));
-
-                // if table has our ciriteria column, we should fetch data from
-                // it
-                if (column_name.equals(this.selectionCriteria)) {
-                    table_matches = true;
+                    // if table has our criteria column, we should fetch data from it
+                    if (column_name.equals(this.selectionCriteria)) {
+                        table_matches = true;
+                    }
+                    // add column to table
+                    to.addColumn(tco);
                 }
-                // add column to table
-                to.addColumn(tco);
+                columns_res.close();
+                if (table_matches) {
+                    tableObjects.add(to);
+                }
             }
-            columns_res.close();
-            if (table_matches) {
-                tableObjects.add(to);
-            }
+        } finally {
+            closeSQLStuff(rs2);
         }
         LOG.debug("####### Found -> {} tables", tableObjects.size());
         return tableObjects;
@@ -2079,8 +2068,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
         }
         list = removeFull(list);
         if (list.isEmpty()) {
-            throw new OXContextException(
-                "The new context could not be created. The maximum number of contexts in every database cluster has been reached. Use register-, create- or change database to resolve the problem.");
+            throw new OXContextException("The new context could not be created. The maximum number of contexts in every database cluster has been reached. Use register-, create- or change database to resolve the problem.");
         }
         Collections.sort(list, Collections.reverseOrder(new DBWeightComparator(totalUnits, totalWeight)));
         final Iterator<DatabaseHandle> iter = list.iterator();
@@ -2183,11 +2171,7 @@ public class OXContextMySQLStorage extends OXContextSQLStorage {
                     final String schema = rpool.getString("db_schema");
                     ResultSet rsi = null;
                     try {
-                        Connection rcon = AdminCacheExtended.getSimpleSqlConnection(
-                            IDNA.toASCII(db.getUrl()) + schema,
-                            db.getLogin(),
-                            db.getPassword(),
-                            db.getDriver());
+                        Connection rcon = AdminCacheExtended.getSimpleSqlConnection(IDNA.toASCII(db.getUrl()) + schema, db.getLogin(), db.getPassword(), db.getDriver());
                         ps = rcon.prepareStatement("SELECT COUNT(id) FROM user");
 
                         rsi = ps.executeQuery();
