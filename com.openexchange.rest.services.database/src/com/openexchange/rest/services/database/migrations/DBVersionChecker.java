@@ -259,6 +259,7 @@ public class DBVersionChecker implements VersionChecker {
             if (rs.next()) {
                 return false;
             }
+            DBUtils.closeSQLStuff(stmt);
 
             //   CREATE LOCK
             stmt = con.prepareStatement("INSERT IGNORE INTO serviceSchemaMigrationLock (module, expires) VALUES (?, ?)");
