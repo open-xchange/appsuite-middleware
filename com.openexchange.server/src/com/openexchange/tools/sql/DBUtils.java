@@ -212,6 +212,7 @@ public final class DBUtils {
     /**
      * Starts a transaction on the given connection. This implementation sets autocommit to false and even executes a START TRANSACTION
      * statement to ensure isolation levels for the current connection.
+     * 
      * @param con connection to start the transaction on.
      * @throws SQLException if starting the transaction fails.
      */
@@ -334,16 +335,22 @@ public final class DBUtils {
      */
     public static int getColumnSize(final Connection con, final String table, final String column) throws SQLException {
         final DatabaseMetaData metas = con.getMetaData();
-        final ResultSet result = metas.getColumns(null, null, table, column);
-        int retval = -1;
-        if (result.next()) {
-            retval = result.getInt("COLUMN_SIZE");
+        ResultSet result = null;
+        try {
+            result = metas.getColumns(null, null, table, column);
+            int retval = -1;
+            if (result.next()) {
+                retval = result.getInt("COLUMN_SIZE");
+            }
+            return retval;
+        } finally {
+            DBUtils.closeSQLStuff(result);
         }
-        return retval;
     }
 
     /**
      * Filters a given list of table names. Returns only those that also exist
+     * 
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -352,7 +359,7 @@ public final class DBUtils {
     public static Set<String> existingTables(final Connection con, final String... tablesToCheck) throws SQLException {
         final Set<String> tables = new HashSet<String>();
         for (final String table : tablesToCheck) {
-            if(tableExists(con, table)) {
+            if (tableExists(con, table)) {
                 tables.add(table);
             }
         }
@@ -361,6 +368,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether all tables listed exist in the given database
+     * 
      * @param con The connection to the database in which to check for the tables
      * @param tablesToCheck The list of table names to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -368,7 +376,7 @@ public final class DBUtils {
      */
     public static boolean tablesExist(final Connection con, final String... tablesToCheck) throws SQLException {
         for (final String table : tablesToCheck) {
-            if(!tableExists(con, table)) {
+            if (!tableExists(con, table)) {
                 return false;
             }
         }
@@ -377,6 +385,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
+     * 
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -397,6 +406,7 @@ public final class DBUtils {
 
     /**
      * Finds out whether a table listed exist in the given database
+     * 
      * @param con The connection to the database in which to check for the tables
      * @param table The table name to check for.
      * @return A set with all the tables that exist of those to be checked for
@@ -418,9 +428,12 @@ public final class DBUtils {
     public static String forSQLCommand(final Order order) {
         if (order != null) {
             switch (order) {
-            case ASCENDING: return " ASC ";
-            case DESCENDING: return " DESC ";
-            case NO_ORDER: return " ";
+                case ASCENDING:
+                    return " ASC ";
+                case DESCENDING:
+                    return " DESC ";
+                case NO_ORDER:
+                    return " ";
             }
         }
         return " ";
