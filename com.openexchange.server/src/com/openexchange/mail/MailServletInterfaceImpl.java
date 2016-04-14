@@ -1453,7 +1453,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
         }
         MailMessage[] originalMails = new MailMessage[folders.length];
         if (transportProperties.isPublishOnExceededQuota() && (!transportProperties.isPublishPrimaryAccountOnly() || MailAccount.DEFAULT_ID == accountId)) {
-            for (int i = 0; i < length && sameAccount; i++) {
+            for (int i = 0; i < length; i++) {
                 MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
@@ -1468,7 +1468,7 @@ final class MailServletInterfaceImpl extends MailServletInterface {
             }
         } else {
             long total = 0;
-            for (int i = 0; i < length && sameAccount; i++) {
+            for (int i = 0; i < length; i++) {
                 MailAccess<?, ?> ma = initMailAccess(arguments[i].getAccountId());
                 try {
                     MailMessage origMail = ma.getMessageStorage().getMessage(arguments[i].getFullname(), fowardMsgUIDs[i], false);
