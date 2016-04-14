@@ -77,6 +77,7 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.locks.Lock;
 import java.util.regex.Pattern;
 import com.openexchange.api2.AppointmentSQLInterface;
 import com.openexchange.api2.ReminderService;
@@ -130,11 +131,13 @@ import com.openexchange.groupware.userconfiguration.UserConfiguration;
 import com.openexchange.java.Autoboxing;
 import com.openexchange.java.Streams;
 import com.openexchange.java.Strings;
+import com.openexchange.lock.LockService;
 import com.openexchange.quota.Quota;
 import com.openexchange.quota.QuotaExceptionCodes;
 import com.openexchange.server.ServiceLookup;
 import com.openexchange.server.impl.DBPool;
 import com.openexchange.server.impl.EffectivePermission;
+import com.openexchange.server.services.ServerServiceRegistry;
 import com.openexchange.session.Session;
 import com.openexchange.sql.builder.StatementBuilder;
 import com.openexchange.sql.grammar.COUNT;
@@ -598,12 +601,17 @@ public class CalendarMySQL implements CalendarSqlImp {
             final String gid = String.valueOf(c.getContextId());
             List<List<Integer>> list = cache.getFromGroup(key, gid);
             if (null == list) {
-                synchronized (gid.intern()) {
+                LockService lockService = ServerServiceRegistry.getInstance().getService(LockService.class);
+                Lock lock = null == lockService ? LockService.EMPTY_LOCK : lockService.getSelfCleaningLockFor(new StringBuilder(32).append("getAllPrivateAppointmentAndFolderIdsForUser-").append(gid).toString());
+                lock.lock();
+                try {
                     list = cache.getFromGroup(key, gid);
                     if (null == list) {
                         list = getAllPrivateAppointmentAndFolderIdsForUser0(c, id, readcon);
                         cache.putInGroup(key, gid, list, Attribute.getIdleTimeSecondsAttribute(3));
                     }
+                } finally {
+                    lock.unlock();
                 }
             }
             return new SearchIteratorAdapter<List<Integer>>(list.iterator(), list.size());
