@@ -54,8 +54,6 @@ import static com.openexchange.java.Autoboxing.I2i;
 import static com.openexchange.java.Autoboxing.L;
 import static com.openexchange.java.Autoboxing.i;
 import static com.openexchange.tools.arrays.Arrays.contains;
-import gnu.trove.list.TIntList;
-import gnu.trove.list.linked.TIntLinkedList;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
@@ -138,7 +136,6 @@ import com.openexchange.groupware.infostore.validation.ValidationChain;
 import com.openexchange.groupware.infostore.webdav.EntityLockManager;
 import com.openexchange.groupware.infostore.webdav.EntityLockManagerImpl;
 import com.openexchange.groupware.infostore.webdav.Lock;
-import com.openexchange.groupware.infostore.webdav.LockManager;
 import com.openexchange.groupware.infostore.webdav.LockManager.Scope;
 import com.openexchange.groupware.infostore.webdav.LockManager.Type;
 import com.openexchange.groupware.infostore.webdav.TouchInfoitemsWithExpiredLocksListener;
@@ -171,6 +168,8 @@ import com.openexchange.tools.session.SessionHolder;
 import com.openexchange.tx.UndoableAction;
 import com.openexchange.user.UserService;
 import com.openexchange.userconf.UserPermissionService;
+import gnu.trove.list.TIntList;
+import gnu.trove.list.linked.TIntLinkedList;
 
 /**
  * {@link InfostoreFacadeImpl}
@@ -458,12 +457,7 @@ public class InfostoreFacadeImpl extends DBService implements InfostoreFacade, I
             return;
         }
 
-        long timeout = 0;
-        if (timeout == -1) {
-            timeout = LockManager.INFINITE;
-        } else {
-            timeout = diff;
-        }
+        long timeout = diff;
         lockManager.lock(
             id,
             timeout,
