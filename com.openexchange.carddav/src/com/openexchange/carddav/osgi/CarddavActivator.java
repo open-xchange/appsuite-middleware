@@ -82,7 +82,7 @@ public class CarddavActivator extends HousekeepingActivator {
     protected Class<?>[] getNeededServices() {
         return new Class[] {
             HttpService.class, FolderService.class, ConfigViewFactory.class, UserService.class, ContactService.class,
-            ResourceService.class, VCardService.class, GroupService.class, ContactSimilarityService.class
+            ResourceService.class, VCardService.class, GroupService.class
         };
     }
 
@@ -108,9 +108,10 @@ public class CarddavActivator extends HousekeepingActivator {
                 }
             });
             /*
-             * track vCard storage service
+             * track optional services
              */
             trackService(VCardStorageFactory.class);
+            trackService(ContactSimilarityService.class);
             openTrackers();
         } catch (Exception e) {
             org.slf4j.LoggerFactory.getLogger(CarddavActivator.class).error("", e);
