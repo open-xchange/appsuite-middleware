@@ -288,7 +288,7 @@ public class LoginServlet extends AJAXServlet {
 
     public LoginServlet() {
         super();
-        handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
+        Map<String, LoginRequestHandler> handlerMap = new ConcurrentHashMap<String, LoginRequestHandler>(16, 0.9f, 1);
         handlerMap.put(ACTION_STORE, new LoginRequestHandler() {
 
             @Override
@@ -623,6 +623,7 @@ public class LoginServlet extends AJAXServlet {
                 }
             }
         });
+        this.handlerMap = handlerMap;
     }
 
     @Override
