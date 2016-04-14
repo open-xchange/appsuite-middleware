@@ -348,7 +348,7 @@ public class AJAXRequestDataTools {
                 return null;
             }
 
-            return new int[] { from < 0 ? 0 : from, to < 0 ? 0 : to};
+            return new int[] { from, to };
         }
 
         int start;
