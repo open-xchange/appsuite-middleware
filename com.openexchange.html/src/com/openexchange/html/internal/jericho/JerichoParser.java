@@ -64,6 +64,7 @@ import net.htmlparser.jericho.CharacterReference;
 import net.htmlparser.jericho.EndTag;
 import net.htmlparser.jericho.EndTagType;
 import net.htmlparser.jericho.Segment;
+import net.htmlparser.jericho.Source;
 import net.htmlparser.jericho.StartTag;
 import net.htmlparser.jericho.StartTagType;
 import net.htmlparser.jericho.StreamedSource;
@@ -267,51 +268,56 @@ public final class JerichoParser {
             handler.handleCharacterReference(characterReference);
         } else {
             // Safety re-parse
-            if (fixStartTags && contains('<', segment)) {
-                Matcher m = FIX_START_TAG.matcher(segment);
-                if (m.find()) {
-                    // Re-parse start tag
+            safeParse(handler, segment, fixStartTags);
+        }
+    }
 
-                    String startTag = m.group(1);
-                    if (startTag.startsWith("<!--")) {
-                        handler.handleComment(m.group());
-                        return;
-                    }
+    private static void safeParse(JerichoHandler handler, Segment segment, boolean fixStartTags) {
+        if (fixStartTags && contains('<', segment)) {
+            Matcher m = FIX_START_TAG.matcher(segment);
+            if (m.find()) {
+                // Re-parse start tag
 
-                    int start = m.start();
-                    if (start > 0) {
-                        handler.handleSegment(segment.subSequence(0, start));
-                    }
-                    String remainder = null;
+                String startTag = m.group(1);
+                if (startTag.startsWith("<!--")) {
+                    handler.handleComment(m.group());
+                    return;
+                }
 
-                    int end = m.end();
-                    if (end < segment.length()) {
-                        remainder = segment.subSequence(end, segment.length()).toString();
-                        int pos = remainder.indexOf('>');
-                        if (pos >= 0) {
-                            startTag = startTag + remainder.substring(0, pos + 1);
-                            remainder = remainder.substring(pos + 1);
-                        }
-                    }
+                int start = m.start();
+                if (start > 0) {
+                    handler.handleSegment(segment.subSequence(0, start));
+                }
+                String remainder = null;
 
-                    try (StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag))) {
-                        Thread thread = Thread.currentThread();
-                        for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
-                            Segment nestedSegment = iter.next();
-                            handleSegment(handler, nestedSegment, false);
-                        }
-                        if (null != remainder) {
-                            handler.handleSegment(remainder);
-                        }
-                    } catch (IOException e) {
-                        // may only happen within StreamedSource.close()
+                int end = m.end();
+                if (end < segment.length()) {
+                    remainder = segment.subSequence(end, segment.length()).toString();
+                    int pos = remainder.indexOf('>');
+                    if (pos >= 0) {
+                        startTag = startTag + remainder.substring(0, pos + 1);
+                        remainder = remainder.substring(pos + 1);
                     }
-                } else {
-                    handler.handleSegment(segment);
+                }
+
+                try (StreamedSource nestedSource = new StreamedSource(dropWeirdAttributes(startTag))) {
+                    Thread thread = Thread.currentThread();
+                    for (Iterator<Segment> iter = nestedSource.iterator(); !thread.isInterrupted() && iter.hasNext();) {
+                        Segment nestedSegment = iter.next();
+                        handleSegment(handler, nestedSegment, false);
+                    }
+                    if (null != remainder) {
+                        safeParse(handler, new Segment(new Source(remainder), 0, remainder.length()), fixStartTags);
+                        // handler.handleSegment(remainder);
+                    }
+                } catch (IOException e) {
+                    // may only happen within StreamedSource.close()
                 }
             } else {
                 handler.handleSegment(segment);
             }
+        } else {
+            handler.handleSegment(segment);
         }
     }
 
