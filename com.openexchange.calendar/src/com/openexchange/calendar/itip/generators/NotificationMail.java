@@ -441,6 +441,9 @@ public class NotificationMail {
         boolean onlyParticipantsChanged = appDiff.exactlyTheseChanged(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
         if (onlyParticipantsChanged) {
             FieldUpdate participantUpdate = appDiff.getUpdateFor(CalendarField.getByColumn(CalendarObject.PARTICIPANTS).getJsonName());
+            if (participantUpdate == null) {
+                return false;
+            }
             Participant[] oldParticipants = (Participant[]) participantUpdate.getOriginalValue();
             Participant[] newParticipants = (Participant[]) participantUpdate.getNewValue();
 
