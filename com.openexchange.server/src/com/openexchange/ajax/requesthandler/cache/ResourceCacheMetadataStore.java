@@ -438,7 +438,7 @@ public class ResourceCacheMetadataStore {
             if (userId > 0) {
                 stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND user = ? AND id = ?");
                 stmt.setInt(1, contextId);
-                stmt.setInt(2, userId > 0 ? userId : 0);
+                stmt.setInt(2, userId);
                 stmt.setString(3, resourceId);
             } else {
                 stmt = con.prepareStatement("DELETE FROM preview WHERE cid = ? AND id = ?");
