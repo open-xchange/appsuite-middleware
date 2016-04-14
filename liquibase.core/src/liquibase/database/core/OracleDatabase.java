@@ -1,5 +1,14 @@
+
 package liquibase.database.core;
 
+import java.lang.reflect.Method;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import liquibase.CatalogAndSchema;
 import liquibase.database.AbstractJdbcDatabase;
 import liquibase.database.DatabaseConnection;
@@ -9,28 +18,20 @@ import liquibase.logging.LogFactory;
 import liquibase.statement.DatabaseFunction;
 import liquibase.structure.DatabaseObject;
 import liquibase.structure.core.Catalog;
-import liquibase.structure.core.Index;
 import liquibase.structure.core.Schema;
 import liquibase.structure.core.Table;
-
-import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * Encapsulates Oracle database support.
  */
 public class OracleDatabase extends AbstractJdbcDatabase {
-    public static final String PRODUCT_NAME = "oracle";
 
+    public static final String PRODUCT_NAME = "oracle";
 
     private Set<String> reservedWords = new HashSet<String>();
 
     public OracleDatabase() {
-        super.unquotedObjectsAreUppercased=true;
+        super.unquotedObjectsAreUppercased = true;
         super.setCurrentDateTimeFunction("SYSTIMESTAMP");
         // Setting list of Oracle's native functions
         dateFunctions.add(new DatabaseFunction("SYSDATE"));
@@ -56,7 +57,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
             method.invoke(sqlConn, true);
 
             reservedWords.addAll(Arrays.asList(sqlConn.getMetaData().getSQLKeywords().toUpperCase().split(",\\s*")));
-            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION","PASSWORD", "RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
+            reservedWords.addAll(Arrays.asList("GROUP", "USER", "SESSION", "PASSWORD", "RESOURCE", "START", "SIZE")); //more reserved words not returned by driver
         } catch (Exception e) {
             LogFactory.getLogger().info("Could not set remarks reporting on OracleDatabase: " + e.getMessage());
             ; //cannot set it. That is OK
@@ -125,12 +126,30 @@ public class OracleDatabase extends AbstractJdbcDatabase {
 
     @Override
     protected String getConnectionCatalogName() throws DatabaseException {
+        CallableStatement prepareStatement = null;
+        ResultSet resultSet = null;
         try {
-            ResultSet resultSet = ((JdbcConnection) getConnection()).prepareCall("select sys_context( 'userenv', 'current_schema' ) from dual").executeQuery();
+            prepareStatement = ((JdbcConnection) getConnection()).prepareCall("select sys_context( 'userenv', 'current_schema' ) from dual");
+            resultSet = prepareStatement.executeQuery();
             resultSet.next();
             return resultSet.getString(1);
         } catch (Exception e) {
             LogFactory.getLogger().info("Error getting default schema", e);
+        } finally {
+            if (prepareStatement != null) {
+                try {
+                    prepareStatement.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
+            if (resultSet != null) {
+                try {
+                    resultSet.close();
+                } catch (final SQLException e) {
+                    LogFactory.getLogger().warning("", e);
+                }
+            }
         }
         return null;
     }
@@ -205,7 +224,7 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         }
 
         if (example instanceof Schema) {
-            if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName())|| "XDB".equals(example.getName())) {
+            if ("SYSTEM".equals(example.getName()) || "SYS".equals(example.getName()) || "CTXSYS".equals(example.getName()) || "XDB".equals(example.getName())) {
                 return true;
             }
             if ("SYSTEM".equals(example.getSchema().getCatalogName()) || "SYS".equals(example.getSchema().getCatalogName()) || "CTXSYS".equals(example.getSchema().getCatalogName()) || "XDB".equals(example.getSchema().getCatalogName())) {
@@ -243,26 +262,25 @@ public class OracleDatabase extends AbstractJdbcDatabase {
         return false;
     }
 
-
-//    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
-//        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
-//
-//        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
-//
-//        UniqueConstraint constraint = null;
-//        for (Map map : maps) {
-//            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
-//                returnSet.add(constraint);
-//                Table table = new Table((String) map.get("TABLE_NAME"));
-//                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
-//            }
-//        }
-//        if (constraint != null) {
-//            returnSet.add(constraint);
-//        }
-//
-//        return returnSet;
-//    }
+    //    public Set<UniqueConstraint> findUniqueConstraints(String schema) throws DatabaseException {
+    //        Set<UniqueConstraint> returnSet = new HashSet<UniqueConstraint>();
+    //
+    //        List<Map> maps = new Executor(this).queryForList(new RawSqlStatement("SELECT UC.CONSTRAINT_NAME, UCC.TABLE_NAME, UCC.COLUMN_NAME FROM USER_CONSTRAINTS UC, USER_CONS_COLUMNS UCC WHERE UC.CONSTRAINT_NAME=UCC.CONSTRAINT_NAME AND CONSTRAINT_TYPE='U' ORDER BY UC.CONSTRAINT_NAME"));
+    //
+    //        UniqueConstraint constraint = null;
+    //        for (Map map : maps) {
+    //            if (constraint == null || !constraint.getName().equals(constraint.getName())) {
+    //                returnSet.add(constraint);
+    //                Table table = new Table((String) map.get("TABLE_NAME"));
+    //                constraint = new UniqueConstraint(map.get("CONSTRAINT_NAME").toString(), table);
+    //            }
+    //        }
+    //        if (constraint != null) {
+    //            returnSet.add(constraint);
+    //        }
+    //
+    //        return returnSet;
+    //    }
 
     @Override
     public boolean supportsRestrictForeignKeys() {
