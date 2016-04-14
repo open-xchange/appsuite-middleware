@@ -663,6 +663,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                 }
             }
             PushbackInputStream in = null;
+            boolean error = true;
             try {
                 // Try to read first byte and push back immediately
                 in = new PushbackInputStream(mailPart.getInputStream());
@@ -671,30 +672,41 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
                     return Streams.EMPTY_INPUT_STREAM;
                 }
                 in.unread(read);
+                error = false;
                 return in;
             } catch (final com.sun.mail.util.FolderClosedIOException e) {
                 // Need to reconnect
-                FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
-                MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
-                try {
-                    ma = MailAccess.getInstance(session, fa.getAccountId());
-                    ma.connect(false);
-                    final ThresholdFileHolder newTfh = new ThresholdFileHolder();
-                    if (image) {
-                        newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
-                    } else {
-                        newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
-                    }
-                    this.tfh = newTfh;
-                    return newTfh.getStream();
-                } finally {
-                    if (null != ma) {
-                        ma.close(true);
-                    }
-                }
+                return getReconnectedStream();
             } finally {
-                if (in != null) {
-                    in.close();
+                if (error) {
+                    Streams.close(in);
+                }
+            }
+        }
+
+        private InputStream getReconnectedStream() throws OXException {
+            FullnameArgument fa = MailFolderUtility.prepareMailFolderParam(folderPath);
+            MailAccess<? extends IMailFolderStorage, ? extends IMailMessageStorage> ma = null;
+            ThresholdFileHolder newTfh = null;
+            boolean error = true;
+            try {
+                ma = MailAccess.getInstance(session, fa.getAccountId());
+                ma.connect(false);
+                newTfh = new ThresholdFileHolder();
+                if (image) {
+                    newTfh.write(ma.getMessageStorage().getImageAttachment(fa.getFullName(), uid, id).getInputStream());
+                } else {
+                    newTfh.write(ma.getMessageStorage().getAttachment(fa.getFullName(), uid, id).getInputStream());
+                }
+                this.tfh = newTfh;
+                error = false;
+                return newTfh.getStream();
+            } finally {
+                if (null != ma) {
+                    ma.close(true);
+                }
+                if (error) {
+                    Streams.close(newTfh);
                 }
             }
         }

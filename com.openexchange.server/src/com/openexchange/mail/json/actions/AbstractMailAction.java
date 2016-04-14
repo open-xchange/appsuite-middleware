@@ -66,8 +66,8 @@ import org.json.JSONObject;
 import com.openexchange.ajax.Mail;
 import com.openexchange.ajax.requesthandler.AJAXActionService;
 import com.openexchange.ajax.requesthandler.AJAXRequestData;
-import com.openexchange.ajax.requesthandler.AJAXRequestDataCleanup;
 import com.openexchange.ajax.requesthandler.AJAXRequestResult;
+import com.openexchange.ajax.requesthandler.AJAXRequestResultCleanup;
 import com.openexchange.ajax.requesthandler.AJAXState;
 import com.openexchange.annotation.NonNull;
 import com.openexchange.contactcollector.ContactCollectorService;
@@ -105,7 +105,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
 
     private static final org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(AbstractMailAction.class);
 
-    private final class MailInterfaceCleanup implements AJAXRequestDataCleanup {
+    private final class MailInterfaceCleanup implements AJAXRequestResultCleanup {
 
         private final MailServletInterface newMailInterface;
 
@@ -114,7 +114,7 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
         }
 
         @Override
-        public void cleanUp(AJAXRequestData requestData) {
+        public void cleanUp(AJAXRequestResult requestResult) {
             newMailInterface.close();
         }
     }
@@ -168,21 +168,22 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
      * @throws OXException If mail interface cannot be initialized
      */
     protected MailServletInterface getMailInterface(final MailRequest mailRequest) throws OXException {
-        /*
-         * Get mail interface
-         */
-        final AJAXState state = mailRequest.getRequest().getState();
-        MailServletInterface mailInterface = null;
+        // Get mail interface
+        AJAXState state = mailRequest.getRequest().getState();
         if (state == null) {
             // No AJAX state
-            MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
-            mailRequest.getRequest().addCleanUp(new MailInterfaceCleanup(newMailInterface));
-            return newMailInterface;
+            MailServletInterface mailInterface = mailRequest.getMailServletInterface();
+            if (mailInterface == null) {
+                MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+                mailRequest.setMailServletInterface(newMailInterface);
+                mailInterface = newMailInterface;
+            }
+            return mailInterface;
         }
 
-        mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
+        MailServletInterface mailInterface = state.optProperty(PROPERTY_MAIL_IFACE);
         if (mailInterface == null) {
-            final MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
+            MailServletInterface newMailInterface = MailServletInterface.getInstance(mailRequest.getSession());
             mailInterface = state.putProperty(PROPERTY_MAIL_IFACE, newMailInterface);
             if (null == mailInterface) {
                 mailInterface = newMailInterface;
@@ -222,8 +223,11 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw AjaxExceptionCodes.NO_PERMISSION_FOR_MODULE.create("mail");
         }
 
+        MailRequest req = new MailRequest(requestData, session);
+        AJAXRequestResult result = null;
         try {
-            return perform(new MailRequest(requestData, session));
+            result = perform(req);
+            return result;
         } catch (final IllegalStateException e) {
             final Throwable cause = e.getCause();
             if (cause instanceof OXException) {
@@ -240,7 +244,12 @@ public abstract class AbstractMailAction implements AJAXActionService, MailActio
             throw e;
         } finally {
             requestData.cleanUploads();
-
+            if (null != result) {
+                MailServletInterface mailInterface = req.getMailServletInterface();
+                if (null != mailInterface) {
+                    result.addCleanUp(new MailInterfaceCleanup(mailInterface));
+                }
+            }
         }
     }
 

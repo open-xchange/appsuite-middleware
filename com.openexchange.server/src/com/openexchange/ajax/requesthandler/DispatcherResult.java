@@ -108,6 +108,7 @@ public class DispatcherResult implements Closeable {
 
     @Override
     public void close() {
+        AJAXRequestResult.cleanUp(requestResult);
         if (null != state) {
             dispatcher.end(state);
         }

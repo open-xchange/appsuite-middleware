@@ -55,7 +55,9 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.UUID;
 import org.json.JSONValue;
 import com.openexchange.annotation.NonNull;
@@ -192,6 +194,19 @@ public class AJAXRequestResult {
      */
     public static final Object DIRECT_OBJECT = new Object();
 
+    /**
+     * Cleans-up specified request result.
+     *
+     * @param requestResult The request result to clean-up or <code>null</code>
+     */
+    public static void cleanUp(@Nullable AJAXRequestResult requestResult) {
+        if (null != requestResult) {
+            requestResult.cleanUp();
+        }
+    }
+
+    // ---------------------------------------------------------------------------------------------------------------------------------
+
     private @NonNull ResultType resultType;
 
     private @Nullable Object resultObject;
@@ -223,6 +238,9 @@ public class AJAXRequestResult {
     private @Nullable UUID continuationUuid;
 
     private int httpStatusCode;
+
+    /** The clean-up tasks */
+    private final @NonNull Queue<AJAXRequestResultCleanup> cleanUps;
 
     /**
      * Initializes a new {@link AJAXRequestResult} with data and time stamp set to <code>null</code>.
@@ -276,6 +294,7 @@ public class AJAXRequestResult {
         headers = new LinkedHashMap<String, String>(8);
         parameters = new HashMap<String, Object>(8);
         responseProperties = new HashMap<String, Object>(4);
+        cleanUps = new LinkedList<AJAXRequestResultCleanup>();
         this.timestamp = null == timestamp ? null : new Date(timestamp.getTime());
         this.format = null == format ? JSON : format;
         if ("direct".equals(format)) {
@@ -305,6 +324,7 @@ public class AJAXRequestResult {
         resultObject = other.resultObject;
         resultType = other.resultType;
         timestamp = other.timestamp;
+        cleanUps = new LinkedList<AJAXRequestResultCleanup>(other.cleanUps);
 
         if(other.headers != null) {
             headers =  new LinkedHashMap<String, String>(other.headers);
@@ -328,6 +348,33 @@ public class AJAXRequestResult {
             warnings = new HashSet<OXException>(other.warnings);
         } else {
             warnings = new HashSet<OXException>(4);
+        }
+    }
+
+    /**
+     * Adds specified clean-up task.
+     *
+     * @param cleanup The clean-up task
+     * @return This instance
+     */
+    public @NonNull AJAXRequestResult addCleanUp(AJAXRequestResultCleanup cleanup) {
+        if (null != cleanup) {
+            this.cleanUps.offer(cleanup);
+        }
+        return this;
+    }
+
+    /**
+     * Cleans-up this instance.
+     */
+    public void cleanUp() {
+        for (AJAXRequestResultCleanup cleanup; (cleanup = this.cleanUps.poll()) != null;) {
+            try {
+                cleanup.cleanUp(this);
+            } catch (Exception e) {
+                org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AJAXRequestData.class);
+                logger.warn("'{}' failed to perform clean-up", cleanup.getClass().getName(), e);
+            }
         }
     }
 
@@ -605,11 +652,7 @@ public class AJAXRequestResult {
      */
     public @NonNull Collection<OXException> getWarnings() {
         final Collection<OXException> thisWarnings = warnings;
-        if (null == thisWarnings) {
-            return Collections.<OXException> emptySet();
-        } else {
-            return Collections.unmodifiableCollection(thisWarnings);
-        }
+        return null == thisWarnings ? Collections.<OXException> emptySet() : Collections.unmodifiableCollection(thisWarnings);
     }
 
     /**

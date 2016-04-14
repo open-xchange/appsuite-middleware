@@ -428,10 +428,10 @@ public class DispatcherServlet extends SessionServlet {
 
         ServerSession session = null;
         AJAXState state = null;
-        AJAXRequestData requestData = null;
+        AJAXRequestResult result = null;
         Dispatcher dispatcher = DISPATCHER.get();
         try {
-            requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
+            AJAXRequestData requestData = initializeRequestData(httpRequest, httpResponse, preferStream);
 
             // Acquire session
             session = requestData.getSession();
@@ -444,7 +444,7 @@ public class DispatcherServlet extends SessionServlet {
             state = dispatcher.begin();
 
             // Perform request
-            AJAXRequestResult result = dispatcher.perform(requestData, state, requestData.getSession());
+            result = dispatcher.perform(requestData, state, requestData.getSession());
 
             // Render the request's result
             if (renderResponse(requestData, result, httpRequest, httpResponse)) {
@@ -488,9 +488,7 @@ public class DispatcherServlet extends SessionServlet {
             }
             super.handleOXException(oxe, httpRequest, httpResponse, false, false);
         } finally {
-            if (null != requestData) {
-                requestData.cleanUploads();
-            }
+            AJAXRequestResult.cleanUp(result);
             if (null != state) {
                 dispatcher.end(state);
             }
