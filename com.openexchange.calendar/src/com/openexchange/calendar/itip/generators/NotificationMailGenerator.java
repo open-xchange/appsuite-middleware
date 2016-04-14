@@ -867,6 +867,9 @@ public class NotificationMailGenerator implements ITipMailGenerator {
             }
             if (diff.anyFieldChangedOf("participants")) {
                 final FieldUpdate update = diff.getUpdateFor("participants");
+                if (update == null) {
+                    return false;
+                }
                 final Difference difference = (Difference) update.getExtraInfo();
                 final List<Object> added = difference.getAdded();
                 for (final Object object : added) {
