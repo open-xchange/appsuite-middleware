@@ -189,7 +189,7 @@ public class PortableReport extends AbstractCustomPortable {
         for (PortableReport portableReport : portableReports) {
             reports.add(PortableReport.unwrap(portableReport));
         }
-        return null != reports ? reports.toArray(new Report[reports.size()]) : new Report[0];
+        return reports.toArray(new Report[reports.size()]);
     }
 
     /**
