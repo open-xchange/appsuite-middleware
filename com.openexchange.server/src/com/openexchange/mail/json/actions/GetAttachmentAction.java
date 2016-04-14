@@ -203,7 +203,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
      * @throws OXException If something fails
      */
     public AJAXRequestResult performGET(final MailRequest req) throws OXException {
-        MailServletInterface mailInterface = null;
         try {
             // Read in parameters
             final String folderPath = req.checkParameter(PARAMETER_FOLDERID);
@@ -237,7 +236,7 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             }
 
             // Get mail interface
-            mailInterface = getMailInterface(req);
+            MailServletInterface mailInterface = getMailInterface(req);
 
             if (asJson) {
                 if (sequenceId == null) {
@@ -446,8 +445,9 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
 
                     @Override
                     public void run() {
-                        try (MailServletInterface mailInterface = getMailInterface(req)) {
+                        try {
                             // Get mail interface
+                            MailServletInterface mailInterface = getMailInterface(req);
                             mailInterface.updateMessageFlags(folderPath, new String[] { uid }, MailMessage.FLAG_SEEN, false);
                         } catch (Exception e) {
                             Logger logger = org.slf4j.LoggerFactory.getLogger(GetAttachmentAction.class);
@@ -476,10 +476,6 @@ public final class GetAttachmentAction extends AbstractMailAction implements ETa
             throw MailExceptionCode.IO_ERROR.create(e, e.getMessage());
         } catch (RuntimeException e) {
             throw MailExceptionCode.UNEXPECTED_ERROR.create(e, e.getMessage());
-        } finally {
-            if (mailInterface != null) {
-                mailInterface.close();
-            }
         }
     }
 
