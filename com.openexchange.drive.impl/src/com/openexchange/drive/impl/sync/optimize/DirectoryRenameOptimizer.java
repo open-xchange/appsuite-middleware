@@ -305,7 +305,7 @@ public class DirectoryRenameOptimizer extends DirectoryActionOptimizer {
         if (null == path1) {
             return null == path2 ? Integer.MAX_VALUE : 0;
         } else if (null == path2) {
-            return null == path1 ? Integer.MAX_VALUE : 0;
+            return 0;
         } else if (path1.equals(path2)) {
             return Integer.MAX_VALUE;
         }
