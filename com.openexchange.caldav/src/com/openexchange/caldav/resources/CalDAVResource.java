@@ -278,6 +278,11 @@ public abstract class CalDAVResource<T extends CalendarObject> extends CommonRes
              * 'You can not use the private flag in a non private folder.'
              */
             throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
+        } else if (e.equalsCode(99, "APP")) { // APP-0099
+            /*
+             * Changing an exception into a series is not supported.
+             */
+            throw protocolException(e, HttpServletResponse.SC_FORBIDDEN);
         } else if (Category.CATEGORY_PERMISSION_DENIED.equals(e.getCategory())) {
             /*
              * throw appropriate protocol exception
