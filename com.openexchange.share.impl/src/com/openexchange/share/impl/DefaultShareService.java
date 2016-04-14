@@ -49,8 +49,7 @@
 
 package com.openexchange.share.impl;
 
-import static com.openexchange.java.Autoboxing.I;
-import static com.openexchange.java.Autoboxing.I2i;
+import static com.openexchange.java.Autoboxing.*;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -740,22 +739,18 @@ public class DefaultShareService implements ShareService {
     private List<ShareInfo> removeExpired(int contextID, List<ShareInfo> shares) throws OXException {
         List<ShareInfo> expiredShares = ShareTool.filterExpiredShares(shares);
         if (null != expiredShares && 0 < expiredShares.size()) {
-            int affectedShares;
             ConnectionHelper connectionHelper = new ConnectionHelper(contextID, services, true);
             try {
                 connectionHelper.start();
                 removeTargetPermissions(null, connectionHelper, expiredShares);
-                affectedShares = 0;
                 connectionHelper.commit();
             } finally {
                 connectionHelper.finish();
             }
             /*
-             * schedule cleanup tasks as needed
+             * schedule cleanup tasks
              */
-            if (0 < affectedShares) {
-                scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
-            }
+            scheduleGuestCleanup(contextID, I2i(ShareTool.getGuestIDs(expiredShares)));
         }
         return shares;
     }
