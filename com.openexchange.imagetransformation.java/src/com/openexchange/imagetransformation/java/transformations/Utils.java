@@ -57,10 +57,11 @@ import java.awt.image.ColorModel;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.spi.IIORegistry;
@@ -70,6 +71,7 @@ import javax.imageio.stream.ImageInputStream;
 import com.openexchange.ajax.container.ThresholdFileHolder;
 import com.openexchange.ajax.fileholder.IFileHolder;
 import com.openexchange.exception.OXException;
+import com.openexchange.imagetransformation.Utility;
 import com.openexchange.imagetransformation.java.exif.ExifTool;
 import com.openexchange.imagetransformation.java.exif.Orientation;
 import com.openexchange.tools.images.ImageTransformationUtility;
@@ -100,6 +102,7 @@ public class Utils {
 
     private static org.slf4j.Logger LOG = org.slf4j.LoggerFactory.getLogger(Utils.class);
 
+    private static final Map<String, ImageReaderSpi> READER_SPI_BY_EXTENSION;
     private static final Map<String, ImageReaderSpi> READER_SPI_BY_FORMAT_NAME;
     static {
         /*
@@ -111,36 +114,52 @@ public class Utils {
             new ICNSImageReaderSpi(), new IFFImageReaderSpi(), new PCXImageReaderSpi(), new PICTImageReaderSpi(),
             new SGIImageReaderSpi(), new TGAImageReaderSpi(), new ThumbsDBImageReaderSpi()
         );
-        Map<String, ImageReaderSpi> readerSpiByFormatName = new HashMap<String, ImageReaderSpi>();
+        Map<String, ImageReaderSpi> readerSpiByExtension = new TreeMap<String, ImageReaderSpi>(String.CASE_INSENSITIVE_ORDER);
+        Map<String, ImageReaderSpi> readerSpiByFormatName = new TreeMap<String, ImageReaderSpi>(String.CASE_INSENSITIVE_ORDER);
         IIORegistry registry = IIORegistry.getDefaultInstance();
         for (ImageReaderSpi readerSpi : readerSpis) {
             readerSpi.onRegistration(registry, ImageReaderSpi.class);
             for (String formatName : readerSpi.getFormatNames()) {
                 readerSpiByFormatName.put(formatName, readerSpi);
             }
+            String[] fileSuffixes = readerSpi.getFileSuffixes();
+            if (null != fileSuffixes) {
+                for (String extension : readerSpi.getFileSuffixes()) {
+                    readerSpiByExtension.put(extension, readerSpi);
+                }
+            }
         }
-        READER_SPI_BY_FORMAT_NAME = readerSpiByFormatName;
+        READER_SPI_BY_EXTENSION = Collections.unmodifiableMap(readerSpiByExtension);
+        READER_SPI_BY_FORMAT_NAME = Collections.unmodifiableMap(readerSpiByFormatName);
     }
 
     /**
      * Gets an image reader suitable for the supplied image input stream.
      *
      * @param inputStream The image input stream to create the reader for
-     * @param formatName The indicated format name, or <code>null</code> if no available
+     * @param contentType The indicated content type, or <code>null</code> if no available
+     * @param fileName The indicated file name, or <code>null</code> if no available
      * @return The image reader
      */
-    public static ImageReader getImageReader(ImageInputStream inputStream, String formatName) throws IOException {
-        if (null != formatName) {
+    public static ImageReader getImageReader(ImageInputStream inputStream, String contentType, String fileName) throws IOException {
+        if (null != contentType) {
             /*
              * prefer alternative image readers if possible
              */
-            ImageReaderSpi readerSpi = READER_SPI_BY_FORMAT_NAME.get(formatName);
+            ImageReaderSpi readerSpi = null;
+            String extension = getFileExtension(fileName);
+            if (null != extension) {
+                readerSpi = READER_SPI_BY_EXTENSION.get(extension);
+            }
+            if (null == readerSpi && null != contentType) {
+                readerSpi = READER_SPI_BY_FORMAT_NAME.get(Utility.getImageFormat(contentType));
+            }
             if (null != readerSpi) {
                 try {
                     inputStream.mark();
                     if (readerSpi.canDecodeInput(inputStream)) {
                         ImageReader reader = readerSpi.createReaderInstance();
-                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), formatName);
+                        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
                         return reader;
                     }
                 } catch (IOException e) {
@@ -155,10 +174,10 @@ public class Utils {
          */
         Iterator<ImageReader> readers = ImageIO.getImageReaders(inputStream);
         if (false == readers.hasNext()) {
-            throw new IOException("No image reader available for format " + formatName);
+            throw new IOException("No image reader available for format " + contentType);
         }
         ImageReader reader = readers.next();
-        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), formatName);
+        LOG.trace("Using {} for indicated format \"{}\".", reader.getClass().getName(), contentType);
         return reader;
     }
 
@@ -364,6 +383,16 @@ public class Utils {
              */
             return resolution1.width * resolution1.height >= resolution2.width * resolution2.height ? -1 : 1;
         }
+    }
+
+    private static String getFileExtension(String fileName) {
+        if (null != fileName) {
+            int index = fileName.lastIndexOf('.');
+            if (0 < index && index < fileName.length() - 1) {
+                return fileName.substring(1 + index);
+            }
+        }
+        return null;
     }
 
 }

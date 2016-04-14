@@ -618,7 +618,7 @@ public class ImageTransformationsImpl implements ImageTransformations {
              * create reader from image input stream
              */
             input = getImageInputStream(imageFile);
-            reader = getImageReader(input, getImageFormat(imageFile.getContentType()));
+            reader = getImageReader(input, imageFile.getContentType(), imageFile.getName());
             reader.setInput(input);
             /*
              * read original image dimensions & check against required dimensions for transformations
