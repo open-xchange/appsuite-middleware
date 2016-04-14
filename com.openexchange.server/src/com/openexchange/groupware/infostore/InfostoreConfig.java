@@ -97,7 +97,7 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
 
     // ------------------------------------------------------------------- //
 
-    private static boolean loaded = false;
+    private volatile boolean loaded = false;
 
     /**
      * Initializes a new {@link InfostoreConfig}.
@@ -119,16 +119,22 @@ public class InfostoreConfig extends AbstractConfig implements Initialization {
         return filename;
     }
 
-    public static String getProperty(final String key) {
-    	InfostoreConfig singleton = InfostoreConfig.singleton;
-        if(!loaded || singleton == null) {
-			try {
-			    singleton = getInstance();
-				singleton.start();
-			} catch (final OXException e) {
-				LOG.error("Can't init config:",e);
-			}
-		}
+    /**
+     * Gets the value associated with specified property key.
+     *
+     * @param key The property name
+     * @return The associated value or <code>null</code>
+     */
+    public static String getProperty(String key) {
+        InfostoreConfig singleton = InfostoreConfig.singleton;
+        if (singleton == null || !singleton.loaded) {
+            try {
+                singleton = getInstance();
+                singleton.start();
+            } catch (final OXException e) {
+                LOG.error("Can't init config:", e);
+            }
+        }
 
         return singleton.getPropertyInternal(key);
     }
