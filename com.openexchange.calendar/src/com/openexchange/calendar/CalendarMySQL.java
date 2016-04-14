@@ -56,9 +56,6 @@ import static com.openexchange.tools.sql.DBUtils.closeSQLStuff;
 import static com.openexchange.tools.sql.DBUtils.forSQLCommand;
 import static com.openexchange.tools.sql.DBUtils.getIN;
 import static com.openexchange.tools.sql.DBUtils.rollback;
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DataTruncation;
@@ -153,6 +150,9 @@ import com.openexchange.tools.iterator.SearchIteratorAdapter;
 import com.openexchange.tools.iterator.SearchIterators;
 import com.openexchange.tools.oxfolder.OXFolderAccess;
 import com.openexchange.tools.sql.DBUtils;
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 
 /**
  * {@link CalendarMySQL} - The MySQL implementation of {@link CalendarSqlImp}.
@@ -2507,11 +2507,6 @@ public class CalendarMySQL implements CalendarSqlImp {
             final int pfid = member.pfid;
 
             if (pfid > 0) {
-                if (pfid < 1) {
-                    LOG.error(StringCollection.convertArraytoString(new Object[] {
-                        "ERROR: getUserParticipantsSQLIn oid:uid ", Integer.valueOf(uid), Character.valueOf(CalendarOperation.COLON),
-                        Integer.valueOf(cdaos.get(0).getObjectID()) }));
-                }
                 for (final CalendarDataObject cdao : cdaos) {
                     if (cdao.getFolderType() == FolderObject.PRIVATE) {
                         if (uid == tuid) {
