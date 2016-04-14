@@ -355,6 +355,9 @@ public class Tools {
         knownFolders.put(I(defaultFolderID), Boolean.TRUE);
         while (searchIterator.hasNext()) {
             DocumentMetadata document = searchIterator.next();
+            if (document == null) {
+                continue;
+            }
             Integer folderID = I((int) document.getFolderId());
             List<Integer> seenFolders = new ArrayList<Integer>();
             while (false == knownFolders.containsKey(folderID) && FolderObject.MIN_FOLDER_ID < folderID.intValue()) {
